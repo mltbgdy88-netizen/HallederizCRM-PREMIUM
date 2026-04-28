@@ -18,9 +18,9 @@ export async function getOrders(): Promise<OrdersQueryResult> {
   };
 }
 
-export async function getOrderDetail(orderId?: string, sourceOfferId?: string | null): Promise<OrderDetailQueryResult> {
+export async function getOrderDetail(orderId?: string, sourceOfferId?: string | null, customerId?: string | null): Promise<OrderDetailQueryResult> {
   return {
-    order: await getOrderById(orderId, sourceOfferId),
+    order: await getOrderById(orderId, sourceOfferId, customerId),
     orders: await getOrderMockData(),
     customers
   };

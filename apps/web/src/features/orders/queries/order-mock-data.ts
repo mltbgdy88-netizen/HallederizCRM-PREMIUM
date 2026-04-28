@@ -294,7 +294,7 @@ export async function getOrderMockData(): Promise<SaleOrder[]> {
   ];
 }
 
-export async function getNewOrderDraft(sourceOfferId?: string | null): Promise<SaleOrder | null> {
+export async function getNewOrderDraft(sourceOfferId?: string | null, customerId?: string | null): Promise<SaleOrder | null> {
   if (sourceOfferId) {
     const offers = await getOfferMockData();
     const offer = offers.find((item) => item.id === sourceOfferId || item.offerNo === sourceOfferId);
@@ -306,7 +306,7 @@ export async function getNewOrderDraft(sourceOfferId?: string | null): Promise<S
   }
 
   const stock = await getStockCatalog();
-  const customer = getCustomerById("customer_1");
+  const customer = getCustomerById(customerId ?? "customer_1") ?? getCustomerById("customer_1");
   const product = stock.products[0];
 
   if (!customer || !product) {
@@ -346,9 +346,9 @@ export async function getNewOrderDraft(sourceOfferId?: string | null): Promise<S
   });
 }
 
-export async function getOrderById(orderId?: string, sourceOfferId?: string | null): Promise<SaleOrder | null> {
+export async function getOrderById(orderId?: string, sourceOfferId?: string | null, customerId?: string | null): Promise<SaleOrder | null> {
   if (!orderId) {
-    return getNewOrderDraft(sourceOfferId);
+    return getNewOrderDraft(sourceOfferId, customerId);
   }
 
   const orders = await getOrderMockData();

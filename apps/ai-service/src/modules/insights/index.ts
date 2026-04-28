@@ -1,0 +1,1 @@
+﻿export function generateInsightSet() { return [{ title: "Riskli cari", severity: "warning" as const, summary: "Mira Yapi tahsilat onceligi tasiyor." }, { title: "Kritik stok egilimi", severity: "critical" as const, summary: "DK-2022 stok seviyesi dusuyor." }]; }

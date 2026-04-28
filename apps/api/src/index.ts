@@ -1,4 +1,5 @@
 import Fastify from "fastify";
+import { registerAiLocalOutputRoutes } from "./ai-local-output-routes";
 import { registerCommercialOperationsRoutes } from "./commercial-operations/routes";
 import { registerIntegrationRoutes } from "./integrations/routes";
 import { registerOperationsEngineRoutes } from "./operations-engine/routes";
@@ -34,6 +35,7 @@ async function bootstrap() {
   await registerCommercialOperationsRoutes(server);
   await registerOperationsEngineRoutes(server);
   await registerIntegrationRoutes(server);
+  await registerAiLocalOutputRoutes(server);
   await server.listen({ port, host });
 }
 

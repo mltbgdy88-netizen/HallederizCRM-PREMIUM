@@ -1,0 +1,1 @@
+﻿export function parseCommand(text: string) { return { raw: text, normalized: text.toLocaleLowerCase("tr-TR"), hasMutationIntent: /olustur|gonder|tamamla|kaydet|tahsilat/.test(text.toLocaleLowerCase("tr-TR")) }; }

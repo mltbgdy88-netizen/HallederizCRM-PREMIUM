@@ -13,7 +13,7 @@ import { OfferTotalsPanel } from "./OfferTotalsPanel";
 import { customerPriceSlots } from "../../customers/queries/customer-mock-data";
 import { getOfferDetail, type OfferDetailQueryResult } from "../queries/get-offers";
 
-export function OfferDetailPage({ offerId }: { offerId?: string }) {
+export function OfferDetailPage({ offerId, customerId }: { offerId?: string; customerId?: string | null }) {
   const [data, setData] = useState<OfferDetailQueryResult | null>(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Satirlar");
@@ -23,7 +23,7 @@ export function OfferDetailPage({ offerId }: { offerId?: string }) {
   useEffect(() => {
     let mounted = true;
 
-    getOfferDetail(offerId)
+    getOfferDetail(offerId, customerId)
       .then((result) => {
         if (mounted) {
           setData(result);
@@ -38,7 +38,7 @@ export function OfferDetailPage({ offerId }: { offerId?: string }) {
     return () => {
       mounted = false;
     };
-  }, [offerId]);
+  }, [offerId, customerId]);
 
   const offer = data?.offer ?? null;
   const customer = useMemo(

@@ -2,6 +2,7 @@
 
 import { LoadingState, MetricCard, PageHeader, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
 import type { Customer, Document } from "@hallederiz/types";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { dateLabel } from "../utils";
 import { getDocuments } from "../queries/get-documents";
@@ -19,8 +20,25 @@ export function DocumentPreviewPanel({ document }: { document: Document | null }
   return <section className="hz-content-card"><h3>Belge Preview</h3>{document ? <ul className="hz-side-list"><li>Belge No: {document.documentNo}</li><li>Tip: {getDocumentTypeLabel(document.type)}</li><li>Bagli entity: {document.entityType} / {document.entityNo}</li><li>Onizleme: {document.previewText}</li></ul> : <p className="hz-content-card-description">Bir belge secin.</p>}</section>;
 }
 
-export function DocumentActionsBar() {
-  return <section className="hz-action-toolbar"><button className="hz-btn hz-btn-primary hz-toolbar-btn" type="button">Onizle</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">WhatsApp'tan Gonder</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">E-posta</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">Indir</button></section>;
+function resolveDocumentEntityHref(document: Document | null): string {
+  if (!document) return "/belgeler";
+  const hrefByEntity: Record<Document["entityType"], string> = {
+    offer: `/teklifler/${document.entityId}`,
+    order: `/siparisler/${document.entityId}`,
+    payment: `/tahsilatlar/${document.entityId}`,
+    warehouse_order: `/depo/emirler/${document.entityId}`,
+    delivery: `/teslimatlar/${document.entityId}`,
+    dispatch: "/teslimatlar",
+    invoice: `/faturalar/${document.entityId}`,
+    return: `/iadeler/${document.entityId}`,
+    statement: document.customerId ? `/cariler/${document.customerId}` : "/cariler"
+  };
+  return hrefByEntity[document.entityType];
+}
+
+export function DocumentActionsBar({ document }: { document: Document | null }) {
+  const router = useRouter();
+  return <section className="hz-action-toolbar"><button className="hz-btn hz-btn-primary hz-toolbar-btn" type="button">Onizle</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">WhatsApp'tan Gonder</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">E-posta</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">Indir</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">Queue Save</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">Queue Print</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => router.push(resolveDocumentEntityHref(document))}>Ilgili Kayda Git</button></section>;
 }
 
 export function DocumentsPage() {
@@ -28,7 +46,19 @@ export function DocumentsPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
-  useEffect(() => { getDocuments().then((result) => { setDocuments(result.documents); setCustomers(result.customers); }).finally(() => setLoading(false)); }, []);
+  useEffect(() => {
+    getDocuments()
+      .then((result) => {
+        setDocuments(result.documents);
+        setCustomers(result.customers);
+        const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
+        const requestedDocument = params.get("document");
+        const requestedCustomer = params.get("customer");
+        const initialDocument = result.documents.find((document) => document.id === requestedDocument || document.customerId === requestedCustomer) ?? result.documents[0] ?? null;
+        setSelectedId(initialDocument?.id ?? null);
+      })
+      .finally(() => setLoading(false));
+  }, []);
   const selected = useMemo(() => documents.find((document) => document.id === selectedId) ?? documents[0] ?? null, [documents, selectedId]);
-  return <div className="hz-page-stack"><PageHeader title="Belgeler" description="Teklif, siparis, tahsilat, depo, teslim, fatura ve iade belgelerini entity baglamiyla yonetin." /><section className="hz-metric-grid"><MetricCard title="Belge" value={String(documents.length)} detail="Foundation record" tone="info" /><MetricCard title="Gonderildi" value={String(documents.filter((item) => item.deliveries.some((delivery) => delivery.status === "sent")).length)} detail="WhatsApp/e-posta" tone="success" /><MetricCard title="Kuyruk" value={String(documents.filter((item) => item.deliveries.length === 0).length)} detail="Aksiyon bekliyor" tone="warning" /><MetricCard title="Tip" value={String(new Set(documents.map((item) => item.type)).size)} detail="Belge turu" tone="neutral" /></section><DocumentActionsBar /><DocumentFilterBar /><SplitContentLayout main={loading ? <LoadingState title="Belgeler yukleniyor" message="Entity baglantilari ve gonderim durumlari hazirlaniyor." /> : <DocumentTable documents={documents} customers={customers} selectedId={selected?.id ?? null} onSelect={setSelectedId} />} side={<DocumentPreviewPanel document={selected} />} /></div>;
+  return <div className="hz-page-stack"><PageHeader title="Belgeler" description="Teklif, siparis, tahsilat, depo, teslim, fatura ve iade belgelerini entity baglamiyla yonetin." /><section className="hz-metric-grid"><MetricCard title="Belge" value={String(documents.length)} detail="Foundation record" tone="info" /><MetricCard title="Gonderildi" value={String(documents.filter((item) => item.deliveries.some((delivery) => delivery.status === "sent")).length)} detail="WhatsApp/e-posta" tone="success" /><MetricCard title="Kuyruk" value={String(documents.filter((item) => item.deliveries.length === 0).length)} detail="Queue save/print bekliyor" tone="warning" /><MetricCard title="Tip" value={String(new Set(documents.map((item) => item.type)).size)} detail="Belge turu" tone="neutral" /></section><DocumentActionsBar document={selected} /><DocumentFilterBar /><SplitContentLayout main={loading ? <LoadingState title="Belgeler yukleniyor" message="Entity baglantilari ve gonderim durumlari hazirlaniyor." /> : <DocumentTable documents={documents} customers={customers} selectedId={selected?.id ?? null} onSelect={setSelectedId} />} side={<DocumentPreviewPanel document={selected} />} /></div>;
 }

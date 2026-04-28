@@ -1,7 +1,7 @@
 "use client";
 
 import { EmptyState, LoadingState, PageHeader, SplitContentLayout, TabSwitcher } from "@hallederiz/ui";
-import type { Customer, PaymentReceipt, SaleOrder, WarehouseOrder } from "@hallederiz/types";
+import type { Customer, Delivery, Invoice, PaymentReceipt, SaleOrder, WarehouseOrder } from "@hallederiz/types";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { OrderActionButtons } from "./OrderActionButtons";
@@ -18,15 +18,19 @@ import { WarehouseOrderPanel } from "./WarehouseOrderPanel";
 import { getOrderDetail } from "../queries/get-orders";
 import { getPaymentMockData } from "../../payments/queries/payment-mock-data";
 import { getWarehouseOrderMockData } from "../../warehouse/queries/warehouse-mock-data";
+import { getDeliveryMockData } from "../../deliveries/queries/delivery-mock-data";
+import { getInvoiceMockData } from "../../invoices/queries/invoice-mock-data";
 
 const tabs = ["Genel", "Satirlar", "Kaynak Plani", "Tahsilatlar", "Depo", "Teslim", "Belgeler", "Timeline"];
 
-export function OrderDetailPage({ orderId, sourceOfferId }: { orderId?: string; sourceOfferId?: string | null }) {
+export function OrderDetailPage({ orderId, sourceOfferId, customerId }: { orderId?: string; sourceOfferId?: string | null; customerId?: string | null }) {
   const router = useRouter();
   const [order, setOrder] = useState<SaleOrder | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [payments, setPayments] = useState<PaymentReceipt[]>([]);
   const [warehouseOrders, setWarehouseOrders] = useState<WarehouseOrder[]>([]);
+  const [deliveries, setDeliveries] = useState<Delivery[]>([]);
+  const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("Genel");
   const [sourcingOpen, setSourcingOpen] = useState(false);
@@ -36,13 +40,15 @@ export function OrderDetailPage({ orderId, sourceOfferId }: { orderId?: string; 
   useEffect(() => {
     let mounted = true;
 
-    Promise.all([getOrderDetail(orderId, sourceOfferId), getPaymentMockData(), getWarehouseOrderMockData()])
-      .then(([orderResult, paymentResult, warehouseResult]) => {
+    Promise.all([getOrderDetail(orderId, sourceOfferId, customerId), getPaymentMockData(), getWarehouseOrderMockData(), getDeliveryMockData(), getInvoiceMockData()])
+      .then(([orderResult, paymentResult, warehouseResult, deliveryResult, invoiceResult]) => {
         if (mounted) {
           setOrder(orderResult.order);
           setCustomers(orderResult.customers);
           setPayments(paymentResult);
           setWarehouseOrders(warehouseResult);
+          setDeliveries(deliveryResult);
+          setInvoices(invoiceResult);
         }
       })
       .finally(() => {
@@ -54,7 +60,7 @@ export function OrderDetailPage({ orderId, sourceOfferId }: { orderId?: string; 
     return () => {
       mounted = false;
     };
-  }, [orderId, sourceOfferId]);
+  }, [orderId, sourceOfferId, customerId]);
 
   const customer = useMemo(() => customers.find((item) => item.id === order?.customerId) ?? null, [customers, order?.customerId]);
   const orderPayments = useMemo(
@@ -65,6 +71,8 @@ export function OrderDetailPage({ orderId, sourceOfferId }: { orderId?: string; 
     () => warehouseOrders.filter((warehouseOrder) => warehouseOrder.orderId === order?.id),
     [warehouseOrders, order?.id]
   );
+  const relatedDelivery = useMemo(() => deliveries.find((delivery) => delivery.orderId === order?.id) ?? null, [deliveries, order?.id]);
+  const relatedInvoice = useMemo(() => invoices.find((invoice) => invoice.orderId === order?.id) ?? null, [invoices, order?.id]);
 
   if (loading) {
     return <LoadingState title="Siparis yukleniyor" message="Satirlar, kaynak plani, tahsilat ve depo baglamlari hazirlaniyor." />;
@@ -86,8 +94,8 @@ export function OrderDetailPage({ orderId, sourceOfferId }: { orderId?: string; 
         onApproval={() => setApprovalOpen(true)}
         onPayment={() => setPaymentOpen(true)}
         onWarehouse={() => setActiveTab("Depo")}
-        onDelivery={() => router.push("/teslimatlar")}
-        onInvoice={() => router.push("/faturalar")}
+        onDelivery={() => router.push(relatedDelivery ? `/teslimatlar/${relatedDelivery.id}` : "/teslimatlar")}
+        onInvoice={() => router.push(relatedInvoice ? `/faturalar/${relatedInvoice.id}` : "/faturalar")}
       />
 
       <SplitContentLayout
@@ -99,8 +107,8 @@ export function OrderDetailPage({ orderId, sourceOfferId }: { orderId?: string; 
             {activeTab === "Kaynak Plani" ? <SourcingPlanInline order={order} /> : null}
             {activeTab === "Tahsilatlar" ? <PaymentsInline payments={orderPayments} /> : null}
             {activeTab === "Depo" ? <WarehouseOrderPanel order={order} warehouseOrders={orderWarehouseOrders} /> : null}
-            {activeTab === "Teslim" ? <DeliveryInline order={order} warehouseOrders={orderWarehouseOrders} /> : null}
-            {activeTab === "Belgeler" ? <DocumentsInline order={order} /> : null}
+            {activeTab === "Teslim" ? <DeliveryInline order={order} warehouseOrders={orderWarehouseOrders} delivery={relatedDelivery} /> : null}
+            {activeTab === "Belgeler" ? <DocumentsInline order={order} invoice={relatedInvoice} /> : null}
             {activeTab === "Timeline" ? <OrderTimelinePanel order={order} payments={orderPayments} warehouseOrders={orderWarehouseOrders} /> : null}
           </section>
         }
@@ -142,24 +150,30 @@ function PaymentsInline({ payments }: { payments: PaymentReceipt[] }) {
   );
 }
 
-function DeliveryInline({ order, warehouseOrders }: { order: SaleOrder; warehouseOrders: WarehouseOrder[] }) {
+function DeliveryInline({ order, warehouseOrders, delivery }: { order: SaleOrder; warehouseOrders: WarehouseOrder[]; delivery: Delivery | null }) {
   return (
     <div className="hz-tab-content">
       <h3>Teslim</h3>
       <ul className="hz-side-list">
         <li>Teslim durumu: {order.deliveryStatus}</li>
         <li>Depo emri: {warehouseOrders[0]?.warehouseOrderNo ?? "Bekliyor"}</li>
-        <li>Teslim dogrulama ve rollback akisleri sonraki teslimat modulunde aktiflesecek.</li>
+        <li>Teslim kaydi: {delivery ? `${delivery.deliveryNo} / ${delivery.status}` : "Bu siparis icin delivery foundation bekliyor."}</li>
+        <li>Teslim dogrulama paneli ilgili delivery kaydinda musteri, odeme ve depo hazirlik kontrollerini gosterir.</li>
       </ul>
     </div>
   );
 }
 
-function DocumentsInline({ order }: { order: SaleOrder }) {
+function DocumentsInline({ order, invoice }: { order: SaleOrder; invoice: Invoice | null }) {
   return (
     <div className="hz-tab-content">
       <h3>Belgeler</h3>
-      <p className="hz-content-card-description">{order.orderNo} icin siparis formu, tahsilat makbuzu ve teslim belgeleri document system'e baglanacak.</p>
+      <p className="hz-content-card-description">{order.orderNo} icin siparis PDF, teslim fisi ve fatura record zinciri belge merkezinde izlenir.</p>
+      <ul className="hz-side-list hz-margin-top-sm">
+        <li>Siparis belgesi: document entity=order olarak hazir.</li>
+        <li>Fatura baglantisi: {invoice ? `${invoice.invoiceNo} / ${invoice.status}` : "Fatura taslagi bekliyor."}</li>
+        <li>Local output: belge merkezinden queue save / queue print foundation'i kullanilir.</li>
+      </ul>
     </div>
   );
 }

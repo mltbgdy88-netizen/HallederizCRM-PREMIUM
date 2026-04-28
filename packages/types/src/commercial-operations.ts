@@ -820,3 +820,183 @@ export interface IntegrationHealthSummary {
   lastSyncedAt?: string;
   message: string;
 }
+
+export type AiProposalStatus = "draft" | "waiting_approval" | "approved" | "rejected" | "executed" | "failed";
+export type AiProposalActionType =
+  | "read_summary"
+  | "create_offer"
+  | "create_order"
+  | "create_payment"
+  | "mark_warehouse_ready"
+  | "complete_delivery"
+  | "create_invoice"
+  | "create_return"
+  | "send_document_whatsapp";
+export type AiOperationType = AiProposalActionType;
+export type AiInsightSeverity = "info" | "warning" | "critical";
+export type AiExecutionStatus = "pending" | "running" | "completed" | "failed" | "cancelled";
+export type AiChannelType = "crm_ui" | "whatsapp" | "mobile";
+export type AiInputMode = "text" | "voice";
+
+export interface AiOperation {
+  id: string;
+  type: AiOperationType;
+  targetType: WorkflowEntityType;
+  targetId: string;
+  targetNo: string;
+  mutation: boolean;
+  summary: string;
+  payload: Record<string, unknown>;
+}
+
+export interface AiProposal {
+  id: string;
+  tenantId: TenantId;
+  proposalNo: string;
+  sessionId: string;
+  status: AiProposalStatus;
+  actionType: AiProposalActionType;
+  channel: AiChannelType;
+  inputMode: AiInputMode;
+  title: string;
+  summary: string;
+  requestedBy: UserId;
+  requestedByName: string;
+  targetType: WorkflowEntityType;
+  targetId: string;
+  targetNo: string;
+  requiresApproval: boolean;
+  approvalId?: ApprovalId;
+  createdAt: string;
+  updatedAt: string;
+  operations: AiOperation[];
+}
+
+export interface AiSession {
+  id: string;
+  tenantId: TenantId;
+  channel: AiChannelType;
+  inputMode: AiInputMode;
+  title: string;
+  createdBy: UserId;
+  createdAt: string;
+  updatedAt: string;
+  readOnlyDefault: boolean;
+  messages: AiMessage[];
+  proposals: AiProposal[];
+}
+
+export interface AiMessage {
+  id: string;
+  tenantId: TenantId;
+  sessionId: string;
+  role: "user" | "assistant" | "system";
+  inputMode: AiInputMode;
+  body: string;
+  createdAt: string;
+  proposalId?: string;
+}
+
+export interface AiInsight {
+  id: string;
+  tenantId: TenantId;
+  title: string;
+  category: "risk" | "stock" | "payment" | "factory" | "opportunity" | "operation";
+  severity: AiInsightSeverity;
+  confidence: number;
+  summary: string;
+  targetType: WorkflowEntityType;
+  targetId: string;
+  targetNo: string;
+  suggestedAction?: AiProposalActionType;
+  createdAt: string;
+}
+
+export interface AiExecutionResult {
+  id: string;
+  tenantId: TenantId;
+  proposalId: string;
+  operationId: string;
+  status: AiExecutionStatus;
+  message: string;
+  auditEventId?: string;
+  startedAt?: string;
+  completedAt?: string;
+}
+
+export type ApprovalExecutionStatus = "pending" | "authorized" | "executed" | "failed" | "cancelled";
+export type ApprovalTargetType = WorkflowEntityType | "ai_proposal" | "local_output";
+
+export interface ApprovalExecution {
+  id: string;
+  tenantId: TenantId;
+  approvalId: ApprovalId;
+  proposalId?: string;
+  targetType: ApprovalTargetType;
+  targetId: string;
+  operationType: AiOperationType;
+  status: ApprovalExecutionStatus;
+  requestedBy: UserId;
+  authorizedBy?: UserId;
+  createdAt: string;
+  authorizedAt?: string;
+  executedAt?: string;
+  result?: AiExecutionResult;
+}
+
+export type LocalOutputType =
+  | "offer_pdf"
+  | "order_pdf"
+  | "payment_receipt_pdf"
+  | "warehouse_note_pdf"
+  | "delivery_note_pdf"
+  | "dispatch_note_pdf"
+  | "invoice_pdf"
+  | "statement_pdf"
+  | "return_note_pdf";
+export type LocalOutputDestination = "local_folder" | "printer" | "both";
+export type PrintJobStatus = "queued" | "printing" | "completed" | "failed" | "cancelled";
+export type FileSaveJobStatus = "queued" | "saving" | "completed" | "failed" | "cancelled";
+export type LocalAgentStatus = "online" | "offline" | "disabled" | "safe_mode" | "error";
+
+export interface LocalOutputRule {
+  id: string;
+  tenantId: TenantId;
+  documentType: LocalOutputType;
+  destination: LocalOutputDestination;
+  subfolder: string;
+  autoSave: boolean;
+  autoPrint: boolean;
+  printerName?: string;
+  copies: number;
+  safeMode: boolean;
+  active: boolean;
+}
+
+export interface PrintJob {
+  id: string;
+  tenantId: TenantId;
+  documentId: DocumentId;
+  documentType: LocalOutputType;
+  status: PrintJobStatus;
+  printerName: string;
+  copies: number;
+  queuedAt: string;
+  startedAt?: string;
+  completedAt?: string;
+  errorMessage?: string;
+}
+
+export interface FileSaveJob {
+  id: string;
+  tenantId: TenantId;
+  documentId: DocumentId;
+  documentType: LocalOutputType;
+  status: FileSaveJobStatus;
+  targetFolder: string;
+  fileName: string;
+  queuedAt: string;
+  startedAt?: string;
+  completedAt?: string;
+  errorMessage?: string;
+}

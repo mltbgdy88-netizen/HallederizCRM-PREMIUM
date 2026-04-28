@@ -18,9 +18,9 @@ export async function getOffers(): Promise<OffersQueryResult> {
   };
 }
 
-export async function getOfferDetail(offerId?: string): Promise<OfferDetailQueryResult> {
+export async function getOfferDetail(offerId?: string, customerId?: string | null): Promise<OfferDetailQueryResult> {
   const offers = await getOfferMockData();
-  const offer = offerId ? offers.find((item) => item.id === offerId || item.offerNo === offerId) ?? null : await getNewOfferDraft();
+  const offer = offerId ? offers.find((item) => item.id === offerId || item.offerNo === offerId) ?? null : await getNewOfferDraft(customerId);
 
   return {
     offer,

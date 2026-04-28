@@ -1,67 +1,25 @@
-import { PageHeader, PrimaryActionToolbar } from "@hallederiz/ui";
+﻿"use client";
 
-const assistantMessages = [
-  "Kullanici: Geciken tahsilatlari ozetle.",
-  "AI: Son 7 gunde 4 cari vade asimi riski olusturdu.",
-  "AI: 2 kayit icin insan onayi gerektiren aksiyon onerisi hazirlandi."
-];
+import type { AiInsight, AiMessage, AiProposal, Approval } from "@hallederiz/types";
+import { MetricCard, PageHeader, PrimaryActionToolbar, TabSwitcher } from "@hallederiz/ui";
+import { useRouter } from "next/navigation";
+import { useState } from "react";
+import { getAiAssistantData } from "../queries";
 
-const sideItems = [
-  "Onay Bekleyenler: 2",
-  "Son Islemler: 6",
-  "Yetki Uyarisi: Fabrika siparisi onayi gerekiyor",
-  "Ilgili Kayit Onizleme: SO-2481"
-];
+const statusLabel: Record<AiProposal["status"], string> = { draft: "Taslak", waiting_approval: "Onay Bekliyor", approved: "Onaylandi", rejected: "Reddedildi", executed: "Executed", failed: "Hata" };
+
+export function AiModeToggle() { return <div className="hz-inline-actions"><span className="hz-badge hz-badge-success">Read-only default</span><span className="hz-badge hz-badge-warning">Mutation insan onayli</span></div>; }
+export function VoiceInputButton() { return <button className="hz-btn hz-btn-secondary" type="button">Mikrofon</button>; }
+export function AiConversationPanel({ messages }: { messages: AiMessage[] }) { return <article className="hz-column-card"><h3 className="hz-column-title">AI Asistan Akisi</h3><div className="hz-chat-feed">{messages.map((message) => <div key={message.id} className={`hz-chat-bubble ${message.role === "user" ? "is-outgoing" : ""}`}><p>{message.body}</p><small>{message.inputMode}</small></div>)}</div><AiInputPanel /></article>; }
+export function AiInputPanel() { return <div className="hz-chat-composer"><input className="hz-control" placeholder="Komut yaz: geciken tahsilatlari ozetle" /><button className="hz-btn hz-btn-primary" type="button">Gonder</button><VoiceInputButton /></div>; }
+export function AiProposalCardList({ proposals }: { proposals: AiProposal[] }) { return <section className="hz-content-card"><h3>Proposal Kartlari</h3>{proposals.map((proposal) => <div key={proposal.id} className="hz-list-item"><strong>{proposal.proposalNo} / {proposal.actionType}</strong><span>{proposal.summary}</span><div className="hz-inline-actions"><span className="hz-badge hz-badge-info">{statusLabel[proposal.status]}</span>{proposal.requiresApproval ? <button className="hz-btn hz-btn-secondary" type="button">Onaya Gonder</button> : <span className="hz-badge hz-badge-success">Read-only cevap</span>}</div></div>)}</section>; }
+export function AiApprovalPanel({ approvals }: { approvals: Approval[] }) { const router = useRouter(); return <section className="hz-content-card"><h3>Onay Bekleyen AI Proposal'lar</h3>{approvals.map((approval) => <div key={approval.id} className="hz-list-item"><strong>{approval.approvalNo}</strong><span>{approval.payloadSummary}</span><button className="hz-btn hz-btn-secondary" type="button" onClick={() => router.push("/ai/onaylar")}>Onaya Git</button></div>)}</section>; }
+export function AiExecutionHistoryPanel() { return <section className="hz-content-card"><h3>Son Executed Islemler</h3><div className="hz-list-item"><strong>approval_exec_1</strong><span>send_document_whatsapp server-side mock execution icin yetkilendirildi.</span></div></section>; }
+export function AiInsightPanel({ insights }: { insights: AiInsight[] }) { const router = useRouter(); return <section className="hz-content-card"><h3>Ilgili Kayit Onizlemeleri</h3>{insights.slice(0, 3).map((insight) => <div key={insight.id} className="hz-list-item"><strong>{insight.title}</strong><span>{insight.summary}</span><button className="hz-btn hz-btn-secondary" type="button" onClick={() => router.push(insight.targetType === "customer" ? `/cariler/${insight.targetId}` : insight.targetType === "product" ? "/stok" : "/ai/icgoruler")}>Kayda Git</button></div>)}</section>; }
+export function AiContextSidePanel({ approvals, insights }: { approvals: Approval[]; insights: AiInsight[] }) { return <article className="hz-column-card"><h3 className="hz-column-title">Onay ve Baglam Paneli</h3><AiApprovalPanel approvals={approvals} /><AiExecutionHistoryPanel /><section className="hz-content-card"><h3>Yetki Uyarilari</h3><p className="muted">AI mutation islemleri approval olmadan execute edilemez. Server-side execution audit ile izlenir.</p></section><AiInsightPanel insights={insights} /></article>; }
 
 export function AIAssistantPage() {
-  return (
-    <div className="hz-page-stack">
-      <PageHeader
-        title="AI"
-        description="Sohbet, komut, onay kuyrugu ve ilgili domain kayitlarini kurumsal denetimle yonetin."
-      />
-
-      <PrimaryActionToolbar>
-        <button type="button" className="hz-btn hz-toolbar-btn hz-btn-primary">
-          Yeni AI Oturumu
-        </button>
-        <button type="button" className="hz-btn hz-toolbar-btn hz-btn-secondary">
-          Prompt Kitapligi
-        </button>
-        <button type="button" className="hz-btn hz-toolbar-btn hz-btn-secondary">
-          Sesli Giris
-        </button>
-      </PrimaryActionToolbar>
-
-      <section className="hz-ai-layout">
-        <article className="hz-column-card">
-          <h3 className="hz-column-title">AI Asistan Akisi</h3>
-          <div className="hz-chat-feed">
-            {assistantMessages.map((message, index) => (
-              <div key={message} className={`hz-chat-bubble ${index % 2 === 0 ? "is-outgoing" : ""}`}>
-                {message}
-              </div>
-            ))}
-          </div>
-          <div className="hz-chat-composer">
-            <input className="hz-control" placeholder="Komut girisi placeholder" />
-            <button type="button" className="hz-btn hz-btn-secondary">
-              Gonder
-            </button>
-          </div>
-        </article>
-
-        <article className="hz-column-card">
-          <h3 className="hz-column-title">Onay ve Baglam Paneli</h3>
-          <div className="hz-list-stack">
-            {sideItems.map((item) => (
-              <div key={item} className="hz-list-item">
-                {item}
-              </div>
-            ))}
-          </div>
-        </article>
-      </section>
-    </div>
-  );
+  const data = getAiAssistantData();
+  const [mode, setMode] = useState("text");
+  return <div className="hz-page-stack"><PageHeader title="AI" description="Yazili/sesli komut, read-only cevap, proposal, approval ve execution akisini tek merkezde yonetin." /><section className="hz-metric-grid"><MetricCard title="Proposal" value={String(data.proposals.length)} detail="AI onerisi" tone="info" /><MetricCard title="Onay Bekleyen" value={String(data.approvals.length)} detail="Mutation guard" tone="warning" /><MetricCard title="Insight" value={String(data.insights.length)} detail="Dashboard uyumlu" tone="success" /><MetricCard title="Execution" value={String(data.executions.length)} detail="Server-side" tone="danger" /></section><PrimaryActionToolbar><button type="button" className="hz-btn hz-toolbar-btn hz-btn-primary">Yeni AI Oturumu</button><button type="button" className="hz-btn hz-toolbar-btn hz-btn-secondary">Prompt Kitapligi</button><button type="button" className="hz-btn hz-toolbar-btn hz-btn-secondary">Sesli Giris</button><AiModeToggle /></PrimaryActionToolbar><TabSwitcher activeKey={mode} onChange={setMode} items={[{ key: "text", label: "Yazili Giris" }, { key: "voice", label: "Sesli Giris" }]} /><section className="hz-ai-layout"><AiConversationPanel messages={data.messages} /><article className="hz-column-card"><AiProposalCardList proposals={data.proposals} /><AiContextSidePanel approvals={data.approvals} insights={data.insights} /></article></section></div>;
 }

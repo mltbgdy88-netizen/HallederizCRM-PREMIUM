@@ -1,4 +1,6 @@
 export * from "./auth";
+export * from "./ai";
+export * from "./approval-execution";
 export * from "./crm/lead";
 export * from "./customers";
 export * from "./deliveries";
@@ -6,6 +8,7 @@ export * from "./documents";
 export * from "./erp";
 export * from "./factories";
 export * from "./invoices";
+export * from "./local-output";
 export * from "./offers";
 export * from "./approvals";
 export * from "./dashboard";

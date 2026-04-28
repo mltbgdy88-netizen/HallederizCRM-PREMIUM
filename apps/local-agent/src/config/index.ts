@@ -1,0 +1,4 @@
+﻿import type { LocalOutputRule } from "@hallederiz/types";
+export interface LocalAgentSettings { rootOutputFolder: string; autoPrintEnabled: boolean; safeMode: boolean; documentFolders: Record<string, string>; printerMapping: Record<string, string>; copies: number; }
+export function loadSettings(): LocalAgentSettings { return { rootOutputFolder: "C:\\HallederizCRM\\Belgeler", autoPrintEnabled: false, safeMode: true, documentFolders: { invoice_pdf: "Faturalar", offer_pdf: "Teklifler", delivery_note_pdf: "Teslimatlar" }, printerMapping: { invoice_pdf: "Ofis-Laser-01" }, copies: 1 }; }
+export function mapRuleToSettings(rule: LocalOutputRule, settings = loadSettings()) { return { folder: `${settings.rootOutputFolder}\\${rule.subfolder}`, printer: rule.printerName ?? settings.printerMapping[rule.documentType], copies: rule.copies || settings.copies }; }

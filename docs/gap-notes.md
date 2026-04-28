@@ -1,0 +1,29 @@
+# Gap Notes
+
+Bu notlar pilot oncesi bilincli olarak foundation seviyesinde birakilan alanlari ve sonraki oncelikleri listeler.
+
+## 1. Bilincli Placeholder Foundation Alanlari
+
+- Gercek auth/token dogrulama henuz mock session uzerindedir.
+- Form mutation'lari UI seviyesinde foundation olarak durur; kalici backend persistence sonraki turda baglanacaktir.
+- PDF render, e-fatura, WhatsApp provider ve ERP secret yonetimi gercek adapter'a bagli degildir.
+- AI model cagrilari mock adapter uzerindedir; proposal/approval/execution kontrati gercek entegrasyona hazirdir.
+- Local agent yazdirma ve dosya kaydetme handler'lari OS seviyesinde gercek cikti uretmez; queue ve policy kontrati hazirdir.
+
+## 2. Pilot Icin Kapatilan Kritik Kopukluklar
+
+- Cari karti aksiyonlari ilgili teklif, siparis, tahsilat, belge ve WhatsApp route'larina baglandi.
+- Yeni teklif ekrani cari query baglamindan fiyat grubu snapshot'i uretebilir hale getirildi.
+- Siparis detayindaki teslim ve fatura aksiyonlari uygun mock kayit varsa dogrudan detay route'una gider.
+- Belge merkezi secili belge baglamiyla entity navigasyonu, queue save ve queue print aksiyonlarini gosterir.
+- WhatsApp belge aksiyonu belge merkezine document query parametresiyle gider.
+- Fabrika siparis listesinde detay acma tek tik ve acik aksiyonla gorunur hale getirildi.
+
+## 3. Sonraki Yuksek Oncelikli Isler
+
+1. Mock store'lari tek bir demo scenario seed katmaninda birlestirmek.
+2. Form submit aksiyonlarini API mock-store endpointlerine baglamak.
+3. Document detail route'u ekleyip belge preview ve delivery history'yi detay sayfasina tasimak.
+4. Approval execution sonucunu audit/timeline mock verisine yazmak.
+5. Local agent ile API queue polling arasinda gercek HTTP contract testleri eklemek.
+6. Playwright route smoke testi ile tum menu ve kritik aksiyon linklerini otomatik dogrulamak.

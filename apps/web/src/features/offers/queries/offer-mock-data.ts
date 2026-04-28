@@ -176,9 +176,9 @@ export async function getOfferMockData(): Promise<Offer[]> {
   return baseOffers.map(withTotals);
 }
 
-export async function getNewOfferDraft(): Promise<Offer | null> {
+export async function getNewOfferDraft(customerId?: string | null): Promise<Offer | null> {
   const stock = await getStockCatalog();
-  const customer = getCustomerById("customer_1");
+  const customer = getCustomerById(customerId ?? "customer_1") ?? getCustomerById("customer_1");
   const product = stock.products[0];
 
   if (!customer || !product) {
