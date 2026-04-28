@@ -16,6 +16,8 @@ import { useTheme } from "../providers/theme-provider";
 
 const PRIMARY_NAV_ITEMS: AppShellNavItem[] = [
   { key: "dashboard", label: "Gorev Merkezi", href: "/", icon: <CRMIcon name="dashboard" /> },
+  { key: "tasks", label: "Gorevler", href: "/gorevler", icon: <CRMIcon name="dashboard" /> },
+  { key: "approvals", label: "Onaylar", href: "/onaylar", icon: <CRMIcon name="roles" /> },
   { key: "customers", label: "Cariler", href: "/cariler", icon: <CRMIcon name="customers" /> },
   { key: "stock", label: "Stok", href: "/stok", icon: <CRMIcon name="stock" /> },
   { key: "offers", label: "Teklifler", href: "/teklifler", icon: <CRMIcon name="offers" /> },
@@ -46,6 +48,9 @@ interface PageMeta {
 }
 
 const PAGE_META: Array<[string, PageMeta]> = [
+  ["/gorevler/", { title: "Gorev Detayi", subtitle: "Gorev yorumlari, durum ve aksiyonlari.", breadcrumb: "Gorevler / Detay" }],
+  ["/onaylar/", { title: "Onay Detayi", subtitle: "Approval payload, risk ve icra hazirligi.", breadcrumb: "Onaylar / Detay" }],
+  ["/workflow/", { title: "Workflow Timeline", subtitle: "Entity bazli operasyon adimlari.", breadcrumb: "Workflow" }],
   ["/cariler/", { title: "Cari Karti", subtitle: "Musteri detayini finans ve operasyon baglamiyla yonetin.", breadcrumb: "Cariler / Detay" }],
   ["/teklifler/yeni", { title: "Yeni Teklif", subtitle: "Teklif olusturma editoru iskeleti.", breadcrumb: "Teklifler / Yeni" }],
   ["/teklifler/", { title: "Teklif Detayi", subtitle: "Teklif satirlari ve follow-up yonetimi.", breadcrumb: "Teklifler / Detay" }],
@@ -62,6 +67,8 @@ const PAGE_META: Array<[string, PageMeta]> = [
   ["/ai/onaylar", { title: "AI Onaylar", subtitle: "Proposal ve approval kayitlarini yonetin.", breadcrumb: "AI / Onaylar" }],
   ["/ai/icgoruler", { title: "AI Icgoruler", subtitle: "AI risk/firsat analizlerini takip edin.", breadcrumb: "AI / Icgoruler" }],
   ["/", { title: "Gorev Merkezi", subtitle: "Sistem ve AI kartlariyla operasyon odakli kontrol merkezi.", breadcrumb: "Anasayfa" }],
+  ["/gorevler", { title: "Gorevler", subtitle: "Workflow ve dashboard kaynakli operasyon gorevleri.", breadcrumb: "Gorevler" }],
+  ["/onaylar", { title: "Onaylar", subtitle: "Insan onayli operasyon ve AI proposal karar merkezi.", breadcrumb: "Onaylar" }],
   ["/cariler", { title: "Cariler", subtitle: "Cari portfoyu, risk ve finans baglami.", breadcrumb: "Cariler" }],
   ["/stok", { title: "Stok", subtitle: "Urun, depo, barkod ve fabrika gorunurlugu.", breadcrumb: "Stok" }],
   ["/teklifler", { title: "Teklifler", subtitle: "Teklif yasam dongusu ve donusum takipleri.", breadcrumb: "Teklifler" }],

@@ -1,5 +1,7 @@
 import Fastify from "fastify";
 import { registerCommercialOperationsRoutes } from "./commercial-operations/routes";
+import { registerIntegrationRoutes } from "./integrations/routes";
+import { registerOperationsEngineRoutes } from "./operations-engine/routes";
 import { registerPlatformCoreRoutes } from "./platform-core/routes";
 import { registerProductStockPricingRoutes } from "./product-stock-pricing/routes";
 import { registerSalesCrmRoutes } from "./sales-crm/routes";
@@ -30,6 +32,8 @@ async function bootstrap() {
   await registerProductStockPricingRoutes(server);
   await registerSalesCrmRoutes(server);
   await registerCommercialOperationsRoutes(server);
+  await registerOperationsEngineRoutes(server);
+  await registerIntegrationRoutes(server);
   await server.listen({ port, host });
 }
 

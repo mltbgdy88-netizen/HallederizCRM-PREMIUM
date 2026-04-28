@@ -1,15 +1,20 @@
 import type {
   CustomerId,
+  AlertId,
+  ApprovalId,
   OfferId,
   PaymentReceiptId,
   DeliveryId,
   DocumentId,
+  FactoryId,
   InvoiceId,
   ProductId,
   ReturnId,
   SaleOrderId,
+  TaskId,
   TenantId,
   UserId,
+  WorkflowId,
   WarehouseId,
   WarehouseOrderId
 } from "./identifiers";
@@ -396,4 +401,422 @@ export interface DocumentAvailabilitySummary {
   availableTypes: DocumentType[];
   missingTypes: DocumentType[];
   latestDocument?: Document;
+}
+
+export type WorkflowEntityType =
+  | "offer"
+  | "order"
+  | "payment"
+  | "warehouse_order"
+  | "delivery"
+  | "factory_order"
+  | "invoice"
+  | "return"
+  | "customer"
+  | "product"
+  | "document"
+  | "ai_proposal";
+
+export type WorkflowStatus = "active" | "completed" | "failed" | "cancelled";
+export type WorkflowStepStatus = "pending" | "active" | "completed" | "skipped" | "failed";
+
+export interface WorkflowStep {
+  id: string;
+  workflowId: WorkflowId;
+  key: string;
+  title: string;
+  description?: string;
+  status: WorkflowStepStatus;
+  sortOrder: number;
+  entityType?: WorkflowEntityType;
+  entityId?: string;
+  startedAt?: string;
+  completedAt?: string;
+}
+
+export interface WorkflowInstance {
+  id: WorkflowId;
+  tenantId: TenantId;
+  workflowNo: string;
+  entityType: WorkflowEntityType;
+  entityId: string;
+  entityNo: string;
+  status: WorkflowStatus;
+  currentStepKey?: string;
+  createdAt: string;
+  updatedAt: string;
+  steps: WorkflowStep[];
+}
+
+export type TaskStatus = "open" | "in_progress" | "done" | "cancelled" | "overdue";
+export type TaskPriority = "low" | "normal" | "high" | "critical";
+export type TaskType =
+  | "new_order"
+  | "payment_followup"
+  | "warehouse_picking"
+  | "factory_order_needed"
+  | "factory_inbound"
+  | "delivery_waiting"
+  | "critical_stock"
+  | "customer_risk"
+  | "high_debt"
+  | "customer_reactivation"
+  | "approval_required"
+  | "ai_risk"
+  | "ai_payment_priority"
+  | "ai_sales_opportunity"
+  | "ai_operation_reminder"
+  | "ai_stockout_prediction";
+
+export interface Task {
+  id: TaskId;
+  tenantId: TenantId;
+  taskNo: string;
+  title: string;
+  description?: string;
+  type: TaskType;
+  status: TaskStatus;
+  priority: TaskPriority;
+  source: DashboardCardSource;
+  entityType: WorkflowEntityType;
+  entityId: string;
+  entityNo: string;
+  customerId?: CustomerId;
+  customerName?: string;
+  assigneeId?: UserId;
+  assigneeName?: string;
+  dueAt: string;
+  createdAt: string;
+  updatedAt: string;
+  approvalId?: ApprovalId;
+}
+
+export interface TaskComment {
+  id: string;
+  taskId: TaskId;
+  authorId: UserId;
+  authorName: string;
+  body: string;
+  createdAt: string;
+}
+
+export type ApprovalType =
+  | "order_high_value"
+  | "delivery_payment_missing"
+  | "return_approval"
+  | "price_override"
+  | "ai_action_proposal"
+  | "manual_operation";
+
+export type ApprovalStatus = "pending" | "approved" | "rejected" | "expired" | "executed";
+export type ApprovalDecision = "approve" | "reject" | "expire" | "execute";
+
+export interface ApprovalPolicySnapshot {
+  policyId: string;
+  requiredRole: string;
+  minApproverCount: number;
+  reason: string;
+  serverActionKey?: string;
+}
+
+export interface Approval {
+  id: ApprovalId;
+  tenantId: TenantId;
+  approvalNo: string;
+  type: ApprovalType;
+  status: ApprovalStatus;
+  entityType: WorkflowEntityType;
+  entityId: string;
+  entityNo: string;
+  requestedBy: UserId;
+  requestedByName: string;
+  requestedRole: string;
+  decidedBy?: UserId;
+  decidedByName?: string;
+  decidedAt?: string;
+  createdAt: string;
+  expiresAt?: string;
+  riskNote?: string;
+  payloadSummary: string;
+  payload: Record<string, unknown>;
+  policySnapshot: ApprovalPolicySnapshot;
+  execution: {
+    executable: boolean;
+    executedAt?: string;
+    result?: string;
+  };
+}
+
+export type AlertSeverity = "info" | "warning" | "critical";
+
+export interface Alert {
+  id: AlertId;
+  tenantId: TenantId;
+  title: string;
+  severity: AlertSeverity;
+  entityType: WorkflowEntityType;
+  entityId: string;
+  entityNo: string;
+  message: string;
+  createdAt: string;
+}
+
+export type DashboardCardSource = "system" | "ai";
+export type DashboardCardType =
+  | "new_orders"
+  | "pending_payments"
+  | "warehouse_preparation"
+  | "factory_order_needed"
+  | "factory_inbound"
+  | "delivery_waiting"
+  | "critical_stock"
+  | "inactive_payers"
+  | "high_risk_customers"
+  | "high_debt_customers"
+  | "payment_request_needed"
+  | "inactive_customers"
+  | "ai_risk_alerts"
+  | "ai_payment_priorities"
+  | "ai_sales_opportunities"
+  | "ai_operation_reminders"
+  | "ai_stockout_predictions";
+
+export interface DashboardTaskLink {
+  taskId: TaskId;
+  entityType: WorkflowEntityType;
+  entityId: string;
+  href: string;
+}
+
+export interface DashboardCard {
+  id: string;
+  type: DashboardCardType;
+  source: DashboardCardSource;
+  title: string;
+  value: number;
+  detail: string;
+  severity: AlertSeverity;
+  icon: string;
+  pulse?: boolean;
+  taskIds: TaskId[];
+  links: DashboardTaskLink[];
+}
+
+export type WhatsAppContactType = "dealer" | "customer" | "staff" | "manager";
+export type WhatsAppMessageDirection = "inbound" | "outbound";
+export type WhatsAppMessageType = "text" | "document" | "image" | "template";
+export type WhatsAppTemplateType = "dealer_self_service" | "staff_task" | "manager_approval" | "document_delivery";
+export type WhatsAppActionRequestStatus = "pending" | "confirmed" | "rejected" | "executed";
+export type WhatsAppIntent = "stok" | "fiyat" | "ekstre" | "siparis" | "odeme" | "iade" | "fatura" | "hatali_urun" | "diger";
+export type WhatsAppApprovalPolicyMode = "none" | "confirmation_required" | "approval_required";
+
+export interface WhatsAppContact {
+  id: string;
+  tenantId: TenantId;
+  displayName: string;
+  phone: string;
+  type: WhatsAppContactType;
+  customerId?: CustomerId;
+  userId?: UserId;
+  registered: boolean;
+  active: boolean;
+}
+
+export interface WhatsAppRuleResolution {
+  intent: WhatsAppIntent;
+  allowed: boolean;
+  policyMode: WhatsAppApprovalPolicyMode;
+  requiresRegisteredPhone: boolean;
+  requiresCustomerLink: boolean;
+  reason: string;
+  fallbackMessage?: string;
+}
+
+export interface WhatsAppConversation {
+  id: string;
+  tenantId: TenantId;
+  contactId: string;
+  title: string;
+  lastMessagePreview: string;
+  intent: WhatsAppIntent;
+  unreadCount: number;
+  pendingActionCount: number;
+  relatedCustomerId?: CustomerId;
+  relatedOrderId?: SaleOrderId;
+  relatedPaymentId?: PaymentReceiptId;
+  relatedDocumentId?: DocumentId;
+  updatedAt: string;
+  ruleResolution: WhatsAppRuleResolution;
+}
+
+export interface WhatsAppMessage {
+  id: string;
+  tenantId: TenantId;
+  conversationId: string;
+  direction: WhatsAppMessageDirection;
+  type: WhatsAppMessageType;
+  body: string;
+  attachmentTitle?: string;
+  quotedMessageId?: string;
+  sentAt: string;
+  status: "received" | "queued" | "sent" | "delivered" | "failed";
+}
+
+export interface WhatsAppTemplate {
+  id: string;
+  tenantId: TenantId;
+  code: string;
+  name: string;
+  type: WhatsAppTemplateType;
+  intent: WhatsAppIntent;
+  body: string;
+  active: boolean;
+}
+
+export interface WhatsAppActionRequest {
+  id: string;
+  tenantId: TenantId;
+  conversationId: string;
+  contactId: string;
+  intent: WhatsAppIntent;
+  status: WhatsAppActionRequestStatus;
+  title: string;
+  payloadSummary: string;
+  targetEntityType: WorkflowEntityType;
+  targetEntityId: string;
+  approvalId?: ApprovalId;
+  createdAt: string;
+  confirmedAt?: string;
+  executedAt?: string;
+}
+
+export type ErpConnectionType = "api" | "excel";
+export type ErpConnectionMode = "import_only" | "export_only" | "bidirectional";
+export type ErpSyncDirection = "import" | "export";
+export type ErpEntityType = "customer" | "product" | "stock" | "price" | "payment" | "invoice" | "order" | "return";
+export type IntegrationHealthStatus = "healthy" | "warning" | "error" | "passive";
+
+export interface ErpConnection {
+  id: string;
+  tenantId: TenantId;
+  name: string;
+  type: ErpConnectionType;
+  mode: ErpConnectionMode;
+  status: IntegrationHealthStatus;
+  baseUrl?: string;
+  lastSyncedAt?: string;
+  lastTestResult: "success" | "failed" | "not_tested";
+  active: boolean;
+}
+
+export interface ErpMapping {
+  id: string;
+  tenantId: TenantId;
+  connectionId: string;
+  entityType: ErpEntityType;
+  localField: string;
+  remoteField: string;
+  active: boolean;
+}
+
+export interface ErpSyncLog {
+  id: string;
+  tenantId: TenantId;
+  connectionId: string;
+  direction: ErpSyncDirection;
+  entityType: ErpEntityType;
+  status: "success" | "warning" | "failed";
+  recordCount: number;
+  message: string;
+  startedAt: string;
+  finishedAt?: string;
+}
+
+export type FactoryIntegrationType = "api" | "excel" | "email" | "manual";
+export type FactoryIntegrationStatus = "active" | "passive" | "error";
+export type FactoryOrderStatus = "draft" | "pending_approval" | "sent" | "confirmed" | "producing" | "shipped" | "completed" | "failed" | "cancelled";
+
+export interface FactoryIntegration {
+  id: string;
+  tenantId: TenantId;
+  factoryId: FactoryId;
+  name: string;
+  type: FactoryIntegrationType;
+  status: FactoryIntegrationStatus;
+  lastHealthCheckAt?: string;
+  lastSyncAt?: string;
+  errorMessage?: string;
+}
+
+export interface FactoryStockItem {
+  id: string;
+  tenantId: TenantId;
+  snapshotId: string;
+  factoryId: FactoryId;
+  productId: ProductId;
+  productCode: string;
+  productName: string;
+  availableQuantity: number;
+  reservedQuantity: number;
+  lastSyncedAt?: string;
+  integrationStatus: FactoryIntegrationStatus;
+}
+
+export interface FactoryStockSnapshot {
+  id: string;
+  tenantId: TenantId;
+  factoryId: FactoryId;
+  integrationId: string;
+  capturedAt: string;
+  itemCount: number;
+  status: "synced" | "stale" | "failed";
+  items: FactoryStockItem[];
+}
+
+export interface FactoryOrderLine {
+  id: string;
+  tenantId: TenantId;
+  factoryOrderId: string;
+  saleOrderLineId?: string;
+  productId: ProductId;
+  productCode: string;
+  productName: string;
+  quantity: number;
+  note?: string;
+}
+
+export interface FactoryOrder {
+  id: string;
+  tenantId: TenantId;
+  factoryOrderNo: string;
+  factoryId: FactoryId;
+  factoryName: string;
+  saleOrderId?: SaleOrderId;
+  saleOrderNo?: string;
+  status: FactoryOrderStatus;
+  lineCount: number;
+  lastUpdatedAt: string;
+  approvalId?: ApprovalId;
+  lines: FactoryOrderLine[];
+}
+
+export interface IntegrationLog {
+  id: string;
+  tenantId: TenantId;
+  integrationType: "erp" | "factory" | "whatsapp";
+  integrationId: string;
+  level: "info" | "warning" | "error";
+  message: string;
+  createdAt: string;
+  entityType?: WorkflowEntityType | ErpEntityType;
+  entityId?: string;
+}
+
+export interface IntegrationHealthSummary {
+  status: IntegrationHealthStatus;
+  activeConnectionCount: number;
+  warningCount: number;
+  errorCount: number;
+  lastSyncedAt?: string;
+  message: string;
 }

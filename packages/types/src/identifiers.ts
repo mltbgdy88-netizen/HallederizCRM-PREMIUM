@@ -17,3 +17,7 @@ export type DeliveryId = string;
 export type InvoiceId = string;
 export type ReturnId = string;
 export type DocumentId = string;
+export type WorkflowId = string;
+export type TaskId = string;
+export type ApprovalId = string;
+export type AlertId = string;
