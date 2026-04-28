@@ -1,6 +1,7 @@
 const nextConfig = {
   reactStrictMode: true,
-  transpilePackages: ["@hallederiz/ui", "@hallederiz/domain", "@hallederiz/sdk"]
+  distDir: ".next-cache",
+  transpilePackages: ["@hallederiz/ui", "@hallederiz/domain", "@hallederiz/sdk", "@hallederiz/types"]
 };
 
 export default nextConfig;

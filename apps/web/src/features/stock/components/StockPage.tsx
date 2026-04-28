@@ -1,0 +1,87 @@
+"use client";
+
+import { LoadingState, MetricCard, PageHeader } from "@hallederiz/ui";
+import type { Product } from "@hallederiz/types";
+import { useMemo, useState } from "react";
+import { StockFilterBar } from "./StockFilterBar";
+import { ProductDetailModal } from "./ProductDetailModal";
+import { StockTable } from "./StockTable";
+import { StockToolbar } from "./StockToolbar";
+import { useStockData } from "../hooks/use-stock-data";
+import { useStockFilters } from "../hooks/use-stock-filters";
+
+export function StockPage() {
+  const { filters, updateFilter, resetFilters } = useStockFilters();
+  const { loading, products, rows, brands, factories, warehouses, categorySlots, priceSlots } = useStockData(filters);
+  const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+
+  const selectedProduct = useMemo<Product | null>(
+    () => products.find((product) => product.id === selectedProductId) ?? null,
+    [products, selectedProductId]
+  );
+
+  const criticalCount = useMemo(
+    () => rows.filter((row) => row.criticalStockStatus === "critical").length,
+    [rows]
+  );
+
+  const totalCenterStock = useMemo(
+    () => rows.reduce((total, row) => total + row.centerWarehouseStockTotal, 0),
+    [rows]
+  );
+
+  const totalFactoryStock = useMemo(
+    () => rows.reduce((total, row) => total + row.factoryStockTotal, 0),
+    [rows]
+  );
+
+  return (
+    <div className="hz-page-stack stock-page">
+      <PageHeader
+        title="Stok"
+        description="Urun, depo, barkod/QR, fiyat slotlari ve fabrika gorunurlugunu yaln ama guclu bir operasyon ekraninda yonetin."
+      />
+
+      <section className="hz-metric-grid">
+        <MetricCard title="Toplam Urun" value={String(rows.length)} detail="Aktif katalog satiri" tone="info" />
+        <MetricCard title="Kritik Stok" value={String(criticalCount)} detail="Oncelikli kontrol" tone="danger" pulse={criticalCount > 0} />
+        <MetricCard title="Merkez Stok" value={String(totalCenterStock)} detail="Merkez depolar toplami" tone="success" />
+        <MetricCard title="Fabrika Stogu" value={String(totalFactoryStock)} detail="Fabrika bildirimi" tone="warning" />
+      </section>
+
+      <div className="stock-summary-note">
+        Stok listesi sade tutulur: tabloda sadece operasyon kararina etki eden alanlar gorunur. Detay seviyeleri urun
+        modalinda acilir.
+      </div>
+
+      <StockToolbar onActionClick={() => undefined} />
+
+      <StockFilterBar
+        filters={filters}
+        brands={brands}
+        factories={factories}
+        products={products}
+        categorySlots={categorySlots}
+        onFilterChange={updateFilter}
+        onReset={resetFilters}
+      />
+
+      {loading ? (
+        <LoadingState title="Stok verisi yukleniyor" message="Merkez depo ve fabrika ozetleri getiriliyor." />
+      ) : (
+        <StockTable rows={rows} onSelectProduct={setSelectedProductId} />
+      )}
+
+      <ProductDetailModal
+        open={Boolean(selectedProduct)}
+        product={selectedProduct}
+        brands={brands}
+        factories={factories}
+        warehouses={warehouses}
+        priceSlots={priceSlots}
+        categorySlots={categorySlots}
+        onClose={() => setSelectedProductId(null)}
+      />
+    </div>
+  );
+}

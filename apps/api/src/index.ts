@@ -1,4 +1,8 @@
 import Fastify from "fastify";
+import { registerCommercialOperationsRoutes } from "./commercial-operations/routes";
+import { registerPlatformCoreRoutes } from "./platform-core/routes";
+import { registerProductStockPricingRoutes } from "./product-stock-pricing/routes";
+import { registerSalesCrmRoutes } from "./sales-crm/routes";
 
 const server = Fastify({
   logger: true
@@ -22,7 +26,10 @@ server.get("/", async () => {
 });
 
 async function bootstrap() {
-  // TODO: Register plugins, auth, and tenant-aware routes here.
+  await registerPlatformCoreRoutes(server);
+  await registerProductStockPricingRoutes(server);
+  await registerSalesCrmRoutes(server);
+  await registerCommercialOperationsRoutes(server);
   await server.listen({ port, host });
 }
 
