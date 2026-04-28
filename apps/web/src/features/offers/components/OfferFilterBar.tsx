@@ -1,4 +1,5 @@
 import type { Customer, OfferStatus } from "@hallederiz/types";
+import { FilterActions, FilterBar, FilterGrid, FilterResetButton } from "@hallederiz/ui";
 import type { OfferFilters } from "../schemas/offer-filter-schema";
 
 export function OfferFilterBar({
@@ -13,8 +14,8 @@ export function OfferFilterBar({
   onReset: () => void;
 }) {
   return (
-    <section className="hz-filter-card">
-      <div className="hz-filter-grid">
+    <FilterBar>
+      <FilterGrid>
         <label>
           Musteri
           <select value={filters.customerId} onChange={(event) => onFilterChange("customerId", event.target.value)}>
@@ -72,13 +73,14 @@ export function OfferFilterBar({
           />
           Satisa donusenler
         </label>
-      </div>
+      </FilterGrid>
 
-      <div className="stock-filter-actions">
-        <button type="button" className="reset-btn" onClick={onReset}>
-          Filtreleri Temizle
+      <FilterActions>
+        <button type="button" className="hz-btn hz-btn-secondary">
+          Filtrele
         </button>
-      </div>
-    </section>
+        <FilterResetButton onClick={onReset} label="Temizle" />
+      </FilterActions>
+    </FilterBar>
   );
 }

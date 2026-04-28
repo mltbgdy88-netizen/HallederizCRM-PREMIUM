@@ -2,7 +2,7 @@
 
 import { buildApprovalSummary, canExecuteApprovedAction, summarizeApprovalTarget } from "@hallederiz/domain";
 import type { Approval } from "@hallederiz/types";
-import { FilterBar, LoadingState, MetricCard, PageHeader, Pagination, SplitContentLayout } from "@hallederiz/ui";
+import { FilterActions, FilterBar, LoadingState, MetricCard, PageHeader, Pagination, SplitContentLayout } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { getOperationsEngineData } from "../../dashboard/queries";
@@ -13,7 +13,7 @@ const typeLabels: Record<Approval["type"], string> = { order_high_value: "Yuksek
 function statusBadge(status: Approval["status"]) { return status === "pending" ? "hz-badge hz-badge-warning" : status === "approved" ? "hz-badge hz-badge-success" : status === "rejected" ? "hz-badge hz-badge-danger" : "hz-badge hz-badge-info"; }
 
 export function ApprovalFilterBar() {
-  return <FilterBar><div className="task-center-filter-grid"><label>Approval Tipi<select defaultValue=""><option value="">Tum tipler</option><option>AI Proposal</option><option>Eksik Tahsilatli Teslim</option></select></label><label>Durum<select defaultValue=""><option value="">Tum durumlar</option><option>Bekliyor</option><option>Onaylandi</option><option>Reddedildi</option></select></label><label>Istenen Rol<select defaultValue=""><option value="">Tum roller</option><option>Yonetici</option><option>Satis Muduru</option></select></label><label>Entity Tipi<select defaultValue=""><option value="">Tum entityler</option><option>Siparis</option><option>Teslimat</option><option>AI Proposal</option></select></label><label>Tarih<input type="date" /></label></div></FilterBar>;
+  return <FilterBar><div className="task-center-filter-grid"><label>Approval Tipi<select defaultValue=""><option value="">Tum tipler</option><option>AI Proposal</option><option>Eksik Tahsilatli Teslim</option></select></label><label>Durum<select defaultValue=""><option value="">Tum durumlar</option><option>Bekliyor</option><option>Onaylandi</option><option>Reddedildi</option></select></label><label>Istenen Rol<select defaultValue=""><option value="">Tum roller</option><option>Yonetici</option><option>Satis Muduru</option></select></label><label>Entity Tipi<select defaultValue=""><option value="">Tum entityler</option><option>Siparis</option><option>Teslimat</option><option>AI Proposal</option></select></label><label>Tarih<input type="date" /></label></div><FilterActions><button type="button" className="hz-btn hz-btn-secondary">Filtrele</button><button type="button" className="reset-btn">Temizle</button></FilterActions></FilterBar>;
 }
 
 export function ApprovalTable({ approvals, onOpen }: { approvals: Approval[]; onOpen: (approvalId: string) => void }) {

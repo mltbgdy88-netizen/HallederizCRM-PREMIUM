@@ -1,5 +1,5 @@
 import type { WarehouseOrderStatus, WarehouseTaskStatus } from "@hallederiz/types";
-import { FilterBar } from "@hallederiz/ui";
+import { FilterActions, FilterBar, FilterGrid, FilterResetButton } from "@hallederiz/ui";
 import type { WarehouseTaskFilters } from "../schemas/warehouse-filter-schema";
 
 export function WarehouseTaskFilterBar({
@@ -13,7 +13,7 @@ export function WarehouseTaskFilterBar({
 }) {
   return (
     <FilterBar>
-      <div className="hz-filter-grid">
+      <FilterGrid>
         <label>Depo<input value={filters.warehouse} onChange={(event) => onFilterChange("warehouse", event.target.value)} placeholder="Merkez Depo" /></label>
         <label>
           Gorev Durumu
@@ -31,10 +31,13 @@ export function WarehouseTaskFilterBar({
         <label className="hz-toggle"><input type="checkbox" checked={filters.criticalOnly} onChange={(event) => onFilterChange("criticalOnly", event.target.checked)} />Kritik isler</label>
         <label className="hz-toggle"><input type="checkbox" checked={filters.readyOnly} onChange={(event) => onFilterChange("readyOnly", event.target.checked)} />Hazir olanlar</label>
         <label className="hz-toggle"><input type="checkbox" checked={filters.overdueOnly} onChange={(event) => onFilterChange("overdueOnly", event.target.checked)} />Gecikenler</label>
-      </div>
-      <div className="stock-filter-actions hz-margin-top-sm">
-        <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn" onClick={onReset}>Filtreleri Sifirla</button>
-      </div>
+      </FilterGrid>
+      <FilterActions>
+        <button type="button" className="hz-btn hz-btn-secondary">
+          Filtrele
+        </button>
+        <FilterResetButton onClick={onReset} label="Temizle" />
+      </FilterActions>
     </FilterBar>
   );
 }

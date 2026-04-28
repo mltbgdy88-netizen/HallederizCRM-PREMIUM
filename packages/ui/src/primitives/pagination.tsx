@@ -15,8 +15,8 @@ export function Pagination({ totalItems, pageSize, currentPage, onPageChange }: 
   const totalPages = Math.max(1, Math.ceil(totalItems / Math.max(1, pageSize)));
   const safePage = Math.min(Math.max(1, currentPage), totalPages);
   const start = Math.max(1, safePage - 2);
-  const end = Math.min(totalPages, start + 4);
-  const visiblePages = range(Math.max(1, end - 4), end);
+  const end = Math.min(totalPages, start + 5);
+  const visiblePages = range(Math.max(1, end - 5), end);
 
   return (
     <div className="hz-paginator">
@@ -27,8 +27,9 @@ export function Pagination({ totalItems, pageSize, currentPage, onPageChange }: 
           className="hz-paginator-btn"
           disabled={safePage <= 1}
           onClick={() => onPageChange(safePage - 1)}
+          aria-label="Onceki sayfa"
         >
-          ‹
+          {"<"}
         </button>
         {visiblePages.map((page) => (
           <button
@@ -45,8 +46,9 @@ export function Pagination({ totalItems, pageSize, currentPage, onPageChange }: 
           className="hz-paginator-btn"
           disabled={safePage >= totalPages}
           onClick={() => onPageChange(safePage + 1)}
+          aria-label="Sonraki sayfa"
         >
-          ›
+          {">"}
         </button>
       </div>
     </div>

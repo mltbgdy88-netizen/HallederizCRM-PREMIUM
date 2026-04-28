@@ -3,9 +3,10 @@ import type { StockRow } from "../mappers/map-stock-row";
 export interface StockTableProps {
   rows: StockRow[];
   onSelectProduct: (productId: string) => void;
+  selectedProductId?: string | null;
 }
 
-export function StockTable({ rows, onSelectProduct }: StockTableProps) {
+export function StockTable({ rows, onSelectProduct, selectedProductId = null }: StockTableProps) {
   return (
     <section className="hz-content-card">
       <div className="table-wrap hz-table-wrap">
@@ -22,7 +23,11 @@ export function StockTable({ rows, onSelectProduct }: StockTableProps) {
           </thead>
           <tbody>
             {rows.map((row) => (
-              <tr key={row.productId} onClick={() => onSelectProduct(row.productId)} className="stock-table-row">
+              <tr
+                key={row.productId}
+                onClick={() => onSelectProduct(row.productId)}
+                className={`stock-table-row ${selectedProductId === row.productId ? "is-selected-row" : ""}`}
+              >
                 <td>{row.productCode}</td>
                 <td>{row.productName}</td>
                 <td>{row.brandName}</td>

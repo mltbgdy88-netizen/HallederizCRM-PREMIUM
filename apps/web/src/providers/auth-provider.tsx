@@ -13,11 +13,14 @@ interface LoginResult {
 interface AuthContextValue {
   state: AuthState;
   session: SessionModel | null;
+  accessToken: string | null;
   login: (input: LoginInput) => Promise<LoginResult>;
   logout: () => void;
 }
 
 const STORAGE_KEY = "hz_platform_session";
+const ACCESS_TOKEN_STORAGE_KEY = "hz_platform_access_token";
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -38,17 +41,46 @@ function readStoredSession(): SessionModel | null {
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>("loading");
   const [session, setSession] = useState<SessionModel | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
 
   useEffect(() => {
-    const storedSession = readStoredSession();
-    if (storedSession) {
-      setSession(storedSession);
-      setState("authenticated");
-      return;
-    }
+    const hydrateSession = async () => {
+      const storedSession = readStoredSession();
+      const storedToken = window.localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
+      if (!storedSession || !storedToken) {
+        setSession(null);
+        setAccessToken(null);
+        setState("anonymous");
+        return;
+      }
 
-    setSession(null);
-    setState("anonymous");
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/session`, {
+          headers: {
+            "x-session-token": storedToken,
+            authorization: `Bearer ${storedToken}`
+          },
+          cache: "no-store"
+        });
+
+        if (!response.ok) {
+          throw new Error("session_invalid");
+        }
+
+        const payload = (await response.json()) as { item: SessionModel };
+        setSession(payload.item);
+        setAccessToken(storedToken);
+        setState("authenticated");
+      } catch {
+        window.localStorage.removeItem(STORAGE_KEY);
+        window.localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+        setSession(null);
+        setAccessToken(null);
+        setState("anonymous");
+      }
+    };
+
+    void hydrateSession();
   }, []);
 
   const login = async (input: LoginInput): Promise<LoginResult> => {
@@ -59,10 +91,26 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
     }
 
-    // TODO: Replace this with a real call to POST /auth/login.
-    const loginResponse = createMockLoginResponse(input, defaultTenant, defaultUser, [adminRole]);
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(loginResponse.session));
-    setSession(loginResponse.session);
+    let loginResponse = null as Awaited<ReturnType<typeof fetch>> | null;
+    try {
+      loginResponse = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(input)
+      });
+    } catch {
+      loginResponse = null;
+    }
+
+    const payload =
+      loginResponse && loginResponse.ok
+        ? ((await loginResponse.json()) as { session: SessionModel; accessToken: string })
+        : createMockLoginResponse(input, defaultTenant, defaultUser, [adminRole]);
+
+    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload.session));
+    window.localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, payload.accessToken);
+    setSession(payload.session);
+    setAccessToken(payload.accessToken);
     setState("authenticated");
 
     return { success: true };
@@ -70,7 +118,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const logout = (): void => {
     window.localStorage.removeItem(STORAGE_KEY);
+    window.localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
     setSession(null);
+    setAccessToken(null);
     setState("anonymous");
   };
 
@@ -78,10 +128,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     () => ({
       state,
       session,
+      accessToken,
       login,
       logout
     }),
-    [state, session]
+    [state, session, accessToken]
   );
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;

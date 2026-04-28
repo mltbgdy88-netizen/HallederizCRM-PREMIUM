@@ -1,4 +1,5 @@
 import type { PriceSlotConfig } from "@hallederiz/types";
+import { FilterActions, FilterBar, FilterGrid, FilterResetButton } from "@hallederiz/ui";
 import type { CustomerFilters } from "../schemas/customer-filter-schema";
 
 export interface CustomerFilterBarProps {
@@ -11,8 +12,8 @@ export interface CustomerFilterBarProps {
 
 export function CustomerFilterBar({ filters, cities, priceSlots, onFilterChange, onReset }: CustomerFilterBarProps) {
   return (
-    <section className="hz-filter-card">
-      <div className="hz-filter-grid">
+    <FilterBar>
+      <FilterGrid>
         <label>
           Arama
           <input
@@ -108,13 +109,14 @@ export function CustomerFilterBar({ filters, cities, priceSlots, onFilterChange,
             ))}
           </select>
         </label>
-      </div>
+      </FilterGrid>
 
-      <div className="stock-filter-actions">
-        <button type="button" className="reset-btn" onClick={onReset}>
-          Filtreleri Temizle
+      <FilterActions>
+        <button type="button" className="hz-btn hz-btn-secondary">
+          Filtrele
         </button>
-      </div>
-    </section>
+        <FilterResetButton onClick={onReset} label="Temizle" />
+      </FilterActions>
+    </FilterBar>
   );
 }

@@ -1,4 +1,5 @@
 import type { Brand, CategorySlotConfig, Factory, Product } from "@hallederiz/types";
+import { FilterActions, FilterBar, FilterGrid, FilterResetButton, FilterToggleRow } from "@hallederiz/ui";
 import type { StockFilters } from "../schemas/stock-filter-schema";
 
 export interface StockFilterBarProps {
@@ -43,8 +44,8 @@ export function StockFilterBar({
   };
 
   return (
-    <section className="stock-filter-bar hz-filter-card">
-      <div className="stock-filter-grid">
+    <FilterBar>
+      <FilterGrid>
         <label>
           Urun Kodu / Ad / Barkod / QR
           <input
@@ -96,9 +97,9 @@ export function StockFilterBar({
             </select>
           </label>
         ))}
-      </div>
+      </FilterGrid>
 
-      <div className="stock-filter-actions">
+      <FilterToggleRow>
         <label className="checkbox-label">
           <input
             type="checkbox"
@@ -117,10 +118,14 @@ export function StockFilterBar({
           Stokta olanlar
         </label>
 
-        <button type="button" onClick={onReset} className="reset-btn">
-          Filtreleri Temizle
+      </FilterToggleRow>
+
+      <FilterActions>
+        <button type="button" className="hz-btn hz-btn-secondary">
+          Filtrele
         </button>
-      </div>
-    </section>
+        <FilterResetButton onClick={onReset} label="Temizle" />
+      </FilterActions>
+    </FilterBar>
   );
 }

@@ -1,6 +1,6 @@
 const nextConfig = {
   reactStrictMode: true,
-  distDir: ".next-cache",
+  distDir: ".runtime-next",
   transpilePackages: ["@hallederiz/ui", "@hallederiz/domain", "@hallederiz/sdk", "@hallederiz/types"]
 };
 

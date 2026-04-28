@@ -2,6 +2,7 @@ export interface ApiClientOptions {
   baseUrl: string;
   tenantId?: string;
   userId?: string;
+  sessionToken?: string;
 }
 
 export interface ListResponse<T> {
@@ -22,6 +23,18 @@ export class ApiError extends Error {
 export class ApiClient {
   constructor(private readonly options: ApiClientOptions) {}
 
+  private resolveSessionToken(): string | undefined {
+    if (this.options.sessionToken) {
+      return this.options.sessionToken;
+    }
+
+    if (typeof window === "undefined") {
+      return undefined;
+    }
+
+    return window.localStorage.getItem("hz_platform_access_token") ?? undefined;
+  }
+
   async get<T>(path: string): Promise<T> {
     return this.request<T>(path, { method: "GET" });
   }
@@ -35,12 +48,15 @@ export class ApiClient {
   }
 
   private async request<T>(path: string, init: { method: string; body?: unknown }): Promise<T> {
+    const sessionToken = this.resolveSessionToken();
     const response = await fetch(`${this.options.baseUrl}${path}`, {
       method: init.method,
       headers: {
         "content-type": "application/json",
         ...(this.options.tenantId ? { "x-tenant-id": this.options.tenantId } : {}),
-        ...(this.options.userId ? { "x-user-id": this.options.userId } : {})
+        ...(this.options.userId ? { "x-user-id": this.options.userId } : {}),
+        ...(sessionToken ? { "x-session-token": sessionToken } : {}),
+        ...(sessionToken ? { authorization: `Bearer ${sessionToken}` } : {})
       },
       body: init.body === undefined ? undefined : JSON.stringify(init.body),
       cache: "no-store"

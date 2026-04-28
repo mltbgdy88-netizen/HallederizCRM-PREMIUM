@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import type { Task } from "@hallederiz/types";
-import { FilterBar, LoadingState, MetricCard, PageHeader, Pagination, SplitContentLayout } from "@hallederiz/ui";
+import { FilterActions, FilterBar, LoadingState, MetricCard, PageHeader, Pagination, SplitContentLayout } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { getOperationsEngineData } from "../../dashboard/queries";
@@ -12,7 +12,7 @@ const statusLabels: Record<Task["status"], string> = { open: "Acik", in_progress
 function priorityBadge(priority: Task["priority"]) { return priority === "critical" ? "hz-badge hz-badge-danger" : priority === "high" ? "hz-badge hz-badge-warning" : "hz-badge hz-badge-info"; }
 
 export function TaskFilterBar() {
-  return <FilterBar><div className="task-center-filter-grid"><label>Atanan Kisi<select defaultValue=""><option value="">Tum ekip</option><option>Operasyon</option><option>Muhasebe</option><option>Depo</option></select></label><label>Durum<select defaultValue=""><option value="">Tum durumlar</option><option>Acik</option><option>Devam</option><option>Gecikti</option></select></label><label>Oncelik<select defaultValue=""><option value="">Tum oncelikler</option><option>Kritik</option><option>Yuksek</option></select></label><label>Gorev Tipi<select defaultValue=""><option value="">Tum tipler</option><option>Siparis</option><option>Tahsilat</option><option>Depo</option><option>AI</option></select></label><label>Entity Tipi<select defaultValue=""><option value="">Tum kayitlar</option><option>Siparis</option><option>Teslimat</option><option>Cari</option></select></label><label className="hz-toggle"><input type="checkbox" />Gecikenler</label></div></FilterBar>;
+  return <FilterBar><div className="task-center-filter-grid"><label>Atanan Kisi<select defaultValue=""><option value="">Tum ekip</option><option>Operasyon</option><option>Muhasebe</option><option>Depo</option></select></label><label>Durum<select defaultValue=""><option value="">Tum durumlar</option><option>Acik</option><option>Devam</option><option>Gecikti</option></select></label><label>Oncelik<select defaultValue=""><option value="">Tum oncelikler</option><option>Kritik</option><option>Yuksek</option></select></label><label>Gorev Tipi<select defaultValue=""><option value="">Tum tipler</option><option>Siparis</option><option>Tahsilat</option><option>Depo</option><option>AI</option></select></label><label>Entity Tipi<select defaultValue=""><option value="">Tum kayitlar</option><option>Siparis</option><option>Teslimat</option><option>Cari</option></select></label><label className="hz-toggle"><input type="checkbox" />Gecikenler</label></div><FilterActions><button type="button" className="hz-btn hz-btn-secondary">Filtrele</button><button type="button" className="reset-btn">Temizle</button></FilterActions></FilterBar>;
 }
 
 export function TaskTable({ tasks, onOpen }: { tasks: Task[]; onOpen: (taskId: string) => void }) {

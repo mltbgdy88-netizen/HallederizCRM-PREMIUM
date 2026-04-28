@@ -1,4 +1,4 @@
-export type ApiErrorCode = "validation_error" | "conflict" | "not_found";
+export type ApiErrorCode = "validation_error" | "conflict" | "not_found" | "unauthorized" | "forbidden";
 
 export class ApiDomainError extends Error {
   constructor(
@@ -18,6 +18,20 @@ export class ConcurrencyConflictError extends ApiDomainError {
       ...details
     });
     this.name = "ConcurrencyConflictError";
+  }
+}
+
+export class UnauthorizedError extends ApiDomainError {
+  constructor(message = "Kimlik dogrulama gerekli.", details?: Record<string, unknown>) {
+    super("unauthorized", message, details);
+    this.name = "UnauthorizedError";
+  }
+}
+
+export class ForbiddenError extends ApiDomainError {
+  constructor(message = "Bu islem icin yetkiniz yok.", details?: Record<string, unknown>) {
+    super("forbidden", message, details);
+    this.name = "ForbiddenError";
   }
 }
 
@@ -42,7 +56,16 @@ export function assertOptimisticConcurrency(params: {
 
 export function asApiErrorPayload(error: unknown): { statusCode: number; body: Record<string, unknown> } {
   if (error instanceof ApiDomainError) {
-    const statusCode = error.code === "conflict" ? 409 : error.code === "not_found" ? 404 : 400;
+    const statusCode =
+      error.code === "conflict"
+        ? 409
+        : error.code === "not_found"
+          ? 404
+          : error.code === "unauthorized"
+            ? 401
+            : error.code === "forbidden"
+              ? 403
+              : 400;
     return {
       statusCode,
       body: {

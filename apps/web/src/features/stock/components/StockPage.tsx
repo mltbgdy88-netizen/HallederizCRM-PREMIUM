@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingState, MetricCard, PageHeader, Pagination } from "@hallederiz/ui";
+import { LoadingState, MetricCard, PageHeader, Pagination, SplitContentLayout } from "@hallederiz/ui";
 import type { Product } from "@hallederiz/types";
 import { useMemo, useState } from "react";
 import { StockFilterBar } from "./StockFilterBar";
@@ -9,6 +9,27 @@ import { StockTable } from "./StockTable";
 import { StockToolbar } from "./StockToolbar";
 import { useStockData } from "../hooks/use-stock-data";
 import { useStockFilters } from "../hooks/use-stock-filters";
+import type { StockRow } from "../mappers/map-stock-row";
+
+function StockQuickSummaryPanel({ row }: { row: StockRow | null }) {
+  return (
+    <aside className="hz-side-panel">
+      <p className="drawer-eyebrow">Urun Ozeti</p>
+      <h3>{row ? `${row.productCode} - ${row.productName}` : "Secili urun yok"}</h3>
+      <p className="muted">Secili kaydin merkez/fabrika stok gorunurlugu ve kritik durum ozeti.</p>
+      <div className="detail-list">
+        <span>Marka</span>
+        <strong>{row?.brandName ?? "-"}</strong>
+        <span>Merkez stok</span>
+        <strong>{row?.centerWarehouseStockTotal ?? 0}</strong>
+        <span>Fabrika stok</span>
+        <strong>{row?.factoryStockTotal ?? 0}</strong>
+        <span>Kritik durum</span>
+        <strong>{row ? (row.criticalStockStatus === "critical" ? "Kritik" : "Saglikli") : "-"}</strong>
+      </div>
+    </aside>
+  );
+}
 
 export function StockPage() {
   const { filters, updateFilter, resetFilters } = useStockFilters();
@@ -21,6 +42,10 @@ export function StockPage() {
   const selectedProduct = useMemo<Product | null>(
     () => products.find((product) => product.id === selectedProductId) ?? null,
     [products, selectedProductId]
+  );
+  const selectedRow = useMemo<StockRow | null>(
+    () => rows.find((row) => row.productId === selectedProductId) ?? pagedRows[0] ?? null,
+    [pagedRows, rows, selectedProductId]
   );
 
   const criticalCount = useMemo(
@@ -72,10 +97,15 @@ export function StockPage() {
       {loading ? (
         <LoadingState title="Stok verisi yukleniyor" message="Merkez depo ve fabrika ozetleri getiriliyor." />
       ) : (
-        <>
-          <StockTable rows={pagedRows} onSelectProduct={setSelectedProductId} />
-          <Pagination totalItems={rows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
-        </>
+        <SplitContentLayout
+          main={
+            <>
+              <StockTable rows={pagedRows} onSelectProduct={setSelectedProductId} selectedProductId={selectedRow?.productId ?? null} />
+              <Pagination totalItems={rows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
+            </>
+          }
+          side={<StockQuickSummaryPanel row={selectedRow} />}
+        />
       )}
 
       <ProductDetailModal

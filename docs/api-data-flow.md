@@ -75,3 +75,11 @@ Bu akisla UI'daki feature query'leri dogrudan mock import etmek yerine typed cli
 - Products: Route -> Service -> Repository -> `save product aggregate` (tx)
 - Offers: Route -> Service -> Repository -> `save offer + replace lines + recalc totals` (tx)
 - Orders: Route -> Service -> Repository -> `save order + replace lines + replace source plans + derive statuses` (tx)
+
+## Batch-2 Ek Guclendirmeler
+
+- Web auth provider login/session akisinda API-first modele alinmistir.
+- API request-context session token uzerinden user/tenant/permission cozumleyebilir.
+- Approval execution akisi status degisiminin otesine gecip domain dispatch map ile calisir.
+- Document queue save/print aksiyonlari audit/timeline write-back ile izlenebilir hale getirilmistir.
+- `GET /audit-events` ve `GET /entity-timelines/:entityType/:entityId` ile event akisina erisim saglanmistir.

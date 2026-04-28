@@ -1,5 +1,5 @@
 import type { PaymentMethod, PaymentStatus } from "@hallederiz/types";
-import { FilterBar } from "@hallederiz/ui";
+import { FilterActions, FilterBar, FilterGrid, FilterResetButton } from "@hallederiz/ui";
 import type { PaymentFilters } from "../schemas/payment-filter-schema";
 
 export function PaymentFilterBar({
@@ -13,7 +13,7 @@ export function PaymentFilterBar({
 }) {
   return (
     <FilterBar>
-      <div className="hz-filter-grid">
+      <FilterGrid>
         <label>
           Musteri / Fis
           <input value={filters.customer} onChange={(event) => onFilterChange("customer", event.target.value)} placeholder="PAY-930 veya cari adi" />
@@ -62,10 +62,13 @@ export function PaymentFilterBar({
           <input type="checkbox" checked={filters.openOnly} onChange={(event) => onFilterChange("openOnly", event.target.checked)} />
           Acik tahsilatlar
         </label>
-      </div>
-      <div className="stock-filter-actions hz-margin-top-sm">
-        <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn" onClick={onReset}>Filtreleri Sifirla</button>
-      </div>
+      </FilterGrid>
+      <FilterActions>
+        <button type="button" className="hz-btn hz-btn-secondary">
+          Filtrele
+        </button>
+        <FilterResetButton onClick={onReset} label="Temizle" />
+      </FilterActions>
     </FilterBar>
   );
 }

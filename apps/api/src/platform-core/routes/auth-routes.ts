@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type { LoginInput } from "@hallederiz/types";
-import { createLoginPayload } from "../mock-data";
+import { createSession, getSessionByToken } from "../../shared/session-store";
+import { buildRequestContext } from "../../shared/request-context";
 
 export async function registerAuthRoutes(server: FastifyInstance) {
   server.post<{ Body: Partial<LoginInput> }>("/auth/login", async (request, reply) => {
@@ -12,7 +13,7 @@ export async function registerAuthRoutes(server: FastifyInstance) {
       });
     }
 
-    const loginPayload = createLoginPayload({
+    const loginPayload = createSession({
       tenantSlug: body.tenantSlug,
       email: body.email,
       password: body.password
@@ -21,12 +22,21 @@ export async function registerAuthRoutes(server: FastifyInstance) {
     return reply.send(loginPayload);
   });
 
-  server.get("/auth/me", async () => {
-    // TODO: Validate access token and resolve authenticated principal.
-    return createLoginPayload({
-      tenantSlug: "hallederiz",
-      email: "admin@hallederiz.com",
-      password: "hidden"
-    }).session;
+  server.get("/auth/me", async (request, reply) => {
+    const context = buildRequestContext(request);
+    const session = getSessionByToken(context.sessionToken);
+    if (!session) {
+      return reply.status(401).send({ message: "Oturum gecersiz veya suresi dolmus." });
+    }
+    return session;
+  });
+
+  server.get("/auth/session", async (request, reply) => {
+    const context = buildRequestContext(request);
+    const session = getSessionByToken(context.sessionToken);
+    if (!session) {
+      return reply.status(401).send({ message: "Oturum bulunamadi." });
+    }
+    return { item: session };
   });
 }

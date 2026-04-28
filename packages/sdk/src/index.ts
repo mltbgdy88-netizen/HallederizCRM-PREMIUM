@@ -4,6 +4,7 @@ import {
   CustomersClient,
   DashboardClient,
   DeliveriesClient,
+  DocumentsClient,
   InvoicesClient,
   OffersClient,
   OrdersClient,
@@ -28,6 +29,7 @@ export interface HallederizSdk {
   returns: ReturnsClient;
   approvals: ApprovalsClient;
   dashboard: DashboardClient;
+  documents: DocumentsClient;
 }
 
 export function createHallederizSdk(options: ApiClientOptions): HallederizSdk {
@@ -44,6 +46,7 @@ export function createHallederizSdk(options: ApiClientOptions): HallederizSdk {
     invoices: new InvoicesClient(apiClient),
     returns: new ReturnsClient(apiClient),
     approvals: new ApprovalsClient(apiClient),
-    dashboard: new DashboardClient(apiClient)
+    dashboard: new DashboardClient(apiClient),
+    documents: new DocumentsClient(apiClient)
   };
 }

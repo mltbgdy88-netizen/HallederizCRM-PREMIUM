@@ -15,11 +15,9 @@
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts",
-    ".next-cache/types/**/*.ts"
+    ".runtime-next/types/**/*.ts"
   ],
   "exclude": [
-    "node_modules",
-    ".next-cache/types/**/*.ts"
+    "node_modules"
   ]
 }

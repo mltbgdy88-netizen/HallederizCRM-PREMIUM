@@ -9,3 +9,4 @@ export * from "./invoices.client";
 export * from "./returns.client";
 export * from "./approvals.client";
 export * from "./dashboard.client";
+export * from "./documents.client";

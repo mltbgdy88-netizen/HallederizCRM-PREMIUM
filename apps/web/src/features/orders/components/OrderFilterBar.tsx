@@ -1,5 +1,5 @@
 import type { OrderChannel, OrderDeliveryStatus, OrderPaymentStatus, OrderSourcePreference, SaleOrderStatus } from "@hallederiz/types";
-import { FilterBar } from "@hallederiz/ui";
+import { FilterActions, FilterBar, FilterGrid, FilterResetButton } from "@hallederiz/ui";
 import type { OrderFilters } from "../schemas/order-filter-schema";
 
 export function OrderFilterBar({
@@ -13,7 +13,7 @@ export function OrderFilterBar({
 }) {
   return (
     <FilterBar>
-      <div className="hz-filter-grid">
+      <FilterGrid>
         <label>
           Musteri / Siparis
           <input value={filters.customer} onChange={(event) => onFilterChange("customer", event.target.value)} placeholder="SO-2481 veya cari adi" />
@@ -79,12 +79,13 @@ export function OrderFilterBar({
           />
           Acik operasyonlar
         </label>
-      </div>
-      <div className="stock-filter-actions hz-margin-top-sm">
-        <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn" onClick={onReset}>
-          Filtreleri Sifirla
+      </FilterGrid>
+      <FilterActions>
+        <button type="button" className="hz-btn hz-btn-secondary">
+          Filtrele
         </button>
-      </div>
+        <FilterResetButton onClick={onReset} label="Temizle" />
+      </FilterActions>
     </FilterBar>
   );
 }

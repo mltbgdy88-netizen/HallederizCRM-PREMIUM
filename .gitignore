@@ -7,6 +7,7 @@ dist
 .turbo
 .next
 .next-cache
+.runtime-next
 coverage
 
 # Logs

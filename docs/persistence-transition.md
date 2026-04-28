@@ -47,3 +47,11 @@ Tarih: 28 Nisan 2026
 1. `warehouse_orders` ve `warehouse_order_lines` icin order create-warehouse-order write parity'yi genisletmek.
 2. Payments/Deliveries/Invoices/Returns/Documents write path'lerini DB-first mode'a tasimak.
 3. DB-mode integration testlerini gercek test veritabani ile otomatik kosulabilir hale getirmek.
+
+## Batch-2 Notlari (29 Nisan 2026)
+
+- Auth/session provider akisi API-first modele yaklastirildi (`/auth/login`, `/auth/session`).
+- Request context session token uzerinden tenant/user/permission cozumleyebiliyor.
+- Approval execution status-only yaklasimindan domain dispatch map modeline gecirildi.
+- Audit/timeline write-back altyapisi (`recordAuditEvent`) eklendi ve kritik write endpointlere baglandi.
+- Document render/regenerate + queue save/print aksiyonlari audit olaylarina dusuyor.

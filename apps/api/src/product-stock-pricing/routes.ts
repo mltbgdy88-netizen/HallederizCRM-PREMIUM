@@ -8,6 +8,8 @@ import type {
 import { ProductStockPricingService } from "../modules/product-stock-pricing/service";
 import { buildRequestContext } from "../shared/request-context";
 import { asApiErrorPayload } from "../shared/errors";
+import { assertAnyPermission, assertAuthenticated, assertTenantAccess, withGuards } from "../shared/auth-guards";
+import { recordAuditEvent } from "../shared/audit-timeline";
 
 interface ProductQuerystring {
   q?: string;
@@ -61,29 +63,65 @@ export async function registerProductStockPricingRoutes(server: FastifyInstance)
   });
 
   server.post<{ Body: Partial<Product> }>("/products", async (request, reply) => {
-    try {
-      const service = new ProductStockPricingService(buildRequestContext(request));
-      const product = await service.createProduct(request.body);
-      return reply.status(201).send({ item: product });
-    } catch (error) {
-      const payload = asApiErrorPayload(error);
-      return reply.status(payload.statusCode).send(payload.body);
-    }
+    return withGuards(
+      request,
+      reply,
+      [
+        assertAuthenticated,
+        (context) => assertAnyPermission(context, ["products.write", "products.manage"]),
+        (context) => assertTenantAccess(context, request.body?.tenantId)
+      ],
+      async (context) => {
+        try {
+          const service = new ProductStockPricingService(context);
+          const product = await service.createProduct(request.body);
+          recordAuditEvent(context, {
+            entityType: "product",
+            entityId: product.id,
+            eventType: "product.created",
+            title: "Urun olusturuldu",
+            description: `${product.code} - ${product.name} urunu olusturuldu.`
+          });
+          return reply.status(201).send({ item: product });
+        } catch (error) {
+          const payload = asApiErrorPayload(error);
+          return reply.status(payload.statusCode).send(payload.body);
+        }
+      }
+    );
   });
 
   server.patch<{ Params: { id: string }; Body: Partial<Product> }>("/products/:id", async (request, reply) => {
-    try {
-      const service = new ProductStockPricingService(buildRequestContext(request));
-      const product = await service.patchProduct(request.params.id, request.body);
-      if (!product) {
-        return reply.status(404).send({ message: "Product not found" });
-      }
+    return withGuards(
+      request,
+      reply,
+      [
+        assertAuthenticated,
+        (context) => assertAnyPermission(context, ["products.write", "products.manage"]),
+        (context) => assertTenantAccess(context, request.body?.tenantId)
+      ],
+      async (context) => {
+        try {
+          const service = new ProductStockPricingService(context);
+          const product = await service.patchProduct(request.params.id, request.body);
+          if (!product) {
+            return reply.status(404).send({ message: "Product not found" });
+          }
+          recordAuditEvent(context, {
+            entityType: "product",
+            entityId: product.id,
+            eventType: "product.updated",
+            title: "Urun guncellendi",
+            description: `${product.code} urunu guncellendi.`
+          });
 
-      return { item: product };
-    } catch (error) {
-      const payload = asApiErrorPayload(error);
-      return reply.status(payload.statusCode).send(payload.body);
-    }
+          return { item: product };
+        } catch (error) {
+          const payload = asApiErrorPayload(error);
+          return reply.status(payload.statusCode).send(payload.body);
+        }
+      }
+    );
   });
 
   server.get<{ Params: { id: string } }>("/products/:id/availability", async (request, reply) => {
@@ -104,13 +142,27 @@ export async function registerProductStockPricingRoutes(server: FastifyInstance)
   });
 
   server.patch<{ Body: { slots: PriceSlotConfig[] } }>("/price-slots", async (request, reply) => {
-    if (!Array.isArray(request.body?.slots) || request.body.slots.length !== 6) {
-      return reply.status(400).send({ message: "Exactly 6 price slots are required." });
-    }
+    return withGuards(
+      request,
+      reply,
+      [assertAuthenticated, (context) => assertAnyPermission(context, ["products.write", "pricing.write", "pricing.manage"])],
+      async (context) => {
+        if (!Array.isArray(request.body?.slots) || request.body.slots.length !== 6) {
+          return reply.status(400).send({ message: "Exactly 6 price slots are required." });
+        }
 
-    const service = new ProductStockPricingService(buildRequestContext(request));
-    const updatedSlots = await service.patchPriceSlots(request.body.slots);
-    return { items: updatedSlots };
+        const service = new ProductStockPricingService(context);
+        const updatedSlots = await service.patchPriceSlots(request.body.slots);
+        recordAuditEvent(context, {
+          entityType: "pricing",
+          entityId: "price-slots",
+          eventType: "pricing.price_slots.updated",
+          title: "Fiyat slotlari guncellendi",
+          description: "Fiyat slot ayarlari guncellendi."
+        });
+        return { items: updatedSlots };
+      }
+    );
   });
 
   server.get("/category-slots", async (request) => {
@@ -121,13 +173,27 @@ export async function registerProductStockPricingRoutes(server: FastifyInstance)
   });
 
   server.patch<{ Body: { slots: CategorySlotConfig[] } }>("/category-slots", async (request, reply) => {
-    if (!Array.isArray(request.body?.slots) || request.body.slots.length !== 4) {
-      return reply.status(400).send({ message: "Exactly 4 category slots are required." });
-    }
+    return withGuards(
+      request,
+      reply,
+      [assertAuthenticated, (context) => assertAnyPermission(context, ["products.write", "pricing.write", "pricing.manage"])],
+      async (context) => {
+        if (!Array.isArray(request.body?.slots) || request.body.slots.length !== 4) {
+          return reply.status(400).send({ message: "Exactly 4 category slots are required." });
+        }
 
-    const service = new ProductStockPricingService(buildRequestContext(request));
-    const updatedSlots = await service.patchCategorySlots(request.body.slots);
-    return { items: updatedSlots };
+        const service = new ProductStockPricingService(context);
+        const updatedSlots = await service.patchCategorySlots(request.body.slots);
+        recordAuditEvent(context, {
+          entityType: "pricing",
+          entityId: "category-slots",
+          eventType: "pricing.category_slots.updated",
+          title: "Kategori slotlari guncellendi",
+          description: "Kategori alan slot ayarlari guncellendi."
+        });
+        return { items: updatedSlots };
+      }
+    );
   });
 
   server.get("/exchange-rates/current", async (request) => {
@@ -135,10 +201,25 @@ export async function registerProductStockPricingRoutes(server: FastifyInstance)
     return service.getCurrentExchangeRates();
   });
 
-  server.patch<{ Body: Partial<ExchangeRatePolicy> }>("/exchange-rate-policy", async (request) => {
-    const service = new ProductStockPricingService(buildRequestContext(request));
-    return {
-      policy: await service.patchExchangeRatePolicy(request.body)
-    };
+  server.patch<{ Body: Partial<ExchangeRatePolicy> }>("/exchange-rate-policy", async (request, reply) => {
+    return withGuards(
+      request,
+      reply,
+      [assertAuthenticated, (context) => assertAnyPermission(context, ["products.write", "pricing.write", "pricing.manage"])],
+      async (context) => {
+        const service = new ProductStockPricingService(context);
+        const policy = await service.patchExchangeRatePolicy(request.body);
+        recordAuditEvent(context, {
+          entityType: "pricing",
+          entityId: "exchange-rate-policy",
+          eventType: "pricing.exchange_policy.updated",
+          title: "Kur politikasi guncellendi",
+          description: "Doviz kur politikasi ayarlari guncellendi."
+        });
+        return {
+          policy
+        };
+      }
+    );
   });
 }

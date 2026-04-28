@@ -4,6 +4,7 @@ import { LoadingState, MetricCard, PageHeader, Pagination, PrimaryActionToolbar,
 import type { Customer, Document } from "@hallederiz/types";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { dataSourceConfig, sdk } from "../../../lib/data-source";
 import { dateLabel } from "../utils";
 import { getDocuments } from "../queries/get-documents";
 import { getDocumentDeliveryStatusLabel, getDocumentTypeLabel } from "../queries/document-mock-data";
@@ -13,7 +14,8 @@ export function DocumentFilterBar() {
 }
 
 export function DocumentTable({ documents, customers, selectedId, onSelect }: { documents: Document[]; customers: Customer[]; selectedId: string | null; onSelect: (id: string) => void }) {
-  return <section className="hz-content-card"><div className="table-wrap hz-table-wrap"><table className="table hz-table hz-table-sticky"><thead><tr><th>Belge Tipi</th><th>Bagli Kayit</th><th>Musteri</th><th>Olusturma</th><th>Gonderim</th></tr></thead><tbody>{documents.map((document) => { const latestDelivery = document.deliveries[0]; return <tr key={document.id} className={`stock-table-row ${selectedId === document.id ? "is-selected-row" : ""}`} onClick={() => onSelect(document.id)}><td>{getDocumentTypeLabel(document.type)}</td><td>{document.entityNo}</td><td>{customers.find((customer) => customer.id === document.customerId)?.name ?? document.customerId ?? "-"}</td><td>{dateLabel(document.createdAt)}</td><td><span className={`hz-badge hz-badge-${latestDelivery?.status === "sent" || latestDelivery?.status === "delivered" ? "success" : latestDelivery?.status === "failed" ? "danger" : "warning"}`}>{getDocumentDeliveryStatusLabel(latestDelivery?.status)}</span></td></tr>; })}</tbody></table></div></section>;
+  const router = useRouter();
+  return <section className="hz-content-card"><div className="table-wrap hz-table-wrap"><table className="table hz-table hz-table-sticky"><thead><tr><th>Belge Tipi</th><th>Bagli Kayit</th><th>Musteri</th><th>Olusturma</th><th>Gonderim</th></tr></thead><tbody>{documents.map((document) => { const latestDelivery = document.deliveries[0]; return <tr key={document.id} className={`stock-table-row ${selectedId === document.id ? "is-selected-row" : ""}`} onClick={() => onSelect(document.id)} onDoubleClick={() => router.push(`/belgeler/${document.id}`)}><td>{getDocumentTypeLabel(document.type)}</td><td>{document.entityNo}</td><td>{customers.find((customer) => customer.id === document.customerId)?.name ?? document.customerId ?? "-"}</td><td>{dateLabel(document.createdAt)}</td><td><span className={`hz-badge hz-badge-${latestDelivery?.status === "sent" || latestDelivery?.status === "delivered" ? "success" : latestDelivery?.status === "failed" ? "danger" : "warning"}`}>{getDocumentDeliveryStatusLabel(latestDelivery?.status)}</span></td></tr>; })}</tbody></table></div></section>;
 }
 
 export function DocumentPreviewPanel({ document }: { document: Document | null }) {
@@ -38,7 +40,15 @@ function resolveDocumentEntityHref(document: Document | null): string {
 
 export function DocumentActionsBar({ document }: { document: Document | null }) {
   const router = useRouter();
-  return <section className="hz-action-toolbar"><button className="hz-btn hz-btn-primary hz-toolbar-btn" type="button">Onizle</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">WhatsApp'tan Gonder</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">E-posta</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">Indir</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">Queue Save</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">Queue Print</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => router.push(resolveDocumentEntityHref(document))}>Ilgili Kayda Git</button></section>;
+  const runDocumentAction = async (action: "sendWhatsApp" | "sendEmail" | "queueSave" | "queuePrint" | "regenerate") => {
+    if (!document || dataSourceConfig.useDemoData) return;
+    if (action === "sendWhatsApp") await sdk.documents.sendWhatsApp(document.id);
+    if (action === "sendEmail") await sdk.documents.sendEmail(document.id);
+    if (action === "queueSave") await sdk.documents.queueSave(document.id);
+    if (action === "queuePrint") await sdk.documents.queuePrint(document.id);
+    if (action === "regenerate") await sdk.documents.regenerate(document.id);
+  };
+  return <section className="hz-action-toolbar"><button className="hz-btn hz-btn-primary hz-toolbar-btn" type="button" onClick={() => document && router.push(`/belgeler/${document.id}`)}>Onizle</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => runDocumentAction("sendWhatsApp")}>WhatsApp'tan Gonder</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => runDocumentAction("sendEmail")}>E-posta</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => document && router.push(`/belgeler/${document.id}`)}>Indir</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => runDocumentAction("queueSave")}>Queue Save</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => runDocumentAction("queuePrint")}>Queue Print</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => runDocumentAction("regenerate")}>Yeniden Olustur</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => router.push(resolveDocumentEntityHref(document))}>Ilgili Kayda Git</button></section>;
 }
 
 export function DocumentsPage() {
