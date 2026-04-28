@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingState, MetricCard, PageHeader } from "@hallederiz/ui";
+import { LoadingState, MetricCard, PageHeader, Pagination } from "@hallederiz/ui";
 import type { Product } from "@hallederiz/types";
 import { useMemo, useState } from "react";
 import { StockFilterBar } from "./StockFilterBar";
@@ -14,6 +14,9 @@ export function StockPage() {
   const { filters, updateFilter, resetFilters } = useStockFilters();
   const { loading, products, rows, brands, factories, warehouses, categorySlots, priceSlots } = useStockData(filters);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 12;
+  const pagedRows = useMemo(() => rows.slice((page - 1) * pageSize, page * pageSize), [page, rows]);
 
   const selectedProduct = useMemo<Product | null>(
     () => products.find((product) => product.id === selectedProductId) ?? null,
@@ -69,7 +72,10 @@ export function StockPage() {
       {loading ? (
         <LoadingState title="Stok verisi yukleniyor" message="Merkez depo ve fabrika ozetleri getiriliyor." />
       ) : (
-        <StockTable rows={rows} onSelectProduct={setSelectedProductId} />
+        <>
+          <StockTable rows={pagedRows} onSelectProduct={setSelectedProductId} />
+          <Pagination totalItems={rows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
+        </>
       )}
 
       <ProductDetailModal

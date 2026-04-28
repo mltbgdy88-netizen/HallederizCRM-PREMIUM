@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingState, MetricCard, PageHeader, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
+import { LoadingState, MetricCard, PageHeader, Pagination, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { CustomerFilterBar } from "./CustomerFilterBar";
@@ -14,6 +14,9 @@ export function CustomersPage() {
   const { filters, updateFilter, resetFilters } = useCustomerFilters();
   const { loading, data, filteredCustomers, rows } = useCustomersData(filters);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const pagedRows = useMemo(() => rows.slice((page - 1) * pageSize, page * pageSize), [page, rows]);
 
   const selectedCustomer = useMemo(
     () => data.customers.find((customer) => customer.id === selectedCustomerId) ?? filteredCustomers[0] ?? null,
@@ -69,12 +72,15 @@ export function CustomersPage() {
           loading ? (
             <LoadingState title="Cariler yukleniyor" message="Cari hesap, fiyat grubu ve risk ozetleri hazirlaniyor." />
           ) : (
-            <CustomerTable
-              rows={rows}
-              selectedCustomerId={selectedCustomer?.id ?? null}
-              onSelectCustomer={setSelectedCustomerId}
-              onOpenCustomer={(customerId) => router.push(`/cariler/${customerId}`)}
-            />
+            <>
+              <CustomerTable
+                rows={pagedRows}
+                selectedCustomerId={selectedCustomer?.id ?? null}
+                onSelectCustomer={setSelectedCustomerId}
+                onOpenCustomer={(customerId) => router.push(`/cariler/${customerId}`)}
+              />
+              <Pagination totalItems={rows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
+            </>
           )
         }
         side={<CustomerQuickPreviewPanel customer={selectedCustomer} account={selectedAccount} />}

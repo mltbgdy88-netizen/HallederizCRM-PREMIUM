@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingState, MetricCard, PageHeader, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
+import { LoadingState, MetricCard, PageHeader, Pagination, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { OfferFilterBar } from "./OfferFilterBar";
@@ -14,6 +14,9 @@ export function OffersPage() {
   const { filters, updateFilter, resetFilters } = useOfferFilters();
   const { loading, customers, filteredOffers, rows } = useOffersData(filters);
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const pagedRows = useMemo(() => rows.slice((page - 1) * pageSize, page * pageSize), [page, rows]);
   const selectedOffer = useMemo(
     () => filteredOffers.find((offer) => offer.id === selectedOfferId) ?? filteredOffers[0] ?? null,
     [filteredOffers, selectedOfferId]
@@ -56,12 +59,15 @@ export function OffersPage() {
           loading ? (
             <LoadingState title="Teklifler yukleniyor" message="Teklif, follow-up ve fiyat grubu ozetleri hazirlaniyor." />
           ) : (
-            <OfferTable
-              rows={rows}
-              selectedOfferId={selectedOffer?.id ?? null}
-              onSelectOffer={setSelectedOfferId}
-              onOpenOffer={(offerId) => router.push(`/teklifler/${offerId}`)}
-            />
+            <>
+              <OfferTable
+                rows={pagedRows}
+                selectedOfferId={selectedOffer?.id ?? null}
+                onSelectOffer={setSelectedOfferId}
+                onOpenOffer={(offerId) => router.push(`/teklifler/${offerId}`)}
+              />
+              <Pagination totalItems={rows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
+            </>
           )
         }
         side={<OfferQuickPreviewPanel offer={selectedOffer} customer={selectedCustomer} />}

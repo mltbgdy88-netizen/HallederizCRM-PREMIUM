@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import type { Task } from "@hallederiz/types";
-import { FilterBar, LoadingState, MetricCard, PageHeader, SplitContentLayout } from "@hallederiz/ui";
+import { FilterBar, LoadingState, MetricCard, PageHeader, Pagination, SplitContentLayout } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { getOperationsEngineData } from "../../dashboard/queries";
@@ -28,9 +28,12 @@ export function TasksPage() {
   const router = useRouter();
   const [tasks, setTasks] = useState<Task[] | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
   useEffect(() => { getOperationsEngineData().then((data) => setTasks(data.tasks)); }, []);
   const selectedTask = useMemo(() => tasks?.find((task) => task.id === selectedTaskId) ?? tasks?.[0] ?? null, [tasks, selectedTaskId]);
-  return <div className="hz-page-stack"><PageHeader title="Gorevler" description="Workflow, dashboard ve AI kaynakli tum operasyon gorevlerini tek listede takip edin." /><section className="hz-metric-grid"><MetricCard title="Toplam" value={String(tasks?.length ?? 0)} detail="Aktif kapsam" tone="info" /><MetricCard title="Geciken" value={String(tasks?.filter((task) => task.status === "overdue").length ?? 0)} detail="SLA riski" tone="danger" /><MetricCard title="AI Kaynakli" value={String(tasks?.filter((task) => task.source === "ai").length ?? 0)} detail="Insight/proposal" tone="success" /><MetricCard title="Onay Bagli" value={String(tasks?.filter((task) => task.approvalId).length ?? 0)} detail="Approval link" tone="warning" /></section><TaskFilterBar />{!tasks ? <LoadingState title="Gorevler yukleniyor" message="Operasyon motoru kayitlari hazirlaniyor." /> : <SplitContentLayout main={<TaskTable tasks={tasks} onOpen={(taskId) => router.push(`/gorevler/${taskId}`)} />} side={<TaskPreviewPanel task={selectedTask} />} />}</div>;
+  const pagedTasks = useMemo(() => (tasks ?? []).slice((page - 1) * pageSize, page * pageSize), [tasks, page]);
+  return <div className="hz-page-stack"><PageHeader title="Gorevler" description="Workflow, dashboard ve AI kaynakli tum operasyon gorevlerini tek listede takip edin." /><section className="hz-metric-grid"><MetricCard title="Toplam" value={String(tasks?.length ?? 0)} detail="Aktif kapsam" tone="info" /><MetricCard title="Geciken" value={String(tasks?.filter((task) => task.status === "overdue").length ?? 0)} detail="SLA riski" tone="danger" /><MetricCard title="AI Kaynakli" value={String(tasks?.filter((task) => task.source === "ai").length ?? 0)} detail="Insight/proposal" tone="success" /><MetricCard title="Onay Bagli" value={String(tasks?.filter((task) => task.approvalId).length ?? 0)} detail="Approval link" tone="warning" /></section><TaskFilterBar />{!tasks ? <LoadingState title="Gorevler yukleniyor" message="Operasyon motoru kayitlari hazirlaniyor." /> : <SplitContentLayout main={<><TaskTable tasks={pagedTasks} onOpen={(taskId) => router.push(`/gorevler/${taskId}`)} /><Pagination totalItems={tasks.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} /></>} side={<TaskPreviewPanel task={selectedTask} />} />}</div>;
 }
 
 export function TaskHeaderInfo({ task }: { task: Task }) {

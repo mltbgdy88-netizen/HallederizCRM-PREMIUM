@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingState, MetricCard, PageHeader, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
+import { LoadingState, MetricCard, PageHeader, Pagination, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
 import type { Customer, Delivery } from "@hallederiz/types";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -63,12 +63,15 @@ export function DeliveriesPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   useEffect(() => {
     getDeliveries().then((result) => { setDeliveries(result.deliveries); setCustomers(result.customers); }).finally(() => setLoading(false));
   }, []);
 
   const selected = useMemo(() => deliveries.find((delivery) => delivery.id === selectedId) ?? deliveries[0] ?? null, [deliveries, selectedId]);
+  const pagedDeliveries = useMemo(() => deliveries.slice((page - 1) * pageSize, page * pageSize), [deliveries, page]);
 
   return (
     <div className="hz-page-stack">
@@ -81,7 +84,7 @@ export function DeliveriesPage() {
       </section>
       <PrimaryActionToolbar><button className="hz-btn hz-btn-primary hz-toolbar-btn" type="button">Yeni Teslimat</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">Dogrula</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">Musteriye Haber Ver</button></PrimaryActionToolbar>
       <DeliveryFilterBar />
-      <SplitContentLayout main={loading ? <LoadingState title="Teslimatlar yukleniyor" message="Dogrulama ve belge durumlari hazirlaniyor." /> : <DeliveryTable deliveries={deliveries} customers={customers} selectedId={selected?.id ?? null} onSelect={setSelectedId} onOpen={(id) => router.push(`/teslimatlar/${id}`)} />} side={<DeliveryPreviewPanel delivery={selected} />} />
+      <SplitContentLayout main={loading ? <LoadingState title="Teslimatlar yukleniyor" message="Dogrulama ve belge durumlari hazirlaniyor." /> : <><DeliveryTable deliveries={pagedDeliveries} customers={customers} selectedId={selected?.id ?? null} onSelect={setSelectedId} onOpen={(id) => router.push(`/teslimatlar/${id}`)} /><Pagination totalItems={deliveries.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} /></>} side={<DeliveryPreviewPanel delivery={selected} />} />
     </div>
   );
 }

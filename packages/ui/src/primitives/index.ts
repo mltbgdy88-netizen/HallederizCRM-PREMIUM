@@ -6,3 +6,4 @@ export * from "./split-content-layout";
 export * from "./metric-card";
 export * from "./state-panels";
 export * from "./tab-switcher";
+export * from "./pagination";

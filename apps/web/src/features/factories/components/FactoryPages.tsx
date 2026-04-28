@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import type { FactoryOrder, FactoryStockItem, IntegrationLog } from "@hallederiz/types";
-import { MetricCard, PageHeader, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
+import { MetricCard, PageHeader, Pagination, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 
@@ -22,8 +22,11 @@ export function FactoryStockPreviewPanel({ item }: { item: FactoryStockItem | nu
 }
 
 export function FactoryStocksPage({ data }: { data: Awaited<ReturnType<typeof import("../queries").getFactoryStockData>> }) {
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const pagedItems = useMemo(() => data.items.slice((page - 1) * pageSize, page * pageSize), [data.items, page]);
   const selected = data.items[0] ?? null;
-  return <div className="hz-page-stack"><PageHeader title="Fabrika Stoklari" description="Urun bazli fabrika stok gorunurlugu, son senkron ve integration health durumunu izleyin." /><section className="hz-metric-grid"><MetricCard title="Snapshot" value={String(data.snapshots.length)} detail="Fabrika" tone="info" /><MetricCard title="Stok Satiri" value={String(data.items.length)} detail="Urun/fabrika" tone="success" /><MetricCard title="Uyari" value={String(data.health.warningCount)} detail="Stale" tone="warning" /><MetricCard title="Hata" value={String(data.health.errorCount)} detail="Integration" tone="danger" /></section><PrimaryActionToolbar><button className="hz-btn hz-toolbar-btn hz-btn-primary" type="button">Senkron Baslat</button><button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button">Snapshot Indir</button><button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button">Hata Kayitlari</button></PrimaryActionToolbar><FactoryStockFilterBar /><SplitContentLayout main={<FactoryStockTable items={data.items} />} side={<><FactoryIntegrationHealthCard health={data.health} /><FactoryStockPreviewPanel item={selected} /></>} /></div>;
+  return <div className="hz-page-stack"><PageHeader title="Fabrika Stoklari" description="Urun bazli fabrika stok gorunurlugu, son senkron ve integration health durumunu izleyin." /><section className="hz-metric-grid"><MetricCard title="Snapshot" value={String(data.snapshots.length)} detail="Fabrika" tone="info" /><MetricCard title="Stok Satiri" value={String(data.items.length)} detail="Urun/fabrika" tone="success" /><MetricCard title="Uyari" value={String(data.health.warningCount)} detail="Stale" tone="warning" /><MetricCard title="Hata" value={String(data.health.errorCount)} detail="Integration" tone="danger" /></section><PrimaryActionToolbar><button className="hz-btn hz-toolbar-btn hz-btn-primary" type="button">Senkron Baslat</button><button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button">Snapshot Indir</button><button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button">Hata Kayitlari</button></PrimaryActionToolbar><FactoryStockFilterBar /><SplitContentLayout main={<><FactoryStockTable items={pagedItems} /><Pagination totalItems={data.items.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} /></>} side={<><FactoryIntegrationHealthCard health={data.health} /><FactoryStockPreviewPanel item={selected} /></>} /></div>;
 }
 
 export function FactoryOrderFilterBar() { return <section className="hz-content-card"><div className="task-center-filter-grid"><label>Fabrika<select defaultValue=""><option value="">Tum fabrikalar</option><option>Ankara</option><option>Izmir</option></select></label><label>Durum<select defaultValue=""><option value="">Tum durumlar</option><option>sent</option><option>producing</option></select></label><label>Bagli Satis<input placeholder="SO-2481" /></label><label>Tarih Araligi<input type="date" /></label></div></section>; }
@@ -36,8 +39,11 @@ export function FactoryOrderPreviewPanel({ order }: { order: FactoryOrder | null
 
 export function FactoryOrdersPage({ orders }: { orders: FactoryOrder[] }) {
   const router = useRouter();
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const pagedOrders = useMemo(() => orders.slice((page - 1) * pageSize, page * pageSize), [orders, page]);
   const selected = useMemo(() => orders[0] ?? null, [orders]);
-  return <div className="hz-page-stack"><PageHeader title="Fabrika Siparisleri" description="Fabrikaya acilan siparisleri, bagli satis ve entegrasyon durumuyla takip edin." /><PrimaryActionToolbar><button className="hz-btn hz-toolbar-btn hz-btn-primary" type="button">Yeni Fabrika Siparisi</button><button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button">Durum Sorgula</button><button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button">Senkron Loglari</button></PrimaryActionToolbar><FactoryOrderFilterBar /><SplitContentLayout main={<FactoryOrderTable orders={orders} onOpen={(id) => router.push(`/fabrikalar/siparisler/${id}`)} />} side={<FactoryOrderPreviewPanel order={selected} />} /></div>;
+  return <div className="hz-page-stack"><PageHeader title="Fabrika Siparisleri" description="Fabrikaya acilan siparisleri, bagli satis ve entegrasyon durumuyla takip edin." /><PrimaryActionToolbar><button className="hz-btn hz-toolbar-btn hz-btn-primary" type="button">Yeni Fabrika Siparisi</button><button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button">Durum Sorgula</button><button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button">Senkron Loglari</button></PrimaryActionToolbar><FactoryOrderFilterBar /><SplitContentLayout main={<><FactoryOrderTable orders={pagedOrders} onOpen={(id) => router.push(`/fabrikalar/siparisler/${id}`)} /><Pagination totalItems={orders.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} /></>} side={<FactoryOrderPreviewPanel order={selected} />} /></div>;
 }
 
 export function FactoryOrderHeaderInfo({ order }: { order: FactoryOrder }) { return <section className="hz-content-card"><p className="drawer-eyebrow">{order.factoryOrderNo}</p><h2>{order.factoryName}</h2><p className="muted">Bagli satis: {order.saleOrderNo ?? "-"}</p><span className="hz-badge hz-badge-info">{order.status}</span></section>; }

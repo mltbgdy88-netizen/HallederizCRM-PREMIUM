@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingState, MetricCard, PageHeader, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
+import { LoadingState, MetricCard, PageHeader, Pagination, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { PaymentFilterBar } from "./PaymentFilterBar";
@@ -14,6 +14,9 @@ export function PaymentsPage() {
   const { filters, updateFilter, resetFilters } = usePaymentFilters();
   const { loading, customers, filteredPayments, rows } = usePaymentsData(filters);
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const pagedRows = useMemo(() => rows.slice((page - 1) * pageSize, page * pageSize), [page, rows]);
   const selectedPayment = useMemo(
     () => filteredPayments.find((payment) => payment.id === selectedPaymentId) ?? filteredPayments[0] ?? null,
     [filteredPayments, selectedPaymentId]
@@ -43,12 +46,15 @@ export function PaymentsPage() {
           loading ? (
             <LoadingState title="Tahsilatlar yukleniyor" message="Fisler, allocation satirlari ve belge durumlari hazirlaniyor." />
           ) : (
-            <PaymentTable
-              rows={rows}
-              selectedPaymentId={selectedPayment?.id ?? null}
-              onSelectPayment={setSelectedPaymentId}
-              onOpenPayment={(paymentId) => router.push(`/tahsilatlar/${paymentId}`)}
-            />
+            <>
+              <PaymentTable
+                rows={pagedRows}
+                selectedPaymentId={selectedPayment?.id ?? null}
+                onSelectPayment={setSelectedPaymentId}
+                onOpenPayment={(paymentId) => router.push(`/tahsilatlar/${paymentId}`)}
+              />
+              <Pagination totalItems={rows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
+            </>
           )
         }
         side={<PaymentPreviewPanel payment={selectedPayment} customer={selectedCustomer} />}

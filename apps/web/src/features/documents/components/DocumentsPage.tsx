@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingState, MetricCard, PageHeader, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
+import { LoadingState, MetricCard, PageHeader, Pagination, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
 import type { Customer, Document } from "@hallederiz/types";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -46,6 +46,8 @@ export function DocumentsPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
   useEffect(() => {
     getDocuments()
       .then((result) => {
@@ -60,5 +62,6 @@ export function DocumentsPage() {
       .finally(() => setLoading(false));
   }, []);
   const selected = useMemo(() => documents.find((document) => document.id === selectedId) ?? documents[0] ?? null, [documents, selectedId]);
-  return <div className="hz-page-stack"><PageHeader title="Belgeler" description="Teklif, siparis, tahsilat, depo, teslim, fatura ve iade belgelerini entity baglamiyla yonetin." /><section className="hz-metric-grid"><MetricCard title="Belge" value={String(documents.length)} detail="Foundation record" tone="info" /><MetricCard title="Gonderildi" value={String(documents.filter((item) => item.deliveries.some((delivery) => delivery.status === "sent")).length)} detail="WhatsApp/e-posta" tone="success" /><MetricCard title="Kuyruk" value={String(documents.filter((item) => item.deliveries.length === 0).length)} detail="Queue save/print bekliyor" tone="warning" /><MetricCard title="Tip" value={String(new Set(documents.map((item) => item.type)).size)} detail="Belge turu" tone="neutral" /></section><DocumentActionsBar document={selected} /><DocumentFilterBar /><SplitContentLayout main={loading ? <LoadingState title="Belgeler yukleniyor" message="Entity baglantilari ve gonderim durumlari hazirlaniyor." /> : <DocumentTable documents={documents} customers={customers} selectedId={selected?.id ?? null} onSelect={setSelectedId} />} side={<DocumentPreviewPanel document={selected} />} /></div>;
+  const pagedDocuments = useMemo(() => documents.slice((page - 1) * pageSize, page * pageSize), [documents, page]);
+  return <div className="hz-page-stack"><PageHeader title="Belgeler" description="Teklif, siparis, tahsilat, depo, teslim, fatura ve iade belgelerini entity baglamiyla yonetin." /><section className="hz-metric-grid"><MetricCard title="Belge" value={String(documents.length)} detail="Foundation record" tone="info" /><MetricCard title="Gonderildi" value={String(documents.filter((item) => item.deliveries.some((delivery) => delivery.status === "sent")).length)} detail="WhatsApp/e-posta" tone="success" /><MetricCard title="Kuyruk" value={String(documents.filter((item) => item.deliveries.length === 0).length)} detail="Queue save/print bekliyor" tone="warning" /><MetricCard title="Tip" value={String(new Set(documents.map((item) => item.type)).size)} detail="Belge turu" tone="neutral" /></section><DocumentActionsBar document={selected} /><DocumentFilterBar /><SplitContentLayout main={loading ? <LoadingState title="Belgeler yukleniyor" message="Entity baglantilari ve gonderim durumlari hazirlaniyor." /> : <><DocumentTable documents={pagedDocuments} customers={customers} selectedId={selected?.id ?? null} onSelect={setSelectedId} /><Pagination totalItems={documents.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} /></>} side={<DocumentPreviewPanel document={selected} />} /></div>;
 }

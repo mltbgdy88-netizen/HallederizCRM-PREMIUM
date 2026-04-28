@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingState, MetricCard, PageHeader, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
+import { LoadingState, MetricCard, PageHeader, Pagination, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
 import type { Customer, Invoice } from "@hallederiz/types";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -25,8 +25,11 @@ export function InvoicesPage() {
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
   const [loading, setLoading] = useState(true);
   useEffect(() => { getInvoices().then((result) => { setInvoices(result.invoices); setCustomers(result.customers); }).finally(() => setLoading(false)); }, []);
   const selected = useMemo(() => invoices.find((invoice) => invoice.id === selectedId) ?? invoices[0] ?? null, [invoices, selectedId]);
-  return <div className="hz-page-stack"><PageHeader title="Faturalar" description="Siparisten turetilen fatura taslaklari, kesim ve belge dagitim akislarini yonetin." /><section className="hz-metric-grid"><MetricCard title="Fatura" value={String(invoices.length)} detail="Toplam" tone="info" /><MetricCard title="Kesildi" value={String(invoices.filter((item) => item.status === "issued").length)} detail="Resmi kayit" tone="success" /><MetricCard title="Taslak" value={String(invoices.filter((item) => item.status === "draft").length)} detail="Kesim bekliyor" tone="warning" /><MetricCard title="PDF" value={String(invoices.filter((item) => item.documentId).length)} detail="Belge bagli" tone="info" /></section><PrimaryActionToolbar><button className="hz-btn hz-btn-primary hz-toolbar-btn" type="button">Yeni Fatura</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">PDF Uret</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">Musteriye Gonder</button></PrimaryActionToolbar><InvoiceFilterBar /><SplitContentLayout main={loading ? <LoadingState title="Faturalar yukleniyor" message="Siparis baglantilari ve belge durumlari hazirlaniyor." /> : <InvoiceTable invoices={invoices} customers={customers} selectedId={selected?.id ?? null} onSelect={setSelectedId} onOpen={(id) => router.push(`/faturalar/${id}`)} />} side={<InvoicePreviewPanel invoice={selected} />} /></div>;
+  const pagedInvoices = useMemo(() => invoices.slice((page - 1) * pageSize, page * pageSize), [invoices, page]);
+  return <div className="hz-page-stack"><PageHeader title="Faturalar" description="Siparisten turetilen fatura taslaklari, kesim ve belge dagitim akislarini yonetin." /><section className="hz-metric-grid"><MetricCard title="Fatura" value={String(invoices.length)} detail="Toplam" tone="info" /><MetricCard title="Kesildi" value={String(invoices.filter((item) => item.status === "issued").length)} detail="Resmi kayit" tone="success" /><MetricCard title="Taslak" value={String(invoices.filter((item) => item.status === "draft").length)} detail="Kesim bekliyor" tone="warning" /><MetricCard title="PDF" value={String(invoices.filter((item) => item.documentId).length)} detail="Belge bagli" tone="info" /></section><PrimaryActionToolbar><button className="hz-btn hz-btn-primary hz-toolbar-btn" type="button">Yeni Fatura</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">PDF Uret</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">Musteriye Gonder</button></PrimaryActionToolbar><InvoiceFilterBar /><SplitContentLayout main={loading ? <LoadingState title="Faturalar yukleniyor" message="Siparis baglantilari ve belge durumlari hazirlaniyor." /> : <><InvoiceTable invoices={pagedInvoices} customers={customers} selectedId={selected?.id ?? null} onSelect={setSelectedId} onOpen={(id) => router.push(`/faturalar/${id}`)} /><Pagination totalItems={invoices.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} /></>} side={<InvoicePreviewPanel invoice={selected} />} /></div>;
 }

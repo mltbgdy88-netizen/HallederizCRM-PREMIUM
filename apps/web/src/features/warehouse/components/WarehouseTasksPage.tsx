@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingState, MetricCard, PageHeader, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
+import { LoadingState, MetricCard, PageHeader, Pagination, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { WarehouseTaskFilterBar } from "./WarehouseTaskFilterBar";
@@ -14,6 +14,9 @@ export function WarehouseTasksPage() {
   const { filters, updateFilter, resetFilters } = useWarehouseTaskFilters();
   const { loading, customers, filteredWarehouseOrders, rows } = useWarehouseTasksData(filters);
   const [selectedWarehouseOrderId, setSelectedWarehouseOrderId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const pagedRows = useMemo(() => rows.slice((page - 1) * pageSize, page * pageSize), [page, rows]);
   const selectedWarehouseOrder = useMemo(
     () => filteredWarehouseOrders.find((warehouseOrder) => warehouseOrder.id === selectedWarehouseOrderId) ?? filteredWarehouseOrders[0] ?? null,
     [filteredWarehouseOrders, selectedWarehouseOrderId]
@@ -43,12 +46,15 @@ export function WarehouseTasksPage() {
           loading ? (
             <LoadingState title="Depo gorevleri yukleniyor" message="Emirler, raflar ve toplama talimatlari hazirlaniyor." />
           ) : (
-            <WarehouseTaskTable
-              rows={rows}
-              selectedWarehouseOrderId={selectedWarehouseOrder?.id ?? null}
-              onSelectWarehouseOrder={setSelectedWarehouseOrderId}
-              onOpenWarehouseOrder={(warehouseOrderId) => router.push(`/depo/emirler/${warehouseOrderId}`)}
-            />
+            <>
+              <WarehouseTaskTable
+                rows={pagedRows}
+                selectedWarehouseOrderId={selectedWarehouseOrder?.id ?? null}
+                onSelectWarehouseOrder={setSelectedWarehouseOrderId}
+                onOpenWarehouseOrder={(warehouseOrderId) => router.push(`/depo/emirler/${warehouseOrderId}`)}
+              />
+              <Pagination totalItems={rows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
+            </>
           )
         }
         side={<WarehouseTaskPreviewPanel warehouseOrder={selectedWarehouseOrder} customer={selectedCustomer} />}

@@ -5,6 +5,7 @@ import {
   EmptyState,
   FilterBar,
   MetricCard,
+  Pagination,
   PageHeader,
   PrimaryActionToolbar,
   SplitContentLayout,
@@ -92,8 +93,11 @@ export function RouteSkeletonPage({
 }: RouteSkeletonPageProps) {
   const firstTab = tabs[0] ?? "";
   const [activeTab, setActiveTab] = useState(firstTab);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
 
   const tabItems = useMemo(() => tabs.map((tab) => ({ key: tab, label: tab })), [tabs]);
+  const pagedRows = useMemo(() => tableRows.slice((page - 1) * pageSize, page * pageSize), [page, tableRows]);
 
   const mainContent = (
     <div className="hz-page-stack">
@@ -150,7 +154,7 @@ export function RouteSkeletonPage({
                 </tr>
               </thead>
               <tbody>
-                {tableRows.map((row, index) => (
+                {pagedRows.map((row, index) => (
                   <tr key={`${row.join("-")}-${index}`}>
                     {row.map((cell, cellIndex) => (
                       <td key={`${cell}-${cellIndex}`}>{cell}</td>
@@ -161,6 +165,7 @@ export function RouteSkeletonPage({
             </table>
           </div>
         )}
+        <Pagination totalItems={tableRows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
       </ContentSection>
     </div>
   );

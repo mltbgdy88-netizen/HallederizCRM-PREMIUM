@@ -89,6 +89,9 @@ importers:
       '@hallederiz/domain':
         specifier: workspace:*
         version: link:../../packages/domain
+      '@hallederiz/sdk':
+        specifier: workspace:*
+        version: link:../../packages/sdk
       '@hallederiz/types':
         specifier: workspace:*
         version: link:../../packages/types

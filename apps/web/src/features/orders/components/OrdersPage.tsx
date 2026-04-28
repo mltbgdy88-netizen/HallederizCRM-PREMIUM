@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingState, MetricCard, PageHeader, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
+import { LoadingState, MetricCard, PageHeader, Pagination, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { OrderFilterBar } from "./OrderFilterBar";
@@ -14,6 +14,9 @@ export function OrdersPage() {
   const { filters, updateFilter, resetFilters } = useOrderFilters();
   const { loading, customers, filteredOrders, rows } = useOrdersData(filters);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [page, setPage] = useState(1);
+  const pageSize = 10;
+  const pagedRows = useMemo(() => rows.slice((page - 1) * pageSize, page * pageSize), [page, rows]);
   const selectedOrder = useMemo(
     () => filteredOrders.find((order) => order.id === selectedOrderId) ?? filteredOrders[0] ?? null,
     [filteredOrders, selectedOrderId]
@@ -56,12 +59,15 @@ export function OrdersPage() {
           loading ? (
             <LoadingState title="Siparisler yukleniyor" message="Kaynak plani, tahsilat ve depo etkisi hazirlaniyor." />
           ) : (
-            <OrderTable
-              rows={rows}
-              selectedOrderId={selectedOrder?.id ?? null}
-              onSelectOrder={setSelectedOrderId}
-              onOpenOrder={(orderId) => router.push(`/siparisler/${orderId}`)}
-            />
+            <>
+              <OrderTable
+                rows={pagedRows}
+                selectedOrderId={selectedOrder?.id ?? null}
+                onSelectOrder={setSelectedOrderId}
+                onOpenOrder={(orderId) => router.push(`/siparisler/${orderId}`)}
+              />
+              <Pagination totalItems={rows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
+            </>
           )
         }
         side={<OrderQuickPreviewPanel order={selectedOrder} customer={selectedCustomer} />}
