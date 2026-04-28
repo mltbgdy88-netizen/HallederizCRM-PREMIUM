@@ -1,0 +1,66 @@
+# API Data Flow
+
+## Akis
+
+`Web UI -> SDK Client -> API Route -> Service -> Repository -> Database Adapter`
+
+Bu akisla UI'daki feature query'leri dogrudan mock import etmek yerine typed client uzerinden API cagirir.
+
+## Web Katmani
+
+- `apps/web/src/lib/data-source.ts`
+  - `NEXT_PUBLIC_USE_DEMO_DATA`
+  - `NEXT_PUBLIC_API_BASE_URL`
+  - `NEXT_PUBLIC_TENANT_ID`
+  - `NEXT_PUBLIC_USER_ID`
+- Oncelikli modullerde query dosyalari API-first calisacak sekilde guncellendi:
+  - customers
+  - stock/pricing
+  - offers
+  - orders
+  - payments
+  - warehouse
+- Web mutation foundation eklendi:
+  - customer create/update/pricing-profile
+  - product create/update + slot config update
+  - offer create/update/follow-up
+  - order create/update
+
+## SDK Katmani
+
+- `packages/sdk/src/base.ts`: ortak fetch wrapper, hata modeli, tenant/user header tasima.
+- `packages/sdk/src/clients/*`: modul bazli typed API client'lar.
+- `createHallederizSdk()` ile tek noktadan client seti uretilir.
+
+## API Katmani
+
+- Route katmani request alir ve context olusturur (`x-tenant-id`, `x-user-id`).
+- Service katmani is kurali ve use-case koordinasyonunu tasir.
+- Repository katmani veri kaynagina erisir.
+- Customers/Products/Offers/Orders repository'leri DB mode'da SQL sorgusu dener.
+- DB sorgusu hata verirse kontrollu mock fallback devreye girer.
+
+## Database Katmani
+
+- `packages/database/src/client.ts`:
+  - `demo` modu: in-memory foundation.
+  - `postgres` modu: `pg` dynamic import + query + transaction foundation.
+- `packages/database/src/schema/*`: modul bazli SQL schema tanimlari.
+- `packages/database/src/migrations/*`: migration SQL dosyalari.
+- `packages/database/src/seeds/*`: demo seed SQL dosyalari.
+
+## Demo Mode / API Mode
+
+- Demo mode (`NEXT_PUBLIC_USE_DEMO_DATA=true`):
+  - UI mock/demodan beslenir.
+- API mode (`NEXT_PUBLIC_USE_DEMO_DATA=false`):
+  - UI SDK uzerinden API'dan beslenir.
+- Repository DB mode (`PERSISTENCE_MODE=postgres`):
+  - API repository once PostgreSQL sorgularini dener.
+  - `POSTGRES_URL` yoksa veya query hata verirse ilgili repository mock fallback verir.
+
+## Tenant Context Akisi
+
+1. Web, SDK cagrilarinda `x-tenant-id` ve `x-user-id` header'larini gonderir.
+2. API `buildRequestContext()` ile bu bilgileri normalize eder.
+3. Service/Repository katmanlari context'i alip tenant-aware sorguya hazir kalir.

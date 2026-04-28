@@ -1,4 +1,5 @@
 import { stockCatalog } from "../../../demo";
+import { dataSourceConfig, sdk } from "../../../lib/data-source";
 
 export interface StockCatalogQueryResult {
   products: typeof stockCatalog.products;
@@ -13,5 +14,23 @@ export interface StockCatalogQueryResult {
 }
 
 export async function getStockCatalog(): Promise<StockCatalogQueryResult> {
+  if (!dataSourceConfig.useDemoData) {
+    const [productsResponse, priceSlotsResponse, categorySlotsResponse, exchangeRatesResponse] = await Promise.all([
+      sdk.stock.list(),
+      sdk.stock.priceSlots(),
+      sdk.stock.categorySlots(),
+      sdk.stock.exchangeRates()
+    ]);
+
+    return {
+      ...stockCatalog,
+      products: productsResponse.items as typeof stockCatalog.products,
+      priceSlots: priceSlotsResponse.items as typeof stockCatalog.priceSlots,
+      categorySlots: categorySlotsResponse.items as typeof stockCatalog.categorySlots,
+      exchangeRates: exchangeRatesResponse.rates as typeof stockCatalog.exchangeRates,
+      exchangeRatePolicy: exchangeRatesResponse.policy as typeof stockCatalog.exchangeRatePolicy
+    };
+  }
+
   return stockCatalog;
 }

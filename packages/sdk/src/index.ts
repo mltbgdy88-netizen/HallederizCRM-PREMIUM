@@ -1,21 +1,49 @@
-import type { TenantContext } from "@hallederiz/types";
+import { ApiClient, type ApiClientOptions } from "./base";
+import {
+  ApprovalsClient,
+  CustomersClient,
+  DashboardClient,
+  DeliveriesClient,
+  InvoicesClient,
+  OffersClient,
+  OrdersClient,
+  PaymentsClient,
+  ReturnsClient,
+  StockClient,
+  WarehouseClient
+} from "./clients";
 
-export interface HallederizSdkOptions {
-  baseUrl: string;
-  tenant: TenantContext;
+export * from "./base";
+export * from "./clients";
+
+export interface HallederizSdk {
+  customers: CustomersClient;
+  stock: StockClient;
+  offers: OffersClient;
+  orders: OrdersClient;
+  payments: PaymentsClient;
+  warehouse: WarehouseClient;
+  deliveries: DeliveriesClient;
+  invoices: InvoicesClient;
+  returns: ReturnsClient;
+  approvals: ApprovalsClient;
+  dashboard: DashboardClient;
 }
 
-export class HallederizSdk {
-  constructor(private readonly options: HallederizSdkOptions) {}
+export function createHallederizSdk(options: ApiClientOptions): HallederizSdk {
+  const apiClient = new ApiClient(options);
 
-  async health(): Promise<unknown> {
-    // TODO: Add auth headers, retry policies, and typed response contracts.
-    const response = await fetch(`${this.options.baseUrl}/health`, {
-      headers: {
-        "x-tenant-id": this.options.tenant.tenantId
-      }
-    });
-
-    return response.json();
-  }
+  return {
+    customers: new CustomersClient(apiClient),
+    stock: new StockClient(apiClient),
+    offers: new OffersClient(apiClient),
+    orders: new OrdersClient(apiClient),
+    payments: new PaymentsClient(apiClient),
+    warehouse: new WarehouseClient(apiClient),
+    deliveries: new DeliveriesClient(apiClient),
+    invoices: new InvoicesClient(apiClient),
+    returns: new ReturnsClient(apiClient),
+    approvals: new ApprovalsClient(apiClient),
+    dashboard: new DashboardClient(apiClient)
+  };
 }

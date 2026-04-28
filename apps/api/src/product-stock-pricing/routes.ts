@@ -5,20 +5,8 @@ import type {
   PriceSlotConfig,
   Product
 } from "@hallederiz/types";
-import {
-  createProduct,
-  getCategorySlots,
-  getCurrentExchangeRates,
-  getPriceSlots,
-  getProductAvailability,
-  getProductById,
-  getStockLookupOptions,
-  listProducts,
-  patchCategorySlots,
-  patchExchangeRatePolicy,
-  patchPriceSlots,
-  patchProduct
-} from "./mock-store";
+import { ProductStockPricingService } from "../modules/product-stock-pricing/service";
+import { buildRequestContext } from "../shared/request-context";
 
 interface ProductQuerystring {
   q?: string;
@@ -38,8 +26,9 @@ function parseBoolean(value?: string): boolean {
 
 export async function registerProductStockPricingRoutes(server: FastifyInstance) {
   server.get<{ Querystring: ProductQuerystring }>("/products", async (request) => {
+    const service = new ProductStockPricingService(buildRequestContext(request));
     const query = request.query;
-    const items = listProducts({
+    const items = await service.listProducts({
       query: query.q,
       brandId: query.brandId,
       factoryId: query.factoryId,
@@ -54,12 +43,13 @@ export async function registerProductStockPricingRoutes(server: FastifyInstance)
     return {
       items,
       total: items.length,
-      options: getStockLookupOptions()
+      options: service.getStockLookupOptions()
     };
   });
 
   server.get<{ Params: { id: string } }>("/products/:id", async (request, reply) => {
-    const product = getProductById(request.params.id);
+    const service = new ProductStockPricingService(buildRequestContext(request));
+    const product = await service.getProductById(request.params.id);
     if (!product) {
       return reply.status(404).send({ message: "Product not found" });
     }
@@ -71,7 +61,8 @@ export async function registerProductStockPricingRoutes(server: FastifyInstance)
 
   server.post<{ Body: Partial<Product> }>("/products", async (request, reply) => {
     try {
-      const product = createProduct(request.body);
+      const service = new ProductStockPricingService(buildRequestContext(request));
+      const product = service.createProduct(request.body);
       return reply.status(201).send({ item: product });
     } catch (error) {
       const message = error instanceof Error ? error.message : "Unexpected error";
@@ -81,7 +72,8 @@ export async function registerProductStockPricingRoutes(server: FastifyInstance)
 
   server.patch<{ Params: { id: string }; Body: Partial<Product> }>("/products/:id", async (request, reply) => {
     try {
-      const product = patchProduct(request.params.id, request.body);
+      const service = new ProductStockPricingService(buildRequestContext(request));
+      const product = service.patchProduct(request.params.id, request.body);
       if (!product) {
         return reply.status(404).send({ message: "Product not found" });
       }
@@ -94,7 +86,8 @@ export async function registerProductStockPricingRoutes(server: FastifyInstance)
   });
 
   server.get<{ Params: { id: string } }>("/products/:id/availability", async (request, reply) => {
-    const availability = getProductAvailability(request.params.id);
+    const service = new ProductStockPricingService(buildRequestContext(request));
+    const availability = await service.getProductAvailability(request.params.id);
     if (!availability) {
       return reply.status(404).send({ message: "Product not found" });
     }
@@ -102,9 +95,10 @@ export async function registerProductStockPricingRoutes(server: FastifyInstance)
     return availability;
   });
 
-  server.get("/price-slots", async () => {
+  server.get("/price-slots", async (request) => {
+    const service = new ProductStockPricingService(buildRequestContext(request));
     return {
-      items: getPriceSlots()
+      items: await service.getPriceSlots()
     };
   });
 
@@ -113,13 +107,15 @@ export async function registerProductStockPricingRoutes(server: FastifyInstance)
       return reply.status(400).send({ message: "Exactly 6 price slots are required." });
     }
 
-    const updatedSlots = patchPriceSlots(request.body.slots);
+    const service = new ProductStockPricingService(buildRequestContext(request));
+    const updatedSlots = service.patchPriceSlots(request.body.slots);
     return { items: updatedSlots };
   });
 
-  server.get("/category-slots", async () => {
+  server.get("/category-slots", async (request) => {
+    const service = new ProductStockPricingService(buildRequestContext(request));
     return {
-      items: getCategorySlots()
+      items: await service.getCategorySlots()
     };
   });
 
@@ -128,17 +124,20 @@ export async function registerProductStockPricingRoutes(server: FastifyInstance)
       return reply.status(400).send({ message: "Exactly 4 category slots are required." });
     }
 
-    const updatedSlots = patchCategorySlots(request.body.slots);
+    const service = new ProductStockPricingService(buildRequestContext(request));
+    const updatedSlots = service.patchCategorySlots(request.body.slots);
     return { items: updatedSlots };
   });
 
-  server.get("/exchange-rates/current", async () => {
-    return getCurrentExchangeRates();
+  server.get("/exchange-rates/current", async (request) => {
+    const service = new ProductStockPricingService(buildRequestContext(request));
+    return service.getCurrentExchangeRates();
   });
 
   server.patch<{ Body: Partial<ExchangeRatePolicy> }>("/exchange-rate-policy", async (request) => {
+    const service = new ProductStockPricingService(buildRequestContext(request));
     return {
-      policy: patchExchangeRatePolicy(request.body)
+      policy: service.patchExchangeRatePolicy(request.body)
     };
   });
 }

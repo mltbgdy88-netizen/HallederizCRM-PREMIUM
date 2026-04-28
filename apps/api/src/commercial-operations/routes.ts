@@ -51,12 +51,19 @@ import {
   startWarehouseOrder,
   validateDelivery
 } from "./mock-store";
+import { CommercialCoreService } from "../modules/commercial-core/service";
+import { buildRequestContext } from "../shared/request-context";
 
 export async function registerCommercialOperationsRoutes(server: FastifyInstance) {
-  server.get("/orders", async () => ({ items: listOrders(), total: listOrders().length }));
+  server.get("/orders", async (request) => {
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const items = await service.listOrders();
+    return { items, total: items.length };
+  });
 
   server.get<{ Params: { id: string } }>("/orders/:id", async (request, reply) => {
-    const order = getOrder(request.params.id);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const order = await service.getOrder(request.params.id);
     if (!order) {
       return reply.status(404).send({ message: "Order not found" });
     }
@@ -64,11 +71,13 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   });
 
   server.post<{ Body: Partial<SaleOrder> }>("/orders", async (request, reply) => {
-    return reply.status(201).send({ item: createOrder(request.body) });
+    const service = new CommercialCoreService(buildRequestContext(request));
+    return reply.status(201).send({ item: service.createOrder(request.body) });
   });
 
   server.patch<{ Params: { id: string }; Body: Partial<SaleOrder> }>("/orders/:id", async (request, reply) => {
-    const order = patchOrder(request.params.id, request.body);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const order = service.patchOrder(request.params.id, request.body);
     if (!order) {
       return reply.status(404).send({ message: "Order not found" });
     }
@@ -76,7 +85,8 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   });
 
   server.post<{ Params: { id: string }; Body: Partial<SaleOrderLine> }>("/orders/:id/lines", async (request, reply) => {
-    const order = addOrderLine(request.params.id, request.body);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const order = service.addOrderLine(request.params.id, request.body);
     if (!order) {
       return reply.status(404).send({ message: "Order not found" });
     }
@@ -84,7 +94,8 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   });
 
   server.patch<{ Params: { id: string; lineId: string }; Body: Partial<SaleOrderLine> }>("/orders/:id/lines/:lineId", async (request, reply) => {
-    const order = patchOrderLine(request.params.id, request.params.lineId, request.body);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const order = service.patchOrderLine(request.params.id, request.params.lineId, request.body);
     if (!order) {
       return reply.status(404).send({ message: "Order not found" });
     }
@@ -92,7 +103,8 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   });
 
   server.post<{ Params: { id: string } }>("/orders/:id/confirm", async (request, reply) => {
-    const order = confirmOrder(request.params.id);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const order = service.confirmOrder(request.params.id);
     if (!order) {
       return reply.status(404).send({ message: "Order not found" });
     }
@@ -100,7 +112,8 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   });
 
   server.post<{ Params: { id: string } }>("/orders/:id/plan-sourcing", async (request, reply) => {
-    const order = planSourcing(request.params.id);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const order = service.planSourcing(request.params.id);
     if (!order) {
       return reply.status(404).send({ message: "Order not found" });
     }
@@ -108,7 +121,8 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   });
 
   server.post<{ Params: { id: string } }>("/orders/:id/create-warehouse-order", async (request, reply) => {
-    const warehouseOrder = createWarehouseOrderFromOrder(request.params.id);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const warehouseOrder = service.createWarehouseOrderFromOrder(request.params.id);
     if (!warehouseOrder) {
       return reply.status(404).send({ message: "Order not found" });
     }
@@ -116,7 +130,8 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   });
 
   server.post<{ Params: { id: string } }>("/orders/:id/create-factory-orders", async (request, reply) => {
-    const result = createFactoryOrders(request.params.id);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const result = service.createFactoryOrders(request.params.id);
     if (!result) {
       return reply.status(404).send({ message: "Order not found" });
     }
@@ -124,17 +139,23 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   });
 
   server.post<{ Params: { id: string } }>("/orders/:id/cancel", async (request, reply) => {
-    const order = cancelOrder(request.params.id);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const order = service.cancelOrder(request.params.id);
     if (!order) {
       return reply.status(404).send({ message: "Order not found" });
     }
     return { item: order };
   });
 
-  server.get("/payments", async () => ({ items: listPayments(), total: listPayments().length }));
+  server.get("/payments", async (request) => {
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const items = await service.listPayments();
+    return { items, total: items.length };
+  });
 
   server.get<{ Params: { id: string } }>("/payments/:id", async (request, reply) => {
-    const payment = getPayment(request.params.id);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const payment = service.getPayment(request.params.id);
     if (!payment) {
       return reply.status(404).send({ message: "Payment not found" });
     }
@@ -142,11 +163,13 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   });
 
   server.post<{ Body: Partial<PaymentReceipt> }>("/payments", async (request, reply) => {
-    return reply.status(201).send({ item: createPayment(request.body) });
+    const service = new CommercialCoreService(buildRequestContext(request));
+    return reply.status(201).send({ item: service.createPayment(request.body) });
   });
 
   server.post<{ Params: { id: string } }>("/payments/:id/confirm", async (request, reply) => {
-    const payment = confirmPayment(request.params.id);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const payment = service.confirmPayment(request.params.id);
     if (!payment) {
       return reply.status(404).send({ message: "Payment not found" });
     }
@@ -154,21 +177,28 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   });
 
   server.post<{ Params: { id: string }; Body: { reason?: string } }>("/payments/:id/reverse", async (request, reply) => {
-    const reversal = reversePayment(request.params.id, request.body?.reason);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const reversal = service.reversePayment(request.params.id, request.body?.reason);
     if (!reversal) {
       return reply.status(404).send({ message: "Payment not found" });
     }
     return { item: reversal };
   });
 
-  server.get<{ Params: { id: string } }>("/payments/:id/allocations", async (request) => ({
-    items: getPaymentAllocations(request.params.id)
-  }));
+  server.get<{ Params: { id: string } }>("/payments/:id/allocations", async (request) => {
+    const service = new CommercialCoreService(buildRequestContext(request));
+    return { items: service.getPaymentAllocations(request.params.id) };
+  });
 
-  server.get("/warehouse-orders", async () => ({ items: listWarehouseOrders(), total: listWarehouseOrders().length }));
+  server.get("/warehouse-orders", async (request) => {
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const items = await service.listWarehouseOrders();
+    return { items, total: items.length };
+  });
 
   server.get<{ Params: { id: string } }>("/warehouse-orders/:id", async (request, reply) => {
-    const warehouseOrder = getWarehouseOrder(request.params.id);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const warehouseOrder = service.getWarehouseOrder(request.params.id);
     if (!warehouseOrder) {
       return reply.status(404).send({ message: "Warehouse order not found" });
     }
@@ -176,11 +206,13 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   });
 
   server.post<{ Body: Partial<WarehouseOrder> }>("/warehouse-orders", async (request, reply) => {
-    return reply.status(201).send({ item: createWarehouseOrder(request.body) });
+    const service = new CommercialCoreService(buildRequestContext(request));
+    return reply.status(201).send({ item: service.createWarehouseOrder(request.body) });
   });
 
   server.post<{ Params: { id: string }; Body: { assignedTo?: string } }>("/warehouse-orders/:id/assign", async (request, reply) => {
-    const warehouseOrder = assignWarehouseOrder(request.params.id, request.body?.assignedTo ?? "Depo Ekibi");
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const warehouseOrder = service.assignWarehouseOrder(request.params.id, request.body?.assignedTo ?? "Depo Ekibi");
     if (!warehouseOrder) {
       return reply.status(404).send({ message: "Warehouse order not found" });
     }
@@ -188,7 +220,8 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   });
 
   server.post<{ Params: { id: string } }>("/warehouse-orders/:id/start", async (request, reply) => {
-    const warehouseOrder = startWarehouseOrder(request.params.id);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const warehouseOrder = service.startWarehouseOrder(request.params.id);
     if (!warehouseOrder) {
       return reply.status(404).send({ message: "Warehouse order not found" });
     }
@@ -196,7 +229,8 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   });
 
   server.post<{ Params: { id: string } }>("/warehouse-orders/:id/mark-prepared", async (request, reply) => {
-    const warehouseOrder = markWarehouseOrderPrepared(request.params.id);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const warehouseOrder = service.markWarehouseOrderPrepared(request.params.id);
     if (!warehouseOrder) {
       return reply.status(404).send({ message: "Warehouse order not found" });
     }
@@ -204,7 +238,8 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   });
 
   server.post<{ Params: { id: string } }>("/warehouse-orders/:id/cancel", async (request, reply) => {
-    const warehouseOrder = cancelWarehouseOrder(request.params.id);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const warehouseOrder = service.cancelWarehouseOrder(request.params.id);
     if (!warehouseOrder) {
       return reply.status(404).send({ message: "Warehouse order not found" });
     }
