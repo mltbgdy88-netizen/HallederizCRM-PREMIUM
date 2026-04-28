@@ -13,7 +13,10 @@
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
     "lint": "turbo run lint",
-    "clean": "turbo run clean"
+    "clean": "turbo run clean",
+    "smoke:routes": "node scripts/smoke/routes.cjs",
+    "smoke:navigation": "node scripts/smoke/navigation.cjs",
+    "smoke:e2e": "node scripts/smoke/e2e.cjs"
   },
   "devDependencies": {
     "@types/node": "^22.7.4",

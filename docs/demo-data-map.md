@@ -42,6 +42,7 @@ Bu dosya pilot demo ve test anlatimi icin onemli seed kimliklerini listeler.
 - `delivery_3` / `DLV-390`: delivered teslimat.
 - `invoice_1` / `INV-1201`: kesilmis fatura.
 - `invoice_2` / `INV-1194`: draft fatura.
+- `return_1` / `RET-202`: onaylanmis iade kaydi.
 
 ## Belgeler
 - `document_1`: teklif PDF.

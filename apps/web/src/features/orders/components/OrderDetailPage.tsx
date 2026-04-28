@@ -12,7 +12,6 @@ import { OrderLinesTable } from "./OrderLinesTable";
 import { OrderSideSummaryPanel } from "./OrderSideSummaryPanel";
 import { OrderTimelinePanel } from "./OrderTimelinePanel";
 import { OrderTopForm } from "./OrderTopForm";
-import { PaymentCreateModal } from "./PaymentCreateModal";
 import { SourcingPlanModal } from "./SourcingPlanModal";
 import { WarehouseOrderPanel } from "./WarehouseOrderPanel";
 import { getOrderDetail } from "../queries/get-orders";
@@ -35,7 +34,6 @@ export function OrderDetailPage({ orderId, sourceOfferId, customerId }: { orderI
   const [activeTab, setActiveTab] = useState("Genel");
   const [sourcingOpen, setSourcingOpen] = useState(false);
   const [approvalOpen, setApprovalOpen] = useState(false);
-  const [paymentOpen, setPaymentOpen] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -92,8 +90,8 @@ export function OrderDetailPage({ orderId, sourceOfferId, customerId }: { orderI
       <OrderActionButtons
         onSourcing={() => setSourcingOpen(true)}
         onApproval={() => setApprovalOpen(true)}
-        onPayment={() => setPaymentOpen(true)}
-        onWarehouse={() => setActiveTab("Depo")}
+        onPayment={() => router.push(`/tahsilatlar/yeni?order=${order.id}`)}
+        onWarehouse={() => router.push(orderWarehouseOrders[0] ? `/depo/emirler/${orderWarehouseOrders[0].id}` : "/depo")}
         onDelivery={() => router.push(relatedDelivery ? `/teslimatlar/${relatedDelivery.id}` : "/teslimatlar")}
         onInvoice={() => router.push(relatedInvoice ? `/faturalar/${relatedInvoice.id}` : "/faturalar")}
       />
@@ -117,7 +115,6 @@ export function OrderDetailPage({ orderId, sourceOfferId, customerId }: { orderI
 
       <SourcingPlanModal open={sourcingOpen} order={order} onClose={() => setSourcingOpen(false)} />
       <OrderApprovalSummaryModal open={approvalOpen} order={order} onClose={() => setApprovalOpen(false)} />
-      <PaymentCreateModal open={paymentOpen} order={order} onClose={() => setPaymentOpen(false)} />
     </div>
   );
 }
