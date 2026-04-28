@@ -52,8 +52,9 @@ export async function getOfferMockData(): Promise<Offer[]> {
   const productOne = stock.products[0];
   const productTwo = stock.products[1];
   const productThree = stock.products[2];
+  const productFour = stock.products[3];
 
-  if (!productOne || !productTwo || !productThree) {
+  if (!productOne || !productTwo || !productThree || !productFour) {
     return [];
   }
 
@@ -113,6 +114,17 @@ export async function getOfferMockData(): Promise<Offer[]> {
       overrideSlotNo: 2
     })
   ];
+  const offerFourLines = [
+    buildOfferLineFromProduct({
+      lineId: "line_6",
+      offerId: "offer_4",
+      product: productFour,
+      profile: customerOne.pricingProfile,
+      priceSlots: stock.priceSlots,
+      warehouses: stock.warehouses,
+      quantity: 14
+    })
+  ];
 
   const baseOffers: Array<Omit<Offer, "subtotal" | "discountTotal" | "taxRate" | "taxTotal" | "grandTotal">> = [
     {
@@ -139,7 +151,7 @@ export async function getOfferMockData(): Promise<Offer[]> {
       tenantId,
       offerNo: "OFF-798",
       customerId: "customer_2",
-      status: "approved",
+      status: "converted",
       validUntil: "2026-05-02T18:00:00.000Z",
       note: "Kurumsal proje icin teklif onay bekliyor.",
       priceSlotNoSnapshot: customerTwo.pricingProfile.selectedPriceSlotNo,
@@ -170,6 +182,25 @@ export async function getOfferMockData(): Promise<Offer[]> {
       lines: offerThreeLines,
       followUps: [],
       documentStatus: "not_created"
+    },
+    {
+      id: "offer_4",
+      tenantId,
+      offerNo: "OFF-789",
+      customerId: "customer_1",
+      status: "sent",
+      validUntil: "2026-05-04T18:00:00.000Z",
+      note: "Bayi showroom yenilemesi icin botanik seri teklif edildi.",
+      priceSlotNoSnapshot: customerOne.pricingProfile.selectedPriceSlotNo,
+      priceSlotLabelSnapshot: customerOne.pricingProfile.priceSlotLabelSnapshot ?? "Bayi",
+      currency: "TRY",
+      createdBy,
+      createdAt: "2026-04-23T10:30:00.000Z",
+      updatedAt: "2026-04-24T09:00:00.000Z",
+      sentAt: "2026-04-24T09:05:00.000Z",
+      lines: offerFourLines,
+      followUps: [],
+      documentStatus: "sent"
     }
   ];
 

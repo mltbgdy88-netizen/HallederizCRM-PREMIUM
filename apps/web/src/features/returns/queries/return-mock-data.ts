@@ -15,6 +15,13 @@ export async function getReturnMockData(): Promise<Return[]> {
   return [
     {
       ...buildReturnFromDelivery(first),
+      id: "return_0",
+      returnNo: "RET-105",
+      status: "draft",
+      note: "Pilot taslak iade; miktar ve onay kontrolu bekliyor."
+    },
+    {
+      ...buildReturnFromDelivery(first),
       id: "return_1",
       returnNo: "RET-102",
       status: "approved",

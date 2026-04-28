@@ -7,13 +7,15 @@ export async function getWarehouseOrderMockData(): Promise<WarehouseOrder[]> {
   const orders = await getOrderMockData();
   const orderOne = orders[0];
   const orderThree = orders[2];
+  const orderFive = orders[4];
 
-  if (!orderOne || !orderThree) {
+  if (!orderOne || !orderThree || !orderFive) {
     return [];
   }
 
   const first = buildWarehouseOrderFromSale(orderOne);
   const second = buildWarehouseOrderFromSale(orderThree);
+  const third = buildWarehouseOrderFromSale(orderFive);
 
   const seededWarehouseOrders: WarehouseOrder[] = [
     {
@@ -44,6 +46,24 @@ export async function getWarehouseOrderMockData(): Promise<WarehouseOrder[]> {
       lines: second.lines.map((line) => ({
         ...line,
         warehouseOrderId: "warehouse_order_2",
+        rackNo: "A1",
+        locationCode: "M-A1-01"
+      }))
+    },
+    {
+      ...third,
+      id: "warehouse_order_3",
+      warehouseOrderNo: "WO-108",
+      status: "prepared",
+      assignedTo: "Ayhan Depo",
+      dueAt: "2026-04-28T13:00:00.000Z",
+      startedAt: "2026-04-28T09:10:00.000Z",
+      preparedAt: "2026-04-28T11:45:00.000Z",
+      note: "Teslimat icin cikis alaninda bekliyor.",
+      lines: third.lines.map((line) => ({
+        ...line,
+        warehouseOrderId: "warehouse_order_3",
+        preparedQuantity: line.requestedQuantity,
         rackNo: "A1",
         locationCode: "M-A1-01"
       }))

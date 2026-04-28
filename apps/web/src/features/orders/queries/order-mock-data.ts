@@ -165,11 +165,17 @@ export async function getOrderMockData(): Promise<SaleOrder[]> {
   const productOne = stock.products[0];
   const productTwo = stock.products[1];
   const productThree = stock.products[2];
+  const productFour = stock.products[3];
+  const productFive = stock.products[4];
+  const productNine = stock.products[8];
   const customerOne = getCustomerById("customer_1");
   const customerTwo = getCustomerById("customer_2");
   const customerThree = getCustomerById("customer_3");
+  const customerFour = getCustomerById("customer_4");
+  const customerFive = getCustomerById("customer_5");
+  const customerEight = getCustomerById("customer_8");
 
-  if (!productOne || !productTwo || !productThree || !customerOne || !customerTwo || !customerThree) {
+  if (!productOne || !productTwo || !productThree || !productFour || !productFive || !productNine || !customerOne || !customerTwo || !customerThree || !customerFour || !customerFive || !customerEight) {
     return [];
   }
 
@@ -282,6 +288,69 @@ export async function getOrderMockData(): Promise<SaleOrder[]> {
       })
     ]
   });
+  const orderFour = withDerivedState({
+    id: "order_4",
+    tenantId,
+    orderNo: "SO-2460",
+    customerId: customerFour.id,
+    offerId: "offer_4",
+    status: "completed",
+    channel: "offer_conversion",
+    deliveryType: "warehouse",
+    note: "Tamamlanmis bayi showroom siparisi.",
+    priceSlotNoSnapshot: customerFour.pricingProfile.selectedPriceSlotNo,
+    priceSlotLabelSnapshot: customerFour.pricingProfile.priceSlotLabelSnapshot ?? "Bayi",
+    currency: "TRY",
+    taxRate: 20,
+    paidTotal: 0,
+    source: "teklif_donusumu",
+    createdBy,
+    createdAt: "2026-04-18T09:15:00.000Z",
+    updatedAt: "2026-04-21T16:00:00.000Z",
+    confirmedAt: "2026-04-18T10:00:00.000Z",
+    lines: [createLine({ orderId: "order_4", lineId: "order_line_5", product: productFour, quantity: 14, unitPrice: 619, priceSlotNo: 4, priceSlotLabelSnapshot: "Bayi", sourcePreference: "warehouse", preparedQuantity: 14, deliveredQuantity: 14 })]
+  });
+  const orderFive = withDerivedState({
+    id: "order_5",
+    tenantId,
+    orderNo: "SO-2455",
+    customerId: customerFive.id,
+    status: "ready",
+    channel: "phone",
+    deliveryType: "warehouse",
+    note: "Hazir, teslim bekleyen bayi siparisi.",
+    priceSlotNoSnapshot: customerFive.pricingProfile.selectedPriceSlotNo,
+    priceSlotLabelSnapshot: customerFive.pricingProfile.priceSlotLabelSnapshot ?? "Bayi",
+    currency: "TRY",
+    taxRate: 20,
+    paidTotal: 0,
+    source: "manual",
+    createdBy,
+    createdAt: "2026-04-19T11:00:00.000Z",
+    updatedAt: "2026-04-28T09:40:00.000Z",
+    confirmedAt: "2026-04-19T11:30:00.000Z",
+    lines: [createLine({ orderId: "order_5", lineId: "order_line_6", product: productOne, quantity: 8, unitPrice: 840, priceSlotNo: 4, priceSlotLabelSnapshot: "Bayi", sourcePreference: "warehouse", preparedQuantity: 8 })]
+  });
+  const orderSix = withDerivedState({
+    id: "order_6",
+    tenantId,
+    orderNo: "SO-2448",
+    customerId: customerEight.id,
+    status: "waiting_stock",
+    channel: "web",
+    deliveryType: "factory",
+    note: "Yuksek borclu cari icin fabrika ve approval kontrolu gerekiyor.",
+    priceSlotNoSnapshot: customerEight.pricingProfile.selectedPriceSlotNo,
+    priceSlotLabelSnapshot: customerEight.pricingProfile.priceSlotLabelSnapshot ?? "Proje",
+    currency: "TRY",
+    taxRate: 20,
+    paidTotal: 0,
+    source: "manual",
+    createdBy,
+    createdAt: "2026-04-15T14:30:00.000Z",
+    updatedAt: "2026-04-28T08:20:00.000Z",
+    lines: [createLine({ orderId: "order_6", lineId: "order_line_7", product: productNine, quantity: 24, unitPrice: 1376, priceSlotNo: 2, priceSlotLabelSnapshot: "Proje", sourcePreference: "factory" }), createLine({ orderId: "order_6", lineId: "order_line_8", product: productFive, quantity: 12, unitPrice: 1163, priceSlotNo: 2, priceSlotLabelSnapshot: "Proje", sourcePreference: "factory" })]
+  });
 
   return [
     {
@@ -290,7 +359,10 @@ export async function getOrderMockData(): Promise<SaleOrder[]> {
       deliveryStatus: "preparing"
     },
     orderTwo,
-    orderThree
+    orderThree,
+    { ...orderFour, paymentStatus: "paid", deliveryStatus: "delivered" },
+    { ...orderFive, paymentStatus: "partial", deliveryStatus: "ready" },
+    orderSix
   ];
 }
 

@@ -3,6 +3,7 @@ import type { Document, DocumentDeliveryStatus, DocumentType } from "@hallederiz
 import { customers } from "../../customers/queries/customer-mock-data";
 import { getDeliveryMockData } from "../../deliveries/queries/delivery-mock-data";
 import { getInvoiceMockData } from "../../invoices/queries/invoice-mock-data";
+import { getOfferMockData } from "../../offers/queries/offer-mock-data";
 import { getOrderMockData } from "../../orders/queries/order-mock-data";
 import { getPaymentMockData } from "../../payments/queries/payment-mock-data";
 import { getReturnMockData } from "../../returns/queries/return-mock-data";
@@ -12,7 +13,8 @@ const tenantId = "tenant_1";
 const createdBy = "user_1";
 
 export async function getDocumentMockData(): Promise<Document[]> {
-  const [orders, payments, warehouseOrders, deliveries, invoices, returns] = await Promise.all([
+  const [offers, orders, payments, warehouseOrders, deliveries, invoices, returns] = await Promise.all([
+    getOfferMockData(),
     getOrderMockData(),
     getPaymentMockData(),
     getWarehouseOrderMockData(),
@@ -22,6 +24,18 @@ export async function getDocumentMockData(): Promise<Document[]> {
   ]);
 
   const records: Document[] = [
+    offers[0]
+      ? buildDocumentRecord({
+          tenantId,
+          type: "offer_pdf",
+          entityType: "offer",
+          entityId: offers[0].id,
+          entityNo: offers[0].offerNo,
+          customerId: offers[0].customerId,
+          createdBy,
+          title: "Teklif PDF"
+        })
+      : null,
     orders[0]
       ? buildDocumentRecord({
           tenantId,
@@ -70,6 +84,18 @@ export async function getDocumentMockData(): Promise<Document[]> {
           title: "Teslim Fisi"
         })
       : null,
+    deliveries[0]
+      ? buildDocumentRecord({
+          tenantId,
+          type: "dispatch_note_pdf",
+          entityType: "dispatch",
+          entityId: deliveries[0].id,
+          entityNo: `IRS-${deliveries[0].deliveryNo}`,
+          customerId: deliveries[0].customerId,
+          createdBy,
+          title: "Irsaliye"
+        })
+      : null,
     invoices[0]
       ? buildDocumentRecord({
           tenantId,
@@ -92,6 +118,19 @@ export async function getDocumentMockData(): Promise<Document[]> {
           customerId: returns[0].customerId,
           createdBy,
           title: "Iade Notu"
+        })
+      : null
+    ,
+    customers[1]
+      ? buildDocumentRecord({
+          tenantId,
+          type: "statement_pdf",
+          entityType: "statement",
+          entityId: customers[1].id,
+          entityNo: `EXT-${customers[1].code}`,
+          customerId: customers[1].id,
+          createdBy,
+          title: "Cari Ekstre"
         })
       : null
   ].filter((document): document is Document => Boolean(document));

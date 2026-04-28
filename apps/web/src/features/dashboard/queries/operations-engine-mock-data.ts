@@ -181,6 +181,44 @@ export async function getOperationsEngineData(): Promise<OperationsEngineData> {
       updatedAt: now
     },
     {
+      id: "task_ai_payment_priority_1",
+      tenantId,
+      taskNo: "TSK-AI-530",
+      title: "AI tahsilat onceligi: Kuzey Insaat",
+      description: "Yuksek borc ve blokaj seviyesi nedeniyle bugun finans follow-up oneriliyor.",
+      type: "ai_payment_priority",
+      status: "open",
+      priority: "critical",
+      source: "ai",
+      entityType: "customer",
+      entityId: "customer_8",
+      entityNo: "CUS-008",
+      customerId: "customer_8",
+      customerName: "Kuzey Insaat",
+      dueAt: "2026-04-28T13:30:00.000Z",
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: "task_ai_operation_reminder_1",
+      tenantId,
+      taskNo: "TSK-AI-590",
+      title: "AI operasyon hatirlatmasi: teslim bekleyen hazir siparis",
+      description: "SO-2455 hazir durumunda; musteri bildirimi ve teslim planlama bekliyor.",
+      type: "ai_operation_reminder",
+      status: "open",
+      priority: "high",
+      source: "ai",
+      entityType: "order",
+      entityId: "order_5",
+      entityNo: "SO-2455",
+      customerId: "customer_5",
+      customerName: "Bursa Duvar Bayi",
+      dueAt: "2026-04-28T16:15:00.000Z",
+      createdAt: now,
+      updatedAt: now
+    },
+    {
       id: "task_ai_stock_1",
       tenantId,
       taskNo: "TSK-AI-610",
@@ -219,8 +257,68 @@ export async function getOperationsEngineData(): Promise<OperationsEngineData> {
       updatedAt: approval.createdAt,
       approvalId: approval.id
     }));
+  const pilotScenarioTasks: Task[] = [
+    {
+      id: "task_factory_inbound_1",
+      tenantId,
+      taskNo: "TSK-FAB-310",
+      title: "FO-214 fabrika sevkiyat takibi",
+      description: "Izmir Fabrika uretimde; teslim tarihi yaklasiyor, durum teyidi alinmali.",
+      type: "factory_inbound",
+      status: "open",
+      priority: "high",
+      source: "system",
+      entityType: "factory_order",
+      entityId: "factory_order_2",
+      entityNo: "FO-214",
+      assigneeName: "Operasyon",
+      dueAt: "2026-04-28T17:30:00.000Z",
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: "task_customer_risk_blocked_1",
+      tenantId,
+      taskNo: "TSK-RISK-900",
+      title: "Kuzey Insaat blokaj/risk kontrolu",
+      description: "Blokeli risk seviyesinde yuksek borclu cari; yeni fabrika siparisi onay gerektirir.",
+      type: "customer_risk",
+      status: "open",
+      priority: "critical",
+      source: "system",
+      entityType: "customer",
+      entityId: "customer_8",
+      entityNo: "CUS-008",
+      customerId: "customer_8",
+      customerName: "Kuzey Insaat",
+      assigneeName: "Yonetici",
+      dueAt: "2026-04-28T14:30:00.000Z",
+      createdAt: now,
+      updatedAt: now
+    },
+    {
+      id: "task_customer_reactivation_1",
+      tenantId,
+      taskNo: "TSK-CRM-204",
+      title: "Bursa Duvar Bayi yeniden aktivasyon",
+      description: "Son siparis uzerinden uzun sure gecti; bayi fiyat grubu ile kampanya teklifi onerilir.",
+      type: "customer_reactivation",
+      status: "open",
+      priority: "normal",
+      source: "system",
+      entityType: "customer",
+      entityId: "customer_5",
+      entityNo: "CUS-005",
+      customerId: "customer_5",
+      customerName: "Bursa Duvar Bayi",
+      assigneeName: "Satis",
+      dueAt: "2026-04-29T10:00:00.000Z",
+      createdAt: now,
+      updatedAt: now
+    }
+  ];
 
-  const tasks = [...orderTasks, ...warehouseTasks, ...deliveryTasks, ...criticalStockTasks, ...customerRiskTasks, ...approvalTasks, ...aiTasks].map(withOverdueState);
+  const tasks = [...orderTasks, ...warehouseTasks, ...deliveryTasks, ...criticalStockTasks, ...customerRiskTasks, ...approvalTasks, ...pilotScenarioTasks, ...aiTasks].map(withOverdueState);
   const workflows = [
     ...orders.map(buildOrderWorkflow),
     ...offers.map(buildOfferWorkflow),

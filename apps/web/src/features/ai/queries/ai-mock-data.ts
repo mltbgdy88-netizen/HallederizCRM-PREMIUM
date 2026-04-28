@@ -23,6 +23,8 @@ export const approvalExecutions: ApprovalExecution[] = [{ id: "approval_exec_1",
 
 export const aiInsights: AiInsight[] = [
   { id: "ai_insight_1", tenantId, title: "Riskli cari: Mira Yapi", category: "risk", severity: "critical", confidence: 0.84, summary: "Yuksek bakiye ve geciken tahsilat birlikte goruluyor.", targetType: "customer", targetId: "customer_2", targetNo: "CUS-002", suggestedAction: "send_document_whatsapp", createdAt: now },
+  { id: "ai_insight_4", tenantId, title: "Tahsilat onceligi: Kuzey Insaat", category: "payment", severity: "critical", confidence: 0.88, summary: "Blokeli risk ve yuksek borc nedeniyle yonetici onayli follow-up onerilir.", targetType: "customer", targetId: "customer_8", targetNo: "CUS-008", suggestedAction: "create_payment", createdAt: now },
+  { id: "ai_insight_5", tenantId, title: "Operasyon hatirlatmasi: SO-2455", category: "operation", severity: "warning", confidence: 0.79, summary: "Hazir siparis teslimata alinmazsa musteri bildirimi gecikecek.", targetType: "order", targetId: "order_5", targetNo: "SO-2455", suggestedAction: "complete_delivery", createdAt: now },
   { id: "ai_insight_2", tenantId, title: "Kritik stok egilimi: DK-2022", category: "stock", severity: "warning", confidence: 0.81, summary: "Merkez stok ve siparis hizi kritiklesme sinyali veriyor.", targetType: "product", targetId: "prod_2", targetNo: "DK-2022", suggestedAction: "create_order", createdAt: now },
   { id: "ai_insight_3", tenantId, title: "Fabrika takibi gecikiyor", category: "factory", severity: "warning", confidence: 0.76, summary: "FO-214 icin durum guncellemesi stale.", targetType: "factory_order", targetId: "factory_order_2", targetNo: "FO-214", suggestedAction: "create_order", createdAt: now }
 ];
