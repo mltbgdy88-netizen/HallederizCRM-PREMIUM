@@ -7,6 +7,7 @@ import type {
 } from "@hallederiz/types";
 import { ProductStockPricingService } from "../modules/product-stock-pricing/service";
 import { buildRequestContext } from "../shared/request-context";
+import { asApiErrorPayload } from "../shared/errors";
 
 interface ProductQuerystring {
   q?: string;
@@ -62,26 +63,26 @@ export async function registerProductStockPricingRoutes(server: FastifyInstance)
   server.post<{ Body: Partial<Product> }>("/products", async (request, reply) => {
     try {
       const service = new ProductStockPricingService(buildRequestContext(request));
-      const product = service.createProduct(request.body);
+      const product = await service.createProduct(request.body);
       return reply.status(201).send({ item: product });
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unexpected error";
-      return reply.status(400).send({ message });
+      const payload = asApiErrorPayload(error);
+      return reply.status(payload.statusCode).send(payload.body);
     }
   });
 
   server.patch<{ Params: { id: string }; Body: Partial<Product> }>("/products/:id", async (request, reply) => {
     try {
       const service = new ProductStockPricingService(buildRequestContext(request));
-      const product = service.patchProduct(request.params.id, request.body);
+      const product = await service.patchProduct(request.params.id, request.body);
       if (!product) {
         return reply.status(404).send({ message: "Product not found" });
       }
 
       return { item: product };
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Unexpected error";
-      return reply.status(400).send({ message });
+      const payload = asApiErrorPayload(error);
+      return reply.status(payload.statusCode).send(payload.body);
     }
   });
 
@@ -108,7 +109,7 @@ export async function registerProductStockPricingRoutes(server: FastifyInstance)
     }
 
     const service = new ProductStockPricingService(buildRequestContext(request));
-    const updatedSlots = service.patchPriceSlots(request.body.slots);
+    const updatedSlots = await service.patchPriceSlots(request.body.slots);
     return { items: updatedSlots };
   });
 
@@ -125,7 +126,7 @@ export async function registerProductStockPricingRoutes(server: FastifyInstance)
     }
 
     const service = new ProductStockPricingService(buildRequestContext(request));
-    const updatedSlots = service.patchCategorySlots(request.body.slots);
+    const updatedSlots = await service.patchCategorySlots(request.body.slots);
     return { items: updatedSlots };
   });
 
@@ -137,7 +138,7 @@ export async function registerProductStockPricingRoutes(server: FastifyInstance)
   server.patch<{ Body: Partial<ExchangeRatePolicy> }>("/exchange-rate-policy", async (request) => {
     const service = new ProductStockPricingService(buildRequestContext(request));
     return {
-      policy: service.patchExchangeRatePolicy(request.body)
+      policy: await service.patchExchangeRatePolicy(request.body)
     };
   });
 }

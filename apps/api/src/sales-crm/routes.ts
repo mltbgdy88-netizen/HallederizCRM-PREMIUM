@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import type { Customer, CustomerAddress, CustomerContact, CustomerPricingProfile, Offer, OfferFollowUp, OfferLine } from "@hallederiz/types";
 import { SalesCrmService } from "../modules/sales-crm/service";
 import { buildRequestContext } from "../shared/request-context";
+import { asApiErrorPayload } from "../shared/errors";
 
 export async function registerSalesCrmRoutes(server: FastifyInstance) {
   server.get("/customers", async (request) => {
@@ -20,17 +21,27 @@ export async function registerSalesCrmRoutes(server: FastifyInstance) {
   });
 
   server.post<{ Body: Partial<Customer> }>("/customers", async (request, reply) => {
-    const service = new SalesCrmService(buildRequestContext(request));
-    return reply.status(201).send({ item: await service.createCustomer(request.body) });
+    try {
+      const service = new SalesCrmService(buildRequestContext(request));
+      return reply.status(201).send({ item: await service.createCustomer(request.body) });
+    } catch (error) {
+      const payload = asApiErrorPayload(error);
+      return reply.status(payload.statusCode).send(payload.body);
+    }
   });
 
   server.patch<{ Params: { id: string }; Body: Partial<Customer> }>("/customers/:id", async (request, reply) => {
     const service = new SalesCrmService(buildRequestContext(request));
-    const customer = await service.patchCustomer(request.params.id, request.body);
-    if (!customer) {
-      return reply.status(404).send({ message: "Customer not found" });
+    try {
+      const customer = await service.patchCustomer(request.params.id, request.body);
+      if (!customer) {
+        return reply.status(404).send({ message: "Customer not found" });
+      }
+      return { item: customer };
+    } catch (error) {
+      const payload = asApiErrorPayload(error);
+      return reply.status(payload.statusCode).send(payload.body);
     }
-    return { item: customer };
   });
 
   server.get<{ Params: { id: string } }>("/customers/:id/account-summary", async (request, reply) => {
@@ -48,22 +59,37 @@ export async function registerSalesCrmRoutes(server: FastifyInstance) {
   });
 
   server.post<{ Params: { id: string }; Body: Partial<CustomerContact> }>("/customers/:id/contacts", async (request, reply) => {
-    const service = new SalesCrmService(buildRequestContext(request));
-    return reply.status(201).send({ item: service.addContact(request.params.id, request.body) });
+    try {
+      const service = new SalesCrmService(buildRequestContext(request));
+      return reply.status(201).send({ item: await service.addContact(request.params.id, request.body) });
+    } catch (error) {
+      const payload = asApiErrorPayload(error);
+      return reply.status(payload.statusCode).send(payload.body);
+    }
   });
 
   server.post<{ Params: { id: string }; Body: Partial<CustomerAddress> }>("/customers/:id/addresses", async (request, reply) => {
-    const service = new SalesCrmService(buildRequestContext(request));
-    return reply.status(201).send({ item: service.addAddress(request.params.id, request.body) });
+    try {
+      const service = new SalesCrmService(buildRequestContext(request));
+      return reply.status(201).send({ item: await service.addAddress(request.params.id, request.body) });
+    } catch (error) {
+      const payload = asApiErrorPayload(error);
+      return reply.status(payload.statusCode).send(payload.body);
+    }
   });
 
   server.patch<{ Params: { id: string }; Body: Partial<CustomerPricingProfile> }>("/customers/:id/pricing-profile", async (request, reply) => {
     const service = new SalesCrmService(buildRequestContext(request));
-    const customer = service.patchPricingProfile(request.params.id, request.body);
-    if (!customer) {
-      return reply.status(404).send({ message: "Customer not found" });
+    try {
+      const customer = await service.patchPricingProfile(request.params.id, request.body);
+      if (!customer) {
+        return reply.status(404).send({ message: "Customer not found" });
+      }
+      return { item: customer.pricingProfile };
+    } catch (error) {
+      const payload = asApiErrorPayload(error);
+      return reply.status(payload.statusCode).send(payload.body);
     }
-    return { item: customer.pricingProfile };
   });
 
   server.get("/offers", async (request) => {
@@ -82,49 +108,74 @@ export async function registerSalesCrmRoutes(server: FastifyInstance) {
   });
 
   server.post<{ Body: Partial<Offer> }>("/offers", async (request, reply) => {
-    const service = new SalesCrmService(buildRequestContext(request));
-    return reply.status(201).send({ item: service.createOffer(request.body) });
+    try {
+      const service = new SalesCrmService(buildRequestContext(request));
+      return reply.status(201).send({ item: await service.createOffer(request.body) });
+    } catch (error) {
+      const payload = asApiErrorPayload(error);
+      return reply.status(payload.statusCode).send(payload.body);
+    }
   });
 
   server.patch<{ Params: { id: string }; Body: Partial<Offer> }>("/offers/:id", async (request, reply) => {
     const service = new SalesCrmService(buildRequestContext(request));
-    const offer = service.patchOffer(request.params.id, request.body);
-    if (!offer) {
-      return reply.status(404).send({ message: "Offer not found" });
+    try {
+      const offer = await service.patchOffer(request.params.id, request.body);
+      if (!offer) {
+        return reply.status(404).send({ message: "Offer not found" });
+      }
+      return { item: offer };
+    } catch (error) {
+      const payload = asApiErrorPayload(error);
+      return reply.status(payload.statusCode).send(payload.body);
     }
-    return { item: offer };
   });
 
   server.post<{ Params: { id: string }; Body: Partial<OfferLine> }>("/offers/:id/lines", async (request, reply) => {
     const service = new SalesCrmService(buildRequestContext(request));
-    const offer = service.addOfferLine(request.params.id, request.body);
-    if (!offer) {
-      return reply.status(404).send({ message: "Offer not found" });
+    try {
+      const offer = await service.addOfferLine(request.params.id, request.body);
+      if (!offer) {
+        return reply.status(404).send({ message: "Offer not found" });
+      }
+      return reply.status(201).send({ item: offer });
+    } catch (error) {
+      const payload = asApiErrorPayload(error);
+      return reply.status(payload.statusCode).send(payload.body);
     }
-    return reply.status(201).send({ item: offer });
   });
 
   server.patch<{ Params: { id: string; lineId: string }; Body: Partial<OfferLine> }>("/offers/:id/lines/:lineId", async (request, reply) => {
     const service = new SalesCrmService(buildRequestContext(request));
-    const offer = service.patchOfferLine(request.params.id, request.params.lineId, request.body);
-    if (!offer) {
-      return reply.status(404).send({ message: "Offer not found" });
+    try {
+      const offer = await service.patchOfferLine(request.params.id, request.params.lineId, request.body);
+      if (!offer) {
+        return reply.status(404).send({ message: "Offer not found" });
+      }
+      return { item: offer };
+    } catch (error) {
+      const payload = asApiErrorPayload(error);
+      return reply.status(payload.statusCode).send(payload.body);
     }
-    return { item: offer };
   });
 
   server.post<{ Params: { id: string }; Body: Partial<OfferFollowUp> }>("/offers/:id/followups", async (request, reply) => {
     const service = new SalesCrmService(buildRequestContext(request));
-    const offer = service.addOfferFollowUp(request.params.id, request.body);
-    if (!offer) {
-      return reply.status(404).send({ message: "Offer not found" });
+    try {
+      const offer = await service.addOfferFollowUp(request.params.id, request.body);
+      if (!offer) {
+        return reply.status(404).send({ message: "Offer not found" });
+      }
+      return reply.status(201).send({ item: offer });
+    } catch (error) {
+      const payload = asApiErrorPayload(error);
+      return reply.status(payload.statusCode).send(payload.body);
     }
-    return reply.status(201).send({ item: offer });
   });
 
   server.post<{ Params: { id: string } }>("/offers/:id/send", async (request, reply) => {
     const service = new SalesCrmService(buildRequestContext(request));
-    const offer = service.sendOffer(request.params.id);
+    const offer = await service.sendOffer(request.params.id);
     if (!offer) {
       return reply.status(404).send({ message: "Offer not found" });
     }
@@ -133,7 +184,7 @@ export async function registerSalesCrmRoutes(server: FastifyInstance) {
 
   server.post<{ Params: { id: string } }>("/offers/:id/convert-to-order", async (request, reply) => {
     const service = new SalesCrmService(buildRequestContext(request));
-    const draft = service.convertOffer(request.params.id);
+    const draft = await service.convertOffer(request.params.id);
     if (!draft) {
       return reply.status(404).send({ message: "Offer not found" });
     }

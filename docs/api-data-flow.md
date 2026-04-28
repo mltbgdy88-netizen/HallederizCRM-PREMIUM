@@ -38,6 +38,10 @@ Bu akisla UI'daki feature query'leri dogrudan mock import etmek yerine typed cli
 - Service katmani is kurali ve use-case koordinasyonunu tasir.
 - Repository katmani veri kaynagina erisir.
 - Customers/Products/Offers/Orders repository'leri DB mode'da SQL sorgusu dener.
+- Write endpointlerinde transaction boundary repository seviyesinde tutulur.
+- Conflict semantigi:
+  - API `409 conflict` + `details.reason=stale_update|resource_changed`
+  - Validation hatalari `400 validation_error`
 - DB sorgusu hata verirse kontrollu mock fallback devreye girer.
 
 ## Database Katmani
@@ -64,3 +68,10 @@ Bu akisla UI'daki feature query'leri dogrudan mock import etmek yerine typed cli
 1. Web, SDK cagrilarinda `x-tenant-id` ve `x-user-id` header'larini gonderir.
 2. API `buildRequestContext()` ile bu bilgileri normalize eder.
 3. Service/Repository katmanlari context'i alip tenant-aware sorguya hazir kalir.
+
+## Write Akis Ozetleri (Core CRM)
+
+- Customers: Route -> Service -> Repository -> `save customer + pricing profile` (tx)
+- Products: Route -> Service -> Repository -> `save product aggregate` (tx)
+- Offers: Route -> Service -> Repository -> `save offer + replace lines + recalc totals` (tx)
+- Orders: Route -> Service -> Repository -> `save order + replace lines + replace source plans + derive statuses` (tx)

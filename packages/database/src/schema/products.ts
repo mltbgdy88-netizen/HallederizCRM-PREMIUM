@@ -39,7 +39,8 @@ CREATE TABLE IF NOT EXISTS products (
   critical_stock_level NUMERIC NOT NULL DEFAULT 0,
   primary_barcode TEXT,
   qr_code_value TEXT,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS product_barcode_aliases (

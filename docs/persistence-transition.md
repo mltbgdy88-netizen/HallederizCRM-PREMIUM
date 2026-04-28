@@ -4,10 +4,10 @@ Tarih: 28 Nisan 2026
 
 ## Gercek Persistence Foundation'a Tasinan Alanlar
 
-- Customers: Repository katmaninda PostgreSQL sorgu yolu eklendi (`customers`, `customer_pricing_profiles`, `customer_accounts`, `customer_ledgers`).
-- Products / Stock / Pricing: Repository katmaninda PostgreSQL sorgu yolu eklendi (`products`, `price_slot_configs`, `category_slot_configs`).
-- Offers: Repository katmaninda PostgreSQL sorgu yolu eklendi (`offers` list/detail).
-- Orders: Repository katmaninda PostgreSQL sorgu yolu eklendi (`sale_orders` list/detail).
+- Customers: DB-mode'da create/update + pricing profile + contact/address insert path eklendi. Optimistic concurrency (`updatedAt`) kontrolu eklendi.
+- Products / Stock / Pricing: DB-mode'da product aggregate create/update (aliases/categories/tiers/locations/stocks) transaction path eklendi.
+- Offers: DB-mode'da offer aggregate create/update + line replace + follow-up insert + status transition + totals recalculation eklendi.
+- Orders: DB-mode'da order aggregate create/update + line replace + source-plan replace + warehouse-order olusturma foundation eklendi.
 - Payments: Commercial core service/repository katmanina alindi.
 - Warehouse Orders: Commercial core service/repository katmanina alindi.
 
@@ -15,7 +15,18 @@ Tarih: 28 Nisan 2026
 
 - Deliveries, Invoices, Returns, Documents route implementation'lari halen mock-store odakli.
 - WhatsApp, ERP, Fabrikalar, AI execution tarafi bu turda contract/foundation modunda.
-- Customers/Products/Offers/Orders icindeki create/update ve ileri seviye relation operasyonlarinin bir bolumu halen kontrollu fallback ile mock-store'a donebilir.
+- Payments, Warehouse detay satir yazimlari, Deliveries, Invoices, Returns, Documents write path'leri halen mock agirlikli.
+- Customers/Products/Offers/Orders DB mode'da hata alirsa kontrollu fallback ile mock-store'a donebilir.
+
+## Transaction ve Concurrency Hardening Durumu
+
+- Customer aggregate write set: `customers + customer_pricing_profiles` tek transaction.
+- Product aggregate write set: `products + aliases + categories + tiers + locations + warehouse_stocks` tek transaction.
+- Offer aggregate write set: `offers + offer_lines (+ offer_followups)` transaction.
+- Order aggregate write set: `sale_orders + sale_order_lines + order_source_plans` transaction.
+- Concurrency foundation:
+  - `customers`, `offers`, `orders`: `expected updatedAt` ile stale-write conflict modeli aktif.
+  - `products`: request tarafindan `updatedAt` gelirse stale-write conflict kontrolu calisir.
 
 ## Fallback Stratejisi
 
@@ -33,7 +44,6 @@ Tarih: 28 Nisan 2026
 
 ## Siradaki Gecis Hedefleri
 
-1. Customers tarafinda contacts/addresses/pricing-profile mutasyonlarini tam SQL write path'e tasimak.
-2. Products tarafinda stock/location/price-tier write path'lerini SQL'e tasimak.
-3. Offers ve Orders tarafinda line/followup/source-plan mutasyonlarini SQL transaction ile kalicilastirmak.
-4. Deliveries/Invoices/Returns/Documents modullerini de ayni DB-first modele almak.
+1. `warehouse_orders` ve `warehouse_order_lines` icin order create-warehouse-order write parity'yi genisletmek.
+2. Payments/Deliveries/Invoices/Returns/Documents write path'lerini DB-first mode'a tasimak.
+3. DB-mode integration testlerini gercek test veritabani ile otomatik kosulabilir hale getirmek.

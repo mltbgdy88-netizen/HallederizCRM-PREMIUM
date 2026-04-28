@@ -21,9 +21,9 @@ Bu notlar pilot oncesi bilincli olarak foundation seviyesinde birakilan alanlari
 
 ## 3. Sonraki Yuksek Oncelikli Isler
 
-1. Mock store'lari tek bir demo scenario seed katmaninda birlestirmek.
-2. Form submit aksiyonlarini API mock-store endpointlerine baglamak.
-3. Document detail route'u ekleyip belge preview ve delivery history'yi detay sayfasina tasimak.
-4. Approval execution sonucunu audit/timeline mock verisine yazmak.
-5. Local agent ile API queue polling arasinda gercek HTTP contract testleri eklemek.
-6. Playwright route smoke testi ile tum menu ve kritik aksiyon linklerini otomatik dogrulamak.
+1. Payments/Deliveries/Invoices/Returns/Documents write path'lerini DB transaction modeline tasimak.
+2. Warehouse order line-level DB parity'yi tamamlamak.
+3. DB-mode integration testlerini gercek test veritabaniyla CI'da kosmak.
+4. UI'da conflict (409 stale update) handling deneyimini form seviyesinde iyilestirmek.
+5. Document detail route'u ekleyip belge preview ve delivery history'yi detay sayfasina tasimak.
+6. Approval execution sonucunu audit/timeline mock verisine yazmak.

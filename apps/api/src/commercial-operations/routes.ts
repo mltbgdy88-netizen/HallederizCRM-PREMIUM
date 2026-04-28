@@ -53,6 +53,7 @@ import {
 } from "./mock-store";
 import { CommercialCoreService } from "../modules/commercial-core/service";
 import { buildRequestContext } from "../shared/request-context";
+import { asApiErrorPayload } from "../shared/errors";
 
 export async function registerCommercialOperationsRoutes(server: FastifyInstance) {
   server.get("/orders", async (request) => {
@@ -71,40 +72,60 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   });
 
   server.post<{ Body: Partial<SaleOrder> }>("/orders", async (request, reply) => {
-    const service = new CommercialCoreService(buildRequestContext(request));
-    return reply.status(201).send({ item: service.createOrder(request.body) });
+    try {
+      const service = new CommercialCoreService(buildRequestContext(request));
+      return reply.status(201).send({ item: await service.createOrder(request.body) });
+    } catch (error) {
+      const payload = asApiErrorPayload(error);
+      return reply.status(payload.statusCode).send(payload.body);
+    }
   });
 
   server.patch<{ Params: { id: string }; Body: Partial<SaleOrder> }>("/orders/:id", async (request, reply) => {
     const service = new CommercialCoreService(buildRequestContext(request));
-    const order = service.patchOrder(request.params.id, request.body);
-    if (!order) {
-      return reply.status(404).send({ message: "Order not found" });
+    try {
+      const order = await service.patchOrder(request.params.id, request.body);
+      if (!order) {
+        return reply.status(404).send({ message: "Order not found" });
+      }
+      return { item: order };
+    } catch (error) {
+      const payload = asApiErrorPayload(error);
+      return reply.status(payload.statusCode).send(payload.body);
     }
-    return { item: order };
   });
 
   server.post<{ Params: { id: string }; Body: Partial<SaleOrderLine> }>("/orders/:id/lines", async (request, reply) => {
     const service = new CommercialCoreService(buildRequestContext(request));
-    const order = service.addOrderLine(request.params.id, request.body);
-    if (!order) {
-      return reply.status(404).send({ message: "Order not found" });
+    try {
+      const order = await service.addOrderLine(request.params.id, request.body);
+      if (!order) {
+        return reply.status(404).send({ message: "Order not found" });
+      }
+      return reply.status(201).send({ item: order });
+    } catch (error) {
+      const payload = asApiErrorPayload(error);
+      return reply.status(payload.statusCode).send(payload.body);
     }
-    return reply.status(201).send({ item: order });
   });
 
   server.patch<{ Params: { id: string; lineId: string }; Body: Partial<SaleOrderLine> }>("/orders/:id/lines/:lineId", async (request, reply) => {
     const service = new CommercialCoreService(buildRequestContext(request));
-    const order = service.patchOrderLine(request.params.id, request.params.lineId, request.body);
-    if (!order) {
-      return reply.status(404).send({ message: "Order not found" });
+    try {
+      const order = await service.patchOrderLine(request.params.id, request.params.lineId, request.body);
+      if (!order) {
+        return reply.status(404).send({ message: "Order not found" });
+      }
+      return { item: order };
+    } catch (error) {
+      const payload = asApiErrorPayload(error);
+      return reply.status(payload.statusCode).send(payload.body);
     }
-    return { item: order };
   });
 
   server.post<{ Params: { id: string } }>("/orders/:id/confirm", async (request, reply) => {
     const service = new CommercialCoreService(buildRequestContext(request));
-    const order = service.confirmOrder(request.params.id);
+    const order = await service.confirmOrder(request.params.id);
     if (!order) {
       return reply.status(404).send({ message: "Order not found" });
     }
@@ -113,7 +134,7 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
 
   server.post<{ Params: { id: string } }>("/orders/:id/plan-sourcing", async (request, reply) => {
     const service = new CommercialCoreService(buildRequestContext(request));
-    const order = service.planSourcing(request.params.id);
+    const order = await service.planSourcing(request.params.id);
     if (!order) {
       return reply.status(404).send({ message: "Order not found" });
     }
@@ -122,7 +143,7 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
 
   server.post<{ Params: { id: string } }>("/orders/:id/create-warehouse-order", async (request, reply) => {
     const service = new CommercialCoreService(buildRequestContext(request));
-    const warehouseOrder = service.createWarehouseOrderFromOrder(request.params.id);
+    const warehouseOrder = await service.createWarehouseOrderFromOrder(request.params.id);
     if (!warehouseOrder) {
       return reply.status(404).send({ message: "Order not found" });
     }

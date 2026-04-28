@@ -5,10 +5,19 @@ CREATE TABLE IF NOT EXISTS customers (
   code TEXT NOT NULL,
   name TEXT NOT NULL,
   type TEXT NOT NULL,
+  email TEXT,
+  district TEXT,
+  address_line TEXT,
+  tax_office TEXT,
+  tax_number TEXT,
   city TEXT,
   phone TEXT,
   is_active BOOLEAN NOT NULL DEFAULT TRUE,
-  created_at TIMESTAMP NOT NULL DEFAULT NOW()
+  risk_level TEXT NOT NULL DEFAULT 'low',
+  whatsapp_matched BOOLEAN NOT NULL DEFAULT FALSE,
+  last_order_at TIMESTAMP,
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  updated_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 
 CREATE TABLE IF NOT EXISTS customer_contacts (
