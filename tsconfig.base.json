@@ -1,0 +1,67 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "module": "ESNext",
+    "moduleResolution": "Bundler",
+    "moduleDetection": "force",
+    "strict": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "forceConsistentCasingInFileNames": true,
+    "noUncheckedIndexedAccess": true,
+    "noFallthroughCasesInSwitch": true,
+    "baseUrl": ".",
+    "paths": {
+      "@hallederiz/ui": [
+        "packages/ui/src/index.ts"
+      ],
+      "@hallederiz/ui/*": [
+        "packages/ui/src/*"
+      ],
+      "@hallederiz/config": [
+        "packages/config/src/index.ts"
+      ],
+      "@hallederiz/config/*": [
+        "packages/config/src/*"
+      ],
+      "@hallederiz/database": [
+        "packages/database/src/index.ts"
+      ],
+      "@hallederiz/database/*": [
+        "packages/database/src/*"
+      ],
+      "@hallederiz/types": [
+        "packages/types/src/index.ts"
+      ],
+      "@hallederiz/types/*": [
+        "packages/types/src/*"
+      ],
+      "@hallederiz/utils": [
+        "packages/utils/src/index.ts"
+      ],
+      "@hallederiz/utils/*": [
+        "packages/utils/src/*"
+      ],
+      "@hallederiz/domain": [
+        "packages/domain/src/index.ts"
+      ],
+      "@hallederiz/domain/*": [
+        "packages/domain/src/*"
+      ],
+      "@hallederiz/sdk": [
+        "packages/sdk/src/index.ts"
+      ],
+      "@hallederiz/sdk/*": [
+        "packages/sdk/src/*"
+      ]
+    }
+  }
+}

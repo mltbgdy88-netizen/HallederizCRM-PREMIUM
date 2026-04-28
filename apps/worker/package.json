@@ -1,0 +1,23 @@
+{
+  "name": "@hallederiz/worker",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --loader ts-node/esm src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node dist/index.js",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "node -e \"console.log('TODO: configure linting for @hallederiz/worker')\"",
+    "clean": "node -e \"console.log('clean: no-op for @hallederiz/worker')\""
+  },
+  "dependencies": {
+    "@hallederiz/domain": "workspace:*",
+    "@hallederiz/sdk": "workspace:*"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
+}
