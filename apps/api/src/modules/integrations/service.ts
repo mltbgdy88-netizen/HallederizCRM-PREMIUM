@@ -1,5 +1,6 @@
 import type { ErpConnection, ErpMapping, FactoryOrder, WhatsAppActionRequest, WhatsAppMessage } from "@hallederiz/types";
 import type { RequestContext } from "../../shared/request-context";
+import { buildIntegrationsHealthSummary } from "../../shared/service-config";
 import { ErpAdapter } from "./adapters/erp-adapter";
 import { FactoryAdapter } from "./adapters/factory-adapter";
 import { WhatsAppAdapter } from "./adapters/whatsapp-adapter";
@@ -45,6 +46,14 @@ export class IntegrationsService {
 
   listWhatsAppTemplates() {
     return this.whatsappAdapter.listTemplates();
+  }
+
+  verifyWhatsAppWebhookToken(token?: string) {
+    return this.whatsappAdapter.verifyWebhookToken(token);
+  }
+
+  verifyWhatsAppWebhookSignature(rawBody: string, signature?: string) {
+    return this.whatsappAdapter.verifyWebhookSignature(rawBody, signature);
   }
 
   listErpConnections() {
@@ -129,5 +138,24 @@ export class IntegrationsService {
 
   getFactoryIntegrationHealth() {
     return this.factoryAdapter.getHealth();
+  }
+
+  getWhatsAppHealth() {
+    return this.whatsappAdapter.getHealth();
+  }
+
+  getErpHealth() {
+    return this.erpAdapter.getHealth();
+  }
+
+  getFactoryHealth() {
+    return this.factoryAdapter.getHealth();
+  }
+
+  getIntegrationsHealthSummary() {
+    const whatsapp = this.getWhatsAppHealth();
+    const erp = this.getErpHealth();
+    const factory = this.getFactoryHealth();
+    return buildIntegrationsHealthSummary([whatsapp, erp, factory]);
   }
 }

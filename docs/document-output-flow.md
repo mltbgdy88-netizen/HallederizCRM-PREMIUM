@@ -23,6 +23,9 @@ Belge aksiyonlari:
 Bu endpointler:
 - local output permission guard ile korunur
 - file save / print job kuyruklarina kayit olusturur.
+- print/file job status gecisleri audit olaylarina yazilir:
+  - `local_output.print.start|completed|failed`
+  - `local_output.file_save.start|completed|failed`
 
 ## 3) Queue -> Local Agent
 
@@ -71,3 +74,5 @@ Tum document/local output endpointleri:
 - tenant/user headers
 - permission guard
 ile korunur.
+
+Ek olarak render path'te entity baglantisi (`entityId`, `entityNo`) zorunlu dogrulanir.

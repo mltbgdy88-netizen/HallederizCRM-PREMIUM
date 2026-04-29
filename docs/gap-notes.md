@@ -27,3 +27,11 @@ Bu notlar pilot oncesi bilincli olarak foundation seviyesinde birakilan alanlari
 4. UI'da conflict (409 stale update) handling deneyimini form seviyesinde iyilestirmek.
 5. Document detail route'u ekleyip belge preview ve delivery history'yi detay sayfasina tasimak.
 6. Approval execution sonucunu audit/timeline mock verisine yazmak.
+
+## 4. Core Completion Batch Sonrasi Durum
+
+- Auth context'te tenant mismatch guard'i aktiflestirildi.
+- Payments ve warehouse orders icin DB-first read/write path genisletildi.
+- Approval execution failure/cancel audit izi guclendirildi.
+- Local output print/file lifecycle audit eventleri eklendi.
+- Document render ve document delivery DB kayit semantigi guclendirildi.

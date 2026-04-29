@@ -242,55 +242,209 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.post<{ Params: { id: string } }>("/print-jobs/:id/start", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async () => {
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) => {
       const item = markPrintJobStatus(request.params.id, "printing");
       if (!item) return reply.status(404).send({ message: "Print job not found" });
+      recordAuditEvent(context, {
+        entityType: "print_job",
+        entityId: item.id,
+        eventType: "local_output.print.start",
+        title: "Yazdirma isi baslatildi",
+        description: `${item.documentType} yazdirma isi baslatildi.`
+      });
       return { item };
     })
   );
 
   server.post<{ Params: { id: string }; Body: { errorMessage?: string } }>("/print-jobs/:id/complete", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async () => {
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) => {
       const item = markPrintJobStatus(request.params.id, "completed", request.body?.errorMessage);
       if (!item) return reply.status(404).send({ message: "Print job not found" });
+      recordAuditEvent(context, {
+        entityType: "print_job",
+        entityId: item.id,
+        eventType: "local_output.print.completed",
+        title: "Yazdirma isi tamamlandi",
+        description: `${item.documentType} yazdirma isi tamamlandi.`
+      });
       return { item };
     })
   );
 
   server.post<{ Params: { id: string }; Body: { errorMessage?: string } }>("/print-jobs/:id/fail", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async () => {
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) => {
       const item = markPrintJobStatus(request.params.id, "failed", request.body?.errorMessage);
       if (!item) return reply.status(404).send({ message: "Print job not found" });
+      recordAuditEvent(context, {
+        entityType: "print_job",
+        entityId: item.id,
+        eventType: "local_output.print.failed",
+        title: "Yazdirma isi basarisiz",
+        description: request.body?.errorMessage ?? `${item.documentType} yazdirma isi basarisiz oldu.`
+      });
       return { item };
     })
   );
 
   server.post<{ Params: { id: string } }>("/file-save-jobs/:id/start", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async () => {
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) => {
       const item = markFileSaveJobStatus(request.params.id, "saving");
       if (!item) return reply.status(404).send({ message: "File save job not found" });
+      recordAuditEvent(context, {
+        entityType: "file_save_job",
+        entityId: item.id,
+        eventType: "local_output.file_save.start",
+        title: "Dosya kaydetme isi baslatildi",
+        description: `${item.documentType} kaydetme isi baslatildi.`
+      });
       return { item };
     })
   );
 
   server.post<{ Params: { id: string }; Body: { errorMessage?: string } }>("/file-save-jobs/:id/complete", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async () => {
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) => {
       const item = markFileSaveJobStatus(request.params.id, "completed", request.body?.errorMessage);
       if (!item) return reply.status(404).send({ message: "File save job not found" });
+      recordAuditEvent(context, {
+        entityType: "file_save_job",
+        entityId: item.id,
+        eventType: "local_output.file_save.completed",
+        title: "Dosya kaydetme isi tamamlandi",
+        description: `${item.documentType} kaydetme isi tamamlandi.`
+      });
       return { item };
     })
   );
 
   server.post<{ Params: { id: string }; Body: { errorMessage?: string } }>("/file-save-jobs/:id/fail", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async () => {
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) => {
       const item = markFileSaveJobStatus(request.params.id, "failed", request.body?.errorMessage);
       if (!item) return reply.status(404).send({ message: "File save job not found" });
+      recordAuditEvent(context, {
+        entityType: "file_save_job",
+        entityId: item.id,
+        eventType: "local_output.file_save.failed",
+        title: "Dosya kaydetme isi basarisiz",
+        description: request.body?.errorMessage ?? `${item.documentType} kaydetme isi basarisiz oldu.`
+      });
       return { item };
     })
   );
 
   server.get("/local-agent/status", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated], async () => ({ item: getLocalAgentStatus() }))
+  );
+
+  server.get("/health/ai", async (request, reply) =>
+    withGuards(request, reply, [assertAuthenticated], async (context) => {
+      const service = new AiRuntimeService(context);
+      return { item: service.getHealth() };
+    })
+  );
+
+  server.post("/health/ai/test-chat", async (request, reply) =>
+    withGuards(request, reply, [assertAuthenticated], async (context) => {
+      const service = new AiRuntimeService(context);
+      const chat = await service.chat("staging ping");
+      return {
+        item: {
+          status: "healthy",
+          mode: chat.mode === "live" ? "live" : "fallback",
+          configured: chat.mode === "live" ? true : false,
+          reason: "AI chat testi tamamlandi.",
+          lastCheckedAt: new Date().toISOString(),
+          details: chat
+        }
+      };
+    })
+  );
+
+  server.post("/health/ai/test-stt", async (request, reply) =>
+    withGuards(request, reply, [assertAuthenticated], async () => {
+      return {
+        item: {
+          status: "degraded",
+          mode: "fallback",
+          configured: false,
+          reason: "STT testi icin ses yuklenmedi; endpoint hazir.",
+          lastCheckedAt: new Date().toISOString(),
+          details: { dryRun: true }
+        }
+      };
+    })
+  );
+
+  server.post("/health/ai/test-tts", async (request, reply) =>
+    withGuards(request, reply, [assertAuthenticated], async (context) => {
+      const service = new AiRuntimeService(context);
+      const voice = await service.speakVoice({ text: "Staging test ses cikisi.", speed: 1 });
+      return {
+        item: {
+          status: "healthy",
+          mode: voice.provider === "openai" ? "live" : "fallback",
+          configured: voice.provider === "openai",
+          reason: "TTS testi tamamlandi.",
+          lastCheckedAt: new Date().toISOString(),
+          details: { provider: voice.provider, mimeType: voice.mimeType }
+        }
+      };
+    })
+  );
+
+  server.get("/health/local-agent", async (request, reply) =>
+    withGuards(request, reply, [assertAuthenticated], async () => {
+      const status = getLocalAgentStatus();
+      return {
+        item: {
+          service: "local-agent",
+          status: status.status === "online" ? "healthy" : status.status === "safe_mode" ? "degraded" : status.status === "disabled" ? "disabled" : "error",
+          mode: status.status === "disabled" ? "disabled" : status.status === "online" ? "live" : "fallback",
+          configured: status.status !== "offline",
+          reason: status.message,
+          lastCheckedAt: status.checkedAt,
+          details: status,
+          runtimeStatus: status.status,
+          legacy: {
+            status: status.status === "online" ? "healthy" : status.status === "safe_mode" ? "warning" : "error",
+            mode: status.status,
+            checkedAt: status.checkedAt,
+            message: status.message
+          }
+        }
+      };
+    })
+  );
+
+  server.post("/health/local-agent/test-save-dry-run", async (request, reply) =>
+    withGuards(request, reply, [assertAuthenticated], async () => {
+      const job = queueDocumentSave("document_1");
+      return {
+        item: {
+          status: "healthy",
+          mode: "fallback",
+          configured: true,
+          reason: "Save dry-run queue testi tamamlandi.",
+          lastCheckedAt: new Date().toISOString(),
+          details: { jobId: job.id, queueStatus: job.status }
+        }
+      };
+    })
+  );
+
+  server.post("/health/local-agent/test-print-dry-run", async (request, reply) =>
+    withGuards(request, reply, [assertAuthenticated], async () => {
+      const job = queueDocumentPrint("document_1");
+      return {
+        item: {
+          status: "healthy",
+          mode: "fallback",
+          configured: true,
+          reason: "Print dry-run queue testi tamamlandi.",
+          lastCheckedAt: new Date().toISOString(),
+          details: { jobId: job.id, queueStatus: job.status }
+        }
+      };
+    })
   );
 
   server.post<{ Body: { status?: LocalAgentStatus; version?: string; checkedAt?: string; message?: string } }>(

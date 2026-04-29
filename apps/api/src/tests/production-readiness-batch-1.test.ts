@@ -38,9 +38,9 @@ test("document generation service: render + regenerate", async () => {
   assert.equal(regenerated?.entityNo, "INV-1201");
 });
 
-test("integrations service: erp sync includes preview fields", () => {
+test("integrations service: erp sync includes preview fields", async () => {
   const service = new IntegrationsService(context);
-  const sync = service.syncErpConnection("erp_conn_1");
+  const sync = await service.syncErpConnection("erp_conn_1");
   assert.ok(sync);
   assert.ok(sync?.preview.fields.length);
 });

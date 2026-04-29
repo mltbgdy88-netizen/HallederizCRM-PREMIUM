@@ -69,3 +69,11 @@ Tarih: 28 Nisan 2026
 - Web tarafinda deliveries/invoices/returns/documents icin API-first mutation servisleri eklendi.
 
 Not: Bu turda schema tarafinda line tablolari olmayan ortamlarda fallback davranisi korunur; line-level parity DB'de tablo mevcutluguna bagli olarak guclenir.
+
+## Core Completion Batch Notlari (29 Nisan 2026)
+
+- Auth guard tarafinda tenant mismatch 403 olarak netlestirildi (session tenant header tenant'i override eder).
+- Commercial core repository icinde payments ve warehouse_orders icin DB-first write/read zinciri guclendirildi.
+- Payment confirm/reverse, warehouse state gecisleri ve local output job lifecycle icin audit write-back arttirildi.
+- Document render ve document delivery DB kayit semantigi zenginlestirildi.
+

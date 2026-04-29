@@ -127,9 +127,14 @@ export function SettingsPage() {
         title="Ayarlar"
         description="Kendi firmaniz icin pilot kurulum, tenant profili ve entegrasyon hazirliklarini yonetin."
         actions={
-          <Link href="/ayarlar/pilot-veri-yukleme" className="hz-btn hz-btn-secondary">
-            Pilot Veri Yukleme
-          </Link>
+          <div className="hz-inline-actions">
+            <Link href="/ayarlar/staging-kontrol" className="hz-btn hz-btn-secondary">
+              Staging Kontrol
+            </Link>
+            <Link href="/ayarlar/pilot-veri-yukleme" className="hz-btn hz-btn-secondary">
+              Pilot Veri Yukleme
+            </Link>
+          </div>
         }
       />
 

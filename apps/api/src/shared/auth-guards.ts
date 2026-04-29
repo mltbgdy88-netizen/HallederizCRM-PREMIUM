@@ -7,8 +7,18 @@ export function resolveContext(request: FastifyRequest): RequestContext {
 }
 
 export function assertAuthenticated(context: RequestContext) {
+  if (context.tenantMismatch || context.authIssue === "tenant_mismatch") {
+    throw new ForbiddenError("Tenant izolasyon ihlali.", {
+      reason: "tenant_mismatch",
+      requestedTenantId: context.requestedTenantId,
+      contextTenantId: context.tenantId
+    });
+  }
+
   if (!context.isAuthenticated) {
-    throw new UnauthorizedError("Bu endpoint icin oturum gerekli.");
+    throw new UnauthorizedError("Bu endpoint icin oturum gerekli.", {
+      reason: context.authIssue ?? "missing_session"
+    });
   }
 }
 

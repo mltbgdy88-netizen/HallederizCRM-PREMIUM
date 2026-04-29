@@ -41,3 +41,11 @@
 
 Bu batch'te audit olaylari in-memory tutulur. Sonraki batch'te DB persistence (`audit_events`, `entity_timelines`) katmanina tasinacaktir.
 
+
+## Core Completion Batch Ekleri
+
+- Payment confirm/reverse eventleri timeline'a yazilir.
+- Warehouse assign/start/prepared/cancel eventleri timeline'a yazilir.
+- Local output print/file job start-complete-fail eventleri timeline'a yazilir.
+- Approval execution cancel eventleri timeline'a yazilir.
+

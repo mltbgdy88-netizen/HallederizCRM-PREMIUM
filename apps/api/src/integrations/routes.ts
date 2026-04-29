@@ -2,8 +2,48 @@ import type { FastifyInstance } from "fastify";
 import type { ErpConnection, ErpMapping, FactoryOrder, WhatsAppActionRequest, WhatsAppMessage } from "@hallederiz/types";
 import { IntegrationsService } from "../modules/integrations/service";
 import { assertAnyPermission, assertAuthenticated, withGuards } from "../shared/auth-guards";
+import { AiRuntimeService } from "../modules/ai-runtime/service";
+import { getLocalAgentStatus } from "../ai-local-output-store";
 
 export async function registerIntegrationRoutes(server: FastifyInstance) {
+  server.get("/whatsapp/webhook", async (request, reply) => {
+    const query = request.query as Record<string, string | undefined>;
+    const mode = query["hub.mode"];
+    const challenge = query["hub.challenge"];
+    const verifyToken = query["hub.verify_token"];
+    if (mode !== "subscribe" || !challenge) {
+      return reply.status(400).send({ message: "Webhook verification parameters invalid." });
+    }
+    const service = new IntegrationsService({
+      tenantId: "tenant_1",
+      userId: "system",
+      persistenceMode: "demo"
+    });
+    if (!service.verifyWhatsAppWebhookToken(verifyToken)) {
+      return reply.status(403).send({ message: "Webhook verify token mismatch." });
+    }
+    return reply.type("text/plain").send(challenge);
+  });
+
+  server.post<{ Body: Record<string, unknown> }>("/whatsapp/webhook", async (request, reply) => {
+    const rawBody = JSON.stringify(request.body ?? {});
+    const signature = request.headers["x-hub-signature-256"];
+    const service = new IntegrationsService({
+      tenantId: "tenant_1",
+      userId: "system",
+      persistenceMode: "demo"
+    });
+    if (!service.verifyWhatsAppWebhookSignature(rawBody, typeof signature === "string" ? signature : undefined)) {
+      return reply.status(403).send({ message: "Webhook signature mismatch." });
+    }
+    const event = request.body;
+    const messageBody = String((event.entry as Array<{ changes?: Array<{ value?: { messages?: Array<{ text?: { body?: string } }> } }> }> | undefined)?.[0]?.changes?.[0]?.value?.messages?.[0]?.text?.body ?? "");
+    if (messageBody) {
+      await service.receiveWhatsAppInbound({ body: messageBody, type: "text" });
+    }
+    return { ok: true };
+  });
+
   server.get("/whatsapp/conversations", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated], async (context) => {
       const service = new IntegrationsService(context);
@@ -31,7 +71,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   server.post<{ Body: Partial<WhatsAppMessage> }>("/whatsapp/outbound", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "whatsapp.write"])], async (context) => {
       const service = new IntegrationsService(context);
-      return reply.status(201).send({ item: service.sendWhatsAppOutbound(request.body) });
+      return reply.status(201).send({ item: await service.sendWhatsAppOutbound(request.body) });
     })
   );
 
@@ -103,7 +143,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   server.post<{ Params: { id: string } }>("/erp/connections/:id/test", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "erp.write"])], async (context) => {
       const service = new IntegrationsService(context);
-      const item = service.testErpConnection(request.params.id);
+      const item = await service.testErpConnection(request.params.id);
       if (!item) return reply.status(404).send({ message: "ERP connection not found" });
       return { item };
     })
@@ -112,7 +152,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   server.post<{ Params: { id: string } }>("/erp/connections/:id/sync", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "erp.write"])], async (context) => {
       const service = new IntegrationsService(context);
-      const item = service.syncErpConnection(request.params.id);
+      const item = await service.syncErpConnection(request.params.id);
       if (!item) return reply.status(404).send({ message: "ERP connection not found" });
       return { item };
     })
@@ -163,7 +203,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   server.post<{ Params: { id: string } }>("/factories/:id/sync-stock", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "factory.write"])], async (context) => {
       const service = new IntegrationsService(context);
-      return { item: service.syncFactoryStock(request.params.id) };
+      return { item: await service.syncFactoryStock(request.params.id) };
     })
   );
 
@@ -194,7 +234,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   server.post<{ Params: { id: string } }>("/factory-orders/:id/send", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "factory.write"])], async (context) => {
       const service = new IntegrationsService(context);
-      const item = service.sendFactoryOrder(request.params.id);
+      const item = await service.sendFactoryOrder(request.params.id);
       if (!item) return reply.status(404).send({ message: "Factory order not found" });
       return { item };
     })
@@ -231,6 +271,110 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
     withGuards(request, reply, [assertAuthenticated], async (context) => {
       const service = new IntegrationsService(context);
       return { item: service.getFactoryIntegrationHealth() };
+    })
+  );
+
+  server.get("/health/whatsapp", async (request, reply) =>
+    withGuards(request, reply, [assertAuthenticated], async (context) => {
+      const service = new IntegrationsService(context);
+      return { item: service.getWhatsAppHealth() };
+    })
+  );
+
+  server.post("/health/whatsapp/test-send", async (request, reply) =>
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "whatsapp.write"])], async (context) => {
+      const service = new IntegrationsService(context);
+      const message = await service.sendWhatsAppOutbound({
+        conversationId: "wa_conv_1",
+        body: "Staging test mesaji (dry-run).",
+        type: "text"
+      });
+      return {
+        item: {
+          ok: message.status === "sent" || message.status === "queued",
+          mode: service.getWhatsAppHealth().mode,
+          messageStatus: message.status,
+          reason: message.status === "sent" ? "Canli gonderim basarili." : "Fallback queue modunda calisti.",
+          lastCheckedAt: new Date().toISOString(),
+          details: { messageId: message.id }
+        }
+      };
+    })
+  );
+
+  server.get("/health/erp", async (request, reply) =>
+    withGuards(request, reply, [assertAuthenticated], async (context) => {
+      const service = new IntegrationsService(context);
+      return { item: service.getErpHealth() };
+    })
+  );
+
+  server.post<{ Body: { connectionId?: string } }>("/health/erp/test", async (request, reply) =>
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "erp.write"])], async (context) => {
+      const service = new IntegrationsService(context);
+      const connectionId = request.body?.connectionId ?? "erp_conn_1";
+      const test = await service.testErpConnection(connectionId);
+      if (!test) return reply.status(404).send({ message: "ERP connection not found" });
+      return {
+        item: {
+          ok: test.lastTestResult === "success",
+          mode: service.getErpHealth().mode,
+          reason: test.lastTestResult === "success" ? "ERP baglanti testi basarili." : "ERP baglanti testi basarisiz.",
+          lastCheckedAt: new Date().toISOString(),
+          details: test
+        }
+      };
+    })
+  );
+
+  server.get("/health/factory", async (request, reply) =>
+    withGuards(request, reply, [assertAuthenticated], async (context) => {
+      const service = new IntegrationsService(context);
+      return { item: service.getFactoryHealth() };
+    })
+  );
+
+  server.post<{ Body: { factoryId?: string } }>("/health/factory/test-sync", async (request, reply) =>
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "factory.write"])], async (context) => {
+      const service = new IntegrationsService(context);
+      const factoryId = request.body?.factoryId ?? "factory_1";
+      const sync = await service.syncFactoryStock(factoryId);
+      return {
+        item: {
+          ok: Boolean(sync),
+          mode: service.getFactoryHealth().mode,
+          reason: "Factory stock sync dry-run tamamlandi.",
+          lastCheckedAt: new Date().toISOString(),
+          details: sync
+        }
+      };
+    })
+  );
+
+  server.get("/health/integrations", async (request, reply) =>
+    withGuards(request, reply, [assertAuthenticated], async (context) => {
+      const service = new IntegrationsService(context);
+      const aiHealth = new AiRuntimeService(context).getHealth();
+      const localAgent = getLocalAgentStatus();
+      const summary = service.getIntegrationsHealthSummary();
+      return {
+        item: {
+          ...summary,
+          services: [
+            ...summary.services,
+            aiHealth,
+            {
+              service: "local-agent",
+              status: localAgent.status === "online" ? "healthy" : localAgent.status === "safe_mode" ? "degraded" : localAgent.status === "disabled" ? "disabled" : "error",
+              mode: localAgent.status === "disabled" ? "disabled" : localAgent.status === "online" ? "live" : "fallback",
+              configured: true,
+              reason: localAgent.message,
+              lastCheckedAt: localAgent.checkedAt,
+              details: localAgent
+            }
+          ]
+        }
+      };
     })
   );
 }

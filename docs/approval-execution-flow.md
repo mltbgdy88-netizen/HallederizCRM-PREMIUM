@@ -35,9 +35,12 @@
 - Desteklenmeyen action: failed
 - Domain kaydi bulunamadi: failed
 - Execution result `message` alanina acik hata nedeni yazilir.
+- Failure message sonuna retryability etiketi eklenir:
+  - `[RETRYABLE]`
+  - `[NON_RETRYABLE]`
+- Cancel edilen execution kayitlari `approval.execution.cancelled` audit eventi uretir.
 
 ## Sonraki Asama
 
 - Retryable vs non-retryable hata siniflamasi DB seviyesinde saklanacak.
 - Job retry policy ve backoff stratejisi eklenecek.
-

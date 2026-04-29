@@ -4,6 +4,10 @@ import { getSessionByToken } from "./session-store";
 export interface RequestContext {
   tenantId: string;
   userId: string;
+  requestedTenantId?: string;
+  requestedUserId?: string;
+  tenantMismatch?: boolean;
+  authIssue?: "missing_session" | "expired_session" | "tenant_mismatch";
   persistenceMode: "demo" | "postgres";
   sessionToken?: string;
   isAuthenticated?: boolean;
@@ -108,9 +112,20 @@ export function buildRequestContext(request: FastifyRequest): RequestContext {
   const sessionToken = String(request.headers["x-session-token"] ?? bearerToken ?? "");
   const principal = parseTokenPrincipal(sessionToken || undefined);
   const session = getSessionByToken(sessionToken || undefined);
-  const tenantId = String(request.headers["x-tenant-id"] ?? session?.tenant.id ?? principal.tenantId ?? "tenant_1");
-  const userId = String(request.headers["x-user-id"] ?? session?.user.id ?? principal.userId ?? "user_admin");
+  const requestedTenantId = request.headers["x-tenant-id"] ? String(request.headers["x-tenant-id"]) : undefined;
+  const requestedUserId = request.headers["x-user-id"] ? String(request.headers["x-user-id"]) : undefined;
+  const tenantId = String(session?.tenant.id ?? requestedTenantId ?? principal.tenantId ?? "tenant_1");
+  const userId = String(session?.user.id ?? requestedUserId ?? principal.userId ?? "user_admin");
   const persistenceMode = process.env.PERSISTENCE_MODE === "postgres" ? "postgres" : "demo";
+  const tenantMismatch = Boolean(session?.tenant.id && requestedTenantId && session.tenant.id !== requestedTenantId);
+  const authIssue =
+    tenantMismatch
+      ? "tenant_mismatch"
+      : sessionToken
+        ? session
+          ? undefined
+          : "expired_session"
+        : undefined;
   const roles =
     session?.roles?.length
       ? session.roles.map((role) => role.code)
@@ -135,7 +150,11 @@ export function buildRequestContext(request: FastifyRequest): RequestContext {
     userId,
     persistenceMode,
     sessionToken: sessionToken || undefined,
-    isAuthenticated: Boolean(sessionToken && session ? true : request.headers["x-user-id"]),
+    isAuthenticated: Boolean(sessionToken ? Boolean(session) : persistenceMode === "demo" ? request.headers["x-user-id"] : false),
+    requestedTenantId,
+    requestedUserId,
+    tenantMismatch,
+    authIssue,
     roles,
     permissions
   };

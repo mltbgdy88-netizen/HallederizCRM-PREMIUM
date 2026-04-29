@@ -26,6 +26,12 @@ Web -> API zincirinde user, tenant ve permission bilgisinin tek bir request-cont
    - `assertPermission` / `assertAnyPermission`
    ile endpointi korur.
 
+## Sertlestirme Notu
+
+- Session varsa `tenantId` ve `userId` session bilgisinden resolve edilir.
+- Header'dan gelen `x-tenant-id`, session tenant ile farkliysa `tenant_mismatch` olarak isaretlenir.
+- `assertAuthenticated` bu durumda 403 dondurur ve izolasyon ihlalini engeller.
+
 ## Hata Semantigi
 
 - `401 unauthorized`: oturum yok / gecersiz token
@@ -36,4 +42,3 @@ Web -> API zincirinde user, tenant ve permission bilgisinin tek bir request-cont
 
 - Bu batch'te token kriptografik imza dogrulamasina gecilmedi.
 - Session resolver production token provider'a gecis icin tek noktadan genisletilebilir.
-

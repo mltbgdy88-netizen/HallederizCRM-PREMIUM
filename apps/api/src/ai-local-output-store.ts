@@ -145,6 +145,13 @@ const localAgentState: { status: LocalAgentStatus; version: string; checkedAt: s
   message: "Local agent beklemede."
 };
 
+function classifyExecutionFailure(error: unknown): { retryable: boolean; message: string } {
+  const message = error instanceof Error ? error.message : "Execution failed";
+  const retryableHints = ["timeout", "network", "ECONN", "rate limit", "temporarily"];
+  const retryable = retryableHints.some((hint) => message.toLowerCase().includes(hint.toLowerCase()));
+  return { retryable, message };
+}
+
 export function chatAi(body: { message?: string }) {
   const message: AiMessage = {
     id: `ai_msg_api_${Date.now()}`,
@@ -292,6 +299,7 @@ export function runApprovalExecution(id: string) {
       }
     });
   } catch (error) {
+    const failure = classifyExecutionFailure(error);
     execution.status = "failed";
     execution.result = {
       id: `ai_exec_result_${Date.now()}`,
@@ -299,7 +307,7 @@ export function runApprovalExecution(id: string) {
       proposalId: execution.proposalId ?? "proposal_unknown",
       operationId: execution.id,
       status: "failed",
-      message: error instanceof Error ? error.message : "Execution failed",
+      message: `${failure.message}${failure.retryable ? " [RETRYABLE]" : " [NON_RETRYABLE]"}`,
       completedAt: new Date().toISOString()
     };
     recordAuditEvent(actorContext, {
@@ -308,9 +316,7 @@ export function runApprovalExecution(id: string) {
       eventType: "approval.execution.failed",
       title: "Onayli islem basarisiz",
       description: execution.result.message,
-      payload: {
-        operation: execution.operationType
-      }
+      payload: { operation: execution.operationType, retryable: failure.retryable }
     });
   }
   return execution;
@@ -320,6 +326,23 @@ export function cancelApprovalExecution(id: string) {
   const execution = getApprovalExecution(id);
   if (!execution) return null;
   execution.status = "cancelled";
+  recordAuditEvent(
+    {
+      tenantId: execution.tenantId,
+      userId: execution.authorizedBy ?? execution.requestedBy,
+      persistenceMode: process.env.PERSISTENCE_MODE === "postgres" ? "postgres" : "demo",
+      isAuthenticated: true,
+      roles: ["admin"],
+      permissions: ["*"]
+    },
+    {
+      entityType: "approval_execution",
+      entityId: execution.id,
+      eventType: "approval.execution.cancelled",
+      title: "Onayli islem iptal edildi",
+      description: `${execution.operationType} aksiyonu iptal edildi.`
+    }
+  );
   return execution;
 }
 

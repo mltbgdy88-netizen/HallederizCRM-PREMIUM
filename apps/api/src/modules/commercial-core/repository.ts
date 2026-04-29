@@ -304,6 +304,50 @@ function mapDocumentDeliveryRow(row: Row): DocumentDelivery {
   };
 }
 
+function mapPaymentRow(row: Row): PaymentReceipt {
+  return {
+    id: asString(row.id),
+    tenantId: asString(row.tenant_id, "tenant_1"),
+    receiptNo: asString(row.receipt_no),
+    customerId: asString(row.customer_id),
+    amount: asNumber(row.amount, 0),
+    currency: asString(row.currency, "TRY") as PaymentReceipt["currency"],
+    method: asString(row.method, "transfer") as PaymentReceipt["method"],
+    status: asString(row.status, "draft") as PaymentReceipt["status"],
+    description: asString(row.description, undefined),
+    referenceNo: asString(row.reference_no, undefined),
+    documentCount: asNumber(row.document_count, 0),
+    receivedAt: asString(row.received_at, asString(row.created_at, nowIso())),
+    createdBy: asString(row.created_by, "user_admin"),
+    createdAt: asString(row.created_at, nowIso()),
+    confirmedAt: asString(row.confirmed_at, undefined),
+    allocations: []
+  };
+}
+
+function mapWarehouseOrderRow(row: Row): WarehouseOrder {
+  return {
+    id: asString(row.id),
+    tenantId: asString(row.tenant_id, "tenant_1"),
+    warehouseOrderNo: asString(row.warehouse_order_no),
+    orderId: asString(row.order_id),
+    orderNo: asString(row.order_no, ""),
+    customerId: asString(row.customer_id, ""),
+    warehouseId: asString(row.warehouse_id, undefined),
+    warehouseName: asString(row.warehouse_name, "Merkez Depo"),
+    status: asString(row.status, "waiting") as WarehouseOrder["status"],
+    assignedTo: asString(row.assigned_to, undefined),
+    dueAt: asString(row.due_at, asString(row.created_at, nowIso())),
+    startedAt: asString(row.started_at, undefined),
+    preparedAt: asString(row.prepared_at, undefined),
+    note: asString(row.note, undefined),
+    createdAt: asString(row.created_at, nowIso()),
+    updatedAt: asString(row.updated_at, asString(row.created_at, nowIso())),
+    lines: [],
+    tasks: []
+  };
+}
+
 function validateSourcePlanQuantities(lines: SaleOrderLine[], plans: OrderSourcePlan[]) {
   const lineById = new Map(lines.map((line) => [line.id, line]));
   const aggregateByLine = new Map<string, { warehouse: number; factory: number }>();
@@ -1214,6 +1258,9 @@ export class CommercialCoreRepository {
     const runtime = this.runtime();
     if (!runtime.dbEnabled) return renderDocumentMock(payload);
     try {
+      if (!payload.entityId || !payload.entityNo) {
+        throw new ApiDomainError("validation_error", "Belge olusturma icin entity baglantisi zorunludur.");
+      }
       const record = buildDocumentRecord({
         tenantId: this.context.tenantId,
         type: payload.type,
@@ -1224,9 +1271,23 @@ export class CommercialCoreRepository {
         createdBy: this.context.userId
       });
       await runtime.executor.query(
-        `insert into documents (id, tenant_id, document_type, entity_type, entity_id, status, created_at)
-         values ($1,$2,$3,$4,$5,$6,$7)`,
-        [record.id, this.context.tenantId, record.type, record.entityType, record.entityId, "queued", record.createdAt]
+        `insert into documents (id, tenant_id, document_no, document_type, entity_type, entity_id, entity_no, customer_id, title, preview_text, status, created_by, created_at)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+        [
+          record.id,
+          this.context.tenantId,
+          record.documentNo,
+          record.type,
+          record.entityType,
+          record.entityId,
+          record.entityNo,
+          record.customerId ?? null,
+          record.title,
+          record.previewText,
+          "queued",
+          this.context.userId,
+          record.createdAt
+        ]
       );
       return record;
     } catch {
@@ -1255,11 +1316,11 @@ export class CommercialCoreRepository {
     try {
       await runtime.executor.query(
         `insert into document_deliveries
-         (id, tenant_id, document_id, channel, status, recipient, requested_at)
-         values ($1,$2,$3,$4,$5,$6,$7)`,
-        [request.id, this.context.tenantId, request.documentId, request.channel, request.status, request.recipient ?? null, request.requestedAt]
+         (id, tenant_id, document_id, channel, status, recipient, requested_at, sent_at)
+         values ($1,$2,$3,$4,$5,$6,$7,$8)`,
+        [request.id, this.context.tenantId, request.documentId, request.channel, "sent", request.recipient ?? null, request.requestedAt, nowIso()]
       );
-      return request;
+      return { ...request, status: "sent", sentAt: nowIso() };
     } catch {
       return null;
     }
@@ -1286,18 +1347,223 @@ export class CommercialCoreRepository {
   createFactoryOrders(id: string) { return createFactoryOrders(id); }
   cancelOrder(id: string) { return cancelOrder(id); }
 
-  listPayments() { return listPayments(); }
-  getPayment(id: string) { return getPayment(id); }
-  createPayment(payload: Partial<PaymentReceipt>) { return createPayment(payload); }
-  confirmPayment(id: string) { return confirmPayment(id); }
-  reversePayment(id: string, reason?: string) { return reversePayment(id, reason); }
-  getPaymentAllocations(id: string) { return getPaymentAllocations(id); }
+  async listPayments() {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return listPayments();
+    try {
+      const rows = await runtime.executor.query<Row>(`select * from payment_receipts where tenant_id = $1 order by created_at desc`, [this.context.tenantId]);
+      return rows.map(mapPaymentRow);
+    } catch {
+      return listPayments();
+    }
+  }
 
-  listWarehouseOrders() { return listWarehouseOrders(); }
-  getWarehouseOrder(id: string) { return getWarehouseOrder(id); }
-  createWarehouseOrder(payload: Partial<WarehouseOrder>) { return createWarehouseOrder(payload); }
-  assignWarehouseOrder(id: string, assignedTo: string) { return assignWarehouseOrder(id, assignedTo); }
-  startWarehouseOrder(id: string) { return startWarehouseOrder(id); }
-  markWarehouseOrderPrepared(id: string) { return markWarehouseOrderPrepared(id); }
-  cancelWarehouseOrder(id: string) { return cancelWarehouseOrder(id); }
+  async getPayment(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return getPayment(id);
+    try {
+      const row = (await runtime.executor.query<Row>(`select * from payment_receipts where tenant_id = $1 and (id = $2 or receipt_no = $2) limit 1`, [this.context.tenantId, id]))[0];
+      return row ? mapPaymentRow(row) : undefined;
+    } catch {
+      return getPayment(id);
+    }
+  }
+
+  async createPayment(payload: Partial<PaymentReceipt>) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return createPayment(payload);
+    try {
+      const id = payload.id ?? `payment_${Date.now()}`;
+      const now = nowIso();
+      await runtime.executor.query(
+        `insert into payment_receipts
+        (id, tenant_id, receipt_no, customer_id, amount, status, method, currency, description, reference_no, document_count, received_at, created_by, created_at, confirmed_at)
+        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)`,
+        [
+          id,
+          this.context.tenantId,
+          payload.receiptNo ?? `PAY-${Date.now().toString().slice(-5)}`,
+          payload.customerId ?? "customer_1",
+          payload.amount ?? 0,
+          payload.status ?? "draft",
+          payload.method ?? "transfer",
+          payload.currency ?? "TRY",
+          payload.description ?? null,
+          payload.referenceNo ?? null,
+          payload.documentCount ?? 0,
+          payload.receivedAt ?? now,
+          this.context.userId,
+          now,
+          payload.confirmedAt ?? null
+        ]
+      );
+      const created = await this.getPayment(id);
+      return created ?? createPayment(payload);
+    } catch {
+      return createPayment(payload);
+    }
+  }
+
+  async confirmPayment(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return confirmPayment(id);
+    try {
+      const payment = await this.getPayment(id);
+      if (!payment) return null;
+      const nextStatus: PaymentReceipt["status"] = payment.allocations.length > 0 ? "allocated" : "confirmed";
+      await runtime.executor.query(
+        `update payment_receipts set status = $3, confirmed_at = $4 where tenant_id = $1 and id = $2`,
+        [this.context.tenantId, payment.id, nextStatus, nowIso()]
+      );
+      return this.getPayment(payment.id);
+    } catch {
+      return confirmPayment(id);
+    }
+  }
+
+  async reversePayment(id: string, reason?: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return reversePayment(id, reason);
+    try {
+      const payment = await this.getPayment(id);
+      if (!payment) return null;
+      await runtime.executor.query(`update payment_receipts set status = $3 where tenant_id = $1 and id = $2`, [this.context.tenantId, payment.id, "reversed"]);
+      return {
+        id: `reversal_${Date.now()}`,
+        tenantId: this.context.tenantId,
+        paymentId: payment.id,
+        reason: reason ?? "Operator ters kayit talebi.",
+        reversedBy: this.context.userId,
+        reversedAt: nowIso()
+      };
+    } catch {
+      return reversePayment(id, reason);
+    }
+  }
+
+  async getPaymentAllocations(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return getPaymentAllocations(id);
+    const payment = await this.getPayment(id);
+    if (!payment) return [];
+    const orders = await this.listOrders();
+    const candidateOrder = orders.find((order) => order.customerId === payment.customerId && order.status !== "cancelled");
+    if (!candidateOrder) return [];
+    return [
+      {
+        id: `allocation_${payment.id}`,
+        tenantId: this.context.tenantId,
+        paymentId: payment.id,
+        customerId: payment.customerId,
+        targetType: "order",
+        targetId: candidateOrder.id,
+        targetNo: candidateOrder.orderNo,
+        targetTotal: candidateOrder.grandTotal,
+        openBalance: Math.max(0, candidateOrder.grandTotal - payment.amount),
+        allocatedAmount: Math.min(payment.amount, candidateOrder.grandTotal),
+        currency: payment.currency,
+        createdAt: payment.confirmedAt ?? payment.createdAt
+      }
+    ];
+  }
+
+  async listWarehouseOrders() {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return listWarehouseOrders();
+    try {
+      const rows = await runtime.executor.query<Row>(`select * from warehouse_orders where tenant_id = $1 order by created_at desc`, [this.context.tenantId]);
+      return rows.map(mapWarehouseOrderRow);
+    } catch {
+      return listWarehouseOrders();
+    }
+  }
+
+  async getWarehouseOrder(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return getWarehouseOrder(id);
+    try {
+      const row = (await runtime.executor.query<Row>(`select * from warehouse_orders where tenant_id = $1 and (id = $2 or warehouse_order_no = $2) limit 1`, [this.context.tenantId, id]))[0];
+      return row ? mapWarehouseOrderRow(row) : undefined;
+    } catch {
+      return getWarehouseOrder(id);
+    }
+  }
+
+  async createWarehouseOrder(payload: Partial<WarehouseOrder>) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return createWarehouseOrder(payload);
+    try {
+      const id = payload.id ?? `warehouse_order_${Date.now()}`;
+      const now = nowIso();
+      await runtime.executor.query(
+        `insert into warehouse_orders
+        (id, tenant_id, warehouse_order_no, order_id, warehouse_id, status, order_no, customer_id, warehouse_name, assigned_to, due_at, note, created_at, updated_at)
+        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+        [
+          id,
+          this.context.tenantId,
+          payload.warehouseOrderNo ?? `WO-${Date.now().toString().slice(-5)}`,
+          payload.orderId ?? "order_1",
+          payload.warehouseId ?? null,
+          payload.status ?? "waiting",
+          payload.orderNo ?? null,
+          payload.customerId ?? null,
+          payload.warehouseName ?? "Merkez Depo",
+          payload.assignedTo ?? null,
+          payload.dueAt ?? now,
+          payload.note ?? null,
+          now,
+          now
+        ]
+      );
+      const created = await this.getWarehouseOrder(id);
+      return created ?? createWarehouseOrder(payload);
+    } catch {
+      return createWarehouseOrder(payload);
+    }
+  }
+
+  async assignWarehouseOrder(id: string, assignedTo: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return assignWarehouseOrder(id, assignedTo);
+    try {
+      await runtime.executor.query(`update warehouse_orders set assigned_to = $3, updated_at = $4 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, assignedTo, nowIso()]);
+      return this.getWarehouseOrder(id) ?? null;
+    } catch {
+      return assignWarehouseOrder(id, assignedTo);
+    }
+  }
+
+  async startWarehouseOrder(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return startWarehouseOrder(id);
+    try {
+      await runtime.executor.query(`update warehouse_orders set status = $3, started_at = $4, updated_at = $4 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, "picking", nowIso()]);
+      return this.getWarehouseOrder(id) ?? null;
+    } catch {
+      return startWarehouseOrder(id);
+    }
+  }
+
+  async markWarehouseOrderPrepared(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return markWarehouseOrderPrepared(id);
+    try {
+      await runtime.executor.query(`update warehouse_orders set status = $3, prepared_at = $4, updated_at = $4 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, "prepared", nowIso()]);
+      return this.getWarehouseOrder(id) ?? null;
+    } catch {
+      return markWarehouseOrderPrepared(id);
+    }
+  }
+
+  async cancelWarehouseOrder(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return cancelWarehouseOrder(id);
+    try {
+      await runtime.executor.query(`update warehouse_orders set status = $3, updated_at = $4 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, "cancelled", nowIso()]);
+      return this.getWarehouseOrder(id) ?? null;
+    } catch {
+      return cancelWarehouseOrder(id);
+    }
+  }
 }

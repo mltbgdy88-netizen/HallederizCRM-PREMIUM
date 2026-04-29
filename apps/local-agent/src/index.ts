@@ -39,6 +39,10 @@ async function processQueueCycle() {
 async function bootstrapLocalAgent() {
   const settings = loadSettings();
   console.info(`[${agentName}] foundation ready`);
+  if (settings.mode === "disabled") {
+    await reportLocalStatus("disabled", "Agent disabled modunda.");
+    return;
+  }
   await reportLocalStatus(settings.safeMode ? "safe_mode" : "online", "Agent bootstrap tamamlandi.");
 
   setInterval(() => {

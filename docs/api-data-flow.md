@@ -100,3 +100,10 @@ Bu akisla UI'daki feature query'leri dogrudan mock import etmek yerine typed cli
 - Approval execution akisi status degisiminin otesine gecip domain dispatch map ile calisir.
 - Document queue save/print aksiyonlari audit/timeline write-back ile izlenebilir hale getirilmistir.
 - `GET /audit-events` ve `GET /entity-timelines/:entityType/:entityId` ile event akisina erisim saglanmistir.
+
+## Core Completion Batch Ekleri
+
+- Session varsa tenant/user cozumlemesinde session degeri header uzerinde onceliklidir.
+- Header tenant ile session tenant farkliysa auth guard 403 tenant_mismatch dondurur.
+- Commercial core icinde payments ve warehouse orders DB-first path guclendirilmistir.
+

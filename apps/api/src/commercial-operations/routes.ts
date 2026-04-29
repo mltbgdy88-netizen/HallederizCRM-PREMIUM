@@ -179,7 +179,7 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
 
   server.get<{ Params: { id: string } }>("/payments/:id", async (request, reply) => {
     const service = new CommercialCoreService(buildRequestContext(request));
-    const payment = service.getPayment(request.params.id);
+    const payment = await service.getPayment(request.params.id);
     if (!payment) {
       return reply.status(404).send({ message: "Payment not found" });
     }
@@ -189,7 +189,7 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   server.post<{ Body: Partial<PaymentReceipt> }>("/payments", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["payments.write", "payments.manage"])], async (context) => {
       const service = new CommercialCoreService(context);
-      const item = service.createPayment(request.body);
+      const item = await service.createPayment(request.body);
       recordAuditEvent(context, {
         entityType: "payment",
         entityId: item.id,
@@ -204,10 +204,17 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   server.post<{ Params: { id: string } }>("/payments/:id/confirm", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["payments.write", "payments.confirm"])], async (context) => {
       const service = new CommercialCoreService(context);
-      const payment = service.confirmPayment(request.params.id);
+      const payment = await service.confirmPayment(request.params.id);
       if (!payment) {
         return reply.status(404).send({ message: "Payment not found" });
       }
+      recordAuditEvent(context, {
+        entityType: "payment",
+        entityId: payment.id,
+        eventType: "payment.confirmed",
+        title: "Tahsilat onaylandi",
+        description: `${payment.receiptNo} tahsilati onaylandi.`
+      });
       return { item: payment };
     });
   });
@@ -215,17 +222,24 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   server.post<{ Params: { id: string }; Body: { reason?: string } }>("/payments/:id/reverse", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["payments.write", "payments.reverse"])], async (context) => {
       const service = new CommercialCoreService(context);
-      const reversal = service.reversePayment(request.params.id, request.body?.reason);
+      const reversal = await service.reversePayment(request.params.id, request.body?.reason);
       if (!reversal) {
         return reply.status(404).send({ message: "Payment not found" });
       }
+      recordAuditEvent(context, {
+        entityType: "payment",
+        entityId: reversal.paymentId,
+        eventType: "payment.reversed",
+        title: "Tahsilat ters kayda alindi",
+        description: reversal.reason
+      });
       return { item: reversal };
     });
   });
 
   server.get<{ Params: { id: string } }>("/payments/:id/allocations", async (request) => {
     const service = new CommercialCoreService(buildRequestContext(request));
-    return { items: service.getPaymentAllocations(request.params.id) };
+    return { items: await service.getPaymentAllocations(request.params.id) };
   });
 
   server.get("/warehouse-orders", async (request) => {
@@ -236,7 +250,7 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
 
   server.get<{ Params: { id: string } }>("/warehouse-orders/:id", async (request, reply) => {
     const service = new CommercialCoreService(buildRequestContext(request));
-    const warehouseOrder = service.getWarehouseOrder(request.params.id);
+    const warehouseOrder = await service.getWarehouseOrder(request.params.id);
     if (!warehouseOrder) {
       return reply.status(404).send({ message: "Warehouse order not found" });
     }
@@ -246,7 +260,7 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   server.post<{ Body: Partial<WarehouseOrder> }>("/warehouse-orders", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["warehouse.write", "warehouse.manage"])], async (context) => {
       const service = new CommercialCoreService(context);
-      const item = service.createWarehouseOrder(request.body);
+      const item = await service.createWarehouseOrder(request.body);
       recordAuditEvent(context, {
         entityType: "warehouse_order",
         entityId: item.id,
@@ -261,10 +275,17 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   server.post<{ Params: { id: string }; Body: { assignedTo?: string } }>("/warehouse-orders/:id/assign", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["warehouse.write", "warehouse.assign"])], async (context) => {
       const service = new CommercialCoreService(context);
-      const warehouseOrder = service.assignWarehouseOrder(request.params.id, request.body?.assignedTo ?? "Depo Ekibi");
+      const warehouseOrder = await service.assignWarehouseOrder(request.params.id, request.body?.assignedTo ?? "Depo Ekibi");
       if (!warehouseOrder) {
         return reply.status(404).send({ message: "Warehouse order not found" });
       }
+      recordAuditEvent(context, {
+        entityType: "warehouse_order",
+        entityId: warehouseOrder.id,
+        eventType: "warehouse_order.assigned",
+        title: "Depo emri atandi",
+        description: `${warehouseOrder.warehouseOrderNo} emri ${warehouseOrder.assignedTo ?? "ekip"} kullanicisina atandi.`
+      });
       return { item: warehouseOrder };
     });
   });
@@ -272,10 +293,17 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   server.post<{ Params: { id: string } }>("/warehouse-orders/:id/start", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["warehouse.write", "warehouse.execute"])], async (context) => {
       const service = new CommercialCoreService(context);
-      const warehouseOrder = service.startWarehouseOrder(request.params.id);
+      const warehouseOrder = await service.startWarehouseOrder(request.params.id);
       if (!warehouseOrder) {
         return reply.status(404).send({ message: "Warehouse order not found" });
       }
+      recordAuditEvent(context, {
+        entityType: "warehouse_order",
+        entityId: warehouseOrder.id,
+        eventType: "warehouse_order.started",
+        title: "Depo emri baslatildi",
+        description: `${warehouseOrder.warehouseOrderNo} emri toplama asamasina alindi.`
+      });
       return { item: warehouseOrder };
     });
   });
@@ -283,10 +311,17 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   server.post<{ Params: { id: string } }>("/warehouse-orders/:id/mark-prepared", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["warehouse.write", "warehouse.execute"])], async (context) => {
       const service = new CommercialCoreService(context);
-      const warehouseOrder = service.markWarehouseOrderPrepared(request.params.id);
+      const warehouseOrder = await service.markWarehouseOrderPrepared(request.params.id);
       if (!warehouseOrder) {
         return reply.status(404).send({ message: "Warehouse order not found" });
       }
+      recordAuditEvent(context, {
+        entityType: "warehouse_order",
+        entityId: warehouseOrder.id,
+        eventType: "warehouse_order.prepared",
+        title: "Depo emri hazirlandi",
+        description: `${warehouseOrder.warehouseOrderNo} emri hazirlandi.`
+      });
       return { item: warehouseOrder };
     });
   });
@@ -294,10 +329,17 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   server.post<{ Params: { id: string } }>("/warehouse-orders/:id/cancel", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["warehouse.write", "warehouse.cancel"])], async (context) => {
       const service = new CommercialCoreService(context);
-      const warehouseOrder = service.cancelWarehouseOrder(request.params.id);
+      const warehouseOrder = await service.cancelWarehouseOrder(request.params.id);
       if (!warehouseOrder) {
         return reply.status(404).send({ message: "Warehouse order not found" });
       }
+      recordAuditEvent(context, {
+        entityType: "warehouse_order",
+        entityId: warehouseOrder.id,
+        eventType: "warehouse_order.cancelled",
+        title: "Depo emri iptal edildi",
+        description: `${warehouseOrder.warehouseOrderNo} emri iptal edildi.`
+      });
       return { item: warehouseOrder };
     });
   });
@@ -402,6 +444,13 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
       const service = new CommercialCoreService(context);
       const invoice = await service.issueInvoice(request.params.id);
       if (!invoice) return reply.status(404).send({ message: "Invoice not found" });
+      recordAuditEvent(context, {
+        entityType: "invoice",
+        entityId: invoice.id,
+        eventType: "invoice.issued",
+        title: "Fatura kesildi",
+        description: `${invoice.invoiceNo} faturasi kesildi.`
+      });
       return { item: invoice };
     })
   );
@@ -410,6 +459,13 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
       const service = new CommercialCoreService(context);
       const invoice = await service.cancelInvoice(request.params.id);
       if (!invoice) return reply.status(404).send({ message: "Invoice not found" });
+      recordAuditEvent(context, {
+        entityType: "invoice",
+        entityId: invoice.id,
+        eventType: "invoice.cancelled",
+        title: "Fatura iptal edildi",
+        description: `${invoice.invoiceNo} faturasi iptal edildi.`
+      });
       return { item: invoice };
     })
   );
@@ -452,6 +508,13 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
       const service = new CommercialCoreService(context);
       const returnRecord = await service.approveReturn(request.params.id);
       if (!returnRecord) return reply.status(404).send({ message: "Return not found" });
+      recordAuditEvent(context, {
+        entityType: "return",
+        entityId: returnRecord.id,
+        eventType: "return.approved",
+        title: "Iade onaylandi",
+        description: `${returnRecord.returnNo} iadesi onaylandi.`
+      });
       return { item: returnRecord };
     })
   );
@@ -460,6 +523,13 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
       const service = new CommercialCoreService(context);
       const returnRecord = await service.receiveReturn(request.params.id);
       if (!returnRecord) return reply.status(404).send({ message: "Return not found" });
+      recordAuditEvent(context, {
+        entityType: "return",
+        entityId: returnRecord.id,
+        eventType: "return.received",
+        title: "Iade teslim alindi",
+        description: `${returnRecord.returnNo} iadesi teslim alindi.`
+      });
       return { item: returnRecord };
     })
   );
@@ -468,6 +538,13 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
       const service = new CommercialCoreService(context);
       const returnRecord = await service.completeReturn(request.params.id);
       if (!returnRecord) return reply.status(404).send({ message: "Return not found" });
+      recordAuditEvent(context, {
+        entityType: "return",
+        entityId: returnRecord.id,
+        eventType: "return.completed",
+        title: "Iade tamamlandi",
+        description: `${returnRecord.returnNo} iadesi tamamlandi.`
+      });
       return { item: returnRecord };
     })
   );
@@ -476,6 +553,13 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
       const service = new CommercialCoreService(context);
       const returnRecord = await service.cancelReturn(request.params.id);
       if (!returnRecord) return reply.status(404).send({ message: "Return not found" });
+      recordAuditEvent(context, {
+        entityType: "return",
+        entityId: returnRecord.id,
+        eventType: "return.cancelled",
+        title: "Iade iptal edildi",
+        description: `${returnRecord.returnNo} iadesi iptal edildi.`
+      });
       return { item: returnRecord };
     })
   );
