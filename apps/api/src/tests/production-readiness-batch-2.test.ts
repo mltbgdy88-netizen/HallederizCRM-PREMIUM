@@ -5,25 +5,28 @@ import { buildRequestContext } from "../shared/request-context";
 import { assertAuthenticated, assertTenantAccess } from "../shared/auth-guards";
 import { createApprovalExecution, runApprovalExecution } from "../ai-local-output-store";
 import { listAuditEvents } from "../shared/audit-timeline";
+import { withDemoAuth } from "./test-env";
 
-test("auth/session resolver: valid session token sets authenticated context", () => {
-  const login = createSession({
-    tenantSlug: "hallederiz",
-    email: "admin@hallederiz.com",
-    password: "demo"
+test("auth/session resolver: valid session token sets authenticated context", async () => {
+  await withDemoAuth(() => {
+    const login = createSession({
+      tenantSlug: "hallederiz",
+      email: "admin@hallederiz.com",
+      password: "demo"
+    });
+
+    const request = {
+      headers: {
+        "x-session-token": login.accessToken,
+        authorization: `Bearer ${login.accessToken}`
+      }
+    } as never;
+
+    const context = buildRequestContext(request);
+    assert.equal(context.isAuthenticated, true);
+    assert.equal(context.tenantId, "tenant_1");
+    assert.ok((context.permissions ?? []).length > 0);
   });
-
-  const request = {
-    headers: {
-      "x-session-token": login.accessToken,
-      authorization: `Bearer ${login.accessToken}`
-    }
-  } as never;
-
-  const context = buildRequestContext(request);
-  assert.equal(context.isAuthenticated, true);
-  assert.equal(context.tenantId, "tenant_1");
-  assert.ok((context.permissions ?? []).length > 0);
 });
 
 test("tenant guard: mismatch throws forbidden", () => {

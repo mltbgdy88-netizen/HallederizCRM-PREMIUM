@@ -1,5 +1,6 @@
 import type { FastifyRequest } from "fastify";
 import { getSessionByToken } from "./session-store";
+import { getAuthMode } from "./auth-mode";
 
 export interface RequestContext {
   tenantId: string;
@@ -107,22 +108,30 @@ function parseTokenPrincipal(token?: string): { tenantId?: string; userId?: stri
 }
 
 export function buildRequestContext(request: FastifyRequest): RequestContext {
+  const authMode = getAuthMode();
   const authHeader = request.headers.authorization;
   const bearerToken = typeof authHeader === "string" && authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : undefined;
   const sessionToken = String(request.headers["x-session-token"] ?? bearerToken ?? "");
-  const principal = parseTokenPrincipal(sessionToken || undefined);
-  const session = getSessionByToken(sessionToken || undefined);
+  const isMockAccessToken = sessionToken.startsWith("mock_access_");
+  const principal = authMode.allowMockAccessTokens ? parseTokenPrincipal(sessionToken || undefined) : { roles: [], permissions: [] };
+  const session =
+    isMockAccessToken && !authMode.allowMockAccessTokens ? null : getSessionByToken(sessionToken || undefined);
   const requestedTenantId = request.headers["x-tenant-id"] ? String(request.headers["x-tenant-id"]) : undefined;
   const requestedUserId = request.headers["x-user-id"] ? String(request.headers["x-user-id"]) : undefined;
-  const tenantId = String(session?.tenant.id ?? requestedTenantId ?? principal.tenantId ?? "tenant_1");
-  const userId = String(session?.user.id ?? requestedUserId ?? principal.userId ?? "user_admin");
-  const persistenceMode = process.env.PERSISTENCE_MODE === "postgres" ? "postgres" : "demo";
+  const tenantId = String(session?.tenant.id ?? requestedTenantId ?? principal.tenantId ?? "tenant_unknown");
+  const userId = String(
+    session?.user.id ??
+      (authMode.allowHeaderPrincipalFallback ? requestedUserId : undefined) ??
+      principal.userId ??
+      "anonymous"
+  );
+  const persistenceMode = authMode.persistenceMode;
   const tenantMismatch = Boolean(session?.tenant.id && requestedTenantId && session.tenant.id !== requestedTenantId);
   const authIssue =
     tenantMismatch
       ? "tenant_mismatch"
-      : sessionToken
-        ? session
+        : sessionToken
+        ? session || principal.userId
           ? undefined
           : "expired_session"
         : undefined;
@@ -131,26 +140,27 @@ export function buildRequestContext(request: FastifyRequest): RequestContext {
       ? session.roles.map((role) => role.code)
       : principal.roles.length > 0
         ? principal.roles
-        : [String(request.headers["x-user-role"] ?? "admin")];
+        : authMode.allowHeaderPrincipalFallback && request.headers["x-user-role"]
+          ? [String(request.headers["x-user-role"])]
+          : [];
   const permissions =
     session?.permissions?.length
       ? session.permissions.map((permission) => permission.key)
       : principal.permissions.length > 0
       ? principal.permissions
-      : String(
-          request.headers["x-user-permissions"] ??
-            "customers.write,products.write,offers.write,orders.write,payments.write,warehouse.write,deliveries.write,invoices.write,returns.write,approvals.write,tasks.write,workflow.write,ai.actions.write,documents.write,documents.render,local_output.write,integrations.write,erp.write,factory.write,whatsapp.write,pricing.write,orders.confirm,orders.plan_sourcing,orders.cancel,warehouse.assign,warehouse.execute,warehouse.cancel,payments.confirm,payments.reverse,deliveries.validate,deliveries.complete,deliveries.rollback,invoices.issue,invoices.cancel,returns.approve,returns.receive,returns.complete,returns.cancel,approvals.approve,approvals.execute"
-        )
-          .split(",")
-          .map((item) => item.trim())
-          .filter(Boolean);
+      : authMode.allowHeaderPrincipalFallback && request.headers["x-user-permissions"]
+        ? String(request.headers["x-user-permissions"])
+            .split(",")
+            .map((item) => item.trim())
+            .filter(Boolean)
+        : [];
 
   return {
     tenantId,
     userId,
     persistenceMode,
     sessionToken: sessionToken || undefined,
-    isAuthenticated: Boolean(sessionToken ? Boolean(session) : persistenceMode === "demo" ? request.headers["x-user-id"] : false),
+    isAuthenticated: Boolean(sessionToken ? Boolean(session || principal.userId) : false),
     requestedTenantId,
     requestedUserId,
     tenantMismatch,

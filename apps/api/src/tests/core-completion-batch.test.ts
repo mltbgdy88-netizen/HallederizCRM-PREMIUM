@@ -4,26 +4,29 @@ import { createSession } from "../shared/session-store";
 import { buildRequestContext } from "../shared/request-context";
 import { assertAuthenticated } from "../shared/auth-guards";
 import { cancelApprovalExecution, getApprovalExecution, runApprovalExecution } from "../ai-local-output-store";
+import { withDemoAuth } from "./test-env";
 
-test("request context flags tenant mismatch when session tenant differs from header", () => {
-  const login = createSession({
-    tenantSlug: "hallederiz",
-    email: "admin@hallederiz.com",
-    password: "x"
+test("request context flags tenant mismatch when session tenant differs from header", async () => {
+  await withDemoAuth(() => {
+    const login = createSession({
+      tenantSlug: "hallederiz",
+      email: "admin@hallederiz.com",
+      password: "x"
+    });
+
+    const request = {
+      headers: {
+        authorization: `Bearer ${login.accessToken}`,
+        "x-session-token": login.accessToken,
+        "x-tenant-id": "tenant_other"
+      }
+    } as never;
+
+    const context = buildRequestContext(request);
+    assert.equal(context.tenantMismatch, true);
+    assert.equal(context.authIssue, "tenant_mismatch");
+    assert.throws(() => assertAuthenticated(context));
   });
-
-  const request = {
-    headers: {
-      authorization: `Bearer ${login.accessToken}`,
-      "x-session-token": login.accessToken,
-      "x-tenant-id": "tenant_other"
-    }
-  } as never;
-
-  const context = buildRequestContext(request);
-  assert.equal(context.tenantMismatch, true);
-  assert.equal(context.authIssue, "tenant_mismatch");
-  assert.throws(() => assertAuthenticated(context));
 });
 
 test("approval execution marks failed results with retryability suffix", () => {

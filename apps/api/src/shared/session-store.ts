@@ -1,5 +1,6 @@
 import type { LoginInput, LoginResponse, SessionModel } from "@hallederiz/types";
 import { createLoginPayload, mockRoles, mockTenant, mockUsers } from "../platform-core/mock-data";
+import { assertDemoAuthAllowed } from "./auth-mode";
 
 const sessionByToken = new Map<string, LoginResponse>();
 
@@ -8,6 +9,7 @@ function getUserByEmail(email: string) {
 }
 
 export function createSession(input: LoginInput): LoginResponse {
+  assertDemoAuthAllowed();
   const payload = createLoginPayload(input);
   const user = getUserByEmail(input.email);
   const resolvedRoles = (input.email.includes("operator") ? [mockRoles[1] ?? mockRoles[0]] : [mockRoles[0]]).filter(

@@ -21,6 +21,8 @@ interface AuthContextValue {
 const STORAGE_KEY = "hz_platform_session";
 const ACCESS_TOKEN_STORAGE_KEY = "hz_platform_access_token";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
+const ENABLE_DEMO_AUTH =
+  process.env.NODE_ENV !== "production" && process.env.NEXT_PUBLIC_ENABLE_DEMO_AUTH === "true";
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
 
@@ -100,6 +102,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
     } catch {
       loginResponse = null;
+    }
+
+    if (!loginResponse?.ok && !ENABLE_DEMO_AUTH) {
+      let message = "Giris yapilamadi. Lutfen auth saglayici ayarlarini kontrol edin.";
+      try {
+        const errorPayload = loginResponse ? ((await loginResponse.json()) as { message?: string }) : null;
+        message = errorPayload?.message ?? message;
+      } catch {
+        // Keep the user-facing fallback message.
+      }
+      return {
+        success: false,
+        message
+      };
     }
 
     const payload =

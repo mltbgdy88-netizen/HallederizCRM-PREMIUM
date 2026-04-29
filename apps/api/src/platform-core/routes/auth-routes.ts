@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import type { LoginInput } from "@hallederiz/types";
 import { createSession, getSessionByToken } from "../../shared/session-store";
 import { buildRequestContext } from "../../shared/request-context";
+import { getAuthMode } from "../../shared/auth-mode";
 
 export async function registerAuthRoutes(server: FastifyInstance) {
   server.post<{ Body: Partial<LoginInput> }>("/auth/login", async (request, reply) => {
@@ -10,6 +11,13 @@ export async function registerAuthRoutes(server: FastifyInstance) {
     if (!body.email || !body.password || !body.tenantSlug) {
       return reply.status(400).send({
         message: "tenantSlug, email ve password alanlari zorunludur."
+      });
+    }
+
+    const authMode = getAuthMode();
+    if (!authMode.demoAuthEnabled || authMode.persistenceMode !== "demo") {
+      return reply.status(503).send({
+        message: "Demo auth disabled. Configure real auth provider."
       });
     }
 
