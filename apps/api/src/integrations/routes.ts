@@ -1,7 +1,9 @@
 import type { FastifyInstance } from "fastify";
 import { Readable } from "node:stream";
+import { hashInboundMessageContent } from "@hallederiz/domain";
 import type { ErpConnection, ErpMapping, FactoryOrder, WhatsAppActionRequest, WhatsAppMessage } from "@hallederiz/types";
 import { IntegrationsService } from "../modules/integrations/service";
+import { whatsAppWorkflowStoreService } from "../modules/whatsapp-workflow/store";
 import { assertAnyPermission, assertAuthenticated, withGuards } from "../shared/auth-guards";
 import { AiRuntimeService } from "../modules/ai-runtime/service";
 import { getLocalAgentStatus } from "../ai-local-output-store";
@@ -17,12 +19,50 @@ function getHeaderValue(value: string | string[] | undefined): string | undefine
   return Array.isArray(value) ? value[0] : value;
 }
 
+type WhatsAppWebhookBody = Record<string, unknown> & {
+  entry?: Array<{
+    changes?: Array<{
+      value?: {
+        messages?: Array<{
+          from?: string;
+          id?: string;
+          type?: string;
+          text?: { body?: string };
+        }>;
+      };
+    }>;
+  }>;
+  from?: string;
+  messageId?: string;
+  tenantId?: string;
+  tenantSlug?: string;
+  text?: string;
+};
+
 async function collectRawBody(payload: AsyncIterable<Buffer | string>) {
   const chunks: Buffer[] = [];
   for await (const chunk of payload) {
     chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
   }
   return Buffer.concat(chunks);
+}
+
+function extractWhatsAppWebhookMessage(event: WhatsAppWebhookBody) {
+  const message = event.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
+  const text = message?.text?.body ?? event.text ?? "";
+  const from = message?.from ?? event.from ?? "";
+  const messageType = message?.type ?? "text";
+  const tenantId = event.tenantId ?? event.tenantSlug ?? "tenant_1";
+  const contentHash = hashInboundMessageContent({ from, messageType, text });
+  const messageId = message?.id ?? event.messageId ?? `wa_msg_${contentHash.slice(0, 24)}`;
+  return {
+    contentHash,
+    from,
+    messageBody: String(text),
+    messageId: String(messageId),
+    messageType,
+    tenantId: String(tenantId)
+  };
 }
 
 export async function registerIntegrationRoutes(server: FastifyInstance) {
@@ -69,12 +109,39 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
     if (secret && !service.verifyWhatsAppWebhookSignature(rawBody ?? "", signature)) {
       return reply.status(403).send({ message: "Webhook signature mismatch." });
     }
-    const event = request.body;
-    const messageBody = String((event.entry as Array<{ changes?: Array<{ value?: { messages?: Array<{ text?: { body?: string } }> } }> }> | undefined)?.[0]?.changes?.[0]?.value?.messages?.[0]?.text?.body ?? "");
-    if (messageBody) {
-      await service.receiveWhatsAppInbound({ body: messageBody, type: "text" });
+    const event = request.body as WhatsAppWebhookBody;
+    const { contentHash, from, messageBody, messageId, tenantId } = extractWhatsAppWebhookMessage(event);
+    const at = new Date().toISOString();
+    const shouldTrackWorkflow = Boolean(from || messageBody);
+    const workflowPayload = { at, contentHash, from, id: messageId };
+
+    if (shouldTrackWorkflow) {
+      const reservation = whatsAppWorkflowStoreService.reserveInboundMessage(tenantId, workflowPayload);
+      if (!reservation.reserved) {
+        return {
+          ok: true,
+          duplicate: true,
+          duplicateReason: reservation.reason,
+          outbound: [],
+          messageId,
+          contentHash,
+          workflowReserved: false
+        };
+      }
+
+      try {
+        if (messageBody) {
+          await service.receiveWhatsAppInbound({ body: messageBody, type: "text" });
+        }
+        whatsAppWorkflowStoreService.markProcessed(tenantId, workflowPayload);
+      } catch (error) {
+        whatsAppWorkflowStoreService.releaseProcessing(tenantId, workflowPayload);
+        throw error;
+      }
+
+      return { ok: true, duplicate: false, messageId, contentHash, workflowReserved: true };
     }
-    return { ok: true };
+    return { ok: true, duplicate: false, workflowReserved: false };
   });
 
   server.get("/whatsapp/conversations", async (request, reply) =>
