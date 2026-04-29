@@ -30,7 +30,7 @@ test("approval execution marks failed results with retryability suffix", () => {
   const exec = getApprovalExecution("approval_exec_1");
   assert.ok(exec);
   if (!exec) return;
-  exec.operationType = "create_order";
+  exec.operationType = "unsupported_test_action" as never;
   exec.targetId = "invalid_target_id";
   const failed = runApprovalExecution(exec.id);
   assert.ok(failed);
@@ -47,4 +47,3 @@ test("approval execution cancel path sets cancelled status", () => {
   assert.ok(cancelled);
   assert.equal(cancelled?.status, "cancelled");
 });
-

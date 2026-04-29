@@ -49,7 +49,7 @@ test("approval execution dispatch: happy path and failure path", () => {
   assert.equal(successResult?.status, "executed");
 
   const failed = createApprovalExecution({
-    operationType: "complete_delivery",
+    operationType: "unsupported_test_action" as never,
     targetId: "delivery_missing",
     targetType: "delivery",
     requestedBy: "user_admin",

@@ -10,15 +10,15 @@ const context: RequestContext = {
   persistenceMode: "demo"
 };
 
-test("AI health returns error when openai provider requested without key", async () => {
+test("AI health returns degraded live mode when openai provider requested without key", async () => {
   const oldProvider = process.env.AI_LLM_PROVIDER;
   const oldKey = process.env.OPENAI_API_KEY;
   process.env.AI_LLM_PROVIDER = "openai";
   delete process.env.OPENAI_API_KEY;
   try {
     const health = new AiRuntimeService(context).getHealth();
-    assert.equal(health.status, "error");
-    assert.equal(health.mode, "fallback");
+    assert.equal(health.status, "degraded");
+    assert.equal(health.mode, "live");
   } finally {
     if (oldProvider === undefined) delete process.env.AI_LLM_PROVIDER;
     else process.env.AI_LLM_PROVIDER = oldProvider;
@@ -27,7 +27,7 @@ test("AI health returns error when openai provider requested without key", async
   }
 });
 
-test("Integration health falls back to warning/error when live env missing", async () => {
+test("Integration health reports misconfigured when live env missing", async () => {
   const oldWhatsappProvider = process.env.WHATSAPP_PROVIDER;
   const oldWhatsappBase = process.env.WHATSAPP_API_BASE_URL;
   const oldErpProvider = process.env.ERP_PROVIDER;
@@ -43,10 +43,10 @@ test("Integration health falls back to warning/error when live env missing", asy
 
   try {
     const service = new IntegrationsService(context);
-    assert.equal(service.getWhatsAppHealth().status, "error");
-    assert.equal(service.getErpHealth().status, "error");
+    assert.equal(service.getWhatsAppHealth().status, "misconfigured");
+    assert.equal(service.getErpHealth().status, "misconfigured");
     const factory = service.getFactoryHealth();
-    assert.equal(factory.status, "error");
+    assert.equal(factory.status, "misconfigured");
   } finally {
     if (oldWhatsappProvider === undefined) delete process.env.WHATSAPP_PROVIDER;
     else process.env.WHATSAPP_PROVIDER = oldWhatsappProvider;
