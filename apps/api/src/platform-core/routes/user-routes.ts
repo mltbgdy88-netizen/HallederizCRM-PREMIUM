@@ -2,16 +2,17 @@ import type { FastifyInstance } from "fastify";
 import type { User } from "@hallederiz/types";
 import { mockTenant, mockUsers } from "../mock-data";
 import { assertAnyPermission, assertAuthenticated, withGuards } from "../../shared/auth-guards";
+import { readPermissions, requireReadAccess } from "../../shared/read-guards";
 
 export async function registerUserRoutes(server: FastifyInstance) {
   let usersState: User[] = [...mockUsers];
 
-  server.get("/users", async () => {
+  server.get("/users", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.users), async () => {
     return {
       items: usersState,
       total: usersState.length
     };
-  });
+  }));
 
   server.post<{ Body: Partial<User> & { roleCode?: string } }>("/users", async (request, reply) => {
     return withGuards(

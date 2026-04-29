@@ -5,21 +5,24 @@ import { buildRequestContext } from "../shared/request-context";
 import { asApiErrorPayload } from "../shared/errors";
 import { assertAnyPermission, assertAuthenticated, assertTenantAccess, withGuards } from "../shared/auth-guards";
 import { recordAuditEvent } from "../shared/audit-timeline";
+import { readPermissions, requireReadAccess } from "../shared/read-guards";
 
 export async function registerSalesCrmRoutes(server: FastifyInstance) {
-  server.get("/customers", async (request) => {
-    const service = new SalesCrmService(buildRequestContext(request));
+  server.get("/customers", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.customers), async (context) => {
+    const service = new SalesCrmService(context);
     const items = await service.listCustomers();
     return { items, total: items.length };
-  });
+  }));
 
   server.get<{ Params: { id: string } }>("/customers/:id", async (request, reply) => {
-    const service = new SalesCrmService(buildRequestContext(request));
-    const customer = await service.getCustomer(request.params.id);
-    if (!customer) {
-      return reply.status(404).send({ message: "Customer not found" });
-    }
-    return { item: customer };
+    return withGuards(request, reply, requireReadAccess(readPermissions.customers), async (context) => {
+      const service = new SalesCrmService(context);
+      const customer = await service.getCustomer(request.params.id);
+      if (!customer) {
+        return reply.status(404).send({ message: "Customer not found" });
+      }
+      return { item: customer };
+    });
   });
 
   server.post<{ Body: Partial<Customer> }>("/customers", async (request, reply) => {
@@ -61,18 +64,20 @@ export async function registerSalesCrmRoutes(server: FastifyInstance) {
   });
 
   server.get<{ Params: { id: string } }>("/customers/:id/account-summary", async (request, reply) => {
-    const service = new SalesCrmService(buildRequestContext(request));
-    const summary = await service.getAccountSummary(request.params.id);
-    if (!summary) {
-      return reply.status(404).send({ message: "Customer account not found" });
-    }
-    return { item: summary };
+    return withGuards(request, reply, requireReadAccess(readPermissions.customers), async (context) => {
+      const service = new SalesCrmService(context);
+      const summary = await service.getAccountSummary(request.params.id);
+      if (!summary) {
+        return reply.status(404).send({ message: "Customer account not found" });
+      }
+      return { item: summary };
+    });
   });
 
-  server.get<{ Params: { id: string } }>("/customers/:id/ledger", async (request) => {
-    const service = new SalesCrmService(buildRequestContext(request));
+  server.get<{ Params: { id: string } }>("/customers/:id/ledger", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.customers), async (context) => {
+    const service = new SalesCrmService(context);
     return { items: await service.getLedger(request.params.id) };
-  });
+  }));
 
   server.post<{ Params: { id: string }; Body: Partial<CustomerContact> }>("/customers/:id/contacts", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertPermissionSet(context, ["customers.write", "customers.manage"])], async (context) => {
@@ -137,19 +142,21 @@ export async function registerSalesCrmRoutes(server: FastifyInstance) {
     });
   });
 
-  server.get("/offers", async (request) => {
-    const service = new SalesCrmService(buildRequestContext(request));
+  server.get("/offers", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.offers), async (context) => {
+    const service = new SalesCrmService(context);
     const items = await service.listOffers();
     return { items, total: items.length };
-  });
+  }));
 
   server.get<{ Params: { id: string } }>("/offers/:id", async (request, reply) => {
-    const service = new SalesCrmService(buildRequestContext(request));
-    const offer = await service.getOffer(request.params.id);
-    if (!offer) {
-      return reply.status(404).send({ message: "Offer not found" });
-    }
-    return { item: offer };
+    return withGuards(request, reply, requireReadAccess(readPermissions.offers), async (context) => {
+      const service = new SalesCrmService(context);
+      const offer = await service.getOffer(request.params.id);
+      if (!offer) {
+        return reply.status(404).send({ message: "Offer not found" });
+      }
+      return { item: offer };
+    });
   });
 
   server.post<{ Body: Partial<Offer> }>("/offers", async (request, reply) => {

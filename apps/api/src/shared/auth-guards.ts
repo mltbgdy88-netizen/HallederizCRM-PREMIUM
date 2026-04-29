@@ -44,7 +44,7 @@ export function assertPermission(context: RequestContext, requiredPermission: st
   });
 }
 
-export function assertAnyPermission(context: RequestContext, requiredPermissions: string[]) {
+export function assertAnyPermission(context: RequestContext, requiredPermissions: readonly string[]) {
   for (const permission of requiredPermissions) {
     try {
       assertPermission(context, permission);

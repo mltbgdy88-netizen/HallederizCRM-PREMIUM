@@ -29,6 +29,7 @@ import {
 import { assertAnyPermission, assertAuthenticated, withGuards } from "./shared/auth-guards";
 import { recordAuditEvent } from "./shared/audit-timeline";
 import { AiRuntimeService } from "./modules/ai-runtime/service";
+import { readPermissions, requireReadAccess } from "./shared/read-guards";
 
 export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   server.post<{ Body: { message?: string } }>("/ai/chat", async (request, reply) =>
@@ -87,11 +88,11 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.get("/ai/proposals", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated], async () => ({ items: listAiProposals(), total: listAiProposals().length }))
+    withGuards(request, reply, requireReadAccess(readPermissions.approvals), async () => ({ items: listAiProposals(), total: listAiProposals().length }))
   );
 
   server.get<{ Params: { id: string } }>("/ai/proposals/:id", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated], async () => {
+    withGuards(request, reply, requireReadAccess(readPermissions.approvals), async () => {
       const item = getAiProposal(request.params.id);
       if (!item) return reply.status(404).send({ message: "AI proposal not found" });
       return { item };
@@ -129,7 +130,7 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.get("/ai/insights", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated], async () => ({ items: listAiInsights(), total: listAiInsights().length }))
+    withGuards(request, reply, requireReadAccess(readPermissions.tasks), async () => ({ items: listAiInsights(), total: listAiInsights().length }))
   );
 
   server.post("/ai/insights/run", async (request, reply) =>
@@ -168,11 +169,11 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.get("/approval-executions", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated], async () => ({ items: listApprovalExecutions(), total: listApprovalExecutions().length }))
+    withGuards(request, reply, requireReadAccess(readPermissions.approvals), async () => ({ items: listApprovalExecutions(), total: listApprovalExecutions().length }))
   );
 
   server.get<{ Params: { id: string } }>("/approval-executions/:id", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated], async () => {
+    withGuards(request, reply, requireReadAccess(readPermissions.approvals), async () => {
       const item = getApprovalExecution(request.params.id);
       if (!item) return reply.status(404).send({ message: "Approval execution not found" });
       return { item };
@@ -202,7 +203,7 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.get("/local-output/rules", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated], async () => ({ items: listLocalOutputRules() }))
+    withGuards(request, reply, requireReadAccess(readPermissions.localOutput), async () => ({ items: listLocalOutputRules() }))
   );
 
   server.patch<{ Body: LocalOutputRule[] }>("/local-output/rules", async (request, reply) =>
@@ -212,11 +213,11 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.get("/print-jobs", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated], async () => ({ items: listPrintJobs() }))
+    withGuards(request, reply, requireReadAccess(readPermissions.localOutput), async () => ({ items: listPrintJobs() }))
   );
 
   server.get("/file-save-jobs", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated], async () => ({ items: listFileSaveJobs() }))
+    withGuards(request, reply, requireReadAccess(readPermissions.localOutput), async () => ({ items: listFileSaveJobs() }))
   );
 
   server.post<{ Params: { id: string } }>("/documents/:id/queue-save", async (request, reply) =>
@@ -338,11 +339,11 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.get("/local-agent/status", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated], async () => ({ item: getLocalAgentStatus() }))
+    withGuards(request, reply, requireReadAccess(readPermissions.localOutput), async () => ({ item: getLocalAgentStatus() }))
   );
 
   server.get("/health/ai", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated], async (context) => {
+    withGuards(request, reply, requireReadAccess(readPermissions.tasks), async (context) => {
       const service = new AiRuntimeService(context);
       return { item: service.getHealth() };
     })
@@ -398,7 +399,7 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.get("/health/local-agent", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated], async () => {
+    withGuards(request, reply, requireReadAccess(readPermissions.localOutput), async () => {
       const status = getLocalAgentStatus();
       return {
         item: {

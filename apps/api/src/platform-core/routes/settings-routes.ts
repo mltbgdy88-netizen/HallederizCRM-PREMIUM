@@ -1,18 +1,18 @@
 import type { FastifyInstance } from "fastify";
 import type { PlatformSettings } from "@hallederiz/types";
 import { platformSettingsSchema } from "@hallederiz/types";
-import { buildRequestContext } from "../../shared/request-context";
 import { assertAnyPermission, assertAuthenticated, withGuards } from "../../shared/auth-guards";
 import { getTenantSettingsState, setTenantSettingsState } from "../settings-state";
 import { buildPilotReadiness } from "../pilot-readiness";
+import { readPermissions, requireReadAccess } from "../../shared/read-guards";
 
 export async function registerSettingsRoutes(server: FastifyInstance) {
-  server.get("/settings", async () => {
+  server.get("/settings", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.settings), async () => {
     return {
       schema: platformSettingsSchema,
       data: getTenantSettingsState()
     };
-  });
+  }));
 
   server.patch<{ Body: Partial<PlatformSettings> }>("/settings", async (request, reply) => {
     return withGuards(
@@ -54,9 +54,8 @@ export async function registerSettingsRoutes(server: FastifyInstance) {
     );
   });
 
-  server.get("/settings/pilot-template", async (request) => {
-    const context = buildRequestContext(request);
-    return {
+  server.get("/settings/pilot-template", async (request, reply) => {
+    return withGuards(request, reply, requireReadAccess(readPermissions.settings), async (context) => ({
       tenantId: context.tenantId,
       template: {
         key: "pilot-tenant-template",
@@ -75,11 +74,11 @@ export async function registerSettingsRoutes(server: FastifyInstance) {
         importModules: ["cariler", "urunler", "stoklar", "fiyatlar", "depolar"],
         integrationChecks: ["erp", "fabrika", "whatsapp", "ai", "local_output"]
       }
-    };
+    }));
   });
 
   server.get("/settings/pilot-readiness", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated], async (context) => {
+    withGuards(request, reply, requireReadAccess(readPermissions.settings), async (context) => {
       const settings = getTenantSettingsState();
       return {
         item: buildPilotReadiness(context.tenantId, settings)

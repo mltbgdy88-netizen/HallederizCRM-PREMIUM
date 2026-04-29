@@ -31,21 +31,24 @@ import { buildRequestContext } from "../shared/request-context";
 import { asApiErrorPayload } from "../shared/errors";
 import { assertAnyPermission, assertAuthenticated, withGuards } from "../shared/auth-guards";
 import { recordAuditEvent } from "../shared/audit-timeline";
+import { readPermissions, requireReadAccess } from "../shared/read-guards";
 
 export async function registerCommercialOperationsRoutes(server: FastifyInstance) {
-  server.get("/orders", async (request) => {
-    const service = new CommercialCoreService(buildRequestContext(request));
+  server.get("/orders", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.orders), async (context) => {
+    const service = new CommercialCoreService(context);
     const items = await service.listOrders();
     return { items, total: items.length };
-  });
+  }));
 
   server.get<{ Params: { id: string } }>("/orders/:id", async (request, reply) => {
-    const service = new CommercialCoreService(buildRequestContext(request));
-    const order = await service.getOrder(request.params.id);
-    if (!order) {
-      return reply.status(404).send({ message: "Order not found" });
-    }
-    return { item: order };
+    return withGuards(request, reply, requireReadAccess(readPermissions.orders), async (context) => {
+      const service = new CommercialCoreService(context);
+      const order = await service.getOrder(request.params.id);
+      if (!order) {
+        return reply.status(404).send({ message: "Order not found" });
+      }
+      return { item: order };
+    });
   });
 
   server.post<{ Body: Partial<SaleOrder> }>("/orders", async (request, reply) => {
@@ -171,19 +174,21 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
     });
   });
 
-  server.get("/payments", async (request) => {
-    const service = new CommercialCoreService(buildRequestContext(request));
+  server.get("/payments", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.payments), async (context) => {
+    const service = new CommercialCoreService(context);
     const items = await service.listPayments();
     return { items, total: items.length };
-  });
+  }));
 
   server.get<{ Params: { id: string } }>("/payments/:id", async (request, reply) => {
-    const service = new CommercialCoreService(buildRequestContext(request));
-    const payment = await service.getPayment(request.params.id);
-    if (!payment) {
-      return reply.status(404).send({ message: "Payment not found" });
-    }
-    return { item: payment };
+    return withGuards(request, reply, requireReadAccess(readPermissions.payments), async (context) => {
+      const service = new CommercialCoreService(context);
+      const payment = await service.getPayment(request.params.id);
+      if (!payment) {
+        return reply.status(404).send({ message: "Payment not found" });
+      }
+      return { item: payment };
+    });
   });
 
   server.post<{ Body: Partial<PaymentReceipt> }>("/payments", async (request, reply) => {
@@ -237,24 +242,26 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
     });
   });
 
-  server.get<{ Params: { id: string } }>("/payments/:id/allocations", async (request) => {
-    const service = new CommercialCoreService(buildRequestContext(request));
+  server.get<{ Params: { id: string } }>("/payments/:id/allocations", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.payments), async (context) => {
+    const service = new CommercialCoreService(context);
     return { items: await service.getPaymentAllocations(request.params.id) };
-  });
+  }));
 
-  server.get("/warehouse-orders", async (request) => {
-    const service = new CommercialCoreService(buildRequestContext(request));
+  server.get("/warehouse-orders", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.warehouse), async (context) => {
+    const service = new CommercialCoreService(context);
     const items = await service.listWarehouseOrders();
     return { items, total: items.length };
-  });
+  }));
 
   server.get<{ Params: { id: string } }>("/warehouse-orders/:id", async (request, reply) => {
-    const service = new CommercialCoreService(buildRequestContext(request));
-    const warehouseOrder = await service.getWarehouseOrder(request.params.id);
-    if (!warehouseOrder) {
-      return reply.status(404).send({ message: "Warehouse order not found" });
-    }
-    return { item: warehouseOrder };
+    return withGuards(request, reply, requireReadAccess(readPermissions.warehouse), async (context) => {
+      const service = new CommercialCoreService(context);
+      const warehouseOrder = await service.getWarehouseOrder(request.params.id);
+      if (!warehouseOrder) {
+        return reply.status(404).send({ message: "Warehouse order not found" });
+      }
+      return { item: warehouseOrder };
+    });
   });
 
   server.post<{ Body: Partial<WarehouseOrder> }>("/warehouse-orders", async (request, reply) => {
@@ -344,16 +351,18 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
     });
   });
 
-  server.get("/deliveries", async (request) => {
-    const service = new CommercialCoreService(buildRequestContext(request));
+  server.get("/deliveries", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.deliveries), async (context) => {
+    const service = new CommercialCoreService(context);
     const items = await service.listDeliveries();
     return { items, total: items.length };
-  });
+  }));
   server.get<{ Params: { id: string } }>("/deliveries/:id", async (request, reply) => {
-    const service = new CommercialCoreService(buildRequestContext(request));
-    const delivery = await service.getDelivery(request.params.id);
-    if (!delivery) return reply.status(404).send({ message: "Delivery not found" });
-    return { item: delivery };
+    return withGuards(request, reply, requireReadAccess(readPermissions.deliveries), async (context) => {
+      const service = new CommercialCoreService(context);
+      const delivery = await service.getDelivery(request.params.id);
+      if (!delivery) return reply.status(404).send({ message: "Delivery not found" });
+      return { item: delivery };
+    });
   });
   server.post<{ Body: Partial<Delivery> }>("/deliveries", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["deliveries.write", "deliveries.manage"])], async (context) => {
@@ -414,16 +423,18 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
     })
   );
 
-  server.get("/invoices", async (request) => {
-    const service = new CommercialCoreService(buildRequestContext(request));
+  server.get("/invoices", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.invoices), async (context) => {
+    const service = new CommercialCoreService(context);
     const items = await service.listInvoices();
     return { items, total: items.length };
-  });
+  }));
   server.get<{ Params: { id: string } }>("/invoices/:id", async (request, reply) => {
-    const service = new CommercialCoreService(buildRequestContext(request));
-    const invoice = await service.getInvoice(request.params.id);
-    if (!invoice) return reply.status(404).send({ message: "Invoice not found" });
-    return { item: invoice };
+    return withGuards(request, reply, requireReadAccess(readPermissions.invoices), async (context) => {
+      const service = new CommercialCoreService(context);
+      const invoice = await service.getInvoice(request.params.id);
+      if (!invoice) return reply.status(404).send({ message: "Invoice not found" });
+      return { item: invoice };
+    });
   });
   server.post<{ Body: Partial<Invoice> }>("/invoices", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["invoices.write", "documents.write"])], async (context) => {
@@ -478,16 +489,18 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
     })
   );
 
-  server.get("/returns", async (request) => {
-    const service = new CommercialCoreService(buildRequestContext(request));
+  server.get("/returns", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.returns), async (context) => {
+    const service = new CommercialCoreService(context);
     const items = await service.listReturns();
     return { items, total: items.length };
-  });
+  }));
   server.get<{ Params: { id: string } }>("/returns/:id", async (request, reply) => {
-    const service = new CommercialCoreService(buildRequestContext(request));
-    const returnRecord = await service.getReturn(request.params.id);
-    if (!returnRecord) return reply.status(404).send({ message: "Return not found" });
-    return { item: returnRecord };
+    return withGuards(request, reply, requireReadAccess(readPermissions.returns), async (context) => {
+      const service = new CommercialCoreService(context);
+      const returnRecord = await service.getReturn(request.params.id);
+      if (!returnRecord) return reply.status(404).send({ message: "Return not found" });
+      return { item: returnRecord };
+    });
   });
   server.post<{ Body: Partial<Return> }>("/returns", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["returns.write", "returns.manage"])], async (context) => {
@@ -564,16 +577,18 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
     })
   );
 
-  server.get("/documents", async (request) => {
-    const service = new CommercialCoreService(buildRequestContext(request));
+  server.get("/documents", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.documents), async (context) => {
+    const service = new CommercialCoreService(context);
     const items = await service.listDocuments();
     return { items, total: items.length };
-  });
+  }));
   server.get<{ Params: { id: string } }>("/documents/:id", async (request, reply) => {
-    const service = new CommercialCoreService(buildRequestContext(request));
-    const document = await service.getDocument(request.params.id);
-    if (!document) return reply.status(404).send({ message: "Document not found" });
-    return { item: document };
+    return withGuards(request, reply, requireReadAccess(readPermissions.documents), async (context) => {
+      const service = new CommercialCoreService(context);
+      const document = await service.getDocument(request.params.id);
+      if (!document) return reply.status(404).send({ message: "Document not found" });
+      return { item: document };
+    });
   });
   server.post<{ Body: { type: DocumentType; entityType: Document["entityType"]; entityId: string; entityNo: string; customerId?: string } }>("/documents/render", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["documents.write", "documents.render"])], async (context) => {

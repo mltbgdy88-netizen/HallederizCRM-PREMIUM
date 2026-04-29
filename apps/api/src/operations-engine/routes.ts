@@ -6,6 +6,7 @@ import { assertAnyPermission, assertAuthenticated, withGuards } from "../shared/
 import { listAuditEvents, recordAuditEvent } from "../shared/audit-timeline";
 import { createApprovalExecution, runApprovalExecution } from "../ai-local-output-store";
 import type { AiOperationType } from "@hallederiz/types";
+import { readPermissions, requireReadAccess } from "../shared/read-guards";
 
 function resolveExecutionAction(approval: Approval): AiOperationType | null {
   const payloadAction = typeof approval.payload.action === "string" ? approval.payload.action : undefined;
@@ -39,10 +40,12 @@ function resolveExecutionAction(approval: Approval): AiOperationType | null {
 
 export async function registerOperationsEngineRoutes(server: FastifyInstance) {
   server.get<{ Params: { entityType: string; entityId: string } }>("/workflows/:entityType/:entityId", async (request, reply) => {
-    const service = new OperationsEngineService(buildRequestContext(request));
-    const workflow = service.getWorkflow(request.params.entityType, request.params.entityId);
-    if (!workflow) return reply.status(404).send({ message: "Workflow not found" });
-    return { item: workflow };
+    return withGuards(request, reply, requireReadAccess(readPermissions.workflow), async (context) => {
+      const service = new OperationsEngineService(context);
+      const workflow = service.getWorkflow(request.params.entityType, request.params.entityId);
+      if (!workflow) return reply.status(404).send({ message: "Workflow not found" });
+      return { item: workflow };
+    });
   });
 
   server.post<{ Params: { entityType: string; entityId: string } }>("/workflows/:entityType/:entityId/bootstrap", async (request, reply) => {
@@ -61,16 +64,18 @@ export async function registerOperationsEngineRoutes(server: FastifyInstance) {
     });
   });
 
-  server.get("/tasks", async (request) => {
-    const service = new OperationsEngineService(buildRequestContext(request));
+  server.get("/tasks", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.tasks), async (context) => {
+    const service = new OperationsEngineService(context);
     const items = service.listTasks();
     return { items, total: items.length };
-  });
+  }));
   server.get<{ Params: { id: string } }>("/tasks/:id", async (request, reply) => {
-    const service = new OperationsEngineService(buildRequestContext(request));
-    const task = service.getTask(request.params.id);
-    if (!task) return reply.status(404).send({ message: "Task not found" });
-    return { item: task };
+    return withGuards(request, reply, requireReadAccess(readPermissions.tasks), async (context) => {
+      const service = new OperationsEngineService(context);
+      const task = service.getTask(request.params.id);
+      if (!task) return reply.status(404).send({ message: "Task not found" });
+      return { item: task };
+    });
   });
   server.post<{ Body: Partial<Task> }>("/tasks", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["tasks.write", "workflow.write"])], async (context) => {
@@ -111,16 +116,18 @@ export async function registerOperationsEngineRoutes(server: FastifyInstance) {
     });
   });
 
-  server.get("/approvals", async (request) => {
-    const service = new OperationsEngineService(buildRequestContext(request));
+  server.get("/approvals", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.approvals), async (context) => {
+    const service = new OperationsEngineService(context);
     const items = service.listApprovals();
     return { items, total: items.length };
-  });
+  }));
   server.get<{ Params: { id: string } }>("/approvals/:id", async (request, reply) => {
-    const service = new OperationsEngineService(buildRequestContext(request));
-    const approval = service.getApproval(request.params.id);
-    if (!approval) return reply.status(404).send({ message: "Approval not found" });
-    return { item: approval };
+    return withGuards(request, reply, requireReadAccess(readPermissions.approvals), async (context) => {
+      const service = new OperationsEngineService(context);
+      const approval = service.getApproval(request.params.id);
+      if (!approval) return reply.status(404).send({ message: "Approval not found" });
+      return { item: approval };
+    });
   });
   server.post<{ Body: Partial<Approval> }>("/approvals", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.write", "approvals.manage"])], async (context) => {
@@ -217,28 +224,28 @@ export async function registerOperationsEngineRoutes(server: FastifyInstance) {
     });
   });
 
-  server.get("/dashboard/cards", async (request) => {
-    const service = new OperationsEngineService(buildRequestContext(request));
+  server.get("/dashboard/cards", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.tasks), async (context) => {
+    const service = new OperationsEngineService(context);
     const items = service.listDashboardCards();
     return { items, total: items.length };
-  });
-  server.get<{ Params: { cardType: string } }>("/dashboard/cards/:cardType/tasks", async (request) => {
-    const service = new OperationsEngineService(buildRequestContext(request));
+  }));
+  server.get<{ Params: { cardType: string } }>("/dashboard/cards/:cardType/tasks", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.tasks), async (context) => {
+    const service = new OperationsEngineService(context);
     return { items: service.listDashboardCardTasks(request.params.cardType) };
-  });
-  server.get("/dashboard/summary", async (request) => {
-    const service = new OperationsEngineService(buildRequestContext(request));
+  }));
+  server.get("/dashboard/summary", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.tasks), async (context) => {
+    const service = new OperationsEngineService(context);
     return { item: service.getDashboardSummary() };
-  });
+  }));
 
   server.get<{ Querystring: { entityType?: string; entityId?: string } }>("/audit-events", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated], async (context) => ({
+    withGuards(request, reply, requireReadAccess(readPermissions.workflow), async (context) => ({
       items: listAuditEvents(context.tenantId, request.query.entityType, request.query.entityId)
     }))
   );
 
   server.get<{ Params: { entityType: string; entityId: string } }>("/entity-timelines/:entityType/:entityId", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated], async (context) => ({
+    withGuards(request, reply, requireReadAccess(readPermissions.workflow), async (context) => ({
       items: listAuditEvents(context.tenantId, request.params.entityType, request.params.entityId)
     }))
   );
