@@ -59,17 +59,17 @@ export function ErpConnectionCard({ connection }: { connection: ErpConnection })
         {connection.lastSyncedAt ? new Date(connection.lastSyncedAt).toLocaleString("tr-TR") : "-"}
       </p>
       <div className="hz-inline-actions">
-        <button className="hz-btn hz-btn-secondary" type="button">
-          Duzenle
+        <button className="hz-btn hz-btn-secondary" type="button" disabled>
+          Duzenle (Foundation)
         </button>
-        <button className="hz-btn hz-btn-secondary" type="button">
-          Test Et
+        <button className="hz-btn hz-btn-secondary" type="button" disabled>
+          Test Et (Foundation)
         </button>
-        <button className="hz-btn hz-btn-secondary" type="button">
-          Senkron Baslat
+        <button className="hz-btn hz-btn-secondary" type="button" disabled>
+          Senkron Baslat (Foundation)
         </button>
-        <button className="hz-btn hz-btn-secondary" type="button">
-          Pasiflestir
+        <button className="hz-btn hz-btn-secondary" type="button" disabled>
+          Pasiflestir (Foundation)
         </button>
       </div>
     </article>
@@ -111,11 +111,11 @@ export function ErpConnectionModal() {
         </label>
       </div>
       <div className="hz-inline-actions">
-        <button className="hz-btn hz-btn-primary" type="button">
-          Kaydet
+        <button className="hz-btn hz-btn-primary" type="button" disabled>
+          Kaydet (Foundation)
         </button>
-        <button className="hz-btn hz-btn-secondary" type="button">
-          Test Et
+        <button className="hz-btn hz-btn-secondary" type="button" disabled>
+          Test Et (Foundation)
         </button>
       </div>
     </section>
@@ -210,11 +210,11 @@ export function ErpTemplatePanel({ templates }: { templates: ReturnType<typeof g
             <h3>{template.title}</h3>
             <p className="muted">Son kullanim: {template.lastUsedAt}</p>
             <div className="hz-inline-actions">
-              <button className="hz-btn hz-btn-secondary" type="button">
-                Indir
+              <button className="hz-btn hz-btn-secondary" type="button" disabled>
+                Indir (Foundation)
               </button>
-              <button className="hz-btn hz-btn-secondary" type="button">
-                Ornek Gor
+              <button className="hz-btn hz-btn-secondary" type="button" disabled>
+                Ornek Gor (Foundation)
               </button>
             </div>
           </article>
@@ -255,16 +255,20 @@ export function ErpPage() {
       </section>
 
       <PrimaryActionToolbar>
-        <button className="hz-btn hz-toolbar-btn hz-btn-primary" type="button">
-          Yeni Baglanti
+        <button className="hz-btn hz-toolbar-btn hz-btn-primary" type="button" disabled>
+          Yeni Baglanti (Foundation)
         </button>
-        <button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button">
-          Senkron Baslat
+        <button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button" disabled>
+          Senkron Baslat (Foundation)
         </button>
-        <button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button">
-          Excel Sablonu
+        <button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button" disabled>
+          Excel Sablonu (Foundation)
         </button>
       </PrimaryActionToolbar>
+
+      <section className="hz-content-card">
+        <p className="muted">Not: Bu toolbar aksiyonlari foundation modundadir. Baglanti test/senkron akislari canli provider konfigurasyonuna gecildiginde aktiflestirilir.</p>
+      </section>
 
       <TabSwitcher
         activeKey={tab}
@@ -311,13 +315,14 @@ export function ErpPage() {
           </label>
         </div>
         <div className="hz-filter-actions">
-          <button type="button" className="hz-btn hz-btn-secondary">
-            Filtrele
+          <button type="button" className="hz-btn hz-btn-secondary" disabled>
+            Filtre Foundation
           </button>
-          <button type="button" className="reset-btn">
+          <button type="button" className="reset-btn" disabled>
             Temizle
           </button>
         </div>
+        <p className="muted">ERP filtreleri bir sonraki adimda API sorgusuna baglanacaktir. Simdilik gorunumu degistirmez.</p>
       </section>
 
       {tab === "connections" ? (

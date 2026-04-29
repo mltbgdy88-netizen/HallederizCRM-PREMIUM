@@ -48,5 +48,8 @@ export async function getFactoryOrderData(): Promise<{ orders: FactoryOrder[]; l
 
 export async function getFactoryOrderById(factoryOrderId?: string) {
   const data = await getFactoryOrderData();
-  return { order: data.orders.find((item) => item.id === factoryOrderId || item.factoryOrderNo === factoryOrderId) ?? data.orders[0] ?? null, logs: data.logs };
+  if (!factoryOrderId) {
+    return { order: data.orders[0] ?? null, logs: data.logs };
+  }
+  return { order: data.orders.find((item) => item.id === factoryOrderId || item.factoryOrderNo === factoryOrderId) ?? null, logs: data.logs };
 }

@@ -347,15 +347,24 @@ export async function getOperationsEngineData(): Promise<OperationsEngineData> {
 
 export async function getTaskById(taskId?: string): Promise<Task | null> {
   const data = await getOperationsEngineData();
-  return data.tasks.find((task) => task.id === taskId || task.taskNo === taskId) ?? data.tasks[0] ?? null;
+  if (!taskId) {
+    return data.tasks[0] ?? null;
+  }
+  return data.tasks.find((task) => task.id === taskId || task.taskNo === taskId) ?? null;
 }
 
 export async function getApprovalById(approvalId?: string): Promise<Approval | null> {
   const data = await getOperationsEngineData();
-  return data.approvals.find((approval) => approval.id === approvalId || approval.approvalNo === approvalId) ?? data.approvals[0] ?? null;
+  if (!approvalId) {
+    return data.approvals[0] ?? null;
+  }
+  return data.approvals.find((approval) => approval.id === approvalId || approval.approvalNo === approvalId) ?? null;
 }
 
 export async function getWorkflowByEntity(entityType?: string, entityId?: string): Promise<WorkflowInstance | null> {
   const data = await getOperationsEngineData();
-  return data.workflows.find((workflow) => workflow.entityType === entityType && (workflow.entityId === entityId || workflow.entityNo === entityId)) ?? data.workflows[0] ?? null;
+  if (!entityType || !entityId) {
+    return data.workflows[0] ?? null;
+  }
+  return data.workflows.find((workflow) => workflow.entityType === entityType && (workflow.entityId === entityId || workflow.entityNo === entityId)) ?? null;
 }

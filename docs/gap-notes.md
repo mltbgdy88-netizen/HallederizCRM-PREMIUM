@@ -35,3 +35,25 @@ Bu notlar pilot oncesi bilincli olarak foundation seviyesinde birakilan alanlari
 - Approval execution failure/cancel audit izi guclendirildi.
 - Local output print/file lifecycle audit eventleri eklendi.
 - Document render ve document delivery DB kayit semantigi guclendirildi.
+
+## 2026-04-29 Pilot Blocker Follow-up
+- `/approvals/:id/execute` no longer stays status-only for supported actions; it now creates/runs approval execution dispatch and writes execution result back to approval record.
+- Unsupported approval execute paths now return explicit `execution_action_not_active` instead of silent no-op.
+- Detail helpers for approvals/tasks/workflows/documents/deliveries/factory orders now avoid falling back to unrelated first records when an invalid id is provided.
+- Pilot readiness items now expose `readinessState` (`go_live_blocker`, `demo_gap`, `warning`, `ready`) to separate real go-live blockers from demo gaps.
+
+## P1 UX Reliability Notes (2026-04-29)
+- Gorevler/Belgeler/ERP/WhatsApp/AI/Fabrikalar filtre panellerinde no-op davranis acikca foundation olarak etiketlendi.
+- Gorevler ve Fabrikalar listelerinde secili satir -> sag panel senkronizasyonu guclendirildi.
+- Kritik listelerde gorunur Detay/Ac aksiyonlari standardize edilmeye devam ediyor.
+
+## Local-First AI Correction (2026-04-29)
+- AI runtime varsayilan provider modeli local-first olarak netlestirildi (local -> external -> fallback).
+- OpenAI baglantisi zorunlu yol olmaktan cikarilip opsiyonel provider olarak konumlandi.
+- CRM/WhatsApp/sesli AI davranis modelinde proposal + approval zorunlulugu korunarak ortaklasma guclendirildi.
+
+## Decision Alignment Fix (2026-04-29)
+- Canonical route sozlugu `/gorevler`, `/onaylar`, `/ai/onaylar`, `/ai/icgoruler`, `/ayarlar/pilot-hazirlik`, `/ayarlar/staging-kontrol` uzerinde sabitlendi.
+- Dokuman ve UI metinlerinde web uygulamanin ic personel cockpit'i oldugu netlestirildi; dis bayi/musteri akisinda ayri portal login yerine WhatsApp + belge paylasimi modeli vurgulandi.
+- ERP / Fabrika / WhatsApp / AI tarafindaki no-op toolbar ve aksiyon butonlari `Foundation` etiketiyle pasiflestirilerek yanlis canli-islem beklentisi azaltildi.
+- Not: ` /approvals/:id/execute ` gibi ifadeler API endpoint adidir; web canonical route karsiligi `/onaylar` olarak korunur.

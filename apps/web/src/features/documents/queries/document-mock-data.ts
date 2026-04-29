@@ -148,7 +148,10 @@ export async function getDocumentMockData(): Promise<Document[]> {
 
 export async function getDocumentById(documentId?: string): Promise<Document | null> {
   const documents = await getDocumentMockData();
-  return documents.find((document) => document.id === documentId || document.documentNo === documentId) ?? documents[0] ?? null;
+  if (!documentId) {
+    return documents[0] ?? null;
+  }
+  return documents.find((document) => document.id === documentId || document.documentNo === documentId) ?? null;
 }
 
 export function getDocumentTypeLabel(type: DocumentType): string {

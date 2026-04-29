@@ -10,4 +10,17 @@ export class ApprovalsClient {
   detail(id: string) {
     return this.api.get<ItemResponse<Approval>>(`/approvals/${id}`);
   }
+  approve(id: string) {
+    return this.api.post<ItemResponse<Approval>>(`/approvals/${id}/approve`);
+  }
+  reject(id: string) {
+    return this.api.post<ItemResponse<Approval>>(`/approvals/${id}/reject`);
+  }
+  execute(id: string) {
+    return this.api.post<
+      ItemResponse<Approval> & {
+        execution?: unknown;
+      }
+    >(`/approvals/${id}/execute`);
+  }
 }

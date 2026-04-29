@@ -29,3 +29,11 @@ Windows ortaminda bazen Next.js build cache dosyalari (`apps/web/.runtime-next/t
 
 Kod kaynakli bir hata degilse bu adimlar genelde sorunu cozer. Kilit tekrarlarsa IDE/terminalde acik kalan eski Next surecleri kontrol edilmelidir.
 
+
+## 2026-04-29 EPERM trace notu
+- Build sirasinda `apps/web/.runtime-next/trace` dosyasinda anlik `EPERM` kilidi gorulebilir.
+- Bu durum kod hatasindan cok ortam kilidi/cached process etkisidir.
+- Uygulanan guvenli adimlar:
+  1. `apps/web/.runtime-next` ve `apps/web/.next` klasorlerini temizlemeyi dene.
+  2. Hata devam ederse build komutunu yeniden calistir (anlik kilitler genellikle ikinci denemede duser).
+  3. Yalniz bu repo ile ilgili acik `next dev/node` sureclerini kapatabildigin ortamlarda kapatip tekrar dene.

@@ -4,6 +4,7 @@ import { platformSettingsSchema } from "@hallederiz/types";
 import { buildRequestContext } from "../../shared/request-context";
 import { assertAnyPermission, assertAuthenticated, withGuards } from "../../shared/auth-guards";
 import { getTenantSettingsState, setTenantSettingsState } from "../settings-state";
+import { buildPilotReadiness } from "../pilot-readiness";
 
 export async function registerSettingsRoutes(server: FastifyInstance) {
   server.get("/settings", async () => {
@@ -76,4 +77,13 @@ export async function registerSettingsRoutes(server: FastifyInstance) {
       }
     };
   });
+
+  server.get("/settings/pilot-readiness", async (request, reply) =>
+    withGuards(request, reply, [assertAuthenticated], async (context) => {
+      const settings = getTenantSettingsState();
+      return {
+        item: buildPilotReadiness(context.tenantId, settings)
+      };
+    })
+  );
 }

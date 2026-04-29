@@ -6,7 +6,16 @@ export class AiClient {
   constructor(private readonly api: ApiClient) {}
 
   chat(message: string) {
-    return this.api.post<ItemResponse<unknown>>("/ai/chat", { message });
+    return this.api.post<
+      ItemResponse<{
+        messages: Array<{ id: string; role: "user" | "assistant" | "system"; inputMode: "text" | "voice"; body: string; tenantId: string; sessionId: string; createdAt: string }>;
+        reply: string;
+        provider: string;
+        mode: string;
+        classification: { mutation: boolean; text: string; parsedAt: string };
+        requiresProposal: boolean;
+      }>
+    >("/ai/chat", { message });
   }
 
   parseCommand(text: string) {
@@ -49,4 +58,3 @@ export class AiClient {
     return this.api.post<ItemResponse<{ audioRef: string; provider: string; mimeType: string }>>("/ai/voice/speak", input);
   }
 }
-

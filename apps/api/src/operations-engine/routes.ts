@@ -4,6 +4,38 @@ import { OperationsEngineService } from "../modules/operations-engine/service";
 import { buildRequestContext } from "../shared/request-context";
 import { assertAnyPermission, assertAuthenticated, withGuards } from "../shared/auth-guards";
 import { listAuditEvents, recordAuditEvent } from "../shared/audit-timeline";
+import { createApprovalExecution, runApprovalExecution } from "../ai-local-output-store";
+import type { AiOperationType } from "@hallederiz/types";
+
+function resolveExecutionAction(approval: Approval): AiOperationType | null {
+  const payloadAction = typeof approval.payload.action === "string" ? approval.payload.action : undefined;
+  const payloadOperation = typeof approval.payload.operationType === "string" ? approval.payload.operationType : undefined;
+  const actionKey = payloadOperation ?? payloadAction ?? approval.policySnapshot.serverActionKey ?? "";
+  const normalized = actionKey.toLowerCase();
+
+  const map: Record<string, AiOperationType> = {
+    create_payment: "create_payment",
+    "payment.create": "create_payment",
+    mark_warehouse_ready: "mark_warehouse_ready",
+    "warehouse.mark_ready": "mark_warehouse_ready",
+    "warehouse.prepare": "mark_warehouse_ready",
+    complete_delivery: "complete_delivery",
+    "delivery.complete": "complete_delivery",
+    create_invoice: "create_invoice",
+    "invoice.create": "create_invoice",
+    create_return: "create_return",
+    "return.create": "create_return",
+    queue_document_save: "queue_document_save",
+    "document.queue_save": "queue_document_save",
+    queue_document_print: "queue_document_print",
+    "document.queue_print": "queue_document_print",
+    send_document_whatsapp: "send_document_whatsapp",
+    "document.send_whatsapp": "send_document_whatsapp",
+    "whatsapp.send_template": "send_document_whatsapp"
+  };
+
+  return map[normalized] ?? null;
+}
 
 export async function registerOperationsEngineRoutes(server: FastifyInstance) {
   server.get<{ Params: { entityType: string; entityId: string } }>("/workflows/:entityType/:entityId", async (request, reply) => {
@@ -129,16 +161,59 @@ export async function registerOperationsEngineRoutes(server: FastifyInstance) {
   server.post<{ Params: { id: string } }>("/approvals/:id/execute", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.write", "approvals.execute", "ai.actions.write"])], async (context) => {
       const service = new OperationsEngineService(context);
-      const approval = service.updateApprovalStatus(request.params.id, "executed");
+      const currentApproval = service.getApproval(request.params.id);
+      if (!currentApproval) return reply.status(404).send({ message: "Approval not found" });
+      if (currentApproval.status !== "approved") {
+        return reply.status(409).send({
+          message: "Approval execute etmek icin kaydin onayli olmasi gerekir.",
+          code: "approval_not_approved"
+        });
+      }
+
+      const operationType = resolveExecutionAction(currentApproval);
+      if (!operationType) {
+        return reply.status(422).send({
+          message: "Bu approval icin aktif execution aksiyonu tanimli degil.",
+          code: "execution_action_not_active"
+        });
+      }
+
+      const execution = runApprovalExecution(
+        createApprovalExecution({
+          tenantId: currentApproval.tenantId,
+          approvalId: currentApproval.id,
+          proposalId: typeof currentApproval.payload.proposalId === "string" ? currentApproval.payload.proposalId : undefined,
+          targetType: currentApproval.entityType,
+          targetId: currentApproval.entityId,
+          operationType,
+          status: "authorized",
+          requestedBy: currentApproval.requestedBy,
+          authorizedBy: context.userId,
+          authorizedAt: new Date().toISOString()
+        }).id
+      );
+      if (!execution) {
+        return reply.status(500).send({ message: "Execution kaydi olusturulamadi." });
+      }
+
+      const approval = execution.status === "executed" ? service.updateApprovalStatus(request.params.id, "executed") : currentApproval;
       if (!approval) return reply.status(404).send({ message: "Approval not found" });
+      approval.execution = {
+        executable: execution.status !== "cancelled",
+        executedAt: execution.executedAt ?? execution.result?.completedAt,
+        result: execution.result?.message ?? execution.status
+      };
       recordAuditEvent(context, {
         entityType: "approval",
         entityId: approval.id,
-        eventType: "approval.executed",
-        title: "Onay kaydi execute edildi",
-        description: `${approval.approvalNo} executed durumuna alindi.`
+        eventType: execution.status === "executed" ? "approval.executed" : "approval.execution_failed",
+        title: execution.status === "executed" ? "Onay kaydi execute edildi" : "Onay kaydi execution basarisiz",
+        description:
+          execution.status === "executed"
+            ? `${approval.approvalNo} onayi domain dispatch ile calistirildi.`
+            : execution.result?.message ?? `${approval.approvalNo} execution basarisiz oldu.`
       });
-      return { item: approval };
+      return { item: approval, execution };
     });
   });
 

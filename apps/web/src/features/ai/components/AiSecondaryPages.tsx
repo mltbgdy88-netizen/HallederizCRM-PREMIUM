@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { getAiAssistantData } from "../queries";
 
 export function AiApprovalFilterBar() {
-  return <FilterBar><div className="task-center-filter-grid"><label>Proposal No<input placeholder="AI-401" /></label><label>Durum<select defaultValue=""><option value="">Tum durumlar</option><option>Bekliyor</option><option>Onaylandi</option></select></label><label>Aksiyon Tipi<select defaultValue=""><option value="">Tum aksiyonlar</option><option>create_offer</option><option>send_document_whatsapp</option></select></label></div><FilterActions><button type="button" className="hz-btn hz-btn-secondary">Filtrele</button><button type="button" className="reset-btn">Temizle</button></FilterActions></FilterBar>;
+  return <FilterBar><div className="task-center-filter-grid"><label>Proposal No<input placeholder="AI-401" /></label><label>Durum<select defaultValue=""><option value="">Tum durumlar</option><option>Bekliyor</option><option>Onaylandi</option></select></label><label>Aksiyon Tipi<select defaultValue=""><option value="">Tum aksiyonlar</option><option>create_offer</option><option>send_document_whatsapp</option></select></label></div><FilterActions><button type="button" className="hz-btn hz-btn-secondary" disabled>Filtre Foundation</button><button type="button" className="reset-btn" disabled>Temizle</button></FilterActions><p className="muted">Bu filtreler sonraki adimda canli AI sorgularina baglanacaktir.</p></FilterBar>;
 }
 
 export function AiApprovalTable({ proposals, approvals }: { proposals: AiProposal[]; approvals: Approval[] }) {
@@ -16,7 +16,49 @@ export function AiApprovalTable({ proposals, approvals }: { proposals: AiProposa
 }
 
 export function AiApprovalDetailDrawer({ approval }: { approval: Approval | undefined }) {
-  return <aside className="hz-side-panel"><p className="drawer-eyebrow">AI Approval Detail</p><h3>{approval?.approvalNo ?? "Secim yok"}</h3><p className="muted">{approval?.payloadSummary ?? "Proposal secildiginde payload burada gorunur."}</p><div className="hz-inline-actions"><button className="hz-btn hz-btn-primary" type="button">Onayla</button><button className="hz-btn hz-btn-secondary" type="button">Reddet</button><button className="hz-btn hz-btn-secondary" type="button">Execution Kaydi</button></div></aside>;
+  return <aside className="hz-side-panel"><p className="drawer-eyebrow">AI Approval Detail</p><h3>{approval?.approvalNo ?? "Secim yok"}</h3><p className="muted">{approval?.payloadSummary ?? "Proposal secildiginde payload burada gorunur."}</p><div className="hz-inline-actions"><button className="hz-btn hz-btn-primary" type="button" disabled>Onayla (Foundation)</button><button className="hz-btn hz-btn-secondary" type="button" disabled>Reddet (Foundation)</button><button className="hz-btn hz-btn-secondary" type="button" disabled>Execution Kaydi (Foundation)</button></div><p className="muted">Not: Bu paneldeki aksiyonlar bilgilendirme amaclidir. Canli onay/isletme akislari merkezi onay ekrani ve API tarafinda yonetilir.</p></aside>;
+}
+
+function ApprovalCoveragePanel() {
+  const rows = [
+    { action: "create_offer", approval: "Evet", state: "Bagli" },
+    { action: "create_order", approval: "Evet", state: "Bagli" },
+    { action: "create_payment", approval: "Evet", state: "Bagli" },
+    { action: "mark_warehouse_ready", approval: "Evet", state: "Bagli" },
+    { action: "complete_delivery", approval: "Evet", state: "Bagli" },
+    { action: "create_invoice", approval: "Evet", state: "Bagli" },
+    { action: "create_return", approval: "Evet", state: "Bagli" },
+    { action: "send_document_whatsapp", approval: "Evet", state: "Bagli" },
+    { action: "queue_document_save", approval: "Evet", state: "Bagli" },
+    { action: "queue_document_print", approval: "Evet", state: "Bagli" }
+  ];
+
+  return (
+    <section className="hz-content-card">
+      <h3>Approval Coverage</h3>
+      <p className="muted">Operatormodu aksiyonlari approval zorunlulugu ile calisir. Read-only yanitlar approval gerektirmez.</p>
+      <div className="table-wrap hz-table-wrap">
+        <table className="table hz-table">
+          <thead>
+            <tr>
+              <th>Aksiyon</th>
+              <th>Approval</th>
+              <th>Execution</th>
+            </tr>
+          </thead>
+          <tbody>
+            {rows.map((row) => (
+              <tr key={row.action}>
+                <td>{row.action}</td>
+                <td><span className="hz-badge hz-badge-warning">{row.approval}</span></td>
+                <td><span className="hz-badge hz-badge-success">{row.state}</span></td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
 }
 
 export function AiApprovalsPage() {
@@ -36,11 +78,11 @@ export function AiApprovalsPage() {
     );
   }, []);
 
-  return <div className="hz-page-stack"><PageHeader title="AI Onaylar" description="AI proposal kayitlarini insan onayi ve execution zinciriyle yonetin." /><section className="hz-metric-grid"><MetricCard title="Proposal" value={String(data.proposals.length)} detail="Toplam" tone="info" /><MetricCard title="Onay Bekleyen" value={String(data.approvals.length)} detail="Pending" tone="warning" /><MetricCard title="Execution" value={String(data.executions.length)} detail="Authorized" tone="success" /><MetricCard title="Rejected" value="0" detail="Bugun" tone="danger" /></section><AiApprovalFilterBar /><SplitContentLayout main={<AiApprovalTable proposals={data.proposals} approvals={data.approvals} />} side={<AiApprovalDetailDrawer approval={data.approvals[0]} />} /></div>;
+  return <div className="hz-page-stack"><PageHeader title="AI Onaylar" description="Local-first AI operatormodu: mutation talepleri proposal + approval zinciriyle yonetilir." /><section className="hz-metric-grid"><MetricCard title="Proposal" value={String(data.proposals.length)} detail="Toplam" tone="info" /><MetricCard title="Onay Bekleyen" value={String(data.approvals.length)} detail="Pending" tone="warning" /><MetricCard title="Execution" value={String(data.executions.length)} detail="Authorized" tone="success" /><MetricCard title="Rejected" value="0" detail="Bugun" tone="danger" /></section><AiApprovalFilterBar /><SplitContentLayout main={<><AiApprovalTable proposals={data.proposals} approvals={data.approvals} /><ApprovalCoveragePanel /></>} side={<AiApprovalDetailDrawer approval={data.approvals[0]} />} /></div>;
 }
 
 export function AiInsightFilterBar() {
-  return <FilterBar><div className="task-center-filter-grid"><label>Modul<select defaultValue=""><option value="">Tum moduller</option><option>Risk</option><option>Stok</option><option>Fabrika</option></select></label><label>Donem<select defaultValue="today"><option value="today">Bugun</option><option value="week">Bu Hafta</option></select></label><label className="hz-toggle"><input type="checkbox" />Kritikler</label></div><FilterActions><button type="button" className="hz-btn hz-btn-secondary">Filtrele</button><button type="button" className="reset-btn">Temizle</button></FilterActions></FilterBar>;
+  return <FilterBar><div className="task-center-filter-grid"><label>Modul<select defaultValue=""><option value="">Tum moduller</option><option>Risk</option><option>Stok</option><option>Fabrika</option></select></label><label>Donem<select defaultValue="today"><option value="today">Bugun</option><option value="week">Bu Hafta</option></select></label><label className="hz-toggle"><input type="checkbox" />Kritikler</label></div><FilterActions><button type="button" className="hz-btn hz-btn-secondary" disabled>Filtre Foundation</button><button type="button" className="reset-btn" disabled>Temizle</button></FilterActions><p className="muted">AI icgoru filtreleri yakinda canli veri taramasini etkileyecek.</p></FilterBar>;
 }
 
 export function AiInsightGrid({ insights }: { insights: AiInsight[] }) {
@@ -58,6 +100,5 @@ export function AiInsightsPage() {
     void getAiAssistantData().then((next) => setInsights(next.insights));
   }, []);
 
-  return <div className="hz-page-stack"><PageHeader title="AI Icgoruler" description="Risk, firsat, tahsilat, stok ve fabrika sinyallerini dashboard uyumlu kartlarla izleyin." /><AiInsightFilterBar /><SplitContentLayout main={<AiInsightGrid insights={insights} />} side={<AiInsightDetailPanel insight={insights[0]} />} /></div>;
+  return <div className="hz-page-stack"><PageHeader title="AI Icgoruler" description="Local-first AI analiz katmani: read-only icgorulerle risk, firsat, tahsilat, stok ve fabrika sinyallerini izleyin." /><AiInsightFilterBar /><SplitContentLayout main={<AiInsightGrid insights={insights} />} side={<AiInsightDetailPanel insight={insights[0]} />} /></div>;
 }
-

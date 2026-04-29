@@ -87,6 +87,10 @@ Web uygulamasinin temel iskeleti tek tip bir app shell uzerine kurulur:
 
 Bu yapi, kullanicinin moduller arasi gecis yaparken baglam kaybetmemesini saglar ve ERP benzeri masaustu deneyimi sunar.
 
+Not:
+- Bu cockpit uygulamasi ic personel rollerine yoneliktir.
+- Ayrik dis bayi/musteri web login/portal bu repo kapsaminda yer almaz.
+
 ## 5. AI + Approval Mimarisi
 AI altyapisi, kontrolsuz otomasyon degil kontrollu karar destek modeli uzerine kurulur.
 
@@ -108,11 +112,16 @@ AI altyapisi, kontrolsuz otomasyon degil kontrollu karar destek modeli uzerine k
 - Mutation icin zorunlu insan onayi
 - Degisikliklerin entity timeline uzerinden geriye donuk incelenebilmesi
 
+### 5.3 Provider onceligi (Local-First)
+- Varsayilan runtime onceligi: `Local Provider -> External Provider -> Safe Fallback`.
+- Local provider kurum ici veri guvenligi ve operasyonel denetlenebilirlik icin birincil secenektir.
+- External provider (OpenAI vb.) opsiyonel adapter olarak korunur.
+
 ## 6. WhatsApp Mimarisi
 WhatsApp katmani tek tip mesajlasma degil, rol ve senaryoya gore ayrik kanal mantigiyla kurgulanir.
 
-1. Bayi self-service kanali
-- Siparis durumu, belge erisimi, temel bilgi sorgulari
+1. WhatsApp uzerinden bayi/musteri bilgi akisi kanali
+- Siparis durumu, belge erisimi, temel bilgi sorgulari (ayri web portal olmadan)
 
 2. Personel gorev mesajlari
 - Operasyonel gorev bildirimleri, gecikme/istisna uyarilari
@@ -151,4 +160,3 @@ Ornek istek zinciri:
 7. Tum kritik adimlar audit/timeline kayitlarina islenir.
 
 Bu zincir, urun buyurken de korunacak temel mimari omurgadir.
-

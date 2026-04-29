@@ -32,17 +32,17 @@ export function WhatsAppIntentBadge({ intent }: { intent: WhatsAppIntent }) {
 export function WhatsappToolbar() {
   return (
     <PrimaryActionToolbar>
-      <button className="hz-btn hz-toolbar-btn hz-btn-primary" type="button">
-        Yeni Mesaj
+      <button className="hz-btn hz-toolbar-btn hz-btn-primary" type="button" disabled>
+        Yeni Mesaj (Foundation)
       </button>
-      <button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button">
-        Sablon Gonder
+      <button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button" disabled>
+        Sablon Gonder (Foundation)
       </button>
-      <button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button">
-        Action Request
+      <button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button" disabled>
+        Action Request (Foundation)
       </button>
-      <button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button">
-        Onaya Gonder
+      <button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button" disabled>
+        Onaya Gonder (Foundation)
       </button>
     </PrimaryActionToolbar>
   );
@@ -89,13 +89,14 @@ export function ConversationListPanel({
           </label>
         </div>
         <div className="hz-filter-actions">
-          <button type="button" className="hz-btn hz-btn-secondary">
-            Filtrele
+          <button type="button" className="hz-btn hz-btn-secondary" disabled>
+            Filtre Foundation
           </button>
-          <button type="button" className="reset-btn">
+          <button type="button" className="reset-btn" disabled>
             Temizle
           </button>
         </div>
+        <p className="muted">Filtreler bir sonraki adimda canli sohbet sorgusuna baglanacaktir. Simdilik gorunumu degistirmez.</p>
       </section>
 
       <div className="hz-list-stack hz-list-stack-scroll">
@@ -145,11 +146,11 @@ export function ReplyComposer() {
   return (
     <div className="hz-chat-composer">
       <input className="hz-control" placeholder="Cevap yaz veya sablon sec" />
-      <button type="button" className="hz-btn hz-btn-primary">
-        Gonder
+      <button type="button" className="hz-btn hz-btn-primary" disabled>
+        Gonder (Foundation)
       </button>
-      <button type="button" className="hz-btn hz-btn-secondary">
-        Belge
+      <button type="button" className="hz-btn hz-btn-secondary" disabled>
+        Belge (Foundation)
       </button>
     </div>
   );
@@ -161,11 +162,11 @@ export function SuggestedReplyCard({ reply }: { reply: string }) {
       <p className="drawer-eyebrow">AI Onerilen Cevap</p>
       <p>{reply}</p>
       <div className="hz-inline-actions">
-        <button className="hz-btn hz-btn-secondary" type="button">
-          Cevaba Al
+        <button className="hz-btn hz-btn-secondary" type="button" disabled>
+          Cevaba Al (Foundation)
         </button>
-        <button className="hz-btn hz-btn-secondary" type="button">
-          Onaya Gonder
+        <button className="hz-btn hz-btn-secondary" type="button" disabled>
+          Onaya Gonder (Foundation)
         </button>
       </div>
     </section>
@@ -201,14 +202,14 @@ export function WhatsappActionModal({ actionRequests }: { actionRequests: WhatsA
         confirmation/approval zincirine baglanir.
       </p>
       <div className="hz-inline-actions">
-        <button className="hz-btn hz-btn-secondary" type="button">
-          Action Request Ac
+        <button className="hz-btn hz-btn-secondary" type="button" disabled>
+          Action Request Ac (Foundation)
         </button>
-        <button className="hz-btn hz-btn-secondary" type="button">
-          Onaya Gonder
+        <button className="hz-btn hz-btn-secondary" type="button" disabled>
+          Onaya Gonder (Foundation)
         </button>
-        <button className="hz-btn hz-btn-secondary" type="button">
-          Fallback Kuralini Uygula
+        <button className="hz-btn hz-btn-secondary" type="button" disabled>
+          Fallback Kuralini Uygula (Foundation)
         </button>
       </div>
       {actionRequests.length > 0 ? (
@@ -314,7 +315,7 @@ export function WhatsAppPage() {
 
   return (
     <div className="hz-page-stack">
-      <PageHeader title="WhatsApp" description="Bayi self-service, personel gorev mesaji ve yonetici onay kanalini tek ekranda yonetin." />
+      <PageHeader title="WhatsApp" description="WhatsApp uzerinden bayi/musteri bilgi akislarini, personel gorev mesajlarini ve yonetici onay kanalini tek ekranda yonetin." />
       <section className="hz-metric-grid">
         <MetricCard title="Konusma" value={String(conversations.length)} detail="Aktif kanal" tone="info" />
         <MetricCard
@@ -332,6 +333,9 @@ export function WhatsAppPage() {
         <MetricCard title="AI Cevap" value="3" detail="Hazir oneriler" tone="info" />
       </section>
       <WhatsappToolbar />
+      <section className="hz-content-card">
+        <p className="muted">Not: Bu ekrandaki toolbar aksiyonlari su an foundation modundadir. Canli mesajlasma ve aksiyon dispatch zinciri entegrasyon ayarlarina gore asamali acilir.</p>
+      </section>
       <section className="hz-three-column">
         <ConversationListPanel conversations={conversations} selectedId={selectedId} onSelect={setSelectedId} />
         <ConversationThreadPanel messages={selected.messages} />

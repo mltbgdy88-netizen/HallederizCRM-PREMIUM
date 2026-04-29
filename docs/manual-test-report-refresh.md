@@ -1,0 +1,140 @@
+# Manual Test Report Refresh
+
+Tarih: 2026-04-29
+Kapsam: Uctan uca kullanici-perspektifli kalite taramasi (modul/akýs + teknik doðrulama)
+Yontem: Uzman ajanlarla paralel inceleme + root teknik komutlar
+
+## 1. Test edilen moduller
+
+- Gorev Merkezi: `/`
+- Gorevler: `/gorevler`, `/gorevler/[taskId]`
+- Onaylar: `/onaylar`, `/onaylar/[approvalId]`
+- Cariler: `/cariler`, `/cariler/[customerId]`
+- Stok: `/stok`
+- Teklifler: `/teklifler`, `/teklifler/yeni`, `/teklifler/[offerId]`
+- Siparisler: `/siparisler`, `/siparisler/yeni`, `/siparisler/[orderId]`
+- Tahsilatlar: `/tahsilatlar`, `/tahsilatlar/yeni`, `/tahsilatlar/[paymentId]`
+- Depo: `/depo`, `/depo/emirler/[warehouseOrderId]`
+- Teslimatlar: `/teslimatlar`, `/teslimatlar/[deliveryId]`
+- Faturalar: `/faturalar`, `/faturalar/[invoiceId]`
+- Iadeler: `/iadeler`, `/iadeler/yeni`, `/iadeler/[returnId]`
+- Fabrikalar: `/fabrikalar/stoklar`, `/fabrikalar/siparisler`, `/fabrikalar/siparisler/[factoryOrderId]`
+- ERP: `/erp`
+- WhatsApp: `/whatsapp`
+- AI: `/ai`, `/ai/onaylar`, `/ai/icgoruler`
+- Belgeler: `/belgeler`, `/belgeler/[documentId]`
+- Raporlar: `/raporlar`
+- Kullanicilar: `/kullanicilar`, `/kullanicilar/roller`
+- Ayarlar: `/ayarlar`, `/ayarlar/pilot-hazirlik`, `/ayarlar/staging-kontrol`
+- Kurulum: `/kurulum/veri-yukleme`
+
+## 2. Sorunsuz calisan akislar
+
+- Route kapsami ve kritik navigasyon smoke testleri temiz:
+  - `pnpm run smoke:routes` basarili
+  - `pnpm run smoke:navigation` basarili
+- Root teknik dogrulama temiz:
+  - `pnpm typecheck` basarili
+  - `pnpm build` basarili
+- Karar hizalama tarafinda local-first AI + canonical route metinleri genel olarak tutarli.
+- Belge modulu API-first temel zincire sahip:
+  - document detail
+  - queue save / queue print endpoint zinciri mevcut
+- Cari -> Teklif baslangic yonlendirmesi tutarli (`/cariler/[customerId]` -> `/teklifler/yeni?customer=...`).
+
+## 3. Kirik veya eksik akislar
+
+### Kritik (P0)
+
+- Onaylar ekraninda UI veri kaynagi ile API mutation kaynagi uyumsuz:
+  - Web approval id seti ile API approval id seti farkli; onayla/reddet/execute etkisi kirik gorunebiliyor.
+  - Etki: "onayladim ama bir sey olmadi".
+- Approval -> execution API zinciri var, ancak web tekrar mock kaynaktan okudugu icin sonuc UI'da guvenilir kapanmiyor.
+- Teslimat/Fatura/Iade tarafinda query katmani buyuk oranda mock; operasyon zinciri API-first davranisla tutarsiz.
+- Invalid detail id’de yanlis kayda dusme riskleri:
+  - Fatura: `getInvoiceById` fallback ilk kayit
+  - Depo emri: `getWarehouseOrderById` fallback ilk kayit
+- Belge detail fetch hata yonetimi eksigi:
+  - detail cagrisinda hata firlarsa kontrollu not-found yerine kirilma riski.
+
+### Yuksek (P1)
+
+- Domain detay sayfalarinda cok sayida aksiyon no-op/placeholder:
+  - Teklif, Siparis, Tahsilat, Depo emri, Fatura, Iade
+- AI proposal -> approval kalici bagi eksik:
+  - `POST /ai/proposals` tarafinda kalici approval olusumu yerine draft davraniþi.
+- `/ai/onaylar` detay aksiyonlari (onayla/reddet/execution) backend bagsiz/no-op.
+- Gorevler ve dashboard modalinde gorunen hizli aksiyonlarin bir kismi no-op.
+- Onaylar listesinde filtre gorunur ama etkisiz (no-op hissi).
+- Belge aksiyonlari demo modda sessiz return ile no-op; kullanici geri bildirimi zayif.
+
+### Orta (P2)
+
+- Filtre/pagination UX sorunlari:
+  - Filtre degisince sayfa 1’e reset eksigi
+  - Cok sayfada filtreler foundation/no-op
+- Sag panel / secili satir senkronu pagination ile yaniltici olabiliyor.
+- Gorunur `Detay/Ac` aksiyonu bazi kritik listelerde eksik; yalniz row click/double click'e bagli.
+- Bos tablo durumunda bazi listelerde net empty-state satiri yok.
+- Entegrasyon ekranlarinda foundation etiketi var ama canli/dry-run ayrimi bazen fazla iyimser algilanabiliyor.
+
+## 4. Kullanilabilirlik problemleri
+
+- Filtre var ama sonuc degismiyor hissi (ozellikle gorevler/belgeler/teslimatlar/faturalar/iadeler).
+- Secili satir degistiginde sag panelin baska kaydi gosterebilme riski (ozellikle sayfalamada).
+- No-op aksiyonlar bazi ekranlarda belirgin etiketlenmis, bazi ekranlarda ise hala "calisiyor" hissi uretiyor.
+- Belge ve AI akislarinda aksiyon sonrasi kullaniciya anlamli basari/hata mesajlari yetersiz.
+- `Ilgili Kayda Git` bazi approval senaryolarinda dar kapsamli route cozumu kullaniyor.
+
+## 5. Teknik riskler
+
+- Mock veri ile API mutation karisimi (ozellikle workflow/approval ve deliveries/invoices/returns) gercek saha davranisinda tutarsizlik uretir.
+- Invalid id fallback -> ilk kayit davranisi yanlis operasyon riski tasir.
+- Entegrasyon/health tarafinda dry-run ile live ayrimi metinsel olarak daha keskinlestirilmezse yanlis canlilik algisi olusabilir.
+- WhatsApp adapter dosyasinda kod butunlugu riski oldugu raporlandi (sinif disi blok suphelenilen bolge); derleme su an gecse de dosya acik sekilde temizlenmeli.
+
+## 6. Pilot icin bloklayicilar
+
+1. Onaylar UI->API->UI veri butunlugunun kirik olmasi (approval id uyumsuzlugu).
+2. Approval->execution sonuclarinin ayni kaynakta geri okunmamasi.
+3. Teslimat/Fatura/Iade modullerinin operasyonel zincirde mock-agirlikli kalmasi.
+4. Invalid ID durumlarinda yanlis kayda dusme fallback davranislari.
+5. AI proposal->approval kalici baginin eksikligi.
+
+## 7. Onceliklendirilmis duzeltme listesi
+
+### Kritik
+- Onaylar ekranini tek kaynaga topla (UI query ve API mutation id/record parity).
+- Approval execute sonucunu ayni datasetten UI’da gosterecek sekilde bagla.
+- Deliveries/Invoices/Returns query katmanini API-first’e gecir.
+- Invalid detail id fallback’lerini kaldir; net not-found/empty-state don.
+
+### Yuksek
+- Teklif/Siparis/Tahsilat/Depo/Fatura/Iade detail aksiyonlarini ya gercek mutasyona bagla ya da foundation olarak net disable et.
+- AI proposal olusunca kalici approval kaydi olusumunu tamamla.
+- `/ai/onaylar` panel aksiyonlarini backend’e bagla.
+- Belge ve AI aksiyonlarina kullaniciya anlasilir basari/hata geri bildirimi ekle.
+
+### Orta
+- Filtre degisince pagination reset standardi uygula.
+- Sag panel secili satir senkronunu page-scope ile sertlestir.
+- `Detay/Ac` aksiyonlarini kritik listelerde standardize et.
+- Bos veri durumlari icin tablo empty-state satirlarini birlestir.
+
+### Dusuk
+- Health/staging’de dry-run ve live ayrimini daha belirgin metinlestir.
+- Entegrasyon mock ekranlarinda operasyonel beklenti metnini sadeleþtir.
+
+## Paralel ajan ozeti
+
+- UI / Frontend Test Ajaný: liste, filtre, pagination, secili satir-sag panel, detay/ac UX.
+- CRUD / Domain Akýþ Ajaný: cari->teklif->siparis->tahsilat->depo->teslimat->fatura->iade zinciri.
+- Workflow / Approval Ajaný: dashboard kartlari, gorevler, onaylar, approval->execution.
+- Entegrasyon Ajaný: WhatsApp, ERP, Fabrikalar, staging/health ve mode mesajlari.
+- AI Ajaný: `/ai`, `/ai/onaylar`, `/ai/icgoruler`, proposal/approval/execution ve local-first uyumu.
+- Belge / Local Output Ajaný: `/belgeler`, detail, queue save/print, local-agent lifecycle.
+- Teknik doðrulama (ana ajan): `pnpm typecheck`, `pnpm build`, `smoke:routes`, `smoke:navigation`.
+
+---
+
+Not: Bu yenileme turunda odak tespit/raporlama idi; buyuk ozellik gelistirmesi veya kapsamli refactor yapilmadi.

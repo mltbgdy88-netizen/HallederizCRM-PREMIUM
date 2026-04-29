@@ -1,4 +1,4 @@
-# AI Runtime Architecture
+# AI Runtime Architecture (Local-First)
 
 Bu mimari, AI katmanini 3 ayri entegrasyon katmanina boler:
 
@@ -36,3 +36,15 @@ Bu mimari, AI katmanini 3 ayri entegrasyon katmanina boler:
 
 Bu bridge, provider env yoksa controlled fallback doner.
 
+## Runtime Onceligi
+AI runtime secim onceligi resmi olarak su siradadir:
+1. Local provider
+2. External provider (OpenAI vb.)
+3. Safe fallback
+
+Bu karar CRM ici AI, WhatsApp AI ve sesli AI akislarinin tamaminda ortaktir.
+
+## External Provider Notu
+- OpenAI entegrasyonu korunur ancak varsayilan mod degildir.
+- External provider secili ve dogru konfigurasyonluysa canli adapter devreye girer.
+- External baglanti yoksa sistem local-first davranisi korur.

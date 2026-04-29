@@ -32,11 +32,12 @@ function nowIso() {
 }
 
 export function validateAiConfig() {
-  const llmProvider = process.env.AI_LLM_PROVIDER ?? "mock";
-  const sttProvider = process.env.AI_STT_PROVIDER ?? "mock";
-  const ttsProvider = process.env.AI_TTS_PROVIDER ?? "mock";
-  const liveRequested = [llmProvider, sttProvider, ttsProvider].includes("openai");
-  const required = liveRequested
+  const llmProvider = process.env.AI_LLM_PROVIDER ?? "local";
+  const sttProvider = process.env.AI_STT_PROVIDER ?? "local";
+  const ttsProvider = process.env.AI_TTS_PROVIDER ?? "local";
+  const externalRequested = [llmProvider, sttProvider, ttsProvider].includes("openai");
+  const localRequested = [llmProvider, sttProvider, ttsProvider].includes("local");
+  const required = externalRequested
     ? validateRequired([
         "OPENAI_API_KEY",
         "AI_MODEL",
@@ -48,26 +49,43 @@ export function validateAiConfig() {
       ])
     : { configured: true, missing: [] };
 
-  const mode: ServiceMode = liveRequested ? "live" : "mock";
-  const status: ServiceHealthStatus = liveRequested
-    ? required.configured
+  const externalConfigured = required.configured;
+  const activeMode: "local" | "external" | "fallback" = localRequested
+    ? "local"
+    : externalRequested && externalConfigured
+      ? "external"
+      : "fallback";
+  const status: ServiceHealthStatus = activeMode === "local"
+    ? externalRequested && !externalConfigured
+      ? "degraded"
+      : "healthy"
+    : activeMode === "external"
       ? "healthy"
-      : "misconfigured"
-    : "fallback";
+      : externalRequested
+        ? "misconfigured"
+        : "fallback";
 
   return {
     service: "ai" as const,
     status,
-    mode: required.configured ? mode : "fallback",
-    configured: required.configured,
-    reason: required.configured
-      ? liveRequested
-        ? "AI provider canli moda hazir."
-        : "AI fallback/mock modunda calisiyor."
-      : `Eksik env: ${required.missing.join(", ")}`,
+    mode: activeMode === "fallback" ? "fallback" : "live",
+    configured: activeMode !== "fallback",
+    reason:
+      activeMode === "local"
+        ? externalRequested && !externalConfigured
+          ? "Lokal AI aktif. Harici provider eksik ayar nedeniyle opsiyonel modda bekliyor."
+          : "Lokal AI aktif ve birincil modda hazir."
+        : activeMode === "external"
+          ? "Harici AI provider aktif. Lokal provider opsiyonel olarak acilabilir."
+          : externalRequested
+            ? `Harici AI icin eksik env: ${required.missing.join(", ")}`
+            : "AI fallback modunda calisiyor.",
     lastCheckedAt: nowIso(),
     details: {
       providers: { llmProvider, sttProvider, ttsProvider },
+      localStatus: localRequested ? "ready" : "missing",
+      externalStatus: externalRequested ? (externalConfigured ? "ready" : "missing") : "optional",
+      activeProviderMode: activeMode,
       missing: required.missing
     }
   } satisfies ServiceHealthResult;

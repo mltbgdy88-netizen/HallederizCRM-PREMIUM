@@ -211,7 +211,7 @@ WhatsApp'i yalnizca mesajlasma kanali degil, operasyonel aksiyon tetikleyicisi o
 - Domain kayit baglantilari
 
 ### Tasinacak fikirler
-- Bayi self-service kanali
+- WhatsApp uzerinden bayi/musteri bilgi akisi (ayri web portal olmadan)
 - Personel gorev mesajlari
 - Yonetici komut/onay kanali
 
@@ -257,6 +257,11 @@ Platformu dis sistemlerle cift yonlu ve denetlenebilir veri akisina kavuşturmak
 
 ### Amac
 Yapay zekayi kurum ici veri guvenligi ve denetlenebilirlik hedefleriyle uyumlu lokal bir yigin uzerinde calistirmak.
+
+### Strateji Notu (Guncel)
+- Faz 9'un birincil hedefi local/acik kaynak stack'in olgunlastirilmasidir.
+- OpenAI veya diger harici saglayicilar sadece ikincil, opsiyonel provider olarak ele alinir.
+- CRM, WhatsApp ve sesli komut akislarinda tek davranis modeli korunur: proposal + approval + execution.
 
 ### Ana moduller
 - AI session/message yonetimi
@@ -315,4 +320,3 @@ Her fazin tamamlanmis sayilmasi icin:
 4. Sonraki fazin teknik onkosullari saglanmis olmali.
 
 Bu kural, projenin hizli degil saglam buyumesini garanti etmek icin uygulanir.
-

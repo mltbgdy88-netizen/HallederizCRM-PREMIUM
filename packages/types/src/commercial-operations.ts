@@ -831,7 +831,9 @@ export type AiProposalActionType =
   | "complete_delivery"
   | "create_invoice"
   | "create_return"
-  | "send_document_whatsapp";
+  | "send_document_whatsapp"
+  | "queue_document_save"
+  | "queue_document_print";
 export type AiOperationType = AiProposalActionType;
 export type AiInsightSeverity = "info" | "warning" | "critical";
 export type AiExecutionStatus = "pending" | "running" | "completed" | "failed" | "cancelled";

@@ -34,6 +34,22 @@ function getBadgeClass(status: ServiceHealthRecord["status"]) {
   return "hz-badge hz-badge-info";
 }
 
+function statusDisplayLabel(status: ServiceHealthRecord["status"]) {
+  if (status === "healthy") return "Hazir";
+  if (status === "fallback" || status === "degraded") return "Demo / Fallback";
+  if (status === "misconfigured") return "Yapilandirma Eksik";
+  if (status === "disabled") return "Devre Disi";
+  return "Hata";
+}
+
+function renderServiceReason(service: ServiceHealthRecord) {
+  if (service.service !== "ai") return service.reason;
+  const localStatus = String(service.details?.localStatus ?? "unknown");
+  const externalStatus = String(service.details?.externalStatus ?? "unknown");
+  const active = String(service.details?.activeProviderMode ?? service.mode);
+  return `${service.reason} | Local: ${localStatus} | External: ${externalStatus} | Aktif: ${active}`;
+}
+
 function runLabel(state: RunState) {
   if (state === "running") return "Calisiyor...";
   if (state === "ok") return "Basarili";
@@ -87,9 +103,15 @@ export function StagingValidationPage() {
         await runLocalAgentSaveDryRunApi();
         await runLocalAgentPrintDryRunApi();
       }
+      setFeedback(
+        service === "local-agent"
+          ? "LOCAL-AGENT dry-run testi tamamlandi. Bu sonuc canli yazdirma yerine guvenli simulasyon dogrulamasidir."
+          : `${service.toUpperCase()} testi tamamlandi.`
+      );
       setRunState((previous) => ({ ...previous, [service]: "ok" }));
       await reload();
-    } catch {
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : `${service.toUpperCase()} testi basarisiz oldu.`);
       setRunState((previous) => ({ ...previous, [service]: "error" }));
       await reload();
     }
@@ -148,12 +170,12 @@ export function StagingValidationPage() {
                       <tr key={service.service}>
                         <td>{service.service}</td>
                         <td>
-                          <span className={getBadgeClass(service.status)}>{service.status}</span>
+                          <span className={getBadgeClass(service.status)}>{statusDisplayLabel(service.status)}</span>
                         </td>
                         <td>{service.mode}</td>
                         <td>{service.configured ? "Evet" : "Hayir"}</td>
                         <td>{new Date(service.lastCheckedAt).toLocaleString("tr-TR")}</td>
-                        <td>{service.reason}</td>
+                        <td>{renderServiceReason(service)}</td>
                         <td>
                           <button
                             className="hz-btn hz-btn-secondary"
@@ -176,7 +198,8 @@ export function StagingValidationPage() {
           <div className="hz-page-stack">
             <aside className="hz-side-panel">
               <h3>Fallback Durumu</h3>
-              <p className="muted">Live olmayan servisler fallback veya disabled modda calisir. Kritik mutationlar onaysiz canliya gitmez.</p>
+              <p className="muted">AI local-first calisir; external provider opsiyoneldir. Live olmayan servisler fallback veya disabled modda calisir. Kritik mutationlar onaysiz canliya gitmez.</p>
+              <p className="muted">Not: Bazi testler dry-run/foundation seviyesinde sadece zincir dogrulama yapar; canli operasyon etkisi uretmez.</p>
               <div className="detail-list">
                 <span>Configured Servis</span>
                 <strong>{summary?.configuredCount ?? 0}</strong>
@@ -201,4 +224,3 @@ export function StagingValidationPage() {
     </div>
   );
 }
-

@@ -6,6 +6,7 @@ import { FilterActions, FilterBar, LoadingState, MetricCard, PageHeader, Paginat
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { getOperationsEngineData } from "../../dashboard/queries";
+import { approveApprovalMutation, executeApprovalMutation, rejectApprovalMutation } from "../mutations";
 
 const statusLabels: Record<Approval["status"], string> = { pending: "Bekliyor", approved: "Onaylandi", rejected: "Reddedildi", expired: "Suresi Doldu", executed: "Icra Edildi" };
 const typeLabels: Record<Approval["type"], string> = { order_high_value: "Yuksek Tutar", delivery_payment_missing: "Eksik Tahsilatli Teslim", return_approval: "Iade Onayi", price_override: "Fiyat Override", ai_action_proposal: "AI Proposal", manual_operation: "Manuel Operasyon" };
@@ -16,8 +17,8 @@ export function ApprovalFilterBar() {
   return <FilterBar><div className="task-center-filter-grid"><label>Approval Tipi<select defaultValue=""><option value="">Tum tipler</option><option>AI Proposal</option><option>Eksik Tahsilatli Teslim</option></select></label><label>Durum<select defaultValue=""><option value="">Tum durumlar</option><option>Bekliyor</option><option>Onaylandi</option><option>Reddedildi</option></select></label><label>Istenen Rol<select defaultValue=""><option value="">Tum roller</option><option>Yonetici</option><option>Satis Muduru</option></select></label><label>Entity Tipi<select defaultValue=""><option value="">Tum entityler</option><option>Siparis</option><option>Teslimat</option><option>AI Proposal</option></select></label><label>Tarih<input type="date" /></label></div><FilterActions><button type="button" className="hz-btn hz-btn-secondary">Filtrele</button><button type="button" className="reset-btn">Temizle</button></FilterActions></FilterBar>;
 }
 
-export function ApprovalTable({ approvals, onOpen }: { approvals: Approval[]; onOpen: (approvalId: string) => void }) {
-  return <section className="hz-content-card"><div className="table-wrap hz-table-wrap"><table className="table hz-table hz-table-sticky"><thead><tr><th>Onay No</th><th>Approval Tipi</th><th>Bagli Kayit</th><th>Durum</th><th>Isteyen</th><th>Karar Veren</th><th>Olusturma</th></tr></thead><tbody>{approvals.map((approval) => <tr key={approval.id} className="stock-table-row" onDoubleClick={() => onOpen(approval.id)}><td>{approval.approvalNo}</td><td>{typeLabels[approval.type]}</td><td>{approval.entityNo}</td><td><span className={statusBadge(approval.status)}>{statusLabels[approval.status]}</span></td><td>{approval.requestedByName}</td><td>{approval.decidedByName ?? "-"}</td><td>{new Date(approval.createdAt).toLocaleString("tr-TR")}</td></tr>)}{approvals.length === 0 ? <tr><td colSpan={7}><div className="table-empty">Onay kaydi bulunamadi.</div></td></tr> : null}</tbody></table></div></section>;
+export function ApprovalTable({ approvals, selectedId, onSelect, onOpen }: { approvals: Approval[]; selectedId: string | null; onSelect: (approvalId: string) => void; onOpen: (approvalId: string) => void }) {
+  return <section className="hz-content-card"><div className="table-wrap hz-table-wrap"><table className="table hz-table hz-table-sticky"><thead><tr><th>Onay No</th><th>Approval Tipi</th><th>Bagli Kayit</th><th>Durum</th><th>Isteyen</th><th>Karar Veren</th><th>Olusturma</th><th>Aksiyon</th></tr></thead><tbody>{approvals.map((approval) => <tr key={approval.id} className={`stock-table-row ${selectedId === approval.id ? "is-selected" : ""}`} onClick={() => onSelect(approval.id)} onDoubleClick={() => onOpen(approval.id)}><td>{approval.approvalNo}</td><td>{typeLabels[approval.type]}</td><td>{approval.entityNo}</td><td><span className={statusBadge(approval.status)}>{statusLabels[approval.status]}</span></td><td>{approval.requestedByName}</td><td>{approval.decidedByName ?? "-"}</td><td>{new Date(approval.createdAt).toLocaleString("tr-TR")}</td><td><button type="button" className="hz-btn hz-btn-secondary" onClick={(event) => { event.stopPropagation(); onOpen(approval.id); }}>Detay</button></td></tr>)}{approvals.length === 0 ? <tr><td colSpan={8}><div className="table-empty">Onay kaydi bulunamadi.</div></td></tr> : null}</tbody></table></div></section>;
 }
 
 export function ApprovalPreviewPanel({ approval }: { approval: Approval | null }) {
@@ -28,14 +29,14 @@ export function ApprovalPreviewPanel({ approval }: { approval: Approval | null }
 export function ApprovalsPage() {
   const router = useRouter();
   const [approvals, setApprovals] = useState<Approval[] | null>(null);
-  const [selectedApprovalId] = useState<string | null>(null);
+  const [selectedApprovalId, setSelectedApprovalId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const pageSize = 10;
   useEffect(() => { getOperationsEngineData().then((data) => setApprovals(data.approvals)); }, []);
   const summary = useMemo(() => buildApprovalSummary(approvals ?? []), [approvals]);
   const selectedApproval = useMemo(() => approvals?.find((approval) => approval.id === selectedApprovalId) ?? approvals?.[0] ?? null, [approvals, selectedApprovalId]);
   const pagedApprovals = useMemo(() => (approvals ?? []).slice((page - 1) * pageSize, page * pageSize), [approvals, page]);
-  return <div className="hz-page-stack"><PageHeader title="Onaylar" description="Human-in-the-loop approval kayitlarini ve server-side execution hazirligini yonetin." /><section className="hz-metric-grid"><MetricCard title="Toplam" value={String(summary.total)} detail="Approval kaydi" tone="info" /><MetricCard title="Bekleyen" value={String(summary.pending)} detail="Karar bekliyor" tone="warning" /><MetricCard title="Icra Edilebilir" value={String(summary.executable)} detail="Server action hazir" tone="success" /><MetricCard title="Reddedilen" value={String(summary.rejected)} detail="Kontrol gecmisi" tone="danger" /></section><ApprovalFilterBar />{!approvals ? <LoadingState title="Onaylar yukleniyor" message="Approval kayitlari hazirlaniyor." /> : <SplitContentLayout main={<><ApprovalTable approvals={pagedApprovals} onOpen={(approvalId) => router.push(`/onaylar/${approvalId}`)} /><Pagination totalItems={approvals.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} /></>} side={<ApprovalPreviewPanel approval={selectedApproval} />} />}</div>;
+  return <div className="hz-page-stack"><PageHeader title="Onaylar" description="Human-in-the-loop approval kayitlarini ve server-side execution hazirligini yonetin." /><section className="hz-metric-grid"><MetricCard title="Toplam" value={String(summary.total)} detail="Approval kaydi" tone="info" /><MetricCard title="Bekleyen" value={String(summary.pending)} detail="Karar bekliyor" tone="warning" /><MetricCard title="Icra Edilebilir" value={String(summary.executable)} detail="Server action hazir" tone="success" /><MetricCard title="Reddedilen" value={String(summary.rejected)} detail="Kontrol gecmisi" tone="danger" /></section><ApprovalFilterBar />{!approvals ? <LoadingState title="Onaylar yukleniyor" message="Approval kayitlari hazirlaniyor." /> : <SplitContentLayout main={<><ApprovalTable approvals={pagedApprovals} selectedId={selectedApprovalId} onSelect={setSelectedApprovalId} onOpen={(approvalId) => router.push(`/onaylar/${approvalId}`)} /><Pagination totalItems={approvals.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} /></>} side={<ApprovalPreviewPanel approval={selectedApproval} />} />}</div>;
 }
 
 export function ApprovalHeaderInfo({ approval }: { approval: Approval }) {
@@ -52,7 +53,34 @@ export function ApprovalPayloadViewer({ approval }: { approval: Approval }) {
 
 export function ApprovalActionsBar({ approval }: { approval: Approval }) {
   const router = useRouter();
-  return <section className="hz-content-card"><h3>Aksiyonlar</h3><div className="hz-inline-actions"><button className="hz-btn hz-btn-primary" type="button">Onayla</button><button className="hz-btn hz-btn-secondary" type="button">Reddet</button><button className="hz-btn hz-btn-secondary" type="button">Expire</button><button className="hz-btn hz-btn-secondary" type="button" onClick={() => router.push(approval.entityType === "delivery" ? `/teslimatlar/${approval.entityId}` : "/ai/onaylar")}>Ilgili Kayda Git</button></div></section>;
+  const [busyAction, setBusyAction] = useState<"approve" | "reject" | "execute" | null>(null);
+  const [feedback, setFeedback] = useState<string | null>(null);
+
+  const runAction = async (action: "approve" | "reject" | "execute") => {
+    setBusyAction(action);
+    setFeedback(null);
+    try {
+      if (action === "approve") {
+        await approveApprovalMutation(approval.id);
+      } else if (action === "reject") {
+        await rejectApprovalMutation(approval.id);
+      } else {
+        const result = await executeApprovalMutation(approval.id);
+        const executionMessage = (result.execution as { result?: { message?: string } } | undefined)?.result?.message;
+        setFeedback(executionMessage ?? "Onayli islem execution zincirine gonderildi.");
+      }
+      router.refresh();
+      if (action !== "execute") {
+        setFeedback(action === "approve" ? "Onay kaydi onaylandi." : "Onay kaydi reddedildi.");
+      }
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Aksiyon tamamlanamadi.");
+    } finally {
+      setBusyAction(null);
+    }
+  };
+
+  return <section className="hz-content-card"><h3>Aksiyonlar</h3><div className="hz-inline-actions"><button className="hz-btn hz-btn-primary" type="button" disabled={busyAction !== null} onClick={() => void runAction("approve")}>Onayla</button><button className="hz-btn hz-btn-secondary" type="button" disabled={busyAction !== null} onClick={() => void runAction("reject")}>Reddet</button><button className="hz-btn hz-btn-secondary" type="button" disabled={busyAction !== null} onClick={() => void runAction("execute")}>Icra Et</button><button className="hz-btn hz-btn-secondary" type="button" onClick={() => router.push(approval.entityType === "delivery" ? `/teslimatlar/${approval.entityId}` : "/ai/onaylar")}>Ilgili Kayda Git</button></div>{feedback ? <p className="muted">{feedback}</p> : null}</section>;
 }
 
 export function ApprovalDetailPage({ approval }: { approval: Approval }) {

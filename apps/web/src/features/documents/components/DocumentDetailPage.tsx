@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { LoadingState, PageHeader, SplitContentLayout } from "@hallederiz/ui";
 import type { Customer, Document } from "@hallederiz/types";
@@ -6,6 +6,7 @@ import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { dataSourceConfig, sdk } from "../../../lib/data-source";
+import type { DocumentOutputJobRow, LocalAgentHealthSnapshot } from "../../../services/api/documents.service";
 import { getDocumentTypeLabel } from "../queries/document-mock-data";
 import { getDocumentDetail } from "../queries/get-documents";
 import { dateLabel } from "../utils";
@@ -94,7 +95,7 @@ function DocumentDeliveryHistory({ document }: { document: Document }) {
           <tbody>
             {document.deliveries.length === 0 ? (
               <tr>
-                <td colSpan={4}>Henüz gonderim kaydi yok.</td>
+                <td colSpan={4}>Henuz gonderim kaydi yok.</td>
               </tr>
             ) : (
               document.deliveries.map((delivery) => (
@@ -113,18 +114,79 @@ function DocumentDeliveryHistory({ document }: { document: Document }) {
   );
 }
 
+function DocumentOutputJobs({
+  printJobs,
+  fileSaveJobs,
+  localAgentHealth
+}: {
+  printJobs: DocumentOutputJobRow[];
+  fileSaveJobs: DocumentOutputJobRow[];
+  localAgentHealth: LocalAgentHealthSnapshot | null;
+}) {
+  return (
+    <section className="hz-content-card">
+      <h3>Output Queue ve Local Agent</h3>
+      <div className="detail-list">
+        <span>Local Agent Durumu</span>
+        <strong>{localAgentHealth?.status ?? "demo/fallback"}</strong>
+        <span>Calisma Modu</span>
+        <strong>{localAgentHealth?.mode ?? "-"}</strong>
+        <span>Son Kontrol</span>
+        <strong>{localAgentHealth?.lastCheckedAt ? dateLabel(localAgentHealth.lastCheckedAt) : "-"}</strong>
+      </div>
+      <div className="table-wrap hz-table-wrap" style={{ marginTop: "12px" }}>
+        <table className="table hz-table">
+          <thead>
+            <tr>
+              <th>Is Tipi</th>
+              <th>Is No</th>
+              <th>Durum</th>
+              <th>Kuyruga Alinma</th>
+              <th>Bitis</th>
+            </tr>
+          </thead>
+          <tbody>
+            {[...fileSaveJobs.map((job) => ({ ...job, kind: "Queue Save" })), ...printJobs.map((job) => ({ ...job, kind: "Queue Print" }))]
+              .slice(0, 8)
+              .map((job) => (
+                <tr key={job.id}>
+                  <td>{job.kind}</td>
+                  <td>{job.id}</td>
+                  <td>{job.status}</td>
+                  <td>{dateLabel(job.queuedAt)}</td>
+                  <td>{job.completedAt ? dateLabel(job.completedAt) : "-"}</td>
+                </tr>
+              ))}
+            {printJobs.length + fileSaveJobs.length === 0 ? (
+              <tr>
+                <td colSpan={5}>Bu belgeye bagli output isi henuz olusmadi.</td>
+              </tr>
+            ) : null}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
 export function DocumentDetailPage() {
   const params = useParams<{ documentId: string }>();
   const documentId = params?.documentId;
   const [loading, setLoading] = useState(true);
   const [document, setDocument] = useState<Document | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
+  const [printJobs, setPrintJobs] = useState<DocumentOutputJobRow[]>([]);
+  const [fileSaveJobs, setFileSaveJobs] = useState<DocumentOutputJobRow[]>([]);
+  const [localAgentHealth, setLocalAgentHealth] = useState<LocalAgentHealthSnapshot | null>(null);
 
   const load = async () => {
     setLoading(true);
     const result = await getDocumentDetail(documentId);
     setDocument(result.document);
     setCustomers(result.customers);
+    setPrintJobs(result.printJobs);
+    setFileSaveJobs(result.fileSaveJobs);
+    setLocalAgentHealth(result.localAgentHealth);
     setLoading(false);
   };
 
@@ -161,6 +223,7 @@ export function DocumentDetailPage() {
           <>
             <DocumentPreview document={document} />
             <DocumentDeliveryHistory document={document} />
+            <DocumentOutputJobs printJobs={printJobs} fileSaveJobs={fileSaveJobs} localAgentHealth={localAgentHealth} />
           </>
         }
         side={<DocumentSummary document={document} customer={customer} />}

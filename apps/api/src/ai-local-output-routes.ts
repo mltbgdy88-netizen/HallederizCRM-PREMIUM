@@ -39,10 +39,16 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
         return { item: chatAi(request.body) };
       }
       const chat = await service.chat(prompt);
+      const messages = service.buildAssistantMessage(prompt, chat.message, "text");
+      const parsed = parseAiCommand({ text: prompt });
       return {
         item: {
-          ...chatAi(request.body),
-          runtime: chat
+          messages,
+          reply: chat.message,
+          provider: chat.provider,
+          mode: chat.mode,
+          classification: parsed,
+          requiresProposal: parsed.mutation
         }
       };
     })
@@ -381,8 +387,8 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
       return {
         item: {
           status: "healthy",
-          mode: voice.provider === "openai" ? "live" : "fallback",
-          configured: voice.provider === "openai",
+          mode: voice.provider === "mock" ? "fallback" : "live",
+          configured: voice.provider !== "mock",
           reason: "TTS testi tamamlandi.",
           lastCheckedAt: new Date().toISOString(),
           details: { provider: voice.provider, mimeType: voice.mimeType }

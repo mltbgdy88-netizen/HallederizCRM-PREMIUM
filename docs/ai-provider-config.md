@@ -1,28 +1,40 @@
-# AI Provider Config
+# AI Provider Config (Local-First)
 
-## LLM
+## 1. Resmi Strateji
+- Varsayilan AI modu: `local-first`
+- External provider (OpenAI vb.): `opsiyonel`
+- Runtime onceligi: `local -> external -> safe fallback`
 
-- `AI_LLM_PROVIDER=mock|openai`
-- `OPENAI_API_KEY=...`
-- `OPENAI_LLM_MODEL=gpt-4.1-mini` (ornek)
+## 2. LLM Provider
+- `AI_LLM_PROVIDER=local|openai|mock`
+- Varsayilan: `local`
+- External secenegi:
+  - `OPENAI_API_KEY=...`
+  - `AI_MODEL=...` (veya `OPENAI_LLM_MODEL`)
 
-## STT
+## 3. STT Provider
+- `AI_STT_PROVIDER=local|openai|mock`
+- Varsayilan: `local`
+- External secenegi:
+  - `AI_STT_MODEL=...` (veya `OPENAI_STT_MODEL`)
 
-- `AI_STT_PROVIDER=mock|openai`
-- `OPENAI_STT_MODEL=gpt-4o-mini-transcribe`
+## 4. TTS Provider
+- `AI_TTS_PROVIDER=local|openai|mock`
+- Varsayilan: `local`
+- External secenegi:
+  - `AI_TTS_MODEL=...` (veya `OPENAI_TTS_MODEL`)
+  - `AI_TTS_VOICE=...`
 
-## TTS
+## 5. Ortak Runtime Ayarlari
+- `AI_TIMEOUT_MS`
+- `AI_RETRY_COUNT`
 
-- `AI_TTS_PROVIDER=mock|openai`
-- `OPENAI_TTS_MODEL=gpt-4o-mini-tts`
+## 6. Davranis Kurallari
+- `local` seciliyse local provider birincil olarak calisir.
+- `openai` secili ama key/model eksikse local veya fallback moda guvenli gecis yapilir.
+- `mock` sadece kontrollu demo/fallback icindir.
 
-## Davranis
-
-- Provider `openai` secili ama `OPENAI_API_KEY` yoksa sistem otomatik fallback (`mock`) calisir.
-- Bu fallback, UI davranisini bozmaz; sadece cevaplar gercek model yerine kontrollu mock olur.
-
-## Guvenlik Notu
-
-- API key repo icine yazilmaz.
-- Ortam degiskenleri local `.env` / deployment secret store uzerinden verilir.
-
+## 7. Guvenlik
+- Secretlar repoya yazilmaz.
+- API keyler sadece `.env` veya deployment secret store uzerinden verilir.
+- Mutation istekleri providerdan bagimsiz olarak approval zorunluluguna tabidir.

@@ -1,6 +1,14 @@
-﻿import { defaultPlatformSettings, type PlatformSettings, type RolePresetItem, type User } from "@hallederiz/types";
+import { defaultPlatformSettings, type PlatformSettings, type RolePresetItem, type User } from "@hallederiz/types";
 import { dataSourceConfig } from "../../../lib/data-source";
-import { getPilotTemplateApi, getPlatformSettingsApi, listImportHistoryApi, listRolePresetsApi, listUsersApi } from "../../../services/api";
+import {
+  getPilotReadinessApi,
+  getPilotTemplateApi,
+  getPlatformSettingsApi,
+  listImportHistoryApi,
+  listRolePresetsApi,
+  listUsersApi,
+  type PilotReadinessSummary
+} from "../../../services/api";
 
 export interface PilotSetupData {
   settings: PlatformSettings;
@@ -72,3 +80,77 @@ export async function getPilotSetupData(): Promise<PilotSetupData> {
   };
 }
 
+export async function getPilotReadinessData(): Promise<PilotReadinessSummary> {
+  if (dataSourceConfig.useDemoData) {
+    return {
+      completionRate: 42,
+      completed: 5,
+      warning: 4,
+      missing: 3,
+      total: 12,
+      blockers: ["Cariler import edildi", "Urunler import edildi", "ERP baglanti hazirligi"],
+      items: [
+        {
+          id: "company-profile",
+          title: "Sirket profili",
+          group: "company_tenant",
+          status: "tamam",
+          priority: "ready",
+          readinessState: "ready",
+          description: "Demo sirket profili hazir.",
+          reason: "Temel alanlar doldurulmus.",
+          actionLabel: "Ayarlari ac",
+          actionHref: "/ayarlar",
+          recommendedNextStep: "Pilot verilerine gore son guncellemeleri yapin.",
+          blocking: false
+        },
+        {
+          id: "import-customers",
+          title: "Cariler import edildi",
+          group: "data_import",
+          status: "eksik",
+          priority: "critical",
+          readinessState: "go_live_blocker",
+          description: "Demo modda import adimi bekleniyor.",
+          reason: "Canliya yakin deneme icin cari importu gerekli.",
+          actionLabel: "Veri yukleme merkezini ac",
+          actionHref: "/kurulum/veri-yukleme",
+          recommendedNextStep: "Cari import dosyasini yukleyip onizleme/apply tamamlayin.",
+          blocking: true
+        }
+      ],
+      onboardingCards: [
+        {
+          roleCode: "yonetici",
+          roleName: "Yonetici",
+          summary: "Genel pilot durumunu ve kritik eksikleri yonetir.",
+          mustCheck: ["Kritik eksikler", "Servis health", "Onaylar"],
+          firstScreens: [
+            { label: "Pilot Hazirlik", href: "/ayarlar/pilot-hazirlik" },
+            { label: "Staging Kontrol", href: "/ayarlar/staging-kontrol" }
+          ],
+          ownGaps: ["Cariler import edildi"]
+        }
+      ],
+      integrationHealth: {
+        status: "fallback",
+        configuredCount: 0,
+        liveCount: 0,
+        fallbackCount: 5,
+        disabledCount: 0,
+        lastCheckedAt: new Date().toISOString(),
+        services: [
+          { service: "ai", status: "fallback", mode: "mock", configured: false, reason: "Demo fallback", lastCheckedAt: new Date().toISOString(), details: {} },
+          { service: "whatsapp", status: "fallback", mode: "mock", configured: false, reason: "Demo fallback", lastCheckedAt: new Date().toISOString(), details: {} },
+          { service: "erp", status: "fallback", mode: "mock", configured: false, reason: "Demo fallback", lastCheckedAt: new Date().toISOString(), details: {} },
+          { service: "factory", status: "fallback", mode: "mock", configured: false, reason: "Demo fallback", lastCheckedAt: new Date().toISOString(), details: {} },
+          { service: "local-agent", status: "fallback", mode: "mock", configured: false, reason: "Demo fallback", lastCheckedAt: new Date().toISOString(), details: {} }
+        ]
+      },
+      consistencyWarnings: ["Demo modunda veri tutarliligi raporu sinirli gosterilir."],
+      generatedAt: new Date().toISOString()
+    };
+  }
+
+  return getPilotReadinessApi();
+}

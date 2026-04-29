@@ -4,11 +4,11 @@ import type { AiInsight, AiMessage, AiProposal, Approval } from "@hallederiz/typ
 import { MetricCard, PageHeader, PrimaryActionToolbar, TabSwitcher } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { confirmAiProposal, createAiProposal, getAiAssistantData, rejectAiProposal, runAiInsights, speakAiText } from "../queries";
+import { confirmAiProposal, createAiProposal, getAiAssistantData, rejectAiProposal, runAiChat, runAiInsights, speakAiText } from "../queries";
 
-const statusLabel: Record<AiProposal["status"], string> = { draft: "Taslak", waiting_approval: "Onay Bekliyor", approved: "Onaylandi", rejected: "Reddedildi", executed: "Executed", failed: "Hata" };
+const statusLabel: Record<AiProposal["status"], string> = { draft: "Taslak", waiting_approval: "Onay Bekliyor", approved: "Onaylandi", rejected: "Reddedildi", executed: "Icra Edildi", failed: "Hata" };
 
-export function AiModeToggle() { return <div className="hz-inline-actions"><span className="hz-badge hz-badge-success">Read-only default</span><span className="hz-badge hz-badge-warning">Mutation insan onayli</span></div>; }
+export function AiModeToggle() { return <div className="hz-inline-actions"><span className="hz-badge hz-badge-success">Local-first AI</span><span className="hz-badge hz-badge-info">Read-only varsayilan</span><span className="hz-badge hz-badge-warning">Mutation icin insan onayi</span></div>; }
 export function VoiceInputButton({ onClick }: { onClick?: () => void }) { return <button className="hz-btn hz-btn-secondary" type="button" onClick={onClick}>Mikrofon</button>; }
 export function AiConversationPanel({ messages }: { messages: AiMessage[] }) { return <article className="hz-column-card"><h3 className="hz-column-title">AI Asistan Akisi</h3><div className="hz-chat-feed">{messages.map((message) => <div key={message.id} className={`hz-chat-bubble ${message.role === "user" ? "is-outgoing" : ""}`}><p>{message.body}</p><small>{message.inputMode}</small></div>)}</div><AiInputPanel /></article>; }
 export function AiInputPanel({ onSubmit, onVoice }: { onSubmit?: (prompt: string) => void; onVoice?: () => void }) {
@@ -24,10 +24,11 @@ export function AiContextSidePanel({ approvals, insights }: { approvals: Approva
 export function AIAssistantPage() {
   const [data, setData] = useState<{ messages: AiMessage[]; proposals: AiProposal[]; approvals: Approval[]; executions: unknown[]; insights: AiInsight[] }>({ messages: [], proposals: [], approvals: [], executions: [], insights: [] });
   const [mode, setMode] = useState("text");
+  const [chatStatus, setChatStatus] = useState<{ provider: string; mode: string } | null>(null);
 
   const reload = async () => {
     const next = await getAiAssistantData();
-    setData(next);
+    setData((previous) => ({ ...next, messages: previous.messages.length > 0 ? previous.messages : next.messages }));
   };
 
   useEffect(() => {
@@ -35,7 +36,12 @@ export function AIAssistantPage() {
   }, []);
 
   const handleSubmit = async (prompt: string) => {
-    await createAiProposal({ prompt, inputMode: mode === "voice" ? "voice" : "text" });
+    const chat = await runAiChat(prompt);
+    setData((previous) => ({ ...previous, messages: [...previous.messages, ...chat.messages] }));
+    setChatStatus({ provider: chat.provider, mode: chat.mode });
+    if (chat.requiresProposal) {
+      await createAiProposal({ prompt, inputMode: mode === "voice" ? "voice" : "text" });
+    }
     await reload();
   };
 
@@ -53,5 +59,5 @@ export function AIAssistantPage() {
     await speakAiText({ text: "Sesli yanit testi." });
   };
 
-  return <div className="hz-page-stack"><PageHeader title="AI" description="Yazili/sesli komut, read-only cevap, proposal, approval ve execution akisini tek merkezde yonetin." /><section className="hz-metric-grid"><MetricCard title="Proposal" value={String(data.proposals.length)} detail="AI onerisi" tone="info" /><MetricCard title="Onay Bekleyen" value={String(data.approvals.length)} detail="Mutation guard" tone="warning" /><MetricCard title="Insight" value={String(data.insights.length)} detail="Dashboard uyumlu" tone="success" /><MetricCard title="Execution" value={String(data.executions.length)} detail="Server-side" tone="danger" /></section><PrimaryActionToolbar><button type="button" className="hz-btn hz-toolbar-btn hz-btn-primary" onClick={() => void runAiInsights().then(reload)}>Insight Uret</button><button type="button" className="hz-btn hz-toolbar-btn hz-btn-secondary">Prompt Kitapligi</button><button type="button" className="hz-btn hz-toolbar-btn hz-btn-secondary" onClick={handleVoice}>Sesli Giris</button><AiModeToggle /></PrimaryActionToolbar><TabSwitcher activeKey={mode} onChange={setMode} items={[{ key: "text", label: "Yazili Giris" }, { key: "voice", label: "Sesli Giris" }]} /><section className="hz-ai-layout"><article className="hz-column-card"><h3 className="hz-column-title">AI Asistan Akisi</h3><div className="hz-chat-feed">{data.messages.map((message) => <div key={message.id} className={`hz-chat-bubble ${message.role === "user" ? "is-outgoing" : ""}`}><p>{message.body}</p><small>{message.inputMode}</small></div>)}</div><AiInputPanel onSubmit={(prompt) => void handleSubmit(prompt)} onVoice={handleVoice} /></article><article className="hz-column-card"><AiProposalCardList proposals={data.proposals} onConfirm={(id) => void handleConfirm(id)} onReject={(id) => void handleReject(id)} /><AiContextSidePanel approvals={data.approvals} insights={data.insights} /></article></section></div>;
+  return <div className="hz-page-stack"><PageHeader title="AI" description="Lokal-oncelikli is asistani: yazili/sesli komut, proposal, approval ve denetlenebilir execution akisini tek merkezde yonetin." /><section className="hz-metric-grid"><MetricCard title="Proposal" value={String(data.proposals.length)} detail="AI onerisi" tone="info" /><MetricCard title="Onay Bekleyen" value={String(data.approvals.length)} detail="Mutation guard" tone="warning" /><MetricCard title="Insight" value={String(data.insights.length)} detail="Dashboard uyumlu" tone="success" /><MetricCard title="Execution" value={String(data.executions.length)} detail="Server-side" tone="danger" /></section><PrimaryActionToolbar><button type="button" className="hz-btn hz-toolbar-btn hz-btn-primary" onClick={() => void runAiInsights().then(reload)}>Insight Uret</button><button type="button" className="hz-btn hz-toolbar-btn hz-btn-secondary" disabled>Prompt Kitapligi (Foundation)</button><button type="button" className="hz-btn hz-toolbar-btn hz-btn-secondary" onClick={handleVoice}>Sesli Yanit Testi</button><AiModeToggle />{chatStatus ? <span className="hz-badge hz-badge-info">{`Aktif Provider: ${chatStatus.provider} (${chatStatus.mode})`}</span> : null}</PrimaryActionToolbar><TabSwitcher activeKey={mode} onChange={setMode} items={[{ key: "text", label: "Yazili Giris" }, { key: "voice", label: "Sesli Giris" }]} /><section className="hz-ai-layout"><article className="hz-column-card"><h3 className="hz-column-title">AI Asistan Akisi</h3><div className="hz-chat-feed">{data.messages.map((message) => <div key={message.id} className={`hz-chat-bubble ${message.role === "user" ? "is-outgoing" : ""}`}><p>{message.body}</p><small>{message.inputMode}</small></div>)}</div><AiInputPanel onSubmit={(prompt) => void handleSubmit(prompt)} onVoice={handleVoice} /></article><article className="hz-column-card"><AiProposalCardList proposals={data.proposals} onConfirm={(id) => void handleConfirm(id)} onReject={(id) => void handleReject(id)} /><AiContextSidePanel approvals={data.approvals} insights={data.insights} /></article></section></div>;
 }

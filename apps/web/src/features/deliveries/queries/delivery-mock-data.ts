@@ -44,7 +44,10 @@ export async function getDeliveryMockData(): Promise<Delivery[]> {
 
 export async function getDeliveryById(deliveryId?: string): Promise<Delivery | null> {
   const deliveries = await getDeliveryMockData();
-  return deliveries.find((delivery) => delivery.id === deliveryId || delivery.deliveryNo === deliveryId) ?? deliveries[0] ?? null;
+  if (!deliveryId) {
+    return deliveries[0] ?? null;
+  }
+  return deliveries.find((delivery) => delivery.id === deliveryId || delivery.deliveryNo === deliveryId) ?? null;
 }
 
 export function getDeliveryStatusLabel(status: DeliveryStatus): string {

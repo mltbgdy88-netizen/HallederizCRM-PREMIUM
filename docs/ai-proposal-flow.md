@@ -10,6 +10,11 @@
 6. Mutation ise approval draft olusumu
 7. Kullaniciya summary + operasyon listesi
 
+## Local-First Notu
+- Proposal uretim zinciri provider-agnostic kalir.
+- Varsayilan calisma modu local provider uzerindendir.
+- External provider (OpenAI vb.) yalnizca opsiyonel zenginlestirme/adaptasyon katmanidir.
+
 ## Endpointler
 
 - `POST /ai/proposals`
@@ -42,4 +47,3 @@ Desteklenen aksiyonlar:
 - `send_document_whatsapp`
 - `queue_document_save`
 - `queue_document_print`
-

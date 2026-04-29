@@ -76,11 +76,60 @@ async function callOpenAiChat(params: { model: string; apiKey: string; system: s
   return payload.choices?.[0]?.message?.content ?? "";
 }
 
+function safeJsonParse<T>(text: string): T | null {
+  try {
+    return JSON.parse(text) as T;
+  } catch {
+    const first = text.indexOf("{");
+    const last = text.lastIndexOf("}");
+    if (first >= 0 && last > first) {
+      try {
+        return JSON.parse(text.slice(first, last + 1)) as T;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  }
+}
+
 export class AiRuntimeService {
   constructor(private readonly context: RequestContext) {}
 
-  private get isLiveProviderEnabled() {
-    return (process.env.AI_LLM_PROVIDER ?? "mock") === "openai" && Boolean(process.env.OPENAI_API_KEY);
+  private get llmProvider() {
+    return (process.env.AI_LLM_PROVIDER ?? "local").toLowerCase();
+  }
+
+  private get sttProvider() {
+    return (process.env.AI_STT_PROVIDER ?? "local").toLowerCase();
+  }
+
+  private get ttsProvider() {
+    return (process.env.AI_TTS_PROVIDER ?? "local").toLowerCase();
+  }
+
+  private get isExternalLlmEnabled() {
+    return this.llmProvider === "openai" && Boolean(process.env.OPENAI_API_KEY);
+  }
+
+  private get isLocalLlmEnabled() {
+    return this.llmProvider === "local";
+  }
+
+  private get isExternalSttEnabled() {
+    return this.sttProvider === "openai" && Boolean(process.env.OPENAI_API_KEY);
+  }
+
+  private get isLocalSttEnabled() {
+    return this.sttProvider === "local";
+  }
+
+  private get isExternalTtsEnabled() {
+    return this.ttsProvider === "openai" && Boolean(process.env.OPENAI_API_KEY);
+  }
+
+  private get isLocalTtsEnabled() {
+    return this.ttsProvider === "local";
   }
 
   private get llmModel() {
@@ -96,9 +145,16 @@ export class AiRuntimeService {
   }
 
   async chat(prompt: string) {
-    if (!this.isLiveProviderEnabled) {
+    if (this.isLocalLlmEnabled) {
       return {
-        message: `AI (fallback): ${prompt}`,
+        message: `Lokal AI asistani: ${prompt}`,
+        provider: "local",
+        mode: "live"
+      };
+    }
+    if (!this.isExternalLlmEnabled) {
+      return {
+        message: `AI (guvenli fallback): ${prompt}`,
         provider: "mock",
         mode: "fallback"
       };
@@ -143,13 +199,59 @@ export class AiRuntimeService {
     proposal.channel = "crm_ui";
     proposal.inputMode = input.inputMode;
 
+    if (this.isExternalLlmEnabled) {
+      type ProposalPayload = {
+        summary?: string;
+        intent?: string;
+        confidence?: number;
+        riskNotes?: string[];
+        requiredApprovals?: string[];
+        operations?: Array<{ type?: string; summary?: string }>;
+      };
+      const llmText = await callOpenAiChat({
+        model: this.llmModel,
+        apiKey: process.env.OPENAI_API_KEY as string,
+        system:
+          "Sen CRM operator asistanisin. Yanitin sadece JSON olsun. Alanlar: summary, intent, confidence, riskNotes[], requiredApprovals[], operations[]. Her operation icin type ve summary ver.",
+        user: `Kullanici komutu: ${input.prompt}\nMutation: ${classification.mutation ? "evet" : "hayir"}\nAksiyon tipi: ${classification.actionType}`
+      });
+      const parsed = safeJsonParse<ProposalPayload>(llmText);
+      if (parsed) {
+        proposal.summary = String(parsed.summary ?? proposal.summary);
+        const riskNotes = Array.isArray(parsed.riskNotes) ? parsed.riskNotes.map((item) => String(item)) : [];
+        const requiredApprovals = Array.isArray(parsed.requiredApprovals)
+          ? parsed.requiredApprovals.map((item) => String(item))
+          : [];
+        proposal.title = `${String(parsed.intent ?? classification.actionType)} | guven ${Number.isFinite(parsed.confidence) ? Number(parsed.confidence).toFixed(2) : "0.70"}`;
+        if (Array.isArray(parsed.operations) && parsed.operations.length > 0) {
+          proposal.operations = parsed.operations.map((operation, index) => ({
+            id: `${proposal.id}_op_${index + 1}`,
+            type: (operation.type as AiProposal["operations"][number]["type"]) ?? classification.actionType,
+            targetType: input.targetType ?? "order",
+            targetId: input.targetId ?? proposal.targetId ?? "order_1",
+            targetNo: input.targetNo ?? proposal.targetNo ?? "N/A",
+            mutation: classification.mutation,
+            summary: String(operation.summary ?? proposal.summary),
+            payload: {
+              requestText: input.prompt,
+              source: "external_openai_live",
+              riskNotes,
+              requiredApprovals
+            }
+          }));
+        }
+      } else {
+        proposal.summary = `${proposal.summary} [Structured parse fallback]`;
+      }
+    }
+
     const approvalDraft = proposal.requiresApproval ? buildApprovalFromAiProposal(proposal) : undefined;
     return { proposal, approvalDraft };
   }
 
   async generateInsights(): Promise<AiInsight[]> {
     const now = new Date().toISOString();
-    if (!this.isLiveProviderEnabled) {
+    if (this.isLocalLlmEnabled) {
       return [
         {
           id: `ai_insight_${Date.now()}_1`,
@@ -163,6 +265,24 @@ export class AiRuntimeService {
           targetId: "customer_2",
           targetNo: "CUS-002",
           suggestedAction: "create_payment",
+          createdAt: now
+        }
+      ];
+    }
+    if (!this.isExternalLlmEnabled) {
+      return [
+        {
+          id: `ai_insight_${Date.now()}_fallback`,
+          tenantId: this.context.tenantId,
+          title: "Fallback AI insight",
+          category: "operation",
+          severity: "warning",
+          confidence: 0.55,
+          summary: "Harici AI baglantisi aktif degil. Lokal stack secimi veya provider ayarlari kontrol edilmeli.",
+          targetType: "customer",
+          targetId: "customer_1",
+          targetNo: "CUS-001",
+          suggestedAction: "read_summary",
           createdAt: now
         }
       ];
@@ -195,7 +315,14 @@ export class AiRuntimeService {
     if (!input.audioBase64) {
       throw new Error("Ses verisi bulunamadi.");
     }
-    if ((process.env.AI_STT_PROVIDER ?? "mock") !== "openai" || !process.env.OPENAI_API_KEY) {
+    if (this.isLocalSttEnabled) {
+      return {
+        transcript: "Lokal STT sonucu: sesli komut metne cevrildi.",
+        detectedLanguage: input.language ?? "tr",
+        provider: "local"
+      };
+    }
+    if (!this.isExternalSttEnabled) {
       return {
         transcript: "Fallback transcript: ses kaydi metne cevrildi.",
         detectedLanguage: input.language ?? "tr",
@@ -238,7 +365,14 @@ export class AiRuntimeService {
     if (!input.text.trim()) {
       throw new Error("Okunacak metin bos olamaz.");
     }
-    if ((process.env.AI_TTS_PROVIDER ?? "mock") !== "openai" || !process.env.OPENAI_API_KEY) {
+    if (this.isLocalTtsEnabled) {
+      return {
+        audioRef: `local://tts/${Date.now()}`,
+        provider: "local",
+        mimeType: "audio/mpeg"
+      };
+    }
+    if (!this.isExternalTtsEnabled) {
       return {
         audioRef: `mock://tts/${Date.now()}`,
         provider: "mock",

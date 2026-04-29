@@ -10,6 +10,15 @@ export interface AiAssistantData {
   insights: AiInsight[];
 }
 
+export interface AiChatResponse {
+  messages: AiMessage[];
+  reply: string;
+  provider: string;
+  mode: string;
+  classification: { mutation: boolean; text: string; parsedAt: string };
+  requiresProposal: boolean;
+}
+
 export async function getAiAssistantData(): Promise<AiAssistantData> {
   if (dataSourceConfig.useDemoData) {
     return {
@@ -48,6 +57,41 @@ export async function createAiProposal(input: { prompt: string; inputMode?: "tex
   return sdk.ai.createProposal(input);
 }
 
+export async function runAiChat(message: string): Promise<AiChatResponse> {
+  if (dataSourceConfig.useDemoData) {
+    const now = new Date().toISOString();
+    return {
+      messages: [
+        {
+          id: `demo_user_${Date.now()}`,
+          tenantId: dataSourceConfig.tenantId,
+          sessionId: "ai_session_demo",
+          role: "user",
+          inputMode: "text",
+          body: message,
+          createdAt: now
+        },
+        {
+          id: `demo_assistant_${Date.now()}`,
+          tenantId: dataSourceConfig.tenantId,
+          sessionId: "ai_session_demo",
+          role: "assistant",
+          inputMode: "text",
+          body: "Demo fallback cevabi: komutunuz alindi.",
+          createdAt: now
+        }
+      ],
+      reply: "Demo fallback cevabi: komutunuz alindi.",
+      provider: "mock",
+      mode: "fallback",
+      classification: { mutation: false, text: message, parsedAt: now },
+      requiresProposal: false
+    };
+  }
+  const response = await sdk.ai.chat(message);
+  return response.item;
+}
+
 export async function confirmAiProposal(id: string) {
   if (dataSourceConfig.useDemoData) {
     return { item: getAiProposalById(id) };
@@ -84,4 +128,3 @@ export async function runAiInsights() {
 }
 
 export { getAiSettingsData };
-

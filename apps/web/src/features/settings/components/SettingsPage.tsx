@@ -128,6 +128,9 @@ export function SettingsPage() {
         description="Kendi firmaniz icin pilot kurulum, tenant profili ve entegrasyon hazirliklarini yonetin."
         actions={
           <div className="hz-inline-actions">
+            <Link href="/ayarlar/pilot-hazirlik" className="hz-btn hz-btn-secondary">
+              Pilot Hazirlik
+            </Link>
             <Link href="/ayarlar/staging-kontrol" className="hz-btn hz-btn-secondary">
               Staging Kontrol
             </Link>
@@ -573,6 +576,20 @@ export function SettingsPage() {
                     <span>Kalan adim</span>
                     <strong>{settings.pilotSetup.checklist.length - checklistDone}</strong>
                   </div>
+                </article>
+                <article className="hz-side-panel">
+                  <h3>AI ve Ses Ayarlari (Local-First)</h3>
+                  <div className="detail-list">
+                    <span>Birincil AI Provider</span>
+                    <strong>Local (kurum ici)</strong>
+                    <span>Ikinci AI Provider</span>
+                    <strong>OpenAI (opsiyonel)</strong>
+                    <span>STT/TTS Onceligi</span>
+                    <strong>{"Local -> External -> Fallback"}</strong>
+                    <span>Mutation modeli</span>
+                    <strong>Onay zorunlu</strong>
+                  </div>
+                  <p className="muted">CRM, WhatsApp ve sesli komut akislarinda ayni local-first AI davranis modeli kullanilir.</p>
                 </article>
               </aside>
             </div>

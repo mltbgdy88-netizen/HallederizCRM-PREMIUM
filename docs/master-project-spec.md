@@ -14,6 +14,11 @@ HallederizCRM-PREMIUM; duvar kagidi sektoru icin gelistirilen, CRM cekirdegi, op
 
 Platformun hedefi yalnizca kayit tutan bir CRM olmak degil; tekliften tahsilata, depodan teslimata, iletisimden belgeye kadar tum ticari ve operasyonel zinciri tek sistemde orkestre etmektir.
 
+Kullanim siniri:
+- Ana web uygulama ic personel cockpit'i olarak tasarlanmistir.
+- Dis bayi/musteri icin ayri web login/portal bu repo kapsaminda tanimli degildir.
+- Dis bilgi akisi agirlikla WhatsApp ve belge paylasim zinciri uzerinden ilerler.
+
 ## 3. Ana Prensipler
 Platformun tum teknik ve urunsel kararlarinda asagidaki prensipler baglayicidir:
 
@@ -147,3 +152,10 @@ Asagidaki alanlar bu dokumanin kapsaminda stratejik seviyede tanimlanir ancak im
 
 Bu alanlar roadmap fazlarinda olgunlastirilir.
 
+## 11. AI Strateji Karari (Local-First)
+- Projede resmi AI yonu `local-first / acik kaynak / kurum ici` olarak kabul edilir.
+- OpenAI ve benzeri harici LLM/STT/TTS servisleri birincil hedef degil, opsiyonel provider katmanidir.
+- CRM ici AI, WhatsApp AI ve sesli AI ayni davranis modelini kullanir:
+  - Bilgi sorusu -> dogrudan yanit
+  - Islem talebi -> proposal -> insan onayi -> execution
+- Mutation etkili islemlerde approval zorunlulugu korunur.
