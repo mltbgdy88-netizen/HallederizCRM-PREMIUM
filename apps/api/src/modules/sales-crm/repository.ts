@@ -225,7 +225,8 @@ export class SalesCrmRepository {
         [this.context.tenantId]
       );
       return rows.map(mapCustomerRowToEntity);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return listCustomersMock();
     }
   }
@@ -245,7 +246,8 @@ export class SalesCrmRepository {
         [this.context.tenantId, id]
       );
       return rows[0] ? mapCustomerRowToEntity(rows[0]) : undefined;
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return getCustomerMock(id) ?? undefined;
     }
   }
@@ -317,6 +319,7 @@ export class SalesCrmRepository {
       });
     } catch (error) {
       if (error instanceof ApiDomainError) throw error;
+      runtime.handleDbFailure(error);
       return createCustomerMock(payload);
     }
   }
@@ -384,6 +387,7 @@ export class SalesCrmRepository {
       });
     } catch (error) {
       if (error instanceof ApiDomainError) throw error;
+      runtime.handleDbFailure(error);
       return patchCustomerMock(id, payload);
     }
   }
@@ -411,7 +415,8 @@ export class SalesCrmRepository {
         openOrderCount: asNumber(row.open_order_count, 0),
         lastPaymentAt: asString(row.last_payment_at, undefined)
       };
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return getAccountSummary(id) ?? null;
     }
   }
@@ -437,7 +442,8 @@ export class SalesCrmRepository {
         referenceId: asString(row.reference_id, undefined),
         occurredAt: asString(row.occurred_at, nowIso())
       }));
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return getLedger(id);
     }
   }
@@ -471,6 +477,7 @@ export class SalesCrmRepository {
       });
     } catch (error) {
       if (error instanceof ApiDomainError) throw error;
+      runtime.handleDbFailure(error);
       return addContact(id, payload);
     }
   }
@@ -505,6 +512,7 @@ export class SalesCrmRepository {
       });
     } catch (error) {
       if (error instanceof ApiDomainError) throw error;
+      runtime.handleDbFailure(error);
       return addAddress(id, payload);
     }
   }
@@ -545,6 +553,7 @@ export class SalesCrmRepository {
       });
     } catch (error) {
       if (error instanceof ApiDomainError) throw error;
+      runtime.handleDbFailure(error);
       return patchPricingProfile(id, payload);
     }
   }
@@ -567,7 +576,8 @@ export class SalesCrmRepository {
         offer.followUps = followups.map(mapOfferFollowupRow);
       }
       return offers;
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return listOffersMock();
     }
   }
@@ -577,7 +587,8 @@ export class SalesCrmRepository {
     if (!runtime.dbEnabled) return getOfferMock(id) ?? undefined;
     try {
       return await this.loadOfferAggregate(runtime.executor, id);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return getOfferMock(id) ?? undefined;
     }
   }
@@ -649,6 +660,7 @@ export class SalesCrmRepository {
       });
     } catch (error) {
       if (error instanceof ApiDomainError) throw error;
+      runtime.handleDbFailure(error);
       return createOfferMock(payload);
     }
   }
@@ -729,6 +741,7 @@ export class SalesCrmRepository {
       });
     } catch (error) {
       if (error instanceof ApiDomainError) throw error;
+      runtime.handleDbFailure(error);
       return patchOfferMock(id, payload);
     }
   }
@@ -801,6 +814,7 @@ export class SalesCrmRepository {
       });
     } catch (error) {
       if (error instanceof ApiDomainError) throw error;
+      runtime.handleDbFailure(error);
       return addOfferFollowUp(id, payload);
     }
   }

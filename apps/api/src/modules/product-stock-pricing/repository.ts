@@ -207,7 +207,8 @@ export class ProductStockPricingRepository {
         if (product) products.push(product);
       }
       return products;
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return listProducts(filters);
     }
   }
@@ -217,7 +218,8 @@ export class ProductStockPricingRepository {
     if (!runtime.dbEnabled) return getProductById(id);
     try {
       return await this.loadProductAggregate(runtime.executor, id);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return getProductById(id);
     }
   }
@@ -277,6 +279,7 @@ export class ProductStockPricingRepository {
       });
     } catch (error) {
       if (error instanceof ApiDomainError) throw error;
+      runtime.handleDbFailure(error);
       return createProduct(payload);
     }
   }
@@ -349,6 +352,7 @@ export class ProductStockPricingRepository {
       });
     } catch (error) {
       if (error instanceof ApiDomainError) throw error;
+      runtime.handleDbFailure(error);
       return patchProduct(id, payload);
     }
   }
@@ -378,7 +382,8 @@ export class ProductStockPricingRepository {
         amount: 0,
         active: asBoolean(row.is_active, true)
       }));
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return getPriceSlots();
     }
   }
@@ -397,7 +402,8 @@ export class ProductStockPricingRepository {
         }
         return slots;
       });
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return patchPriceSlots(slots);
     }
   }
@@ -413,7 +419,8 @@ export class ProductStockPricingRepository {
         slotName: asString(row.name, "Kategori"),
         active: asBoolean(row.is_active, true)
       }));
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return getCategorySlots();
     }
   }
@@ -432,7 +439,8 @@ export class ProductStockPricingRepository {
         }
         return slots;
       });
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return patchCategorySlots(slots);
     }
   }
@@ -474,7 +482,8 @@ export class ProductStockPricingRepository {
           snapshotOnOrder: payload.snapshotOnOrder ?? true
         } satisfies ExchangeRatePolicy;
       });
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return patchExchangeRatePolicy(payload);
     }
   }

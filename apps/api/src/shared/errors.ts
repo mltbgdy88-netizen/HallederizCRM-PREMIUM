@@ -1,4 +1,4 @@
-export type ApiErrorCode = "validation_error" | "conflict" | "not_found" | "unauthorized" | "forbidden";
+export type ApiErrorCode = "validation_error" | "conflict" | "not_found" | "unauthorized" | "forbidden" | "persistence_unavailable";
 
 export class ApiDomainError extends Error {
   constructor(
@@ -65,6 +65,8 @@ export function asApiErrorPayload(error: unknown): { statusCode: number; body: R
             ? 401
             : error.code === "forbidden"
               ? 403
+              : error.code === "persistence_unavailable"
+                ? 503
               : 400;
     return {
       statusCode,

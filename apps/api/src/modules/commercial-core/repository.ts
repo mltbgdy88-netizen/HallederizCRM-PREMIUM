@@ -559,7 +559,8 @@ export class CommercialCoreRepository {
         if (order) items.push(order);
       }
       return items;
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return listOrders();
     }
   }
@@ -569,7 +570,8 @@ export class CommercialCoreRepository {
     if (!runtime.dbEnabled) return getOrder(id);
     try {
       return await this.loadOrderAggregate(runtime.executor, id);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return getOrder(id);
     }
   }
@@ -652,6 +654,7 @@ export class CommercialCoreRepository {
       });
     } catch (error) {
       if (error instanceof ApiDomainError) throw error;
+      runtime.handleDbFailure(error);
       return createOrder(payload);
     }
   }
@@ -737,6 +740,7 @@ export class CommercialCoreRepository {
       });
     } catch (error) {
       if (error instanceof ApiDomainError) throw error;
+      runtime.handleDbFailure(error);
       return patchOrder(id, payload);
     }
   }
@@ -828,7 +832,8 @@ export class CommercialCoreRepository {
           tasks: []
         } satisfies WarehouseOrder;
       });
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return createWarehouseOrderFromOrder(id);
     }
   }
@@ -848,7 +853,8 @@ export class CommercialCoreRepository {
         })
       );
       return items;
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return listDeliveriesMock();
     }
   }
@@ -858,7 +864,8 @@ export class CommercialCoreRepository {
     if (!runtime.dbEnabled) return getDeliveryMock(id);
     try {
       return await this.loadDeliveryAggregate(runtime.executor, id);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return getDeliveryMock(id);
     }
   }
@@ -949,6 +956,7 @@ export class CommercialCoreRepository {
       });
     } catch (error) {
       if (error instanceof ApiDomainError) throw error;
+      runtime.handleDbFailure(error);
       return createDeliveryMock(payload);
     }
   }
@@ -1003,6 +1011,7 @@ export class CommercialCoreRepository {
       });
     } catch (error) {
       if (error instanceof ApiDomainError) throw error;
+      runtime.handleDbFailure(error);
       return completeDeliveryMock(id);
     }
   }
@@ -1024,7 +1033,8 @@ export class CommercialCoreRepository {
         }
         return this.loadDeliveryAggregate(tx, id);
       });
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return rollbackDeliveryMock(id);
     }
   }
@@ -1044,7 +1054,8 @@ export class CommercialCoreRepository {
       const rows = await runtime.executor.query<Row>(`select * from invoices where tenant_id = $1 order by created_at desc`, [this.context.tenantId]);
       const items = await Promise.all(rows.map(async (row) => (await this.loadInvoiceAggregate(runtime.executor, asString(row.id))) ?? mapInvoiceRow(row)));
       return items;
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return listInvoicesMock();
     }
   }
@@ -1054,7 +1065,8 @@ export class CommercialCoreRepository {
     if (!runtime.dbEnabled) return getInvoiceMock(id);
     try {
       return await this.loadInvoiceAggregate(runtime.executor, id);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return getInvoiceMock(id);
     }
   }
@@ -1094,6 +1106,7 @@ export class CommercialCoreRepository {
       });
     } catch (error) {
       if (error instanceof ApiDomainError) throw error;
+      runtime.handleDbFailure(error);
       return createInvoiceMock(payload);
     }
   }
@@ -1109,7 +1122,8 @@ export class CommercialCoreRepository {
         [this.context.tenantId, id, "issued"]
       );
       return this.getInvoice(id);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return issueInvoiceMock(id);
     }
   }
@@ -1120,7 +1134,8 @@ export class CommercialCoreRepository {
     try {
       await runtime.executor.query(`update invoices set status = $3 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, "cancelled"]);
       return this.getInvoice(id);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return cancelInvoiceMock(id);
     }
   }
@@ -1138,7 +1153,8 @@ export class CommercialCoreRepository {
       const rows = await runtime.executor.query<Row>(`select * from returns where tenant_id = $1 order by created_at desc`, [this.context.tenantId]);
       const items = await Promise.all(rows.map(async (row) => (await this.loadReturnAggregate(runtime.executor, asString(row.id))) ?? mapReturnRow(row)));
       return items;
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return listReturnsMock();
     }
   }
@@ -1148,7 +1164,8 @@ export class CommercialCoreRepository {
     if (!runtime.dbEnabled) return getReturnMock(id);
     try {
       return await this.loadReturnAggregate(runtime.executor, id);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return getReturnMock(id);
     }
   }
@@ -1184,6 +1201,7 @@ export class CommercialCoreRepository {
       });
     } catch (error) {
       if (error instanceof ApiDomainError) throw error;
+      runtime.handleDbFailure(error);
       return createReturnMock(payload);
     }
   }
@@ -1194,7 +1212,8 @@ export class CommercialCoreRepository {
     try {
       await runtime.executor.query(`update returns set status = $3 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, "approved"]);
       return this.getReturn(id);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return approveReturnMock(id);
     }
   }
@@ -1205,7 +1224,8 @@ export class CommercialCoreRepository {
     try {
       await runtime.executor.query(`update returns set status = $3 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, "received"]);
       return this.getReturn(id);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return receiveReturnMock(id);
     }
   }
@@ -1216,7 +1236,8 @@ export class CommercialCoreRepository {
     try {
       await runtime.executor.query(`update returns set status = $3 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, "completed"]);
       return this.getReturn(id);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return completeReturnMock(id);
     }
   }
@@ -1227,7 +1248,8 @@ export class CommercialCoreRepository {
     try {
       await runtime.executor.query(`update returns set status = $3 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, "cancelled"]);
       return this.getReturn(id);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return cancelReturnMock(id);
     }
   }
@@ -1239,7 +1261,8 @@ export class CommercialCoreRepository {
       const rows = await runtime.executor.query<Row>(`select * from documents where tenant_id = $1 order by created_at desc`, [this.context.tenantId]);
       const items = await Promise.all(rows.map(async (row) => (await this.loadDocumentAggregate(runtime.executor, asString(row.id))) ?? mapDocumentRow(row)));
       return items;
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return listDocumentsMock();
     }
   }
@@ -1249,7 +1272,8 @@ export class CommercialCoreRepository {
     if (!runtime.dbEnabled) return getDocumentMock(id);
     try {
       return await this.loadDocumentAggregate(runtime.executor, id);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return getDocumentMock(id);
     }
   }
@@ -1290,7 +1314,8 @@ export class CommercialCoreRepository {
         ]
       );
       return record;
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return renderDocumentMock(payload);
     }
   }
@@ -1321,7 +1346,8 @@ export class CommercialCoreRepository {
         [request.id, this.context.tenantId, request.documentId, request.channel, "sent", request.recipient ?? null, request.requestedAt, nowIso()]
       );
       return { ...request, status: "sent", sentAt: nowIso() };
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return null;
     }
   }
@@ -1353,7 +1379,8 @@ export class CommercialCoreRepository {
     try {
       const rows = await runtime.executor.query<Row>(`select * from payment_receipts where tenant_id = $1 order by created_at desc`, [this.context.tenantId]);
       return rows.map(mapPaymentRow);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return listPayments();
     }
   }
@@ -1364,7 +1391,8 @@ export class CommercialCoreRepository {
     try {
       const row = (await runtime.executor.query<Row>(`select * from payment_receipts where tenant_id = $1 and (id = $2 or receipt_no = $2) limit 1`, [this.context.tenantId, id]))[0];
       return row ? mapPaymentRow(row) : undefined;
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return getPayment(id);
     }
   }
@@ -1399,7 +1427,8 @@ export class CommercialCoreRepository {
       );
       const created = await this.getPayment(id);
       return created ?? createPayment(payload);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return createPayment(payload);
     }
   }
@@ -1416,7 +1445,8 @@ export class CommercialCoreRepository {
         [this.context.tenantId, payment.id, nextStatus, nowIso()]
       );
       return this.getPayment(payment.id);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return confirmPayment(id);
     }
   }
@@ -1436,7 +1466,8 @@ export class CommercialCoreRepository {
         reversedBy: this.context.userId,
         reversedAt: nowIso()
       };
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return reversePayment(id, reason);
     }
   }
@@ -1473,7 +1504,8 @@ export class CommercialCoreRepository {
     try {
       const rows = await runtime.executor.query<Row>(`select * from warehouse_orders where tenant_id = $1 order by created_at desc`, [this.context.tenantId]);
       return rows.map(mapWarehouseOrderRow);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return listWarehouseOrders();
     }
   }
@@ -1484,7 +1516,8 @@ export class CommercialCoreRepository {
     try {
       const row = (await runtime.executor.query<Row>(`select * from warehouse_orders where tenant_id = $1 and (id = $2 or warehouse_order_no = $2) limit 1`, [this.context.tenantId, id]))[0];
       return row ? mapWarehouseOrderRow(row) : undefined;
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return getWarehouseOrder(id);
     }
   }
@@ -1518,7 +1551,8 @@ export class CommercialCoreRepository {
       );
       const created = await this.getWarehouseOrder(id);
       return created ?? createWarehouseOrder(payload);
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return createWarehouseOrder(payload);
     }
   }
@@ -1529,7 +1563,8 @@ export class CommercialCoreRepository {
     try {
       await runtime.executor.query(`update warehouse_orders set assigned_to = $3, updated_at = $4 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, assignedTo, nowIso()]);
       return this.getWarehouseOrder(id) ?? null;
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return assignWarehouseOrder(id, assignedTo);
     }
   }
@@ -1540,7 +1575,8 @@ export class CommercialCoreRepository {
     try {
       await runtime.executor.query(`update warehouse_orders set status = $3, started_at = $4, updated_at = $4 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, "picking", nowIso()]);
       return this.getWarehouseOrder(id) ?? null;
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return startWarehouseOrder(id);
     }
   }
@@ -1551,7 +1587,8 @@ export class CommercialCoreRepository {
     try {
       await runtime.executor.query(`update warehouse_orders set status = $3, prepared_at = $4, updated_at = $4 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, "prepared", nowIso()]);
       return this.getWarehouseOrder(id) ?? null;
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return markWarehouseOrderPrepared(id);
     }
   }
@@ -1562,7 +1599,8 @@ export class CommercialCoreRepository {
     try {
       await runtime.executor.query(`update warehouse_orders set status = $3, updated_at = $4 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, "cancelled", nowIso()]);
       return this.getWarehouseOrder(id) ?? null;
-    } catch {
+    } catch (error) {
+      runtime.handleDbFailure(error);
       return cancelWarehouseOrder(id);
     }
   }
