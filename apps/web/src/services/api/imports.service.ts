@@ -31,3 +31,13 @@ export async function listImportHistoryApi(type?: ImportType): Promise<ImportHis
   const response = await sdk.imports.listHistory(type);
   return response.items;
 }
+
+export async function retryImportHistoryApi(id: string): Promise<ImportHistoryRecord> {
+  const response = await sdk.imports.retryHistory(id);
+  return response.item;
+}
+
+export async function getImportErrorReportApi(id: string): Promise<string[]> {
+  const response = await sdk.imports.getErrorReport(id);
+  return response.item.errorReport;
+}

@@ -1,6 +1,6 @@
 # Veri Import Akisi
 
-Bu dokuman, HallederizCRM-PREMIUM icin pilot veri yukleme akisini ozetler.
+Bu dokuman, HallederizCRM-PREMIUM icin import merkezinin parse -> validate -> preview -> apply -> history akisini ozetler.
 
 ## Kapsam
 - `customers`
@@ -16,40 +16,58 @@ Bu dokuman, HallederizCRM-PREMIUM icin pilot veri yukleme akisini ozetler.
 - `POST /imports/:type/apply`
 - `GET /imports/history`
 - `GET /imports/history/:id`
+- `POST /imports/history/:id/retry`
+- `GET /imports/history/:id/error-report`
 
 ## Akis
-1. Template indirilir (`/imports/templates/:type`).
-2. Kullanici CSV dosyasini yukler.
-3. `preview` cagrisi ile parse/validation sonuclari uretilir.
-4. Hata yoksa `apply` cagrisi ile veri kalici katmana yazilir.
-5. Sonuc `import_history` kaydina yazilir.
+1. Template indirilir.
+2. CSV veya XLSX dosyasi yuklenir.
+3. Preview cagrisi parse/validation sonucu dondurur.
+4. Hata yoksa apply ile kalici yazim calisir.
+5. Sonuc import history ve audit tarafina yazilir.
 
-## Parse / Validate / Preview
-- Parse: CSV satirlari ve kolonlari normalize edilir.
-- Validate: zorunlu alan, duplicate, referans eslesme ve sayisal kontrol yapilir.
-- Preview: gecerli satir, hata/uyari listesi ve satir ornekleri donulur.
+## CSV + XLSX
+- CSV destegi korunur.
+- XLSX destegi vardir.
+- XLSX dosyada birden fazla sheet varsa sistem sheet basliklarini skorlayarak `suggestedSheetName` onerir.
+- Kullanici isterse sheet secimini degistirip preview/apply tekrar calistirabilir.
+
+## Preview metadata
+Preview cevabinda su alanlar doner:
+- `fileType`: `csv` veya `xlsx`
+- `sheetName`: secili sheet
+- `sheetNames`: tum sheet listesi
+- `suggestedSheetName`: otomatik onerilen sheet
+- `sheetScoreSummary`: sheet bazli uyum skoru
+- `columnMapping`: ham baslik -> normalize alan
+- `requiredMissingColumns`: zorunlu eksik kolonlar
+- `unmappedColumns`: eslestirilemeyen kolonlar
+
+## Hata ve uyari modeli
+- Satir bazli hata/uyari uretilir.
+- Her issue kaydinda satir no, kolon, seviye, kod, mesaj, cozum oneri bilgisi tutulur.
+- Onizleme kayitlarinda satir durumlari: `valid`, `warning`, `error`.
 
 ## Conflict Politikalari
-- Cari kodu duplicate: dosya icinde `error`, mevcut kayitta `warning` (update olarak ele alinir).
-- Urun kodu duplicate: dosya icinde `error`, mevcut kayitta `warning` (update olarak ele alinir).
-- Barkod cakisimi: `error`.
-- Fiyat slotu gecersiz: `error`.
-- Urun/depo eslesmesi yok: `error`.
+- Duplicate customer/product code: dosya icinde `error`, mevcut kayitta `warning` (update semantigi).
+- Barcode conflict: `error`.
+- Invalid currency/slot/number: `error`.
+- Unknown product/warehouse mapping: `error`.
 
-## History Modeli
-Her import icin:
-- `id`
-- `type`
-- `fileName`
-- `uploadedBy`
-- `uploadedAt`
-- `previewRecordCount`
-- `successCount`
-- `errorCount`
-- `warningCount`
-- `status`
-- `summary`
+## Apply ve sonuc
+- Apply oncesi preview dogrulamasi tekrar kullanilir.
+- Hata varsa import `failed` olarak history'ye yazilir.
+- Basarili/kismi basarili importlar `applied` olarak kaydedilir.
+- Sonuc alanlari:
+  - totalRows
+  - successCount
+  - errorCount
+  - warningCount
+  - skippedCount
+  - conflictCount
+  - durationMs
 
-## Notlar
-- Bu batchte CSV tam desteklidir.
-- XLSX yuklemeleri icin kontrollu mesaj ile CSV’ye disa aktarma yonlendirmesi bulunur.
+## History / Retry / Error Report
+- Import gecmisi tip, dosya, sheet, sonuc ve sayisal ozetle listelenir.
+- `retry` endpointi failed kaydi tekrar deneme durumuna cekmek icin foundation sunar.
+- `error-report` endpointi satir bazli derlenmis hata raporu dondurur.

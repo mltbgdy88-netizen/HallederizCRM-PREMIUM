@@ -38,15 +38,22 @@ Bu dokuman, kendi firma verilerini pilot tenant icine yuklerken onerilen sirayi 
 - `depo_kodu`
 - `mevcut_stok`
 
+## XLSX kullanimi
+- Sistem secilen import tipine gore sheet basliklarini skorlar.
+- Onerilen sheet otomatik gelir.
+- Gerekirse farkli sheet secilip preview tekrar calistirilir.
+
 ## Ornek pilot akisi
 1. `/ayarlar/pilot-veri-yukleme` ekranina gir.
-2. Ilgili template’i indir.
-3. Dosyayi doldur.
+2. Ilgili template'i indir.
+3. Dosyayi doldur (`.csv` veya `.xlsx`).
 4. Preview calistir.
-5. Hata varsa duzeltip tekrar preview al.
-6. Apply ile kalici yaz.
-7. `Gecmis` sekmesinden sonucu kontrol et.
-8. Ayarlar > Pilot Kurulum checklistte adimlarin tamamlandigini dogrula.
+5. Gerekirse sheet secimini degistir.
+6. Hata/uyari raporunu incele.
+7. Hatalari duzeltip tekrar preview al.
+8. Apply ile kalici yaz.
+9. `Gecmis` sekmesinden sonucu kontrol et.
+10. Ayarlar > Pilot Kurulum checklistte import adimlarinin otomatik isaretlendigini dogrula.
 
 ## Demo ve Gercek tenant ayrimi
 - Demo mod korunur.

@@ -22,6 +22,27 @@ export function getImportHistoryById(tenantId: string, id: string): ImportHistor
   return importHistory.find((record) => record.tenantId === tenantId && record.id === id) ?? null;
 }
 
+export function updateImportHistoryRecord(
+  tenantId: string,
+  id: string,
+  patch: Partial<ImportHistoryRecord>
+): ImportHistoryRecord | null {
+  const index = importHistory.findIndex((record) => record.tenantId === tenantId && record.id === id);
+  if (index < 0) return null;
+  const current = importHistory[index];
+  if (!current) return null;
+  const next: ImportHistoryRecord = {
+    ...current,
+    ...patch,
+    details: {
+      ...(current.details ?? {}),
+      ...(patch.details ?? {})
+    }
+  };
+  importHistory[index] = next;
+  return next;
+}
+
 export function buildImportSummary(status: ImportStatus, totalRows: number, successCount: number, errorCount: number): string {
   if (status === "failed") {
     return `Import basarisiz: ${errorCount}/${totalRows} hata`;

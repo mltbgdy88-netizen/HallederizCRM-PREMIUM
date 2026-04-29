@@ -1,6 +1,20 @@
-import { buildOrderSourcePlan, calculateOrderTotals, deriveOrderDeliveryStatus, deriveOrderPaymentStatus, validateOrderTransition } from "@hallederiz/domain";
+import {
+  buildDocumentDeliveryRequest,
+  buildDocumentRecord,
+  buildOrderSourcePlan,
+  calculateInvoiceTotals,
+  calculateOrderTotals,
+  calculateReturnImpact,
+  deriveOrderCompletionState,
+  deriveOrderDeliveryStatus,
+  deriveOrderPaymentStatus,
+  validateDeliveryCustomerLink,
+  validateDeliveryPaymentRule,
+  validateDeliveryWarehouseState,
+  validateOrderTransition
+} from "@hallederiz/domain";
 import type { QueryExecutor } from "@hallederiz/database";
-import type { PaymentReceipt, SaleOrder, SaleOrderLine, WarehouseOrder, OrderSourcePlan } from "@hallederiz/types";
+import type { Delivery, DeliveryLine, Document, DocumentDelivery, DocumentType, Invoice, InvoiceLine, PaymentReceipt, Return, ReturnLine, SaleOrder, SaleOrderLine, WarehouseOrder, OrderSourcePlan } from "@hallederiz/types";
 import { ApiDomainError, assertOptimisticConcurrency } from "../../shared/errors";
 import type { RequestContext } from "../../shared/request-context";
 import { buildRepositoryRuntime } from "../../shared/db-runtime";
@@ -19,6 +33,31 @@ import {
   getOrder,
   getPayment,
   getPaymentAllocations,
+  getDelivery as getDeliveryMock,
+  listDeliveries as listDeliveriesMock,
+  createDelivery as createDeliveryMock,
+  validateDelivery as validateDeliveryMock,
+  completeDelivery as completeDeliveryMock,
+  rollbackDelivery as rollbackDeliveryMock,
+  notifyDeliveryCustomer as notifyDeliveryCustomerMock,
+  getInvoice as getInvoiceMock,
+  listInvoices as listInvoicesMock,
+  createInvoice as createInvoiceMock,
+  issueInvoice as issueInvoiceMock,
+  cancelInvoice as cancelInvoiceMock,
+  sendInvoice as sendInvoiceMock,
+  getReturn as getReturnMock,
+  listReturns as listReturnsMock,
+  createReturn as createReturnMock,
+  approveReturn as approveReturnMock,
+  receiveReturn as receiveReturnMock,
+  completeReturn as completeReturnMock,
+  cancelReturn as cancelReturnMock,
+  getDocument as getDocumentMock,
+  listDocuments as listDocumentsMock,
+  renderDocument as renderDocumentMock,
+  sendDocumentEmail as sendDocumentEmailMock,
+  sendDocumentWhatsApp as sendDocumentWhatsAppMock,
   getWarehouseOrder,
   listOrders,
   listPayments,
@@ -104,6 +143,164 @@ function mapSourcePlanRow(row: Row): OrderSourcePlan {
     status: asString(row.status, "not_planned") as OrderSourcePlan["status"],
     note: asString(row.note, undefined),
     createdAt: asString(row.created_at, nowIso())
+  };
+}
+
+function mapDeliveryRow(row: Row): Delivery {
+  return {
+    id: asString(row.id),
+    tenantId: asString(row.tenant_id, "tenant_1"),
+    deliveryNo: asString(row.delivery_no),
+    orderId: asString(row.order_id),
+    orderNo: asString(row.order_no),
+    customerId: asString(row.customer_id),
+    warehouseOrderId: asString(row.warehouse_order_id, undefined),
+    status: asString(row.status, "pending") as Delivery["status"],
+    plannedAt: asString(row.planned_at, nowIso()),
+    deliveredAt: asString(row.delivered_at, undefined),
+    documentStatus: asString(row.document_status, "missing") as Delivery["documentStatus"],
+    note: asString(row.note, undefined),
+    validation: {
+      customerVerified: Boolean(row.validation_customer_verified ?? false),
+      orderMatched: Boolean(row.validation_order_matched ?? false),
+      warehouseReady: Boolean(row.validation_warehouse_ready ?? false),
+      paymentMissing: Boolean(row.validation_payment_missing ?? false),
+      approvalRequired: Boolean(row.validation_approval_required ?? false),
+      riskNote: asString(row.validation_risk_note, ""),
+      valid: Boolean(row.validation_valid ?? false),
+      blockers: []
+    },
+    confirmation: row.confirmed_at
+      ? {
+          confirmedBy: asString(row.confirmed_by, "user_admin"),
+          confirmedAt: asString(row.confirmed_at),
+          note: asString(row.confirmation_note, undefined),
+          customerNotified: Boolean(row.customer_notified ?? false)
+        }
+      : undefined,
+    createdAt: asString(row.created_at, nowIso()),
+    updatedAt: asString(row.updated_at, nowIso()),
+    lines: []
+  };
+}
+
+function mapDeliveryLineRow(row: Row): DeliveryLine {
+  return {
+    id: asString(row.id),
+    deliveryId: asString(row.delivery_id),
+    orderLineId: asString(row.order_line_id),
+    productId: asString(row.product_id),
+    productCode: asString(row.product_code),
+    productName: asString(row.product_name),
+    orderedQuantity: asNumber(row.ordered_quantity, 0),
+    preparedQuantity: asNumber(row.prepared_quantity, 0),
+    deliveredQuantity: asNumber(row.delivered_quantity, 0)
+  };
+}
+
+function mapInvoiceRow(row: Row): Invoice {
+  return {
+    id: asString(row.id),
+    tenantId: asString(row.tenant_id, "tenant_1"),
+    invoiceNo: asString(row.invoice_no),
+    customerId: asString(row.customer_id),
+    orderId: asString(row.order_id, undefined),
+    orderNo: asString(row.order_no, undefined),
+    status: asString(row.status, "draft") as Invoice["status"],
+    deliveryStatus: asString(row.delivery_status, "not_sent") as Invoice["deliveryStatus"],
+    paymentStatus: asString(row.payment_status, "unpaid") as Invoice["paymentStatus"],
+    issueDate: asString(row.issue_date, undefined),
+    currency: asString(row.currency, "TRY") as Invoice["currency"],
+    subtotal: asNumber(row.subtotal, 0),
+    taxTotal: asNumber(row.tax_total, 0),
+    grandTotal: asNumber(row.grand_total, 0),
+    documentId: asString(row.document_id, undefined),
+    createdAt: asString(row.created_at, nowIso()),
+    updatedAt: asString(row.updated_at, nowIso()),
+    lines: []
+  };
+}
+
+function mapInvoiceLineRow(row: Row): InvoiceLine {
+  return {
+    id: asString(row.id),
+    invoiceId: asString(row.invoice_id),
+    orderLineId: asString(row.order_line_id, undefined),
+    productId: asString(row.product_id),
+    productCode: asString(row.product_code),
+    productName: asString(row.product_name),
+    quantity: asNumber(row.quantity, 0),
+    unitPrice: asNumber(row.unit_price, 0),
+    currency: asString(row.currency, "TRY") as InvoiceLine["currency"],
+    taxRate: asNumber(row.tax_rate, 20),
+    taxTotal: asNumber(row.tax_total, 0),
+    lineTotal: asNumber(row.line_total, 0)
+  };
+}
+
+function mapReturnRow(row: Row): Return {
+  return {
+    id: asString(row.id),
+    tenantId: asString(row.tenant_id, "tenant_1"),
+    returnNo: asString(row.return_no),
+    customerId: asString(row.customer_id),
+    orderId: asString(row.order_id, undefined),
+    orderNo: asString(row.order_no, undefined),
+    deliveryId: asString(row.delivery_id, undefined),
+    deliveryNo: asString(row.delivery_no, undefined),
+    status: asString(row.status, "draft") as Return["status"],
+    note: asString(row.note, undefined),
+    createdAt: asString(row.created_at, nowIso()),
+    updatedAt: asString(row.updated_at, nowIso()),
+    lines: []
+  };
+}
+
+function mapReturnLineRow(row: Row): ReturnLine {
+  return {
+    id: asString(row.id),
+    returnId: asString(row.return_id),
+    orderLineId: asString(row.order_line_id, undefined),
+    deliveryLineId: asString(row.delivery_line_id, undefined),
+    productId: asString(row.product_id),
+    productCode: asString(row.product_code),
+    productName: asString(row.product_name),
+    quantity: asNumber(row.quantity, 0),
+    reasonCategory: asString(row.reason_category, "other") as ReturnLine["reasonCategory"],
+    note: asString(row.note, undefined)
+  };
+}
+
+function mapDocumentRow(row: Row): Document {
+  return {
+    id: asString(row.id),
+    tenantId: asString(row.tenant_id, "tenant_1"),
+    documentNo: asString(row.document_no),
+    type: asString(row.document_type, "order_pdf") as DocumentType,
+    entityType: asString(row.entity_type, "order") as Document["entityType"],
+    entityId: asString(row.entity_id),
+    entityNo: asString(row.entity_no),
+    customerId: asString(row.customer_id, undefined),
+    title: asString(row.title, "Belge"),
+    previewText: asString(row.preview_text, ""),
+    createdAt: asString(row.created_at, nowIso()),
+    createdBy: asString(row.created_by, "user_admin"),
+    deliveries: []
+  };
+}
+
+function mapDocumentDeliveryRow(row: Row): DocumentDelivery {
+  return {
+    id: asString(row.id),
+    tenantId: asString(row.tenant_id, "tenant_1"),
+    documentId: asString(row.document_id),
+    channel: asString(row.channel, "download") as DocumentDelivery["channel"],
+    status: asString(row.status, "queued") as DocumentDelivery["status"],
+    recipient: asString(row.recipient, undefined),
+    requestedAt: asString(row.requested_at, nowIso()),
+    sentAt: asString(row.sent_at, undefined),
+    deliveredAt: asString(row.delivered_at, undefined),
+    errorMessage: asString(row.error_message, undefined)
   };
 }
 
@@ -216,6 +413,91 @@ export class CommercialCoreRepository {
         ]
       );
     }
+  }
+
+  private async loadDeliveryAggregate(executor: QueryExecutor, deliveryId: string): Promise<Delivery | undefined> {
+    const row = (await executor.query<Row>(`select * from deliveries where tenant_id = $1 and id = $2 limit 1`, [this.context.tenantId, deliveryId]))[0];
+    if (!row) return undefined;
+    const lines = await executor.query<Row>(`select * from delivery_lines where tenant_id = $1 and delivery_id = $2 order by id asc`, [this.context.tenantId, deliveryId]);
+    const delivery = mapDeliveryRow(row);
+    delivery.lines = lines.map(mapDeliveryLineRow);
+    return delivery;
+  }
+
+  private async replaceDeliveryLinesTx(tx: QueryExecutor, deliveryId: string, lines: DeliveryLine[]) {
+    await tx.query(`delete from delivery_lines where tenant_id = $1 and delivery_id = $2`, [this.context.tenantId, deliveryId]);
+    for (const line of lines) {
+      await tx.query(
+        `insert into delivery_lines
+         (id, tenant_id, delivery_id, order_line_id, product_id, product_code, product_name, ordered_quantity, prepared_quantity, delivered_quantity)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+        [line.id, this.context.tenantId, deliveryId, line.orderLineId, line.productId, line.productCode, line.productName, line.orderedQuantity, line.preparedQuantity, line.deliveredQuantity]
+      );
+    }
+  }
+
+  private validateDeliveryLineParity(lines: DeliveryLine[], orderLines: SaleOrderLine[]) {
+    const orderLineMap = new Map(orderLines.map((line) => [line.id, line]));
+    for (const line of lines) {
+      const source = orderLineMap.get(line.orderLineId);
+      if (!source) {
+        throw new ApiDomainError("validation_error", "Teslim satiri siparis satiri ile eslesmiyor.", { lineId: line.id, orderLineId: line.orderLineId });
+      }
+      if (line.deliveredQuantity > source.quantity) {
+        throw new ApiDomainError("validation_error", "Teslim edilen miktar siparis miktarini asamaz.", { lineId: line.id, delivered: line.deliveredQuantity, ordered: source.quantity });
+      }
+    }
+  }
+
+  private async loadInvoiceAggregate(executor: QueryExecutor, invoiceId: string): Promise<Invoice | undefined> {
+    const row = (await executor.query<Row>(`select * from invoices where tenant_id = $1 and id = $2 limit 1`, [this.context.tenantId, invoiceId]))[0];
+    if (!row) return undefined;
+    const lineRows = await executor.query<Row>(`select * from invoice_lines where tenant_id = $1 and invoice_id = $2 order by id asc`, [this.context.tenantId, invoiceId]);
+    const invoice = mapInvoiceRow(row);
+    invoice.lines = lineRows.map(mapInvoiceLineRow);
+    return invoice;
+  }
+
+  private async replaceInvoiceLinesTx(tx: QueryExecutor, invoiceId: string, lines: InvoiceLine[]) {
+    await tx.query(`delete from invoice_lines where tenant_id = $1 and invoice_id = $2`, [this.context.tenantId, invoiceId]);
+    for (const line of lines) {
+      await tx.query(
+        `insert into invoice_lines
+         (id, tenant_id, invoice_id, order_line_id, product_id, product_code, product_name, quantity, unit_price, currency, tax_rate, tax_total, line_total)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)`,
+        [line.id, this.context.tenantId, invoiceId, line.orderLineId ?? null, line.productId, line.productCode, line.productName, line.quantity, line.unitPrice, line.currency, line.taxRate, line.taxTotal, line.lineTotal]
+      );
+    }
+  }
+
+  private async loadReturnAggregate(executor: QueryExecutor, returnId: string): Promise<Return | undefined> {
+    const row = (await executor.query<Row>(`select * from returns where tenant_id = $1 and id = $2 limit 1`, [this.context.tenantId, returnId]))[0];
+    if (!row) return undefined;
+    const lineRows = await executor.query<Row>(`select * from return_lines where tenant_id = $1 and return_id = $2 order by id asc`, [this.context.tenantId, returnId]);
+    const ret = mapReturnRow(row);
+    ret.lines = lineRows.map(mapReturnLineRow);
+    return ret;
+  }
+
+  private async replaceReturnLinesTx(tx: QueryExecutor, returnId: string, lines: ReturnLine[]) {
+    await tx.query(`delete from return_lines where tenant_id = $1 and return_id = $2`, [this.context.tenantId, returnId]);
+    for (const line of lines) {
+      await tx.query(
+        `insert into return_lines
+         (id, tenant_id, return_id, order_line_id, delivery_line_id, product_id, product_code, product_name, quantity, reason_category, note)
+         values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11)`,
+        [line.id, this.context.tenantId, returnId, line.orderLineId ?? null, line.deliveryLineId ?? null, line.productId, line.productCode, line.productName, line.quantity, line.reasonCategory, line.note ?? null]
+      );
+    }
+  }
+
+  private async loadDocumentAggregate(executor: QueryExecutor, documentId: string): Promise<Document | undefined> {
+    const row = (await executor.query<Row>(`select * from documents where tenant_id = $1 and id = $2 limit 1`, [this.context.tenantId, documentId]))[0];
+    if (!row) return undefined;
+    const deliveryRows = await executor.query<Row>(`select * from document_deliveries where tenant_id = $1 and document_id = $2 order by requested_at desc`, [this.context.tenantId, documentId]);
+    const document = mapDocumentRow(row);
+    document.deliveries = deliveryRows.map(mapDocumentDeliveryRow);
+    return document;
   }
 
   async listOrders() {
@@ -505,6 +787,500 @@ export class CommercialCoreRepository {
     } catch {
       return createWarehouseOrderFromOrder(id);
     }
+  }
+
+  async listDeliveries() {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return listDeliveriesMock();
+    try {
+      const rows = await runtime.executor.query<Row>(
+        `select * from deliveries where tenant_id = $1 order by created_at desc`,
+        [this.context.tenantId]
+      );
+      const items = await Promise.all(
+        rows.map(async (row) => {
+          const aggregate = await this.loadDeliveryAggregate(runtime.executor, asString(row.id));
+          return aggregate ?? mapDeliveryRow(row);
+        })
+      );
+      return items;
+    } catch {
+      return listDeliveriesMock();
+    }
+  }
+
+  async getDelivery(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return getDeliveryMock(id);
+    try {
+      return await this.loadDeliveryAggregate(runtime.executor, id);
+    } catch {
+      return getDeliveryMock(id);
+    }
+  }
+
+  async createDelivery(payload: Partial<Delivery>) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return createDeliveryMock(payload);
+    try {
+      return await runtime.executor.transaction(async (tx) => {
+        const id = payload.id ?? `delivery_${Date.now()}`;
+        const now = nowIso();
+        const order = payload.orderId ? await this.loadOrderAggregate(tx, payload.orderId) : null;
+        if (!order) {
+          throw new ApiDomainError("validation_error", "Teslimat olusturmak icin gecerli siparis baglantisi gerekli.");
+        }
+
+        const lines: DeliveryLine[] = (payload.lines ?? []).map((line) => ({
+          id: line.id ?? `delivery_line_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          deliveryId: id,
+          orderLineId: line.orderLineId,
+          productId: line.productId,
+          productCode: line.productCode,
+          productName: line.productName,
+          orderedQuantity: line.orderedQuantity,
+          preparedQuantity: line.preparedQuantity,
+          deliveredQuantity: line.deliveredQuantity
+        }));
+        this.validateDeliveryLineParity(lines, order.lines);
+
+        const warehouseOrders = await this.listWarehouseOrders();
+        const deliveryDraft: Delivery = {
+          id,
+          tenantId: this.context.tenantId,
+          deliveryNo: payload.deliveryNo ?? `DLV-${Date.now().toString().slice(-5)}`,
+          orderId: order.id,
+          orderNo: order.orderNo,
+          customerId: order.customerId,
+          warehouseOrderId: payload.warehouseOrderId,
+          status: payload.status ?? "pending",
+          plannedAt: payload.plannedAt ?? now,
+          deliveredAt: payload.deliveredAt,
+          documentStatus: payload.documentStatus ?? "missing",
+          note: payload.note,
+          validation: payload.validation ?? {
+            customerVerified: false,
+            orderMatched: false,
+            warehouseReady: false,
+            paymentMissing: false,
+            approvalRequired: false,
+            riskNote: "Teslimat dogrulamasi henuz tamamlanmadi.",
+            valid: false,
+            blockers: []
+          },
+          confirmation: payload.confirmation,
+          createdAt: now,
+          updatedAt: now,
+          lines
+        };
+
+        const linkValidation = validateDeliveryCustomerLink(deliveryDraft, order, { id: order.customerId, active: true });
+        const paymentValidation = validateDeliveryPaymentRule(order);
+        const warehouseValidation = validateDeliveryWarehouseState(deliveryDraft, warehouseOrders);
+        const validation = {
+          customerVerified: linkValidation.valid,
+          orderMatched: deliveryDraft.orderId === order.id && deliveryDraft.customerId === order.customerId,
+          warehouseReady: warehouseValidation.warehouseReady,
+          paymentMissing: paymentValidation.paymentMissing,
+          approvalRequired: paymentValidation.approvalRequired,
+          riskNote: [...linkValidation.blockers, ...paymentValidation.blockers, ...warehouseValidation.blockers][0] ?? "Dogrulama uygun.",
+          valid: linkValidation.valid && paymentValidation.valid && warehouseValidation.valid,
+          blockers: [...linkValidation.blockers, ...paymentValidation.blockers, ...warehouseValidation.blockers]
+        } satisfies Delivery["validation"];
+
+        await tx.query(
+          `insert into deliveries
+          (id, tenant_id, delivery_no, order_id, status, created_at)
+          values ($1,$2,$3,$4,$5,$6)`,
+          [id, this.context.tenantId, deliveryDraft.deliveryNo, order.id, deliveryDraft.status, now]
+        );
+        await this.replaceDeliveryLinesTx(tx, id, lines);
+        await tx.query(
+          `update sale_orders set delivery_status = $3, updated_at = $4 where tenant_id = $1 and id = $2`,
+          [this.context.tenantId, order.id, deliveryDraft.status === "ready" ? "ready" : "preparing", now]
+        );
+        const created = await this.loadDeliveryAggregate(tx, id);
+        if (!created) throw new ApiDomainError("validation_error", "Teslimat kaydi olusturulamadi.");
+        return { ...created, validation };
+      });
+    } catch (error) {
+      if (error instanceof ApiDomainError) throw error;
+      return createDeliveryMock(payload);
+    }
+  }
+
+  async validateDelivery(id: string) {
+    const delivery = await this.getDelivery(id);
+    if (!delivery) return null;
+    const order = await this.getOrder(delivery.orderId);
+    if (!order) {
+      throw new ApiDomainError("validation_error", "Teslimat siparis baglantisi bulunamadi.");
+    }
+    const warehouseOrders = await this.listWarehouseOrders();
+    const linkValidation = validateDeliveryCustomerLink(delivery, order, { id: order.customerId, active: true });
+    const paymentValidation = validateDeliveryPaymentRule(order);
+    const warehouseValidation = validateDeliveryWarehouseState(delivery, warehouseOrders);
+    return {
+      customerVerified: linkValidation.valid,
+      orderMatched: delivery.orderId === order.id && delivery.customerId === order.customerId,
+      warehouseReady: warehouseValidation.warehouseReady,
+      paymentMissing: paymentValidation.paymentMissing,
+      approvalRequired: paymentValidation.approvalRequired,
+      riskNote: [...linkValidation.blockers, ...paymentValidation.blockers, ...warehouseValidation.blockers][0] ?? "Dogrulama uygun.",
+      valid: linkValidation.valid && paymentValidation.valid && warehouseValidation.valid,
+      blockers: [...linkValidation.blockers, ...paymentValidation.blockers, ...warehouseValidation.blockers]
+    } satisfies Delivery["validation"];
+  }
+
+  async completeDelivery(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return completeDeliveryMock(id);
+    try {
+      return await runtime.executor.transaction(async (tx) => {
+        const delivery = await this.loadDeliveryAggregate(tx, id);
+        if (!delivery) return null;
+        const validation = await this.validateDelivery(id);
+        if (!validation?.valid) {
+          throw new ApiDomainError("validation_error", `Teslimat tamamlanamadi: ${(validation?.blockers ?? []).join(" | ")}`);
+        }
+        await tx.query(
+          `update deliveries set status = $3 where tenant_id = $1 and id = $2`,
+          [this.context.tenantId, id, "delivered"]
+        );
+        const order = await this.loadOrderAggregate(tx, delivery.orderId);
+        if (order) {
+          await tx.query(
+            `update sale_orders set delivery_status = $3, status = $4, updated_at = $5 where tenant_id = $1 and id = $2`,
+            [this.context.tenantId, order.id, "delivered", deriveOrderCompletionState([{ ...delivery, status: "delivered" }]), nowIso()]
+          );
+        }
+        const updated = await this.loadDeliveryAggregate(tx, id);
+        return updated ? { ...updated, validation } : null;
+      });
+    } catch (error) {
+      if (error instanceof ApiDomainError) throw error;
+      return completeDeliveryMock(id);
+    }
+  }
+
+  async rollbackDelivery(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return rollbackDeliveryMock(id);
+    try {
+      return await runtime.executor.transaction(async (tx) => {
+        const delivery = await this.loadDeliveryAggregate(tx, id);
+        if (!delivery) return null;
+        await tx.query(`update deliveries set status = $3 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, "rolled_back"]);
+        const order = await this.loadOrderAggregate(tx, delivery.orderId);
+        if (order) {
+          await tx.query(
+            `update sale_orders set delivery_status = $3, status = $4, updated_at = $5 where tenant_id = $1 and id = $2`,
+            [this.context.tenantId, order.id, "none", order.status === "completed" ? "partially_delivered" : order.status, nowIso()]
+          );
+        }
+        return this.loadDeliveryAggregate(tx, id);
+      });
+    } catch {
+      return rollbackDeliveryMock(id);
+    }
+  }
+
+  async notifyDeliveryCustomer(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return notifyDeliveryCustomerMock(id);
+    const delivery = await this.getDelivery(id);
+    if (!delivery) return null;
+    return { ...delivery, confirmation: { confirmedBy: this.context.userId, confirmedAt: nowIso(), customerNotified: true, note: "Musteriye teslimat bildirimi gonderildi." } };
+  }
+
+  async listInvoices() {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return listInvoicesMock();
+    try {
+      const rows = await runtime.executor.query<Row>(`select * from invoices where tenant_id = $1 order by created_at desc`, [this.context.tenantId]);
+      const items = await Promise.all(rows.map(async (row) => (await this.loadInvoiceAggregate(runtime.executor, asString(row.id))) ?? mapInvoiceRow(row)));
+      return items;
+    } catch {
+      return listInvoicesMock();
+    }
+  }
+
+  async getInvoice(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return getInvoiceMock(id);
+    try {
+      return await this.loadInvoiceAggregate(runtime.executor, id);
+    } catch {
+      return getInvoiceMock(id);
+    }
+  }
+
+  async createInvoice(payload: Partial<Invoice>) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return createInvoiceMock(payload);
+    try {
+      return await runtime.executor.transaction(async (tx) => {
+        const id = payload.id ?? `invoice_${Date.now()}`;
+        const now = nowIso();
+        const order = payload.orderId ? await this.loadOrderAggregate(tx, payload.orderId) : null;
+        const lines: InvoiceLine[] = (payload.lines ?? []).map((line) => ({
+          id: line.id ?? `invoice_line_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          invoiceId: id,
+          orderLineId: line.orderLineId,
+          productId: line.productId,
+          productCode: line.productCode,
+          productName: line.productName,
+          quantity: line.quantity,
+          unitPrice: line.unitPrice,
+          currency: line.currency ?? payload.currency ?? "TRY",
+          taxRate: line.taxRate ?? 20,
+          taxTotal: line.taxTotal ?? Number((line.quantity * line.unitPrice * ((line.taxRate ?? 20) / 100)).toFixed(2)),
+          lineTotal: line.lineTotal ?? Number((line.quantity * line.unitPrice).toFixed(2))
+        }));
+        const totals = calculateInvoiceTotals(lines, payload.currency ?? order?.currency ?? "TRY");
+        await tx.query(
+          `insert into invoices (id, tenant_id, invoice_no, order_id, status, grand_total, created_at)
+           values ($1,$2,$3,$4,$5,$6,$7)`,
+          [id, this.context.tenantId, payload.invoiceNo ?? `INV-${Date.now().toString().slice(-5)}`, payload.orderId ?? null, payload.status ?? "draft", totals.grandTotal, now]
+        );
+        await this.replaceInvoiceLinesTx(tx, id, lines);
+        const created = await this.loadInvoiceAggregate(tx, id);
+        if (!created) throw new ApiDomainError("validation_error", "Fatura kaydi olusturulamadi.");
+        return created;
+      });
+    } catch (error) {
+      if (error instanceof ApiDomainError) throw error;
+      return createInvoiceMock(payload);
+    }
+  }
+
+  async issueInvoice(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return issueInvoiceMock(id);
+    try {
+      const invoice = await this.getInvoice(id);
+      if (!invoice) return null;
+      await runtime.executor.query(
+        `update invoices set status = $3 where tenant_id = $1 and id = $2`,
+        [this.context.tenantId, id, "issued"]
+      );
+      return this.getInvoice(id);
+    } catch {
+      return issueInvoiceMock(id);
+    }
+  }
+
+  async cancelInvoice(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return cancelInvoiceMock(id);
+    try {
+      await runtime.executor.query(`update invoices set status = $3 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, "cancelled"]);
+      return this.getInvoice(id);
+    } catch {
+      return cancelInvoiceMock(id);
+    }
+  }
+
+  async sendInvoice(id: string) {
+    const invoice = await this.getInvoice(id);
+    if (!invoice) return null;
+    return { ...invoice, deliveryStatus: "sent" };
+  }
+
+  async listReturns() {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return listReturnsMock();
+    try {
+      const rows = await runtime.executor.query<Row>(`select * from returns where tenant_id = $1 order by created_at desc`, [this.context.tenantId]);
+      const items = await Promise.all(rows.map(async (row) => (await this.loadReturnAggregate(runtime.executor, asString(row.id))) ?? mapReturnRow(row)));
+      return items;
+    } catch {
+      return listReturnsMock();
+    }
+  }
+
+  async getReturn(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return getReturnMock(id);
+    try {
+      return await this.loadReturnAggregate(runtime.executor, id);
+    } catch {
+      return getReturnMock(id);
+    }
+  }
+
+  async createReturn(payload: Partial<Return>) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return createReturnMock(payload);
+    try {
+      return await runtime.executor.transaction(async (tx) => {
+        const id = payload.id ?? `return_${Date.now()}`;
+        const now = nowIso();
+        const lines: ReturnLine[] = (payload.lines ?? []).map((line) => ({
+          id: line.id ?? `return_line_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
+          returnId: id,
+          orderLineId: line.orderLineId,
+          deliveryLineId: line.deliveryLineId,
+          productId: line.productId,
+          productCode: line.productCode,
+          productName: line.productName,
+          quantity: line.quantity,
+          reasonCategory: line.reasonCategory ?? "other",
+          note: line.note
+        }));
+        await tx.query(
+          `insert into returns (id, tenant_id, return_no, customer_id, status, created_at)
+           values ($1,$2,$3,$4,$5,$6)`,
+          [id, this.context.tenantId, payload.returnNo ?? `RET-${Date.now().toString().slice(-5)}`, payload.customerId ?? "customer_1", payload.status ?? "draft", now]
+        );
+        await this.replaceReturnLinesTx(tx, id, lines);
+        const created = await this.loadReturnAggregate(tx, id);
+        if (!created) throw new ApiDomainError("validation_error", "Iade kaydi olusturulamadi.");
+        return created;
+      });
+    } catch (error) {
+      if (error instanceof ApiDomainError) throw error;
+      return createReturnMock(payload);
+    }
+  }
+
+  async approveReturn(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return approveReturnMock(id);
+    try {
+      await runtime.executor.query(`update returns set status = $3 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, "approved"]);
+      return this.getReturn(id);
+    } catch {
+      return approveReturnMock(id);
+    }
+  }
+
+  async receiveReturn(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return receiveReturnMock(id);
+    try {
+      await runtime.executor.query(`update returns set status = $3 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, "received"]);
+      return this.getReturn(id);
+    } catch {
+      return receiveReturnMock(id);
+    }
+  }
+
+  async completeReturn(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return completeReturnMock(id);
+    try {
+      await runtime.executor.query(`update returns set status = $3 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, "completed"]);
+      return this.getReturn(id);
+    } catch {
+      return completeReturnMock(id);
+    }
+  }
+
+  async cancelReturn(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return cancelReturnMock(id);
+    try {
+      await runtime.executor.query(`update returns set status = $3 where tenant_id = $1 and id = $2`, [this.context.tenantId, id, "cancelled"]);
+      return this.getReturn(id);
+    } catch {
+      return cancelReturnMock(id);
+    }
+  }
+
+  async listDocuments() {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return listDocumentsMock();
+    try {
+      const rows = await runtime.executor.query<Row>(`select * from documents where tenant_id = $1 order by created_at desc`, [this.context.tenantId]);
+      const items = await Promise.all(rows.map(async (row) => (await this.loadDocumentAggregate(runtime.executor, asString(row.id))) ?? mapDocumentRow(row)));
+      return items;
+    } catch {
+      return listDocumentsMock();
+    }
+  }
+
+  async getDocument(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return getDocumentMock(id);
+    try {
+      return await this.loadDocumentAggregate(runtime.executor, id);
+    } catch {
+      return getDocumentMock(id);
+    }
+  }
+
+  async renderDocument(payload: { type: DocumentType; entityType: Document["entityType"]; entityId: string; entityNo: string; customerId?: string }) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return renderDocumentMock(payload);
+    try {
+      const record = buildDocumentRecord({
+        tenantId: this.context.tenantId,
+        type: payload.type,
+        entityType: payload.entityType,
+        entityId: payload.entityId,
+        entityNo: payload.entityNo,
+        customerId: payload.customerId,
+        createdBy: this.context.userId
+      });
+      await runtime.executor.query(
+        `insert into documents (id, tenant_id, document_type, entity_type, entity_id, status, created_at)
+         values ($1,$2,$3,$4,$5,$6,$7)`,
+        [record.id, this.context.tenantId, record.type, record.entityType, record.entityId, "queued", record.createdAt]
+      );
+      return record;
+    } catch {
+      return renderDocumentMock(payload);
+    }
+  }
+
+  async regenerateDocument(id: string) {
+    const source = await this.getDocument(id);
+    if (!source) return null;
+    return this.renderDocument({
+      type: source.type,
+      entityType: source.entityType,
+      entityId: source.entityId,
+      entityNo: source.entityNo,
+      customerId: source.customerId
+    });
+  }
+
+  private async createDocumentDelivery(documentId: string, channel: DocumentDelivery["channel"], recipient?: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return null;
+    const document = await this.getDocument(documentId);
+    if (!document) return null;
+    const request = buildDocumentDeliveryRequest(document, channel, recipient);
+    try {
+      await runtime.executor.query(
+        `insert into document_deliveries
+         (id, tenant_id, document_id, channel, status, recipient, requested_at)
+         values ($1,$2,$3,$4,$5,$6,$7)`,
+        [request.id, this.context.tenantId, request.documentId, request.channel, request.status, request.recipient ?? null, request.requestedAt]
+      );
+      return request;
+    } catch {
+      return null;
+    }
+  }
+
+  async sendDocumentWhatsApp(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return sendDocumentWhatsAppMock(id);
+    const document = await this.getDocument(id);
+    if (!document) return null;
+    await this.createDocumentDelivery(id, "whatsapp", "whatsapp-placeholder");
+    return this.getDocument(id);
+  }
+
+  async sendDocumentEmail(id: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return sendDocumentEmailMock(id);
+    const document = await this.getDocument(id);
+    if (!document) return null;
+    await this.createDocumentDelivery(id, "email", "email-placeholder");
+    return this.getDocument(id);
   }
 
   createFactoryOrders(id: string) { return createFactoryOrders(id); }

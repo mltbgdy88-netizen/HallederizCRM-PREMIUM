@@ -14,23 +14,43 @@ export interface ImportTemplateDefinition {
 export interface ImportFilePayload {
   fileName: string;
   contentBase64: string;
+  sheetName?: string;
 }
 
 export interface ImportPreviewIssue {
   rowNumber: number;
   field: string;
   severity: "error" | "warning";
+  code?: string;
   message: string;
+  suggestion?: string;
 }
 
 export interface ImportPreviewRecord {
   rowNumber: number;
   data: Record<string, string>;
+  normalized?: Record<string, string>;
+  status?: "valid" | "warning" | "error";
+}
+
+export interface ImportSheetScore {
+  sheetName: string;
+  score: number;
+  matchedColumns: string[];
+  missingRequiredColumns: string[];
 }
 
 export interface ImportPreviewResult {
   importType: ImportType;
   fileName: string;
+  fileType: "csv" | "xlsx";
+  sheetName?: string;
+  sheetNames?: string[];
+  suggestedSheetName?: string;
+  sheetScoreSummary?: ImportSheetScore[];
+  columnMapping?: Record<string, string>;
+  unmappedColumns?: string[];
+  requiredMissingColumns?: string[];
   totalRows: number;
   validRows: number;
   errorCount: number;
@@ -56,12 +76,22 @@ export interface ImportHistoryRecord {
   tenantId: string;
   type: ImportType;
   fileName: string;
+  fileType?: "csv" | "xlsx";
+  sheetName?: string;
   uploadedBy: string;
   uploadedAt: string;
   previewRecordCount: number;
   successCount: number;
   errorCount: number;
+  skippedCount?: number;
+  conflictCount?: number;
   warningCount: number;
+  durationMs?: number;
   status: ImportStatus;
   summary: string;
+  details?: {
+    issues?: ImportPreviewIssue[];
+    records?: ImportPreviewRecord[];
+    errorReport?: string[];
+  };
 }

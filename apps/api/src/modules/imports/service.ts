@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   Customer,
   CustomerRiskLevel,
   ImportApplyResult,
@@ -7,6 +7,7 @@ import type {
   ImportPreviewIssue,
   ImportPreviewRecord,
   ImportPreviewResult,
+  ImportSheetScore,
   ImportTemplateDefinition,
   ImportType,
   PlatformSettings,
@@ -15,12 +16,14 @@ import type {
   WarehouseSetupItem
 } from "@hallederiz/types";
 import { normalizeBarcode } from "@hallederiz/domain";
+import XLSX from "xlsx";
 import type { RequestContext } from "../../shared/request-context";
 import {
   addImportHistoryRecord,
   buildImportSummary,
   getImportHistoryById,
-  listImportHistory
+  listImportHistory,
+  updateImportHistoryRecord
 } from "../../shared/import-history-store";
 import { ProductStockPricingService } from "../product-stock-pricing/service";
 import { SalesCrmService } from "../sales-crm/service";
@@ -29,11 +32,27 @@ import { getTenantSettingsState, setTenantSettingsState } from "../../platform-c
 interface ParsedTable {
   headers: string[];
   rows: string[][];
+  source: {
+    fileType: "csv" | "xlsx";
+    sheetName?: string;
+    sheetNames?: string[];
+    suggestedSheetName?: string;
+    sheetScoreSummary?: ImportSheetScore[];
+  };
 }
 
 type PreviewRow = {
   rowNumber: number;
   values: Record<string, string>;
+  normalized: Record<string, string>;
+};
+
+const REQUIRED_COLUMNS: Record<ImportType, string[]> = {
+  customers: ["cari_kodu", "cari_adi"],
+  products: ["urun_kodu", "urun_adi"],
+  pricing: ["urun_kodu", "fiyat_slotu", "fiyat_degeri", "para_birimi"],
+  warehouses: ["depo_kodu", "depo_adi"],
+  "stock-locations": ["urun_kodu", "depo_kodu", "mevcut_stok"]
 };
 
 const CSV_TEMPLATES: Record<ImportType, ImportTemplateDefinition> = {
@@ -113,16 +132,91 @@ function canonicalizeHeader(value: string): string {
   return value
     .trim()
     .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
     .replace(/ı/g, "i")
-    .replace(/ğ/g, "g")
-    .replace(/ü/g, "u")
-    .replace(/ş/g, "s")
-    .replace(/ö/g, "o")
-    .replace(/ç/g, "c")
     .replace(/[^a-z0-9]+/g, "_")
     .replace(/^_+|_+$/g, "");
 }
 
+const HEADER_ALIASES: Record<string, string> = {
+  carikodu: "cari_kodu",
+  carikod: "cari_kodu",
+  cari_kod: "cari_kodu",
+  caricode: "cari_kodu",
+  musterikodu: "cari_kodu",
+  musterikod: "cari_kodu",
+  urunkodu: "urun_kodu",
+  urunkod: "urun_kodu",
+  urun_kod: "urun_kodu",
+  stokkodu: "urun_kodu",
+  stokkod: "urun_kodu",
+  sku: "urun_kodu",
+  barkod: "ana_barkod",
+  anabarkod: "ana_barkod",
+  barcode: "ana_barkod",
+  fiyatslotu: "fiyat_slotu",
+  slot: "fiyat_slotu",
+  slotadi: "fiyat_slotu",
+  bayifiyati: "fiyat_slotu",
+  mimarfiyati: "fiyat_slotu",
+  fiyatgrubu: "fiyat_grubu",
+  parabirimi: "para_birimi",
+  depokodu: "depo_kodu",
+  warehousecode: "depo_kodu",
+  depoadi: "depo_adi",
+  warehouse: "depo_adi",
+  lokasyon: "lokasyon_kodu",
+  raf: "raf_no",
+  rafno: "raf_no",
+  mevcutstok: "mevcut_stok",
+  kullanilabilirstok: "mevcut_stok"
+};
+
+function resolveHeaderAlias(value: string): string {
+  const canonical = canonicalizeHeader(value);
+  const aliasKey = canonical.replace(/_/g, "");
+  return HEADER_ALIASES[aliasKey] ?? canonical;
+}
+
+function scoreSheetHeaders(importType: ImportType, headers: string[], sheetName: string): ImportSheetScore {
+  const normalized = headers.map(resolveHeaderAlias);
+  const expected = new Set(CSV_TEMPLATES[importType].columns);
+  const matchedColumns = normalized.filter((header) => expected.has(header));
+  const missingRequiredColumns = REQUIRED_COLUMNS[importType].filter((required) => !normalized.includes(required));
+  const score = matchedColumns.length * 2 - missingRequiredColumns.length * 3;
+  return {
+    sheetName,
+    score,
+    matchedColumns,
+    missingRequiredColumns
+  };
+}
+
+function buildSheetSuggestionSummary(scores: ImportSheetScore[]): ImportSheetScore[] {
+  return [...scores].sort((a, b) => b.score - a.score || b.matchedColumns.length - a.matchedColumns.length);
+}
+
+function resolveColumnMapping(importType: ImportType, headers: string[]): {
+  mappedHeaders: string[];
+  columnMapping: Record<string, string>;
+  requiredMissingColumns: string[];
+  unmappedColumns: string[];
+} {
+  const expected = new Set(CSV_TEMPLATES[importType].columns);
+  const mappedHeaders = headers.map(resolveHeaderAlias);
+  const columnMapping: Record<string, string> = {};
+  const unmappedColumns: string[] = [];
+  headers.forEach((header, index) => {
+    const mapped = mappedHeaders[index] ?? "";
+    columnMapping[header] = mapped;
+    if (!expected.has(mapped)) {
+      unmappedColumns.push(header);
+    }
+  });
+  const requiredMissingColumns = REQUIRED_COLUMNS[importType].filter((required) => !mappedHeaders.includes(required));
+  return { mappedHeaders, columnMapping, requiredMissingColumns, unmappedColumns };
+}
 function parseCsvLine(line: string, delimiter: "," | ";"): string[] {
   const cells: string[] = [];
   let current = "";
@@ -159,7 +253,7 @@ function parseCsv(content: string): ParsedTable {
     .filter((line) => line.length > 0);
 
   if (lines.length === 0) {
-    return { headers: [], rows: [] };
+    return { headers: [], rows: [], source: { fileType: "csv" } };
   }
 
   const firstLine = lines[0] ?? "";
@@ -167,23 +261,91 @@ function parseCsv(content: string): ParsedTable {
   const semicolonCells = parseCsvLine(firstLine, ";").length;
   const delimiter: "," | ";" = semicolonCells > commaCells ? ";" : ",";
 
-  const headers = parseCsvLine(firstLine, delimiter).map(canonicalizeHeader);
+  const headers = parseCsvLine(firstLine, delimiter).map((header) => header.trim());
   const rows = lines.slice(1).map((line) => parseCsvLine(line, delimiter));
-  return { headers, rows };
+  return { headers, rows, source: { fileType: "csv" } };
 }
 
-function decodeFileContent(file: ImportFilePayload): string {
-  const buffer = Buffer.from(file.contentBase64, "base64");
-  return buffer.toString("utf-8");
+function parseXlsx(buffer: Buffer, importType: ImportType, selectedSheetName?: string): ParsedTable {
+  const workbook = XLSX.read(buffer, { type: "buffer", cellDates: true });
+  const sheetNames = workbook.SheetNames ?? [];
+  const sheetScores = buildSheetSuggestionSummary(
+    sheetNames.map((name) => {
+      const sheet = workbook.Sheets[name];
+      if (!sheet) {
+        return {
+          sheetName: name,
+          score: -999,
+          matchedColumns: [],
+          missingRequiredColumns: [...REQUIRED_COLUMNS[importType]]
+        };
+      }
+      const headerRow = (XLSX.utils.sheet_to_json(sheet, {
+        header: 1,
+        blankrows: false,
+        raw: false,
+        defval: ""
+      }) as string[][])[0] ?? [];
+      return scoreSheetHeaders(importType, headerRow.map((cell) => String(cell ?? "")), name);
+    })
+  );
+  const suggestedSheetName = sheetScores[0]?.sheetName;
+  const sheetName = selectedSheetName && sheetNames.includes(selectedSheetName) ? selectedSheetName : suggestedSheetName ?? sheetNames[0];
+  if (!sheetName) {
+    return { headers: [], rows: [], source: { fileType: "xlsx", sheetNames, suggestedSheetName, sheetScoreSummary: sheetScores } };
+  }
+
+  const worksheet = workbook.Sheets[sheetName];
+  if (!worksheet) {
+    return { headers: [], rows: [], source: { fileType: "xlsx", sheetName, sheetNames, suggestedSheetName, sheetScoreSummary: sheetScores } };
+  }
+  const rawRows = (XLSX.utils.sheet_to_json(worksheet, {
+    header: 1,
+    blankrows: false,
+    raw: false,
+    defval: ""
+  }) as Array<Array<string | number | boolean | Date | null>>).filter((row) =>
+    row.some((cell) => String(cell ?? "").trim().length > 0)
+  );
+  if (rawRows.length === 0) {
+    return { headers: [], rows: [], source: { fileType: "xlsx", sheetName, sheetNames, suggestedSheetName, sheetScoreSummary: sheetScores } };
+  }
+  const headerRow = rawRows[0] ?? [];
+  const headers = headerRow.map((cell) => String(cell ?? "").trim());
+  const rows = rawRows
+    .slice(1)
+    .map((row) => row.map((cell) => String(cell ?? "").trim()))
+    .filter((row) => row.some((cell) => cell.length > 0));
+
+  return {
+    headers,
+    rows,
+    source: { fileType: "xlsx", sheetName, sheetNames, suggestedSheetName, sheetScoreSummary: sheetScores }
+  };
 }
 
-function toPreviewRows(table: ParsedTable): PreviewRow[] {
-  return table.rows.map((row, index) => {
+function decodeFileContent(file: ImportFilePayload): Buffer {
+  return Buffer.from(file.contentBase64, "base64");
+}
+
+function parseFile(type: ImportType, file: ImportFilePayload): ParsedTable {
+  const fileName = file.fileName.toLowerCase();
+  const buffer = decodeFileContent(file);
+  if (fileName.endsWith(".xlsx")) {
+    return parseXlsx(buffer, type, file.sheetName);
+  }
+  return parseCsv(buffer.toString("utf-8"));
+}
+
+function toPreviewRows(headers: string[], rows: string[][]): PreviewRow[] {
+  return rows.map((row, index) => {
     const values: Record<string, string> = {};
-    table.headers.forEach((header, headerIndex) => {
+    const normalized: Record<string, string> = {};
+    headers.forEach((header, headerIndex) => {
       values[header] = String(row[headerIndex] ?? "").trim();
+      normalized[header] = String(row[headerIndex] ?? "").trim();
     });
-    return { rowNumber: index + 2, values };
+    return { rowNumber: index + 2, values, normalized };
   });
 }
 
@@ -221,15 +383,35 @@ function normalizePhone(value: string): string {
   return digits ? `+90${digits}` : "";
 }
 
-function buildIssue(rowNumber: number, field: string, severity: "error" | "warning", message: string): ImportPreviewIssue {
-  return { rowNumber, field, severity, message };
+function buildIssue(
+  rowNumber: number,
+  field: string,
+  severity: "error" | "warning",
+  message: string,
+  code?: string,
+  suggestion?: string
+): ImportPreviewIssue {
+  return { rowNumber, field, severity, message, code, suggestion };
 }
 
-function toPreviewRecords(rows: PreviewRow[]): ImportPreviewRecord[] {
-  return rows.map((row) => ({
-    rowNumber: row.rowNumber,
-    data: row.values
-  }));
+function toPreviewRecords(rows: PreviewRow[], issues: ImportPreviewIssue[]): ImportPreviewRecord[] {
+  const rowsWithError = new Set(issues.filter((issue) => issue.severity === "error").map((issue) => issue.rowNumber));
+  const rowsWithWarning = new Set(issues.filter((issue) => issue.severity === "warning").map((issue) => issue.rowNumber));
+  return rows.map((row) => {
+    const status = rowsWithError.has(row.rowNumber) ? "error" : rowsWithWarning.has(row.rowNumber) ? "warning" : "valid";
+    return {
+      rowNumber: row.rowNumber,
+      data: row.values,
+      normalized: row.normalized,
+      status
+    };
+  });
+}
+
+function buildErrorReport(issues: ImportPreviewIssue[]): string[] {
+  return issues
+    .filter((item) => item.severity === "error")
+    .map((item) => `Satir ${item.rowNumber} [${item.field}] ${item.message}${item.suggestion ? ` | Cozum: ${item.suggestion}` : ""}`);
 }
 
 export class ImportsService {
@@ -259,29 +441,17 @@ export class ImportsService {
   }
 
   async preview(type: ImportType, file: ImportFilePayload): Promise<ImportPreviewResult> {
-    if (!file.fileName.toLowerCase().endsWith(".csv")) {
-      return {
-        importType: type,
-        fileName: file.fileName,
-        totalRows: 0,
-        validRows: 0,
-        errorCount: 1,
-        warningCount: 0,
-        records: [],
-        issues: [buildIssue(1, "file", "error", "Bu surumde sadece CSV dosyasi desteklenir. Excel dosyasini CSV olarak disa aktarip tekrar yukleyin.")]
-      };
-    }
-
-    const table = parseCsv(decodeFileContent(file));
-    const rows = toPreviewRows(table);
+    const table = parseFile(type, file);
+    const mapping = resolveColumnMapping(type, table.headers);
+    const rows = toPreviewRows(mapping.mappedHeaders, table.rows);
     const issues: ImportPreviewIssue[] = [];
 
-    const expectedColumns = new Set(this.getTemplate(type).columns.map(canonicalizeHeader));
-    for (const column of expectedColumns) {
-      if (!table.headers.includes(column)) {
-        issues.push(buildIssue(1, column, "error", `${column} kolonu bulunamadi.`));
-      }
-    }
+    mapping.requiredMissingColumns.forEach((column) => {
+      issues.push(buildIssue(1, column, "error", `${column} kolonu bulunamadi.`, "missing_required_column", "Template basliklarini kullanin."));
+    });
+    mapping.unmappedColumns.forEach((column) => {
+      issues.push(buildIssue(1, column, "warning", `${column} kolonu eslestirilemedi.`, "unmapped_column", "Kolon adini standart basliga yaklastirin."));
+    });
 
     const existingCustomers = await this.salesCrmService.listCustomers();
     const existingProducts = await this.stockService.listProducts({});
@@ -306,7 +476,7 @@ export class ImportsService {
         if (!name) issues.push(buildIssue(row.rowNumber, "cari_adi", "error", "Cari adi zorunludur."));
         const codeKey = code.toLowerCase();
         if (code && seenCustomerCodes.has(codeKey)) {
-          issues.push(buildIssue(row.rowNumber, "cari_kodu", "error", "Dosya icinde duplicate cari kodu var."));
+          issues.push(buildIssue(row.rowNumber, "cari_kodu", "error", "Dosya icinde duplicate cari kodu var.", "duplicate_in_file"));
         }
         seenCustomerCodes.add(codeKey);
         if (code && existingCustomerCodes.has(codeKey)) {
@@ -335,7 +505,7 @@ export class ImportsService {
               product.barcodeAliases.some((alias) => normalizeBarcode(alias.value) === mainBarcode)
           );
           if (conflict && conflict.code.toLowerCase() !== codeKey) {
-            issues.push(buildIssue(row.rowNumber, "ana_barkod", "error", `Barkod cakisiyor (${conflict.code}).`));
+            issues.push(buildIssue(row.rowNumber, "ana_barkod", "error", `Barkod cakisiyor (${conflict.code}).`, "barcode_conflict"));
           }
         }
       }
@@ -345,18 +515,18 @@ export class ImportsService {
         const slotRaw = (data.fiyat_slotu ?? "").trim();
         const currency = (data.para_birimi ?? "").trim().toUpperCase();
         if (!productByCode.has(code)) {
-          issues.push(buildIssue(row.rowNumber, "urun_kodu", "error", "Urun kodu bulunamadi."));
+          issues.push(buildIssue(row.rowNumber, "urun_kodu", "error", "Urun kodu bulunamadi.", "unknown_product"));
         }
         const slotNo = Number(slotRaw);
         const slotByName = priceSlotByName.get(slotRaw.toLowerCase());
         if (!(slotNo >= 1 && slotNo <= 6) && !slotByName) {
-          issues.push(buildIssue(row.rowNumber, "fiyat_slotu", "error", "Fiyat slotu 1-6 veya gecerli slot adi olmali."));
+          issues.push(buildIssue(row.rowNumber, "fiyat_slotu", "error", "Fiyat slotu 1-6 veya gecerli slot adi olmali.", "invalid_slot"));
         }
         if (!["TRY", "USD", "EUR"].includes(currency)) {
-          issues.push(buildIssue(row.rowNumber, "para_birimi", "error", "Para birimi TRY/USD/EUR olmali."));
+          issues.push(buildIssue(row.rowNumber, "para_birimi", "error", "Para birimi TRY/USD/EUR olmali.", "invalid_currency"));
         }
         if (!Number.isFinite(Number((data.fiyat_degeri ?? "").replace(",", ".")))) {
-          issues.push(buildIssue(row.rowNumber, "fiyat_degeri", "error", "Fiyat degeri sayi olmali."));
+          issues.push(buildIssue(row.rowNumber, "fiyat_degeri", "error", "Fiyat degeri sayi olmali.", "invalid_number"));
         }
       }
 
@@ -367,7 +537,7 @@ export class ImportsService {
         if (!name) issues.push(buildIssue(row.rowNumber, "depo_adi", "error", "Depo adi zorunludur."));
         const codeKey = code.toLowerCase();
         if (code && seenWarehouseCodes.has(codeKey)) {
-          issues.push(buildIssue(row.rowNumber, "depo_kodu", "error", "Dosya icinde duplicate depo kodu var."));
+          issues.push(buildIssue(row.rowNumber, "depo_kodu", "error", "Dosya icinde duplicate depo kodu var.", "duplicate_in_file"));
         }
         seenWarehouseCodes.add(codeKey);
       }
@@ -376,16 +546,16 @@ export class ImportsService {
         const code = (data.urun_kodu ?? "").trim().toLowerCase();
         const warehouseCode = (data.depo_kodu ?? "").trim().toLowerCase();
         if (!productByCode.has(code)) {
-          issues.push(buildIssue(row.rowNumber, "urun_kodu", "error", "Urun kodu bulunamadi."));
+          issues.push(buildIssue(row.rowNumber, "urun_kodu", "error", "Urun kodu bulunamadi.", "unknown_product"));
         }
         if (!warehouseCodeSet.has(warehouseCode)) {
-          issues.push(buildIssue(row.rowNumber, "depo_kodu", "error", "Depo kodu bulunamadi."));
+          issues.push(buildIssue(row.rowNumber, "depo_kodu", "error", "Depo kodu bulunamadi.", "unknown_warehouse"));
         }
         if (!Number.isFinite(Number((data.mevcut_stok ?? "").replace(",", ".")))) {
-          issues.push(buildIssue(row.rowNumber, "mevcut_stok", "error", "Mevcut stok sayi olmali."));
+          issues.push(buildIssue(row.rowNumber, "mevcut_stok", "error", "Mevcut stok sayi olmali.", "invalid_number"));
         }
         if (!Number.isFinite(Number((data.rezerve_stok ?? "0").replace(",", ".")))) {
-          issues.push(buildIssue(row.rowNumber, "rezerve_stok", "error", "Rezerve stok sayi olmali."));
+          issues.push(buildIssue(row.rowNumber, "rezerve_stok", "error", "Rezerve stok sayi olmali.", "invalid_number"));
         }
       }
     }
@@ -398,29 +568,48 @@ export class ImportsService {
     return {
       importType: type,
       fileName: file.fileName,
+      fileType: table.source.fileType,
+      sheetName: table.source.sheetName,
+      sheetNames: table.source.sheetNames,
+      suggestedSheetName: table.source.suggestedSheetName,
+      sheetScoreSummary: table.source.sheetScoreSummary,
+      columnMapping: mapping.columnMapping,
+      unmappedColumns: mapping.unmappedColumns,
+      requiredMissingColumns: mapping.requiredMissingColumns,
       totalRows: rows.length,
       validRows: Math.max(validRows, 0),
       errorCount,
       warningCount,
-      records: toPreviewRecords(rows).slice(0, 250),
+      records: toPreviewRecords(rows, issues).slice(0, 250),
       issues: issues.slice(0, 500)
     };
   }
 
   async apply(type: ImportType, file: ImportFilePayload): Promise<ImportApplyResult> {
+    const startedAt = Date.now();
     const preview = await this.preview(type, file);
     if (preview.errorCount > 0) {
       const failedRecord = addImportHistoryRecord({
         tenantId: this.context.tenantId,
         type,
         fileName: file.fileName,
+        fileType: preview.fileType,
+        sheetName: preview.sheetName,
         uploadedBy: this.context.userId,
         previewRecordCount: preview.totalRows,
         successCount: 0,
         errorCount: preview.errorCount,
+        skippedCount: preview.totalRows,
+        conflictCount: preview.issues.filter((issue) => (issue.code ?? "").includes("duplicate") || (issue.code ?? "").includes("conflict")).length,
         warningCount: preview.warningCount,
+        durationMs: Date.now() - startedAt,
         status: "failed",
-        summary: buildImportSummary("failed", preview.totalRows, 0, preview.errorCount)
+        summary: buildImportSummary("failed", preview.totalRows, 0, preview.errorCount),
+        details: {
+          issues: preview.issues.slice(0, 500),
+          records: preview.records.slice(0, 250),
+          errorReport: buildErrorReport(preview.issues)
+        }
       });
       return {
         importId: failedRecord.id,
@@ -431,12 +620,13 @@ export class ImportsService {
         errorCount: preview.errorCount,
         warningCount: preview.warningCount,
         status: "failed",
-        errors: preview.issues.filter((item) => item.severity === "error").map((item) => `Satir ${item.rowNumber}: ${item.message}`)
+        errors: buildErrorReport(preview.issues)
       };
     }
 
-    const table = parseCsv(decodeFileContent(file));
-    const rows = toPreviewRows(table);
+    const table = parseFile(type, file);
+    const mapping = resolveColumnMapping(type, table.headers);
+    const rows = toPreviewRows(mapping.mappedHeaders, table.rows);
     let successCount = 0;
     const errors: string[] = [];
 
@@ -663,17 +853,29 @@ export class ImportsService {
     }
 
     const status = errors.length > 0 ? (successCount > 0 ? "applied" : "failed") : "applied";
+    const conflictCount = preview.issues.filter((issue) => (issue.code ?? "").includes("duplicate") || (issue.code ?? "").includes("conflict")).length;
+    const skippedCount = Math.max(preview.totalRows - successCount, 0);
     const history = addImportHistoryRecord({
       tenantId: this.context.tenantId,
       type,
       fileName: file.fileName,
+      fileType: preview.fileType,
+      sheetName: preview.sheetName,
       uploadedBy: this.context.userId,
       previewRecordCount: preview.totalRows,
       successCount,
       errorCount: errors.length,
+      skippedCount,
+      conflictCount,
       warningCount: preview.warningCount,
+      durationMs: Date.now() - startedAt,
       status,
-      summary: buildImportSummary(status, preview.totalRows, successCount, errors.length)
+      summary: buildImportSummary(status, preview.totalRows, successCount, errors.length),
+      details: {
+        issues: preview.issues.slice(0, 500),
+        records: preview.records.slice(0, 250),
+        errorReport: errors.length > 0 ? errors : buildErrorReport(preview.issues)
+      }
     });
 
     return {
@@ -696,4 +898,20 @@ export class ImportsService {
   getHistoryById(id: string): ImportHistoryRecord | null {
     return getImportHistoryById(this.context.tenantId, id);
   }
+
+  retryHistory(id: string): ImportHistoryRecord | null {
+    const target = this.getHistoryById(id);
+    if (!target) return null;
+    return updateImportHistoryRecord(this.context.tenantId, id, {
+      status: target.status === "failed" ? "previewed" : target.status,
+      summary: target.status === "failed" ? "Import yeniden deneme icin hazirlandi." : target.summary
+    });
+  }
+
+  getErrorReport(id: string): string[] {
+    const target = this.getHistoryById(id);
+    return target?.details?.errorReport ?? [];
+  }
 }
+
+

@@ -55,3 +55,17 @@ Tarih: 28 Nisan 2026
 - Approval execution status-only yaklasimindan domain dispatch map modeline gecirildi.
 - Audit/timeline write-back altyapisi (`recordAuditEvent`) eklendi ve kritik write endpointlere baglandi.
 - Document render/regenerate + queue save/print aksiyonlari audit olaylarina dusuyor.
+
+## Manual CRM Flow Hardening Batch Notlari (29 Nisan 2026)
+
+- Deliveries/Invoies/Returns/Documents endpointleri `CommercialCoreService` zincirine tasindi.
+- DB-first deneme + kontrollu fallback modeli bu 4 modulde aktif edildi.
+- Yeni repository aggregate/read path helper'lari eklendi:
+  - `loadDeliveryAggregate`, `replaceDeliveryLinesTx`, `validateDeliveryLineParity`
+  - `loadInvoiceAggregate`, `replaceInvoiceLinesTx`
+  - `loadReturnAggregate`, `replaceReturnLinesTx`
+  - `loadDocumentAggregate`
+- Delivery complete/rollback akisinda order delivery/status write-back foundation'i eklendi.
+- Web tarafinda deliveries/invoices/returns/documents icin API-first mutation servisleri eklendi.
+
+Not: Bu turda schema tarafinda line tablolari olmayan ortamlarda fallback davranisi korunur; line-level parity DB'de tablo mevcutluguna bagli olarak guclenir.

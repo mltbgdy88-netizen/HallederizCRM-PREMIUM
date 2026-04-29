@@ -99,4 +99,43 @@ export async function registerImportRoutes(server: FastifyInstance) {
       }
     );
   });
+
+  server.post<{ Params: { id: string } }>("/imports/history/:id/retry", async (request, reply) => {
+    return withGuards(
+      request,
+      reply,
+      [assertAuthenticated, (context) => assertAnyPermission(context, ["settings.manage", "customers.write", "products.write"])],
+      async (context) => {
+        const service = new ImportsService(context);
+        const record = service.retryHistory(request.params.id);
+        if (!record) {
+          return reply.status(404).send({ message: "Import gecmisi bulunamadi." });
+        }
+        recordAuditEvent(context, {
+          entityType: "import",
+          entityId: record.id,
+          eventType: "import.retry",
+          title: "Import tekrar deneme isaretlendi",
+          description: `${record.type} import kaydi yeniden deneme icin hazirlandi.`
+        });
+        return { item: record };
+      }
+    );
+  });
+
+  server.get<{ Params: { id: string } }>("/imports/history/:id/error-report", async (request, reply) => {
+    return withGuards(
+      request,
+      reply,
+      [assertAuthenticated, (context) => assertAnyPermission(context, ["settings.manage", "customers.read", "products.read"])],
+      async (context) => {
+        const service = new ImportsService(context);
+        const history = service.getHistoryById(request.params.id);
+        if (!history) {
+          return reply.status(404).send({ message: "Import gecmisi bulunamadi." });
+        }
+        return { item: { id: history.id, errorReport: service.getErrorReport(history.id) } };
+      }
+    );
+  });
 }

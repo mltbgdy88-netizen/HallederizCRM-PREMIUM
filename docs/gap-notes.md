@@ -21,7 +21,7 @@ Bu notlar pilot oncesi bilincli olarak foundation seviyesinde birakilan alanlari
 
 ## 3. Sonraki Yuksek Oncelikli Isler
 
-1. Payments/Deliveries/Invoices/Returns/Documents write path'lerini DB transaction modeline tasimak.
+1. Deliveries/Invoices/Returns/Documents line-level SQL parity'si icin line tablolarini migration tarafinda tamamlama.
 2. Warehouse order line-level DB parity'yi tamamlamak.
 3. DB-mode integration testlerini gercek test veritabaniyla CI'da kosmak.
 4. UI'da conflict (409 stale update) handling deneyimini form seviyesinde iyilestirmek.

@@ -16,7 +16,8 @@
     "@hallederiz/domain": "workspace:*",
     "@hallederiz/types": "workspace:*",
     "@hallederiz/utils": "workspace:*",
-    "fastify": "^4.28.1"
+    "fastify": "^4.28.1",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/node": "^22.7.4",

@@ -4,3 +4,7 @@ export * from "./offers.service";
 export * from "./orders.service";
 export * from "./platform.service";
 export * from "./imports.service";
+export * from "./deliveries.service";
+export * from "./invoices.service";
+export * from "./returns.service";
+export * from "./documents.service";

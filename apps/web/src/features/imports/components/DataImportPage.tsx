@@ -5,10 +5,12 @@ import type { ImportApplyResult, ImportHistoryRecord, ImportPreviewResult, Impor
 import { FilterActions, FilterBar, FilterGrid, MetricCard, PageHeader, Pagination, SplitContentLayout, TabSwitcher } from "@hallederiz/ui";
 import {
   applyImportApi,
+  getImportErrorReportApi,
   getImportTemplateApi,
   listImportHistoryApi,
   listImportTemplatesApi,
-  previewImportApi
+  previewImportApi,
+  retryImportHistoryApi
 } from "../../../services/api";
 
 type ImportTab = "customers" | "products" | "pricing" | "warehouses" | "stock-locations" | "history";
@@ -44,6 +46,9 @@ export function DataImportPage() {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [preview, setPreview] = useState<ImportPreviewResult | null>(null);
   const [result, setResult] = useState<ImportApplyResult | null>(null);
+  const [selectedSheetName, setSelectedSheetName] = useState<string>("");
+  const [selectedHistoryErrorReport, setSelectedHistoryErrorReport] = useState<string[]>([]);
+  const [selectedHistoryId, setSelectedHistoryId] = useState<string | null>(null);
   const [historyPage, setHistoryPage] = useState(1);
   const pageSize = 8;
 
@@ -103,8 +108,15 @@ export function DataImportPage() {
     setResult(null);
     try {
       const contentBase64 = await toBase64(selectedFile);
-      const previewResult = await previewImportApi(importType, { fileName: selectedFile.name, contentBase64 });
+      const previewResult = await previewImportApi(importType, {
+        fileName: selectedFile.name,
+        contentBase64,
+        sheetName: selectedSheetName || undefined
+      });
       setPreview(previewResult);
+      if (!selectedSheetName && previewResult.sheetName) {
+        setSelectedSheetName(previewResult.sheetName);
+      }
       setFeedback(
         previewResult.errorCount > 0
           ? `Onizleme tamamlandi: ${previewResult.errorCount} hata var.`
@@ -126,7 +138,11 @@ export function DataImportPage() {
     setFeedback(null);
     try {
       const contentBase64 = await toBase64(selectedFile);
-      const applyResult = await applyImportApi(importType, { fileName: selectedFile.name, contentBase64 });
+      const applyResult = await applyImportApi(importType, {
+        fileName: selectedFile.name,
+        contentBase64,
+        sheetName: selectedSheetName || undefined
+      });
       setResult(applyResult);
       const historyItems = await listImportHistoryApi();
       setHistory(historyItems);
@@ -137,6 +153,37 @@ export function DataImportPage() {
       );
     } catch (error) {
       setFeedback(error instanceof Error ? error.message : "Import uygulanamadi.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const refreshHistory = async () => {
+    const historyItems = await listImportHistoryApi();
+    setHistory(historyItems);
+  };
+
+  const handleRetryHistory = async (id: string) => {
+    try {
+      setLoading(true);
+      await retryImportHistoryApi(id);
+      await refreshHistory();
+      setFeedback("Import kaydi yeniden deneme icin hazirlandi.");
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Import yeniden deneme islemi basarisiz.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleShowErrorReport = async (id: string) => {
+    try {
+      setLoading(true);
+      setSelectedHistoryId(id);
+      const errors = await getImportErrorReportApi(id);
+      setSelectedHistoryErrorReport(errors);
+    } catch (error) {
+      setFeedback(error instanceof Error ? error.message : "Hata raporu alinamadi.");
     } finally {
       setLoading(false);
     }
@@ -184,11 +231,15 @@ export function DataImportPage() {
                   <th>Import No</th>
                   <th>Tip</th>
                   <th>Dosya</th>
+                  <th>Tur</th>
+                  <th>Sheet</th>
                   <th>Yukleyen</th>
                   <th>Tarih</th>
                   <th>Basarili</th>
+                  <th>Atlanan</th>
                   <th>Hata</th>
                   <th>Durum</th>
+                  <th>Islem</th>
                 </tr>
               </thead>
               <tbody>
@@ -197,20 +248,45 @@ export function DataImportPage() {
                     <td>{item.id}</td>
                     <td>{item.type}</td>
                     <td>{item.fileName}</td>
+                    <td>{item.fileType?.toUpperCase() ?? "-"}</td>
+                    <td>{item.sheetName ?? "-"}</td>
                     <td>{item.uploadedBy}</td>
                     <td>{new Date(item.uploadedAt).toLocaleString("tr-TR")}</td>
                     <td>{item.successCount}</td>
+                    <td>{item.skippedCount ?? 0}</td>
                     <td>{item.errorCount}</td>
                     <td>
                       <span className={`hz-badge ${item.status === "applied" ? "hz-badge-success" : item.status === "failed" ? "hz-badge-danger" : "hz-badge-info"}`}>
                         {item.status}
                       </span>
                     </td>
+                    <td>
+                      <div style={{ display: "flex", gap: 6 }}>
+                        <button className="hz-btn hz-btn-secondary" type="button" onClick={() => void handleShowErrorReport(item.id)}>
+                          Hata Raporu
+                        </button>
+                        <button className="hz-btn hz-btn-secondary" type="button" onClick={() => void handleRetryHistory(item.id)}>
+                          Tekrar Dene
+                        </button>
+                      </div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
+          {selectedHistoryId ? (
+            <div className="hz-content-card" style={{ marginTop: 10 }}>
+              <h3>Hata Raporu: {selectedHistoryId}</h3>
+              <ul className="hz-side-list">
+                {selectedHistoryErrorReport.length > 0 ? (
+                  selectedHistoryErrorReport.slice(0, 15).map((errorLine, index) => <li key={`${selectedHistoryId}_${index}`}>{errorLine}</li>)
+                ) : (
+                  <li>Hata raporu bulunmuyor.</li>
+                )}
+              </ul>
+            </div>
+          ) : null}
           <Pagination totalItems={history.length} pageSize={pageSize} currentPage={historyPage} onPageChange={setHistoryPage} />
         </section>
       ) : (
@@ -229,12 +305,32 @@ export function DataImportPage() {
                       className="hz-control"
                       type="file"
                       accept=".csv,.xlsx"
-                      onChange={(event) => setSelectedFile(event.target.files?.[0] ?? null)}
+                      onChange={(event) => {
+                        setSelectedFile(event.target.files?.[0] ?? null);
+                        setPreview(null);
+                        setResult(null);
+                        setSelectedSheetName("");
+                      }}
                     />
                   </label>
                   <label className="hz-field-label">
                     Secili Dosya
                     <input className="hz-control" value={selectedFile?.name ?? "-"} readOnly />
+                  </label>
+                  <label className="hz-field-label">
+                    Sheet
+                    <select
+                      className="hz-control"
+                      value={selectedSheetName}
+                      onChange={(event) => setSelectedSheetName(event.target.value)}
+                    >
+                      <option value="">Ilk sheet (varsayilan)</option>
+                      {(preview?.sheetNames ?? []).map((sheetName) => (
+                        <option key={sheetName} value={sheetName}>
+                          {sheetName}
+                        </option>
+                      ))}
+                    </select>
                   </label>
                   <label className="hz-field-label">
                     Sablon
@@ -267,11 +363,20 @@ export function DataImportPage() {
               {preview ? (
                 <section className="hz-content-card">
                   <h3>Import Onizleme</h3>
+                  <div className="hz-filter-grid" style={{ marginBottom: 10 }}>
+                    <div className="hz-stat-pill">Dosya: <strong>{preview.fileName}</strong></div>
+                    <div className="hz-stat-pill">Tip: <strong>{preview.fileType.toUpperCase()}</strong></div>
+                    <div className="hz-stat-pill">Sheet: <strong>{preview.sheetName ?? "-"}</strong></div>
+                    <div className="hz-stat-pill">Onerilen Sheet: <strong>{preview.suggestedSheetName ?? "-"}</strong></div>
+                    <div className="hz-stat-pill">Toplam: <strong>{preview.totalRows}</strong></div>
+                    <div className="hz-stat-pill">Gecerli/Uyari/Hata: <strong>{preview.validRows}/{preview.warningCount}/{preview.errorCount}</strong></div>
+                  </div>
                   <div className="table-wrap hz-table-wrap">
                     <table className="table hz-table">
                       <thead>
                         <tr>
                           <th>Satir</th>
+                          <th>Durum</th>
                           <th>Veri</th>
                         </tr>
                       </thead>
@@ -279,6 +384,11 @@ export function DataImportPage() {
                         {preview.records.slice(0, 20).map((row) => (
                           <tr key={`preview_${row.rowNumber}`}>
                             <td>{row.rowNumber}</td>
+                            <td>
+                              <span className={`hz-badge ${row.status === "error" ? "hz-badge-danger" : row.status === "warning" ? "hz-badge-warning" : "hz-badge-success"}`}>
+                                {row.status ?? "valid"}
+                              </span>
+                            </td>
                             <td>{Object.entries(row.data).map(([key, value]) => `${key}: ${value}`).join(" | ")}</td>
                           </tr>
                         ))}
@@ -290,18 +400,40 @@ export function DataImportPage() {
             </>
           }
           side={
-            <div className="hz-side-panel">
-              <h3>Validation</h3>
-              <div className="detail-list">
-                <span>Toplam Satir</span>
-                <strong>{preview?.totalRows ?? 0}</strong>
+              <div className="hz-side-panel">
+                <h3>Validation</h3>
+                <div className="detail-list">
+                  <span>Dosya Tipi</span>
+                  <strong>{preview?.fileType?.toUpperCase() ?? "-"}</strong>
+                  <span>Sheet</span>
+                  <strong>{preview?.sheetName ?? "-"}</strong>
+                  <span>Onerilen Sheet</span>
+                  <strong>{preview?.suggestedSheetName ?? "-"}</strong>
+                  <span>Toplam Satir</span>
+                  <strong>{preview?.totalRows ?? 0}</strong>
                 <span>Gecerli Satir</span>
                 <strong>{preview?.validRows ?? 0}</strong>
                 <span>Hata</span>
                 <strong>{preview?.errorCount ?? 0}</strong>
                 <span>Uyari</span>
                 <strong>{preview?.warningCount ?? 0}</strong>
+                <span>Eksik Zorunlu Kolon</span>
+                <strong>{preview?.requiredMissingColumns?.length ?? 0}</strong>
+                <span>Eslestirilemeyen Kolon</span>
+                <strong>{preview?.unmappedColumns?.length ?? 0}</strong>
               </div>
+
+              <h3>Sheet Skor Ozeti</h3>
+              <ul className="hz-side-list">
+                {(preview?.sheetScoreSummary ?? []).slice(0, 4).map((sheet) => (
+                  <li key={sheet.sheetName}>
+                    <strong>{sheet.sheetName}</strong>
+                    <div>Skor: {sheet.score}</div>
+                    <div>Eslestirme: {sheet.matchedColumns.length}</div>
+                  </li>
+                ))}
+                {!preview?.sheetScoreSummary?.length ? <li>Sheet skoru yok.</li> : null}
+              </ul>
 
               <h3>Hata/Oneri</h3>
               <ul className="hz-side-list">
@@ -309,6 +441,7 @@ export function DataImportPage() {
                   <li key={`${issue.rowNumber}_${issue.field}_${issue.message}`}>
                     <strong>{`Satir ${issue.rowNumber}`}</strong>
                     <div>{issue.message}</div>
+                    {issue.suggestion ? <div className="muted">{issue.suggestion}</div> : null}
                   </li>
                 ))}
                 {!preview?.issues?.length ? <li>Henuz issue yok.</li> : null}

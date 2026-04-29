@@ -35,4 +35,12 @@ export class ImportsClient {
   getHistoryById(id: string): Promise<{ item: ImportHistoryRecord }> {
     return this.apiClient.get(`/imports/history/${id}`);
   }
+
+  retryHistory(id: string): Promise<{ item: ImportHistoryRecord }> {
+    return this.apiClient.post(`/imports/history/${id}/retry`, {});
+  }
+
+  getErrorReport(id: string): Promise<{ item: { id: string; errorReport: string[] } }> {
+    return this.apiClient.get(`/imports/history/${id}/error-report`);
+  }
 }

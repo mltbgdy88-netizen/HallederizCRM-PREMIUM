@@ -1,58 +1,32 @@
 import type { FastifyInstance } from "fastify";
-import type { Delivery, Document, Invoice, PaymentReceipt, Return, SaleOrder, SaleOrderLine, WarehouseOrder } from "@hallederiz/types";
+import type { Delivery, Document, DocumentType, Invoice, PaymentReceipt, Return, SaleOrder, SaleOrderLine, WarehouseOrder } from "@hallederiz/types";
 import {
   addOrderLine,
   assignWarehouseOrder,
-  approveReturn,
   cancelOrder,
-  cancelInvoice,
-  cancelReturn,
   cancelWarehouseOrder,
-  completeDelivery,
-  completeReturn,
   confirmOrder,
   confirmPayment,
-  createDelivery,
   createFactoryOrders,
-  createInvoice,
   createOrder,
   createPayment,
-  createReturn,
   createWarehouseOrder,
   createWarehouseOrderFromOrder,
-  getDelivery,
-  getDocument,
-  getInvoice,
   getOrder,
   getPayment,
   getPaymentAllocations,
-  getReturn,
   getWarehouseOrder,
-  issueInvoice,
-  listDeliveries,
-  listDocuments,
-  listInvoices,
   listOrders,
   listPayments,
-  listReturns,
   listWarehouseOrders,
   markWarehouseOrderPrepared,
-  notifyDeliveryCustomer,
   patchOrder,
   patchOrderLine,
   planSourcing,
-  receiveReturn,
-  renderDocument,
   reversePayment,
-  rollbackDelivery,
-  sendDocumentEmail,
-  sendDocumentWhatsApp,
-  sendInvoice,
   startWarehouseOrder,
-  validateDelivery
 } from "./mock-store";
 import { CommercialCoreService } from "../modules/commercial-core/service";
-import { DocumentGenerationService } from "../modules/documents/service";
 import { buildRequestContext } from "../shared/request-context";
 import { asApiErrorPayload } from "../shared/errors";
 import { assertAnyPermission, assertAuthenticated, withGuards } from "../shared/auth-guards";
@@ -328,27 +302,41 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
     });
   });
 
-  server.get("/deliveries", async () => ({ items: listDeliveries(), total: listDeliveries().length }));
+  server.get("/deliveries", async (request) => {
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const items = await service.listDeliveries();
+    return { items, total: items.length };
+  });
   server.get<{ Params: { id: string } }>("/deliveries/:id", async (request, reply) => {
-    const delivery = getDelivery(request.params.id);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const delivery = await service.getDelivery(request.params.id);
     if (!delivery) return reply.status(404).send({ message: "Delivery not found" });
     return { item: delivery };
   });
   server.post<{ Body: Partial<Delivery> }>("/deliveries", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["deliveries.write", "deliveries.manage"])], async () =>
-      reply.status(201).send({ item: createDelivery(request.body) })
-    )
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["deliveries.write", "deliveries.manage"])], async (context) => {
+      try {
+        const service = new CommercialCoreService(context);
+        const item = await service.createDelivery(request.body);
+        return reply.status(201).send({ item });
+      } catch (error) {
+        const payload = asApiErrorPayload(error);
+        return reply.status(payload.statusCode).send(payload.body);
+      }
+    })
   );
   server.post<{ Params: { id: string } }>("/deliveries/:id/validate", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["deliveries.write", "deliveries.validate"])], async () => {
-      const delivery = validateDelivery(request.params.id);
-      if (!delivery) return reply.status(404).send({ message: "Delivery not found" });
-      return { item: delivery.validation };
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["deliveries.write", "deliveries.validate"])], async (context) => {
+      const service = new CommercialCoreService(context);
+      const validation = await service.validateDelivery(request.params.id);
+      if (!validation) return reply.status(404).send({ message: "Delivery not found" });
+      return { item: validation };
     })
   );
   server.post<{ Params: { id: string } }>("/deliveries/:id/complete", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["deliveries.write", "deliveries.complete"])], async (context) => {
-      const delivery = completeDelivery(request.params.id);
+      const service = new CommercialCoreService(context);
+      const delivery = await service.completeDelivery(request.params.id);
       if (!delivery) return reply.status(404).send({ message: "Delivery not found" });
       recordAuditEvent(context, {
         entityType: "delivery",
@@ -362,7 +350,8 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   );
   server.post<{ Params: { id: string } }>("/deliveries/:id/rollback", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["deliveries.write", "deliveries.rollback"])], async (context) => {
-      const delivery = rollbackDelivery(request.params.id);
+      const service = new CommercialCoreService(context);
+      const delivery = await service.rollbackDelivery(request.params.id);
       if (!delivery) return reply.status(404).send({ message: "Delivery not found" });
       recordAuditEvent(context, {
         entityType: "delivery",
@@ -375,22 +364,29 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
     })
   );
   server.post<{ Params: { id: string } }>("/deliveries/:id/notify-customer", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["deliveries.write", "documents.write"])], async () => {
-      const delivery = notifyDeliveryCustomer(request.params.id);
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["deliveries.write", "documents.write"])], async (context) => {
+      const service = new CommercialCoreService(context);
+      const delivery = await service.notifyDeliveryCustomer(request.params.id);
       if (!delivery) return reply.status(404).send({ message: "Delivery not found" });
       return { item: delivery };
     })
   );
 
-  server.get("/invoices", async () => ({ items: listInvoices(), total: listInvoices().length }));
+  server.get("/invoices", async (request) => {
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const items = await service.listInvoices();
+    return { items, total: items.length };
+  });
   server.get<{ Params: { id: string } }>("/invoices/:id", async (request, reply) => {
-    const invoice = getInvoice(request.params.id);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const invoice = await service.getInvoice(request.params.id);
     if (!invoice) return reply.status(404).send({ message: "Invoice not found" });
     return { item: invoice };
   });
   server.post<{ Body: Partial<Invoice> }>("/invoices", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["invoices.write", "documents.write"])], async (context) => {
-      const item = createInvoice(request.body);
+      const service = new CommercialCoreService(context);
+      const item = await service.createInvoice(request.body);
       recordAuditEvent(context, {
         entityType: "invoice",
         entityId: item.id,
@@ -402,36 +398,45 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
     })
   );
   server.post<{ Params: { id: string } }>("/invoices/:id/issue", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["invoices.write", "invoices.issue"])], async () => {
-      const invoice = issueInvoice(request.params.id);
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["invoices.write", "invoices.issue"])], async (context) => {
+      const service = new CommercialCoreService(context);
+      const invoice = await service.issueInvoice(request.params.id);
       if (!invoice) return reply.status(404).send({ message: "Invoice not found" });
       return { item: invoice };
     })
   );
   server.post<{ Params: { id: string } }>("/invoices/:id/cancel", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["invoices.write", "invoices.cancel"])], async () => {
-      const invoice = cancelInvoice(request.params.id);
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["invoices.write", "invoices.cancel"])], async (context) => {
+      const service = new CommercialCoreService(context);
+      const invoice = await service.cancelInvoice(request.params.id);
       if (!invoice) return reply.status(404).send({ message: "Invoice not found" });
       return { item: invoice };
     })
   );
   server.post<{ Params: { id: string } }>("/invoices/:id/send", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["invoices.write", "documents.write"])], async () => {
-      const invoice = sendInvoice(request.params.id);
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["invoices.write", "documents.write"])], async (context) => {
+      const service = new CommercialCoreService(context);
+      const invoice = await service.sendInvoice(request.params.id);
       if (!invoice) return reply.status(404).send({ message: "Invoice not found" });
       return { item: invoice };
     })
   );
 
-  server.get("/returns", async () => ({ items: listReturns(), total: listReturns().length }));
+  server.get("/returns", async (request) => {
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const items = await service.listReturns();
+    return { items, total: items.length };
+  });
   server.get<{ Params: { id: string } }>("/returns/:id", async (request, reply) => {
-    const returnRecord = getReturn(request.params.id);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const returnRecord = await service.getReturn(request.params.id);
     if (!returnRecord) return reply.status(404).send({ message: "Return not found" });
     return { item: returnRecord };
   });
   server.post<{ Body: Partial<Return> }>("/returns", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["returns.write", "returns.manage"])], async (context) => {
-      const item = createReturn(request.body);
+      const service = new CommercialCoreService(context);
+      const item = await service.createReturn(request.body);
       recordAuditEvent(context, {
         entityType: "return",
         entityId: item.id,
@@ -443,43 +448,53 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
     })
   );
   server.post<{ Params: { id: string } }>("/returns/:id/approve", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["returns.write", "returns.approve"])], async () => {
-      const returnRecord = approveReturn(request.params.id);
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["returns.write", "returns.approve"])], async (context) => {
+      const service = new CommercialCoreService(context);
+      const returnRecord = await service.approveReturn(request.params.id);
       if (!returnRecord) return reply.status(404).send({ message: "Return not found" });
       return { item: returnRecord };
     })
   );
   server.post<{ Params: { id: string } }>("/returns/:id/receive", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["returns.write", "returns.receive"])], async () => {
-      const returnRecord = receiveReturn(request.params.id);
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["returns.write", "returns.receive"])], async (context) => {
+      const service = new CommercialCoreService(context);
+      const returnRecord = await service.receiveReturn(request.params.id);
       if (!returnRecord) return reply.status(404).send({ message: "Return not found" });
       return { item: returnRecord };
     })
   );
   server.post<{ Params: { id: string } }>("/returns/:id/complete", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["returns.write", "returns.complete"])], async () => {
-      const returnRecord = completeReturn(request.params.id);
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["returns.write", "returns.complete"])], async (context) => {
+      const service = new CommercialCoreService(context);
+      const returnRecord = await service.completeReturn(request.params.id);
       if (!returnRecord) return reply.status(404).send({ message: "Return not found" });
       return { item: returnRecord };
     })
   );
   server.post<{ Params: { id: string } }>("/returns/:id/cancel", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["returns.write", "returns.cancel"])], async () => {
-      const returnRecord = cancelReturn(request.params.id);
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["returns.write", "returns.cancel"])], async (context) => {
+      const service = new CommercialCoreService(context);
+      const returnRecord = await service.cancelReturn(request.params.id);
       if (!returnRecord) return reply.status(404).send({ message: "Return not found" });
       return { item: returnRecord };
     })
   );
 
-  server.get("/documents", async () => ({ items: listDocuments(), total: listDocuments().length }));
+  server.get("/documents", async (request) => {
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const items = await service.listDocuments();
+    return { items, total: items.length };
+  });
   server.get<{ Params: { id: string } }>("/documents/:id", async (request, reply) => {
-    const document = getDocument(request.params.id);
+    const service = new CommercialCoreService(buildRequestContext(request));
+    const document = await service.getDocument(request.params.id);
     if (!document) return reply.status(404).send({ message: "Document not found" });
     return { item: document };
   });
-  server.post<{ Body: Parameters<typeof renderDocument>[0] }>("/documents/render", async (request, reply) =>
+  server.post<{ Body: { type: DocumentType; entityType: Document["entityType"]; entityId: string; entityNo: string; customerId?: string } }>("/documents/render", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["documents.write", "documents.render"])], async (context) => {
-      const item = new DocumentGenerationService(context).render(request.body);
+      const service = new CommercialCoreService(context);
+      const item = await service.renderDocument(request.body);
       recordAuditEvent(context, {
         entityType: "document",
         entityId: item.id,
@@ -492,7 +507,8 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   );
   server.post<{ Params: { id: string } }>("/documents/:id/regenerate", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["documents.write", "documents.render"])], async (context) => {
-      const regenerated = new DocumentGenerationService(context).regenerate(request.params.id);
+      const service = new CommercialCoreService(context);
+      const regenerated = await service.regenerateDocument(request.params.id);
       if (!regenerated) return reply.status(404).send({ message: "Document not found" });
       recordAuditEvent(context, {
         entityType: "document",
@@ -505,15 +521,17 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
     })
   );
   server.post<{ Params: { id: string } }>("/documents/:id/send-whatsapp", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["documents.write", "integrations.write"])], async () => {
-      const document = sendDocumentWhatsApp(request.params.id);
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["documents.write", "integrations.write"])], async (context) => {
+      const service = new CommercialCoreService(context);
+      const document = await service.sendDocumentWhatsApp(request.params.id);
       if (!document) return reply.status(404).send({ message: "Document not found" });
       return { item: document };
     })
   );
   server.post<{ Params: { id: string } }>("/documents/:id/send-email", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["documents.write", "integrations.write"])], async () => {
-      const document = sendDocumentEmail(request.params.id);
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["documents.write", "integrations.write"])], async (context) => {
+      const service = new CommercialCoreService(context);
+      const document = await service.sendDocumentEmail(request.params.id);
       if (!document) return reply.status(404).send({ message: "Document not found" });
       return { item: document };
     })

@@ -76,6 +76,23 @@ Bu akisla UI'daki feature query'leri dogrudan mock import etmek yerine typed cli
 - Offers: Route -> Service -> Repository -> `save offer + replace lines + recalc totals` (tx)
 - Orders: Route -> Service -> Repository -> `save order + replace lines + replace source plans + derive statuses` (tx)
 
+## Manual CRM Flow Hardening Batch Ekleri
+
+- Deliveries:
+  - Route -> `CommercialCoreService` -> Repository
+  - create/validate/complete/rollback/notify aksiyonlari service zincirine tasindi.
+- Invoices:
+  - create/issue/cancel/send route'lari service/repository zinciriyle tekil hale getirildi.
+- Returns:
+  - create/approve/receive/complete/cancel route'lari service/repository zinciriyle calisir.
+- Documents:
+  - list/get/render/regenerate/send route'lari service/repository zinciriyle calisir.
+- Web API-first mutation katmani:
+  - `apps/web/src/services/api/deliveries.service.ts`
+  - `apps/web/src/services/api/invoices.service.ts`
+  - `apps/web/src/services/api/returns.service.ts`
+  - `apps/web/src/services/api/documents.service.ts`
+
 ## Batch-2 Ek Guclendirmeler
 
 - Web auth provider login/session akisinda API-first modele alinmistir.

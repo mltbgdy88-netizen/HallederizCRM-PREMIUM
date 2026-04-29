@@ -46,7 +46,9 @@ export async function getPilotSetupData(): Promise<PilotSetupData> {
     listImportHistoryApi()
   ]);
 
-  const importedTypes = new Set(importHistory.filter((item) => item.status === "applied").map((item) => item.type));
+  const importedTypes = new Set(
+    importHistory.filter((item) => item.status === "applied" && item.successCount > 0).map((item) => item.type)
+  );
   const enrichedSettings: PlatformSettings = {
     ...settings,
     pilotSetup: {

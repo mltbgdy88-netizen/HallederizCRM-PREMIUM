@@ -1,4 +1,4 @@
-import type { PaymentReceipt, SaleOrder, SaleOrderLine, WarehouseOrder } from "@hallederiz/types";
+import type { Delivery, Document, DocumentType, Invoice, PaymentReceipt, Return, SaleOrder, SaleOrderLine, WarehouseOrder } from "@hallederiz/types";
 import type { RequestContext } from "../../shared/request-context";
 import { CommercialCoreRepository } from "./repository";
 
@@ -19,6 +19,38 @@ export class CommercialCoreService {
   createWarehouseOrderFromOrder(id: string) { return this.repository.createWarehouseOrderFromOrder(id); }
   createFactoryOrders(id: string) { return this.repository.createFactoryOrders(id); }
   cancelOrder(id: string) { return this.repository.cancelOrder(id); }
+
+  listDeliveries() { return this.repository.listDeliveries(); }
+  getDelivery(id: string) { return this.repository.getDelivery(id); }
+  createDelivery(payload: Partial<Delivery>) { return this.repository.createDelivery(payload); }
+  validateDelivery(id: string) { return this.repository.validateDelivery(id); }
+  completeDelivery(id: string) { return this.repository.completeDelivery(id); }
+  rollbackDelivery(id: string) { return this.repository.rollbackDelivery(id); }
+  notifyDeliveryCustomer(id: string) { return this.repository.notifyDeliveryCustomer(id); }
+
+  listInvoices() { return this.repository.listInvoices(); }
+  getInvoice(id: string) { return this.repository.getInvoice(id); }
+  createInvoice(payload: Partial<Invoice>) { return this.repository.createInvoice(payload); }
+  issueInvoice(id: string) { return this.repository.issueInvoice(id); }
+  cancelInvoice(id: string) { return this.repository.cancelInvoice(id); }
+  sendInvoice(id: string) { return this.repository.sendInvoice(id); }
+
+  listReturns() { return this.repository.listReturns(); }
+  getReturn(id: string) { return this.repository.getReturn(id); }
+  createReturn(payload: Partial<Return>) { return this.repository.createReturn(payload); }
+  approveReturn(id: string) { return this.repository.approveReturn(id); }
+  receiveReturn(id: string) { return this.repository.receiveReturn(id); }
+  completeReturn(id: string) { return this.repository.completeReturn(id); }
+  cancelReturn(id: string) { return this.repository.cancelReturn(id); }
+
+  listDocuments() { return this.repository.listDocuments(); }
+  getDocument(id: string) { return this.repository.getDocument(id); }
+  renderDocument(payload: { type: DocumentType; entityType: Document["entityType"]; entityId: string; entityNo: string; customerId?: string }) {
+    return this.repository.renderDocument(payload);
+  }
+  regenerateDocument(id: string) { return this.repository.regenerateDocument(id); }
+  sendDocumentWhatsApp(id: string) { return this.repository.sendDocumentWhatsApp(id); }
+  sendDocumentEmail(id: string) { return this.repository.sendDocumentEmail(id); }
 
   listPayments() { return this.repository.listPayments(); }
   getPayment(id: string) { return this.repository.getPayment(id); }
