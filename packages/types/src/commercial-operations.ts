@@ -608,7 +608,19 @@ export type WhatsAppMessageType = "text" | "document" | "image" | "template";
 export type WhatsAppTemplateType = "dealer_self_service" | "staff_task" | "manager_approval" | "document_delivery";
 export type WhatsAppActionRequestStatus = "pending" | "confirmed" | "rejected" | "executed";
 export type WhatsAppIntent = "stok" | "fiyat" | "ekstre" | "siparis" | "odeme" | "iade" | "fatura" | "hatali_urun" | "diger";
-export type WhatsAppApprovalPolicyMode = "none" | "confirmation_required" | "approval_required";
+export type WhatsAppBusinessIntent = WhatsAppIntent;
+export type WhatsAppRuleMode = "menu" | "ai" | "hybrid";
+export type WhatsAppApprovalPolicyMode =
+  | "none"
+  | "confirmation_required"
+  | "approval_required"
+  | "internal_approval"
+  | "sales_only"
+  | "accounting_only"
+  | "sales_and_accounting"
+  | "crm_and_sales";
+export type WhatsAppRuleTemplateKey = "stock" | "price" | "statement" | "order" | "payment" | "return" | "invoice" | "defect" | "generic";
+export type WhatsAppApproverRole = "sales" | "accounting" | "crm";
 
 export interface WhatsAppContact {
   id: string;
@@ -630,6 +642,25 @@ export interface WhatsAppRuleResolution {
   requiresCustomerLink: boolean;
   reason: string;
   fallbackMessage?: string;
+  mode?: WhatsAppRuleMode;
+  requiresCustomerConfirmation?: boolean;
+  requiresLinkedCustomer?: boolean;
+  canAutoReply?: boolean;
+  requiresInternalApproval?: boolean;
+  requiresSalesApproval?: boolean;
+  requiresAccountingApproval?: boolean;
+  requiresCrmApproval?: boolean;
+  approvalPolicyMode?: WhatsAppApprovalPolicyMode;
+  requiredRoles?: WhatsAppApproverRole[];
+  approverPhones?: string[];
+  approvalPolicy?: {
+    mode: WhatsAppApprovalPolicyMode;
+    requiredRoles: WhatsAppApproverRole[];
+    approverPhones: string[];
+    requiresInternalApproval: boolean;
+    requiresCrmApproval: boolean;
+  };
+  templateKey?: WhatsAppRuleTemplateKey;
 }
 
 export interface WhatsAppConversation {

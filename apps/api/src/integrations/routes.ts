@@ -1,4 +1,5 @@
 import type { FastifyInstance } from "fastify";
+import { Readable } from "node:stream";
 import type { ErpConnection, ErpMapping, FactoryOrder, WhatsAppActionRequest, WhatsAppMessage } from "@hallederiz/types";
 import { IntegrationsService } from "../modules/integrations/service";
 import { assertAnyPermission, assertAuthenticated, withGuards } from "../shared/auth-guards";
@@ -6,7 +7,34 @@ import { AiRuntimeService } from "../modules/ai-runtime/service";
 import { getLocalAgentStatus } from "../ai-local-output-store";
 import { readPermissions, requireReadAccess } from "../shared/read-guards";
 
+type RequestWithRawBody = {
+  rawBody?: string;
+  method: string;
+  url: string;
+};
+
+function getHeaderValue(value: string | string[] | undefined): string | undefined {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+async function collectRawBody(payload: AsyncIterable<Buffer | string>) {
+  const chunks: Buffer[] = [];
+  for await (const chunk of payload) {
+    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
+  }
+  return Buffer.concat(chunks);
+}
+
 export async function registerIntegrationRoutes(server: FastifyInstance) {
+  server.addHook("preParsing", async (request, _reply, payload) => {
+    if (request.method !== "POST" || request.url.split("?")[0] !== "/whatsapp/webhook") return payload;
+    const buffer = await collectRawBody(payload as AsyncIterable<Buffer | string>);
+    (request as unknown as RequestWithRawBody).rawBody = buffer.toString("utf8");
+    const replay = Readable.from([buffer]);
+    (replay as Readable & { receivedEncodedLength?: number }).receivedEncodedLength = buffer.length;
+    return replay;
+  });
+
   server.get("/whatsapp/webhook", async (request, reply) => {
     const query = request.query as Record<string, string | undefined>;
     const mode = query["hub.mode"];
@@ -27,14 +55,18 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   });
 
   server.post<{ Body: Record<string, unknown> }>("/whatsapp/webhook", async (request, reply) => {
-    const rawBody = JSON.stringify(request.body ?? {});
-    const signature = request.headers["x-hub-signature-256"];
+    const rawBody = (request as unknown as RequestWithRawBody).rawBody;
+    const signature = getHeaderValue(request.headers["x-hub-signature-256"]) ?? getHeaderValue(request.headers["x-whatsapp-signature"]);
+    const secret = process.env.WHATSAPP_WEBHOOK_APP_SECRET;
+    if (!secret && process.env.NODE_ENV === "production") {
+      return reply.status(503).send({ message: "WhatsApp webhook secret is not configured." });
+    }
     const service = new IntegrationsService({
       tenantId: "tenant_1",
       userId: "system",
       persistenceMode: "demo"
     });
-    if (!service.verifyWhatsAppWebhookSignature(rawBody, typeof signature === "string" ? signature : undefined)) {
+    if (secret && !service.verifyWhatsAppWebhookSignature(rawBody ?? "", signature)) {
       return reply.status(403).send({ message: "Webhook signature mismatch." });
     }
     const event = request.body;

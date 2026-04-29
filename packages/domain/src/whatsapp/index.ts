@@ -1,4 +1,6 @@
-﻿import type { Customer, WhatsAppActionRequest, WhatsAppContact, WhatsAppIntent, WhatsAppRuleResolution, WhatsAppTemplate } from "@hallederiz/types";
+import type { Customer, WhatsAppActionRequest, WhatsAppContact, WhatsAppIntent, WhatsAppRuleResolution, WhatsAppTemplate } from "@hallederiz/types";
+
+export * from "./rule-resolver";
 
 export function resolveWhatsAppIntent(text: string): WhatsAppIntent {
   const normalized = text.toLocaleLowerCase("tr-TR");

@@ -9,8 +9,8 @@ import {
   sendWhatsAppOutbound,
   updateWhatsAppActionRequest
 } from "../../../integrations/mock-store";
-import crypto from "node:crypto";
 import { validateWhatsAppConfig } from "../../../shared/service-config";
+import { verifyHmacSha256Signature } from "../../../shared/webhook-security";
 
 function requiresStrictPolicy(message: Partial<WhatsAppMessage>): boolean {
   const text = `${message.body ?? ""}`.toLocaleLowerCase("tr-TR");
@@ -42,6 +42,10 @@ export class WhatsAppAdapter {
     const apiBaseUrl = process.env.WHATSAPP_API_BASE_URL as string;
     const token = process.env.WHATSAPP_API_TOKEN as string;
     const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID as string;
+    const testRecipient = process.env.WHATSAPP_TEST_RECIPIENT;
+    if (!testRecipient) {
+      throw new Error("WHATSAPP_TEST_RECIPIENT tanimsiz.");
+    }
     const { controller, clear } = withTimeout(Number(process.env.WHATSAPP_TIMEOUT_MS ?? 12000));
 
     try {
@@ -135,9 +139,8 @@ export class WhatsAppAdapter {
 
   verifyWebhookSignature(rawBody: string, signature?: string) {
     const secret = process.env.WHATSAPP_WEBHOOK_APP_SECRET;
-    if (!secret || !signature) return true;
-    const digest = crypto.createHmac("sha256", secret).update(rawBody).digest("hex");
-    return signature.replace("sha256=", "") === digest;
+    if (!secret) return false;
+    return verifyHmacSha256Signature(rawBody, signature, secret);
   }
 
   getHealth() {
@@ -152,7 +155,3 @@ export class WhatsAppAdapter {
     };
   }
 }
-    const testRecipient = process.env.WHATSAPP_TEST_RECIPIENT;
-    if (!testRecipient) {
-      throw new Error("WHATSAPP_TEST_RECIPIENT tanimsiz.");
-    }

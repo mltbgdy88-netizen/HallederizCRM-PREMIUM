@@ -100,7 +100,8 @@ export function validateWhatsAppConfig() {
         "WHATSAPP_API_TOKEN",
         "WHATSAPP_PHONE_NUMBER_ID",
         "WHATSAPP_BUSINESS_ACCOUNT_ID",
-        "WHATSAPP_WEBHOOK_VERIFY_TOKEN"
+        "WHATSAPP_WEBHOOK_VERIFY_TOKEN",
+        "WHATSAPP_WEBHOOK_APP_SECRET"
       ])
     : { configured: true, missing: [] };
   return {
