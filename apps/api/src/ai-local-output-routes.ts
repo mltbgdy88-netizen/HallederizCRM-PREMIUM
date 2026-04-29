@@ -19,21 +19,65 @@ import {
   patchLocalOutputRules,
   queueDocumentPrint,
   queueDocumentSave,
+  replaceAiInsights,
   reportLocalAgentStatus,
   runAiInsights,
   runApprovalExecution,
+  saveAiProposal,
   updateAiProposalStatus
 } from "./ai-local-output-store";
 import { assertAnyPermission, assertAuthenticated, withGuards } from "./shared/auth-guards";
 import { recordAuditEvent } from "./shared/audit-timeline";
+import { AiRuntimeService } from "./modules/ai-runtime/service";
 
 export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   server.post<{ Body: { message?: string } }>("/ai/chat", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated], async () => ({ item: chatAi(request.body) }))
+    withGuards(request, reply, [assertAuthenticated], async (context) => {
+      const service = new AiRuntimeService(context);
+      const prompt = request.body?.message ?? "";
+      if (!prompt.trim()) {
+        return { item: chatAi(request.body) };
+      }
+      const chat = await service.chat(prompt);
+      return {
+        item: {
+          ...chatAi(request.body),
+          runtime: chat
+        }
+      };
+    })
   );
 
   server.post<{ Body: { text?: string } }>("/ai/commands/parse", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated], async () => ({ item: parseAiCommand(request.body) }))
+  );
+
+  server.post<{ Body: { prompt?: string; inputMode?: "text" | "voice"; targetType?: string; targetId?: string; targetNo?: string } }>(
+    "/ai/proposals",
+    async (request, reply) =>
+      withGuards(request, reply, [assertAuthenticated], async (context) => {
+        const prompt = request.body?.prompt?.trim();
+        if (!prompt) {
+          return reply.status(400).send({ message: "prompt alani zorunludur." });
+        }
+        const service = new AiRuntimeService(context);
+        const generated = await service.generateProposal({
+          prompt,
+          inputMode: request.body?.inputMode ?? "text",
+          targetType: request.body?.targetType as never,
+          targetId: request.body?.targetId,
+          targetNo: request.body?.targetNo
+        });
+        const proposal = saveAiProposal(generated.proposal);
+        recordAuditEvent(context, {
+          entityType: "ai_proposal",
+          entityId: proposal.id,
+          eventType: "ai.proposal.created",
+          title: "AI proposal olusturuldu",
+          description: `${proposal.proposalNo} proposal kaydi olusturuldu.`
+        });
+        return reply.status(201).send({ item: { proposal, approvalDraft: generated.approvalDraft } });
+      })
   );
 
   server.get("/ai/proposals", async (request, reply) =>
@@ -83,9 +127,38 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.post("/ai/insights/run", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["ai.actions.write", "approvals.write"])], async () => ({
-      item: runAiInsights()
-    }))
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["ai.actions.write", "approvals.write"])], async (context) => {
+      const service = new AiRuntimeService(context);
+      const insights = await service.generateInsights();
+      replaceAiInsights(insights);
+      return {
+        item: runAiInsights()
+      };
+    })
+  );
+
+  server.post<{ Body: { audioBase64?: string; mimeType?: string; language?: string } }>("/ai/voice/transcribe", async (request, reply) =>
+    withGuards(request, reply, [assertAuthenticated], async (context) => {
+      const service = new AiRuntimeService(context);
+      const item = await service.transcribeVoice({
+        audioBase64: request.body?.audioBase64 ?? "",
+        mimeType: request.body?.mimeType,
+        language: request.body?.language ?? "tr"
+      });
+      return { item };
+    })
+  );
+
+  server.post<{ Body: { text?: string; voice?: string; speed?: number } }>("/ai/voice/speak", async (request, reply) =>
+    withGuards(request, reply, [assertAuthenticated], async (context) => {
+      const service = new AiRuntimeService(context);
+      const text = request.body?.text ?? "";
+      if (!text.trim()) {
+        return reply.status(400).send({ message: "text alani zorunludur." });
+      }
+      const item = await service.speakVoice({ text, voice: request.body?.voice, speed: request.body?.speed });
+      return { item };
+    })
   );
 
   server.get("/approval-executions", async (request, reply) =>

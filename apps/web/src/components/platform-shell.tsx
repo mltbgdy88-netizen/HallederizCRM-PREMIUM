@@ -66,6 +66,8 @@ const PAGE_META: Array<[string, PageMeta]> = [
   ["/fabrikalar/siparisler/", { title: "Fabrika Siparis Detayi", subtitle: "Fabrika durum ve senkron paneli.", breadcrumb: "Fabrikalar / Siparis Detay" }],
   ["/ai/onaylar", { title: "AI Onaylar", subtitle: "Proposal ve approval kayitlarini yonetin.", breadcrumb: "AI / Onaylar" }],
   ["/ai/icgoruler", { title: "AI Icgoruler", subtitle: "AI risk/firsat analizlerini takip edin.", breadcrumb: "AI / Icgoruler" }],
+  ["/kurulum/veri-yukleme", { title: "Pilot Veri Yukleme", subtitle: "CSV tabanli import merkezi ile cari, urun, fiyat ve stok yukleyin.", breadcrumb: "Kurulum / Veri Yukleme" }],
+  ["/ayarlar/pilot-veri-yukleme", { title: "Pilot Veri Yukleme", subtitle: "Template indir, dosya yukle, onizle ve ice aktar.", breadcrumb: "Ayarlar / Pilot Veri Yukleme" }],
   ["/", { title: "Gorev Merkezi", subtitle: "Sistem ve AI kartlariyla operasyon odakli kontrol merkezi.", breadcrumb: "Anasayfa" }],
   ["/gorevler", { title: "Gorevler", subtitle: "Workflow ve dashboard kaynakli operasyon gorevleri.", breadcrumb: "Gorevler" }],
   ["/onaylar", { title: "Onaylar", subtitle: "Insan onayli operasyon ve AI proposal karar merkezi.", breadcrumb: "Onaylar" }],

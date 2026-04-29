@@ -22,6 +22,12 @@ export const mockPermissions: Permission[] = [
     moduleCode: "users"
   },
   {
+    id: "perm_users_write",
+    key: "platform.users.write",
+    name: "Kullanicilari yonetme",
+    moduleCode: "users"
+  },
+  {
     id: "perm_roles_read",
     key: "platform.roles.read",
     name: "Rolleri goruntuleme",
@@ -31,6 +37,12 @@ export const mockPermissions: Permission[] = [
     id: "perm_settings_read",
     key: "platform.settings.read",
     name: "Ayarlari goruntuleme",
+    moduleCode: "settings"
+  },
+  {
+    id: "perm_settings_write",
+    key: "platform.settings.write",
+    name: "Ayarlari guncelleme",
     moduleCode: "settings"
   }
 ];

@@ -1,1 +1,16 @@
-﻿export function generateInsightSet() { return [{ title: "Riskli cari", severity: "warning" as const, summary: "Mira Yapi tahsilat onceligi tasiyor." }, { title: "Kritik stok egilimi", severity: "critical" as const, summary: "DK-2022 stok seviyesi dusuyor." }]; }
+import type { AiInsight } from "@hallederiz/types";
+import type { AiRuntimeContext } from "../contracts";
+import { LlmRuntime } from "../llm";
+
+export class InsightEngine {
+  constructor(private readonly llmRuntime = new LlmRuntime()) {}
+
+  async generateInsightSet(input: { runtime: AiRuntimeContext; contextSummary?: string }): Promise<AiInsight[]> {
+    const insights = await this.llmRuntime.generateInsights({
+      runtime: input.runtime,
+      contextSummary: input.contextSummary
+    });
+    return insights;
+  }
+}
+

@@ -1,1 +1,23 @@
-﻿export function parseCommand(text: string) { return { raw: text, normalized: text.toLocaleLowerCase("tr-TR"), hasMutationIntent: /olustur|gonder|tamamla|kaydet|tahsilat/.test(text.toLocaleLowerCase("tr-TR")) }; }
+import { canExecuteApproval, executeApprovedOperation } from "@hallederiz/domain";
+import type { Approval, ApprovalExecution, AiOperation } from "@hallederiz/types";
+
+export function canExecute(approval: Approval) {
+  return canExecuteApproval(approval);
+}
+
+export function buildExecutionResult(input: {
+  approval: Approval;
+  execution: ApprovalExecution;
+  operation: AiOperation;
+}) {
+  if (!canExecute(input.approval)) {
+    return {
+      allowed: false,
+      reason: "Approval execute kosullari saglanmadi."
+    };
+  }
+  return {
+    allowed: true,
+    result: executeApprovedOperation(input)
+  };
+}

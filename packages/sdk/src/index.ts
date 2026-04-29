@@ -1,10 +1,13 @@
 import { ApiClient, type ApiClientOptions } from "./base";
 import {
   ApprovalsClient,
+  AiClient,
+  PlatformClient,
   CustomersClient,
   DashboardClient,
   DeliveriesClient,
   DocumentsClient,
+  ImportsClient,
   InvoicesClient,
   OffersClient,
   OrdersClient,
@@ -30,6 +33,9 @@ export interface HallederizSdk {
   approvals: ApprovalsClient;
   dashboard: DashboardClient;
   documents: DocumentsClient;
+  ai: AiClient;
+  platform: PlatformClient;
+  imports: ImportsClient;
 }
 
 export function createHallederizSdk(options: ApiClientOptions): HallederizSdk {
@@ -47,6 +53,9 @@ export function createHallederizSdk(options: ApiClientOptions): HallederizSdk {
     returns: new ReturnsClient(apiClient),
     approvals: new ApprovalsClient(apiClient),
     dashboard: new DashboardClient(apiClient),
-    documents: new DocumentsClient(apiClient)
+    documents: new DocumentsClient(apiClient),
+    ai: new AiClient(apiClient),
+    platform: new PlatformClient(apiClient),
+    imports: new ImportsClient(apiClient)
   };
 }

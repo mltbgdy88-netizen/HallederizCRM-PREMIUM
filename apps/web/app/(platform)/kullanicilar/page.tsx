@@ -1,23 +1,57 @@
-import { RouteSkeletonPage } from "../../../src/components/page-system/route-skeleton-page";
+﻿"use client";
+
+import { useEffect, useState } from "react";
+import type { User } from "@hallederiz/types";
+import { PageHeader } from "@hallederiz/ui";
+import { listUsersApi } from "../../../src/services/api";
 
 export default function UsersPage() {
+  const [users, setUsers] = useState<User[]>([]);
+
+  useEffect(() => {
+    void listUsersApi().then(setUsers).catch(() => setUsers([]));
+  }, []);
+
   return (
-    <RouteSkeletonPage
-      title="Kullanicilar"
-      description="Kullanici hesaplari, rol atamalari ve platform erisim kapsamlarini yonetin."
-      actions={["Yeni Kullanici", "Davet Gonder", "Toplu Durum Guncelle"]}
-      filters={[
-        { label: "Ad Soyad / E-Posta", type: "text", placeholder: "Kullanici ara" },
-        { label: "Rol", type: "select", options: ["Platform Yoneticisi", "Satis", "Muhasebe", "Depo"] },
-        { label: "Durum", type: "select", options: ["Aktif", "Pasif", "Davet"] },
-        { label: "Mobil Erisim", type: "toggle" }
-      ]}
-      tableColumns={["Ad", "Rol", "Durum", "Son Giris", "Mobil Erisim", "Onay Yetkisi"]}
-      tableRows={[
-        ["Platform Admin", "Platform Yoneticisi", "Aktif", "Bugun", "Evet", "Evet"],
-        ["Demo Operator", "Operasyon", "Davet", "-", "Evet", "Hayir"],
-        ["Merve Finans", "Muhasebe", "Aktif", "Dun", "Hayir", "Evet"]
-      ]}
-    />
+    <div className="hz-page-stack">
+      <PageHeader
+        title="Kullanicilar"
+        description="Pilot personel listesi, mobil erisim ve onay yetkilerini yonetin."
+      />
+
+      <section className="hz-content-card">
+        <div className="table-wrap hz-table-wrap">
+          <table className="table hz-table">
+            <thead>
+              <tr>
+                <th>Ad</th>
+                <th>E-Posta</th>
+                <th>Durum</th>
+                <th>Unvan</th>
+                <th>Son Giris</th>
+              </tr>
+            </thead>
+            <tbody>
+              {users.length === 0 ? (
+                <tr>
+                  <td className="table-empty" colSpan={5}>Kayit bulunamadi.</td>
+                </tr>
+              ) : (
+                users.map((user) => (
+                  <tr key={user.id}>
+                    <td>{user.fullName}</td>
+                    <td>{user.email}</td>
+                    <td>{user.status}</td>
+                    <td>{user.title ?? "-"}</td>
+                    <td>{user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString("tr-TR") : "-"}</td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
+      </section>
+    </div>
   );
 }
+

@@ -171,6 +171,11 @@ export function listAiProposals() {
   return aiProposals;
 }
 
+export function saveAiProposal(proposal: AiProposal) {
+  aiProposals.unshift(proposal);
+  return proposal;
+}
+
 export function getAiProposal(id: string) {
   return aiProposals.find((proposal) => proposal.id === id || proposal.proposalNo === id);
 }
@@ -184,6 +189,11 @@ export function updateAiProposalStatus(id: string, status: AiProposal["status"])
 }
 
 export function listAiInsights() {
+  return aiInsights;
+}
+
+export function replaceAiInsights(nextInsights: AiInsight[]) {
+  aiInsights.splice(0, aiInsights.length, ...nextInsights);
   return aiInsights;
 }
 

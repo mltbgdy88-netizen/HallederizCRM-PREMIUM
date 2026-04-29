@@ -34,4 +34,16 @@ export class StockClient {
   exchangeRates() {
     return this.api.get<{ rates: ExchangeRate[]; policy: ExchangeRatePolicy }>("/exchange-rates/current");
   }
+
+  patchPriceSlots(slots: PriceSlotConfig[]) {
+    return this.api.patch<{ items: PriceSlotConfig[] }>("/price-slots", { slots });
+  }
+
+  patchCategorySlots(slots: CategorySlotConfig[]) {
+    return this.api.patch<{ items: CategorySlotConfig[] }>("/category-slots", { slots });
+  }
+
+  patchExchangeRatePolicy(payload: Partial<ExchangeRatePolicy>) {
+    return this.api.patch<{ policy: ExchangeRatePolicy }>("/exchange-rate-policy", payload);
+  }
 }
