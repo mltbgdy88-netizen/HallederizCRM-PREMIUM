@@ -3,6 +3,7 @@ import {
   ApprovalsClient,
   AiClient,
   PlatformClient,
+  QuickOperationsClient,
   CustomersClient,
   DashboardClient,
   DeliveriesClient,
@@ -36,6 +37,7 @@ export interface HallederizSdk {
   ai: AiClient;
   platform: PlatformClient;
   imports: ImportsClient;
+  quickOperations: QuickOperationsClient;
 }
 
 export function createHallederizSdk(options: ApiClientOptions): HallederizSdk {
@@ -56,6 +58,7 @@ export function createHallederizSdk(options: ApiClientOptions): HallederizSdk {
     documents: new DocumentsClient(apiClient),
     ai: new AiClient(apiClient),
     platform: new PlatformClient(apiClient),
-    imports: new ImportsClient(apiClient)
+    imports: new ImportsClient(apiClient),
+    quickOperations: new QuickOperationsClient(apiClient)
   };
 }

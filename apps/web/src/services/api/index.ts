@@ -8,3 +8,4 @@ export * from "./deliveries.service";
 export * from "./invoices.service";
 export * from "./returns.service";
 export * from "./documents.service";
+export * from "./quick-operations.service";

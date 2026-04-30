@@ -6,6 +6,7 @@ import { registerIntegrationRoutes } from "./integrations/routes";
 import { registerOperationsEngineRoutes } from "./operations-engine/routes";
 import { registerPlatformCoreRoutes } from "./platform-core/routes";
 import { registerProductStockPricingRoutes } from "./product-stock-pricing/routes";
+import { registerQuickOperationsRoutes } from "./quick-operations/routes";
 import { registerSalesCrmRoutes } from "./sales-crm/routes";
 
 const server = Fastify({
@@ -37,6 +38,7 @@ async function bootstrap() {
   await registerOperationsEngineRoutes(server);
   await registerIntegrationRoutes(server);
   await registerImportRoutes(server);
+  await registerQuickOperationsRoutes(server);
   await registerAiLocalOutputRoutes(server);
   await server.listen({ port, host });
 }

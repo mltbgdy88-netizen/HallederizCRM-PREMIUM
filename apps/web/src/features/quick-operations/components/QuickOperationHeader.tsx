@@ -7,10 +7,12 @@ const operationTypes = Object.keys(operationTypeLabels) as QuickOperationType[];
 interface Props {
   operationType: QuickOperationType;
   onOperationTypeChange: (operationType: QuickOperationType) => void;
-  onAction: (action: string) => void;
+  onFoundationAction: (action: string) => void;
+  onSubmit: () => void;
+  submitting: boolean;
 }
 
-export function QuickOperationHeader({ operationType, onOperationTypeChange, onAction }: Props) {
+export function QuickOperationHeader({ operationType, onOperationTypeChange, onFoundationAction, onSubmit, submitting }: Props) {
   const meta = operationTypeLabels[operationType];
 
   return (
@@ -40,10 +42,12 @@ export function QuickOperationHeader({ operationType, onOperationTypeChange, onA
       </section>
 
       <PrimaryActionToolbar>
-        <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn" onClick={() => onAction("Taslak Kaydet")}>Taslak Kaydet</button>
-        <button type="button" className="hz-btn hz-btn-primary hz-toolbar-btn" onClick={() => onAction("Islemi Olustur")}>Islemi Olustur</button>
-        <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn" onClick={() => onAction("Belge Onizle")}>Belge Onizle</button>
-        <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn" onClick={() => onAction("WhatsApp Taslagi")}>WhatsApp Taslagi</button>
+        <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn" onClick={() => onFoundationAction("Taslak Kaydet")}>Taslak Kaydet</button>
+        <button type="button" className="hz-btn hz-btn-primary hz-toolbar-btn" onClick={onSubmit} disabled={submitting}>
+          {submitting ? "Olusturuluyor..." : "Islemi Olustur"}
+        </button>
+        <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn" onClick={() => onFoundationAction("Belge Onizle")}>Belge Onizle</button>
+        <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn" onClick={() => onFoundationAction("WhatsApp Taslagi")}>WhatsApp Taslagi</button>
       </PrimaryActionToolbar>
     </>
   );

@@ -5,6 +5,7 @@ export * from "./auth";
 export * from "./session";
 export * from "./settings";
 export * from "./imports";
+export * from "./quick-operations";
 export * from "./product-stock-pricing";
 export * from "./customer-offer";
 export * from "./commercial-operations";

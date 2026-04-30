@@ -14,6 +14,7 @@ export * from "./approvals";
 export * from "./dashboard";
 export * from "./orders";
 export * from "./payments";
+export * from "./quick-operations";
 export * from "./pricing";
 export * from "./returns";
 export * from "./stock";

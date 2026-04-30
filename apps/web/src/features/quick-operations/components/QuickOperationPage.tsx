@@ -27,12 +27,20 @@ export function QuickOperationPage() {
     updateLine,
     selectProduct,
     selectSource,
-    showFoundationNotice
+    showFoundationNotice,
+    submitOperation,
+    isSubmitting
   } = useQuickOperationState();
 
   return (
     <div className="hz-page-stack">
-      <QuickOperationHeader operationType={operationType} onOperationTypeChange={setOperationType} onAction={showFoundationNotice} />
+      <QuickOperationHeader
+        operationType={operationType}
+        onOperationTypeChange={setOperationType}
+        onFoundationAction={showFoundationNotice}
+        onSubmit={submitOperation}
+        submitting={isSubmitting}
+      />
 
       {notice ? (
         <section className="hz-state-card tone-danger">

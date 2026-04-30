@@ -1,7 +1,9 @@
 ﻿"use client";
 
 import { useMemo, useState } from "react";
-import type { QuickOperationCustomer, QuickOperationLine, QuickOperationProduct, QuickOperationSourceType, QuickOperationType, SourceOption } from "../types";
+import type { QuickOperationSubmitRequest } from "@hallederiz/types";
+import type { QuickOperationCustomer, QuickOperationImpact, QuickOperationLine, QuickOperationProduct, QuickOperationSourceType, QuickOperationType, SourceOption } from "../types";
+import { submitQuickOperationRecord } from "../../../services/api/quick-operations.service";
 import { calculateQuickOperationTotals } from "../utils/calculate-quick-operation-totals";
 import { mapSourceSelectionToWorkflow } from "../utils/map-source-selection-to-workflow";
 
@@ -163,19 +165,23 @@ function createLine(index: number): QuickOperationLine {
 }
 
 export function useQuickOperationState() {
-  const [operationType, setOperationType] = useState<QuickOperationType>("offer");
+  const [operationType, setOperationTypeState] = useState<QuickOperationType>("offer");
   const [customerId, setCustomerId] = useState(demoCustomers[0]?.id ?? fallbackCustomer.id);
   const [lines, setLines] = useState<QuickOperationLine[]>([createLine(0), createLine(1), createLine(2)]);
   const [expandedLineId, setExpandedLineId] = useState<string | null>(lines[0]?.id ?? null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [submittedImpacts, setSubmittedImpacts] = useState<QuickOperationImpact[] | null>(null);
 
   const selectedCustomer = useMemo(() => {
     return demoCustomers.find((customer) => customer.id === customerId) ?? demoCustomers[0] ?? fallbackCustomer;
   }, [customerId]);
   const totals = useMemo(() => calculateQuickOperationTotals(lines), [lines]);
-  const impacts = useMemo(() => mapSourceSelectionToWorkflow(operationType, lines), [operationType, lines]);
+  const calculatedImpacts = useMemo(() => mapSourceSelectionToWorkflow(operationType, lines), [operationType, lines]);
+  const impacts = submittedImpacts ?? calculatedImpacts;
 
   const updateLine = (lineId: string, patch: Partial<QuickOperationLine>) => {
+    setSubmittedImpacts(null);
     setLines((current) => current.map((line) => (line.id === lineId ? { ...line, ...patch } : line)));
   };
 
@@ -204,11 +210,13 @@ export function useQuickOperationState() {
 
   const addLine = () => {
     const nextLine = createLine(lines.length);
+    setSubmittedImpacts(null);
     setLines((current) => [...current, nextLine]);
     setExpandedLineId(nextLine.id);
   };
 
   const removeLine = (lineId: string) => {
+    setSubmittedImpacts(null);
     setLines((current) => current.filter((line) => line.id !== lineId));
     if (expandedLineId === lineId) {
       setExpandedLineId(null);
@@ -217,6 +225,60 @@ export function useQuickOperationState() {
 
   const showFoundationNotice = (action: string) => {
     setNotice(`${action}: Backend baglantisi sonraki asamada eklenecek. Bu ekran su an frontend-only onizleme modunda.`);
+  };
+
+  const setOperationType = (next: QuickOperationType) => {
+    setSubmittedImpacts(null);
+    setOperationTypeState(next);
+  };
+
+  const buildSubmitPayload = (): QuickOperationSubmitRequest => {
+    return {
+      operationType,
+      customerId: selectedCustomer.id,
+      customerName: selectedCustomer.name,
+      lines: lines.map((line) => ({
+        id: line.id,
+        productCode: line.productCode,
+        productName: line.productName,
+        quantity: line.quantity,
+        unitPrice: line.unitPrice,
+        taxRate: line.taxRate,
+        sourceType: line.sourceType,
+        warehouseName: line.warehouseName,
+        rackCode: line.rackCode,
+        locationCode: line.locationCode,
+        lineTotal: Number((line.quantity * line.unitPrice * (1 + line.taxRate / 100)).toFixed(2))
+      }))
+    };
+  };
+
+  const submitOperation = async () => {
+    setIsSubmitting(true);
+    try {
+      const result = await submitQuickOperationRecord(buildSubmitPayload());
+      setSubmittedImpacts(
+        result.workflowImpacts.map((impact) => ({
+          id: impact.id,
+          title: impact.title,
+          description: impact.description,
+          tone: impact.severity === "warning" ? "warning" : impact.severity === "success" ? "success" : "info"
+        }))
+      );
+      const validationErrorCount = (result.validationIssues ?? []).filter((issue) => issue.level === "error").length;
+      const suffix =
+        result.mode === "foundation"
+          ? "Backend write bir sonraki adimda acilacaktir; bu cevap foundation mode'dur."
+          : "Islem backend tarafinda calistirildi.";
+      setNotice(
+        `Islem sonucu: ${result.operationType} · mode=${result.mode} · impact=${result.workflowImpacts.length} · validation=${validationErrorCount}. ${suffix}`
+      );
+    } catch (error) {
+      const message = error instanceof Error ? error.message : "Bilinmeyen hata";
+      setNotice(`Islem olusturulamadi: ${message}`);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return {
@@ -237,6 +299,8 @@ export function useQuickOperationState() {
     updateLine,
     selectProduct,
     selectSource,
-    showFoundationNotice
+    showFoundationNotice,
+    submitOperation,
+    isSubmitting
   };
 }
