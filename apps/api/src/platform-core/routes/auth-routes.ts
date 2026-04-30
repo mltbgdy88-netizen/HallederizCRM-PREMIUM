@@ -1,10 +1,21 @@
 import type { FastifyInstance } from "fastify";
 import type { LoginInput } from "@hallederiz/types";
-import { createLocalPilotSession, createSession, getSessionByToken } from "../../shared/session-store";
+import { createDatabaseSession, createLocalPilotSession, createSession, getSessionByToken } from "../../shared/session-store";
 import { buildRequestContext } from "../../shared/request-context";
 import { getAuthMode } from "../../shared/auth-mode";
+import { authenticateWithDatabase, createPostgresAuthExecutor, type DatabaseAuthResult } from "../../shared/database-auth";
+import { buildPersistenceUnavailableError } from "../../shared/persistence-policy";
+import { asApiErrorPayload } from "../../shared/errors";
 
-export async function registerAuthRoutes(server: FastifyInstance) {
+interface AuthRouteDeps {
+  authenticateDatabaseLogin?: (input: LoginInput) => Promise<DatabaseAuthResult>;
+}
+
+export async function registerAuthRoutes(server: FastifyInstance, deps: AuthRouteDeps = {}) {
+  const authenticateDatabaseLogin =
+    deps.authenticateDatabaseLogin ??
+    (async (input: LoginInput) => authenticateWithDatabase(input, createPostgresAuthExecutor()));
+
   server.post<{ Body: Partial<LoginInput> }>("/auth/login", async (request, reply) => {
     const body = request.body;
 
@@ -22,6 +33,63 @@ export async function registerAuthRoutes(server: FastifyInstance) {
         password: body.password
       });
       return reply.send(loginPayload);
+    }
+
+    if (authMode.persistenceMode === "postgres") {
+      if (authMode.canUseLocalPilotAuth) {
+        const emailMatches = body.email.trim().toLocaleLowerCase("tr-TR") === authMode.localPilotAuthEmail?.toLocaleLowerCase("tr-TR");
+        if (emailMatches) {
+          const passwordMatches = body.password === authMode.localPilotAuthPassword;
+          if (!passwordMatches) {
+            return reply.status(401).send({
+              message: "Gecersiz giris bilgileri."
+            });
+          }
+
+          const loginPayload = createLocalPilotSession({
+            tenantSlug: body.tenantSlug,
+            email: body.email,
+            password: body.password
+          });
+          return reply.send(loginPayload);
+        }
+      }
+
+      try {
+        const dbAuthResult = await authenticateDatabaseLogin({
+          tenantSlug: body.tenantSlug,
+          email: body.email,
+          password: body.password
+        });
+
+        if (dbAuthResult.status === "success") {
+          const loginPayload = createDatabaseSession(
+            {
+              tenantSlug: body.tenantSlug,
+              email: body.email,
+              password: body.password
+            },
+            dbAuthResult
+          );
+          return reply.send(loginPayload);
+        }
+
+        if (dbAuthResult.status === "inactive_user") {
+          return reply.status(403).send({
+            message: "Kullanici pasif. Yonetici ile iletisime gecin."
+          });
+        }
+
+        return reply.status(401).send({
+          message: "Gecersiz giris bilgileri."
+        });
+      } catch (error) {
+        const persistenceError = buildPersistenceUnavailableError(error, {
+          persistenceMode: authMode.persistenceMode
+        });
+        const payload = asApiErrorPayload(persistenceError);
+        return reply.status(payload.statusCode).send(payload.body);
+      }
     }
 
     if (authMode.canUseLocalPilotAuth) {

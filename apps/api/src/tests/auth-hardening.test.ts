@@ -2,13 +2,14 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import Fastify from "fastify";
 import { registerAuthRoutes } from "../platform-core/routes/auth-routes";
+import type { DatabaseAuthResult } from "../shared/database-auth";
 import { buildRequestContext } from "../shared/request-context";
 import { createSession } from "../shared/session-store";
 import { withDemoAuth, withEnv } from "./test-env";
 
-async function buildAuthServer() {
+async function buildAuthServer(authenticateDatabaseLogin?: (input: { tenantSlug: string; email: string; password: string }) => Promise<DatabaseAuthResult>) {
   const server = Fastify();
-  await registerAuthRoutes(server);
+  await registerAuthRoutes(server, authenticateDatabaseLogin ? { authenticateDatabaseLogin } : {});
   return server;
 }
 
@@ -295,6 +296,95 @@ test("local pilot auth does not enable mock access token or header fallback in p
       } as never);
       assert.equal(headerFallbackContext.isAuthenticated, false);
       assert.deepEqual(headerFallbackContext.permissions, []);
+    }
+  );
+});
+
+test("postgres database auth: valid user credentials return login session", async () => {
+  await withEnv(
+    {
+      NODE_ENV: "development",
+      PERSISTENCE_MODE: "postgres",
+      DEMO_AUTH_ENABLED: "false",
+      LOCAL_PILOT_AUTH_ENABLED: "false"
+    },
+    async () => {
+      const server = await buildAuthServer(async () => ({
+        status: "success",
+        tenantId: "tenant_1",
+        tenantSlug: "hallederiz",
+        tenantName: "Hallederiz Demo Tenant",
+        userId: "user_db_admin",
+        email: "admin@hallederiz.com",
+        fullName: "DB Admin",
+        role: "platform_admin"
+      }));
+
+      const response = await server.inject({
+        method: "POST",
+        url: "/auth/login",
+        payload: {
+          tenantSlug: "hallederiz",
+          email: "admin@hallederiz.com",
+          password: "correct-password"
+        }
+      });
+
+      assert.equal(response.statusCode, 200);
+      assert.ok(response.json().accessToken);
+      await server.close();
+    }
+  );
+});
+
+test("postgres database auth: wrong password returns 401", async () => {
+  await withEnv(
+    {
+      NODE_ENV: "development",
+      PERSISTENCE_MODE: "postgres",
+      DEMO_AUTH_ENABLED: "false",
+      LOCAL_PILOT_AUTH_ENABLED: "false"
+    },
+    async () => {
+      const server = await buildAuthServer(async () => ({ status: "invalid_credentials" }));
+      const response = await server.inject({
+        method: "POST",
+        url: "/auth/login",
+        payload: {
+          tenantSlug: "hallederiz",
+          email: "admin@hallederiz.com",
+          password: "wrong-password"
+        }
+      });
+
+      assert.equal(response.statusCode, 401);
+      await server.close();
+    }
+  );
+});
+
+test("postgres database auth: inactive user returns 403", async () => {
+  await withEnv(
+    {
+      NODE_ENV: "development",
+      PERSISTENCE_MODE: "postgres",
+      DEMO_AUTH_ENABLED: "false",
+      LOCAL_PILOT_AUTH_ENABLED: "false"
+    },
+    async () => {
+      const server = await buildAuthServer(async () => ({ status: "inactive_user" }));
+      const response = await server.inject({
+        method: "POST",
+        url: "/auth/login",
+        payload: {
+          tenantSlug: "hallederiz",
+          email: "inactive@hallederiz.com",
+          password: "correct-password"
+        }
+      });
+
+      assert.equal(response.statusCode, 403);
+      await server.close();
     }
   );
 });

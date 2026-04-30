@@ -1,6 +1,7 @@
 import type { LoginInput, LoginResponse, Permission, SessionModel } from "@hallederiz/types";
 import { createLoginPayload, mockRoles, mockTenant, mockUsers } from "../platform-core/mock-data";
 import { assertDemoAuthAllowed, getAuthMode } from "./auth-mode";
+import type { DatabaseAuthResult } from "./database-auth";
 
 const sessionByToken = new Map<string, LoginResponse>();
 
@@ -69,6 +70,31 @@ function getUserByEmail(email: string) {
   return mockUsers.find((user) => user.email.toLowerCase() === email.toLowerCase()) ?? mockUsers[0];
 }
 
+function resolveRoleForCode(roleCode: string) {
+  const normalized = roleCode.toLocaleLowerCase("tr-TR");
+  return (
+    mockRoles.find((role) => role.code.toLocaleLowerCase("tr-TR") === normalized) ??
+    mockRoles.find((role) => role.code === "platform_operator") ??
+    mockRoles[0]
+  );
+}
+
+function roleToPermissionKeys(roleCode: string): string[] {
+  const normalized = roleCode.toLocaleLowerCase("tr-TR");
+  if (normalized.includes("admin")) {
+    return [...demoBusinessReadPermissions, ...demoBusinessWritePermissions];
+  }
+
+  return [
+    ...demoBusinessReadPermissions,
+    "offers.write",
+    "orders.write",
+    "payments.write",
+    "warehouse.write",
+    "tasks.write"
+  ];
+}
+
 export function createSession(input: LoginInput): LoginResponse {
   assertDemoAuthAllowed();
   const payload = createLoginPayload(input);
@@ -130,6 +156,50 @@ export function createLocalPilotSession(input: LoginInput): LoginResponse {
       ...payload.session,
       tenant: mockTenant,
       user: user ?? payload.session.user,
+      roles: resolvedRoles as SessionModel["roles"],
+      permissions: [...rolePermissions, ...extraPermissions]
+    }
+  };
+
+  sessionByToken.set(response.accessToken, response);
+  return response;
+}
+
+export function createDatabaseSession(input: LoginInput, principal: Extract<DatabaseAuthResult, { status: "success" }>): LoginResponse {
+  const payload = createLoginPayload(input);
+  const resolvedRole = resolveRoleForCode(principal.role);
+  const resolvedRoles = resolvedRole ? [resolvedRole] : [];
+  const rolePermissions = resolvedRoles.flatMap((role) => role.permissions);
+  const permissionKeys = roleToPermissionKeys(principal.role);
+  const extraPermissions: Permission[] = permissionKeys.map((key) => ({
+    id: `db_${key.replaceAll(".", "_")}`,
+    key,
+    name: key,
+    moduleCode: "core"
+  }));
+
+  const response: LoginResponse = {
+    ...payload,
+    accessToken: `db_access_${payload.session.id}`,
+    refreshToken: `db_refresh_${payload.session.id}`,
+    session: {
+      ...payload.session,
+      tenant: {
+        ...mockTenant,
+        id: principal.tenantId,
+        slug: principal.tenantSlug,
+        name: principal.tenantName
+      },
+      user: {
+        id: principal.userId,
+        tenantId: principal.tenantId,
+        email: principal.email,
+        fullName: principal.fullName,
+        status: "active",
+        title: principal.role,
+        directPermissions: [],
+        lastLoginAt: new Date().toISOString()
+      },
       roles: resolvedRoles as SessionModel["roles"],
       permissions: [...rolePermissions, ...extraPermissions]
     }

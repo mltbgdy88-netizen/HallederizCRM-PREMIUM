@@ -7,6 +7,7 @@
     "dev": "node --watch --experimental-specifier-resolution=node --loader ts-node/esm src/index.ts",
     "build": "tsc -p tsconfig.json",
     "start": "node --experimental-specifier-resolution=node --loader ts-node/esm src/index.ts",
+    "seed:auth-admin": "node --experimental-specifier-resolution=node --loader ts-node/esm src/scripts/seed-admin-user.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node scripts/run-tests.cjs",
     "lint": "node -e \"console.log('TODO: configure linting for @hallederiz/api')\"",
