@@ -124,6 +124,8 @@ export function createLocalPilotSession(input: LoginInput): LoginResponse {
 
   const response: LoginResponse = {
     ...payload,
+    accessToken: `pilot_access_${payload.session.id}`,
+    refreshToken: `pilot_refresh_${payload.session.id}`,
     session: {
       ...payload.session,
       tenant: mockTenant,
