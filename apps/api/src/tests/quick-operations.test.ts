@@ -69,10 +69,19 @@ test("sale_order valid submit returns executed mode", async () => {
     });
 
     assert.equal(response.statusCode, 200);
-    const body = response.json() as { item: { mode: string; createdEntityType?: string; workflowImpacts: Array<{ key: string }> } };
+    const body = response.json() as {
+      item: {
+        mode: string;
+        createdEntityType?: string;
+        workflowImpacts: Array<{ key: string }>;
+        sideActions?: { documentPreview?: { referenceNo: string }; whatsappDraft?: { sendEnabled: boolean } };
+      };
+    };
     assert.equal(body.item.mode, "executed");
     assert.equal(body.item.createdEntityType, "order");
     assert.ok(body.item.workflowImpacts.some((impact) => impact.key === "warehouse_prepare"));
+    assert.ok(body.item.sideActions?.documentPreview?.referenceNo);
+    assert.equal(body.item.sideActions?.whatsappDraft?.sendEnabled, false);
     await server.close();
   });
 });
@@ -115,8 +124,16 @@ test("offer valid submit runs controlled execution", async () => {
     });
 
     assert.equal(response.statusCode, 200);
-    const body = response.json() as { item: { mode: string; createdEntityType?: string; workflowImpacts: Array<{ key: string }> } };
+    const body = response.json() as {
+      item: {
+        mode: string;
+        createdEntityType?: string;
+        workflowImpacts: Array<{ key: string }>;
+        sideActions?: { documentPreview?: { title: string } };
+      };
+    };
     assert.ok(["executed", "foundation"].includes(body.item.mode));
+    assert.equal(body.item.sideActions?.documentPreview?.title, "Teklif Onizleme");
     if (body.item.mode === "executed") {
       assert.equal(body.item.createdEntityType, "offer");
       assert.ok(body.item.workflowImpacts.some((impact) => impact.key === "offer_created"));
@@ -178,8 +195,18 @@ test("payment valid submit executed or controlled foundation", async () => {
     });
 
     assert.equal(response.statusCode, 200);
-    const body = response.json() as { item: { mode: string; createdEntityType?: string; workflowImpacts: Array<{ key: string }> } };
+    const body = response.json() as {
+      item: {
+        mode: string;
+        createdEntityType?: string;
+        workflowImpacts: Array<{ key: string }>;
+        sideActions?: { whatsappDraft?: { message: string }; aiInsight?: { recommendations: string[]; warnings: string[] } };
+      };
+    };
     assert.ok(["executed", "foundation"].includes(body.item.mode));
+    assert.match(body.item.sideActions?.whatsappDraft?.message ?? "", /tahsilat/i);
+    assert.ok((body.item.sideActions?.aiInsight?.recommendations ?? []).length > 0);
+    assert.ok(Array.isArray(body.item.sideActions?.aiInsight?.warnings ?? []));
     if (body.item.mode === "executed") {
       assert.equal(body.item.createdEntityType, "payment");
       assert.ok(body.item.workflowImpacts.some((impact) => impact.key === "payment_recorded"));

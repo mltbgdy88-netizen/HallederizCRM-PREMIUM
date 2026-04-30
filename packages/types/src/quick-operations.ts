@@ -89,6 +89,49 @@ export interface QuickOperationPreviewResponse {
   validationIssues: QuickOperationValidationIssue[];
 }
 
+export interface QuickOperationDocumentPreviewLine {
+  no: number;
+  productCode: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  taxRate: number;
+  lineTotal: number;
+}
+
+export interface QuickOperationDocumentPreview {
+  documentType: "offer" | "sale_order" | "delivery" | "payment" | "return";
+  title: string;
+  referenceNo: string;
+  customerName: string;
+  lines: QuickOperationDocumentPreviewLine[];
+  totals: QuickOperationTotals;
+  notes?: string;
+  previewText?: string;
+  previewHtml?: string;
+}
+
+export interface QuickOperationWhatsappDraft {
+  toPhone?: string;
+  message: string;
+  intent: "offer" | "sale_order" | "delivery" | "payment" | "return" | "generic";
+  requiresApproval?: boolean;
+  sendEnabled: false;
+}
+
+export interface QuickOperationAiInsight {
+  summary: string;
+  warnings: string[];
+  recommendations: string[];
+  source: "template" | "local-ai" | "mock";
+}
+
+export interface QuickOperationSideActions {
+  documentPreview?: QuickOperationDocumentPreview;
+  whatsappDraft?: QuickOperationWhatsappDraft;
+  aiInsight?: QuickOperationAiInsight;
+}
+
 export interface QuickOperationSubmitResponse {
   ok: boolean;
   operationType: QuickOperationType;
@@ -100,5 +143,6 @@ export interface QuickOperationSubmitResponse {
   documentIds: string[];
   auditEventIds: string[];
   validationIssues?: QuickOperationValidationIssue[];
+  sideActions?: QuickOperationSideActions;
   mode: "foundation" | "executed";
 }

@@ -2,7 +2,19 @@
 
 import { useMemo, useState } from "react";
 import type { QuickOperationSubmitRequest } from "@hallederiz/types";
-import type { QuickOperationCustomer, QuickOperationImpact, QuickOperationLine, QuickOperationProduct, QuickOperationSourceType, QuickOperationType, SourceOption } from "../types";
+import type {
+  QuickOperationAiInsight,
+  QuickOperationCustomer,
+  QuickOperationDocumentPreview,
+  QuickOperationImpact,
+  QuickOperationLine,
+  QuickOperationProduct,
+  QuickOperationSideActions,
+  QuickOperationSourceType,
+  QuickOperationType,
+  QuickOperationWhatsappDraft,
+  SourceOption
+} from "../types";
 import { submitQuickOperationRecord } from "../../../services/api/quick-operations.service";
 import { calculateQuickOperationTotals } from "../utils/calculate-quick-operation-totals";
 import { mapSourceSelectionToWorkflow } from "../utils/map-source-selection-to-workflow";
@@ -172,6 +184,9 @@ export function useQuickOperationState() {
   const [notice, setNotice] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedImpacts, setSubmittedImpacts] = useState<QuickOperationImpact[] | null>(null);
+  const [sideActions, setSideActions] = useState<QuickOperationSideActions | null>(null);
+  const [documentPreviewVisible, setDocumentPreviewVisible] = useState(false);
+  const [whatsappDraftVisible, setWhatsappDraftVisible] = useState(false);
 
   const selectedCustomer = useMemo(() => {
     return demoCustomers.find((customer) => customer.id === customerId) ?? demoCustomers[0] ?? fallbackCustomer;
@@ -179,9 +194,13 @@ export function useQuickOperationState() {
   const totals = useMemo(() => calculateQuickOperationTotals(lines), [lines]);
   const calculatedImpacts = useMemo(() => mapSourceSelectionToWorkflow(operationType, lines), [operationType, lines]);
   const impacts = submittedImpacts ?? calculatedImpacts;
+  const aiInsight: QuickOperationAiInsight | undefined = sideActions?.aiInsight;
+  const documentPreview: QuickOperationDocumentPreview | undefined = sideActions?.documentPreview;
+  const whatsappDraft: QuickOperationWhatsappDraft | undefined = sideActions?.whatsappDraft;
 
   const updateLine = (lineId: string, patch: Partial<QuickOperationLine>) => {
     setSubmittedImpacts(null);
+    setSideActions(null);
     setLines((current) => current.map((line) => (line.id === lineId ? { ...line, ...patch } : line)));
   };
 
@@ -211,12 +230,14 @@ export function useQuickOperationState() {
   const addLine = () => {
     const nextLine = createLine(lines.length);
     setSubmittedImpacts(null);
+    setSideActions(null);
     setLines((current) => [...current, nextLine]);
     setExpandedLineId(nextLine.id);
   };
 
   const removeLine = (lineId: string) => {
     setSubmittedImpacts(null);
+    setSideActions(null);
     setLines((current) => current.filter((line) => line.id !== lineId));
     if (expandedLineId === lineId) {
       setExpandedLineId(null);
@@ -224,11 +245,12 @@ export function useQuickOperationState() {
   };
 
   const showFoundationNotice = (action: string) => {
-    setNotice(`${action}: Backend baglantisi sonraki asamada eklenecek. Bu ekran su an frontend-only onizleme modunda.`);
+    setNotice(`${action}: Bu turda taslak/onizleme olusturulur. Gercek gonderim/uretim sonraki asamada etkinlesecektir.`);
   };
 
   const setOperationType = (next: QuickOperationType) => {
     setSubmittedImpacts(null);
+    setSideActions(null);
     setOperationTypeState(next);
   };
 
@@ -265,6 +287,7 @@ export function useQuickOperationState() {
           tone: impact.severity === "warning" ? "warning" : impact.severity === "success" ? "success" : "info"
         }))
       );
+      setSideActions(result.sideActions ?? null);
       if (result.mode === "executed") {
         setNotice(`Islem olusturuldu: ${result.createdEntityNo ?? "Numara uretilmedi"}`);
       } else {
@@ -276,6 +299,22 @@ export function useQuickOperationState() {
     } finally {
       setIsSubmitting(false);
     }
+  };
+
+  const openDocumentPreview = () => {
+    if (!documentPreview) {
+      showFoundationNotice("Belge Onizle");
+      return;
+    }
+    setDocumentPreviewVisible(true);
+  };
+
+  const openWhatsappDraft = () => {
+    if (!whatsappDraft) {
+      showFoundationNotice("WhatsApp Taslagi");
+      return;
+    }
+    setWhatsappDraftVisible(true);
   };
 
   return {
@@ -298,6 +337,16 @@ export function useQuickOperationState() {
     selectSource,
     showFoundationNotice,
     submitOperation,
-    isSubmitting
+    isSubmitting,
+    sideActions,
+    aiInsight,
+    documentPreview,
+    whatsappDraft,
+    documentPreviewVisible,
+    setDocumentPreviewVisible,
+    whatsappDraftVisible,
+    setWhatsappDraftVisible,
+    openDocumentPreview,
+    openWhatsappDraft
   };
 }

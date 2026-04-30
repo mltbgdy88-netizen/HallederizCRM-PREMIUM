@@ -6,6 +6,7 @@ import { QuickOperationCustomerPanel } from "./QuickOperationCustomerPanel";
 import { QuickOperationHeader } from "./QuickOperationHeader";
 import { QuickOperationImpactPanel } from "./QuickOperationImpactPanel";
 import { QuickOperationLineGrid } from "./QuickOperationLineGrid";
+import { QuickOperationSideActionsPanel } from "./QuickOperationSideActionsPanel";
 import { QuickOperationTotalsPanel } from "./QuickOperationTotalsPanel";
 
 export function QuickOperationPage() {
@@ -28,8 +29,17 @@ export function QuickOperationPage() {
     selectProduct,
     selectSource,
     showFoundationNotice,
+    openDocumentPreview,
+    openWhatsappDraft,
     submitOperation,
-    isSubmitting
+    isSubmitting,
+    aiInsight,
+    documentPreview,
+    whatsappDraft,
+    documentPreviewVisible,
+    setDocumentPreviewVisible,
+    whatsappDraftVisible,
+    setWhatsappDraftVisible
   } = useQuickOperationState();
 
   return (
@@ -38,6 +48,8 @@ export function QuickOperationPage() {
         operationType={operationType}
         onOperationTypeChange={setOperationType}
         onFoundationAction={showFoundationNotice}
+        onDocumentPreview={openDocumentPreview}
+        onWhatsappDraft={openWhatsappDraft}
         onSubmit={submitOperation}
         submitting={isSubmitting}
       />
@@ -71,15 +83,23 @@ export function QuickOperationPage() {
                 <li>{operationTypeLabels[operationType].title}</li>
                 <li>Satir kaynagi merkez depo secilirse depo hazirlik emri etkisi olusur.</li>
                 <li>Fabrika/tedarikci secimleri sadece workflow etkisi onizlemesidir; write sonraki asamada baglanacaktir.</li>
-                <li>Belge onizle ve WhatsApp taslagi butonlari bu turda foundation mesaji verir.</li>
+                <li>Belge onizle ve WhatsApp taslagi submit sonrasi olusan side-actions ile calisir.</li>
               </ul>
             </ContentSection>
+            <QuickOperationSideActionsPanel
+              documentPreview={documentPreview}
+              whatsappDraft={whatsappDraft}
+              documentPreviewVisible={documentPreviewVisible}
+              whatsappDraftVisible={whatsappDraftVisible}
+              onCloseDocumentPreview={() => setDocumentPreviewVisible(false)}
+              onCloseWhatsappDraft={() => setWhatsappDraftVisible(false)}
+            />
           </>
         }
         side={
           <>
             <QuickOperationTotalsPanel totals={totals} />
-            <QuickOperationImpactPanel impacts={impacts} />
+            <QuickOperationImpactPanel impacts={impacts} aiInsight={aiInsight} />
           </>
         }
       />

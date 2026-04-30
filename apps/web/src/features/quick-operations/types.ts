@@ -39,8 +39,8 @@ export interface QuickOperationTotals {
   discountTotal: number;
   taxTotal: number;
   grandTotal: number;
-  paidAmount: number;
-  remainingAmount: number;
+  paidAmount?: number;
+  remainingAmount?: number;
 }
 
 export interface QuickOperationImpact {
@@ -48,6 +48,48 @@ export interface QuickOperationImpact {
   title: string;
   description: string;
   tone: "info" | "success" | "warning" | "danger";
+}
+
+export interface QuickOperationDocumentPreviewLine {
+  no: number;
+  productCode: string;
+  productName: string;
+  quantity: number;
+  unitPrice: number;
+  taxRate: number;
+  lineTotal: number;
+}
+
+export interface QuickOperationDocumentPreview {
+  documentType: "offer" | "sale_order" | "delivery" | "payment" | "return";
+  title: string;
+  referenceNo: string;
+  customerName: string;
+  lines: QuickOperationDocumentPreviewLine[];
+  totals: QuickOperationTotals;
+  notes?: string;
+  previewText?: string;
+}
+
+export interface QuickOperationWhatsappDraft {
+  toPhone?: string;
+  message: string;
+  intent: "offer" | "sale_order" | "delivery" | "payment" | "return" | "generic";
+  requiresApproval?: boolean;
+  sendEnabled: false;
+}
+
+export interface QuickOperationAiInsight {
+  summary: string;
+  warnings: string[];
+  recommendations: string[];
+  source: "template" | "local-ai" | "mock";
+}
+
+export interface QuickOperationSideActions {
+  documentPreview?: QuickOperationDocumentPreview;
+  whatsappDraft?: QuickOperationWhatsappDraft;
+  aiInsight?: QuickOperationAiInsight;
 }
 
 export interface SourceOption {

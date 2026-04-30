@@ -20,17 +20,56 @@ function resolveCreatedEntityType(operationType: QuickOperationSubmitRequest["op
 
 export async function submitQuickOperationRecord(payload: QuickOperationSubmitRequest): Promise<QuickOperationSubmitResponse> {
   if (dataSourceConfig.useDemoData) {
+    const referenceNo = `QO-DEMO-${String(Date.now()).slice(-6)}`;
     return {
       ok: true,
       operationType: payload.operationType,
       draftId: `qod_demo_${Date.now()}`,
       createdEntityType: resolveCreatedEntityType(payload.operationType),
       createdEntityId: `foundation_${payload.operationType}_${Date.now()}`,
-      createdEntityNo: `QO-DEMO-${String(Date.now()).slice(-6)}`,
+      createdEntityNo: referenceNo,
       workflowImpacts: [],
       documentIds: [],
       auditEventIds: [],
       validationIssues: [],
+      sideActions: {
+        documentPreview: {
+          documentType: payload.operationType,
+          title: "Belge Onizleme Taslagi",
+          referenceNo,
+          customerName: payload.customerName ?? "Cari",
+          lines: payload.lines.map((line, index) => ({
+            no: index + 1,
+            productCode: line.productCode,
+            productName: line.productName,
+            quantity: line.quantity,
+            unitPrice: line.unitPrice,
+            taxRate: line.taxRate,
+            lineTotal: line.lineTotal
+          })),
+          totals: {
+            subtotal: payload.lines.reduce((sum, line) => sum + line.unitPrice * line.quantity, 0),
+            discountTotal: 0,
+            taxTotal: payload.lines.reduce((sum, line) => sum + (line.unitPrice * line.quantity * line.taxRate) / 100, 0),
+            grandTotal: payload.lines.reduce((sum, line) => sum + line.lineTotal, 0),
+            paidAmount: payload.paidAmount ?? 0,
+            remainingAmount: payload.lines.reduce((sum, line) => sum + line.lineTotal, 0) - (payload.paidAmount ?? 0)
+          },
+          previewText: "Demo modunda belge taslagi olusturuldu."
+        },
+        whatsappDraft: {
+          message: `${payload.customerName ?? "Cari"} icin ${referenceNo} islem taslagi hazirlandi.`,
+          intent: payload.operationType,
+          requiresApproval: true,
+          sendEnabled: false
+        },
+        aiInsight: {
+          summary: "Demo modunda AI operasyon notu template kaynaktan uretildi.",
+          warnings: [],
+          recommendations: ["Gercek gonderim ve belge uretimi sonraki asamada acilacaktir."],
+          source: "mock"
+        }
+      },
       mode: "foundation"
     };
   }

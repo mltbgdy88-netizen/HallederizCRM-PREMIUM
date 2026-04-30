@@ -1,7 +1,8 @@
-﻿import type { QuickOperationImpact } from "../types";
+import type { QuickOperationAiInsight, QuickOperationImpact } from "../types";
 
 interface Props {
   impacts: QuickOperationImpact[];
+  aiInsight?: QuickOperationAiInsight;
 }
 
 const toneClass: Record<QuickOperationImpact["tone"], string> = {
@@ -11,11 +12,21 @@ const toneClass: Record<QuickOperationImpact["tone"], string> = {
   danger: "hz-badge-danger"
 };
 
-export function QuickOperationImpactPanel({ impacts }: Props) {
+export function QuickOperationImpactPanel({ impacts, aiInsight }: Props) {
   return (
     <section className="hz-side-panel">
       <h3>Operasyon Etkisi</h3>
-      <p className="hz-content-card-description">Bu panel sadece frontend onizleme etkilerini gosterir; backend write sonraki batch'te baglanir.</p>
+      <p className="hz-content-card-description">Bu panel operasyon etkilerini ve AI operasyon notunu gosterir.</p>
+      {aiInsight ? (
+        <div className="hz-state-card tone-warning hz-margin-top-sm">
+          <h4>AI Operasyon Notu ({aiInsight.source})</h4>
+          <p className="hz-content-card-description">{aiInsight.summary}</p>
+          {aiInsight.warnings.length > 0 ? <p className="hz-content-card-description">Uyarilar: {aiInsight.warnings.join(" | ")}</p> : null}
+          {aiInsight.recommendations.length > 0 ? (
+            <p className="hz-content-card-description">Oneriler: {aiInsight.recommendations.join(" | ")}</p>
+          ) : null}
+        </div>
+      ) : null}
       <ul className="hz-side-list">
         {impacts.map((impact) => (
           <li key={impact.id}>

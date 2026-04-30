@@ -8,11 +8,21 @@ interface Props {
   operationType: QuickOperationType;
   onOperationTypeChange: (operationType: QuickOperationType) => void;
   onFoundationAction: (action: string) => void;
+  onDocumentPreview: () => void;
+  onWhatsappDraft: () => void;
   onSubmit: () => void;
   submitting: boolean;
 }
 
-export function QuickOperationHeader({ operationType, onOperationTypeChange, onFoundationAction, onSubmit, submitting }: Props) {
+export function QuickOperationHeader({
+  operationType,
+  onOperationTypeChange,
+  onFoundationAction,
+  onDocumentPreview,
+  onWhatsappDraft,
+  onSubmit,
+  submitting
+}: Props) {
   const meta = operationTypeLabels[operationType];
 
   return (
@@ -46,8 +56,8 @@ export function QuickOperationHeader({ operationType, onOperationTypeChange, onF
         <button type="button" className="hz-btn hz-btn-primary hz-toolbar-btn" onClick={onSubmit} disabled={submitting}>
           {submitting ? "Olusturuluyor..." : "Islemi Olustur"}
         </button>
-        <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn" onClick={() => onFoundationAction("Belge Onizle")}>Belge Onizle</button>
-        <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn" onClick={() => onFoundationAction("WhatsApp Taslagi")}>WhatsApp Taslagi</button>
+        <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn" onClick={onDocumentPreview}>Belge Onizle</button>
+        <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn" onClick={onWhatsappDraft}>WhatsApp Taslagi</button>
       </PrimaryActionToolbar>
     </>
   );

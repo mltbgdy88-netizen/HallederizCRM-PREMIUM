@@ -17,8 +17,8 @@ export function QuickOperationTotalsPanel({ totals }: Props) {
         <li><strong>Iskonto:</strong> {formatMoney(totals.discountTotal)}</li>
         <li><strong>Toplam KDV:</strong> {formatMoney(totals.taxTotal)}</li>
         <li><strong>Genel Toplam:</strong> {formatMoney(totals.grandTotal)}</li>
-        <li><strong>Odenen:</strong> {formatMoney(totals.paidAmount)}</li>
-        <li><strong>Kalan:</strong> {formatMoney(totals.remainingAmount)}</li>
+        <li><strong>Odenen:</strong> {formatMoney(totals.paidAmount ?? 0)}</li>
+        <li><strong>Kalan:</strong> {formatMoney(totals.remainingAmount ?? totals.grandTotal)}</li>
       </ul>
     </section>
   );

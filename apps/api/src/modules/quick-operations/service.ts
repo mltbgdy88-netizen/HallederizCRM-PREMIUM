@@ -1,4 +1,11 @@
-import { buildQuickOperationWorkflowImpacts, calculateQuickOperationTotals, validateQuickOperationRequest } from "@hallederiz/domain";
+import {
+  buildQuickOperationAiInsight,
+  buildQuickOperationDocumentPreview,
+  buildQuickOperationWhatsappDraft,
+  buildQuickOperationWorkflowImpacts,
+  calculateQuickOperationTotals,
+  validateQuickOperationRequest
+} from "@hallederiz/domain";
 import type {
   Offer,
   OfferLine,
@@ -104,7 +111,7 @@ export class QuickOperationsService {
     };
 
     if (!preview.ok) {
-      return base;
+      return this.withSideActions(request, base);
     }
 
     switch (request.operationType) {
@@ -115,25 +122,25 @@ export class QuickOperationsService {
       case "payment":
         return this.executePayment(request, base);
       case "delivery":
-        return {
+        return this.withSideActions(request, {
           ...base,
           workflowImpacts: [
             ...preview.workflowImpacts,
             impact("impact_delivery_pending", "delivery_execution_pending", "Teslim execution sonraki turda", "Teslim olusturma bu turda foundation olarak birakildi.", "warning")
           ],
           mode: "foundation"
-        };
+        });
       case "return":
-        return {
+        return this.withSideActions(request, {
           ...base,
           workflowImpacts: [
             ...preview.workflowImpacts,
             impact("impact_return_review", "return_review_required", "Iade inceleme bekliyor", "Iade execution sonraki turda tam baglanacaktir.", "warning")
           ],
           mode: "foundation"
-        };
+        });
       default:
-        return base;
+        return this.withSideActions(request, base);
     }
   }
 
@@ -171,7 +178,7 @@ export class QuickOperationsService {
     };
 
     const created = await this.salesCrmService.createOffer(offerPayload);
-    return {
+    return this.withSideActions(request, {
       ...base,
       ok: true,
       mode: "executed",
@@ -184,7 +191,7 @@ export class QuickOperationsService {
         impact("impact_offer_doc", "document_preview_available", "Belge onizleme hazir", "Belge onizleme aksiyonu sonraki adimda baglanacaktir.", "info"),
         impact("impact_offer_wa", "whatsapp_draft_available", "WhatsApp taslagi hazir", "WhatsApp taslak gonderimi sonraki adimda baglanacaktir.", "info")
       ]
-    };
+    });
   }
 
   private async executeSaleOrder(request: QuickOperationSubmitRequest, base: QuickOperationSubmitResponse): Promise<QuickOperationSubmitResponse> {
@@ -225,14 +232,14 @@ export class QuickOperationsService {
     };
 
     const created = await this.commercialService.createOrder(orderPayload);
-    return {
+    return this.withSideActions(request, {
       ...base,
       ok: true,
       mode: "executed",
       createdEntityType: "order",
       createdEntityId: created.id,
       createdEntityNo: created.orderNo
-    };
+    });
   }
 
   private async executePayment(request: QuickOperationSubmitRequest, base: QuickOperationSubmitResponse): Promise<QuickOperationSubmitResponse> {
@@ -250,7 +257,7 @@ export class QuickOperationsService {
     };
 
     const created = await this.commercialService.createPayment(paymentPayload);
-    return {
+    return this.withSideActions(request, {
       ...base,
       ok: true,
       mode: "executed",
@@ -262,7 +269,7 @@ export class QuickOperationsService {
         impact("impact_payment_recorded", "payment_recorded", "Tahsilat kaydi olustu", `${created.receiptNo} tahsilat kaydi olusturuldu.`, "success"),
         impact("impact_payment_allocation", "payment_allocation_required", "Allocation adimi gerekli", "Tahsilat kaydi olustu, allocation adimi sonraki turda derinlestirilecektir.", "warning")
       ]
-    };
+    });
   }
 
   private buildImpacts(request: QuickOperationSubmitRequest, defaultImpacts: QuickOperationWorkflowImpact[]): QuickOperationWorkflowImpact[] {
@@ -308,5 +315,16 @@ export class QuickOperationsService {
       default:
         return undefined;
     }
+  }
+
+  private withSideActions(request: QuickOperationSubmitRequest, response: QuickOperationSubmitResponse): QuickOperationSubmitResponse {
+    return {
+      ...response,
+      sideActions: {
+        documentPreview: buildQuickOperationDocumentPreview(request, response),
+        whatsappDraft: buildQuickOperationWhatsappDraft(request, response),
+        aiInsight: buildQuickOperationAiInsight(request)
+      }
+    };
   }
 }
