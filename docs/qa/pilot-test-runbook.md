@@ -44,12 +44,19 @@ Aşağıdaki minimum set test ortaminda doldurulmalidir:
 
 ## 3. Postgres Hazirligi
 1. Postgres instance calisir durumda olmali.
+   - Docker ile lokal kurulum (onerilen):
+     - `docker compose -f docker-compose.local.yml up -d postgres`
+     - `docker compose -f docker-compose.local.yml ps`
 2. Baglanti dogrulamasi:
    - `POSTGRES_URL` / `DATABASE_URL` ile API ayaga kalkmali.
+   - Port kontrolu: `5432`
 3. Policy kontrolu:
    - `PERSISTENCE_MODE=postgres`
    - `ALLOW_DEMO_FALLBACK=false`
 4. Beklenen: DB baglantisi yoksa sessiz demo fallback olmamali; kontrollu hata gorulmeli.
+5. Port cakismasi varsa:
+   - Lokal compose portunu degistir (ornegin `5433:5432`)
+   - `POSTGRES_URL`/`DATABASE_URL` degerlerini ayni porta guncelle.
 
 ## 4. API Baslatma
 1. Bagimliliklari kur:

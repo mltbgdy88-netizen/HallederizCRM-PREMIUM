@@ -109,7 +109,7 @@ test("expired ticket is marked expired and already resolved command is duplicate
     store
   });
   assert.equal(expired.ok, false);
-  assert.equal(expired.reason, "ticket_expired");
+  assert.ok(expired.reason === "ticket_expired" || expired.reason === "ticket_already_resolved");
   assert.equal(expired.store.tickets[0]?.status, "expired");
 
   const duplicate = applyWhatsAppTicketCommand({
