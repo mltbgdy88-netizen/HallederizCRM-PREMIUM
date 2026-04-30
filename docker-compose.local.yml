@@ -1,17 +1,15 @@
-﻿version: "3.9"
-services:
+﻿services:
   postgres:
     image: postgres:16-alpine
-    container_name: hallederizcrm-postgres-local
     restart: unless-stopped
     ports:
-      - "5432:5432"
+      - "55432:5432"
     environment:
       POSTGRES_DB: hallederizcrm
       POSTGRES_USER: postgres
       POSTGRES_PASSWORD: postgres
     volumes:
-      - hallederizcrm_pgdata:/var/lib/postgresql/data
+      - hallederizcrm_premium_pgdata:/var/lib/postgresql/data
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres -d hallederizcrm"]
       interval: 10s
@@ -19,4 +17,4 @@ services:
       retries: 10
 
 volumes:
-  hallederizcrm_pgdata:
+  hallederizcrm_premium_pgdata:
