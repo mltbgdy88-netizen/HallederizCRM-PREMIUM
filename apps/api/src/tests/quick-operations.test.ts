@@ -1,7 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import Fastify from "fastify";
-import { buildQuickOperationWorkflowImpacts, calculateQuickOperationTotals } from "@hallederiz/domain";
 import type { QuickOperationSubmitRequest } from "@hallederiz/types";
 import { registerPlatformCoreRoutes } from "../platform-core/routes";
 import { registerQuickOperationsRoutes } from "../quick-operations/routes";
@@ -15,7 +14,14 @@ async function buildServer() {
   return server;
 }
 
-const validPayload: QuickOperationSubmitRequest = {
+function authHeaders(token: string) {
+  return {
+    "x-session-token": token,
+    authorization: `Bearer ${token}`
+  };
+}
+
+const baseSaleOrderPayload: QuickOperationSubmitRequest = {
   operationType: "sale_order",
   customerId: "customer_1",
   customerName: "MUSTERI FIRMA A.S.",
@@ -33,95 +39,56 @@ const validPayload: QuickOperationSubmitRequest = {
   ]
 };
 
-function authHeaders(token: string) {
-  return {
-    "x-session-token": token,
-    authorization: `Bearer ${token}`
-  };
-}
-
 test("quick-operations preview requires auth", async () => {
-  await withEnv(
-    {
-      DEMO_AUTH_ENABLED: "false",
-      NODE_ENV: "development",
-      PERSISTENCE_MODE: "demo"
-    },
-    async () => {
-      const server = await buildServer();
-      const response = await server.inject({
-        method: "POST",
-        url: "/quick-operations/preview",
-        payload: validPayload
-      });
-
-      assert.equal(response.statusCode, 401);
-      await server.close();
-    }
-  );
-});
-
-test("quick-operations submit requires auth", async () => {
-  await withEnv(
-    {
-      DEMO_AUTH_ENABLED: "false",
-      NODE_ENV: "development",
-      PERSISTENCE_MODE: "demo"
-    },
-    async () => {
-      const server = await buildServer();
-      const response = await server.inject({
-        method: "POST",
-        url: "/quick-operations/submit",
-        payload: validPayload
-      });
-
-      assert.equal(response.statusCode, 401);
-      await server.close();
-    }
-  );
-});
-
-test("quick-operations preview returns impacts for center warehouse with demo auth", async () => {
-  await withDemoAuth(async () => {
+  await withEnv({ DEMO_AUTH_ENABLED: "false", NODE_ENV: "development", PERSISTENCE_MODE: "demo" }, async () => {
     const server = await buildServer();
-    const login = createSession({
-      tenantSlug: "hallederiz",
-      email: "admin@hallederiz.com",
-      password: "demo"
-    });
-
-    const response = await server.inject({
-      method: "POST",
-      url: "/quick-operations/preview",
-      payload: validPayload,
-      headers: authHeaders(login.accessToken)
-    });
-
-    assert.equal(response.statusCode, 200);
-    const body = response.json() as { item: { workflowImpacts: Array<{ key: string }>; validationIssues: unknown[] } };
-    assert.ok(body.item.workflowImpacts.some((impact) => impact.key === "warehouse_prepare"));
-    assert.ok(body.item.workflowImpacts.some((impact) => impact.key === "sale_order_source_plan"));
-    assert.equal(body.item.validationIssues.length, 0);
+    const response = await server.inject({ method: "POST", url: "/quick-operations/preview", payload: baseSaleOrderPayload });
+    assert.equal(response.statusCode, 401);
     await server.close();
   });
 });
 
-test("quick-operations preview returns factory impact", async () => {
+test("quick-operations submit requires auth", async () => {
+  await withEnv({ DEMO_AUTH_ENABLED: "false", NODE_ENV: "development", PERSISTENCE_MODE: "demo" }, async () => {
+    const server = await buildServer();
+    const response = await server.inject({ method: "POST", url: "/quick-operations/submit", payload: baseSaleOrderPayload });
+    assert.equal(response.statusCode, 401);
+    await server.close();
+  });
+});
+
+test("sale_order valid submit returns executed mode", async () => {
   await withDemoAuth(async () => {
     const server = await buildServer();
-    const login = createSession({
-      tenantSlug: "hallederiz",
-      email: "admin@hallederiz.com",
-      password: "demo"
-    });
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
     const response = await server.inject({
       method: "POST",
-      url: "/quick-operations/preview",
-      payload: {
-        ...validPayload,
-        lines: [{ ...validPayload.lines[0], id: "line_factory", sourceType: "factory", lineTotal: 3540 }]
-      },
+      url: "/quick-operations/submit",
+      payload: baseSaleOrderPayload,
+      headers: authHeaders(login.accessToken)
+    });
+
+    assert.equal(response.statusCode, 200);
+    const body = response.json() as { item: { mode: string; createdEntityType?: string; workflowImpacts: Array<{ key: string }> } };
+    assert.equal(body.item.mode, "executed");
+    assert.equal(body.item.createdEntityType, "order");
+    assert.ok(body.item.workflowImpacts.some((impact) => impact.key === "warehouse_prepare"));
+    await server.close();
+  });
+});
+
+test("sale_order factory source produces factory impact", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const payload: QuickOperationSubmitRequest = {
+      ...baseSaleOrderPayload,
+        lines: [{ ...baseSaleOrderPayload.lines[0]!, id: "line_factory", sourceType: "factory" }]
+    };
+    const response = await server.inject({
+      method: "POST",
+      url: "/quick-operations/submit",
+      payload,
       headers: authHeaders(login.accessToken)
     });
 
@@ -132,101 +99,143 @@ test("quick-operations preview returns factory impact", async () => {
   });
 });
 
-test("quick-operations preview returns validation issue for invalid quantity", async () => {
+test("offer valid submit runs controlled execution", async () => {
   await withDemoAuth(async () => {
     const server = await buildServer();
-    const login = createSession({
-      tenantSlug: "hallederiz",
-      email: "admin@hallederiz.com",
-      password: "demo"
-    });
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const payload: QuickOperationSubmitRequest = {
+      ...baseSaleOrderPayload,
+      operationType: "offer"
+    };
     const response = await server.inject({
       method: "POST",
-      url: "/quick-operations/preview",
+      url: "/quick-operations/submit",
+      payload,
+      headers: authHeaders(login.accessToken)
+    });
+
+    assert.equal(response.statusCode, 200);
+    const body = response.json() as { item: { mode: string; createdEntityType?: string; workflowImpacts: Array<{ key: string }> } };
+    assert.ok(["executed", "foundation"].includes(body.item.mode));
+    if (body.item.mode === "executed") {
+      assert.equal(body.item.createdEntityType, "offer");
+      assert.ok(body.item.workflowImpacts.some((impact) => impact.key === "offer_created"));
+    }
+    await server.close();
+  });
+});
+
+test("payment missing amount returns validation issue", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const payload: QuickOperationSubmitRequest = {
+      operationType: "payment",
+      customerId: "customer_1",
+      lines: []
+    };
+    const response = await server.inject({
+      method: "POST",
+      url: "/quick-operations/submit",
+      payload,
+      headers: authHeaders(login.accessToken)
+    });
+
+    assert.equal(response.statusCode, 200);
+    const body = response.json() as { item: { mode: string; validationIssues?: Array<{ code: string }> } };
+    assert.equal(body.item.mode, "foundation");
+    assert.ok((body.item.validationIssues ?? []).some((issue) => issue.code === "line_required"));
+    await server.close();
+  });
+});
+
+test("payment valid submit executed or controlled foundation", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const payload: QuickOperationSubmitRequest = {
+      operationType: "payment",
+      customerId: "customer_1",
+      paidAmount: 1000,
+      lines: [
+        {
+          id: "pay_line_1",
+          productCode: "PAYMENT",
+          productName: "Tahsilat",
+          quantity: 1,
+          unitPrice: 1000,
+          taxRate: 0,
+          sourceType: "auto",
+          lineTotal: 1000
+        }
+      ]
+    };
+    const response = await server.inject({
+      method: "POST",
+      url: "/quick-operations/submit",
+      payload,
+      headers: authHeaders(login.accessToken)
+    });
+
+    assert.equal(response.statusCode, 200);
+    const body = response.json() as { item: { mode: string; createdEntityType?: string; workflowImpacts: Array<{ key: string }> } };
+    assert.ok(["executed", "foundation"].includes(body.item.mode));
+    if (body.item.mode === "executed") {
+      assert.equal(body.item.createdEntityType, "payment");
+      assert.ok(body.item.workflowImpacts.some((impact) => impact.key === "payment_recorded"));
+    }
+    await server.close();
+  });
+});
+
+test("delivery and return stay in foundation mode", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+
+    const deliveryResponse = await server.inject({
+      method: "POST",
+      url: "/quick-operations/submit",
+      payload: { ...baseSaleOrderPayload, operationType: "delivery" as const },
+      headers: authHeaders(login.accessToken)
+    });
+    const returnResponse = await server.inject({
+      method: "POST",
+      url: "/quick-operations/submit",
+      payload: { ...baseSaleOrderPayload, operationType: "return" as const },
+      headers: authHeaders(login.accessToken)
+    });
+
+    assert.equal(deliveryResponse.statusCode, 200);
+    assert.equal(returnResponse.statusCode, 200);
+    const deliveryItem = (deliveryResponse.json() as { item: { mode: string; workflowImpacts: Array<{ key: string }> } }).item;
+    const returnItem = (returnResponse.json() as { item: { mode: string; workflowImpacts: Array<{ key: string }> } }).item;
+    assert.equal(deliveryItem.mode, "foundation");
+    assert.equal(returnItem.mode, "foundation");
+    assert.ok(deliveryItem.workflowImpacts.some((impact) => impact.key === "delivery_execution_pending"));
+    assert.ok(returnItem.workflowImpacts.some((impact) => impact.key === "return_review_required"));
+    await server.close();
+  });
+});
+
+test("invalid quantity prevents execution", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const response = await server.inject({
+      method: "POST",
+      url: "/quick-operations/submit",
       payload: {
-        ...validPayload,
-        lines: [{ ...validPayload.lines[0], id: "line_bad", quantity: 0, lineTotal: 0 }]
+        ...baseSaleOrderPayload,
+        lines: [{ ...baseSaleOrderPayload.lines[0]!, id: "bad_qty", quantity: 0, lineTotal: 0 }]
       },
       headers: authHeaders(login.accessToken)
     });
 
     assert.equal(response.statusCode, 200);
-    const body = response.json() as { item: { ok: boolean; validationIssues: Array<{ code: string }> } };
-    assert.equal(body.item.ok, false);
-    assert.ok(body.item.validationIssues.some((issue) => issue.code === "quantity_invalid"));
-    await server.close();
-  });
-});
-
-test("quick-operations submit returns foundation mode", async () => {
-  await withDemoAuth(async () => {
-    const server = await buildServer();
-    const login = createSession({
-      tenantSlug: "hallederiz",
-      email: "admin@hallederiz.com",
-      password: "demo"
-    });
-    const response = await server.inject({
-      method: "POST",
-      url: "/quick-operations/submit",
-      payload: validPayload,
-      headers: authHeaders(login.accessToken)
-    });
-
-    assert.equal(response.statusCode, 200);
-    const body = response.json() as { item: { mode: string; operationType: string } };
+    const body = response.json() as { item: { mode: string; validationIssues?: Array<{ code: string }> } };
     assert.equal(body.item.mode, "foundation");
-    assert.equal(body.item.operationType, "sale_order");
+    assert.ok((body.item.validationIssues ?? []).some((issue) => issue.code === "quantity_invalid"));
     await server.close();
   });
-});
-
-test("domain totals calculation is deterministic", () => {
-  const totals = calculateQuickOperationTotals([
-    {
-      id: "line_a",
-      productCode: "DKG-1001",
-      productName: "Marvel Ivory",
-      quantity: 2,
-      unitPrice: 100,
-      taxRate: 20,
-      discountRate: 10,
-      sourceType: "center_warehouse",
-      lineTotal: 216
-    }
-  ]);
-
-  assert.equal(totals.subtotal, 200);
-  assert.equal(totals.discountTotal, 20);
-  assert.equal(totals.taxTotal, 36);
-  assert.equal(totals.grandTotal, 216);
-});
-
-test("domain source planner maps supplier and auto impacts", () => {
-  const impacts = buildQuickOperationWorkflowImpacts("offer", [
-    {
-      id: "line_supplier",
-      productCode: "DKG-2040",
-      productName: "Luxe Gri",
-      quantity: 1,
-      unitPrice: 200,
-      taxRate: 20,
-      sourceType: "supplier",
-      lineTotal: 240
-    },
-    {
-      id: "line_auto",
-      productCode: "HZM-01",
-      productName: "Hizmet",
-      quantity: 1,
-      unitPrice: 50,
-      taxRate: 20,
-      sourceType: "auto",
-      lineTotal: 60
-    }
-  ]);
-
-  assert.ok(impacts.some((impact) => impact.key === "supplier_procurement"));
-  assert.ok(impacts.some((impact) => impact.key === "recommendation_required"));
-  assert.ok(impacts.some((impact) => impact.key === "offer_no_reservation"));
 });

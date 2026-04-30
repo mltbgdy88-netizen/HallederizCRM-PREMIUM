@@ -23,7 +23,7 @@ export async function registerQuickOperationsRoutes(server: FastifyInstance) {
       [assertAuthenticated, (context) => assertAnyPermission(context, ["orders.write", "offers.write", "payments.write"])],
       async (context) => {
         const service = new QuickOperationsService(context);
-        return { item: service.submitQuickOperation(request.body) };
+        return { item: await service.submitQuickOperation(request.body) };
       }
     )
   );

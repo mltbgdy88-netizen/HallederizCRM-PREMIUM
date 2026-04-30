@@ -265,14 +265,11 @@ export function useQuickOperationState() {
           tone: impact.severity === "warning" ? "warning" : impact.severity === "success" ? "success" : "info"
         }))
       );
-      const validationErrorCount = (result.validationIssues ?? []).filter((issue) => issue.level === "error").length;
-      const suffix =
-        result.mode === "foundation"
-          ? "Backend write bir sonraki adimda acilacaktir; bu cevap foundation mode'dur."
-          : "Islem backend tarafinda calistirildi.";
-      setNotice(
-        `Islem sonucu: ${result.operationType} · mode=${result.mode} · impact=${result.workflowImpacts.length} · validation=${validationErrorCount}. ${suffix}`
-      );
+      if (result.mode === "executed") {
+        setNotice(`Islem olusturuldu: ${result.createdEntityNo ?? "Numara uretilmedi"}`);
+      } else {
+        setNotice("Islem onizleme/foundation olarak hazirlandi; gercek execution sonraki asamada.");
+      }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Bilinmeyen hata";
       setNotice(`Islem olusturulamadi: ${message}`);

@@ -50,9 +50,15 @@ export interface QuickOperationWorkflowImpact {
     | "multi_source"
     | "recommendation_required"
     | "offer_no_reservation"
+    | "offer_created"
+    | "document_preview_available"
+    | "whatsapp_draft_available"
     | "sale_order_source_plan"
+    | "payment_recorded"
     | "payment_allocation_required"
-    | "return_approval_may_be_required";
+    | "return_approval_may_be_required"
+    | "delivery_execution_pending"
+    | "return_review_required";
   title: string;
   description: string;
   severity: "info" | "warning" | "success";
@@ -71,6 +77,7 @@ export interface QuickOperationSubmitRequest {
   customerId: string;
   customerName?: string;
   note?: string;
+  paidAmount?: number;
   lines: QuickOperationLine[];
 }
 
