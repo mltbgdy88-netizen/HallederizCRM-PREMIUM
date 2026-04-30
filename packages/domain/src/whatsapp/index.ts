@@ -1,6 +1,7 @@
 import type { Customer, WhatsAppActionRequest, WhatsAppContact, WhatsAppIntent, WhatsAppRuleResolution, WhatsAppTemplate } from "@hallederiz/types";
 
 export * from "./rule-resolver";
+export * from "./command-parser";
 export * from "./workflow-store";
 
 export function resolveWhatsAppIntent(text: string): WhatsAppIntent {

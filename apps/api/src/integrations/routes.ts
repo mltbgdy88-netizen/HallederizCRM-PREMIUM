@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import { Readable } from "node:stream";
-import { hashInboundMessageContent } from "@hallederiz/domain";
+import { hashInboundMessageContent, parseWhatsAppApprovalCommand } from "@hallederiz/domain";
 import type { ErpConnection, ErpMapping, FactoryOrder, WhatsAppActionRequest, WhatsAppMessage } from "@hallederiz/types";
 import { IntegrationsService } from "../modules/integrations/service";
 import { whatsAppWorkflowStoreService } from "../modules/whatsapp-workflow/store";
@@ -130,6 +130,46 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
       }
 
       try {
+        const parsedCommand = parseWhatsAppApprovalCommand(messageBody);
+        if (parsedCommand.command && parsedCommand.referenceCode && parsedCommand.rawToken) {
+          const commandResult = await whatsAppWorkflowStoreService.handleApprovalCommand(tenantId, {
+            command: parsedCommand.command,
+            fromPhone: from,
+            rawToken: parsedCommand.rawToken,
+            referenceCode: parsedCommand.referenceCode
+          });
+          await whatsAppWorkflowStoreService.markProcessed(tenantId, workflowPayload);
+          return {
+            ok: true,
+            commandResult,
+            duplicate: false,
+            messageId,
+            contentHash,
+            outbound: commandResult.outboundMessage ? [commandResult.outboundMessage] : [],
+            workflowReserved: true
+          };
+        }
+
+        if (parsedCommand.command && parsedCommand.parseError && parsedCommand.parseError !== "not_command") {
+          const commandResult = {
+            ok: false,
+            command: parsedCommand.command,
+            referenceCode: parsedCommand.referenceCode,
+            reason: parsedCommand.parseError,
+            outboundMessage: "Komut dogrulanamadi. Lutfen ONAY/RED/INCELE, referans kodu ve guvenlik kodunu birlikte gonderin."
+          };
+          await whatsAppWorkflowStoreService.markProcessed(tenantId, workflowPayload);
+          return {
+            ok: true,
+            commandResult,
+            duplicate: false,
+            messageId,
+            contentHash,
+            outbound: [commandResult.outboundMessage],
+            workflowReserved: true
+          };
+        }
+
         if (messageBody) {
           await service.receiveWhatsAppInbound({ body: messageBody, type: "text" });
         }

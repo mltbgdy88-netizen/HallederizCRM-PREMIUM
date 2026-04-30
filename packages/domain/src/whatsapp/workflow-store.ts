@@ -34,6 +34,26 @@ export type WhatsAppInboundMessageIdentity = {
   at: string;
 };
 
+export type WhatsAppTicketCommand = "approve" | "reject" | "review";
+
+export type WhatsAppTicketCommandApplyResult = {
+  store: TenantWhatsAppWorkflowStore;
+  ok: boolean;
+  command: WhatsAppTicketCommand;
+  referenceCode: string;
+  ticketId?: string;
+  status?: WhatsAppWorkflowTicketStatus;
+  reason?: "ticket_not_found" | "ticket_expired" | "command_not_allowed" | "token_invalid" | "approver_not_allowed" | "ticket_already_resolved";
+  auditId: string;
+};
+
+export type WhatsAppTicketCommandApproverContext = {
+  role?: string;
+  roles?: string[];
+  allowedPhones?: string[];
+  approverPhones?: string[];
+};
+
 export function createEmptyWhatsAppWorkflowStore(): TenantWhatsAppWorkflowStore {
   return {
     processedMessages: [],
@@ -129,6 +149,32 @@ export function normalizePhone(phone: string | undefined | null): string {
 
 function normalizeCommand(command: string): string {
   return command.trim().toLocaleLowerCase("tr-TR").replace(/\s+/g, "_");
+}
+
+function canonicalCommand(command: string): WhatsAppTicketCommand | string {
+  const normalized = normalizeCommand(command).replace(/İ/g, "i").replace(/ı/g, "i");
+  if (["onay", "onayla", "approve"].includes(normalized)) return "approve";
+  if (["red", "reddet", "reject"].includes(normalized)) return "reject";
+  if (["incele", "review"].includes(normalized)) return "review";
+  return normalized;
+}
+
+function allowedCommandIncludes(ticket: WhatsAppWorkflowPendingTicket, command: string): boolean {
+  const canonical = canonicalCommand(command);
+  return ticket.allowedCommands.some((allowedCommand) => canonicalCommand(allowedCommand) === canonical);
+}
+
+function stringArrayFromPayload(payload: Record<string, unknown> | undefined, key: string): string[] {
+  const value = payload?.[key];
+  return Array.isArray(value) ? value.filter((item): item is string => typeof item === "string") : [];
+}
+
+function buildCommandAuditId(referenceCode: string, command: string, fromPhone: string, at: string): string {
+  return `wa_cmd_${referenceCode}_${hashToken(`${referenceCode}:${command}:${normalizePhone(fromPhone)}:${at}`).slice(0, 12)}`;
+}
+
+function normalizeReferenceCode(referenceCode: string): string {
+  return referenceCode.trim().toLocaleLowerCase("tr-TR");
 }
 
 const SHA256_K = [
@@ -433,10 +479,108 @@ export function validateTicketCommand(
 ): WhatsAppWorkflowCommandValidationResult {
   if (ticket.status !== "pending") return { ok: false, reason: "ticket_already_resolved" };
   if (isTicketExpired(ticket, now)) return { ok: false, reason: "ticket_expired" };
-  if (!ticket.allowedCommands.includes(normalizeCommand(commandName))) return { ok: false, reason: "command_not_allowed" };
+  if (!allowedCommandIncludes(ticket, commandName)) return { ok: false, reason: "command_not_allowed" };
   if (ticket.tokenHash !== hashToken(rawToken)) return { ok: false, reason: "token_invalid" };
   if (approverContext && !canApproverHandleTicket(ticket, { ...approverContext, phone: fromPhone || approverContext.phone })) {
     return { ok: false, reason: "approver_not_allowed" };
   }
   return { ok: true };
+}
+
+export function applyWhatsAppTicketCommand(input: {
+  store: TenantWhatsAppWorkflowStore;
+  referenceCode: string;
+  command: WhatsAppTicketCommand;
+  rawToken: string;
+  fromPhone: string;
+  now?: string;
+  approverContext?: WhatsAppTicketCommandApproverContext;
+}): WhatsAppTicketCommandApplyResult {
+  const now = input.now ?? new Date().toISOString();
+  const fromPhone = normalizePhone(input.fromPhone);
+  const normalizedStore = normalizeTenantWhatsAppWorkflowStore(input.store);
+  const ticket = normalizedStore.tickets.find((item) => normalizeReferenceCode(item.referenceCode) === normalizeReferenceCode(input.referenceCode));
+  const auditId = buildCommandAuditId(input.referenceCode, input.command, fromPhone, now);
+
+  if (!ticket) {
+    return {
+      auditId,
+      command: input.command,
+      ok: false,
+      reason: "ticket_not_found",
+      referenceCode: input.referenceCode,
+      store: addCommandAudit(normalizedStore, {
+        at: now,
+        command: input.command,
+        fromPhone,
+        id: auditId,
+        reason: "ticket_not_found",
+        referenceCode: input.referenceCode,
+        result: "rejected"
+      })
+    };
+  }
+
+  const payloadApproverPhones = [...stringArrayFromPayload(ticket.payload, "approverPhones"), ...stringArrayFromPayload(ticket.payload, "allowedApproverPhones")];
+  const approverPhones = [...(input.approverContext?.allowedPhones ?? []), ...(input.approverContext?.approverPhones ?? []), ...payloadApproverPhones];
+  const roles = [...(input.approverContext?.roles ?? []), ...(input.approverContext?.role ? [input.approverContext.role] : [])];
+  const validation = validateTicketCommand(
+    ticket,
+    input.command,
+    input.rawToken,
+    fromPhone,
+    approverPhones.length > 0 || roles.length > 0 ? { approverPhones, phone: fromPhone, roles } : undefined,
+    now
+  );
+
+  if (!validation.ok) {
+    const nextStore =
+      validation.reason === "ticket_expired" && ticket.status === "pending"
+        ? updateTicket(normalizedStore, ticket.id, { status: "expired" })
+        : normalizedStore;
+    return {
+      auditId,
+      command: input.command,
+      ok: false,
+      reason: validation.reason,
+      referenceCode: input.referenceCode,
+      status: validation.reason === "ticket_expired" ? "expired" : ticket.status,
+      store: addCommandAudit(nextStore, {
+        at: now,
+        command: input.command,
+        fromPhone,
+        id: auditId,
+        reason: validation.reason,
+        referenceCode: input.referenceCode,
+        result: validation.reason === "ticket_already_resolved" ? "duplicate" : "rejected"
+      }),
+      ticketId: ticket.id
+    };
+  }
+
+  const nextStatus: WhatsAppWorkflowTicketStatus = input.command === "approve" ? "applied" : input.command === "reject" ? "rejected" : "pending";
+  const updatedStore = updateTicket(normalizedStore, ticket.id, {
+    resolvedCommand: input.command,
+    status: nextStatus,
+    usedAt: now,
+    usedByPhone: fromPhone
+  });
+
+  return {
+    auditId,
+    command: input.command,
+    ok: true,
+    referenceCode: input.referenceCode,
+    status: nextStatus,
+    store: addCommandAudit(updatedStore, {
+      at: now,
+      command: input.command,
+      fromPhone,
+      id: auditId,
+      reason: input.command === "review" ? "review_requested" : undefined,
+      referenceCode: input.referenceCode,
+      result: "accepted"
+    }),
+    ticketId: ticket.id
+  };
 }
