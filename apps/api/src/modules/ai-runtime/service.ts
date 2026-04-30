@@ -76,6 +76,31 @@ async function callOpenAiChat(params: { model: string; apiKey: string; system: s
   return payload.choices?.[0]?.message?.content ?? "";
 }
 
+function normalizeBaseUrl(url: string) {
+  return url.replace(/\/+$/, "");
+}
+
+function parseLocalAiNdjson(text: string) {
+  let doneText = "";
+  let tokenText = "";
+  for (const line of text.split(/\r?\n/)) {
+    const trimmed = line.trim();
+    if (!trimmed) continue;
+    try {
+      const event = JSON.parse(trimmed) as { type?: string; text?: string };
+      if (event.type === "done" && typeof event.text === "string") {
+        doneText = event.text;
+      }
+      if (event.type === "token" && typeof event.text === "string") {
+        tokenText += event.text;
+      }
+    } catch {
+      tokenText += trimmed;
+    }
+  }
+  return (doneText || tokenText).trim();
+}
+
 function safeJsonParse<T>(text: string): T | null {
   try {
     return JSON.parse(text) as T;
@@ -97,15 +122,15 @@ export class AiRuntimeService {
   constructor(private readonly context: RequestContext) {}
 
   private get llmProvider() {
-    return (process.env.AI_LLM_PROVIDER ?? "local").toLowerCase();
+    return (process.env.AI_PROVIDER ?? process.env.AI_LLM_PROVIDER ?? "local").toLowerCase();
   }
 
   private get sttProvider() {
-    return (process.env.AI_STT_PROVIDER ?? "local").toLowerCase();
+    return (process.env.AI_PROVIDER ?? process.env.AI_STT_PROVIDER ?? "local").toLowerCase();
   }
 
   private get ttsProvider() {
-    return (process.env.AI_TTS_PROVIDER ?? "local").toLowerCase();
+    return (process.env.AI_PROVIDER ?? process.env.AI_TTS_PROVIDER ?? "local").toLowerCase();
   }
 
   private get isExternalLlmEnabled() {
@@ -144,12 +169,94 @@ export class AiRuntimeService {
     return process.env.AI_TTS_MODEL ?? process.env.OPENAI_TTS_MODEL ?? "gpt-4o-mini-tts";
   }
 
+  private get localAiServiceUrl() {
+    return normalizeBaseUrl(process.env.LOCAL_AI_SERVICE_URL ?? "http://127.0.0.1:8008");
+  }
+
+  private get localAiTimeoutMs() {
+    const parsed = Number(process.env.LOCAL_AI_TIMEOUT_MS ?? 30000);
+    return Number.isFinite(parsed) && parsed > 0 ? parsed : 30000;
+  }
+
+  private async callLocalAiText(prompt: string) {
+    const response = await fetchWithTimeout(
+      `${this.localAiServiceUrl}/api/v1/chat/text-stream`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          message: prompt,
+          session_id: `crm_${this.context.tenantId}_${this.context.userId}`,
+          temperature: 0.2
+        })
+      },
+      this.localAiTimeoutMs
+    );
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(`Local AI chat failed: ${response.status} ${message}`);
+    }
+    return parseLocalAiNdjson(await response.text());
+  }
+
+  async checkLocalProviderHealth() {
+    try {
+      const response = await fetchWithTimeout(
+        `${this.localAiServiceUrl}/health`,
+        {
+          method: "GET",
+          headers: { accept: "application/json" }
+        },
+        this.localAiTimeoutMs
+      );
+      if (!response.ok) {
+        return {
+          status: "degraded" as const,
+          configured: true,
+          reason: `Lokal AI servisi ${response.status} dondu.`,
+          details: { serviceUrl: this.localAiServiceUrl }
+        };
+      }
+      const payload = (await response.json()) as Record<string, unknown>;
+      return {
+        status: "healthy" as const,
+        configured: true,
+        reason: "Lokal AI servisi erisilebilir.",
+        details: { serviceUrl: this.localAiServiceUrl, ...payload }
+      };
+    } catch (error) {
+      return {
+        status: "degraded" as const,
+        configured: true,
+        reason: error instanceof Error ? error.message : "Lokal AI servisine erisilemedi.",
+        details: { serviceUrl: this.localAiServiceUrl }
+      };
+    }
+  }
+
   async chat(prompt: string) {
     if (this.isLocalLlmEnabled) {
+      try {
+        const text = await this.callLocalAiText(prompt);
+        return {
+          message: text || `Lokal AI yaniti bos dondu. Komut: ${prompt}`,
+          provider: "local",
+          mode: "live"
+        };
+      } catch (error) {
+        return {
+          message: `Lokal AI servisine ulasilamadi. Guvenli fallback: ${prompt}`,
+          provider: "local",
+          mode: "degraded",
+          reason: error instanceof Error ? error.message : "local_ai_unavailable"
+        };
+      }
+    }
+    if (this.llmProvider === "mock") {
       return {
-        message: `Lokal AI asistani: ${prompt}`,
-        provider: "local",
-        mode: "live"
+        message: `AI (guvenli fallback): ${prompt}`,
+        provider: "mock",
+        mode: "fallback"
       };
     }
     if (!this.isExternalLlmEnabled) {

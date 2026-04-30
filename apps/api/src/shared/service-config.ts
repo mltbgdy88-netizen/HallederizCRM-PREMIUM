@@ -31,12 +31,34 @@ function nowIso() {
   return new Date().toISOString();
 }
 
+function resolveAiProvider(channelProvider: string | undefined) {
+  return (process.env.AI_PROVIDER ?? channelProvider ?? "local").toLowerCase();
+}
+
+function validateUrl(value: string | undefined, fallback: string) {
+  const candidate = (value ?? fallback).trim();
+  try {
+    const url = new URL(candidate);
+    return {
+      configured: url.protocol === "http:" || url.protocol === "https:",
+      value: candidate
+    };
+  } catch {
+    return {
+      configured: false,
+      value: candidate
+    };
+  }
+}
+
 export function validateAiConfig() {
-  const llmProvider = process.env.AI_LLM_PROVIDER ?? "local";
-  const sttProvider = process.env.AI_STT_PROVIDER ?? "local";
-  const ttsProvider = process.env.AI_TTS_PROVIDER ?? "local";
+  const primaryProvider = (process.env.AI_PROVIDER ?? "local").toLowerCase();
+  const llmProvider = resolveAiProvider(process.env.AI_LLM_PROVIDER);
+  const sttProvider = resolveAiProvider(process.env.AI_STT_PROVIDER);
+  const ttsProvider = resolveAiProvider(process.env.AI_TTS_PROVIDER);
   const externalRequested = [llmProvider, sttProvider, ttsProvider].includes("openai");
   const localRequested = [llmProvider, sttProvider, ttsProvider].includes("local");
+  const localService = validateUrl(process.env.LOCAL_AI_SERVICE_URL, "http://127.0.0.1:8008");
   const required = externalRequested
     ? validateRequired([
         "OPENAI_API_KEY",
@@ -50,13 +72,16 @@ export function validateAiConfig() {
     : { configured: true, missing: [] };
 
   const externalConfigured = required.configured;
+  const localConfigured = !localRequested || localService.configured;
   const activeMode: "local" | "external" | "fallback" = localRequested
     ? "local"
     : externalRequested && externalConfigured
       ? "external"
       : "fallback";
   const status: ServiceHealthStatus = activeMode === "local"
-    ? externalRequested && !externalConfigured
+    ? !localConfigured
+      ? "misconfigured"
+      : externalRequested && !externalConfigured
       ? "degraded"
       : "healthy"
     : activeMode === "external"
@@ -69,10 +94,12 @@ export function validateAiConfig() {
     service: "ai" as const,
     status,
     mode: activeMode === "fallback" ? "fallback" : "live",
-    configured: activeMode !== "fallback",
+    configured: activeMode !== "fallback" && localConfigured,
     reason:
       activeMode === "local"
-        ? externalRequested && !externalConfigured
+        ? !localConfigured
+          ? "Lokal AI servis URL ayari gecersiz."
+          : externalRequested && !externalConfigured
           ? "Lokal AI aktif. Harici provider eksik ayar nedeniyle opsiyonel modda bekliyor."
           : "Lokal AI aktif ve birincil modda hazir."
         : activeMode === "external"
@@ -82,11 +109,14 @@ export function validateAiConfig() {
             : "AI fallback modunda calisiyor.",
     lastCheckedAt: nowIso(),
     details: {
+      primaryProvider,
       providers: { llmProvider, sttProvider, ttsProvider },
-      localStatus: localRequested ? "ready" : "missing",
+      localServiceUrl: localService.value,
+      localTimeoutMs: Number(process.env.LOCAL_AI_TIMEOUT_MS ?? 30000),
+      localStatus: localRequested ? (localConfigured ? "ready" : "misconfigured") : "missing",
       externalStatus: externalRequested ? (externalConfigured ? "ready" : "missing") : "optional",
       activeProviderMode: activeMode,
-      missing: required.missing
+      missing: [...required.missing, ...(!localConfigured ? ["LOCAL_AI_SERVICE_URL"] : [])]
     }
   } satisfies ServiceHealthResult;
 }
