@@ -289,9 +289,19 @@ export function useQuickOperationState() {
       );
       setSideActions(result.sideActions ?? null);
       if (result.mode === "executed") {
-        setNotice(`Islem olusturuldu: ${result.createdEntityNo ?? "Numara uretilmedi"}`);
+        if (result.operationType === "delivery") {
+          setNotice(`Teslim kaydi olusturuldu: ${result.createdEntityNo ?? "Numara uretilmedi"}`);
+        } else if (result.operationType === "return") {
+          setNotice(`Iade talebi olusturuldu / inceleme akisina alindi: ${result.createdEntityNo ?? "Numara uretilmedi"}`);
+        } else {
+          setNotice(`Islem olusturuldu: ${result.createdEntityNo ?? "Numara uretilmedi"}`);
+        }
       } else {
-        setNotice("Islem onizleme/foundation olarak hazirlandi; gercek execution sonraki asamada.");
+        if (result.operationType === "return") {
+          setNotice(`Iade talebi olusturuldu / inceleme akisina alindi: ${result.createdEntityNo ?? "Numara uretilmedi"}`);
+        } else {
+          setNotice("Bu islem inceleme/foundation modunda hazirlandi.");
+        }
       }
     } catch (error) {
       const message = error instanceof Error ? error.message : "Bilinmeyen hata";

@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   QuickOperationAiInsight,
   QuickOperationDocumentPreview,
   QuickOperationSubmitRequest,
@@ -14,11 +14,11 @@ function resolveDocumentTitle(operationType: QuickOperationSubmitRequest["operat
     case "sale_order":
       return "Siparis Onizleme";
     case "delivery":
-      return "Teslim Onizleme";
+      return "Teslim Fisi Onizleme";
     case "payment":
       return "Tahsilat Onizleme";
     case "return":
-      return "Iade Onizleme";
+      return "Iade Talebi Onizleme";
     default:
       return "Islem Onizleme";
   }
@@ -82,14 +82,14 @@ export function buildQuickOperationWhatsappDraft(
       };
     case "delivery":
       return {
-        message: `${customerName} icin teslim hazirlik taslagi olusturuldu. Gonderim sonraki asamada etkinlestirilecektir.`,
+        message: `${customerName} icin teslim bilgilendirme taslagi hazirlandi. Teslim sureci kontrol adimlariyla tamamlanacaktir.`,
         intent: "delivery",
         requiresApproval: true,
         sendEnabled: false
       };
     case "return":
       return {
-        message: `${customerName} icin iade inceleme taslagi olusturuldu. Onay sonrasi surec devam edecektir.`,
+        message: `${customerName} icin iade talebi alindi. Inceleme ve onay sonrasi geri bildirim paylasilacaktir.`,
         intent: "return",
         requiresApproval: true,
         sendEnabled: false
@@ -116,8 +116,13 @@ export function buildQuickOperationAiInsight(draft: QuickOperationSubmitRequest)
   if (draft.operationType === "payment") {
     warnings.push("Tahsilat kaydi sonrasi allocation adimi tamamlanmadan bakiye kapatma tamamlanmis sayilmaz.");
   }
+  if (draft.operationType === "delivery") {
+    warnings.push("Teslim oncesi odeme durumu ve depo hazirlik kontrolu tamamlanmalidir.");
+    recommendations.push("Teslim satirlari siparis satirlari ile miktar uyumunda olmali ve bloke kontrolu yapilmalidir.");
+  }
   if (draft.operationType === "return") {
-    warnings.push("Iade taleplerinde hasar/eksik urun kanitlari ve onay adimi kontrol edilmelidir.");
+    warnings.push("Iade taleplerinde approval ve stok/finans etki dogrulama adimlari tamamlanmadan kesinlestirme yapilmaz.");
+    recommendations.push("Iade satirlari icin teslim/siparis baglantisi ve iade sebebi kanitlari kontrol edilmelidir.");
   }
   if (draft.lines.some((line) => line.sourceType === "auto" || line.sourceType === "split")) {
     warnings.push("Auto/Split kaynakli satirlar operasyon ekibi tarafindan manuel dogrulanmalidir.");
@@ -131,7 +136,7 @@ export function buildQuickOperationAiInsight(draft: QuickOperationSubmitRequest)
       : draft.operationType === "payment"
       ? "Tahsilat kaydi finans akisina yazilir, allocation kontrolu gerekir."
       : draft.operationType === "delivery"
-      ? "Teslim islemi bu turda foundation modunda onizlenir."
+      ? "Teslim islemi depo hazirlik ve odeme durumu kontrolleriyle ilerler."
       : "Iade islemi inceleme ve onay adimlariyla ilerler.";
 
   if (recommendations.length === 0) {

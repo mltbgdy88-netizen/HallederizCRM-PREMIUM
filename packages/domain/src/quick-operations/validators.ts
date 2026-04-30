@@ -17,9 +17,14 @@ export function validateQuickOperationRequest(request: QuickOperationSubmitReque
     issues.push(createIssue("customer_required", "customerId", "Cari secimi zorunludur."));
   }
 
-  if (!Array.isArray(request.lines) || request.lines.length === 0) {
-    issues.push(createIssue("line_required", "lines", "En az bir satir girilmelidir."));
-    return issues;
+  const hasLines = Array.isArray(request.lines) && request.lines.length > 0;
+  if (!hasLines) {
+    if (request.operationType === "delivery" && request.orderId) {
+      // Delivery can proceed with reference order even when explicit lines are omitted.
+    } else {
+      issues.push(createIssue("line_required", "lines", "En az bir satir girilmelidir."));
+      return issues;
+    }
   }
 
   for (const line of request.lines) {
@@ -41,6 +46,16 @@ export function validateQuickOperationRequest(request: QuickOperationSubmitReque
 
     if (request.operationType === "sale_order" && !line.sourceType) {
       issues.push(createIssue("source_type_required", "sourceType", "Satis/siparis satirlarinda kaynak secimi zorunludur.", "error", line.id));
+    }
+  }
+
+  if (request.operationType === "delivery" && !request.orderId && !hasLines) {
+    issues.push(createIssue("delivery_reference_or_lines_required", "orderId", "Teslim islemi icin siparis referansi veya satir bilgisi gereklidir."));
+  }
+
+  if (request.operationType === "return") {
+    if (!request.note?.trim() && !request.reason?.trim()) {
+      issues.push(createIssue("return_reason_required", "note", "Iade islemi icin aciklama veya iade sebebi girilmelidir."));
     }
   }
 

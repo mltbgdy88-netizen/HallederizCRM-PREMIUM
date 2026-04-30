@@ -7,6 +7,8 @@ import {
   validateQuickOperationRequest
 } from "@hallederiz/domain";
 import type {
+  Delivery,
+  DeliveryLine,
   Offer,
   OfferLine,
   PaymentReceipt,
@@ -16,6 +18,8 @@ import type {
   QuickOperationSubmitRequest,
   QuickOperationSubmitResponse,
   QuickOperationWorkflowImpact,
+  Return,
+  ReturnLine,
   SaleOrder,
   SaleOrderLine
 } from "@hallederiz/types";
@@ -122,23 +126,9 @@ export class QuickOperationsService {
       case "payment":
         return this.executePayment(request, base);
       case "delivery":
-        return this.withSideActions(request, {
-          ...base,
-          workflowImpacts: [
-            ...preview.workflowImpacts,
-            impact("impact_delivery_pending", "delivery_execution_pending", "Teslim execution sonraki turda", "Teslim olusturma bu turda foundation olarak birakildi.", "warning")
-          ],
-          mode: "foundation"
-        });
+        return this.executeDelivery(request, base);
       case "return":
-        return this.withSideActions(request, {
-          ...base,
-          workflowImpacts: [
-            ...preview.workflowImpacts,
-            impact("impact_return_review", "return_review_required", "Iade inceleme bekliyor", "Iade execution sonraki turda tam baglanacaktir.", "warning")
-          ],
-          mode: "foundation"
-        });
+        return this.executeReturn(request, base);
       default:
         return this.withSideActions(request, base);
     }
@@ -270,6 +260,149 @@ export class QuickOperationsService {
         impact("impact_payment_allocation", "payment_allocation_required", "Allocation adimi gerekli", "Tahsilat kaydi olustu, allocation adimi sonraki turda derinlestirilecektir.", "warning")
       ]
     });
+  }
+
+  private async executeDelivery(request: QuickOperationSubmitRequest, base: QuickOperationSubmitResponse): Promise<QuickOperationSubmitResponse> {
+    if (!request.orderId) {
+      return this.withSideActions(request, {
+        ...base,
+        mode: "foundation",
+        validationIssues: [
+          ...(base.validationIssues ?? []),
+          {
+            code: "delivery_reference_required",
+            field: "orderId",
+            message: "Teslim kaydi icin siparis referansi gereklidir.",
+            level: "error"
+          }
+        ],
+        workflowImpacts: [
+          ...base.workflowImpacts,
+          impact("impact_delivery_pending", "delivery_execution_pending", "Teslim inceleme bekliyor", "Siparis referansi olmadan teslim execution baslatilamaz.", "warning")
+        ]
+      });
+    }
+
+    try {
+      const deliveryPayload: Partial<Delivery> = {
+        orderId: request.orderId as Delivery["orderId"],
+        customerId: request.customerId as Delivery["customerId"],
+        status: "pending",
+        note: request.note,
+        plannedAt: nowIso(),
+        documentStatus: "missing",
+        lines: request.lines.map(
+          (line, index) =>
+            ({
+              id: `delivery_line_qo_${Date.now()}_${index}`,
+              deliveryId: "delivery_new" as DeliveryLine["deliveryId"],
+              orderLineId: `order_line_qo_${line.id}`,
+              productId: (line.productId ?? line.productCode) as DeliveryLine["productId"],
+              productCode: line.productCode,
+              productName: line.productName,
+              orderedQuantity: line.quantity,
+              preparedQuantity: line.quantity,
+              deliveredQuantity: line.quantity
+            }) satisfies DeliveryLine
+        )
+      };
+
+      const created = await this.commercialService.createDelivery(deliveryPayload);
+      return this.withSideActions(request, {
+        ...base,
+        ok: true,
+        mode: "executed",
+        createdEntityType: "delivery",
+        createdEntityId: created.id,
+        createdEntityNo: created.deliveryNo,
+        workflowImpacts: [
+          ...base.workflowImpacts,
+          impact("impact_delivery_created", "delivery_execution_pending", "Teslim kaydi olusturuldu", `${created.deliveryNo} teslim kaydi olusturuldu.`, "success"),
+          impact("impact_delivery_wh_check", "warehouse_preparation_check", "Depo hazirlik kontrolu", "Depo hazirlik emri ve satir uygunlugu kontrol edilmelidir.", "warning"),
+          impact("impact_delivery_payment_check", "payment_status_check", "Odeme durumu kontrolu", "Teslim oncesi odeme ve approval durumlari tekrar gozden gecirilmelidir.", "warning"),
+          impact("impact_delivery_doc_preview", "document_preview_available", "Belge onizleme hazir", "Teslim fisi onizleme taslagi olusturuldu.", "info")
+        ]
+      });
+    } catch (error) {
+      return this.withSideActions(request, {
+        ...base,
+        mode: "foundation",
+        workflowImpacts: [
+          ...base.workflowImpacts,
+          impact("impact_delivery_pending", "delivery_execution_pending", "Teslim execution foundation modda", "Teslim kaydi olusturulamadi, inceleme modunda taslak olusturuldu.", "warning")
+        ],
+        validationIssues: [
+          ...(base.validationIssues ?? []),
+          {
+            code: "delivery_execution_unavailable",
+            field: "operationType",
+            message: error instanceof Error ? error.message : "Teslim execution su an tamamlanamadi.",
+            level: "warning"
+          }
+        ]
+      });
+    }
+  }
+
+  private async executeReturn(request: QuickOperationSubmitRequest, base: QuickOperationSubmitResponse): Promise<QuickOperationSubmitResponse> {
+    try {
+      const returnPayload: Partial<Return> = {
+        customerId: request.customerId as Return["customerId"],
+        orderId: request.orderId as Return["orderId"],
+        deliveryId: request.deliveryId as Return["deliveryId"],
+        status: "draft",
+        note: request.reason ?? request.note,
+        lines: request.lines.map(
+          (line, index) =>
+            ({
+              id: `return_line_qo_${Date.now()}_${index}`,
+              returnId: "return_new" as ReturnLine["returnId"],
+              productId: (line.productId ?? line.productCode) as ReturnLine["productId"],
+              productCode: line.productCode,
+              productName: line.productName,
+              quantity: line.quantity,
+              reasonCategory: "other",
+              note: request.reason ?? request.note
+            }) satisfies ReturnLine
+        )
+      };
+
+      const created = await this.commercialService.createReturn(returnPayload);
+      return this.withSideActions(request, {
+        ...base,
+        ok: true,
+        mode: "executed",
+        createdEntityType: "return",
+        createdEntityId: created.id,
+        createdEntityNo: created.returnNo,
+        workflowImpacts: [
+          ...base.workflowImpacts,
+          impact("impact_return_review", "return_review_required", "Iade inceleme akisina alindi", `${created.returnNo} iade kaydi inceleme durumuna alindi.`, "warning"),
+          impact("impact_return_approval", "return_approval_may_be_required", "Approval gerekebilir", "Iade miktari ve risk seviyesine gore ek onay adimi tetiklenebilir.", "warning"),
+          impact("impact_return_stock_finance", "stock_finance_impact_pending", "Stok/finans etkisi beklemede", "Iade kaydi olustu, stok ve finans etkisi inceleme sonrasi kesinlesecektir.", "info"),
+          impact("impact_return_doc_preview", "document_preview_available", "Belge onizleme hazir", "Iade talebi onizleme taslagi olusturuldu.", "info")
+        ]
+      });
+    } catch (error) {
+      return this.withSideActions(request, {
+        ...base,
+        mode: "foundation",
+        workflowImpacts: [
+          ...base.workflowImpacts,
+          impact("impact_return_review", "return_review_required", "Iade inceleme bekliyor", "Iade kaydi olusturulamadi, inceleme/foundation modunda taslak uretildi.", "warning"),
+          impact("impact_return_approval", "return_approval_may_be_required", "Approval gerekebilir", "Iade talebinin onay akisina alinmasi onerilir.", "warning")
+        ],
+        validationIssues: [
+          ...(base.validationIssues ?? []),
+          {
+            code: "return_execution_unavailable",
+            field: "operationType",
+            message: error instanceof Error ? error.message : "Iade execution su an tamamlanamadi.",
+            level: "warning"
+          }
+        ]
+      });
+    }
   }
 
   private buildImpacts(request: QuickOperationSubmitRequest, defaultImpacts: QuickOperationWorkflowImpact[]): QuickOperationWorkflowImpact[] {

@@ -18,6 +18,23 @@ function resolveCreatedEntityType(operationType: QuickOperationSubmitRequest["op
   }
 }
 
+function resolveDocumentTitle(operationType: QuickOperationSubmitRequest["operationType"]): string {
+  switch (operationType) {
+    case "offer":
+      return "Teklif Onizleme";
+    case "sale_order":
+      return "Siparis Onizleme";
+    case "delivery":
+      return "Teslim Fisi Onizleme";
+    case "payment":
+      return "Tahsilat Onizleme";
+    case "return":
+      return "Iade Talebi Onizleme";
+    default:
+      return "Belge Onizleme";
+  }
+}
+
 export async function submitQuickOperationRecord(payload: QuickOperationSubmitRequest): Promise<QuickOperationSubmitResponse> {
   if (dataSourceConfig.useDemoData) {
     const referenceNo = `QO-DEMO-${String(Date.now()).slice(-6)}`;
@@ -35,7 +52,7 @@ export async function submitQuickOperationRecord(payload: QuickOperationSubmitRe
       sideActions: {
         documentPreview: {
           documentType: payload.operationType,
-          title: "Belge Onizleme Taslagi",
+          title: resolveDocumentTitle(payload.operationType),
           referenceNo,
           customerName: payload.customerName ?? "Cari",
           lines: payload.lines.map((line, index) => ({
@@ -58,7 +75,12 @@ export async function submitQuickOperationRecord(payload: QuickOperationSubmitRe
           previewText: "Demo modunda belge taslagi olusturuldu."
         },
         whatsappDraft: {
-          message: `${payload.customerName ?? "Cari"} icin ${referenceNo} islem taslagi hazirlandi.`,
+          message:
+            payload.operationType === "delivery"
+              ? `${payload.customerName ?? "Cari"} icin teslim bilgilendirme taslagi hazirlandi.`
+              : payload.operationType === "return"
+              ? `${payload.customerName ?? "Cari"} icin iade talebi inceleme taslagi hazirlandi.`
+              : `${payload.customerName ?? "Cari"} icin ${referenceNo} islem taslagi hazirlandi.`,
           intent: payload.operationType,
           requiresApproval: true,
           sendEnabled: false

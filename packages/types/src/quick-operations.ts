@@ -56,6 +56,9 @@ export interface QuickOperationWorkflowImpact {
     | "sale_order_source_plan"
     | "payment_recorded"
     | "payment_allocation_required"
+    | "warehouse_preparation_check"
+    | "payment_status_check"
+    | "stock_finance_impact_pending"
     | "return_approval_may_be_required"
     | "delivery_execution_pending"
     | "return_review_required";
@@ -76,6 +79,9 @@ export interface QuickOperationSubmitRequest {
   operationType: QuickOperationType;
   customerId: string;
   customerName?: string;
+  orderId?: string;
+  deliveryId?: string;
+  reason?: string;
   note?: string;
   paidAmount?: number;
   lines: QuickOperationLine[];

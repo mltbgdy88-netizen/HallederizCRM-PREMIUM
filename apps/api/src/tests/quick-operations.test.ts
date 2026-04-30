@@ -240,7 +240,129 @@ test("delivery and return stay in foundation mode", async () => {
     assert.equal(deliveryItem.mode, "foundation");
     assert.equal(returnItem.mode, "foundation");
     assert.ok(deliveryItem.workflowImpacts.some((impact) => impact.key === "delivery_execution_pending"));
-    assert.ok(returnItem.workflowImpacts.some((impact) => impact.key === "return_review_required"));
+    assert.ok(returnItem.workflowImpacts.some((impact) => impact.key === "return_approval_may_be_required"));
+    await server.close();
+  });
+});
+
+test("delivery without reference and lines returns validation issue", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const response = await server.inject({
+      method: "POST",
+      url: "/quick-operations/submit",
+      payload: { operationType: "delivery", customerId: "customer_1", lines: [] },
+      headers: authHeaders(login.accessToken)
+    });
+    assert.equal(response.statusCode, 200);
+    const body = response.json() as { item: { mode: string; validationIssues?: Array<{ code: string }> } };
+    assert.equal(body.item.mode, "foundation");
+    assert.ok((body.item.validationIssues ?? []).some((issue) => issue.code === "line_required"));
+    await server.close();
+  });
+});
+
+test("valid delivery submit returns executed or controlled foundation and delivery side actions", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const payload: QuickOperationSubmitRequest = {
+      operationType: "delivery",
+      customerId: "customer_1",
+      customerName: "MUSTERI FIRMA A.S.",
+      orderId: "order_1",
+      note: "Teslim planlandi",
+      lines: [
+        {
+          id: "delivery_line_1",
+          productCode: "DKG-1001",
+          productName: "Marvel Ivory",
+          quantity: 1,
+          unitPrice: 590,
+          taxRate: 20,
+          sourceType: "center_warehouse",
+          lineTotal: 708
+        }
+      ]
+    };
+    const response = await server.inject({
+      method: "POST",
+      url: "/quick-operations/submit",
+      payload,
+      headers: authHeaders(login.accessToken)
+    });
+    assert.equal(response.statusCode, 200);
+    const body = response.json() as {
+      item: {
+        mode: string;
+        createdEntityType?: string;
+        workflowImpacts: Array<{ key: string }>;
+        sideActions?: { documentPreview?: { title: string } };
+      };
+    };
+    assert.ok(["executed", "foundation"].includes(body.item.mode));
+    assert.equal(body.item.sideActions?.documentPreview?.title, "Teslim Fisi Onizleme");
+    if (body.item.mode === "executed") {
+      assert.equal(body.item.createdEntityType, "delivery");
+    } else {
+      assert.ok(body.item.workflowImpacts.some((impact) => impact.key === "delivery_execution_pending"));
+    }
+    await server.close();
+  });
+});
+
+test("return missing reason returns validation issue", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const response = await server.inject({
+      method: "POST",
+      url: "/quick-operations/submit",
+      payload: {
+        operationType: "return",
+        customerId: "customer_1",
+        lines: [{ ...baseSaleOrderPayload.lines[0]!, id: "ret_line_1" }]
+      } satisfies QuickOperationSubmitRequest,
+      headers: authHeaders(login.accessToken)
+    });
+    assert.equal(response.statusCode, 200);
+    const body = response.json() as { item: { mode: string; validationIssues?: Array<{ code: string }> } };
+    assert.equal(body.item.mode, "foundation");
+    assert.ok((body.item.validationIssues ?? []).some((issue) => issue.code === "return_reason_required"));
+    await server.close();
+  });
+});
+
+test("valid return submit includes review/approval impact and return side actions", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const payload: QuickOperationSubmitRequest = {
+      operationType: "return",
+      customerId: "customer_1",
+      customerName: "MUSTERI FIRMA A.S.",
+      reason: "Hasarli urun iadesi",
+      note: "Kosede ezilme var",
+      lines: [{ ...baseSaleOrderPayload.lines[0]!, id: "return_line_2", quantity: 1 }]
+    };
+    const response = await server.inject({
+      method: "POST",
+      url: "/quick-operations/submit",
+      payload,
+      headers: authHeaders(login.accessToken)
+    });
+    assert.equal(response.statusCode, 200);
+    const body = response.json() as {
+      item: {
+        mode: string;
+        workflowImpacts: Array<{ key: string }>;
+        sideActions?: { documentPreview?: { title: string } };
+      };
+    };
+    assert.ok(["executed", "foundation"].includes(body.item.mode));
+    assert.ok(body.item.workflowImpacts.some((impact) => impact.key === "return_approval_may_be_required"));
+    assert.equal(body.item.sideActions?.documentPreview?.title, "Iade Talebi Onizleme");
     await server.close();
   });
 });
