@@ -182,6 +182,7 @@ export function useQuickOperationState() {
   const [lines, setLines] = useState<QuickOperationLine[]>([createLine(0), createLine(1), createLine(2)]);
   const [expandedLineId, setExpandedLineId] = useState<string | null>(lines[0]?.id ?? null);
   const [notice, setNotice] = useState<string | null>(null);
+  const [operationNote, setOperationNote] = useState("Pilot hizli islem notu");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedImpacts, setSubmittedImpacts] = useState<QuickOperationImpact[] | null>(null);
   const [sideActions, setSideActions] = useState<QuickOperationSideActions | null>(null);
@@ -259,6 +260,8 @@ export function useQuickOperationState() {
       operationType,
       customerId: selectedCustomer.id,
       customerName: selectedCustomer.name,
+      reason: operationType === "return" ? operationNote : undefined,
+      note: operationNote,
       lines: lines.map((line) => ({
         id: line.id,
         productCode: line.productCode,
@@ -340,6 +343,8 @@ export function useQuickOperationState() {
     impacts,
     notice,
     setNotice,
+    operationNote,
+    setOperationNote,
     addLine,
     removeLine,
     updateLine,
