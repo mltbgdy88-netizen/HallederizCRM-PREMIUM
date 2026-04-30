@@ -26,8 +26,8 @@ export async function getPilotSetupData(): Promise<PilotSetupData> {
       pilotTemplate: {
         tenantId: dataSourceConfig.tenantId,
         template: {
-          key: "pilot-tenant-template",
-          importPlaceholdersKey: "pilot-import-placeholders",
+          key: "local-tenant-template",
+          importPlaceholdersKey: "import-placeholders-local",
           companyFields: [
             "sirket_adi",
             "ticari_unvan",
@@ -97,11 +97,11 @@ export async function getPilotReadinessData(): Promise<PilotReadinessSummary> {
           status: "tamam",
           priority: "ready",
           readinessState: "ready",
-          description: "Demo sirket profili hazir.",
+          description: "Ornek sirket profili hazir.",
           reason: "Temel alanlar doldurulmus.",
           actionLabel: "Ayarlari ac",
           actionHref: "/ayarlar",
-          recommendedNextStep: "Pilot verilerine gore son guncellemeleri yapin.",
+          recommendedNextStep: "Canli veri planina gore son guncellemeleri yapin.",
           blocking: false
         },
         {
@@ -111,7 +111,7 @@ export async function getPilotReadinessData(): Promise<PilotReadinessSummary> {
           status: "eksik",
           priority: "critical",
           readinessState: "go_live_blocker",
-          description: "Demo modda import adimi bekleniyor.",
+          description: "Yerel gelistirme verisinde import adimi bekleniyor.",
           reason: "Canliya yakin deneme icin cari importu gerekli.",
           actionLabel: "Veri yukleme merkezini ac",
           actionHref: "/kurulum/veri-yukleme",
@@ -123,10 +123,10 @@ export async function getPilotReadinessData(): Promise<PilotReadinessSummary> {
         {
           roleCode: "yonetici",
           roleName: "Yonetici",
-          summary: "Genel pilot durumunu ve kritik eksikleri yonetir.",
+          summary: "Genel kullanim durumunu ve kritik eksikleri yonetir.",
           mustCheck: ["Kritik eksikler", "Servis health", "Onaylar"],
           firstScreens: [
-            { label: "Pilot Hazirlik", href: "/ayarlar/pilot-hazirlik" },
+            { label: "Kullanim Hazirligi", href: "/ayarlar/kullanim-hazirligi" },
             { label: "Staging Kontrol", href: "/ayarlar/staging-kontrol" }
           ],
           ownGaps: ["Cariler import edildi"]
@@ -140,14 +140,14 @@ export async function getPilotReadinessData(): Promise<PilotReadinessSummary> {
         disabledCount: 0,
         lastCheckedAt: new Date().toISOString(),
         services: [
-          { service: "ai", status: "fallback", mode: "mock", configured: false, reason: "Demo fallback", lastCheckedAt: new Date().toISOString(), details: {} },
-          { service: "whatsapp", status: "fallback", mode: "mock", configured: false, reason: "Demo fallback", lastCheckedAt: new Date().toISOString(), details: {} },
-          { service: "erp", status: "fallback", mode: "mock", configured: false, reason: "Demo fallback", lastCheckedAt: new Date().toISOString(), details: {} },
-          { service: "factory", status: "fallback", mode: "mock", configured: false, reason: "Demo fallback", lastCheckedAt: new Date().toISOString(), details: {} },
-          { service: "local-agent", status: "fallback", mode: "mock", configured: false, reason: "Demo fallback", lastCheckedAt: new Date().toISOString(), details: {} }
+          { service: "ai", status: "fallback", mode: "mock", configured: false, reason: "Yerel gelistirme fallback", lastCheckedAt: new Date().toISOString(), details: {} },
+          { service: "whatsapp", status: "fallback", mode: "mock", configured: false, reason: "Yerel gelistirme fallback", lastCheckedAt: new Date().toISOString(), details: {} },
+          { service: "erp", status: "fallback", mode: "mock", configured: false, reason: "Yerel gelistirme fallback", lastCheckedAt: new Date().toISOString(), details: {} },
+          { service: "factory", status: "fallback", mode: "mock", configured: false, reason: "Yerel gelistirme fallback", lastCheckedAt: new Date().toISOString(), details: {} },
+          { service: "local-agent", status: "fallback", mode: "mock", configured: false, reason: "Yerel gelistirme fallback", lastCheckedAt: new Date().toISOString(), details: {} }
         ]
       },
-      consistencyWarnings: ["Demo modunda veri tutarliligi raporu sinirli gosterilir."],
+      consistencyWarnings: ["Yerel gelistirme modunda veri tutarliligi raporu sinirli gosterilir."],
       generatedAt: new Date().toISOString()
     };
   }

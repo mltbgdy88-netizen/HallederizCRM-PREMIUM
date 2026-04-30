@@ -1,5 +1,5 @@
-import { DataImportPage } from "../../../../src/features/imports/components";
+import { redirect } from "next/navigation";
 
 export default function PilotDataLoadingRoutePage() {
-  return <DataImportPage />;
+  redirect("/ayarlar/veri-yukleme");
 }

@@ -17,7 +17,7 @@ async function main() {
   }
 
   const tenantSlug = requireEnv("AUTH_SEED_TENANT_SLUG", "hallederiz");
-  const tenantName = requireEnv("AUTH_SEED_TENANT_NAME", "Hallederiz Demo Tenant");
+  const tenantName = requireEnv("AUTH_SEED_TENANT_NAME", "Hallederiz Operations Tenant");
   const adminEmail = requireEnv("AUTH_SEED_ADMIN_EMAIL");
   const adminPassword = requireEnv("AUTH_SEED_ADMIN_PASSWORD");
   const adminFullName = requireEnv("AUTH_SEED_ADMIN_FULL_NAME", "Platform Admin");

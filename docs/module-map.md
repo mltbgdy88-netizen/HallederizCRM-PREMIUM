@@ -46,7 +46,7 @@ Ana menu yapisi asagidaki sirayla korunur:
 | Belgeler | `/belgeler`, `/belgeler/:id` | Belge ve cikti sistemi | `documents`, `document_deliveries` |
 | Raporlar | `/raporlar` | Analitik katman | Toplanmis ve hesaplanmis metrikler |
 | Kullanicilar | `/kullanicilar`, `/kullanicilar/roller` | Platform core | `users`, `roles`, `permissions`, `user_roles` |
-| Ayarlar | `/ayarlar`, `/ayarlar/pilot-hazirlik`, `/ayarlar/staging-kontrol` | Platform + tenant ayarlari | `tenants`, `tenant_modules`, `approval_policies` |
+| Ayarlar | `/ayarlar`, `/ayarlar/kullanim-hazirligi`, `/ayarlar/veri-yukleme`, `/ayarlar/staging-kontrol` | Platform + tenant ayarlari | `tenants`, `tenant_modules`, `approval_policies` |
 
 ## 4. Dashboard Kartlari ve Modul Yonlendirmeleri
 Gorev Merkezi kartlari, sadece bilgi gostermek icin degil aksiyon baslatmak icin tasarlanir.
@@ -149,5 +149,6 @@ Bu harita, hem tasarim sisteminin hem de route implementasyonunun referans cizel
 - `Approvals` canonical route: `/onaylar` (legacy docs alias: `/approvals`)
 - `AI approvals` canonical route: `/ai/onaylar` (legacy docs alias: `/ai/proposals`)
 - `AI insights` canonical route: `/ai/icgoruler` (legacy docs alias: `/ai/insights`)
-- `Pilot readiness` canonical route: `/ayarlar/pilot-hazirlik`
+- `Usage readiness` canonical route: `/ayarlar/kullanim-hazirligi` (legacy alias: `/ayarlar/pilot-hazirlik`)
+- `Data loading` canonical route: `/ayarlar/veri-yukleme` (legacy alias: `/ayarlar/pilot-veri-yukleme`)
 - `Staging validation` canonical route: `/ayarlar/staging-kontrol`

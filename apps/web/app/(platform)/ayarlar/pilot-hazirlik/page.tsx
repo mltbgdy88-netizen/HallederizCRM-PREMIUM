@@ -1,5 +1,5 @@
-import { PilotReadinessPage } from "../../../../src/features/settings/components";
+import { redirect } from "next/navigation";
 
 export default function PilotReadinessRoutePage() {
-  return <PilotReadinessPage />;
+  redirect("/ayarlar/kullanim-hazirligi");
 }

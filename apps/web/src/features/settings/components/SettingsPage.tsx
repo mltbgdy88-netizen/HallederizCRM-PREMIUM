@@ -20,7 +20,7 @@ const TABS = [
   { id: "currency", label: "Doviz" },
   { id: "warehouses", label: "Depolar" },
   { id: "team", label: "Rol ve Personel" },
-  { id: "setup", label: "Pilot Kurulum" }
+  { id: "setup", label: "Kurulum Hazirligi" }
 ] as const;
 
 type SettingsTabId = (typeof TABS)[number]["id"];
@@ -102,7 +102,7 @@ export function SettingsPage() {
         email: newUserEmail,
         status: "active",
         roleCode: newUserRoleCode,
-        title: "Pilot Kullanici"
+        title: "Yerel Gelistirme Kullanicisi"
       });
       setUsers((previous) => [created, ...previous]);
       setNewUserName("");
@@ -116,7 +116,7 @@ export function SettingsPage() {
   if (loading || !settings) {
     return (
       <div className="hz-page-stack">
-        <PageHeader title="Ayarlar" description="Pilot tenant kurulumu yukleniyor..." />
+        <PageHeader title="Ayarlar" description="Kurulum bilgileri yukleniyor..." />
       </div>
     );
   }
@@ -125,17 +125,17 @@ export function SettingsPage() {
     <div className="hz-page-stack">
       <PageHeader
         title="Ayarlar"
-        description="Kendi firmaniz icin pilot kurulum, tenant profili ve entegrasyon hazirliklarini yonetin."
+        description="Kendi firmaniz icin canli kullanim hazirligi, tenant profili ve entegrasyon ayarlarini yonetin."
         actions={
           <div className="hz-inline-actions">
-            <Link href="/ayarlar/pilot-hazirlik" className="hz-btn hz-btn-secondary">
-              Pilot Hazirlik
+            <Link href="/ayarlar/kullanim-hazirligi" className="hz-btn hz-btn-secondary">
+              Kullanim Hazirligi
             </Link>
             <Link href="/ayarlar/staging-kontrol" className="hz-btn hz-btn-secondary">
               Staging Kontrol
             </Link>
-            <Link href="/ayarlar/pilot-veri-yukleme" className="hz-btn hz-btn-secondary">
-              Pilot Veri Yukleme
+            <Link href="/ayarlar/veri-yukleme" className="hz-btn hz-btn-secondary">
+              Veri Yukleme
             </Link>
           </div>
         }
@@ -314,7 +314,7 @@ export function SettingsPage() {
 
               <aside className="hz-split-side">
                 <article className="hz-side-panel">
-                  <h3>Pilot Slot Ornekleri</h3>
+                  <h3>Ornek Slot Seti</h3>
                   <ul className="hz-side-list">
                     <li>Bayi</li>
                     <li>Perakende</li>
@@ -524,7 +524,7 @@ export function SettingsPage() {
             <div className="hz-split-layout">
               <div className="hz-split-main">
                 <article className="hz-content-card">
-                  <h3>Pilot Kurulum Checklist</h3>
+                  <h3>Kurulum Hazirlik Checklist</h3>
                   <div className="table-wrap hz-table-wrap">
                     <table className="table hz-table">
                       <thead>
@@ -567,7 +567,7 @@ export function SettingsPage() {
               </div>
               <aside className="hz-split-side">
                 <article className="hz-side-panel">
-                  <h3>Import-Ready Pilot Mod</h3>
+                  <h3>Import Hazirlik Durumu</h3>
                   <div className="detail-list">
                     <span>Template</span>
                     <strong>{settings.pilotSetup.templateName}</strong>

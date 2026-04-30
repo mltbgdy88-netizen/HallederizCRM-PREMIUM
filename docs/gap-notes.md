@@ -53,7 +53,7 @@ Bu notlar pilot oncesi bilincli olarak foundation seviyesinde birakilan alanlari
 - CRM/WhatsApp/sesli AI davranis modelinde proposal + approval zorunlulugu korunarak ortaklasma guclendirildi.
 
 ## Decision Alignment Fix (2026-04-29)
-- Canonical route sozlugu `/gorevler`, `/onaylar`, `/ai/onaylar`, `/ai/icgoruler`, `/ayarlar/pilot-hazirlik`, `/ayarlar/staging-kontrol` uzerinde sabitlendi.
+- Canonical route sozlugu `/gorevler`, `/onaylar`, `/ai/onaylar`, `/ai/icgoruler`, `/ayarlar/kullanim-hazirligi`, `/ayarlar/veri-yukleme`, `/ayarlar/staging-kontrol` uzerinde sabitlendi.
 - Dokuman ve UI metinlerinde web uygulamanin ic personel cockpit'i oldugu netlestirildi; dis bayi/musteri akisinda ayri portal login yerine WhatsApp + belge paylasimi modeli vurgulandi.
 - ERP / Fabrika / WhatsApp / AI tarafindaki no-op toolbar ve aksiyon butonlari `Foundation` etiketiyle pasiflestirilerek yanlis canli-islem beklentisi azaltildi.
 - Not: ` /approvals/:id/execute ` gibi ifadeler API endpoint adidir; web canonical route karsiligi `/onaylar` olarak korunur.

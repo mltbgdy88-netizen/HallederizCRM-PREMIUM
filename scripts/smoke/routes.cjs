@@ -40,7 +40,9 @@ const expectedPageFiles = [
   "(platform)/ai/icgoruler/page.tsx",
   "(platform)/kullanicilar/page.tsx",
   "(platform)/kullanicilar/roller/page.tsx",
-  "(platform)/ayarlar/page.tsx"
+  "(platform)/ayarlar/page.tsx",
+  "(platform)/ayarlar/kullanim-hazirligi/page.tsx",
+  "(platform)/ayarlar/veri-yukleme/page.tsx"
 ];
 
 const requiredDemoIds = [

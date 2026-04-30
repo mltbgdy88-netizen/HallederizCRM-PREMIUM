@@ -128,7 +128,7 @@ function DocumentOutputJobs({
       <h3>Output Queue ve Local Agent</h3>
       <div className="detail-list">
         <span>Local Agent Durumu</span>
-        <strong>{localAgentHealth?.status ?? "demo/fallback"}</strong>
+                <strong>{localAgentHealth?.status ?? "yerel-gelistirme/fallback"}</strong>
         <span>Calisma Modu</span>
         <strong>{localAgentHealth?.mode ?? "-"}</strong>
         <span>Son Kontrol</span>

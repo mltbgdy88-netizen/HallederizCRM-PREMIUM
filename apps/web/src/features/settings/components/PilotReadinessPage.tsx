@@ -45,7 +45,7 @@ function statusLabel(status: PilotReadinessItem["status"]) {
 
 function readinessStateLabel(state: PilotReadinessItem["readinessState"]) {
   if (state === "go_live_blocker") return "Go-Live Bloklayici";
-  if (state === "demo_gap") return "Demo Gap";
+  if (state === "demo_gap") return "Ornek Veri Boslugu";
   if (state === "warning") return "Uyari";
   return "Hazir";
 }
@@ -72,7 +72,7 @@ interface RoleTaskDefinition {
 
 const ONBOARDING_TASKS: Record<"yonetici" | "satis" | "muhasebe" | "depo" | "pazarlama", RoleTaskDefinition[]> = {
   yonetici: [
-    { title: "Pilot blokajlarini kontrol et", href: "/ayarlar/pilot-hazirlik", relatedItemIds: ["company-profile", "import-customers", "import-products"] },
+    { title: "Kullanim blokajlarini kontrol et", href: "/ayarlar/kullanim-hazirligi", relatedItemIds: ["company-profile", "import-customers", "import-products"] },
     { title: "Onay bekleyen islemleri ac", href: "/onaylar", relatedItemIds: ["service-ai"] },
     { title: "Entegrasyon sagligini dogrula", href: "/ayarlar/staging-kontrol", relatedItemIds: ["service-erp", "service-whatsapp", "service-factory", "service-local-agent"] }
   ],
@@ -116,7 +116,7 @@ export function PilotReadinessPage() {
       const next = await getPilotReadinessData();
       setData(next);
     } catch (readinessError) {
-      setError(readinessError instanceof Error ? readinessError.message : "Pilot hazirlik bilgisi alinamadi.");
+      setError(readinessError instanceof Error ? readinessError.message : "Kullanim hazirligi bilgisi alinamadi.");
     } finally {
       setLoading(false);
     }
@@ -158,8 +158,8 @@ export function PilotReadinessPage() {
   return (
     <div className="hz-page-stack">
       <PageHeader
-        title="Pilot Hazirlik Merkezi"
-        description="Kritik eksikler, onboarding adimlari ve servis saglik durumlariyla pilot acilis kararini tek panelden verin."
+        title="Kullanim Hazirligi Merkezi"
+        description="Kritik eksikler, onboarding adimlari ve servis saglik durumlariyla canli kullanim kararini tek panelden verin."
         actions={
           <div className="hz-inline-actions">
             <Link href="/ayarlar" className="hz-btn hz-btn-secondary">
@@ -196,7 +196,7 @@ export function PilotReadinessPage() {
       <section className="hz-content-card">
         <h3>Bloklayicilar</h3>
         {criticalItems.length === 0 ? (
-          <p className="muted">Pilotu engelleyen kritik eksik yok. Uyari seviyesindeki maddeleri tamamlayarak guvenli acilisa gecebilirsiniz.</p>
+          <p className="muted">Canli kullanimi engelleyen kritik eksik yok. Uyari seviyesindeki maddeleri tamamlayarak guvenli acilisa gecebilirsiniz.</p>
         ) : (
           <div className="hz-page-stack">
             {criticalItems.map((item) => (

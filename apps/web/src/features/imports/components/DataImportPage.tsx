@@ -192,7 +192,7 @@ export function DataImportPage() {
   return (
     <div className="hz-page-stack">
       <PageHeader
-        title="Pilot Veri Yukleme"
+        title="Veri Yukleme Merkezi"
         description="Cari, urun, fiyat, depo ve stok verilerini parse/validate/preview/apply akisiyla sisteme alin."
       />
 

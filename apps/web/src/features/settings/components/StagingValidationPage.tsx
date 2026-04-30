@@ -36,7 +36,7 @@ function getBadgeClass(status: ServiceHealthRecord["status"]) {
 
 function statusDisplayLabel(status: ServiceHealthRecord["status"]) {
   if (status === "healthy") return "Hazir";
-  if (status === "fallback" || status === "degraded") return "Demo / Fallback";
+  if (status === "fallback" || status === "degraded") return "Yerel Gelistirme / Fallback";
   if (status === "misconfigured") return "Yapilandirma Eksik";
   if (status === "disabled") return "Devre Disi";
   return "Hata";
