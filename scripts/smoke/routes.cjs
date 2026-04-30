@@ -14,6 +14,7 @@ const expectedPageFiles = [
   "(platform)/teklifler/yeni/page.tsx",
   "(platform)/teklifler/[offerId]/page.tsx",
   "(platform)/siparisler/page.tsx",
+  "(platform)/hizli-islem/page.tsx",
   "(platform)/siparisler/yeni/page.tsx",
   "(platform)/siparisler/[orderId]/page.tsx",
   "(platform)/tahsilatlar/page.tsx",
