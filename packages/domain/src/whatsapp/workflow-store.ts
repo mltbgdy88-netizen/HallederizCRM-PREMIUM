@@ -43,6 +43,86 @@ export function createEmptyWhatsAppWorkflowStore(): TenantWhatsAppWorkflowStore 
   };
 }
 
+function isRecord(value: unknown): value is Record<string, unknown> {
+  return Boolean(value && typeof value === "object" && !Array.isArray(value));
+}
+
+function normalizeArray<T>(value: unknown, map: (item: Record<string, unknown>) => T | null): T[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!isRecord(item)) return [];
+    const mapped = map(item);
+    return mapped ? [mapped] : [];
+  });
+}
+
+function stringValue(value: unknown, fallback = ""): string {
+  return typeof value === "string" ? value : fallback;
+}
+
+function optionalStringValue(value: unknown): string | undefined {
+  return typeof value === "string" ? value : undefined;
+}
+
+function objectValue(value: unknown): Record<string, unknown> | undefined {
+  return isRecord(value) ? value : undefined;
+}
+
+export function normalizeTenantWhatsAppWorkflowStore(value: unknown): TenantWhatsAppWorkflowStore {
+  const store = isRecord(value) ? value : {};
+  return withStoreCleanup({
+    commandAudit: normalizeArray(store.commandAudit, (item) => ({
+      at: stringValue(item.at, new Date(0).toISOString()),
+      command: stringValue(item.command),
+      fromPhone: normalizePhone(stringValue(item.fromPhone)),
+      id: stringValue(item.id),
+      reason: optionalStringValue(item.reason),
+      referenceCode: stringValue(item.referenceCode),
+      result: ["accepted", "rejected", "duplicate"].includes(stringValue(item.result)) ? (stringValue(item.result) as WhatsAppWorkflowCommandAudit["result"]) : "rejected"
+    })),
+    mediaMessages: normalizeArray(store.mediaMessages, (item) => ({
+      at: stringValue(item.at, new Date(0).toISOString()),
+      fileName: optionalStringValue(item.fileName),
+      from: normalizePhone(stringValue(item.from)),
+      id: stringValue(item.id),
+      mediaHash: optionalStringValue(item.mediaHash),
+      mimeType: optionalStringValue(item.mimeType)
+    })),
+    processedMessages: normalizeArray(store.processedMessages, (item) => ({
+      at: stringValue(item.at, new Date(0).toISOString()),
+      contentHash: stringValue(item.contentHash),
+      from: normalizePhone(stringValue(item.from)),
+      id: stringValue(item.id)
+    })),
+    processingMessages: normalizeArray(store.processingMessages, (item) => ({
+      at: stringValue(item.at, new Date(0).toISOString()),
+      contentHash: stringValue(item.contentHash),
+      from: normalizePhone(stringValue(item.from)),
+      id: stringValue(item.id),
+      startedAt: stringValue(item.startedAt, stringValue(item.at, new Date(0).toISOString()))
+    })),
+    tickets: normalizeArray(store.tickets, (item) => ({
+      allowedCommands: Array.isArray(item.allowedCommands) ? item.allowedCommands.map((command) => stringValue(command)).filter(Boolean) : [],
+      createdAt: stringValue(item.createdAt, new Date(0).toISOString()),
+      customerName: stringValue(item.customerName),
+      customerPhone: normalizePhone(stringValue(item.customerPhone)),
+      expiresAt: stringValue(item.expiresAt, new Date(0).toISOString()),
+      id: stringValue(item.id),
+      payload: objectValue(item.payload),
+      referenceCode: stringValue(item.referenceCode),
+      resolvedCommand: optionalStringValue(item.resolvedCommand),
+      status: ["pending", "applied", "rejected", "expired"].includes(stringValue(item.status)) ? (stringValue(item.status) as WhatsAppWorkflowTicketStatus) : "pending",
+      tenantId: stringValue(item.tenantId),
+      tokenHash: stringValue(item.tokenHash),
+      type: ["order_decision", "payment_receipt", "return_review", "defect_review", "payment_exception"].includes(stringValue(item.type))
+        ? (stringValue(item.type) as WhatsAppWorkflowTicketType)
+        : "order_decision",
+      usedAt: optionalStringValue(item.usedAt),
+      usedByPhone: optionalStringValue(item.usedByPhone)
+    }))
+  });
+}
+
 export function normalizePhone(phone: string | undefined | null): string {
   return String(phone ?? "").replace(/\D/g, "");
 }

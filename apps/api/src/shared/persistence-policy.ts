@@ -17,7 +17,7 @@ export function getPersistencePolicy(env: NodeJS.ProcessEnv = process.env): Pers
   const isProduction = env.NODE_ENV === "production";
   const explicitFallbackAllowed = isEnabled(env.ALLOW_DEMO_FALLBACK);
   const demoFallbackAllowed = !isProduction && explicitFallbackAllowed;
-  const dbFallbackAllowed = persistenceMode !== "postgres" && demoFallbackAllowed;
+  const dbFallbackAllowed = demoFallbackAllowed;
 
   return {
     persistenceMode,

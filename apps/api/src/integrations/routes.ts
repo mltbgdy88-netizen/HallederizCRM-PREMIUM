@@ -116,7 +116,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
     const workflowPayload = { at, contentHash, from, id: messageId };
 
     if (shouldTrackWorkflow) {
-      const reservation = whatsAppWorkflowStoreService.reserveInboundMessage(tenantId, workflowPayload);
+      const reservation = await whatsAppWorkflowStoreService.reserveInboundMessage(tenantId, workflowPayload);
       if (!reservation.reserved) {
         return {
           ok: true,
@@ -133,9 +133,9 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
         if (messageBody) {
           await service.receiveWhatsAppInbound({ body: messageBody, type: "text" });
         }
-        whatsAppWorkflowStoreService.markProcessed(tenantId, workflowPayload);
+        await whatsAppWorkflowStoreService.markProcessed(tenantId, workflowPayload);
       } catch (error) {
-        whatsAppWorkflowStoreService.releaseProcessing(tenantId, workflowPayload);
+        await whatsAppWorkflowStoreService.releaseProcessing(tenantId, workflowPayload);
         throw error;
       }
 

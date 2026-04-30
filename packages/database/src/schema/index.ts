@@ -12,3 +12,4 @@ export * from "./returns";
 export * from "./workflows";
 export * from "./approvals";
 export * from "./documents";
+export * from "./whatsapp-workflows";
