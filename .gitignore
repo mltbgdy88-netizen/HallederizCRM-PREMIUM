@@ -8,6 +8,7 @@ dist
 .next
 .next-cache
 .runtime-next
+.runtime-next-dev
 coverage
 
 # Logs

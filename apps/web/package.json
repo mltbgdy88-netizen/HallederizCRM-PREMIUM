@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "node scripts/dev.cjs",
+    "dev:clean": "node -e \"const fs=require('fs'); for (const p of ['.runtime-next','.runtime-next-dev','tsconfig.tsbuildinfo']) { try { fs.rmSync(p,{recursive:true,force:true}); } catch {} } console.log('web dev cache cleaned');\"",
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc -p tsconfig.json --noEmit",
