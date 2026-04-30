@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import Fastify from "fastify";
 import type { QuickOperationSubmitRequest } from "@hallederiz/types";
+import { registerCommercialOperationsRoutes } from "../commercial-operations/routes";
 import { registerPlatformCoreRoutes } from "../platform-core/routes";
 import { registerQuickOperationsRoutes } from "../quick-operations/routes";
 import { createSession } from "../shared/session-store";
@@ -10,6 +11,7 @@ import { withDemoAuth, withEnv } from "./test-env";
 async function buildServer() {
   const server = Fastify();
   await registerPlatformCoreRoutes(server);
+  await registerCommercialOperationsRoutes(server);
   await registerQuickOperationsRoutes(server);
   return server;
 }
@@ -198,6 +200,7 @@ test("payment valid submit executed or controlled foundation", async () => {
     const body = response.json() as {
       item: {
         mode: string;
+        createdEntityId?: string;
         createdEntityType?: string;
         workflowImpacts: Array<{ key: string }>;
         sideActions?: { whatsappDraft?: { message: string }; aiInsight?: { recommendations: string[]; warnings: string[] } };
@@ -210,6 +213,14 @@ test("payment valid submit executed or controlled foundation", async () => {
     if (body.item.mode === "executed") {
       assert.equal(body.item.createdEntityType, "payment");
       assert.ok(body.item.workflowImpacts.some((impact) => impact.key === "payment_recorded"));
+      const paymentDetail = await server.inject({
+        method: "GET",
+        url: `/payments/${body.item.createdEntityId}`,
+        headers: authHeaders(login.accessToken)
+      });
+      assert.equal(paymentDetail.statusCode, 200);
+      const paymentBody = paymentDetail.json() as { item?: { currency?: string } };
+      assert.equal(paymentBody.item?.currency, "TRY");
     }
     await server.close();
   });
