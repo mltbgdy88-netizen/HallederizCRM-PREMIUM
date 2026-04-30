@@ -14,12 +14,14 @@ import { signHmacSha256Payload } from "../shared/webhook-security";
 import { withEnv } from "./test-env";
 
 function storeWithTicket(options: { expiresAt?: string; allowedCommands?: string[]; payload?: Record<string, unknown> } = {}) {
+  const createdAt = new Date().toISOString();
+  const defaultExpiresAt = new Date(Date.now() + 60 * 60 * 1000).toISOString();
   const ticket = createWhatsAppApprovalTicket({
     allowedCommands: options.allowedCommands ?? ["approve", "reject", "review"],
-    createdAt: "2026-04-30T10:00:00.000Z",
+    createdAt,
     customerName: "Musteri Firma",
     customerPhone: "905321112233",
-    expiresAt: options.expiresAt ?? "2026-04-30T11:00:00.000Z",
+    expiresAt: options.expiresAt ?? defaultExpiresAt,
     id: "ticket_approval_1",
     payload: options.payload,
     rawToken: "secret-token",
@@ -32,10 +34,11 @@ function storeWithTicket(options: { expiresAt?: string; allowedCommands?: string
 
 test("valid approve command applies ticket and writes audit", () => {
   const { store, ticket } = storeWithTicket();
+  const now = new Date().toISOString();
   const result = applyWhatsAppTicketCommand({
     command: "approve",
     fromPhone: "905321112233",
-    now: "2026-04-30T10:30:00.000Z",
+    now,
     rawToken: "secret-token",
     referenceCode: ticket.referenceCode,
     store
@@ -52,10 +55,11 @@ test("valid approve command applies ticket and writes audit", () => {
 
 test("valid reject command rejects ticket", () => {
   const { store, ticket } = storeWithTicket();
+  const now = new Date().toISOString();
   const result = applyWhatsAppTicketCommand({
     command: "reject",
     fromPhone: "905321112233",
-    now: "2026-04-30T10:30:00.000Z",
+    now,
     rawToken: "secret-token",
     referenceCode: ticket.referenceCode,
     store
@@ -67,10 +71,11 @@ test("valid reject command rejects ticket", () => {
 
 test("review command keeps ticket pending and writes accepted audit", () => {
   const { store, ticket } = storeWithTicket();
+  const now = new Date().toISOString();
   const result = applyWhatsAppTicketCommand({
     command: "review",
     fromPhone: "905321112233",
-    now: "2026-04-30T10:30:00.000Z",
+    now,
     rawToken: "secret-token",
     referenceCode: ticket.referenceCode,
     store
@@ -83,10 +88,11 @@ test("review command keeps ticket pending and writes accepted audit", () => {
 
 test("invalid token writes rejected audit without storing raw token", () => {
   const { store, ticket } = storeWithTicket();
+  const now = new Date().toISOString();
   const result = applyWhatsAppTicketCommand({
     command: "approve",
     fromPhone: "905321112233",
-    now: "2026-04-30T10:30:00.000Z",
+    now,
     rawToken: "wrong-token",
     referenceCode: ticket.referenceCode,
     store
@@ -99,11 +105,12 @@ test("invalid token writes rejected audit without storing raw token", () => {
 });
 
 test("expired ticket is marked expired and already resolved command is duplicate", () => {
-  const { store, ticket } = storeWithTicket({ expiresAt: "2026-04-30T10:10:00.000Z" });
+  const { store, ticket } = storeWithTicket({ expiresAt: new Date(Date.now() - 60_000).toISOString() });
+  const now = new Date().toISOString();
   const expired = applyWhatsAppTicketCommand({
     command: "approve",
     fromPhone: "905321112233",
-    now: "2026-04-30T10:30:00.000Z",
+    now,
     rawToken: "secret-token",
     referenceCode: ticket.referenceCode,
     store
@@ -115,7 +122,7 @@ test("expired ticket is marked expired and already resolved command is duplicate
   const duplicate = applyWhatsAppTicketCommand({
     command: "approve",
     fromPhone: "905321112233",
-    now: "2026-04-30T10:31:00.000Z",
+    now: new Date(Date.now() + 60_000).toISOString(),
     rawToken: "secret-token",
     referenceCode: ticket.referenceCode,
     store: expired.store
@@ -126,10 +133,11 @@ test("expired ticket is marked expired and already resolved command is duplicate
 
 test("unauthorized phone is rejected when ticket payload has approver phones", () => {
   const { store, ticket } = storeWithTicket({ payload: { approverPhones: ["905551112233"] } });
+  const now = new Date().toISOString();
   const result = applyWhatsAppTicketCommand({
     command: "approve",
     fromPhone: "905321112233",
-    now: "2026-04-30T10:30:00.000Z",
+    now,
     rawToken: "secret-token",
     referenceCode: ticket.referenceCode,
     store
@@ -149,10 +157,10 @@ test("signed webhook command updates ticket state and duplicate retry stays idem
       whatsAppWorkflowStoreService.clear("tenant_command_route");
       const ticket = createWhatsAppApprovalTicket({
         allowedCommands: ["approve"],
-        createdAt: "2026-04-30T10:00:00.000Z",
+        createdAt: new Date().toISOString(),
         customerName: "Musteri Firma",
         customerPhone: "905321112233",
-        expiresAt: "2026-04-30T11:00:00.000Z",
+        expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
         rawToken: "route-token",
         referenceCode: "SO-ROUTE-1",
         tenantId: "tenant_command_route",

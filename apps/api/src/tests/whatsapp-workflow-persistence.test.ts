@@ -8,7 +8,7 @@ import { withEnv } from "./test-env";
 
 function message(id: string, text = "Siparis durumu") {
   return {
-    at: "2026-04-30T10:00:00.000Z",
+    at: new Date().toISOString(),
     contentHash: hashInboundMessageContent({ from: "905321112233", text }),
     from: "905321112233",
     id
