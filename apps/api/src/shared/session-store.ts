@@ -1,6 +1,6 @@
 import type { LoginInput, LoginResponse, Permission, SessionModel } from "@hallederiz/types";
 import { createLoginPayload, mockRoles, mockTenant, mockUsers } from "../platform-core/mock-data";
-import { assertDemoAuthAllowed } from "./auth-mode";
+import { assertDemoAuthAllowed, getAuthMode } from "./auth-mode";
 
 const sessionByToken = new Map<string, LoginResponse>();
 
@@ -96,6 +96,43 @@ export function createSession(input: LoginInput): LoginResponse {
       permissions: [...rolePermissions, ...extraPermissions]
     }
   };
+  sessionByToken.set(response.accessToken, response);
+  return response;
+}
+
+export function createLocalPilotSession(input: LoginInput): LoginResponse {
+  const authMode = getAuthMode();
+  if (!authMode.canUseLocalPilotAuth) {
+    throw new Error("Local pilot auth disabled. Configure local pilot auth provider.");
+  }
+
+  const payload = createLoginPayload(input);
+  const user = getUserByEmail(input.email);
+  const resolvedRoleKey = authMode.localPilotAuthRole.toLocaleLowerCase("tr-TR");
+  const resolvedRole =
+    mockRoles.find((role) => role.code.toLocaleLowerCase("tr-TR") === resolvedRoleKey) ??
+    mockRoles.find((role) => role.code === "admin") ??
+    mockRoles[0];
+  const resolvedRoles = resolvedRole ? [resolvedRole] : [];
+  const rolePermissions = resolvedRoles.flatMap((role) => role.permissions);
+  const extraPermissions: Permission[] = [...demoBusinessReadPermissions, ...demoBusinessWritePermissions].map((key) => ({
+    id: `pilot_${key.replaceAll(".", "_")}`,
+    key,
+    name: key,
+    moduleCode: "core"
+  }));
+
+  const response: LoginResponse = {
+    ...payload,
+    session: {
+      ...payload.session,
+      tenant: mockTenant,
+      user: user ?? payload.session.user,
+      roles: resolvedRoles as SessionModel["roles"],
+      permissions: [...rolePermissions, ...extraPermissions]
+    }
+  };
+
   sessionByToken.set(response.accessToken, response);
   return response;
 }

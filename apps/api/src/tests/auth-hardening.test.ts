@@ -16,6 +16,7 @@ test("demo auth disabled: /auth/login does not create demo session", async () =>
   await withEnv(
     {
       DEMO_AUTH_ENABLED: "false",
+      LOCAL_PILOT_AUTH_ENABLED: "false",
       NODE_ENV: "development",
       PERSISTENCE_MODE: "demo"
     },
@@ -61,6 +62,7 @@ test("createSession throws when demo auth is disabled", async () => {
   await withEnv(
     {
       DEMO_AUTH_ENABLED: "false",
+      LOCAL_PILOT_AUTH_ENABLED: "false",
       NODE_ENV: "development",
       PERSISTENCE_MODE: "demo"
     },
@@ -80,6 +82,7 @@ test("mock access token is ignored when demo auth is disabled", async () => {
   await withEnv(
     {
       DEMO_AUTH_ENABLED: "false",
+      LOCAL_PILOT_AUTH_ENABLED: "false",
       NODE_ENV: "development",
       PERSISTENCE_MODE: "demo"
     },
@@ -155,4 +158,143 @@ test("tenant mismatch guard behavior is preserved", async () => {
     assert.equal(context.tenantMismatch, true);
     assert.equal(context.authIssue, "tenant_mismatch");
   });
+});
+
+test("production ignores local pilot auth even if enabled", async () => {
+  await withEnv(
+    {
+      NODE_ENV: "production",
+      PERSISTENCE_MODE: "postgres",
+      LOCAL_PILOT_AUTH_ENABLED: "true",
+      LOCAL_PILOT_AUTH_EMAIL: "pilot@hallederiz.local",
+      LOCAL_PILOT_AUTH_PASSWORD: "local-pilot-password"
+    },
+    async () => {
+      const server = await buildAuthServer();
+      const response = await server.inject({
+        method: "POST",
+        url: "/auth/login",
+        payload: {
+          tenantSlug: "hallederiz",
+          email: "pilot@hallederiz.local",
+          password: "local-pilot-password"
+        }
+      });
+      assert.equal(response.statusCode, 503);
+      await server.close();
+    }
+  );
+});
+
+test("postgres mode keeps 503 when local pilot auth is disabled", async () => {
+  await withEnv(
+    {
+      NODE_ENV: "development",
+      PERSISTENCE_MODE: "postgres",
+      DEMO_AUTH_ENABLED: "true",
+      LOCAL_PILOT_AUTH_ENABLED: "false"
+    },
+    async () => {
+      const server = await buildAuthServer();
+      const response = await server.inject({
+        method: "POST",
+        url: "/auth/login",
+        payload: {
+          tenantSlug: "hallederiz",
+          email: "pilot@hallederiz.local",
+          password: "local-pilot-password"
+        }
+      });
+      assert.equal(response.statusCode, 503);
+      await server.close();
+    }
+  );
+});
+
+test("local pilot auth allows login in development postgres mode with explicit flag", async () => {
+  await withEnv(
+    {
+      NODE_ENV: "development",
+      PERSISTENCE_MODE: "postgres",
+      DEMO_AUTH_ENABLED: "false",
+      LOCAL_PILOT_AUTH_ENABLED: "true",
+      LOCAL_PILOT_AUTH_EMAIL: "pilot@hallederiz.local",
+      LOCAL_PILOT_AUTH_PASSWORD: "local-pilot-password",
+      LOCAL_PILOT_AUTH_ROLE: "admin"
+    },
+    async () => {
+      const server = await buildAuthServer();
+      const response = await server.inject({
+        method: "POST",
+        url: "/auth/login",
+        payload: {
+          tenantSlug: "hallederiz",
+          email: "pilot@hallederiz.local",
+          password: "local-pilot-password"
+        }
+      });
+      assert.equal(response.statusCode, 200);
+      assert.ok(response.json().accessToken);
+      await server.close();
+    }
+  );
+});
+
+test("local pilot auth rejects wrong password", async () => {
+  await withEnv(
+    {
+      NODE_ENV: "development",
+      PERSISTENCE_MODE: "postgres",
+      DEMO_AUTH_ENABLED: "false",
+      LOCAL_PILOT_AUTH_ENABLED: "true",
+      LOCAL_PILOT_AUTH_EMAIL: "pilot@hallederiz.local",
+      LOCAL_PILOT_AUTH_PASSWORD: "local-pilot-password"
+    },
+    async () => {
+      const server = await buildAuthServer();
+      const response = await server.inject({
+        method: "POST",
+        url: "/auth/login",
+        payload: {
+          tenantSlug: "hallederiz",
+          email: "pilot@hallederiz.local",
+          password: "wrong-password"
+        }
+      });
+      assert.equal(response.statusCode, 401);
+      await server.close();
+    }
+  );
+});
+
+test("local pilot auth does not enable mock access token or header fallback in postgres mode", async () => {
+  await withEnv(
+    {
+      NODE_ENV: "development",
+      PERSISTENCE_MODE: "postgres",
+      LOCAL_PILOT_AUTH_ENABLED: "true",
+      LOCAL_PILOT_AUTH_EMAIL: "pilot@hallederiz.local",
+      LOCAL_PILOT_AUTH_PASSWORD: "local-pilot-password"
+    },
+    () => {
+      const mockTokenContext = buildRequestContext({
+        headers: {
+          authorization: "Bearer mock_access_hallederiz:pilot@hallederiz.local"
+        }
+      } as never);
+      assert.equal(mockTokenContext.isAuthenticated, false);
+      assert.deepEqual(mockTokenContext.permissions, []);
+
+      const headerFallbackContext = buildRequestContext({
+        headers: {
+          "x-tenant-id": "tenant_1",
+          "x-user-id": "user_admin",
+          "x-user-role": "admin",
+          "x-user-permissions": "orders.write,approvals.execute"
+        }
+      } as never);
+      assert.equal(headerFallbackContext.isAuthenticated, false);
+      assert.deepEqual(headerFallbackContext.permissions, []);
+    }
+  );
 });

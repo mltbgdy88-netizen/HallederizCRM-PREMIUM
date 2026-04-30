@@ -1,6 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import type { LoginInput } from "@hallederiz/types";
-import { createSession, getSessionByToken } from "../../shared/session-store";
+import { createLocalPilotSession, createSession, getSessionByToken } from "../../shared/session-store";
 import { buildRequestContext } from "../../shared/request-context";
 import { getAuthMode } from "../../shared/auth-mode";
 
@@ -15,19 +15,41 @@ export async function registerAuthRoutes(server: FastifyInstance) {
     }
 
     const authMode = getAuthMode();
-    if (!authMode.demoAuthEnabled || authMode.persistenceMode !== "demo") {
+    if (authMode.demoAuthEnabled && authMode.persistenceMode === "demo") {
+      const loginPayload = createSession({
+        tenantSlug: body.tenantSlug,
+        email: body.email,
+        password: body.password
+      });
+      return reply.send(loginPayload);
+    }
+
+    if (authMode.canUseLocalPilotAuth) {
+      const emailMatches = body.email.trim().toLocaleLowerCase("tr-TR") === authMode.localPilotAuthEmail?.toLocaleLowerCase("tr-TR");
+      const passwordMatches = body.password === authMode.localPilotAuthPassword;
+      if (!emailMatches || !passwordMatches) {
+        return reply.status(401).send({
+          message: "Gecersiz giris bilgileri."
+        });
+      }
+
+      const loginPayload = createLocalPilotSession({
+        tenantSlug: body.tenantSlug,
+        email: body.email,
+        password: body.password
+      });
+      return reply.send(loginPayload);
+    }
+
+    if (authMode.localPilotAuthEnabled && !authMode.localPilotAuthConfigured) {
       return reply.status(503).send({
-        message: "Demo auth disabled. Configure real auth provider."
+        message: "Local pilot auth misconfigured. Set LOCAL_PILOT_AUTH_EMAIL and LOCAL_PILOT_AUTH_PASSWORD."
       });
     }
 
-    const loginPayload = createSession({
-      tenantSlug: body.tenantSlug,
-      email: body.email,
-      password: body.password
+    return reply.status(503).send({
+      message: "Demo auth disabled. Configure real auth provider."
     });
-
-    return reply.send(loginPayload);
   });
 
   server.get("/auth/me", async (request, reply) => {

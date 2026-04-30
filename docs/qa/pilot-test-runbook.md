@@ -24,6 +24,13 @@ Aşağıdaki minimum set test ortaminda doldurulmalidir:
 - `DEMO_AUTH_ENABLED=false` (auth testi disinda)
 - `NEXT_PUBLIC_ENABLE_DEMO_AUTH=false` (auth testi disinda)
 
+### Local pilot auth (yalnizca development)
+- `LOCAL_PILOT_AUTH_ENABLED=true` (postgres modunda lokal login smoke icin)
+- `LOCAL_PILOT_AUTH_EMAIL` ve `LOCAL_PILOT_AUTH_PASSWORD` dolu olmalidir
+- `LOCAL_PILOT_AUTH_ROLE=admin` (veya testte kullanilacak rol)
+- Bu ayar production icin degildir; `NODE_ENV=production` altinda etkisiz olmalidir.
+- `.env.local` / `.env.development` dosyalari commitlenmemelidir.
+
 ### WhatsApp testi icin
 - `WHATSAPP_WEBHOOK_VERIFY_TOKEN`
 - `WHATSAPP_WEBHOOK_APP_SECRET`
@@ -49,7 +56,7 @@ Aşağıdaki minimum set test ortaminda doldurulmalidir:
      - `docker compose -f docker-compose.local.yml ps`
 2. Baglanti dogrulamasi:
    - `POSTGRES_URL` / `DATABASE_URL` ile API ayaga kalkmali.
-   - Port kontrolu: `5432`
+   - Port kontrolu: `55432` (izole local compose)
 3. Policy kontrolu:
    - `PERSISTENCE_MODE=postgres`
    - `ALLOW_DEMO_FALLBACK=false`
