@@ -57,3 +57,15 @@ Bu notlar pilot oncesi bilincli olarak foundation seviyesinde birakilan alanlari
 - Dokuman ve UI metinlerinde web uygulamanin ic personel cockpit'i oldugu netlestirildi; dis bayi/musteri akisinda ayri portal login yerine WhatsApp + belge paylasimi modeli vurgulandi.
 - ERP / Fabrika / WhatsApp / AI tarafindaki no-op toolbar ve aksiyon butonlari `Foundation` etiketiyle pasiflestirilerek yanlis canli-islem beklentisi azaltildi.
 - Not: ` /approvals/:id/execute ` gibi ifadeler API endpoint adidir; web canonical route karsiligi `/onaylar` olarak korunur.
+
+## Pilot Acceptance Polish (2026-04-30)
+- `.env.example` production/pilot kritik flag aciklamalariyla guncellendi:
+  - demo auth / demo fallback
+  - postgres mode zorunlu alanlari
+  - webhook secret gereksinimleri
+  - local AI ve local agent alanlari
+- Hizli Islem delivery/return execution baglantisi sonrasi manuel QA planlari eklendi:
+  - `docs/qa/quick-operation-manual-test-plan.md`
+  - `docs/qa/whatsapp-workflow-manual-test-plan.md`
+- Pilot kabul kontrol listesi eklendi:
+  - `docs/implementation/016-pilot-acceptance-checklist.md`

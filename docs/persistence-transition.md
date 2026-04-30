@@ -77,3 +77,14 @@ Not: Bu turda schema tarafinda line tablolari olmayan ortamlarda fallback davran
 - Payment confirm/reverse, warehouse state gecisleri ve local output job lifecycle icin audit write-back arttirildi.
 - Document render ve document delivery DB kayit semantigi zenginlestirildi.
 
+## Quick Operation Delivery/Return Binding (30 Nisan 2026)
+
+- Quick Operation submit akisi delivery/return operation type'larinda controlled execution path'e tasindi.
+- Delivery execution:
+  - `orderId` referansi ile `createDelivery` path'i denenir.
+  - Referans eksiginde validation/foundation sonucuna donulur.
+- Return execution:
+  - `createReturn` path'i ile kayit acilir.
+  - `reason`/`note` zorunlulugu ile inceleme disiplini guclendirildi.
+- Bu turda iade icin stok/finans nihai mutasyon adimi bilincli olarak review/approval sonrasi asamaya birakildi.
+
