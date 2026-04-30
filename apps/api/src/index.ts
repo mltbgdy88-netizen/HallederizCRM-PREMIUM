@@ -1,3 +1,4 @@
+import cors from "@fastify/cors";
 import Fastify from "fastify";
 import { registerAiLocalOutputRoutes } from "./ai-local-output-routes";
 import { registerCommercialOperationsRoutes } from "./commercial-operations/routes";
@@ -8,6 +9,7 @@ import { registerPlatformCoreRoutes } from "./platform-core/routes";
 import { registerProductStockPricingRoutes } from "./product-stock-pricing/routes";
 import { registerQuickOperationsRoutes } from "./quick-operations/routes";
 import { registerSalesCrmRoutes } from "./sales-crm/routes";
+import { buildApiCorsOptions } from "./shared/cors-config";
 
 const server = Fastify({
   logger: true
@@ -31,6 +33,7 @@ server.get("/", async () => {
 });
 
 async function bootstrap() {
+  await server.register(cors, buildApiCorsOptions());
   await registerPlatformCoreRoutes(server);
   await registerProductStockPricingRoutes(server);
   await registerSalesCrmRoutes(server);
