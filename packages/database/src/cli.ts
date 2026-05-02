@@ -1,5 +1,5 @@
-import { applyDatabaseMigrations, createPostgresMigrationExecutor, listAppliedMigrations } from "./migrations";
-import { loadMigrationSqlFiles, loadSeedSqlFiles } from "./scripts";
+import { applyDatabaseMigrations, createPostgresMigrationExecutor, listAppliedMigrations } from "./migrations.js";
+import { loadMigrationSqlFiles, loadSeedSqlFiles } from "./scripts.js";
 
 function getPostgresUrl(): string | undefined {
   return process.env.POSTGRES_URL ?? process.env.DATABASE_URL;
