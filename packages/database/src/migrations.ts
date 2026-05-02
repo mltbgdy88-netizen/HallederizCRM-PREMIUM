@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
-import { createQueryExecutor } from "./client";
-import type { DatabaseConfig, QueryExecutor, QueryResultRow } from "./types";
-import { aiFoundationMigrationName, aiFoundationMigrationSql } from "./ai-foundation";
+import { createQueryExecutor } from "./client.js";
+import type { DatabaseConfig, QueryExecutor, QueryResultRow } from "./types.js";
+import { aiFoundationMigrationName, aiFoundationMigrationSql } from "./ai-foundation/index.js";
 
 export interface DatabaseMigration {
   name: string;
