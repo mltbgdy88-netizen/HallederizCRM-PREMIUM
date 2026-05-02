@@ -1,11 +1,17 @@
 ﻿{
   "extends": "../../tsconfig.base.json",
   "compilerOptions": {
+    "baseUrl": ".",
+    "rootDir": "./src",
     "outDir": "dist",
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
-    "tsBuildInfoFile": "dist/.tsbuildinfo"
+    "tsBuildInfoFile": "dist/.tsbuildinfo",
+    "paths": {
+      "@hallederiz/types": ["../types/dist/index.d.ts"],
+      "@hallederiz/types/*": ["../types/dist/*"]
+    }
   },
   "include": [
     "src/**/*.ts"
