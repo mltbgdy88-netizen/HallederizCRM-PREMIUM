@@ -20,6 +20,12 @@
     "noFallthroughCasesInSwitch": true,
     "baseUrl": ".",
     "paths": {
+      "@hallederiz/ai-contracts": [
+        "packages/ai-contracts/src/index.ts"
+      ],
+      "@hallederiz/ai-contracts/*": [
+        "packages/ai-contracts/src/*"
+      ],
       "@hallederiz/ui": [
         "packages/ui/src/index.ts"
       ],
