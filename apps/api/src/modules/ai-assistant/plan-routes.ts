@@ -26,7 +26,7 @@ function extractOperationTypes(plan: unknown): string[] {
       }
       return String((operation as { type?: unknown }).type ?? "");
     })
-    .filter((operationType): operationType is string => operationType.length > 0);
+    .filter((operationType): operationType is string => typeof operationType === "string" && operationType.length > 0);
 }
 
 export async function registerAiAssistantPlanRoutes(server: FastifyInstance) {
