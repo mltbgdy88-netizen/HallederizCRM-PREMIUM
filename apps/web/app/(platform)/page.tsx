@@ -1,5 +1,5 @@
-import { TaskCenterPage } from "../../src/features/task-center/components";
+import { redirect } from "next/navigation";
 
-export default function DashboardPage() {
-  return <TaskCenterPage />;
+export default function PlatformRootPage() {
+  redirect("/dashboard");
 }
