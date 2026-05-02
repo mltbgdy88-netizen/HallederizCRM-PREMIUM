@@ -1,0 +1,57 @@
+﻿---
+description: Safety and scope rules
+alwaysApply: true
+---
+
+# Safety Rules
+
+Work in small steps.
+
+Before editing files:
+1. Inspect the existing structure.
+2. List the files you plan to modify.
+3. Explain why each file needs to change.
+
+## Do not touch unless explicitly requested
+
+Do not modify these areas during UI tasks:
+
+- database migrations
+- backend persistence logic
+- auth logic
+- worker jobs
+- local AI service
+- approval executor logic
+- package lockfile unless dependency changes are required
+
+## Mutation UX rule
+
+Every action that changes system data must show feedback.
+
+Examples:
+
+- Kaydedildi
+- Silindi
+- Gonderildi
+- Onaylandi
+- Reddedildi
+
+After a successful mutation action, disable the triggering button or move it to a completed/passive state.
+
+Goal:
+
+- prevent duplicate submissions
+- prevent duplicate records
+- prevent repeated send operations
+
+## AI operation rule
+
+AI UI can suggest, summarize, draft, or explain.
+
+Do not implement direct CRM data-changing AI actions unless backend approval, policy, audit, transaction, idempotency, and outbox flow exists.
+
+## Implementation rule
+
+Prefer reusable components.
+
+Avoid duplicating layout patterns across pages.

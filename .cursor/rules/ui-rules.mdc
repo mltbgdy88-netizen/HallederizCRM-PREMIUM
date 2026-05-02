@@ -1,0 +1,86 @@
+﻿---
+description: UI implementation rules
+alwaysApply: true
+---
+
+# UI Rules
+
+Follow the visual direction in:
+
+- reference-dashboard-v1.png
+- crm-ui-blueprint.md
+- crm-backlog.md
+
+## Layout
+
+Use a premium SaaS CRM style:
+
+- dark navy left sidebar
+- bright white / light gray content area
+- purple accent color
+- rounded cards
+- soft shadows
+- clean Turkish labels
+- compact but readable tables
+
+## Sidebar
+
+Sidebar must include a large logo area at the top.
+
+Main sidebar items:
+
+- Gosterge Paneli
+- Hizli Islem
+- Onaylar
+- WhatsApp
+- Cariler
+- Urun / Stok
+- Arsiv
+- Raporlar
+- Ayarlar
+
+Do not use expanding archive submenus in the sidebar.
+
+Archive category buttons must appear inside the Archive page content area, not inside the sidebar.
+
+## Dashboard
+
+AI Assistant right column appears only on the dashboard homepage.
+
+The AI Assistant top area must look like a small video-capable screen with:
+
+- play button
+- progress bar
+- control icons
+- video frame styling
+
+It should not look like an image upload box.
+
+## Tables
+
+List pages should show compact rows.
+
+Target desktop density:
+
+- at least 20 visible rows where possible
+- clear columns
+- row click opens detail modal
+
+## Modals
+
+Detail modal should include:
+
+- record title
+- customer / document information
+- line items when relevant
+- totals when relevant
+- bottom action buttons
+
+Typical modal actions:
+
+- Duzenle
+- Sil
+- Kaydet
+- Gonder
+- Onayla
+- Reddet

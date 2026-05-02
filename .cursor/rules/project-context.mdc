@@ -1,0 +1,42 @@
+﻿---
+description: HallederizCRM project context
+alwaysApply: true
+---
+
+# HallederizCRM Premium - Project Context
+
+This repository is a Turkish CRM and operations platform.
+
+Core product areas:
+- CRM / cari management
+- Orders
+- Payments / tahsilat
+- Stock and inventory
+- WhatsApp operations
+- Approvals
+- Documents
+- Reports
+- AI-assisted operation planning
+
+Before making UI changes, read these files:
+
+- crm-ui-blueprint.md
+- crm-backlog.md
+- cursor-screen-prompt.md
+- reference-dashboard-v1.png
+
+Current UI priority:
+
+1. App shell
+2. Sidebar
+3. Topbar
+4. Dashboard homepage
+5. Toast and modal system
+6. Archive page
+7. Other pages
+
+Use Turkish labels for user-facing UI.
+
+Do not create a separate AI item in the left sidebar.
+AI Assistant appears only on the dashboard homepage.
+AI settings belong under Ayarlar.
