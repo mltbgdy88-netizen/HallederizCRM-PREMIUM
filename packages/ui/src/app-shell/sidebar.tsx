@@ -53,23 +53,27 @@ export function Sidebar({
       </div>
 
       <div className="hz-sidebar-scroll">
-        <section className="hz-sidebar-section">
-          <p className="hz-sidebar-section-title">Moduller</p>
-          <nav className="hz-sidebar-nav">
-            {primaryItems.map((item) => (
-              <SidebarItem key={item.key} item={item} activeHref={activeHref} onNavigate={onNavigate} />
-            ))}
-          </nav>
-        </section>
+        {primaryItems.length > 0 ? (
+          <section className="hz-sidebar-section">
+            <p className="hz-sidebar-section-title">Menü</p>
+            <nav className="hz-sidebar-nav">
+              {primaryItems.map((item) => (
+                <SidebarItem key={item.key} item={item} activeHref={activeHref} onNavigate={onNavigate} />
+              ))}
+            </nav>
+          </section>
+        ) : null}
 
-        <section className="hz-sidebar-section">
-          <p className="hz-sidebar-section-title">Sistem</p>
-          <nav className="hz-sidebar-nav">
-            {secondaryItems.map((item) => (
-              <SidebarItem key={item.key} item={item} activeHref={activeHref} onNavigate={onNavigate} />
-            ))}
-          </nav>
-        </section>
+        {secondaryItems.length > 0 ? (
+          <section className="hz-sidebar-section">
+            <p className="hz-sidebar-section-title">Sistem</p>
+            <nav className="hz-sidebar-nav">
+              {secondaryItems.map((item) => (
+                <SidebarItem key={item.key} item={item} activeHref={activeHref} onNavigate={onNavigate} />
+              ))}
+            </nav>
+          </section>
+        ) : null}
       </div>
 
       <div className="hz-sidebar-footer">

@@ -15,32 +15,18 @@ import { useAuth } from "../providers/auth-provider";
 import { useTheme } from "../providers/theme-provider";
 
 const PRIMARY_NAV_ITEMS: AppShellNavItem[] = [
-  { key: "dashboard", label: "Gorev Merkezi", href: "/", icon: <CRMIcon name="dashboard" /> },
-  { key: "tasks", label: "Gorevler", href: "/gorevler", icon: <CRMIcon name="dashboard" /> },
+  { key: "dashboard", label: "Gösterge Paneli", href: "/dashboard", icon: <CRMIcon name="dashboard" /> },
+  { key: "quick-operations", label: "Hızlı İşlem", href: "/hizli-islem", icon: <CRMIcon name="orders" /> },
   { key: "approvals", label: "Onaylar", href: "/onaylar", icon: <CRMIcon name="roles" /> },
-  { key: "customers", label: "Cariler", href: "/cariler", icon: <CRMIcon name="customers" /> },
-  { key: "stock", label: "Stok", href: "/stok", icon: <CRMIcon name="stock" /> },
-  { key: "offers", label: "Teklifler", href: "/teklifler", icon: <CRMIcon name="offers" /> },
-  { key: "orders", label: "Siparisler", href: "/siparisler", icon: <CRMIcon name="orders" /> },
-  { key: "quick-operations", label: "Hizli Islem", href: "/hizli-islem", icon: <CRMIcon name="orders" /> },
-  { key: "payments", label: "Tahsilatlar", href: "/tahsilatlar", icon: <CRMIcon name="payments" /> },
-  { key: "warehouse", label: "Depo", href: "/depo", icon: <CRMIcon name="warehouse" /> },
-  { key: "delivery", label: "Teslimatlar", href: "/teslimatlar", icon: <CRMIcon name="delivery" /> },
-  { key: "invoices", label: "Faturalar", href: "/faturalar", icon: <CRMIcon name="invoices" /> },
-  { key: "returns", label: "Iadeler", href: "/iadeler", icon: <CRMIcon name="returns" /> },
-  { key: "factories", label: "Fabrikalar", href: "/fabrikalar/stoklar", icon: <CRMIcon name="factories" /> },
-  { key: "erp", label: "ERP", href: "/erp", icon: <CRMIcon name="erp" /> },
   { key: "whatsapp", label: "WhatsApp", href: "/whatsapp", icon: <CRMIcon name="whatsapp" /> },
-  { key: "ai", label: "AI", href: "/ai", icon: <CRMIcon name="ai" />, badge: "5", pulse: true },
-  { key: "documents", label: "Belgeler", href: "/belgeler", icon: <CRMIcon name="documents" /> },
-  { key: "reports", label: "Raporlar", href: "/raporlar", icon: <CRMIcon name="reports" /> }
-];
-
-const SECONDARY_NAV_ITEMS: AppShellNavItem[] = [
-  { key: "users", label: "Kullanicilar", href: "/kullanicilar", icon: <CRMIcon name="users" /> },
-  { key: "roles", label: "Roller", href: "/kullanicilar/roller", icon: <CRMIcon name="roles" /> },
+  { key: "customers", label: "Cariler", href: "/cariler", icon: <CRMIcon name="customers" /> },
+  { key: "stock", label: "Ürün / Stok", href: "/stok", icon: <CRMIcon name="stock" /> },
+  { key: "archive", label: "Arşiv", href: "/archive", icon: <CRMIcon name="documents" /> },
+  { key: "reports", label: "Raporlar", href: "/raporlar", icon: <CRMIcon name="reports" /> },
   { key: "settings", label: "Ayarlar", href: "/ayarlar", icon: <CRMIcon name="settings" /> }
 ];
+
+const SECONDARY_NAV_ITEMS: AppShellNavItem[] = [];
 
 interface PageMeta {
   title: string;
@@ -67,11 +53,13 @@ const PAGE_META: Array<[string, PageMeta]> = [
   ["/fabrikalar/siparisler/", { title: "Fabrika Siparis Detayi", subtitle: "Fabrika durum ve senkron paneli.", breadcrumb: "Fabrikalar / Siparis Detay" }],
   ["/ai/onaylar", { title: "AI Onaylar", subtitle: "Proposal ve approval kayitlarini yonetin.", breadcrumb: "AI / Onaylar" }],
   ["/ai/icgoruler", { title: "AI Icgoruler", subtitle: "AI risk/firsat analizlerini takip edin.", breadcrumb: "AI / Icgoruler" }],
-  ["/hizli-islem", { title: "Hizli Islem Merkezi", subtitle: "Klasik fis hissiyle satir, kaynak ve operasyon etkisini tek ekranda yonetin.", breadcrumb: "Hizli Islem" }],
+  ["/hizli-islem", { title: "Hızlı İşlem Merkezi", subtitle: "Klasik fiş hissiyle satır, kaynak ve operasyon etkisini tek ekranda yönetin.", breadcrumb: "Hızlı İşlem" }],
+  ["/dashboard", { title: "Gösterge Paneli", subtitle: "Günlük operasyon kontrol merkezi.", breadcrumb: "Gösterge Paneli" }],
+  ["/archive", { title: "Arşiv", subtitle: "Geçmiş işlemler ve belge arşivi (yer tutucu).", breadcrumb: "Arşiv" }],
   ["/kurulum/veri-yukleme", { title: "Veri Yukleme", subtitle: "CSV tabanli import merkezi ile cari, urun, fiyat ve stok yukleyin.", breadcrumb: "Kurulum / Veri Yukleme" }],
   ["/ayarlar/veri-yukleme", { title: "Veri Yukleme", subtitle: "Template indir, dosya yukle, onizle ve ice aktar.", breadcrumb: "Ayarlar / Veri Yukleme" }],
   ["/ayarlar/kullanim-hazirligi", { title: "Kullanim Hazirligi", subtitle: "Canli kullanim oncesi kritik eksik ve servis durumunu izleyin.", breadcrumb: "Ayarlar / Kullanim Hazirligi" }],
-  ["/", { title: "Gorev Merkezi", subtitle: "Sistem ve AI kartlariyla operasyon odakli kontrol merkezi.", breadcrumb: "Anasayfa" }],
+  ["/", { title: "Gösterge Paneli", subtitle: "Yönlendiriliyor…", breadcrumb: "Gösterge Paneli" }],
   ["/gorevler", { title: "Gorevler", subtitle: "Workflow ve dashboard kaynakli operasyon gorevleri.", breadcrumb: "Gorevler" }],
   ["/onaylar", { title: "Onaylar", subtitle: "Insan onayli operasyon ve AI proposal karar merkezi.", breadcrumb: "Onaylar" }],
   ["/cariler", { title: "Cariler", subtitle: "Cari portfoyu, risk ve finans baglami.", breadcrumb: "Cariler" }],
@@ -95,21 +83,13 @@ const PAGE_META: Array<[string, PageMeta]> = [
 ];
 
 function resolveActiveHref(pathname: string): string {
-  if (pathname === "/") {
-    return "/";
-  }
-
-  if (pathname.startsWith("/fabrikalar")) {
-    return "/fabrikalar/stoklar";
-  }
-
-  for (const item of [...PRIMARY_NAV_ITEMS, ...SECONDARY_NAV_ITEMS]) {
+  const items = [...PRIMARY_NAV_ITEMS, ...SECONDARY_NAV_ITEMS].sort((a, b) => b.href.length - a.href.length);
+  for (const item of items) {
     if (pathname === item.href || pathname.startsWith(`${item.href}/`)) {
       return item.href;
     }
   }
-
-  return "/";
+  return "";
 }
 
 function getPageMeta(pathname: string): PageMeta {
