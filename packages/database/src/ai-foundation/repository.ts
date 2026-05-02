@@ -157,6 +157,8 @@ export interface AiFoundationRepository {
   reserveIdempotencyKey(input: IdempotencyKeyInsert): Promise<{ id?: string; status?: string }>;
   createAiProposal(input: AiProposalInsert): Promise<string | undefined>;
   createAiProposalOperation(input: AiProposalOperationInsert): Promise<string | undefined>;
+  createAiProposalValidation(input: AiProposalValidationInsert): Promise<string | undefined>;
+  createAiPromptAudit(input: AiPromptAuditInsert): Promise<string | undefined>;
   createApprovalTicket(input: ApprovalTicketInsert): Promise<string | undefined>;
 }
 
@@ -181,6 +183,8 @@ export function createAiFoundationRepository(executor: QueryExecutor): AiFoundat
     },
     createAiProposal: (input) => insertReturningId(buildInsertAiProposal(input)),
     createAiProposalOperation: (input) => insertReturningId(buildInsertAiProposalOperation(input)),
+    createAiProposalValidation: (input) => insertReturningId(buildInsertAiProposalValidation(input)),
+    createAiPromptAudit: (input) => insertReturningId(buildInsertAiPromptAudit(input)),
     createApprovalTicket: (input) => insertReturningId(buildInsertApprovalTicket(input)),
   };
 }

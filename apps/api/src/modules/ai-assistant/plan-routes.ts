@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { safeParseAiOperationPlan, isForbiddenOperationType } from "@hallederiz/ai-contracts";
 import { assertAuthenticated, withGuards } from "../../shared/auth-guards";
 import { recordAuditEvent } from "../../shared/audit-timeline";
+import { persistValidatedAiPlan } from "./plan-persistence-service";
 
 interface AiAssistantPlanBody {
   plan?: unknown;
@@ -33,6 +34,7 @@ export async function registerAiAssistantPlanRoutes(server: FastifyInstance) {
   server.post<{ Body: AiAssistantPlanBody }>("/api/ai/assistant/plan", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated], async (context) => {
       const plan = request.body?.plan;
+      const source = request.body?.source ?? "crm_ui";
 
       if (!plan) {
         return reply.status(400).send({
@@ -52,7 +54,7 @@ export async function registerAiAssistantPlanRoutes(server: FastifyInstance) {
           title: "AI plan reddedildi",
           description: `Yasak operasyon tipleri tespit edildi: ${forbiddenOperationTypes.join(", ")}`,
           payload: {
-            source: request.body?.source ?? "crm_ui",
+            source,
             forbiddenOperationTypes
           }
         });
@@ -74,7 +76,7 @@ export async function registerAiAssistantPlanRoutes(server: FastifyInstance) {
           title: "AI plan dogrulamasi basarisiz",
           description: "AI operation plan schema validation basarisiz oldu.",
           payload: {
-            source: request.body?.source ?? "crm_ui",
+            source,
             issues: validation.error.issues.map((issue) => ({
               path: issue.path.join("."),
               message: issue.message
@@ -93,31 +95,26 @@ export async function registerAiAssistantPlanRoutes(server: FastifyInstance) {
       }
 
       const validatedPlan = validation.data;
-      const approvalRequiredOperations = validatedPlan.operations.filter((operation) => operation.requiresApproval);
-
-      recordAuditEvent(context, {
-        entityType: "ai_proposal",
-        entityId: "validated_plan",
-        eventType: "ai.plan.validated",
-        title: "AI plan dogrulandi",
-        description: `${validatedPlan.operations.length} operasyon iceren AI plan dogrulandi.`,
-        payload: {
-          source: request.body?.source ?? "crm_ui",
-          operationCount: validatedPlan.operations.length,
-          requiresApproval: validatedPlan.requiresApproval,
-          approvalRequiredOperationCount: approvalRequiredOperations.length
-        }
+      const persistedPlan = await persistValidatedAiPlan({
+        context,
+        plan: validatedPlan,
+        source,
+        prompt: request.body?.prompt
       });
 
-      return reply.status(validatedPlan.requiresApproval ? 202 : 200).send({
+      return reply.status(validatedPlan.requiresApproval ? 202 : 201).send({
         ok: true,
         item: {
+          proposalId: persistedPlan.proposalId,
+          proposalNo: persistedPlan.proposalNo,
+          approvalTicketIds: persistedPlan.approvalTicketIds,
           plan: validatedPlan,
           proposalMode: true,
           directMutation: false,
+          persisted: true,
           requiresApproval: validatedPlan.requiresApproval,
-          approvalRequiredOperationCount: approvalRequiredOperations.length,
-          nextStep: validatedPlan.requiresApproval ? "approval_ticket_required" : "read_only_or_draft_response"
+          approvalRequiredOperationCount: persistedPlan.approvalRequiredOperationCount,
+          nextStep: validatedPlan.requiresApproval ? "approval_ticket_required" : "persisted_read_only_or_draft_response"
         }
       });
     })
