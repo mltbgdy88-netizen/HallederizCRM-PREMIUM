@@ -4,6 +4,7 @@ import { registerAiLocalOutputRoutes } from "./ai-local-output-routes";
 import { registerCommercialOperationsRoutes } from "./commercial-operations/routes";
 import { registerImportRoutes } from "./imports/routes";
 import { registerIntegrationRoutes } from "./integrations/routes";
+import { registerAiAssistantPlanRoutes } from "./modules/ai-assistant/plan-routes";
 import { registerOperationsEngineRoutes } from "./operations-engine/routes";
 import { registerPlatformCoreRoutes } from "./platform-core/routes";
 import { registerProductStockPricingRoutes } from "./product-stock-pricing/routes";
@@ -42,6 +43,7 @@ async function bootstrap() {
   await registerIntegrationRoutes(server);
   await registerImportRoutes(server);
   await registerQuickOperationsRoutes(server);
+  await registerAiAssistantPlanRoutes(server);
   await registerAiLocalOutputRoutes(server);
   await server.listen({ port, host });
 }
