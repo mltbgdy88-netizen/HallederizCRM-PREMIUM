@@ -3,6 +3,8 @@ import type { ReactNode } from "react";
 export interface HeaderProps {
   title: string;
   subtitle: string;
+  /** true: sol başlık / breadcrumb / alt başlık gösterilmez (sayfa kendi başlığını kullanır). */
+  suppressPageMeta?: boolean;
   breadcrumb?: string;
   searchPlaceholder?: string;
   /** Replaces the left title / breadcrumb / subtitle block (e.g. dashboard greeting). */
@@ -19,6 +21,7 @@ export interface HeaderProps {
 export function Header({
   title,
   subtitle,
+  suppressPageMeta = false,
   breadcrumb,
   searchPlaceholder = "Global arama (yakinda)",
   leadingSlot,
@@ -28,12 +31,14 @@ export function Header({
   userSlot,
   layout = "default"
 }: HeaderProps) {
-  const rootClass = `hz-header-root ${layout === "dashboard" ? "hz-header-root--dashboard" : ""}`;
+  const rootClass = `hz-header-root ${layout === "dashboard" ? "hz-header-root--dashboard" : ""} ${suppressPageMeta ? "hz-header-root--qop" : ""}`;
 
   return (
     <div className={rootClass}>
       {leadingSlot ? (
         <div className="hz-header-leading">{leadingSlot}</div>
+      ) : suppressPageMeta ? (
+        <div className="hz-header-meta hz-header-meta--suppressed" aria-hidden="true" />
       ) : (
         <div className="hz-header-meta">
           {breadcrumb ? <p className="hz-header-breadcrumb">{breadcrumb}</p> : null}

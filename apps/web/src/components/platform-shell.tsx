@@ -70,7 +70,7 @@ const PAGE_META: Array<[string, PageMeta]> = [
   ["/fabrikalar/siparisler/", { title: "Fabrika Siparis Detayi", subtitle: "Fabrika durum ve senkron paneli.", breadcrumb: "Fabrikalar / Siparis Detay" }],
   ["/ai/onaylar", { title: "AI Onaylar", subtitle: "Proposal ve approval kayitlarini yonetin.", breadcrumb: "AI / Onaylar" }],
   ["/ai/icgoruler", { title: "AI Icgoruler", subtitle: "AI risk/firsat analizlerini takip edin.", breadcrumb: "AI / Icgoruler" }],
-  ["/hizli-islem", { title: "Hızlı İşlem Merkezi", subtitle: "Klasik fiş hissiyle satır, kaynak ve operasyon etkisini tek ekranda yönetin.", breadcrumb: "Hızlı İşlem" }],
+  ["/hizli-islem", { title: "Hızlı İşlem", subtitle: "Sipariş, tahsilat, fiyat ve belge işlemlerini hızlıca hazırlayın.", breadcrumb: "Hızlı İşlem" }],
   ["/dashboard", { title: "Gösterge Paneli", subtitle: "", breadcrumb: "" }],
   ["/archive", { title: "Arşiv", subtitle: "Geçmiş işlemler ve belge arşivi (yer tutucu).", breadcrumb: "Arşiv" }],
   ["/kurulum/veri-yukleme", { title: "Veri Yukleme", subtitle: "CSV tabanli import merkezi ile cari, urun, fiyat ve stok yukleyin.", breadcrumb: "Kurulum / Veri Yukleme" }],
@@ -153,6 +153,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
   const pageMeta = useMemo(() => getPageMeta(pathname), [pathname]);
   const activeHref = resolveActiveHref(pathname);
   const isDashboard = pathname === "/dashboard";
+  const isQuickOperation = pathname === "/hizli-islem";
 
   const dashboardGreeting = useMemo(() => {
     const display = session?.user.fullName?.trim() || "Ahmet Yılmaz";
@@ -183,6 +184,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
       header={
         <Header
           layout={isDashboard ? "dashboard" : "default"}
+          suppressPageMeta={isQuickOperation}
           title={pageMeta.title}
           subtitle={pageMeta.subtitle}
           breadcrumb={pageMeta.breadcrumb}
