@@ -57,9 +57,9 @@ const QUICK_ACTIONS = [
   { label: "Depolari kontrol et", href: "/ayarlar" },
   { label: "Kullanici ekle", href: "/kullanicilar" },
   { label: "Veri yukleme merkezine git", href: "/kurulum/veri-yukleme" },
-  { label: "Staging kontrolu ac", href: "/ayarlar/staging-kontrol" },
+  { label: "Hazırlık kontrolünü aç", href: "/ayarlar/staging-kontrol" },
   { label: "Belge sablonlarini ac", href: "/belgeler" },
-  { label: "Local agent durumunu kontrol et", href: "/ayarlar/staging-kontrol" }
+  { label: "Yerel arac bağlantısını doğrula", href: "/ayarlar/staging-kontrol" }
 ] as const;
 
 type TaskTone = "kritik" | "oneri" | "hazir";
@@ -74,7 +74,7 @@ const ONBOARDING_TASKS: Record<"yonetici" | "satis" | "muhasebe" | "depo" | "paz
   yonetici: [
     { title: "Kullanim blokajlarini kontrol et", href: "/ayarlar/kullanim-hazirligi", relatedItemIds: ["company-profile", "import-customers", "import-products"] },
     { title: "Onay bekleyen islemleri ac", href: "/onaylar", relatedItemIds: ["service-ai"] },
-    { title: "Entegrasyon sagligini dogrula", href: "/ayarlar/staging-kontrol", relatedItemIds: ["service-erp", "service-whatsapp", "service-factory", "service-local-agent"] }
+    { title: "Entegrasyon sağlığını doğrula (hazırlık)", href: "/ayarlar/staging-kontrol", relatedItemIds: ["service-erp", "service-whatsapp", "service-factory", "service-local-agent"] }
   ],
   satis: [
     { title: "Fiyat slotlarini kontrol et", href: "/ayarlar", relatedItemIds: ["price-slots"] },
@@ -84,7 +84,7 @@ const ONBOARDING_TASKS: Record<"yonetici" | "satis" | "muhasebe" | "depo" | "paz
   muhasebe: [
     { title: "Tahsilat ekranini kontrol et", href: "/tahsilatlar", relatedItemIds: ["import-customers"] },
     { title: "Ekstre ve belge akisini gozden gecir", href: "/belgeler", relatedItemIds: ["document-templates"] },
-    { title: "Odeme hatirlatma ayarlarini kontrol et", href: "/ayarlar/staging-kontrol", relatedItemIds: ["service-whatsapp", "service-ai"] }
+    { title: "Ödeme hatırlatma ve servis hazırlığını kontrol et", href: "/ayarlar/staging-kontrol", relatedItemIds: ["service-whatsapp", "service-ai"] }
   ],
   depo: [
     { title: "Depo tanimlarini dogrula", href: "/ayarlar", relatedItemIds: ["warehouses"] },

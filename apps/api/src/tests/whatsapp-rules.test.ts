@@ -2,16 +2,16 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import { resolveWhatsAppRulePolicy } from "@hallederiz/domain";
 
-test("stok intent can auto reply without linked customer", () => {
+test("stok: kayitli telefon ve cari boolean map true; otomatik cevap conditional maps false", () => {
   const rule = resolveWhatsAppRulePolicy({ intent: "stok" });
 
-  assert.equal(rule.canAutoReply, true);
-  assert.equal(rule.requiresRegisteredPhone, false);
-  assert.equal(rule.requiresLinkedCustomer, false);
-  assert.equal(rule.requiresInternalApproval, false);
+  assert.equal(rule.canAutoReply, false);
+  assert.equal(rule.requiresRegisteredPhone, true);
+  assert.equal(rule.requiresLinkedCustomer, true);
+  assert.equal(rule.requiresInternalApproval, true);
 });
 
-test("fiyat and ekstre require linked customer", () => {
+test("fiyat ve ekstre: kayitli telefon ve cari zorunlu; otomatik cevap kapalı", () => {
   const price = resolveWhatsAppRulePolicy({ intent: "fiyat" });
   const statement = resolveWhatsAppRulePolicy({ intent: "ekstre" });
 
@@ -22,8 +22,18 @@ test("fiyat and ekstre require linked customer", () => {
   assert.equal(statement.requiresLinkedCustomer, true);
 });
 
-test("siparis requires internal sales accounting and crm approval", () => {
+test("siparis: satış ve CRM boolean true; muhasebe hayır — onay rolleri crm_and_sales", () => {
   const rule = resolveWhatsAppRulePolicy({ intent: "siparis" });
+
+  assert.equal(rule.requiresInternalApproval, true);
+  assert.equal(rule.requiresSalesApproval, true);
+  assert.equal(rule.requiresAccountingApproval, false);
+  assert.equal(rule.requiresCrmApproval, true);
+  assert.deepEqual(rule.requiredRoles, ["crm", "sales"]);
+});
+
+test("iade: çoklu onay — crm_and_sales + muhasebe", () => {
+  const rule = resolveWhatsAppRulePolicy({ intent: "iade" });
 
   assert.equal(rule.requiresInternalApproval, true);
   assert.equal(rule.requiresSalesApproval, true);
@@ -32,25 +42,15 @@ test("siparis requires internal sales accounting and crm approval", () => {
   assert.deepEqual(rule.requiredRoles, ["crm", "sales", "accounting"]);
 });
 
-test("iade requires sales and accounting approval", () => {
-  const rule = resolveWhatsAppRulePolicy({ intent: "iade" });
-
-  assert.equal(rule.requiresInternalApproval, true);
-  assert.equal(rule.requiresSalesApproval, true);
-  assert.equal(rule.requiresAccountingApproval, true);
-  assert.equal(rule.requiresCrmApproval, false);
-  assert.deepEqual(rule.requiredRoles, ["sales", "accounting"]);
-});
-
-test("hatali_urun requires approval but not linked customer", () => {
+test("hatali_urun: telefon ve cari matrise göre zorunlu", () => {
   const rule = resolveWhatsAppRulePolicy({ intent: "hatali_urun" });
 
   assert.equal(rule.requiresInternalApproval, true);
-  assert.equal(rule.requiresLinkedCustomer, false);
-  assert.equal(rule.requiresRegisteredPhone, false);
+  assert.equal(rule.requiresLinkedCustomer, true);
+  assert.equal(rule.requiresRegisteredPhone, true);
 });
 
-test("sales and accounting phones are normalized into approverPhones", () => {
+test("sales ve accounting telefonları normalize edilir", () => {
   const rule = resolveWhatsAppRulePolicy({
     intent: "iade",
     settings: {

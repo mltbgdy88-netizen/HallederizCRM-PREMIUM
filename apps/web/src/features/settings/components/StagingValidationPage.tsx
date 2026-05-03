@@ -120,8 +120,8 @@ export function StagingValidationPage() {
   return (
     <div className="hz-page-stack">
       <PageHeader
-        title="Staging Kontrol"
-        description="Canli baglantiya gecis oncesi AI, WhatsApp, ERP, Fabrika ve Local Agent servis sagligini dogrulayin."
+        title="Hazırlık kontrolü"
+        description="Canlı bağlantıya geçiş öncesi AI, WhatsApp, ERP, fabrika ve yerel aracı servis sağlığını doğrulayın."
       />
 
       <section className="hz-metric-grid">
