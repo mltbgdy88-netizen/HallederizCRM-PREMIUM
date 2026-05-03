@@ -1,12 +1,5 @@
-import { PagePlaceholder } from "../../../src/components/page-placeholder";
+import { ArchivePage } from "../../../src/features/archive/components/ArchivePage";
 
-export default function ArchivePlaceholderPage() {
-  return (
-    <div className="hz-page-stack">
-      <PagePlaceholder
-        title="Arşiv"
-        description="Belge ve işlem arşivi bu sürümde yer tutucu olarak açılır. Kategori sekmeleri ve liste görünümü sonraki dilimde eklenecek."
-      />
-    </div>
-  );
+export default function ArchiveRoutePage() {
+  return <ArchivePage />;
 }

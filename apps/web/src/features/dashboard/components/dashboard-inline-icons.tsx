@@ -593,6 +593,34 @@ export function IconArrowUpRight({ size = 14, className }: IcoProps) {
   );
 }
 
+export function IconDownload({ size = 18, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3" stroke="currentColor" strokeWidth="2" {...S.round} />
+    </svg>
+  );
+}
+
+export function IconArchive({ size = 18, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M21 8v11a2 2 0 01-2 2H5a2 2 0 01-2-2V8" stroke="currentColor" strokeWidth="2" {...S.round} />
+      <path d="M1 3h22v5H1z" stroke="currentColor" strokeWidth="2" {...S.round} />
+      <path d="M10 12h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconDatabase({ size = 18, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <ellipse cx="12" cy="5" rx="9" ry="3" stroke="currentColor" strokeWidth="2" />
+      <path d="M3 5v14c0 1.66 4.03 3 9 3s9-1.34 9-3V5" stroke="currentColor" strokeWidth="2" />
+      <path d="M3 12c0 1.66 4.03 3 9 3s9-1.34 9-3" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  );
+}
+
 export type ActivityIconKind = "order" | "pay" | "invoice" | "wa" | "stock" | "doc";
 
 export function ActivityFeedIcon({ kind, size = 17 }: { kind: ActivityIconKind; size?: number }) {

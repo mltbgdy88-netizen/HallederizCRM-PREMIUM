@@ -528,7 +528,7 @@ export function StockPage() {
           radarDone={radarDone}
           onFireRadar={fireRadarDemo}
           onOpenDetail={handleOpenDetail}
-          onGoArchive={() => router.push("/arsiv")}
+          onGoArchive={() => router.push("/archive")}
           onGoQuickOp={() => router.push("/hizli-islem")}
         />
       </div>
