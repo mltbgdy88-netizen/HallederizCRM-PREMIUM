@@ -1,43 +1,34 @@
-﻿# Agent Instructions
+﻿# AGENTS.md — HallederizCRM Agent Instructions
 
-Use this file as a short instruction guide for Cursor agents.
+Bu repo HallederizCRM-PREMIUM projesidir.
 
-## First read
+## Varsayılan davranış
 
-Before UI work, read:
+- Önce mevcut dosyaları incele.
+- Gereksiz refactor yapma.
+- Kabul edilmiş tasarımları bozma.
+- Sadece istenen kapsamda değişiklik yap.
+- Büyük mimari değişiklikleri kullanıcının açık onayı olmadan yapma.
 
-- crm-ui-blueprint.md
-- crm-backlog.md
-- cursor-screen-prompt.md
-- reference-dashboard-v1.png
+## UI işleri
 
-## Current priority
+UI işi verildiyse:
+- Sadece apps/web ve gerekirse packages/ui içinde çalış.
+- Backend/API/database/auth/worker dosyalarına dokunma.
+- Ölçülü referans görselleri dikkate al.
+- 1920x1080 hedef viewport için body scroll ve yatay scroll üretme.
+- Kartları kırpma.
+- Emoji ikon kullanma.
+- Profesyonel CRM görünümü koru.
 
-Implement the homepage/dashboard UI first.
+## AI ve onay mimarisi
 
-## Scope
+- AI proposal-only çalışır.
+- AI doğrudan CRM verisi değiştirmez.
+- Mutation işlemleri backend policy + approval + transaction + audit + outbox zincirinden geçer.
+- UI butonları başarılı işlemden sonra toast gösterir ve disabled olur.
 
-For UI tasks:
+## Komutlar
 
-- work mainly inside apps/web
-- use shared UI packages only when useful
-- do not touch backend/database/migrations unless explicitly asked
-
-## Dashboard rules
-
-- Right AI assistant column appears only on dashboard.
-- AI assistant top panel should look like a video-capable screen.
-- Sidebar must reserve a large logo area.
-- No AI Assistant item in sidebar.
-- No expanding archive submenu in sidebar.
-
-## UX rules
-
-- Show toast feedback for successful actions.
-- Disable successful mutation buttons to prevent duplicate actions.
-- Row click should open detail modal on table/list pages.
-- Use compact tables with at least 20 visible rows where possible.
-
-## Language
-
-Use Turkish for user-facing UI labels.
+Kullanıcı özellikle istemedikçe komut çalıştırmadan önce bildir.
+PowerShell komutları tek parça, kopyala-yapıştır çalışacak şekilde verilmelidir.

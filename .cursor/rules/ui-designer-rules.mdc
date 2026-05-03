@@ -1,0 +1,104 @@
+﻿---
+description: Frontend UI tasarımı, ölçü, renk, ikon ve layout kuralları
+globs:
+  - "apps/web/**/*"
+  - "packages/ui/**/*"
+alwaysApply: true
+---
+
+# HallederizCRM UI Designer Rules
+
+## Genel UI hedefi
+
+Tasarım dili:
+- Modern kurumsal CRM
+- Premium operasyon paneli hissi
+- Lacivert sidebar
+- Açık gri / beyaz ana içerik
+- Yumuşak border
+- Yuvarlatılmış kartlar
+- Kontrollü renk kullanımı
+- Profesyonel ve kompakt görünüm
+
+## Ölçü kuralları
+
+Hedef viewport:
+- 1920 x 1080
+
+Genel:
+- Dış boşluklar kontrollü olmalı.
+- Ana gutter genelde 16px olmalı.
+- Sağ panel varsa yaklaşık 330px olmalı.
+- Ana içerik minmax(0, 1fr) mantığında olmalı.
+- Sayfa body scroll üretmemeli.
+- Yatay scrollbar kabul edilmez.
+- Kartlar kırpılmamalı.
+- Kart gridlerinde 1600px üzeri mümkünse 4 kolon hedeflenir.
+- Root sayfa classları height: 100%, min-height: 0, overflow: hidden mantığıyla kurulmalıdır.
+
+## Renk sistemi
+
+Primary:
+- Mor / mavi
+
+Success:
+- Yeşil
+
+Warning:
+- Amber / turuncu
+
+Danger:
+- Kırmızı / coral
+
+Info:
+- Mavi / cyan
+
+Neutral:
+- Koyu lacivert metin
+- Açık mavi-gri border
+- Beyaz kart zemini
+- Çok açık gri arka plan
+
+## İkon kuralları
+
+- Emoji ikon kullanma.
+- Rastgele dolu yuvarlak ikon kullanma.
+- Tek, tutarlı, çizgisel ikon dili kullan.
+- İkonlar genelde 16-20px aralığında olmalı.
+- Kart ikon kutuları 34-44px olabilir.
+- Dashboard / Hızlı İşlem ikon diliyle uyumlu olmalı.
+
+## CSS kuralları
+
+- Yeni CSS classları sayfaya özel prefix ile yaz:
+  - .hz-dashboard-*
+  - .hz-qop-*
+  - .hz-approvals-*
+  - .hz-archive-*
+- Genel button, div, table, input selector yazma.
+- Başka sayfalara sızacak global CSS ekleme.
+- Kabul edilmiş Dashboard ve Hızlı İşlem tasarımlarını bozma.
+
+## Mutation buton kuralı
+
+Veri değiştiren tüm butonlar:
+- Kaydet
+- Sil
+- Düzenle
+- Gönder
+- Kabul Et
+- Onayla
+- Reddet
+- Sipariş Oluştur
+- Tahsilat İşle
+
+Başarılı işlem sonrası:
+1. Toast / küçük bilgi mesajı göstermeli.
+2. Aynı işlemin ikinci kez yapılmaması için disabled hale gelmeli.
+3. Mükerrer kayıt oluşmasını engelleyecek state yönetimi olmalı.
+
+## AI UI kuralı
+
+- AI chat/etkileşim kolonu sadece Dashboard ana sayfasında olur.
+- Diğer sayfalarda sağ AI chat kolonu oluşturma.
+- Onaylar, Arşiv, Hızlı İşlem gibi sayfalarda gerekirse sadece sayfaya özel küçük öneri/uyarı kartları kullanılabilir.

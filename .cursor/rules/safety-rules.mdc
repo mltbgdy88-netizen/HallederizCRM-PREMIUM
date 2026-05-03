@@ -1,57 +1,62 @@
 ﻿---
-description: Safety and scope rules
+description: Güvenlik, dosya sınırı, backend koruma ve onay mimarisi kuralları
+globs:
+  - "**/*"
 alwaysApply: true
 ---
 
-# Safety Rules
+# HallederizCRM Safety Rules
 
-Work in small steps.
+## Dosya sınırı
 
-Before editing files:
-1. Inspect the existing structure.
-2. List the files you plan to modify.
-3. Explain why each file needs to change.
+Kullanıcı açıkça istemedikçe şu alanlara dokunma:
+- apps/api
+- packages/database
+- packages/domain
+- apps/worker
+- apps/local-ai-service
+- migration dosyaları
+- auth dosyaları
+- env / secret dosyaları
+- Docker / deployment dosyaları
 
-## Do not touch unless explicitly requested
+UI görevi verildiyse sadece frontend UI dosyalarında çalış:
+- apps/web
+- packages/ui
+- gerekirse sadece ilgili route/component/CSS
 
-Do not modify these areas during UI tasks:
+## Backend güvenlik kuralı
 
-- database migrations
-- backend persistence logic
-- auth logic
-- worker jobs
-- local AI service
-- approval executor logic
-- package lockfile unless dependency changes are required
+AI hiçbir zaman doğrudan CRM mutation yapamaz.
+AI output sadece öneridir.
+Gerçek işlem backend içinde:
+- policy
+- approval
+- transaction
+- audit
+- outbox
+zincirinden geçmelidir.
 
-## Mutation UX rule
+## Onay sistemi kuralı
 
-Every action that changes system data must show feedback.
+Onay gerektiren işlemler:
+- create_order
+- create_payment
+- complete_delivery
+- create_invoice
+- create_return
+- send_document_whatsapp
+- queue_document_save
+- queue_document_print
+- ai_plan_approval
 
-Examples:
+UI tarafında bu işlemler sadece taslak/demo olarak gösterilebilir.
+Gerçek execution bağlanacaksa ayrıca açık görev ve backend planı gerekir.
 
-- Kaydedildi
-- Silindi
-- Gonderildi
-- Onaylandi
-- Reddedildi
+## Test kuralı
 
-After a successful mutation action, disable the triggering button or move it to a completed/passive state.
+Frontend UI değişikliğinden sonra önerilecek kontroller:
+- pnpm --filter @hallederiz/web typecheck
+- pnpm --filter @hallederiz/ui typecheck
 
-Goal:
-
-- prevent duplicate submissions
-- prevent duplicate records
-- prevent repeated send operations
-
-## AI operation rule
-
-AI UI can suggest, summarize, draft, or explain.
-
-Do not implement direct CRM data-changing AI actions unless backend approval, policy, audit, transaction, idempotency, and outbox flow exists.
-
-## Implementation rule
-
-Prefer reusable components.
-
-Avoid duplicating layout patterns across pages.
+Backend/package değişirse ayrıca ilgili package typecheck/build gerekir.

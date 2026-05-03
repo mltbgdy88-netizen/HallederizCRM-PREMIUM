@@ -1,42 +1,33 @@
 ﻿---
-description: HallederizCRM project context
+description: HallederizCRM genel proje bağlamı ve ürün hedefleri
+globs:
+  - "**/*"
 alwaysApply: true
 ---
 
-# HallederizCRM Premium - Project Context
+# HallederizCRM Premium Project Context
 
-This repository is a Turkish CRM and operations platform.
+Bu proje HallederizCRM-PREMIUM projesidir.
 
-Core product areas:
-- CRM / cari management
-- Orders
-- Payments / tahsilat
-- Stock and inventory
-- WhatsApp operations
-- Approvals
-- Documents
-- Reports
-- AI-assisted operation planning
+Ana hedef:
+- Çok kiracılı kurumsal CRM
+- Operasyon platformu
+- WhatsApp otomasyonu
+- ERP / fabrika entegrasyonları
+- AI destekli ama kontrollü onay akışları
+- Local AI assistant yaklaşımı
+- Stok, sipariş, tahsilat, iade, belge ve arşiv yönetimi
 
-Before making UI changes, read these files:
+Temel mimari kural:
+- AI doğrudan CRM verisini değiştirmez.
+- AI sadece öneri, plan, özet, risk açıklaması ve taslak üretir.
+- Gerçek mutation backend tarafında policy + approval + transaction + audit + outbox zincirinden geçer.
 
-- crm-ui-blueprint.md
-- crm-backlog.md
-- cursor-screen-prompt.md
-- reference-dashboard-v1.png
-
-Current UI priority:
-
-1. App shell
-2. Sidebar
-3. Topbar
-4. Dashboard homepage
-5. Toast and modal system
-6. Archive page
-7. Other pages
-
-Use Turkish labels for user-facing UI.
-
-Do not create a separate AI item in the left sidebar.
-AI Assistant appears only on the dashboard homepage.
-AI settings belong under Ayarlar.
+Ana UI kararları:
+- Sol menü sade ve kurumsal olmalı.
+- AI etkileşim kolonu sadece Dashboard ana sayfasında olur.
+- Diğer sayfalarda AI chat kolonu eklenmez.
+- Gerekirse sağ panelde sayfaya özel AI öneri/uyarı kartları olabilir.
+- Arşiv tek sol menü kalemi olarak kalır; alt menü açılmaz.
+- Hızlı İşlem yeni kayıt/fiş merkezi olarak çalışır.
+- Sipariş, tahsilat, teslimat, iade gibi geçmiş işlemler Arşiv mantığına taşınır.
