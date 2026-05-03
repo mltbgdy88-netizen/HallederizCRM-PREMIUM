@@ -1,56 +1,147 @@
 "use client";
 
+import { useState } from "react";
+import { useAuth } from "../../../providers/auth-provider";
+import { useToast } from "../../../providers/toast-provider";
+
+function greetingFirstName(fullName: string | undefined): string {
+  if (!fullName?.trim()) return "Ahmet";
+  return fullName.trim().split(/\s+/)[0] ?? "Ahmet";
+}
+
+const AI_CHIPS = [
+  { id: "summary", label: "Günlük Özeti Anlat" },
+  { id: "collect", label: "Tahsilat Durumu Söyle" },
+  { id: "stock", label: "Stok Risklerini Kontrol Et" },
+  { id: "loss", label: "Mevcut kayıp için stok durumu nedir?" }
+];
+
 export function DashboardAiAssistantPanel() {
+  const { session } = useAuth();
+  const { pushToast } = useToast();
+  const first = greetingFirstName(session?.user.fullName);
+  const [summaryDone, setSummaryDone] = useState(false);
+
   return (
-    <div className="hz-ai-panel">
-      <div className="hz-ai-video-frame" aria-label="Asistan önizleme alanı">
-        <div className="hz-ai-video-chrome">
-          <button type="button" className="hz-ai-video-play" aria-label="Oynat">
-            <span className="hz-ai-video-play-icon" aria-hidden />
-          </button>
-          <div className="hz-ai-video-timeline">
-            <div className="hz-ai-video-progress" />
-          </div>
-          <div className="hz-ai-video-controls">
-            <button type="button" className="hz-ai-video-icon-btn" aria-label="Ses">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                <path d="M11 5L6 9H2v6h4l5 4V5z" />
-                <path d="M15.54 8.46a5 5 0 010 7.07" />
-              </svg>
-            </button>
-            <button type="button" className="hz-ai-video-icon-btn" aria-label="Tam ekran">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-                <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" />
-              </svg>
-            </button>
-            <button type="button" className="hz-ai-video-icon-btn" aria-label="Daha fazla">
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
-                <circle cx="5" cy="12" r="2" />
-                <circle cx="12" cy="12" r="2" />
-                <circle cx="19" cy="12" r="2" />
-              </svg>
-            </button>
-          </div>
+    <div className="hz-ai-panel hz-ai-panel--premium">
+      <div className="hz-ai-panel-top">
+        <div>
+          <p className="hz-ai-panel-title">
+            AI Asistan <span className="hz-ai-beta">Beta</span>
+          </p>
         </div>
-        <div className="hz-ai-video-viewport">
-          <p className="hz-ai-video-placeholder">Canlı oturum / özet akışı için yer tutucu</p>
+        <div className="hz-ai-panel-top-actions">
+          <button type="button" className="hz-ai-mini-ic" aria-label="Ses">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M11 5L6 9H2v6h4l5 4V5z" />
+            </svg>
+          </button>
+          <button type="button" className="hz-ai-mini-ic" aria-label="Tam ekran">
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" />
+            </svg>
+          </button>
         </div>
       </div>
 
-      <div className="hz-ai-chat">
-        <label className="hz-ai-chat-label" htmlFor="hz-ai-chat-input">
-          Asistan
-        </label>
-        <textarea
-          id="hz-ai-chat-input"
-          className="hz-ai-chat-input"
-          rows={4}
-          readOnly
-          placeholder="Özet veya taslak burada görünecek (demo)."
-        />
-        <button type="button" className="hz-ai-voice-btn" disabled>
-          Sesli asistan (demo)
-        </button>
+      <div className="hz-ai-hero" aria-label="Asistan görüntü alanı">
+        <div className="hz-ai-hero-glow" />
+        <div className="hz-ai-hero-topbar">
+          <span className="hz-ai-live-pill">
+            <span className="hz-ai-live-dot" aria-hidden />
+            Canlı
+          </span>
+          <div className="hz-ai-hero-spacer" />
+        </div>
+        <div className="hz-ai-hero-body">
+          <div className="hz-ai-avatar-ring">
+            <div className="hz-ai-avatar-face">{first.slice(0, 1)}</div>
+          </div>
+          <button type="button" className="hz-ai-hero-play" aria-label="Oynat">
+            <span className="hz-ai-hero-play-triangle" aria-hidden />
+          </button>
+        </div>
+        <div className="hz-ai-hero-chrome">
+          <div className="hz-ai-hero-timeline">
+            <div className="hz-ai-hero-progress" />
+          </div>
+          <div className="hz-ai-hero-controls">
+            <button type="button" className="hz-ai-hero-ctl" aria-label="Ses aç">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M11 5L6 9H2v6h4l5 4V5z" />
+              </svg>
+            </button>
+            <button type="button" className="hz-ai-hero-ctl" aria-label="Genişlet">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div className="hz-ai-welcome">
+        <p className="hz-ai-welcome-line">
+          Merhaba {first}! <span aria-hidden>👋</span>
+        </p>
+        <p className="hz-ai-welcome-sub">Size nasıl yardımcı olabilirim?</p>
+      </div>
+
+      <div className="hz-ai-chips" role="list">
+        {AI_CHIPS.map((c) => {
+          const isSummary = c.id === "summary";
+          const done = isSummary && summaryDone;
+          return (
+            <button
+              key={c.id}
+              type="button"
+              className={`hz-ai-chip ${done ? "is-done" : ""}`}
+              disabled={done}
+              onClick={() => {
+                if (isSummary) {
+                  pushToast("Gönderildi");
+                  setSummaryDone(true);
+                  return;
+                }
+                pushToast("İstek kuyruğa alındı");
+              }}
+            >
+              {done ? "Günlük özeti gönderildi" : c.label}
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="hz-ai-thread" aria-label="Sohbet">
+        <div className="hz-ai-bubble hz-ai-bubble--ai">
+          <p>Bugün tahsilat akışında 3 kritik cari var. Özetlememi ister misiniz?</p>
+        </div>
+        <div className="hz-ai-bubble hz-ai-bubble--user">
+          <p>Kısa özet yeter.</p>
+        </div>
+      </div>
+
+      <div className="hz-ai-voice-panel">
+        <div className="hz-ai-voice-head">
+          <span className="hz-ai-voice-title">Sesli Konuşma</span>
+          <button type="button" className="hz-ai-voice-close" aria-label="Kapat">
+            ×
+          </button>
+        </div>
+        <div className="hz-ai-wave" aria-hidden>
+          {Array.from({ length: 16 }).map((_, i) => (
+            <span key={i} className="hz-ai-wave-bar" style={{ height: `${6 + ((i * 5) % 12)}px` }} />
+          ))}
+        </div>
+        <div className="hz-ai-voice-actions">
+          <button type="button" className="hz-ai-mic" aria-label="Mikrofon">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+              <path d="M12 14a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3z" />
+              <path d="M19 10v1a7 7 0 01-14 0v-1M12 18v4M8 22h8" />
+            </svg>
+          </button>
+          <input type="text" className="hz-ai-voice-input" readOnly placeholder="Mesajınızı yazın veya konuşun…" />
+        </div>
       </div>
     </div>
   );

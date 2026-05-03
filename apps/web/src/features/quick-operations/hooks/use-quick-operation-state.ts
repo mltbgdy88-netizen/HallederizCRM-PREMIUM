@@ -49,24 +49,43 @@ export const operationTypeLabels: Record<QuickOperationType, { label: string; ti
 
 export const demoCustomers: QuickOperationCustomer[] = [
   {
-    id: "customer_1",
-    name: "MUSTERI FIRMA A.S.",
-    contactName: "Ahmet Yilmaz",
-    phone: "0532 111 22 33",
-    priceGroup: "Bayi / Slot 2",
-    risk: "Dusuk",
-    balance: 8240,
-    address: "Sanayi Bolgesi, 1234. Sokak No:5, Ankara"
+    id: "customer_delta",
+    name: "Delta A.Ş.",
+    contactName: "Mehmet Yıldız",
+    phone: "+90 312 555 01 48",
+    priceGroup: "Bayi / Slot 1",
+    risk: "Orta",
+    balance: 72100,
+    address: "Ostim OSB, 1232. Cad. No:4, Ankara",
+    receivableDisplay: "84.500",
+    payableDisplay: "12.300",
+    warningDisplay: "2 gecikmiş ödeme"
   },
   {
-    id: "customer_2",
-    name: "MIMAR PROJE LTD.",
-    contactName: "Selin Kara",
-    phone: "0533 222 44 55",
-    priceGroup: "Mimar / Slot 3",
-    risk: "Orta",
-    balance: 2460,
-    address: "Cukurambar Mah. Proje Cad. No:18, Ankara"
+    id: "customer_nova",
+    name: "Nova Gıda",
+    contactName: "Elif Aksoy",
+    phone: "+90 232 444 90 12",
+    priceGroup: "Perakende",
+    risk: "Dusuk",
+    balance: 12400,
+    address: "İzmir Atatürk OSB, No:88",
+    receivableDisplay: "42.100",
+    payableDisplay: "3.200",
+    warningDisplay: "—"
+  },
+  {
+    id: "customer_ege",
+    name: "Ege Un A.Ş.",
+    contactName: "Can Öztürk",
+    phone: "+90 266 333 77 65",
+    priceGroup: "Üretici",
+    risk: "Dusuk",
+    balance: 8800,
+    address: "Bandırma Lojistik Üssü",
+    receivableDisplay: "118.900",
+    payableDisplay: "6.450",
+    warningDisplay: "Vade yaklaşıyor (1)"
   }
 ];
 
@@ -158,31 +177,99 @@ const fallbackSource: SourceOption = {
   locationCode: "Oneri"
 };
 
-function createLine(index: number): QuickOperationLine {
-  const product = demoProducts[index % demoProducts.length] ?? demoProducts[0] ?? fallbackProduct;
-  const source = sourceOptions[index === 1 ? 1 : 0] ?? sourceOptions[0] ?? fallbackSource;
+/** Tabloya eklenen boş satır — ürün seçilene kadar sıfır/boş değerler */
+function createEmptyLine(): QuickOperationLine {
   return {
-    id: `line_${Date.now()}_${index}`,
-    productCode: product.code,
-    productName: product.name,
-    quantity: index === 1 ? 10 : 5,
-    sourceType: source.type,
-    sourceLabel: source.sourceLabel,
-    warehouseName: source.warehouseName,
-    rackCode: source.rackCode,
-    locationCode: source.locationCode,
-    unitPrice: product.price,
-    taxRate: product.taxRate
+    id: `line_empty_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
+    productCode: "",
+    productName: "",
+    unit: "",
+    quantity: 0,
+    unitPrice: 0,
+    sourceType: "auto",
+    sourceLabel: "—",
+    warehouseName: "",
+    rackCode: "",
+    locationCode: "—",
+    taxRate: 20
   };
 }
 
+/** Referans mock satırları — Tutar = miktar × birim fiyat ile uyumlu */
+export function seedQuickOperationLines(): QuickOperationLine[] {
+  const w = (i: number, row: Omit<QuickOperationLine, "id" | "sourceType" | "sourceLabel" | "locationCode" | "taxRate">): QuickOperationLine => ({
+    id: `line_seed_${i}`,
+    sourceType: "center_warehouse",
+    sourceLabel: "Merkez",
+    locationCode: "-",
+    taxRate: 20,
+    ...row
+  });
+  return [
+    w(1, {
+      productCode: "URN-001",
+      productName: "Suntalam Beyaz 18mm",
+      unit: "Adet",
+      quantity: 12,
+      unitPrice: 807.5,
+      warehouseName: "Merkez",
+      rackCode: "A-12"
+    }),
+    w(2, {
+      productCode: "URN-014",
+      productName: "Menteşe Takımı",
+      unit: "Paket",
+      quantity: 6,
+      unitPrice: 264,
+      warehouseName: "A Blok",
+      rackCode: "B-04"
+    }),
+    w(3, {
+      productCode: "URN-145",
+      productName: "Kapak Kulpu Siyah",
+      unit: "Adet",
+      quantity: 40,
+      unitPrice: 37.8,
+      warehouseName: "Merkez",
+      rackCode: "C-07"
+    }),
+    w(4, {
+      productCode: "URN-221",
+      productName: "MDF Akrilik",
+      unit: "Adet",
+      quantity: 18,
+      unitPrice: 144,
+      warehouseName: "Ana Depo",
+      rackCode: "R-22"
+    }),
+    w(5, {
+      productCode: "URN-312",
+      productName: "Ray Sistemi",
+      unit: "Takım",
+      quantity: 8,
+      unitPrice: 512,
+      warehouseName: "A Blok",
+      rackCode: "D-10"
+    }),
+    w(6, {
+      productCode: "URN-056",
+      productName: "Yonga Vida 3.5x16",
+      unit: "Kutu",
+      quantity: 30,
+      unitPrice: 45,
+      warehouseName: "Merkez",
+      rackCode: "E-05"
+    })
+  ];
+}
+
 export function useQuickOperationState() {
-  const [operationType, setOperationTypeState] = useState<QuickOperationType>("offer");
+  const [operationType, setOperationTypeState] = useState<QuickOperationType>("sale_order");
   const [customerId, setCustomerId] = useState(demoCustomers[0]?.id ?? fallbackCustomer.id);
-  const [lines, setLines] = useState<QuickOperationLine[]>([createLine(0), createLine(1), createLine(2)]);
-  const [expandedLineId, setExpandedLineId] = useState<string | null>(lines[0]?.id ?? null);
+  const [lines, setLines] = useState<QuickOperationLine[]>(() => seedQuickOperationLines());
+  const [expandedLineId, setExpandedLineId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
-  const [operationNote, setOperationNote] = useState("Pilot hizli islem notu");
+  const [operationNote, setOperationNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedImpacts, setSubmittedImpacts] = useState<QuickOperationImpact[] | null>(null);
   const [sideActions, setSideActions] = useState<QuickOperationSideActions | null>(null);
@@ -212,7 +299,8 @@ export function useQuickOperationState() {
       productCode: product.code,
       productName: product.name,
       unitPrice: product.price,
-      taxRate: product.taxRate
+      taxRate: product.taxRate,
+      unit: product.name.includes("hizmet") ? "Hizmet" : "Adet"
     });
   };
 
@@ -228,8 +316,8 @@ export function useQuickOperationState() {
     });
   };
 
-  const addLine = () => {
-    const nextLine = createLine(lines.length);
+  const addEmptyLine = () => {
+    const nextLine = createEmptyLine();
     setSubmittedImpacts(null);
     setSideActions(null);
     setLines((current) => [...current, nextLine]);
@@ -278,8 +366,9 @@ export function useQuickOperationState() {
     };
   };
 
-  const submitOperation = async () => {
+  const submitOperation = async (): Promise<boolean> => {
     setIsSubmitting(true);
+    let success = false;
     try {
       const result = await submitQuickOperationRecord(buildSubmitPayload());
       setSubmittedImpacts(
@@ -293,25 +382,28 @@ export function useQuickOperationState() {
       setSideActions(result.sideActions ?? null);
       if (result.mode === "executed") {
         if (result.operationType === "delivery") {
-          setNotice(`Teslim kaydi olusturuldu: ${result.createdEntityNo ?? "Numara uretilmedi"}`);
+          setNotice(`Teslim kaydı oluşturuldu: ${result.createdEntityNo ?? "Numara üretilmedi"}`);
         } else if (result.operationType === "return") {
-          setNotice(`Iade talebi olusturuldu / inceleme akisina alindi: ${result.createdEntityNo ?? "Numara uretilmedi"}`);
+          setNotice(`İade talebi oluşturuldu: ${result.createdEntityNo ?? "Numara üretilmedi"}`);
         } else {
-          setNotice(`Islem olusturuldu: ${result.createdEntityNo ?? "Numara uretilmedi"}`);
+          setNotice(`İşlem oluşturuldu: ${result.createdEntityNo ?? "Numara üretilmedi"}`);
         }
       } else {
         if (result.operationType === "return") {
-          setNotice(`Iade talebi olusturuldu / inceleme akisina alindi: ${result.createdEntityNo ?? "Numara uretilmedi"}`);
+          setNotice(`İade talebi oluşturuldu: ${result.createdEntityNo ?? "Numara üretilmedi"}`);
         } else {
-          setNotice("Bu islem inceleme/foundation modunda hazirlandi.");
+          setNotice("Bu işlem inceleme modunda hazırlandı.");
         }
       }
+      success = true;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Bilinmeyen hata";
-      setNotice(`Islem olusturulamadi: ${message}`);
+      setNotice(`İşlem oluşturulamadı: ${message}`);
+      success = false;
     } finally {
       setIsSubmitting(false);
     }
+    return success;
   };
 
   const openDocumentPreview = () => {
@@ -330,6 +422,16 @@ export function useQuickOperationState() {
     setWhatsappDraftVisible(true);
   };
 
+  const resetDraft = () => {
+    setSubmittedImpacts(null);
+    setSideActions(null);
+    setNotice(null);
+    setLines(seedQuickOperationLines());
+    setCustomerId(demoCustomers[0]?.id ?? fallbackCustomer.id);
+    setOperationTypeState("sale_order");
+    setOperationNote("");
+  };
+
   return {
     operationType,
     setOperationType,
@@ -345,7 +447,7 @@ export function useQuickOperationState() {
     setNotice,
     operationNote,
     setOperationNote,
-    addLine,
+    addEmptyLine,
     removeLine,
     updateLine,
     selectProduct,
@@ -362,6 +464,7 @@ export function useQuickOperationState() {
     whatsappDraftVisible,
     setWhatsappDraftVisible,
     openDocumentPreview,
-    openWhatsappDraft
+    openWhatsappDraft,
+    resetDraft
   };
 }

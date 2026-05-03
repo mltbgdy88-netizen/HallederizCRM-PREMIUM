@@ -11,6 +11,12 @@ export interface QuickOperationCustomer {
   risk: "Dusuk" | "Orta" | "Yuksek";
   balance: number;
   address: string;
+  /** Gösterim: Alacak tutarı (₺) */
+  receivableDisplay?: string;
+  /** Gösterim: Verecek tutarı (₺) */
+  payableDisplay?: string;
+  /** Gösterim: Uyarı metni */
+  warningDisplay?: string;
 }
 
 export interface QuickOperationProduct {
@@ -24,6 +30,8 @@ export interface QuickOperationLine {
   id: string;
   productCode: string;
   productName: string;
+  /** Satır birimi (Adet, Paket, Takım …) */
+  unit: string;
   quantity: number;
   sourceType: QuickOperationSourceType;
   sourceLabel: string;

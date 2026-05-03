@@ -8,25 +8,42 @@ import {
   UserMenu,
   type AppShellNavItem
 } from "@hallederiz/ui";
+import type { SidebarNavSection } from "@hallederiz/ui";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { CRMIcon } from "./icons";
 import { useAuth } from "../providers/auth-provider";
 import { useTheme } from "../providers/theme-provider";
 
-const PRIMARY_NAV_ITEMS: AppShellNavItem[] = [
-  { key: "dashboard", label: "Gösterge Paneli", href: "/dashboard", icon: <CRMIcon name="dashboard" /> },
-  { key: "quick-operations", label: "Hızlı İşlem", href: "/hizli-islem", icon: <CRMIcon name="orders" /> },
-  { key: "approvals", label: "Onaylar", href: "/onaylar", icon: <CRMIcon name="roles" /> },
-  { key: "whatsapp", label: "WhatsApp", href: "/whatsapp", icon: <CRMIcon name="whatsapp" /> },
-  { key: "customers", label: "Cariler", href: "/cariler", icon: <CRMIcon name="customers" /> },
-  { key: "stock", label: "Ürün / Stok", href: "/stok", icon: <CRMIcon name="stock" /> },
-  { key: "archive", label: "Arşiv", href: "/archive", icon: <CRMIcon name="documents" /> },
-  { key: "reports", label: "Raporlar", href: "/raporlar", icon: <CRMIcon name="reports" /> },
-  { key: "settings", label: "Ayarlar", href: "/ayarlar", icon: <CRMIcon name="settings" /> }
+const NAV_SECTIONS: SidebarNavSection[] = [
+  {
+    title: "ANA",
+    items: [
+      { key: "dashboard", label: "Gösterge Paneli", href: "/dashboard", icon: <CRMIcon name="dashboard" /> },
+      { key: "quick-operations", label: "Hızlı İşlem", href: "/hizli-islem", icon: <CRMIcon name="orders" /> },
+      { key: "approvals", label: "Onaylar", href: "/onaylar", icon: <CRMIcon name="roles" />, badge: "7" },
+      { key: "whatsapp", label: "WhatsApp", href: "/whatsapp", icon: <CRMIcon name="whatsapp" />, badge: "12" }
+    ]
+  },
+  {
+    title: "VERİ",
+    items: [
+      { key: "customers", label: "Cariler", href: "/cariler", icon: <CRMIcon name="customers" /> },
+      { key: "stock", label: "Ürün / Stok", href: "/stok", icon: <CRMIcon name="stock" /> },
+      { key: "archive", label: "Arşiv", href: "/archive", icon: <CRMIcon name="documents" /> }
+    ]
+  },
+  {
+    title: "ANALİZ",
+    items: [{ key: "reports", label: "Raporlar", href: "/raporlar", icon: <CRMIcon name="reports" /> }]
+  },
+  {
+    title: "SİSTEM",
+    items: [{ key: "settings", label: "Ayarlar", href: "/ayarlar", icon: <CRMIcon name="settings" /> }]
+  }
 ];
 
-const SECONDARY_NAV_ITEMS: AppShellNavItem[] = [];
+const ALL_SHELL_NAV_ITEMS: AppShellNavItem[] = NAV_SECTIONS.flatMap((s) => s.items);
 
 interface PageMeta {
   title: string;
@@ -53,8 +70,8 @@ const PAGE_META: Array<[string, PageMeta]> = [
   ["/fabrikalar/siparisler/", { title: "Fabrika Siparis Detayi", subtitle: "Fabrika durum ve senkron paneli.", breadcrumb: "Fabrikalar / Siparis Detay" }],
   ["/ai/onaylar", { title: "AI Onaylar", subtitle: "Proposal ve approval kayitlarini yonetin.", breadcrumb: "AI / Onaylar" }],
   ["/ai/icgoruler", { title: "AI Icgoruler", subtitle: "AI risk/firsat analizlerini takip edin.", breadcrumb: "AI / Icgoruler" }],
-  ["/hizli-islem", { title: "Hızlı İşlem Merkezi", subtitle: "Klasik fiş hissiyle satır, kaynak ve operasyon etkisini tek ekranda yönetin.", breadcrumb: "Hızlı İşlem" }],
-  ["/dashboard", { title: "Gösterge Paneli", subtitle: "Günlük operasyon kontrol merkezi.", breadcrumb: "Gösterge Paneli" }],
+  ["/hizli-islem", { title: "Hızlı İşlem", subtitle: "Sipariş, tahsilat, fiyat ve belge işlemlerini hızlıca hazırlayın.", breadcrumb: "Hızlı İşlem" }],
+  ["/dashboard", { title: "Gösterge Paneli", subtitle: "", breadcrumb: "" }],
   ["/archive", { title: "Arşiv", subtitle: "Geçmiş işlemler ve belge arşivi (yer tutucu).", breadcrumb: "Arşiv" }],
   ["/kurulum/veri-yukleme", { title: "Veri Yukleme", subtitle: "CSV tabanli import merkezi ile cari, urun, fiyat ve stok yukleyin.", breadcrumb: "Kurulum / Veri Yukleme" }],
   ["/ayarlar/veri-yukleme", { title: "Veri Yukleme", subtitle: "Template indir, dosya yukle, onizle ve ice aktar.", breadcrumb: "Ayarlar / Veri Yukleme" }],
@@ -83,7 +100,7 @@ const PAGE_META: Array<[string, PageMeta]> = [
 ];
 
 function resolveActiveHref(pathname: string): string {
-  const items = [...PRIMARY_NAV_ITEMS, ...SECONDARY_NAV_ITEMS].sort((a, b) => b.href.length - a.href.length);
+  const items = [...ALL_SHELL_NAV_ITEMS].sort((a, b) => b.href.length - a.href.length);
   for (const item of items) {
     if (pathname === item.href || pathname.startsWith(`${item.href}/`)) {
       return item.href;
@@ -113,6 +130,15 @@ function getPageMeta(pathname: string): PageMeta {
   };
 }
 
+function formatDashboardDateLine(): string {
+  return new Intl.DateTimeFormat("tr-TR", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+    year: "numeric"
+  }).format(new Date());
+}
+
 export function PlatformShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
@@ -126,6 +152,20 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
 
   const pageMeta = useMemo(() => getPageMeta(pathname), [pathname]);
   const activeHref = resolveActiveHref(pathname);
+  const isDashboard = pathname === "/dashboard";
+  const isQuickOperation = pathname === "/hizli-islem";
+
+  const dashboardGreeting = useMemo(() => {
+    const display = session?.user.fullName?.trim() || "Ahmet Yılmaz";
+    return (
+      <div className="hz-header-greeting">
+        <p className="hz-header-greeting-line">
+          Günaydın, {display} <span aria-hidden>👋</span>
+        </p>
+        <p className="hz-header-greeting-date">{formatDashboardDateLine()}</p>
+      </div>
+    );
+  }, [session?.user.fullName]);
 
   return (
     <AppShell
@@ -133,28 +173,48 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
       onMobileSidebarOpenChange={setMobileSidebarOpen}
       sidebar={
         <Sidebar
-          appTitle="HallederizCRM"
-          appSubtitle="Premium Operations Suite"
-          versionLabel="v0.4 UI Foundation"
-          primaryItems={PRIMARY_NAV_ITEMS}
-          secondaryItems={SECONDARY_NAV_ITEMS}
+          logoMarkLabel="LOGO ALANI"
+          appTitle="HallederizCRM Premium"
+          navSections={NAV_SECTIONS}
           activeHref={activeHref}
+          companyCard={{ name: "Hallederiz A.Ş.", branch: "Merkez", status: "Çevrimiçi" }}
           onNavigate={(href) => router.push(href)}
         />
       }
       header={
         <Header
+          layout={isDashboard ? "dashboard" : "default"}
+          suppressPageMeta={isQuickOperation}
           title={pageMeta.title}
           subtitle={pageMeta.subtitle}
           breadcrumb={pageMeta.breadcrumb}
-          searchPlaceholder="Cari, siparis, urun kodu veya barkod ara"
-          notificationSlot={
-            <button type="button" className="hz-header-icon-button" aria-label="Bildirimler">
-              <span className="hz-dot hz-dot-info" />
-              Bildirimler
-            </button>
+          leadingSlot={isDashboard ? dashboardGreeting : undefined}
+          searchPlaceholder={isDashboard ? "Ara (Cari, Sipariş, Ürün, Belge...)" : "Cari, siparis, urun kodu veya barkod ara"}
+          toolbarSlot={
+            isDashboard ? (
+              <button type="button" className="hz-header-quick-primary" onClick={() => router.push("/hizli-islem")}>
+                + Hızlı İşlem
+              </button>
+            ) : null
           }
-          themeSlot={<ThemeToggle mode={theme} onToggle={toggleTheme} />}
+          notificationSlot={
+            <>
+              <button type="button" className="hz-header-icon-button hz-header-icon-button--ghost" aria-label="Bildirimler">
+                <span className="hz-header-bell" aria-hidden />
+                <span className="hz-sr-only">Bildirimler</span>
+              </button>
+              <button
+                type="button"
+                className="hz-header-icon-button hz-header-icon-button--ghost"
+                aria-label="WhatsApp"
+                onClick={() => router.push("/whatsapp")}
+              >
+                <span className="hz-header-wa" aria-hidden />
+                <span className="hz-sr-only">WhatsApp</span>
+              </button>
+            </>
+          }
+          themeSlot={<ThemeToggle mode={theme} onToggle={toggleTheme} compact={isDashboard} />}
           userSlot={
             <UserMenu
               fullName={session?.user.fullName ?? "Bilinmeyen Kullanici"}

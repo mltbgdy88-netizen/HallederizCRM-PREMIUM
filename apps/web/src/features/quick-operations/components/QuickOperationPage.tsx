@@ -1,36 +1,100 @@
 "use client";
 
-import { Fragment, useMemo } from "react";
-import { demoProducts, operationTypeLabels, sourceOptions, useQuickOperationState } from "../hooks/use-quick-operation-state";
-import type { QuickOperationImpact, QuickOperationLine, QuickOperationSourceType, QuickOperationType } from "../types";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useToast } from "../../../providers/toast-provider";
+import { QuickActionIcon } from "../../dashboard/components/dashboard-inline-icons";
+import { demoCustomers, useQuickOperationState } from "../hooks/use-quick-operation-state";
+import type { QuickOperationLine, QuickOperationType } from "../types";
 
-const operationTypes = Object.keys(operationTypeLabels) as QuickOperationType[];
-const visibleRowCount = 8;
+const UNIT_OPTIONS = ["Adet", "Paket", "Takım", "Kutu", "Hizmet", "Metre"];
 
-const sourceToneClass: Record<QuickOperationSourceType, string> = {
-  center_warehouse: "qo-pill-blue",
-  factory: "qo-pill-purple",
-  supplier: "qo-pill-amber",
-  split: "qo-pill-slate",
-  auto: "qo-pill-green"
-};
+type WorkflowTabId = "order" | "payment" | "price" | "stock" | "return" | "document";
+
+const WORKFLOW_TABS: Array<{
+  id: WorkflowTabId;
+  label: string;
+  operation: QuickOperationType;
+  icon: "order" | "pay" | "price" | "stock" | "return" | "doc";
+}> = [
+  { id: "order", label: "Sipariş Oluştur", operation: "sale_order", icon: "order" },
+  { id: "payment", label: "Tahsilat İşle", operation: "payment", icon: "pay" },
+  { id: "price", label: "Fiyat Ver", operation: "offer", icon: "price" },
+  { id: "stock", label: "Stok Sorgula", operation: "sale_order", icon: "stock" },
+  { id: "return", label: "İade Başlat", operation: "return", icon: "return" },
+  { id: "document", label: "Belge Gönder", operation: "delivery", icon: "doc" }
+];
 
 function money(value: number): string {
   return value.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 }
 
-function impactToneClass(tone: QuickOperationImpact["tone"]): string {
-  if (tone === "success") return "qo-pill-green";
-  if (tone === "warning") return "qo-pill-amber";
-  if (tone === "danger") return "qo-pill-red";
-  return "qo-pill-blue";
+function lineAmount(line: QuickOperationLine): number {
+  return Math.round(line.quantity * line.unitPrice * 100) / 100;
 }
 
-function lineTotal(line: QuickOperationLine): number {
-  return line.quantity * line.unitPrice * (1 + line.taxRate / 100);
+function operationTypeLabel(type: QuickOperationType): string {
+  switch (type) {
+    case "sale_order":
+      return "Sipariş";
+    case "payment":
+      return "Tahsilat";
+    case "offer":
+      return "Teklif";
+    case "delivery":
+      return "Teslim / Belge";
+    case "return":
+      return "İade";
+    default:
+      return type;
+  }
+}
+
+function primaryActionLabel(tab: WorkflowTabId): string {
+  switch (tab) {
+    case "order":
+      return "Siparişi Oluştur";
+    case "payment":
+      return "Tahsilatı Kaydet";
+    case "price":
+      return "Teklifi Oluştur";
+    case "stock":
+      return "Stok Sorgula";
+    case "return":
+      return "İadeyi Başlat";
+    case "document":
+      return "Belgeyi Gönder";
+    default:
+      return "Kaydet";
+  }
+}
+
+function IconTrash({ size = 16 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <path d="M3 6h18M8 6V4h8v2M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M10 11v6M14 11v6" strokeLinecap="round" strokeLinejoin="round" />
+    </svg>
+  );
+}
+
+function IconPlus({ size = 14 }: { size?: number }) {
+  return (
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
+      <path d="M12 5v14M5 12h14" strokeLinecap="round" />
+    </svg>
+  );
 }
 
 export function QuickOperationPage() {
+  const { pushToast } = useToast();
+  const tableScrollRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState<WorkflowTabId>("order");
+  const [primaryDone, setPrimaryDone] = useState(false);
+  const [representative, setRepresentative] = useState("Ayşe Kaya");
+  const [warehouse, setWarehouse] = useState("Merkez Depo");
+  const [dueDate, setDueDate] = useState("15.05.2026");
+  const [deliveryDate, setDeliveryDate] = useState("08.05.2026");
+  const [description, setDescription] = useState("");
+
   const {
     operationType,
     setOperationType,
@@ -38,376 +102,391 @@ export function QuickOperationPage() {
     setCustomerId,
     selectedCustomer,
     lines,
-    expandedLineId,
-    setExpandedLineId,
     totals,
-    impacts,
     notice,
     setNotice,
-    operationNote,
-    setOperationNote,
-    addLine,
     removeLine,
     updateLine,
-    selectProduct,
-    selectSource,
-    showFoundationNotice,
-    openDocumentPreview,
-    openWhatsappDraft,
+    addEmptyLine,
     submitOperation,
     isSubmitting,
-    aiInsight,
-    documentPreview,
-    whatsappDraft,
-    documentPreviewVisible,
-    setDocumentPreviewVisible,
-    whatsappDraftVisible,
-    setWhatsappDraftVisible
+    resetDraft,
+    setOperationNote
   } = useQuickOperationState();
 
-  const selectedLine = lines.find((line) => line.id === expandedLineId) ?? lines[0];
-  const tableRows = useMemo(() => {
-    const emptySlots = Math.max(visibleRowCount - lines.length, 0);
-    return [...lines, ...Array.from({ length: emptySlots }, (_, index) => ({ emptyIndex: lines.length + index + 1 }))];
-  }, [lines]);
+  useEffect(() => {
+    setOperationNote(description);
+  }, [description, setOperationNote]);
 
-  const operationSummary = useMemo(() => {
-    const warehouse = lines.filter((line) => line.sourceType === "center_warehouse").length;
-    const factory = lines.filter((line) => line.sourceType === "factory").length;
-    const supplier = lines.filter((line) => line.sourceType === "supplier").length;
-    return { warehouse, factory, supplier };
-  }, [lines]);
+  useLayoutEffect(() => {
+    const el = tableScrollRef.current;
+    if (el) {
+      el.scrollTop = 0;
+    }
+  }, [lines.length]);
+
+  const docDate = useMemo(
+    () =>
+      new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date()),
+    []
+  );
+  const docTime = useMemo(
+    () => new Intl.DateTimeFormat("tr-TR", { hour: "2-digit", minute: "2-digit" }).format(new Date()),
+    []
+  );
+
+  const totalPieces = useMemo(() => lines.reduce((sum, line) => sum + line.quantity, 0), [lines]);
+
+  const showDocMeta = activeTab !== "stock";
+
+  const applyWorkflowTab = useCallback(
+    (tab: WorkflowTabId) => {
+      setActiveTab(tab);
+      const next = WORKFLOW_TABS.find((t) => t.id === tab);
+      if (next) setOperationType(next.operation);
+      setPrimaryDone(false);
+    },
+    [setOperationType]
+  );
+
+  const handlePrimary = async () => {
+    const ok = await submitOperation();
+    if (ok) {
+      pushToast("Kaydedildi");
+      setPrimaryDone(true);
+    }
+  };
+
+  const handleClear = () => {
+    resetDraft();
+    setDescription("");
+    setRepresentative("Ayşe Kaya");
+    setWarehouse("Merkez Depo");
+    setDueDate("15.05.2026");
+    setDeliveryDate("08.05.2026");
+    setPrimaryDone(false);
+    applyWorkflowTab("order");
+    pushToast("Temizlendi");
+  };
 
   return (
-    <main className="qo-document-page">
-      <header className="qo-hero">
-        <div>
-          <h1>Hizli Islem Merkezi</h1>
-          <p>Klasik fis gorunumu + modern CRM is akisi</p>
-        </div>
-        <div className="qo-brand-mark">
-          <span>HallederizCRM</span>
-          <strong>PREMIUM</strong>
-        </div>
-      </header>
-
-      <section className="qo-strip qo-mode-strip">
-        <h2>Islem Turu</h2>
-        <div className="qo-segment-row" aria-label="Islem turu secimi">
-          {operationTypes.map((type) => (
-            <button
-              key={type}
-              type="button"
-              className={type === operationType ? "is-active" : undefined}
-              onClick={() => setOperationType(type)}
-            >
-              {operationTypeLabels[type].label}
-            </button>
-          ))}
-        </div>
-        <div className="qo-field-grid">
-          <label>
-            <span>Cari</span>
-            <select value={customerId} onChange={(event) => setCustomerId(event.target.value)}>
-              <option value="customer_1">MUSTERI FIRMA A.S.</option>
-              <option value="customer_2">MIMAR PROJE LTD.</option>
-            </select>
-          </label>
-          <label>
-            <span>Yetkili</span>
-            <input value={selectedCustomer.contactName} readOnly />
-          </label>
-          <label>
-            <span>Telefon</span>
-            <input value={selectedCustomer.phone} readOnly />
-          </label>
-          <label>
-            <span>Fiyat Grubu</span>
-            <input value={selectedCustomer.priceGroup} readOnly />
-          </label>
-          <label>
-            <span>Risk</span>
-            <input value={selectedCustomer.risk} readOnly />
-          </label>
-          <label>
-            <span>Islem No</span>
-            <input value="HI-2026-0042" readOnly />
-          </label>
-        </div>
-      </section>
-
+    <div className="hz-qop-page">
       {notice ? (
-        <section className="qo-notice">
-          <strong>{notice}</strong>
-          <button type="button" onClick={() => setNotice(null)}>
+        <div className="hz-qop-notice" role="status">
+          <span>{notice}</span>
+          <button type="button" className="hz-qop-notice-dismiss" onClick={() => setNotice(null)}>
             Kapat
           </button>
-        </section>
+        </div>
       ) : null}
 
-      <section className="qo-paper">
-        <div className="qo-summary-row">
-          <div className="qo-customer-box">
-            <h2>Musteri Bilgileri</h2>
-            <dl>
-              <div>
-                <dt>Firma Adi</dt>
-                <dd>{selectedCustomer.name}</dd>
-              </div>
-              <div>
-                <dt>Yetkili</dt>
-                <dd>{selectedCustomer.contactName.toLocaleUpperCase("tr-TR")}</dd>
-              </div>
-              <div>
-                <dt>Adres</dt>
-                <dd>{selectedCustomer.address}</dd>
-              </div>
-            </dl>
-          </div>
-          <div className="qo-smart-box">
-            <h2>Akilli Operasyon Ozeti</h2>
-            <div className="qo-pill-row">
-              <span className="qo-pill qo-pill-blue">Depo: {operationSummary.warehouse} satir</span>
-              <span className="qo-pill qo-pill-purple">Fabrika: {operationSummary.factory} satir</span>
-              <span className="qo-pill qo-pill-amber">Tedarik: {operationSummary.supplier} satir</span>
-              <span className="qo-pill qo-pill-green">Belge hazir</span>
+      <div className="hz-qop-layout">
+        <div className="hz-qop-main">
+          <div className="hz-qop-main-surface">
+            <h1 className="hz-sr-only">Hızlı İşlem</h1>
+            <div className="hz-qop-tabs-bar">
+              <nav className="hz-qop-tabs" aria-label="İşlem sekmeleri">
+                {WORKFLOW_TABS.map((tab) => (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    className={`hz-qop-tab ${activeTab === tab.id ? "is-active" : ""}`}
+                    onClick={() => applyWorkflowTab(tab.id)}
+                  >
+                    <span className="hz-qop-tab-ico">
+                      <QuickActionIcon kind={tab.icon} size={16} />
+                    </span>
+                    {tab.label}
+                  </button>
+                ))}
+              </nav>
             </div>
-            <p>{operationTypeLabels[operationType].description}</p>
-          </div>
-        </div>
 
-        <section className="qo-table-section" aria-label="Urun ve hizmet satirlari">
-          <div className="qo-table-scroll">
-            <table className="qo-line-table">
+            <section className="hz-qop-form" aria-label="Belge üst bilgileri">
+            <div className="hz-qop-form-row hz-qop-form-row--cari">
+              <label className="hz-qop-cari-search">
+                <span className="hz-qop-label">Cari Arama</span>
+                <select className="hz-qop-input" value={customerId} onChange={(e) => setCustomerId(e.target.value)}>
+                  {demoCustomers.map((c) => (
+                    <option key={c.id} value={c.id}>
+                      {c.name}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div className="hz-qop-risk-cards">
+                <div className="hz-qop-risk-card hz-qop-risk-card--recv">
+                  <span className="hz-qop-risk-label">Alacak</span>
+                  <strong>₺{selectedCustomer.receivableDisplay ?? "—"}</strong>
+                </div>
+                <div className="hz-qop-risk-card hz-qop-risk-card--pay">
+                  <span className="hz-qop-risk-label">Verecek</span>
+                  <strong>₺{selectedCustomer.payableDisplay ?? "—"}</strong>
+                </div>
+                <div className="hz-qop-risk-card hz-qop-risk-card--warn">
+                  <span className="hz-qop-risk-label">Uyarı</span>
+                  <strong className="hz-qop-risk-warn-text">{selectedCustomer.warningDisplay ?? "—"}</strong>
+                </div>
+              </div>
+              <div className="hz-qop-date-inline hz-qop-date-in-form">
+                <span className="hz-qop-label">Tarih</span>
+                <div className="hz-qop-date-val">
+                  <strong>{docDate}</strong>
+                  <span className="hz-qop-date-auto">Otomatik</span>
+                </div>
+              </div>
+            </div>
+
+          </section>
+
+          <div className="hz-qop-table-toolbar">
+            <button type="button" className="hz-btn hz-btn-secondary hz-qop-add-row-btn" onClick={() => addEmptyLine()}>
+              <span className="hz-qop-add-row-ico" aria-hidden>
+                <IconPlus size={15} />
+              </span>
+              Satır Ekle
+            </button>
+          </div>
+
+          <div ref={tableScrollRef} className="hz-qop-table-scroll">
+            <table className="hz-qop-table">
               <thead>
                 <tr>
-                  <th>NO</th>
-                  <th>KOD</th>
-                  <th>URUN / HIZMET ADI</th>
-                  <th>MIKTAR</th>
-                  <th>KAYNAK</th>
-                  <th>DEPO</th>
-                  <th>RAF</th>
-                  <th>BIRIM FIYAT</th>
-                  <th>KDV</th>
-                  <th>TOPLAM</th>
-                  <th></th>
+                  <th>#</th>
+                  <th>Ürün Kodu</th>
+                  <th>Ürün Adı</th>
+                  <th>Birim</th>
+                  <th>Miktar</th>
+                  <th>Fiyat (₺)</th>
+                  <th>Depo</th>
+                  <th>Raf No</th>
+                  <th>Tutar (₺)</th>
+                  <th className="hz-qop-col-act">İşlem</th>
                 </tr>
               </thead>
               <tbody>
-                {tableRows.map((row, index) => {
-                  if ("emptyIndex" in row) {
-                    return (
-                      <tr key={`empty_${row.emptyIndex}`} className="qo-empty-row">
-                        <td>{row.emptyIndex}</td>
-                        <td />
-                        <td />
-                        <td />
-                        <td />
-                        <td />
-                        <td />
-                        <td />
-                        <td />
-                        <td />
-                        <td />
-                      </tr>
-                    );
-                  }
-
-                  const selected = row.id === selectedLine?.id;
-                  return (
-                    <tr key={row.id} className={selected ? "is-selected" : undefined} onClick={() => setExpandedLineId(row.id)}>
-                      <td>{index + 1}</td>
-                      <td>
-                        <select value={row.productCode} onChange={(event) => selectProduct(row.id, event.target.value)}>
-                          {demoProducts.map((product) => (
-                            <option key={product.code} value={product.code}>
-                              {product.code}
-                            </option>
-                          ))}
-                        </select>
-                      </td>
-                      <td>
-                        <input value={row.productName} onChange={(event) => updateLine(row.id, { productName: event.target.value })} />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          min={0}
-                          value={row.quantity}
-                          onChange={(event) => updateLine(row.id, { quantity: Math.max(0, Number(event.target.value || 0)) })}
-                        />
-                      </td>
-                      <td>
-                        <span className={`qo-pill ${sourceToneClass[row.sourceType]}`}>{row.sourceLabel}</span>
-                      </td>
-                      <td>{row.warehouseName}</td>
-                      <td>{row.rackCode}</td>
-                      <td>
-                        <input
-                          type="number"
-                          min={0}
-                          value={row.unitPrice}
-                          onChange={(event) => updateLine(row.id, { unitPrice: Math.max(0, Number(event.target.value || 0)) })}
-                        />
-                      </td>
-                      <td>
-                        <input
-                          type="number"
-                          min={0}
-                          max={100}
-                          value={row.taxRate}
-                          onChange={(event) => updateLine(row.id, { taxRate: Math.max(0, Number(event.target.value || 0)) })}
-                        />
-                      </td>
-                      <td>{money(lineTotal(row))} TL</td>
-                      <td>
-                        <button type="button" className="qo-icon-button" onClick={() => removeLine(row.id)} disabled={lines.length <= 1}>
-                          Sil
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
+                {lines.map((line, index) => (
+                  <tr key={line.id}>
+                    <td>{index + 1}</td>
+                    <td>
+                      <input
+                        className="hz-qop-cell-input"
+                        value={line.productCode}
+                        onChange={(e) => updateLine(line.id, { productCode: e.target.value })}
+                        placeholder="Ürün ara…"
+                      />
+                    </td>
+                    <td>
+                      <input
+                        className="hz-qop-cell-input"
+                        value={line.productName}
+                        onChange={(e) => updateLine(line.id, { productName: e.target.value })}
+                      />
+                    </td>
+                    <td>
+                      <select
+                        className="hz-qop-cell-input"
+                        value={line.unit}
+                        onChange={(e) => updateLine(line.id, { unit: e.target.value })}
+                      >
+                        <option value="">—</option>
+                        {UNIT_OPTIONS.map((u) => (
+                          <option key={u} value={u}>
+                            {u}
+                          </option>
+                        ))}
+                      </select>
+                    </td>
+                    <td>
+                      <input
+                        className="hz-qop-cell-input hz-qop-cell-num"
+                        type="number"
+                        min={0}
+                        value={line.quantity}
+                        onChange={(e) => updateLine(line.id, { quantity: Math.max(0, Number(e.target.value || 0)) })}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        className="hz-qop-cell-input hz-qop-cell-num"
+                        type="number"
+                        min={0}
+                        step={0.01}
+                        value={line.unitPrice}
+                        onChange={(e) => updateLine(line.id, { unitPrice: Math.max(0, Number(e.target.value || 0)) })}
+                      />
+                    </td>
+                    <td>
+                      <input
+                        className="hz-qop-cell-input"
+                        value={line.warehouseName}
+                        onChange={(e) => updateLine(line.id, { warehouseName: e.target.value })}
+                      />
+                    </td>
+                    <td>
+                      <input className="hz-qop-cell-input" value={line.rackCode} onChange={(e) => updateLine(line.id, { rackCode: e.target.value })} />
+                    </td>
+                    <td className="hz-qop-cell amt">{money(lineAmount(line))}</td>
+                    <td className="hz-qop-col-act">
+                      <button type="button" className="hz-qop-icon-btn" aria-label="Satırı sil" onClick={() => removeLine(line.id)}>
+                        <IconTrash />
+                      </button>
+                    </td>
+                  </tr>
+                ))}
               </tbody>
             </table>
           </div>
 
-          <div className="qo-source-panel">
-            <div>
-              <h3>Satir Kaynak Secimi</h3>
-              <p>Secim yapilinca KAYNAK / DEPO / RAF kolonlari otomatik guncellenir.</p>
-            </div>
-            {selectedLine ? (
-              <div className="qo-source-options">
-                {sourceOptions.map((option) => {
-                  const selected = option.type === selectedLine.sourceType;
-                  return (
-                    <button
-                      key={option.type}
-                      type="button"
-                      className={selected ? "is-selected" : undefined}
-                      onClick={() => selectSource(selectedLine.id, option.type)}
-                    >
-                      <strong>{option.title}</strong>
-                      <span>{option.badge}</span>
-                    </button>
-                  );
-                })}
+          <div className="hz-qop-total-strip">
+            <span>
+              <strong>{lines.length}</strong> satır
+            </span>
+            <span>
+              <strong>{totalPieces}</strong> ürün
+            </span>
+            <span className="hz-qop-strip-sep" />
+            <span>Ara Toplam: {money(totals.subtotal)} ₺</span>
+            <span>Toplam İskonto: {money(totals.discountTotal)} ₺</span>
+            <span className="hz-qop-strip-grand">Genel Toplam: {money(totals.grandTotal)} ₺</span>
+          </div>
+
+          <footer className="hz-qop-actions">
+            <button type="button" className="hz-btn hz-btn-secondary" onClick={() => pushToast("Taslak kaydedildi")}>
+              Taslak Kaydet
+            </button>
+            <button type="button" className="hz-btn hz-btn-secondary" onClick={() => pushToast("Onaya gönderildi")}>
+              Onaya Gönder
+            </button>
+            <button
+              type="button"
+              className="hz-btn hz-btn-primary"
+              disabled={primaryDone || isSubmitting}
+              onClick={handlePrimary}
+            >
+              {isSubmitting ? "İşleniyor…" : primaryActionLabel(activeTab)}
+            </button>
+            <button type="button" className="hz-btn hz-btn-secondary" onClick={handleClear}>
+              Temizle
+            </button>
+            <button type="button" className="hz-btn hz-btn-secondary" onClick={() => pushToast("Önizleme hazırlanıyor")}>
+              Yazdır Önizleme
+            </button>
+          </footer>
+          </div>
+        </div>
+
+        <aside className="hz-qop-side" aria-label="Özet paneli">
+          <article className="hz-qop-card hz-qop-card--summary">
+            <h2 className="hz-qop-card-title">İşlem Özeti</h2>
+            <dl className="hz-qop-dl">
+              <div>
+                <dt>İşlem Türü</dt>
+                <dd>{operationTypeLabel(operationType)}</dd>
               </div>
-            ) : null}
-          </div>
-        </section>
+              {showDocMeta ? (
+                <>
+                  <div>
+                    <dt>Belge No</dt>
+                    <dd>SO-2026-0148</dd>
+                  </div>
+                  <div>
+                    <dt>Tarih</dt>
+                    <dd>{docDate}</dd>
+                  </div>
+                  <div>
+                    <dt>Saat</dt>
+                    <dd>{docTime}</dd>
+                  </div>
+                </>
+              ) : null}
+              <div>
+                <dt>Temsilci</dt>
+                <dd>
+                  <input
+                    className="hz-qop-summary-input"
+                    value={representative}
+                    onChange={(e) => setRepresentative(e.target.value)}
+                    autoComplete="off"
+                  />
+                </dd>
+              </div>
+              <div>
+                <dt>Depo</dt>
+                <dd>
+                  <select className="hz-qop-summary-input" value={warehouse} onChange={(e) => setWarehouse(e.target.value)}>
+                    <option>Merkez Depo</option>
+                    <option>Ana Depo</option>
+                    <option>A Blok</option>
+                  </select>
+                </dd>
+              </div>
+              <div>
+                <dt>Vade</dt>
+                <dd>
+                  <input className="hz-qop-summary-input" value={dueDate} onChange={(e) => setDueDate(e.target.value)} autoComplete="off" />
+                </dd>
+              </div>
+              <div>
+                <dt>Teslim Tarihi</dt>
+                <dd>
+                  <input
+                    className="hz-qop-summary-input"
+                    value={deliveryDate}
+                    onChange={(e) => setDeliveryDate(e.target.value)}
+                    autoComplete="off"
+                  />
+                </dd>
+              </div>
+            </dl>
+          </article>
 
-        <div className="qo-footer-grid">
-          <section className="qo-notes-box">
-            <h2>Aciklamalar ve Kosullar</h2>
-            <ol>
-              <li>Fiyatlar secilen cari fiyat grubuna gore hesaplanir.</li>
-              <li>Merkez depo secilen satirlar depo hazirlik emrine duser.</li>
-              <li>Fabrika kaynagi secilen satirlar fabrika is akisina dahil olur.</li>
-              <li>Belge onizleme ve WhatsApp taslagi islem sonrasi uretilebilir.</li>
-            </ol>
-            <label>
-              <span>Islem Notu / Iade Sebebi</span>
-              <textarea value={operationNote} onChange={(event) => setOperationNote(event.target.value)} />
-            </label>
-          </section>
+          <article className="hz-qop-card hz-qop-card--amounts">
+            <h2 className="hz-qop-card-title">Tutar Özeti</h2>
+            <dl className="hz-qop-dl hz-qop-dl--amounts">
+              <div>
+                <dt>Ara Toplam</dt>
+                <dd>{money(totals.subtotal)} ₺</dd>
+              </div>
+              <div>
+                <dt>Toplam İskonto</dt>
+                <dd className="hz-qop-disc">{money(totals.discountTotal)} ₺</dd>
+              </div>
+              <div>
+                <dt>KDV (%20)</dt>
+                <dd>{money(totals.taxTotal)} ₺</dd>
+              </div>
+              <div className="hz-qop-grand-row">
+                <dt>Genel Toplam</dt>
+                <dd>{money(totals.grandTotal)} ₺</dd>
+              </div>
+            </dl>
+          </article>
 
-          <section className="qo-totals-box">
-            <h2>Toplamlar</h2>
-            <div>
-              <span>Ara Toplam</span>
-              <strong>{money(totals.subtotal)} TL</strong>
-            </div>
-            <div>
-              <span>Iskonto</span>
-              <strong>{money(totals.discountTotal)} TL</strong>
-            </div>
-            <div>
-              <span>Toplam KDV</span>
-              <strong>{money(totals.taxTotal)} TL</strong>
-            </div>
-            <div className="is-grand">
-              <span>Genel Toplam</span>
-              <strong>{money(totals.grandTotal)} TL</strong>
-            </div>
-            <button type="button" onClick={submitOperation} disabled={isSubmitting}>
-              {isSubmitting ? "OLUSTURULUYOR..." : "ISLEMI OLUSTUR"}
-            </button>
-          </section>
-        </div>
-      </section>
-
-      <section className="qo-result-panel">
-        <div className="qo-result-header">
-          <div>
-            <h2>Islem Sonucu</h2>
-            <p>{notice ?? "Islem olusturuldugunda belge, WhatsApp taslagi ve AI operasyon notu burada gorunur."}</p>
-          </div>
-          <div className="qo-result-actions">
-            <button type="button" onClick={openDocumentPreview}>
-              Belge Onizleme
-            </button>
-            <button type="button" onClick={openWhatsappDraft}>
-              WhatsApp Taslagi
-            </button>
-            <button type="button" onClick={() => showFoundationNotice("AI Operasyon Notu")}>
-              AI Operasyon Notu
-            </button>
-            <button type="button" onClick={addLine}>
-              Satir Ekle
-            </button>
-          </div>
-        </div>
-
-        <div className="qo-result-grid">
-          <div>
-            <h3>Operasyon Etkileri</h3>
-            <ul>
-              {impacts.map((impact) => (
-                <li key={impact.id}>
-                  <span className={`qo-pill ${impactToneClass(impact.tone)}`}>{impact.tone}</span>
-                  <strong>{impact.title}</strong>
-                  <p>{impact.description}</p>
-                </li>
-              ))}
+          <article className="hz-qop-card hz-qop-card--ai">
+            <h2 className="hz-qop-card-title">Öneri (AI)</h2>
+            <ul className="hz-qop-ai-list">
+              <li>Bu siparişte 2 üründe stok kritik seviyeye yakın.</li>
+              <li>Tahsilat riski orta.</li>
+              <li>İstersen taksit teklifi de oluşturabilirim.</li>
             </ul>
-          </div>
+          </article>
 
-          <div>
-            <h3>Yan Aksiyonlar</h3>
-            {aiInsight ? (
-              <div className="qo-action-preview">
-                <strong>AI Operasyon Notu ({aiInsight.source})</strong>
-                <p>{aiInsight.summary}</p>
-              </div>
-            ) : null}
-            {documentPreviewVisible && documentPreview ? (
-              <div className="qo-action-preview">
-                <button type="button" onClick={() => setDocumentPreviewVisible(false)}>
-                  Kapat
-                </button>
-                <strong>{documentPreview.title}</strong>
-                <p>
-                  Ref: {documentPreview.referenceNo} - Cari: {documentPreview.customerName} - Toplam: {money(documentPreview.totals.grandTotal)} TL
-                </p>
-              </div>
-            ) : null}
-            {whatsappDraftVisible && whatsappDraft ? (
-              <div className="qo-action-preview">
-                <button type="button" onClick={() => setWhatsappDraftVisible(false)}>
-                  Kapat
-                </button>
-                <strong>WhatsApp Taslagi</strong>
-                <p>{whatsappDraft.message}</p>
-                <p>Gonderim: {whatsappDraft.sendEnabled ? "Etkin" : "Kapali"}</p>
-              </div>
-            ) : null}
-            {!aiInsight && !documentPreviewVisible && !whatsappDraftVisible ? <p className="qo-muted">Submit sonrasi taslaklar burada acilir.</p> : null}
-          </div>
-        </div>
-      </section>
-    </main>
+          <article className="hz-qop-card hz-qop-card--note">
+            <h2 className="hz-qop-card-title">Açıklama</h2>
+            <textarea
+              id="hz-qop-note"
+              className="hz-qop-note-textarea"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="İşlem notu / açıklama ekleyin…"
+              rows={4}
+              maxLength={500}
+              aria-label="İşlem notu veya açıklama"
+            />
+          </article>
+        </aside>
+      </div>
+    </div>
   );
 }
