@@ -2,7 +2,24 @@
 
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useToast } from "../../../providers/toast-provider";
-import { QuickActionIcon } from "../../dashboard/components/dashboard-inline-icons";
+import type { QuickBubbleKind } from "../../dashboard/components/dashboard-inline-icons";
+import {
+  IconAlertTriangle,
+  IconCreditCard,
+  IconCalculator,
+  IconClipboardList,
+  IconEraser,
+  IconListRows,
+  IconMessageSquare,
+  IconPlusCircle,
+  IconPrinter,
+  IconSave,
+  IconSend,
+  IconSparkles,
+  IconTrash2,
+  IconWallet,
+  QuickActionIcon
+} from "../../dashboard/components/dashboard-inline-icons";
 import { demoCustomers, useQuickOperationState } from "../hooks/use-quick-operation-state";
 import type { QuickOperationLine, QuickOperationType } from "../types";
 
@@ -68,20 +85,23 @@ function primaryActionLabel(tab: WorkflowTabId): string {
   }
 }
 
-function IconTrash({ size = 16 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-      <path d="M3 6h18M8 6V4h8v2M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6M10 11v6M14 11v6" strokeLinecap="round" strokeLinejoin="round" />
-    </svg>
-  );
-}
-
-function IconPlus({ size = 14 }: { size?: number }) {
-  return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-      <path d="M12 5v14M5 12h14" strokeLinecap="round" />
-    </svg>
-  );
+function primaryActionIconKind(tab: WorkflowTabId): QuickBubbleKind {
+  switch (tab) {
+    case "order":
+      return "order";
+    case "payment":
+      return "pay";
+    case "price":
+      return "price";
+    case "stock":
+      return "stock";
+    case "return":
+      return "return";
+    case "document":
+      return "doc";
+    default:
+      return "order";
+  }
 }
 
 export function QuickOperationPage() {
@@ -190,11 +210,11 @@ export function QuickOperationPage() {
                   <button
                     key={tab.id}
                     type="button"
-                    className={`hz-qop-tab ${activeTab === tab.id ? "is-active" : ""}`}
+                    className={`hz-qop-tab hz-qop-tab--${tab.id} ${activeTab === tab.id ? "is-active" : ""}`}
                     onClick={() => applyWorkflowTab(tab.id)}
                   >
                     <span className="hz-qop-tab-ico">
-                      <QuickActionIcon kind={tab.icon} size={16} />
+                      <QuickActionIcon kind={tab.icon} size={16} className="hz-qop-tab-svg" />
                     </span>
                     {tab.label}
                   </button>
@@ -216,15 +236,30 @@ export function QuickOperationPage() {
               </label>
               <div className="hz-qop-risk-cards">
                 <div className="hz-qop-risk-card hz-qop-risk-card--recv">
-                  <span className="hz-qop-risk-label">Alacak</span>
+                  <span className="hz-qop-risk-head">
+                    <span className="hz-qop-risk-ico" aria-hidden>
+                      <IconWallet size={13} />
+                    </span>
+                    <span className="hz-qop-risk-label">Alacak</span>
+                  </span>
                   <strong>₺{selectedCustomer.receivableDisplay ?? "—"}</strong>
                 </div>
                 <div className="hz-qop-risk-card hz-qop-risk-card--pay">
-                  <span className="hz-qop-risk-label">Verecek</span>
+                  <span className="hz-qop-risk-head">
+                    <span className="hz-qop-risk-ico" aria-hidden>
+                      <IconCreditCard size={13} />
+                    </span>
+                    <span className="hz-qop-risk-label">Verecek</span>
+                  </span>
                   <strong>₺{selectedCustomer.payableDisplay ?? "—"}</strong>
                 </div>
                 <div className="hz-qop-risk-card hz-qop-risk-card--warn">
-                  <span className="hz-qop-risk-label">Uyarı</span>
+                  <span className="hz-qop-risk-head">
+                    <span className="hz-qop-risk-ico" aria-hidden>
+                      <IconAlertTriangle size={13} />
+                    </span>
+                    <span className="hz-qop-risk-label">Uyarı</span>
+                  </span>
                   <strong className="hz-qop-risk-warn-text">{selectedCustomer.warningDisplay ?? "—"}</strong>
                 </div>
               </div>
@@ -240,9 +275,9 @@ export function QuickOperationPage() {
           </section>
 
           <div className="hz-qop-table-toolbar">
-            <button type="button" className="hz-btn hz-btn-secondary hz-qop-add-row-btn" onClick={() => addEmptyLine()}>
+            <button type="button" className="hz-btn hz-qop-add-row-btn" onClick={() => addEmptyLine()}>
               <span className="hz-qop-add-row-ico" aria-hidden>
-                <IconPlus size={15} />
+                <IconPlusCircle size={17} />
               </span>
               Satır Ekle
             </button>
@@ -329,7 +364,7 @@ export function QuickOperationPage() {
                     <td className="hz-qop-cell amt">{money(lineAmount(line))}</td>
                     <td className="hz-qop-col-act">
                       <button type="button" className="hz-qop-icon-btn" aria-label="Satırı sil" onClick={() => removeLine(line.id)}>
-                        <IconTrash />
+                        <IconTrash2 size={15} />
                       </button>
                     </td>
                   </tr>
@@ -339,37 +374,58 @@ export function QuickOperationPage() {
           </div>
 
           <div className="hz-qop-total-strip">
-            <span>
-              <strong>{lines.length}</strong> satır
+            <span className="hz-qop-strip-pill hz-qop-strip-pill--muted">
+              <IconListRows size={14} className="hz-qop-strip-ico" aria-hidden />
+              <strong>{lines.length}</strong>
+              <span className="hz-qop-strip-pill-txt">satır</span>
             </span>
-            <span>
-              <strong>{totalPieces}</strong> ürün
+            <span className="hz-qop-strip-pill hz-qop-strip-pill--muted">
+              <QuickActionIcon kind="stock" size={14} className="hz-qop-strip-ico hz-qop-strip-ico--package" />
+              <strong>{totalPieces}</strong>
+              <span className="hz-qop-strip-pill-txt">ürün</span>
             </span>
             <span className="hz-qop-strip-sep" />
-            <span>Ara Toplam: {money(totals.subtotal)} ₺</span>
-            <span>Toplam İskonto: {money(totals.discountTotal)} ₺</span>
-            <span className="hz-qop-strip-grand">Genel Toplam: {money(totals.grandTotal)} ₺</span>
+            <span className="hz-qop-strip-line hz-qop-strip-line--sub">
+              Ara Toplam: <strong>{money(totals.subtotal)} ₺</strong>
+            </span>
+            <span className="hz-qop-strip-line hz-qop-strip-line--disc">
+              Toplam İskonto: <strong>{money(totals.discountTotal)} ₺</strong>
+            </span>
+            <span className="hz-qop-strip-grand hz-qop-strip-grand--badge">
+              Genel Toplam: <strong>{money(totals.grandTotal)} ₺</strong>
+            </span>
           </div>
 
           <footer className="hz-qop-actions">
-            <button type="button" className="hz-btn hz-btn-secondary" onClick={() => pushToast("Taslak kaydedildi")}>
+            <button type="button" className="hz-btn hz-qop-footer-btn hz-qop-footer-btn--draft" onClick={() => pushToast("Taslak kaydedildi")}>
+              <IconSave size={16} className="hz-qop-footer-ico" aria-hidden />
               Taslak Kaydet
             </button>
-            <button type="button" className="hz-btn hz-btn-secondary" onClick={() => pushToast("Onaya gönderildi")}>
+            <button type="button" className="hz-btn hz-qop-footer-btn hz-qop-footer-btn--send" onClick={() => pushToast("Onaya gönderildi")}>
+              <IconSend size={16} className="hz-qop-footer-ico" aria-hidden />
               Onaya Gönder
             </button>
             <button
               type="button"
-              className="hz-btn hz-btn-primary"
+              className="hz-btn hz-qop-footer-btn hz-qop-footer-btn--primary"
               disabled={primaryDone || isSubmitting}
               onClick={handlePrimary}
             >
-              {isSubmitting ? "İşleniyor…" : primaryActionLabel(activeTab)}
+              {isSubmitting ? (
+                "İşleniyor…"
+              ) : (
+                <>
+                  <QuickActionIcon kind={primaryActionIconKind(activeTab)} size={17} className="hz-qop-footer-ico hz-qop-footer-ico--on-primary" />
+                  {primaryActionLabel(activeTab)}
+                </>
+              )}
             </button>
-            <button type="button" className="hz-btn hz-btn-secondary" onClick={handleClear}>
+            <button type="button" className="hz-btn hz-qop-footer-btn hz-qop-footer-btn--clear" onClick={handleClear}>
+              <IconEraser size={16} className="hz-qop-footer-ico" aria-hidden />
               Temizle
             </button>
-            <button type="button" className="hz-btn hz-btn-secondary" onClick={() => pushToast("Önizleme hazırlanıyor")}>
+            <button type="button" className="hz-btn hz-qop-footer-btn hz-qop-footer-btn--print" onClick={() => pushToast("Önizleme hazırlanıyor")}>
+              <IconPrinter size={16} className="hz-qop-footer-ico" aria-hidden />
               Yazdır Önizleme
             </button>
           </footer>
@@ -378,7 +434,12 @@ export function QuickOperationPage() {
 
         <aside className="hz-qop-side" aria-label="Özet paneli">
           <article className="hz-qop-card hz-qop-card--summary">
-            <h2 className="hz-qop-card-title">İşlem Özeti</h2>
+            <h2 className="hz-qop-card-title hz-qop-card-title--row hz-qop-card-title--summary">
+              <span className="hz-qop-card-title-ico" aria-hidden>
+                <IconClipboardList size={15} />
+              </span>
+              İşlem Özeti
+            </h2>
             <dl className="hz-qop-dl">
               <div>
                 <dt>İşlem Türü</dt>
@@ -442,7 +503,12 @@ export function QuickOperationPage() {
           </article>
 
           <article className="hz-qop-card hz-qop-card--amounts">
-            <h2 className="hz-qop-card-title">Tutar Özeti</h2>
+            <h2 className="hz-qop-card-title hz-qop-card-title--row hz-qop-card-title--amounts">
+              <span className="hz-qop-card-title-ico" aria-hidden>
+                <IconCalculator size={15} />
+              </span>
+              Tutar Özeti
+            </h2>
             <dl className="hz-qop-dl hz-qop-dl--amounts">
               <div>
                 <dt>Ara Toplam</dt>
@@ -464,7 +530,12 @@ export function QuickOperationPage() {
           </article>
 
           <article className="hz-qop-card hz-qop-card--ai">
-            <h2 className="hz-qop-card-title">Öneri (AI)</h2>
+            <h2 className="hz-qop-card-title hz-qop-card-title--row hz-qop-card-title--ai">
+              <span className="hz-qop-card-title-ico" aria-hidden>
+                <IconSparkles size={15} />
+              </span>
+              Öneri (AI)
+            </h2>
             <ul className="hz-qop-ai-list">
               <li>Bu siparişte 2 üründe stok kritik seviyeye yakın.</li>
               <li>Tahsilat riski orta.</li>
@@ -473,7 +544,12 @@ export function QuickOperationPage() {
           </article>
 
           <article className="hz-qop-card hz-qop-card--note">
-            <h2 className="hz-qop-card-title">Açıklama</h2>
+            <h2 className="hz-qop-card-title hz-qop-card-title--row hz-qop-card-title--note">
+              <span className="hz-qop-card-title-ico" aria-hidden>
+                <IconMessageSquare size={15} />
+              </span>
+              Açıklama
+            </h2>
             <textarea
               id="hz-qop-note"
               className="hz-qop-note-textarea"

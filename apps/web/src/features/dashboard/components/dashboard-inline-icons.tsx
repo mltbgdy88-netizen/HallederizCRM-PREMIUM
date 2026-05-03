@@ -196,14 +196,30 @@ export function KpiBubbleIcon({ kind, size = 22 }: { kind: KpiBubbleKind; size?:
 
 export type QuickBubbleKind = "order" | "price" | "stock" | "pay" | "return" | "doc";
 
-export function QuickActionIcon({ kind, size = 26 }: { kind: QuickBubbleKind; size?: number }) {
-  const c = "hz-dash-quick-svg";
+/** Dashboard quick bubbles & quick-op workflow tabs */
+export function QuickActionIcon({
+  kind,
+  size = 26,
+  className = "hz-dash-quick-svg"
+}: {
+  kind: QuickBubbleKind;
+  size?: number;
+  /** Dashboard: default hz-dash-quick-svg; quick-op tabs pass hz-qop-tab-svg */
+  className?: string;
+}) {
+  const c = className;
   switch (kind) {
     case "order":
       return (
         <svg className={c} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
-          <path d="M6 2 3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4H6z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-          <path d="M3 6h18M16 10a4 4 0 01-8 0" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+          <circle cx="9" cy="20" r="1.5" fill="currentColor" />
+          <circle cx="18" cy="20" r="1.5" fill="currentColor" />
+          <path
+            d="M2 3h2l.4 2M4 5h15l-1.5 9.5a2 2 0 01-2 1.7H7.7a2 2 0 01-2-1.4L4 7M4 7 6 3"
+            stroke="currentColor"
+            strokeWidth="2"
+            {...S.round}
+          />
         </svg>
       );
     case "price":
@@ -211,14 +227,143 @@ export function QuickActionIcon({ kind, size = 26 }: { kind: QuickBubbleKind; si
     case "stock":
       return <IconPackage size={size} className={c} />;
     case "pay":
-      return <IconCreditCard size={size} className={c} />;
+      return <IconBanknote size={size} className={c} />;
     case "return":
       return <IconRotateCcw size={size} className={c} />;
     case "doc":
-      return <IconSend size={size} className={c} />;
+      return (
+        <svg className={c} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+          <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke="currentColor" strokeWidth="2" {...S.round} />
+          <path d="M14 2v6h6M12 18l-2-2 2-2M16 14h-6" stroke="currentColor" strokeWidth="2" {...S.round} />
+        </svg>
+      );
     default:
       return null;
   }
+}
+
+/** Lucide-style trash-2 — quick-op row delete */
+export function IconTrash2({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M3 6h18" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path
+        d="M8 6V4a2 2 0 012-2h4a2 2 0 012 2v2M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6"
+        stroke="currentColor"
+        strokeWidth="2"
+        {...S.round}
+      />
+      <path d="M10 11v6M14 11v6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconPlusCircle({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+      <path d="M12 8v8M8 12h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconListRows({ size = 15, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M9 6h11M9 12h11M9 18h11M5 6h.01M5 12h.01M5 18h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconClipboardList({ size = 15, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2" stroke="currentColor" strokeWidth="2" {...S.round} />
+      <path d="M9 5a2 2 0 012-2h2a2 2 0 012 2v0a2 2 0 01-2 2h-2a2 2 0 01-2-2v0z" stroke="currentColor" strokeWidth="2" {...S.round} />
+      <path d="M9 12h6M9 16h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconCalculator({ size = 15, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect x="4" y="3" width="16" height="18" rx="2" stroke="currentColor" strokeWidth="2" />
+      <path d="M8 7h8M8 11h2M12 11h2M16 11h2M8 15h2M12 15h2M16 15h2M8 19h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconSparkles({ size = 15, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M12 3v3M12 18v3M4.93 4.93l2.12 2.12M16.95 16.95l2.12 2.12M3 12h3M18 12h3M4.93 19.07l2.12-2.12M16.95 7.05l2.12-2.12"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+      />
+    </svg>
+  );
+}
+
+export function IconMessageSquare({ size = 15, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M21 15a2 2 0 01-2 2H8l-5 4V5a2 2 0 012-2h14a2 2 0 012 2v10z" stroke="currentColor" strokeWidth="2" {...S.round} />
+    </svg>
+  );
+}
+
+export function IconSave({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M19 21H5a2 2 0 01-2-2V5a2 2 0 012-2h11l5 5v11a2 2 0 01-2 2z" stroke="currentColor" strokeWidth="2" {...S.round} />
+      <path d="M17 21v-8H7v8M7 3v5h8" stroke="currentColor" strokeWidth="2" {...S.round} />
+    </svg>
+  );
+}
+
+export function IconPrinter({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M6 9V3h12v6M6 14H4a2 2 0 01-2-2v-3a2 2 0 012-2h16a2 2 0 012 2v3a2 2 0 01-2 2h-2M6 14v6h12v-6" stroke="currentColor" strokeWidth="2" {...S.round} />
+      <path d="M6 18h12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconEraser({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M8 21h12M5.4 16.6L16 6l4 4-10.6 10.6a2 2 0 01-2.83 0L5.4 19.43a2 2 0 010-2.83z" stroke="currentColor" strokeWidth="2" {...S.round} />
+    </svg>
+  );
+}
+
+export function IconCheckCircle({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+      <path d="M9 12l2 2 4-4" stroke="currentColor" strokeWidth="2" {...S.round} />
+    </svg>
+  );
+}
+
+export function IconArrowDownLeft({ size = 14, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M17 7L7 17M17 17H7V7" stroke="currentColor" strokeWidth="2" {...S.round} />
+    </svg>
+  );
+}
+
+export function IconArrowUpRight({ size = 14, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M7 17L17 7M17 17V7H7" stroke="currentColor" strokeWidth="2" {...S.round} />
+    </svg>
+  );
 }
 
 export type ActivityIconKind = "order" | "pay" | "invoice" | "wa" | "stock" | "doc";
