@@ -4977,7 +4977,7 @@ select.hz-qop-summary-input {
   width: 100%;
   display: grid;
   grid-template-columns: 320px minmax(0, 1fr) 350px;
-  gap: 12px;
+  gap: 14px;
   overflow: hidden;
   align-items: stretch;
 }
@@ -5083,12 +5083,14 @@ select.hz-qop-summary-input {
 }
 
 .hz-wa-conversation-list {
-  flex: 1 1 auto;
+  flex: 1 1 0;
+  flex-basis: 0;
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 0 10px 8px;
+  padding: 4px 10px 8px;
+  scroll-padding-top: 4px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -5350,12 +5352,13 @@ select.hz-qop-summary-input {
 }
 
 .hz-wa-chat-feed {
-  flex: 1 1 auto;
+  flex: 1 1 0;
+  flex-basis: 0;
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 12px;
+  padding: 12px 12px 20px;
   background-color: var(--hz-wa-canvas);
   background-image: radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--hz-wa-border) 55%, transparent) 1px, transparent 0);
   background-size: 14px 14px;
@@ -5470,9 +5473,11 @@ select.hz-qop-summary-input {
 
 .hz-wa-composer {
   flex: 0 0 auto;
+  flex-shrink: 0;
   min-height: 108px;
   max-height: 118px;
-  padding: 8px 10px 10px;
+  margin-top: 10px;
+  padding: 10px 10px 10px;
   border-top: 1px solid var(--hz-wa-border);
   background: #fff;
   display: flex;
@@ -5719,6 +5724,41 @@ select.hz-qop-summary-input {
 
 .hz-wa-side-btn-grid--3 {
   grid-template-columns: 1fr 1fr 1fr;
+}
+
+.hz-wa-linked-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.hz-wa-linked-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  min-height: 32px;
+  max-height: 34px;
+  padding: 0 8px;
+  border-radius: 10px;
+  border: 1px solid var(--hz-wa-border);
+  background: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  color: #475569;
+  cursor: pointer;
+  text-align: left;
+}
+
+.hz-wa-linked-action:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--hz-wa-primary) 22%, var(--hz-wa-border));
+  color: var(--hz-wa-primary);
+  background: #fafbff;
+}
+
+.hz-wa-linked-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
 }
 
 .hz-wa-convert-grid {
