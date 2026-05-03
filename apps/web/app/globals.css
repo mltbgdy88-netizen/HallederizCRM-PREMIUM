@@ -5726,6 +5726,41 @@ select.hz-qop-summary-input {
   grid-template-columns: 1fr 1fr 1fr;
 }
 
+.hz-wa-linked-actions {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.hz-wa-linked-action {
+  display: inline-flex;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 6px;
+  min-height: 32px;
+  max-height: 34px;
+  padding: 0 8px;
+  border-radius: 10px;
+  border: 1px solid var(--hz-wa-border);
+  background: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  color: #475569;
+  cursor: pointer;
+  text-align: left;
+}
+
+.hz-wa-linked-action:hover:not(:disabled) {
+  border-color: color-mix(in srgb, var(--hz-wa-primary) 22%, var(--hz-wa-border));
+  color: var(--hz-wa-primary);
+  background: #fafbff;
+}
+
+.hz-wa-linked-action:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .hz-wa-convert-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;

@@ -362,6 +362,67 @@ export function WhatsAppPage() {
               </article>
 
               <article className="hz-wa-side-card">
+                <h3 className="hz-wa-side-card-title">İlgili kayıtlar</h3>
+                <p className="hz-wa-ai-note">Yalnızca kayıt ekranına gider; işlem başlatmaz.</p>
+                <div className="hz-wa-linked-actions">
+                  <button
+                    type="button"
+                    className="hz-wa-linked-action"
+                    disabled={!conversation.relatedCustomerId}
+                    onClick={() => {
+                      if (!conversation.relatedCustomerId) {
+                        return;
+                      }
+                      router.push(`/cariler/${conversation.relatedCustomerId}`);
+                    }}
+                  >
+                    <IconUser size={14} aria-hidden />
+                    Cariyi Aç
+                  </button>
+                  <button
+                    type="button"
+                    className="hz-wa-linked-action"
+                    onClick={() =>
+                      router.push(
+                        conversation.relatedOrderId ? `/siparisler/${conversation.relatedOrderId}` : "/siparisler/SO-2026-0148"
+                      )
+                    }
+                  >
+                    <IconShoppingCart size={14} aria-hidden />
+                    Siparişe Git
+                  </button>
+                  <button
+                    type="button"
+                    className="hz-wa-linked-action"
+                    disabled={!conversation.relatedCustomerId}
+                    onClick={() => {
+                      if (!conversation.relatedCustomerId) {
+                        return;
+                      }
+                      router.push(`/tahsilatlar/yeni?customer=${conversation.relatedCustomerId}`);
+                    }}
+                  >
+                    <IconWallet size={14} aria-hidden />
+                    Tahsilat
+                  </button>
+                  <button
+                    type="button"
+                    className="hz-wa-linked-action"
+                    onClick={() =>
+                      router.push(
+                        conversation.relatedDocumentId
+                          ? `/belgeler?document=${conversation.relatedDocumentId}`
+                          : "/belgeler?document=TF-2026-0189"
+                      )
+                    }
+                  >
+                    <IconFileText size={14} aria-hidden />
+                    Belge
+                  </button>
+                </div>
+              </article>
+
+              <article className="hz-wa-side-card">
                 <h3 className="hz-wa-side-card-title">Kural / güvenlik</h3>
                 <ul className="hz-wa-rule-list">
                   <li>
