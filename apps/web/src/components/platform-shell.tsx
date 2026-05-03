@@ -154,6 +154,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
   const activeHref = resolveActiveHref(pathname);
   const isDashboard = pathname === "/dashboard";
   const isQuickOperation = pathname === "/hizli-islem";
+  const isApprovalsList = pathname === "/onaylar";
 
   const dashboardGreeting = useMemo(() => {
     const display = session?.user.fullName?.trim() || "Ahmet Yılmaz";
@@ -184,12 +185,18 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
       header={
         <Header
           layout={isDashboard ? "dashboard" : "default"}
-          suppressPageMeta={isQuickOperation}
+          suppressPageMeta={isQuickOperation || isApprovalsList}
           title={pageMeta.title}
           subtitle={pageMeta.subtitle}
           breadcrumb={pageMeta.breadcrumb}
           leadingSlot={isDashboard ? dashboardGreeting : undefined}
-          searchPlaceholder={isDashboard ? "Ara (Cari, Sipariş, Ürün, Belge...)" : "Cari, siparis, urun kodu veya barkod ara"}
+          searchPlaceholder={
+            isDashboard
+              ? "Ara (Cari, Sipariş, Ürün, Belge...)"
+              : isApprovalsList
+                ? "Cari, onay no, belge no, tutar ara..."
+                : "Cari, siparis, urun kodu veya barkod ara"
+          }
           toolbarSlot={
             isDashboard ? (
               <button type="button" className="hz-header-quick-primary" onClick={() => router.push("/hizli-islem")}>

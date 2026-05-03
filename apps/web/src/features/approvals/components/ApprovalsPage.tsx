@@ -1,12 +1,12 @@
 ﻿"use client";
 
-import { buildApprovalSummary, canExecuteApprovedAction, summarizeApprovalTarget } from "@hallederiz/domain";
+import { canExecuteApprovedAction, summarizeApprovalTarget } from "@hallederiz/domain";
 import type { Approval } from "@hallederiz/types";
-import { FilterActions, FilterBar, LoadingState, MetricCard, PageHeader, Pagination, SplitContentLayout } from "@hallederiz/ui";
+import { FilterActions, FilterBar, PageHeader, SplitContentLayout } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
-import { getOperationsEngineData } from "../../dashboard/queries";
+import { useState } from "react";
 import { approveApprovalMutation, executeApprovalMutation, rejectApprovalMutation } from "../mutations";
+import { ApprovalsBoardPage } from "./ApprovalsBoardPage";
 
 const statusLabels: Record<Approval["status"], string> = { pending: "Bekliyor", approved: "Onaylandi", rejected: "Reddedildi", expired: "Suresi Doldu", executed: "Icra Edildi" };
 const typeLabels: Record<Approval["type"], string> = { order_high_value: "Yuksek Tutar", delivery_payment_missing: "Eksik Tahsilatli Teslim", return_approval: "Iade Onayi", price_override: "Fiyat Override", ai_action_proposal: "AI Proposal", manual_operation: "Manuel Operasyon" };
@@ -27,16 +27,7 @@ export function ApprovalPreviewPanel({ approval }: { approval: Approval | null }
 }
 
 export function ApprovalsPage() {
-  const router = useRouter();
-  const [approvals, setApprovals] = useState<Approval[] | null>(null);
-  const [selectedApprovalId, setSelectedApprovalId] = useState<string | null>(null);
-  const [page, setPage] = useState(1);
-  const pageSize = 10;
-  useEffect(() => { getOperationsEngineData().then((data) => setApprovals(data.approvals)); }, []);
-  const summary = useMemo(() => buildApprovalSummary(approvals ?? []), [approvals]);
-  const selectedApproval = useMemo(() => approvals?.find((approval) => approval.id === selectedApprovalId) ?? approvals?.[0] ?? null, [approvals, selectedApprovalId]);
-  const pagedApprovals = useMemo(() => (approvals ?? []).slice((page - 1) * pageSize, page * pageSize), [approvals, page]);
-  return <div className="hz-page-stack"><PageHeader title="Onaylar" description="Human-in-the-loop approval kayitlarini ve server-side execution hazirligini yonetin." /><section className="hz-metric-grid"><MetricCard title="Toplam" value={String(summary.total)} detail="Approval kaydi" tone="info" /><MetricCard title="Bekleyen" value={String(summary.pending)} detail="Karar bekliyor" tone="warning" /><MetricCard title="Icra Edilebilir" value={String(summary.executable)} detail="Server action hazir" tone="success" /><MetricCard title="Reddedilen" value={String(summary.rejected)} detail="Kontrol gecmisi" tone="danger" /></section><ApprovalFilterBar />{!approvals ? <LoadingState title="Onaylar yukleniyor" message="Approval kayitlari hazirlaniyor." /> : <SplitContentLayout main={<><ApprovalTable approvals={pagedApprovals} selectedId={selectedApprovalId} onSelect={setSelectedApprovalId} onOpen={(approvalId) => router.push(`/onaylar/${approvalId}`)} /><Pagination totalItems={approvals.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} /></>} side={<ApprovalPreviewPanel approval={selectedApproval} />} />}</div>;
+  return <ApprovalsBoardPage />;
 }
 
 export function ApprovalHeaderInfo({ approval }: { approval: Approval }) {

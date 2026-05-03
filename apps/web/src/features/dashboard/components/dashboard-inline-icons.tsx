@@ -350,6 +350,97 @@ export function IconCheckCircle({ size = 16, className }: IcoProps) {
   );
 }
 
+export function IconXCircle({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+      <path d="M15 9l-6 6M9 9l6 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconTruck({ size = 18, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M14 18V8a2 2 0 00-2-2H4a2 2 0 00-2 2v8a1 1 0 001 1h2m9-9h6l3 5v3a1 1 0 01-1 1h-1M14 18h-3m8 0h2a1 1 0 001-1v-2"
+        stroke="currentColor"
+        strokeWidth="2"
+        {...S.round}
+      />
+      <circle cx="7" cy="18" r="2" stroke="currentColor" strokeWidth="2" />
+      <circle cx="17" cy="18" r="2" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  );
+}
+
+export function IconWarehouse({ size = 18, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M3 9l9-6 9 6v11a1 1 0 01-1 1H4a1 1 0 01-1-1V9z" stroke="currentColor" strokeWidth="2" {...S.round} />
+      <path d="M9 22V12h6v10M9 22h6" stroke="currentColor" strokeWidth="2" {...S.round} />
+    </svg>
+  );
+}
+
+export function IconFilter({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M22 3H2l8 9v9l4 2v-11l8-9z" stroke="currentColor" strokeWidth="2" {...S.round} />
+    </svg>
+  );
+}
+
+export function IconFileText({ size = 18, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke="currentColor" strokeWidth="2" {...S.round} />
+      <path d="M14 2v6h6M9 13h6M9 17h4" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconShieldAlert({ size = 18, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" stroke="currentColor" strokeWidth="2" {...S.round} />
+      <path d="M12 8v4M12 16h.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconFileSearch({ size = 18, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8l-6-6z" stroke="currentColor" strokeWidth="2" {...S.round} />
+      <path d="M14 2v6h6M9 13h6M9 17h3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="17.5" cy="17.5" r="2.5" stroke="currentColor" strokeWidth="2" />
+      <path d="M21 21l-2.35-2.35" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconArrowRightCircle({ size = 18, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+      <path d="M12 16l4-4-4-4M8 12h8" stroke="currentColor" strokeWidth="2" {...S.round} />
+    </svg>
+  );
+}
+
+export function IconBot({ size = 18, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <rect x="5" y="9" width="14" height="11" rx="2" stroke="currentColor" strokeWidth="2" />
+      <path d="M9 9V7a3 3 0 016 0v2M12 15v.01" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <path d="M8 19h8" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+      <circle cx="9" cy="13" r="1" fill="currentColor" />
+      <circle cx="15" cy="13" r="1" fill="currentColor" />
+    </svg>
+  );
+}
+
 export function IconArrowDownLeft({ size = 14, className }: IcoProps) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
