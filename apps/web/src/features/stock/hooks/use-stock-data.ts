@@ -39,10 +39,12 @@ export function useStockData(filters: StockFilters): StockDataState {
         mapProductToStockRow({
           product,
           brands: data.brands,
-          warehouses: data.warehouses
+          factories: data.factories,
+          warehouses: data.warehouses,
+          priceSlots: data.priceSlots
         })
       ),
-    [filteredProducts, data.brands, data.warehouses]
+    [filteredProducts, data.brands, data.factories, data.warehouses, data.priceSlots]
   );
 
   return {

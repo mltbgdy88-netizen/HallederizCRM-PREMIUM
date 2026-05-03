@@ -33,6 +33,11 @@ export function useStockCatalogQuery() {
         }
         setData(result);
       })
+      .catch(() => {
+        if (mounted) {
+          setData((prev) => ({ ...prev, products: [] }));
+        }
+      })
       .finally(() => {
         if (mounted) {
           setLoading(false);
