@@ -4977,7 +4977,7 @@ select.hz-qop-summary-input {
   width: 100%;
   display: grid;
   grid-template-columns: 320px minmax(0, 1fr) 350px;
-  gap: 12px;
+  gap: 14px;
   overflow: hidden;
   align-items: stretch;
 }
@@ -5083,12 +5083,14 @@ select.hz-qop-summary-input {
 }
 
 .hz-wa-conversation-list {
-  flex: 1 1 auto;
+  flex: 1 1 0;
+  flex-basis: 0;
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 0 10px 8px;
+  padding: 4px 10px 8px;
+  scroll-padding-top: 4px;
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -5350,12 +5352,13 @@ select.hz-qop-summary-input {
 }
 
 .hz-wa-chat-feed {
-  flex: 1 1 auto;
+  flex: 1 1 0;
+  flex-basis: 0;
   min-height: 0;
   overflow-x: hidden;
   overflow-y: auto;
   overscroll-behavior: contain;
-  padding: 12px;
+  padding: 12px 12px 20px;
   background-color: var(--hz-wa-canvas);
   background-image: radial-gradient(circle at 1px 1px, color-mix(in srgb, var(--hz-wa-border) 55%, transparent) 1px, transparent 0);
   background-size: 14px 14px;
@@ -5470,9 +5473,11 @@ select.hz-qop-summary-input {
 
 .hz-wa-composer {
   flex: 0 0 auto;
+  flex-shrink: 0;
   min-height: 108px;
   max-height: 118px;
-  padding: 8px 10px 10px;
+  margin-top: 10px;
+  padding: 10px 10px 10px;
   border-top: 1px solid var(--hz-wa-border);
   background: #fff;
   display: flex;

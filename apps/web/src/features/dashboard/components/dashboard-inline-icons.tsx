@@ -283,6 +283,24 @@ export function IconPlusCircle({ size = 16, className }: IcoProps) {
   );
 }
 
+export function IconShoppingCart({ size = 18, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M9 20a1 1 0 100-2 1 1 0 000 2zm7 0a1 1 0 100-2 1 1 0 000 2z" stroke="currentColor" strokeWidth="2" {...S.round} />
+      <path d="M3 4h2l1 12h12l2-9H6" stroke="currentColor" strokeWidth="2" {...S.round} />
+    </svg>
+  );
+}
+
+export function IconClock({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
+      <path d="M12 7v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function IconListRows({ size = 15, className }: IcoProps) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
