@@ -8,9 +8,27 @@ alwaysApply: true
 
 # HallederizCRM UI Designer Rules
 
+## Kabul edilmiş sayfalar (referans)
+
+Bu route’lardaki düzen, yoğunluk ve davranış **referans kabul** seviyesindedir. Yeni UI işlerinde aynı hatalar tekrarlanmamalıdır:
+
+- `/dashboard`
+- `/hizli-islem`
+- `/onaylar`
+- `/whatsapp`
+- `/cariler`
+- `/stok`
+- `/archive`
+- `/raporlar`
+
+Bu sayfaların dışına taşan “büyük redesign” yapılmadan önce `crm-ui-blueprint.md`, `crm-backlog.md` ve proje kuralları okunmalıdır.
+
+---
+
 ## Genel UI hedefi
 
 Tasarım dili:
+
 - Modern kurumsal CRM
 - Premium operasyon paneli hissi
 - Lacivert sidebar
@@ -20,85 +38,280 @@ Tasarım dili:
 - Kontrollü renk kullanımı
 - Profesyonel ve kompakt görünüm
 
-## Ölçü kuralları
+Kullanıcıya dönük metinler **Türkçe** olmalıdır.
 
-Hedef viewport:
-- 1920 x 1080
+---
 
-Genel:
+## 1. İlk görünüm / satır görünürlüğü
+
+Liste, tablo, grid veya kayıt satırı olan sayfalarda:
+
+- **1920×1080** viewport’ta kullanıcı **liste gövdesini kaydırmadan** en az **5 satır** görmeli.
+- Mümkünse **5–6 satır** hedeflenmeli.
+- “Listeye scroll ekledim” **tek başına kabul değildir**; ilk görünümde yeterli satır görünür olmalıdır.
+- İlk görünümde **yalnızca ~3 satır** görünüyorsa iş **kabul edilmez**.
+- Üst **grafik**, **KPI**, **filtre**, **chip** veya **preview** alanları listeyi **ezemez**; dikey bütçe kontrollü tutulmalıdır.
+- Grafik varsa listeli sayfalarda **mini trend strip** (çok kompakt) veya **tamamen kaldırılmalıdır**. Büyük grafik yalnızca **dashboard** gibi liste önceliği olmayan sayfalarda kabul edilir.
+- Gereksiz grafik (ör. Raporlar’da kaldırılan Performans Trendi gibi) **liste lehine** kaldırılabilir.
+
+**Rapor dili:** Aşağıdaki cümle **yalnızca gerçekten doğrulanmışsa** yazılmalıdır; tahmin veya “tasarım hedefi” ile yazılmamalıdır:
+
+> “1920×1080 ilk görünümde kaydırmadan en az 5 satır görünür.”
+
+Doğru değilse bu cümleyi yazma; düzeltmeye devam et veya “yerelde doğrulanmalı” de.
+
+---
+
+## 2. Shell PageMeta kuralı
+
+Kendi profesyonel başlığını çizen sayfalarda shell **PageMeta** gizlenmelidir.
+
+Zorunlu:
+
+- `platform-shell.tsx` içinde ilgili route için `isXList` / `isXPage` benzeri **bayrak** tanımlı olmalı.
+- `Header` üzerindeki **`suppressPageMeta`** ifadesine bu bayrak **dahil** edilmeli (yalnızca placeholder veya search ile yetinme).
+- Üstte **“RAPORLAR / Raporlar”**, **“ARŞİV / Arşiv”** gibi ikinci başlık bandı **kalmamalı**.
+- **Header search placeholder** ilgili sayfaya özel olmalı.
+- Global header: arama, tema, kullanıcı, çıkış alanı **korunmalı**.
+
+---
+
+## 3. Aksiyon kolonu kuralı
+
+Prompt ana listedeki satır aksiyonlarını istiyorsa, aksiyonlar **sağ panele değil** liste satırının **son kolonuna** eklenmelidir.
+
+Zorunlu:
+
+- Header’da **AKSİYON** (veya eşdeğeri) kolonu görünmeli.
+- Her satır sonunda aksiyon butonları görünmeli.
+- Sağ panelde “Hızlı Aksiyonlar” kartı olabilir; bu, **ana liste aksiyon kolonunun yerine geçmez**.
+- Header ve row **aynı** `grid-template-columns` (veya eşdeğer şablon) kullanmalı.
+- Aksiyon kolonu **kesilmemeli**.
+- **Yatay scrollbar** oluşmamalı.
+
+---
+
+## 4. Sağ panel ilk açılış kuralı
+
+Sağ panel ilk açılışta **boş kalmamalı** (veri varken).
+
+Demo / liste verisi varsa:
+
+- İlk kayıt / metrik / cari / ürün **varsayılan seçili** gelmeli.
+- İlk satır **selected** görünmeli.
+- Sağ panel **dolu** açılmalı.
+- Filtre değişince seçili kayıt filtre dışı kalırsa **ilk uygun kayıt** seçilmeli.
+- Liste tamamen boşsa boş state gösterilebilir.
+
+**“Listeden bir kayıt seçin”** boşluğu, **veri varken** kabul edilmez.
+
+---
+
+## 5. Filtre ve buton sığma kuralı
+
+Filtre satırındaki butonlar **kesik** görünmemeli.
+
+Metinli buton sığmıyorsa:
+
+- Bilinçli **icon-only** kare butona dönüştür.
+- **34×34** veya **input yüksekliği** ile aynı hizaya getir.
+- `title` ve **`aria-label`** ekle.
+- Yarım metin, **“S…”** kırpığı, kırpık buton **kabul edilmez**.
+
+Örnek: Sıfırla sığmıyorsa icon-only: `title="Filtreleri sıfırla"` `aria-label="Filtreleri sıfırla"`.
+
+---
+
+## 6. Üst blok yoğunluk kuralı
+
+KPI, filtre, chip, grafik ve preview alanları listeyi **ezmeyecek**.
+
+Listeli sayfalarda **hedef** yükseklik bantları (aşırı büyütmeden sıkı tut):
+
+- Topbar (sayfa içi): **50–58px**
+- KPI strip: **38–44px**
+- Filter band: **42–50px**
+- Chip row: **26–32px**
+- Preview band: **18–24px**
+- Liste header: **26–30px**
+- Liste row: **46–58px**
+
+Grafik varsa (liste öncelikli sayfalarda):
+
+- Grafik + özet toplamı kabaca **105–140px** bandında kalmalı; liste görünürlüğünü bozuyorsa grafik **kaldırılmalı** veya **mini strip**e indirgenmeli.
+
+---
+
+## 7. Dış ölçü ve scroll kuralı
+
+Kabul edilen sayfalarla uyumlu **dış ölçü**:
+
+- `max-width: 1604px`
+- `margin: 0 auto`
+- `height: 100%`
+- `min-height: 0`
+- `overflow: hidden` (sayfa kökü / ana layout zincirinde taşmayı kontrol et)
+
+**Kaçınılması gerekenler:**
+
+- Body scroll (sayfa seviyesinde istenmeyen kaydırma)
+- Yatay scrollbar
+- Sağ panel altına taşan içerik
+- Üst üste binen kartlar
+- Kırpılan butonlar / filtre inputları
+
+İç **liste body** dikey scroll alabilir; ancak **ilk görünümde minimum satır** şartı sağlanmalıdır.
+
+---
+
+## 8. CSS prefix kuralı
+
+Sadece ilgili sayfanın prefix’i ile CSS yaz:
+
+- `.hz-reports-*`
+- `.hz-archive-*`
+- `.hz-stock-*`
+- `.hz-customers-*`
+- `.hz-wa-*`
+- `.hz-approvals-*`
+- `.hz-qop-*`
+- `.hz-dashboard-*`
+
+**Genel selector yazma:** `button`, `div`, `input`, `select`, `table`, `section` (sayfa geneline sızan kurallar).
+
+**Kabul edilmiş diğer sayfaları bozma:** Yukarıdaki prefix’lerden işin dışında kalanlara dokunma; yalnızca hedef sayfanın bloklarını değiştir.
+
+---
+
+## 9. Demo veri kuralı
+
+Backend yoksa frontend-only **demo veri** kullanılabilir.
+
+- Gerçek veri geldiğinde demo ile **karışmamalı** (bayrak / ayrı kaynak).
+- Demo kayıtlar **ayrı data dosyasında** tutulmalı.
+- Demo olduğunu gösteren **ince preview band** olmalı.
+- Preview band **18–24px** bandında; sayfayı şişirmemeli.
+
+---
+
+## 10. AI ve mutation güvenliği
+
+**AI:**
+
+- Doğrudan CRM verisini **değiştirmez**.
+- Özet, öneri, risk/fırsat notu üretir.
+
+**Mutation benzeri aksiyonlar** (örnekler):
+
+- Rapor oluştur, belge yükle, PDF/Excel indir, e-posta gönder, onaya gönder, arşiv notu ekle.
+
+Backend bağlı değilse:
+
+- **Demo toast** kullan.
+- Gerekirse **disabled-after-success** (mükerrer tıklama önleme).
+- Gerçek API mutation **ekleme** (onay/audit akışı yoksa).
+
+---
+
+## 11. Zorunlu self-check (iş bitmeden)
+
+1. Sayfa route’u açılıyor mu?
+2. Placeholder / geçici metin kalktı mı?
+3. Shell PageMeta gizli mi (kendi başlıklı sayfalarda)?
+4. İlk görünümde en az **5** liste satırı görünüyor mu (1920×1080)?
+5. Aksiyon kolonu istenen yerde mi?
+6. Sağ panel ilk açılışta dolu mu (veri varken)?
+7. Filtre butonları kesiliyor mu?
+8. Body scroll var mı?
+9. Yatay scrollbar var mı?
+10. Kabul edilmiş **diğer** sayfalara dokunuldu mu? (olmamalı)
+11. `pnpm --filter @hallederiz/web typecheck` geçti mi?
+12. `pnpm smoke:navigation` geçti mi?
+13. `apps/web/tsconfig.tsbuildinfo` commit dışı mı?
+
+Biri başarısızsa iş **bitmiş sayılmaz**.
+
+---
+
+## 12. Test kuralı (her UI işi sonunda)
+
+```bash
+pnpm --filter @hallederiz/web typecheck
+pnpm --filter @hallederiz/ui typecheck
+pnpm smoke:navigation
+```
+
+Typecheck sonrası `apps/web/tsconfig.tsbuildinfo` değişirse **commit’e alma**; `git checkout -- apps/web/tsconfig.tsbuildinfo` ile geri al.
+
+---
+
+## 13. Rapor formatı (agent çıktısı)
+
+Rapor sonunda şunlar **net** yazılmalı:
+
+- Hangi dosyalar değişti?
+- Shell PageMeta gizli mi?
+- İlk görünümde kaydırmadan **kaç satır** görünüyor (mümkünse ölçüm; değilse “yerelde doğrulanmalı”)?
+- Aksiyon kolonu doğru yerde mi?
+- Sağ panel ilk açılışta dolu mu?
+- Filtre butonlarında kesik görünüm var mı?
+- Body / yatay scroll var mı?
+- Hangi kabul edilmiş sayfalara **dokunulmadı**?
+- Typecheck ve smoke sonucu?
+
+**“1920×1080 ilk görünümde kaydırmadan en az 5 satır görünür.”** — yalnızca **gerçekten doğrulandıysa** yaz.
+
+---
+
+## Ölçü kuralları (genel)
+
+Hedef viewport: **1920×1080**.
+
 - Dış boşluklar kontrollü olmalı.
-- Ana gutter genelde 16px olmalı.
-- Sağ panel varsa yaklaşık 330px olmalı.
-- Ana içerik minmax(0, 1fr) mantığında olmalı.
-- Sayfa body scroll üretmemeli.
-- Yatay scrollbar kabul edilmez.
-- Kartlar kırpılmamalı.
-- Kart gridlerinde 1600px üzeri mümkünse 4 kolon hedeflenir.
-- Root sayfa classları height: 100%, min-height: 0, overflow: hidden mantığıyla kurulmalıdır.
+- Ana gutter genelde **16px** olmalı.
+- Sağ panel varsa yaklaşık **320–350px** olabilir.
+- Ana içerik `minmax(0, 1fr)` mantığında olmalı.
+- Kartlar kırpılmamalı; kart gridlerinde 1600px üzeri mümkünse 4 kolon hedeflenebilir.
+
+---
 
 ## Renk sistemi
 
-Primary:
-- Mor / mavi
+Primary: mor / mavi  
+Success: yeşil  
+Warning: amber / turuncu  
+Danger: kırmızı / coral  
+Info: mavi / cyan  
+Neutral: koyu lacivert metin, açık mavi-gri border, beyaz kart, çok açık gri arka plan
 
-Success:
-- Yeşil
-
-Warning:
-- Amber / turuncu
-
-Danger:
-- Kırmızı / coral
-
-Info:
-- Mavi / cyan
-
-Neutral:
-- Koyu lacivert metin
-- Açık mavi-gri border
-- Beyaz kart zemini
-- Çok açık gri arka plan
+---
 
 ## İkon kuralları
 
 - Emoji ikon kullanma.
 - Rastgele dolu yuvarlak ikon kullanma.
 - Tek, tutarlı, çizgisel ikon dili kullan.
-- İkonlar genelde 16-20px aralığında olmalı.
-- Kart ikon kutuları 34-44px olabilir.
+- İkonlar genelde **16–20px** aralığında olmalı.
+- Kart ikon kutuları **34–44px** olabilir.
 - Dashboard / Hızlı İşlem ikon diliyle uyumlu olmalı.
 
-## CSS kuralları
-
-- Yeni CSS classları sayfaya özel prefix ile yaz:
-  - .hz-dashboard-*
-  - .hz-qop-*
-  - .hz-approvals-*
-  - .hz-archive-*
-- Genel button, div, table, input selector yazma.
-- Başka sayfalara sızacak global CSS ekleme.
-- Kabul edilmiş Dashboard ve Hızlı İşlem tasarımlarını bozma.
+---
 
 ## Mutation buton kuralı
 
-Veri değiştiren tüm butonlar:
-- Kaydet
-- Sil
-- Düzenle
-- Gönder
-- Kabul Et
-- Onayla
-- Reddet
-- Sipariş Oluştur
-- Tahsilat İşle
+Veri değiştiren tüm butonlar (örnek): Kaydet, Sil, Düzenle, Gönder, Kabul Et, Onayla, Reddet, Sipariş Oluştur, Tahsilat İşle.
 
 Başarılı işlem sonrası:
-1. Toast / küçük bilgi mesajı göstermeli.
-2. Aynı işlemin ikinci kez yapılmaması için disabled hale gelmeli.
-3. Mükerrer kayıt oluşmasını engelleyecek state yönetimi olmalı.
 
-## AI UI kuralı
+1. Toast / bilgi mesajı gösterilmeli.
+2. Aynı işlemin ikinci kez yapılmaması için disabled veya pasif state.
+3. Mükerrer kayıt oluşmasını engelleyecek state yönetimi.
 
-- AI chat/etkileşim kolonu sadece Dashboard ana sayfasında olur.
-- Diğer sayfalarda sağ AI chat kolonu oluşturma.
-- Onaylar, Arşiv, Hızlı İşlem gibi sayfalarda gerekirse sadece sayfaya özel küçük öneri/uyarı kartları kullanılabilir.
+---
+
+## AI UI kuralı (sidebar / sayfa)
+
+- AI asistan **ana kolon** olarak yalnızca **Dashboard** ana sayfasında yer alır.
+- Sol sidebar’da ayrı bir “AI” menü öğesi oluşturma.
+- AI ayarları **Ayarlar** altında kalır.
+- Diğer sayfalarda sağ “AI chat” kolonu oluşturma; gerekirse sayfaya özel küçük özet/uyarı kartları kullanılabilir.
