@@ -283,6 +283,14 @@ export function IconPlusCircle({ size = 16, className }: IcoProps) {
   );
 }
 
+export function IconPlus({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M12 5v14M5 12h14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
 export function IconShoppingCart({ size = 18, className }: IcoProps) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -297,6 +305,23 @@ export function IconClock({ size = 16, className }: IcoProps) {
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
       <circle cx="12" cy="12" r="9" stroke="currentColor" strokeWidth="2" />
       <path d="M12 7v6l4 2" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconSearch({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <circle cx="11" cy="11" r="7" stroke="currentColor" strokeWidth="2" />
+      <path d="M20 20l-4.3-4.3" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+    </svg>
+  );
+}
+
+export function IconBarcode({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M4 6v12M7 8v8M10 5v14M13 7v10M16 6v12M19 8v8M22 6v12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
     </svg>
   );
 }

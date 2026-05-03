@@ -1,5 +1,6 @@
 import { detectCriticalStock, normalizeBarcode, resolveProductAvailability } from "@hallederiz/domain";
-import type { Product, Warehouse } from "@hallederiz/types";
+import type { PriceSlotNumber, Product, Warehouse } from "@hallederiz/types";
+import { computeStockDisplayStatusForFilter } from "../mappers/map-stock-row";
 import type { StockFilters } from "../schemas/stock-filter-schema";
 
 function matchesSearch(product: Product, searchText: string): boolean {
@@ -46,6 +47,24 @@ export function filterProducts(params: {
       return false;
     }
 
+    if (filters.warehouseId) {
+      const inStock = product.warehouseStocks.some((s) => s.warehouseId === filters.warehouseId && s.onHand > 0);
+      const inLoc = product.locations.some((l) => l.warehouseId === filters.warehouseId);
+      if (!inStock && !inLoc) {
+        return false;
+      }
+    }
+
+    if (filters.priceSlotNo) {
+      const n = Number(filters.priceSlotNo);
+      if (([1, 2, 3, 4, 5, 6] as const).includes(n as PriceSlotNumber)) {
+        const ok = product.priceTiers.some((t) => t.slotNumber === n && t.active && t.amount > 0);
+        if (!ok) {
+          return false;
+        }
+      }
+    }
+
     if (!matchesCategory(product, 1, filters.category1)) {
       return false;
     }
@@ -65,7 +84,12 @@ export function filterProducts(params: {
     const availability = resolveProductAvailability({ product, warehouses });
     const criticalStatus = detectCriticalStock(product, availability);
 
-    if (filters.criticalOnly && criticalStatus !== "critical") {
+    if (filters.stockStatusFilter) {
+      const st = computeStockDisplayStatusForFilter(product, warehouses);
+      if (st !== filters.stockStatusFilter) {
+        return false;
+      }
+    } else if (filters.criticalOnly && criticalStatus !== "critical") {
       return false;
     }
 
