@@ -109,16 +109,31 @@ function resolveActiveHref(pathname: string): string {
   return "";
 }
 
+function normalizePathname(pathname: string): string {
+  if (pathname.length > 1 && pathname.endsWith("/")) {
+    return pathname.replace(/\/+$/, "") || "/";
+  }
+  return pathname;
+}
+
 function getPageMeta(pathname: string): PageMeta {
+  const p = normalizePathname(pathname);
+
   for (const [prefix, meta] of PAGE_META) {
     if (prefix.endsWith("/")) {
-      if (pathname.startsWith(prefix)) {
+      if (prefix === "/") {
+        if (p === "/") {
+          return meta;
+        }
+        continue;
+      }
+      if (p.startsWith(prefix)) {
         return meta;
       }
       continue;
     }
 
-    if (pathname === prefix || pathname.startsWith(`${prefix}/`)) {
+    if (p === prefix || p.startsWith(`${prefix}/`)) {
       return meta;
     }
   }
@@ -150,19 +165,20 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
     setMobileSidebarOpen(false);
   }, [pathname]);
 
+  const normalizedPath = useMemo(() => normalizePathname(pathname), [pathname]);
   const pageMeta = useMemo(() => getPageMeta(pathname), [pathname]);
   const activeHref = resolveActiveHref(pathname);
-  const isDashboard = pathname === "/dashboard";
-  const isQuickOperation = pathname === "/hizli-islem";
-  const isApprovalsList = pathname === "/onaylar";
+  const isDashboard = normalizedPath === "/dashboard";
+  const isQuickOperation = normalizedPath === "/hizli-islem";
+  const isApprovalsList = normalizedPath === "/onaylar";
+  const isWhatsApp = normalizedPath === "/whatsapp";
+  const isCustomersList = normalizedPath === "/cariler";
 
   const dashboardGreeting = useMemo(() => {
     const display = session?.user.fullName?.trim() || "Ahmet Yılmaz";
     return (
       <div className="hz-header-greeting">
-        <p className="hz-header-greeting-line">
-          Günaydın, {display} <span aria-hidden>👋</span>
-        </p>
+        <p className="hz-header-greeting-line">Günaydın, {display}</p>
         <p className="hz-header-greeting-date">{formatDashboardDateLine()}</p>
       </div>
     );
@@ -185,7 +201,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
       header={
         <Header
           layout={isDashboard ? "dashboard" : "default"}
-          suppressPageMeta={isQuickOperation || isApprovalsList}
+          suppressPageMeta={isQuickOperation || isApprovalsList || isWhatsApp || isCustomersList}
           title={pageMeta.title}
           subtitle={pageMeta.subtitle}
           breadcrumb={pageMeta.breadcrumb}
@@ -195,7 +211,11 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
               ? "Ara (Cari, Sipariş, Ürün, Belge...)"
               : isApprovalsList
                 ? "Cari, onay no, belge no, tutar ara..."
-                : "Cari, siparis, urun kodu veya barkod ara"
+                : isWhatsApp
+                  ? "Cari, telefon, mesaj, belge no veya tutar ara..."
+                  : isCustomersList
+                    ? "Cari, telefon, vergi no, şehir veya bakiye ara..."
+                    : "Cari, siparis, urun kodu veya barkod ara"
           }
           toolbarSlot={
             isDashboard ? (

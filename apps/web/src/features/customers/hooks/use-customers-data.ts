@@ -28,6 +28,11 @@ export function useCustomersData(filters: CustomerFilters) {
           setData(result);
         }
       })
+      .catch(() => {
+        if (mounted) {
+          setData(emptyData);
+        }
+      })
       .finally(() => {
         if (mounted) {
           setLoading(false);
