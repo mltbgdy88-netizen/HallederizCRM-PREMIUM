@@ -121,6 +121,22 @@ export function IconRotateCcw({ size = 18, className }: IcoProps) {
   );
 }
 
+/** Hızlı işlem / kısayol — tek çizgi şimşek */
+export function IconZap({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M13 2L3 14h9l-1 8 10-12h-7l1-8z"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinejoin="round"
+        strokeLinecap="round"
+        fill="none"
+      />
+    </svg>
+  );
+}
+
 export function IconSend({ size = 18, className }: IcoProps) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -359,6 +375,28 @@ export function IconXCircle({ size = 16, className }: IcoProps) {
   );
 }
 
+export function IconPaperclip({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M21.44 11.05l-9.19 9.19a4.5 4.5 0 01-6.36-6.36l9.2-9.19a3 3 0 014.24 4.24l-9.2 9.19a1.5 1.5 0 01-2.12-2.12l8.08-8.06"
+        stroke="currentColor"
+        strokeWidth="2"
+        {...S.round}
+      />
+    </svg>
+  );
+}
+
+export function IconMic({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M12 1a3 3 0 00-3 3v8a3 3 0 006 0V4a3 3 0 00-3-3z" stroke="currentColor" strokeWidth="2" {...S.round} />
+      <path d="M19 10v1a7 7 0 01-14 0v-1M12 19v4M8 23h8" stroke="currentColor" strokeWidth="2" {...S.round} />
+    </svg>
+  );
+}
+
 export function IconTruck({ size = 18, className }: IcoProps) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
@@ -387,6 +425,61 @@ export function IconFilter({ size = 16, className }: IcoProps) {
   return (
     <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
       <path d="M22 3H2l8 9v9l4 2v-11l8-9z" stroke="currentColor" strokeWidth="2" {...S.round} />
+    </svg>
+  );
+}
+
+export function IconUser({ size = 18, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" stroke="currentColor" strokeWidth="2" {...S.round} />
+      <circle cx="12" cy="7" r="4" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  );
+}
+
+export function IconBuilding({ size = 18, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M3 21h18M5 21V7l8-4v18M13 11h4M13 15h4M13 7h4" stroke="currentColor" strokeWidth="2" {...S.round} />
+    </svg>
+  );
+}
+
+export function IconMapPin({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M21 10c0 7-9 13-9 13S3 17 3 10a9 9 0 1118 0z" stroke="currentColor" strokeWidth="2" {...S.round} />
+      <circle cx="12" cy="10" r="3" stroke="currentColor" strokeWidth="2" />
+    </svg>
+  );
+}
+
+export function IconUpload({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M17 8l-5-5-5 5M12 3v12" stroke="currentColor" strokeWidth="2" {...S.round} />
+    </svg>
+  );
+}
+
+export function IconExternalLink({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path d="M18 13v6a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2h6M15 3h6v6M10 14L21 3" stroke="currentColor" strokeWidth="2" {...S.round} />
+    </svg>
+  );
+}
+
+export function IconPhone({ size = 16, className }: IcoProps) {
+  return (
+    <svg className={className} width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden>
+      <path
+        d="M22 16.92v3a2 2 0 01-2.18 2 19.79 19.79 0 01-8.63-3.07 19.5 19.5 0 01-6-6 19.79 19.79 0 01-3.07-8.67A2 2 0 014.11 2h3a2 2 0 012 1.72 12.84 12.84 0 00.7 2.81 2 2 0 01-.45 2.11L8.09 10.91a16 16 0 006 6l1.27-1.27a2 2 0 012.11-.45 12.84 12.84 0 002.81.7A2 2 0 0122 16.92z"
+        stroke="currentColor"
+        strokeWidth="2"
+        {...S.round}
+      />
     </svg>
   );
 }

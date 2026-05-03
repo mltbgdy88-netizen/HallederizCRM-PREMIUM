@@ -1,6 +1,6 @@
 import type { PriceSlotConfig } from "@hallederiz/types";
-import { FilterActions, FilterBar, FilterGrid, FilterResetButton } from "@hallederiz/ui";
-import type { CustomerFilters } from "../schemas/customer-filter-schema";
+import type { CustomerFilters, CustomerWhatsappFilter } from "../schemas/customer-filter-schema";
+import { IconRotateCcw } from "../../dashboard/components/dashboard-inline-icons";
 
 export interface CustomerFilterBarProps {
   filters: CustomerFilters;
@@ -12,37 +12,21 @@ export interface CustomerFilterBarProps {
 
 export function CustomerFilterBar({ filters, cities, priceSlots, onFilterChange, onReset }: CustomerFilterBarProps) {
   return (
-    <FilterBar>
-      <FilterGrid>
-        <label>
-          Arama
+    <div className="hz-customers-filter-bar" role="search" aria-label="Cari filtreleri">
+      <div className="hz-customers-filter-row hz-customers-filter-row--primary">
+        <label className="hz-customers-filter-field hz-customers-filter-field--grow">
+          <span className="hz-customers-filter-label">Ara</span>
           <input
+            className="hz-customers-filter-input"
             value={filters.searchText}
             onChange={(event) => onFilterChange("searchText", event.target.value)}
-            placeholder="Cari kodu, ad, telefon veya yetkili"
+            placeholder="Cari adı, kod, telefon veya vergi no"
           />
         </label>
-
-        <label>
-          Musteri Tipi
-          <select
-            value={filters.customerType}
-            onChange={(event) => onFilterChange("customerType", event.target.value as CustomerFilters["customerType"])}
-          >
-            <option value="">Tum tipler</option>
-            <option value="bayi">Bayi</option>
-            <option value="perakende">Perakende</option>
-            <option value="mimar">Mimar</option>
-            <option value="usta">Usta</option>
-            <option value="kurumsal">Kurumsal</option>
-            <option value="ozel">Ozel</option>
-          </select>
-        </label>
-
-        <label>
-          Sehir
-          <select value={filters.city} onChange={(event) => onFilterChange("city", event.target.value)}>
-            <option value="">Tum sehirler</option>
+        <label className="hz-customers-filter-field">
+          <span className="hz-customers-filter-label">Şehir</span>
+          <select className="hz-customers-filter-select" value={filters.city} onChange={(event) => onFilterChange("city", event.target.value)}>
+            <option value="">Tümü</option>
             {cities.map((city) => (
               <option key={city} value={city}>
                 {city}
@@ -50,50 +34,11 @@ export function CustomerFilterBar({ filters, cities, priceSlots, onFilterChange,
             ))}
           </select>
         </label>
-
-        <label>
-          Risk Seviyesi
+        <label className="hz-customers-filter-field">
+          <span className="hz-customers-filter-label">Fiyat grubu</span>
           <select
-            value={filters.riskLevel}
-            onChange={(event) => onFilterChange("riskLevel", event.target.value as CustomerFilters["riskLevel"])}
-          >
-            <option value="">Tum riskler</option>
-            <option value="low">Dusuk</option>
-            <option value="medium">Orta</option>
-            <option value="high">Yuksek</option>
-            <option value="blocked">Blokeli</option>
-          </select>
-        </label>
-
-        <label>
-          Bakiye Durumu
-          <select
-            value={filters.balanceState}
-            onChange={(event) => onFilterChange("balanceState", event.target.value as CustomerFilters["balanceState"])}
-          >
-            <option value="all">Tum bakiyeler</option>
-            <option value="open_balance">Acik bakiye</option>
-            <option value="credit">Alacakli</option>
-            <option value="zero">Sifir bakiye</option>
-          </select>
-        </label>
-
-        <label>
-          Durum
-          <select
-            value={filters.activeState}
-            onChange={(event) => onFilterChange("activeState", event.target.value as CustomerFilters["activeState"])}
-          >
-            <option value="all">Tum durumlar</option>
-            <option value="active">Aktif</option>
-            <option value="inactive">Pasif</option>
-          </select>
-        </label>
-
-        <label>
-          Fiyat Grubu
-          <select
-            value={filters.priceSlotNo}
+            className="hz-customers-filter-select"
+            value={filters.priceSlotNo === "" ? "" : String(filters.priceSlotNo)}
             onChange={(event) =>
               onFilterChange(
                 "priceSlotNo",
@@ -101,7 +46,7 @@ export function CustomerFilterBar({ filters, cities, priceSlots, onFilterChange,
               )
             }
           >
-            <option value="">Tum gruplar</option>
+            <option value="">Tümü</option>
             {priceSlots.map((slot) => (
               <option key={slot.slotNumber} value={slot.slotNumber}>
                 {slot.slotName}
@@ -109,14 +54,37 @@ export function CustomerFilterBar({ filters, cities, priceSlots, onFilterChange,
             ))}
           </select>
         </label>
-      </FilterGrid>
-
-      <FilterActions>
-        <button type="button" className="hz-btn hz-btn-secondary">
-          Filtrele
+        <label className="hz-customers-filter-field">
+          <span className="hz-customers-filter-label">Risk</span>
+          <select
+            className="hz-customers-filter-select"
+            value={filters.riskLevel}
+            onChange={(event) => onFilterChange("riskLevel", event.target.value as CustomerFilters["riskLevel"])}
+          >
+            <option value="">Tümü</option>
+            <option value="low">Düşük</option>
+            <option value="medium">Orta</option>
+            <option value="high">Yüksek</option>
+            <option value="blocked">Blokeli</option>
+          </select>
+        </label>
+        <label className="hz-customers-filter-field">
+          <span className="hz-customers-filter-label">WhatsApp</span>
+          <select
+            className="hz-customers-filter-select"
+            value={filters.whatsappMatch}
+            onChange={(event) => onFilterChange("whatsappMatch", event.target.value as CustomerWhatsappFilter)}
+          >
+            <option value="all">Tümü</option>
+            <option value="matched">Eşleşti</option>
+            <option value="unmatched">Eşleşmedi</option>
+          </select>
+        </label>
+        <button type="button" className="hz-customers-filter-reset" onClick={onReset}>
+          <IconRotateCcw size={14} />
+          Sıfırla
         </button>
-        <FilterResetButton onClick={onReset} label="Temizle" />
-      </FilterActions>
-    </FilterBar>
+      </div>
+    </div>
   );
 }

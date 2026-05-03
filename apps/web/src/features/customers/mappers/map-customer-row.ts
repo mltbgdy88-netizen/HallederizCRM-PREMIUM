@@ -9,14 +9,17 @@ export interface CustomerRow {
   phone: string;
   city: string;
   balanceLabel: string;
+  balanceCreditLine: string;
+  balanceDebitLine: string;
   riskLabel: string;
   riskTone: "success" | "warning" | "danger";
   priceGroupLabel: string;
   lastOrderLabel: string;
+  whatsappMatched: boolean;
 }
 
 function formatMoney(amount: number, currency: string): string {
-  return `${amount.toLocaleString("tr-TR")} ${currency}`;
+  return new Intl.NumberFormat("tr-TR", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
 }
 
 function riskTone(level: string): CustomerRow["riskTone"] {
@@ -33,6 +36,10 @@ function riskTone(level: string): CustomerRow["riskTone"] {
 
 export function mapCustomerToRow(customer: Customer, account: CustomerAccount): CustomerRow {
   const risk = calculateCustomerRiskState(customer, account);
+  const b = account.balance;
+  const cur = account.currency;
+  const balanceCreditLine = b > 0 ? `${formatMoney(b, cur)} alacak` : "—";
+  const balanceDebitLine = b < 0 ? `${formatMoney(-b, cur)} verecek` : b === 0 ? "Bakiye sıfır" : "—";
 
   return {
     customerId: customer.id,
@@ -41,10 +48,13 @@ export function mapCustomerToRow(customer: Customer, account: CustomerAccount): 
     typeLabel: resolveCustomerDisplayType(customer.type),
     phone: customer.phone,
     city: customer.city,
-    balanceLabel: formatMoney(account.balance, account.currency),
+    balanceLabel: formatMoney(b, cur),
+    balanceCreditLine,
+    balanceDebitLine,
     riskLabel: risk.label,
     riskTone: riskTone(risk.level),
     priceGroupLabel: customer.pricingProfile.priceSlotLabelSnapshot ?? `Slot ${customer.pricingProfile.selectedPriceSlotNo}`,
-    lastOrderLabel: customer.lastOrderAt ? new Date(customer.lastOrderAt).toLocaleDateString("tr-TR") : "-"
+    lastOrderLabel: customer.lastOrderAt ? new Date(customer.lastOrderAt).toLocaleDateString("tr-TR") : "—",
+    whatsappMatched: customer.whatsappMatched
   };
 }

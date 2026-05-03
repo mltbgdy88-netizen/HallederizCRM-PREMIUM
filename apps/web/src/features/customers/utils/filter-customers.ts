@@ -55,6 +55,14 @@ export function filterCustomers(params: {
       return false;
     }
 
+    if (filters.whatsappMatch === "matched" && !customer.whatsappMatched) {
+      return false;
+    }
+
+    if (filters.whatsappMatch === "unmatched" && customer.whatsappMatched) {
+      return false;
+    }
+
     return true;
   });
 }

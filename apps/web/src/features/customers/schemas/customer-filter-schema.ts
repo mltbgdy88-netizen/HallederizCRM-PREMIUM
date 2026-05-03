@@ -1,5 +1,7 @@
 import type { CustomerBalanceState, CustomerRiskLevel, CustomerType, PriceSlotNumber } from "@hallederiz/types";
 
+export type CustomerWhatsappFilter = "all" | "matched" | "unmatched";
+
 export interface CustomerFilters {
   searchText: string;
   customerType: CustomerType | "";
@@ -8,6 +10,7 @@ export interface CustomerFilters {
   balanceState: CustomerBalanceState;
   activeState: "all" | "active" | "inactive";
   priceSlotNo: PriceSlotNumber | "";
+  whatsappMatch: CustomerWhatsappFilter;
 }
 
 export const defaultCustomerFilters: CustomerFilters = {
@@ -17,5 +20,6 @@ export const defaultCustomerFilters: CustomerFilters = {
   riskLevel: "",
   balanceState: "all",
   activeState: "all",
-  priceSlotNo: ""
+  priceSlotNo: "",
+  whatsappMatch: "all"
 };
