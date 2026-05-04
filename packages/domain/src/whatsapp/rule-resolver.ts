@@ -2,9 +2,16 @@ import type {
   WhatsAppApprovalPolicyMode,
   WhatsAppApproverRole,
   WhatsAppBusinessIntent,
+  WhatsAppIntentRulesConfig,
   WhatsAppRuleMode,
   WhatsAppRuleResolution,
   WhatsAppRuleTemplateKey
+} from "@hallederiz/types";
+import {
+  createDefaultWhatsappIntentRules,
+  findIntentRule,
+  runtimeBooleansFromIntentRule,
+  type WhatsAppIntentRule
 } from "@hallederiz/types";
 
 export interface WhatsAppRuleResolverSettings {
@@ -18,6 +25,7 @@ interface RuntimeRule {
   requiresRegisteredPhone: boolean;
   requiresLinkedCustomer: boolean;
   canAutoReply: boolean;
+  requiresCustomerConfirmation: boolean;
   requiresInternalApproval: boolean;
   requiresSalesApproval: boolean;
   requiresAccountingApproval: boolean;
@@ -25,91 +33,45 @@ interface RuntimeRule {
   templateKey: WhatsAppRuleTemplateKey;
 }
 
-const defaultRule: RuntimeRule = {
-  requiresRegisteredPhone: false,
-  requiresLinkedCustomer: false,
-  canAutoReply: true,
-  requiresInternalApproval: false,
-  requiresSalesApproval: false,
-  requiresAccountingApproval: false,
-  requiresCrmApproval: false,
-  templateKey: "generic"
+const defaultIntentRulesConfig: WhatsAppIntentRulesConfig = {
+  intents: createDefaultWhatsappIntentRules()
 };
 
-const rulesByIntent: Record<WhatsAppBusinessIntent, RuntimeRule> = {
-  stok: {
-    ...defaultRule,
-    templateKey: "stock"
-  },
-  fiyat: {
-    ...defaultRule,
-    requiresRegisteredPhone: true,
-    requiresLinkedCustomer: true,
-    canAutoReply: false,
-    templateKey: "price"
-  },
-  ekstre: {
-    ...defaultRule,
-    requiresRegisteredPhone: true,
-    requiresLinkedCustomer: true,
-    canAutoReply: false,
-    templateKey: "statement"
-  },
-  siparis: {
-    ...defaultRule,
-    requiresRegisteredPhone: true,
-    requiresLinkedCustomer: true,
-    canAutoReply: false,
-    requiresInternalApproval: true,
-    requiresSalesApproval: true,
-    requiresAccountingApproval: true,
-    requiresCrmApproval: true,
-    templateKey: "order"
-  },
-  odeme: {
-    ...defaultRule,
-    requiresRegisteredPhone: true,
-    requiresLinkedCustomer: true,
-    canAutoReply: false,
-    requiresInternalApproval: true,
-    requiresSalesApproval: true,
-    requiresAccountingApproval: true,
-    requiresCrmApproval: true,
-    templateKey: "payment"
-  },
-  iade: {
-    ...defaultRule,
-    requiresRegisteredPhone: true,
-    requiresLinkedCustomer: true,
-    canAutoReply: false,
-    requiresInternalApproval: true,
-    requiresSalesApproval: true,
-    requiresAccountingApproval: true,
-    templateKey: "return"
-  },
-  fatura: {
-    ...defaultRule,
-    requiresRegisteredPhone: true,
-    requiresLinkedCustomer: true,
-    canAutoReply: false,
-    requiresInternalApproval: true,
-    requiresSalesApproval: true,
-    requiresAccountingApproval: true,
-    requiresCrmApproval: true,
-    templateKey: "invoice"
-  },
-  hatali_urun: {
-    ...defaultRule,
-    requiresInternalApproval: true,
-    requiresSalesApproval: true,
-    requiresAccountingApproval: true,
-    templateKey: "defect"
-  },
-  diger: {
-    ...defaultRule,
-    templateKey: "generic"
-  }
+const templateKeyByIntent: Record<WhatsAppBusinessIntent, WhatsAppRuleTemplateKey> = {
+  stok: "stock",
+  fiyat: "price",
+  ekstre: "statement",
+  siparis: "order",
+  odeme: "payment",
+  iade: "return",
+  fatura: "invoice",
+  hatali_urun: "defect",
+  diger: "generic"
 };
+
+function intentRuleToRuntimeRule(intent: WhatsAppBusinessIntent, row: WhatsAppIntentRule): RuntimeRule {
+  const b = runtimeBooleansFromIntentRule(row);
+  return {
+    requiresRegisteredPhone: b.registeredPhone,
+    requiresLinkedCustomer: b.linkedCustomer,
+    canAutoReply: b.autoReply,
+    requiresCustomerConfirmation: b.customerConfirmation,
+    requiresInternalApproval: b.internalApproval,
+    requiresSalesApproval: b.salesApproval,
+    requiresAccountingApproval: b.accountingApproval,
+    requiresCrmApproval: b.crmApproval,
+    templateKey: templateKeyByIntent[intent] ?? "generic"
+  };
+}
+
+function getRuntimeRuleForIntent(
+  intent: WhatsAppBusinessIntent,
+  platformIntentRules?: WhatsAppIntentRulesConfig | null
+): RuntimeRule {
+  const cfg = platformIntentRules ?? defaultIntentRulesConfig;
+  const row = findIntentRule(cfg, intent) ?? findIntentRule(defaultIntentRulesConfig, "diger")!;
+  return intentRuleToRuntimeRule(intent, row);
+}
 
 function normalizePhone(value?: string): string {
   return (value ?? "").replace(/\D/g, "");
@@ -150,8 +112,10 @@ export function resolveWhatsAppRulePolicy(input: {
   intent: WhatsAppBusinessIntent;
   mode?: WhatsAppRuleMode;
   settings?: WhatsAppRuleResolverSettings;
+  /** Tenant ayarı; yoksa ürün varsayılan matrisi kullanılır. */
+  platformIntentRules?: WhatsAppIntentRulesConfig | null;
 }): WhatsAppRuleResolution {
-  const rule = rulesByIntent[input.intent] ?? rulesByIntent.diger;
+  const rule = getRuntimeRuleForIntent(input.intent, input.platformIntentRules);
   const mode = input.mode ?? input.settings?.mode ?? "hybrid";
   const approvalPolicyMode = resolvePolicyMode(rule, input.settings?.approvalPolicyMode);
   const requiredRoles = resolveRequiredRoles(approvalPolicyMode, rule);
@@ -175,7 +139,7 @@ export function resolveWhatsAppRulePolicy(input: {
         ? "Bu talep icin kayitli telefon ve cari eslesmesi gerekir."
         : "Dusuk riskli WhatsApp akisi.",
     mode,
-    requiresCustomerConfirmation: rule.requiresRegisteredPhone || rule.requiresLinkedCustomer,
+    requiresCustomerConfirmation: rule.requiresCustomerConfirmation,
     requiresLinkedCustomer: rule.requiresLinkedCustomer,
     canAutoReply: rule.canAutoReply,
     requiresInternalApproval: rule.requiresInternalApproval,

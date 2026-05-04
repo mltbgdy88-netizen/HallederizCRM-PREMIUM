@@ -44,7 +44,8 @@ export async function registerSettingsRoutes(server: FastifyInstance) {
           pilotSetup: {
             ...tenantSettingsState.pilotSetup,
             ...(patch.pilotSetup ?? {})
-          }
+          },
+          whatsappIntentRules: patch.whatsappIntentRules ?? tenantSettingsState.whatsappIntentRules
         };
         setTenantSettingsState(nextState);
         return {

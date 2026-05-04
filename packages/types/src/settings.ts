@@ -1,5 +1,7 @@
 import type { TenantModuleCode } from "./tenant";
 import type { CategorySlotConfig, PriceSlotConfig } from "./product-stock-pricing";
+import { createDefaultWhatsappIntentRules } from "./whatsapp-intent-rules";
+import type { WhatsAppIntentRulesConfig } from "./whatsapp-intent-rules";
 
 export type ThemeMode = "light" | "dark" | "system";
 
@@ -121,6 +123,8 @@ export interface PlatformSettings {
   rolePresets: RolePresetItem[];
   pilotSetup: PilotSetupState;
   whatsapp: WhatsAppSettings;
+  /** WhatsApp + AI kural ve onay matrisi (varsayılan ürün kararı). */
+  whatsappIntentRules: WhatsAppIntentRulesConfig;
   ai: AiSettings;
   erp: ErpSettings;
   printSave: PrintSaveSettings;
@@ -303,6 +307,9 @@ export const defaultPlatformSettings: PlatformSettings = {
     provider: "meta",
     defaultSenderName: "",
     approvalRequired: true
+  },
+  whatsappIntentRules: {
+    intents: createDefaultWhatsappIntentRules()
   },
   ai: {
     enabled: false,

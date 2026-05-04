@@ -59,6 +59,7 @@ export async function getPilotSetupData(): Promise<PilotSetupData> {
   );
   const enrichedSettings: PlatformSettings = {
     ...settings,
+    whatsappIntentRules: settings.whatsappIntentRules ?? defaultPlatformSettings.whatsappIntentRules,
     pilotSetup: {
       ...settings.pilotSetup,
       checklist: settings.pilotSetup.checklist.map((item) => {
@@ -127,7 +128,7 @@ export async function getPilotReadinessData(): Promise<PilotReadinessSummary> {
           mustCheck: ["Kritik eksikler", "Servis health", "Onaylar"],
           firstScreens: [
             { label: "Kullanim Hazirligi", href: "/ayarlar/kullanim-hazirligi" },
-            { label: "Staging Kontrol", href: "/ayarlar/staging-kontrol" }
+            { label: "Hazırlık kontrolü", href: "/ayarlar/staging-kontrol" }
           ],
           ownGaps: ["Cariler import edildi"]
         }

@@ -27,7 +27,11 @@ export async function savePlatformSettings(patch: Partial<PlatformSettings>): Pr
       pilotSetup: {
         ...defaultPlatformSettings.pilotSetup,
         ...(patch.pilotSetup ?? {})
-      }
+      },
+      whatsappIntentRules:
+        patch.whatsappIntentRules !== undefined
+          ? patch.whatsappIntentRules
+          : defaultPlatformSettings.whatsappIntentRules
     };
   }
   return patchPlatformSettingsApi(patch);

@@ -176,6 +176,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
   const isStockList = normalizedPath === "/stok";
   const isArchiveList = normalizedPath === "/archive";
   const isReportsList = normalizedPath === "/raporlar";
+  const isSettingsCenter = normalizedPath === "/ayarlar";
 
   const dashboardGreeting = useMemo(() => {
     const display = session?.user.fullName?.trim() || "Ahmet Yılmaz";
@@ -211,7 +212,8 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
             isCustomersList ||
             isStockList ||
             isArchiveList ||
-            isReportsList
+            isReportsList ||
+            isSettingsCenter
           }
           title={pageMeta.title}
           subtitle={pageMeta.subtitle}
@@ -232,7 +234,9 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
                         ? "Belge no, cari, işlem, tarih, kullanıcı veya etiket ara..."
                         : isReportsList
                           ? "Rapor, cari, belge, tarih, metrik veya kullanıcı ara..."
-                          : "Cari, siparis, urun kodu veya barkod ara"
+                          : isSettingsCenter
+                            ? "Ayar, kullanıcı, bağlantı, depo, fiyat veya belge ara..."
+                            : "Cari, siparis, urun kodu veya barkod ara"
           }
           toolbarSlot={
             isDashboard ? (

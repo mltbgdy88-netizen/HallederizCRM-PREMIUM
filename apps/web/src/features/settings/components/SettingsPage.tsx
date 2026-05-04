@@ -1,29 +1,68 @@
 ﻿"use client";
 
-import { type FormEvent, useEffect, useMemo, useState } from "react";
-import Link from "next/link";
+import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useRouter } from "next/navigation";
 import type {
   CategorySlotConfig,
   PlatformSettings,
   PriceSlotConfig,
   RolePresetItem,
   User,
-  WarehouseSetupItem
+  WarehouseSetupItem,
+  WhatsAppIntent
 } from "@hallederiz/types";
-import { MetricCard, PageHeader, PrimaryActionToolbar, TabSwitcher } from "@hallederiz/ui";
 import { savePlatformSettings, quickCreateUser } from "../mutations";
 import { getPilotSetupData } from "../queries";
+import { IntentRuleAssistantPanel, WhatsAppIntentRulesSection } from "./WhatsAppIntentRulesSection";
+import { useToast } from "../../../providers/toast-provider";
+import {
+  IconArchive,
+  IconBarChart3,
+  IconBuilding,
+  IconCheckCircle,
+  IconClipboardCheck,
+  IconDatabase,
+  IconExternalLink,
+  IconMessageCircle,
+  IconPackage,
+  IconRotateCcw,
+  IconSave,
+  IconShieldCheck,
+  IconTag,
+  IconUpload,
+  IconUser,
+  IconWarehouse,
+  IconZap
+} from "../../dashboard/components/dashboard-inline-icons";
 
-const TABS = [
-  { id: "company", label: "Sirket" },
-  { id: "pricing", label: "Fiyat/Kategori" },
-  { id: "currency", label: "Doviz" },
-  { id: "warehouses", label: "Depolar" },
-  { id: "team", label: "Rol ve Personel" },
-  { id: "setup", label: "Kurulum Hazirligi" }
-] as const;
+export type SettingsCategoryId =
+  | "firma"
+  | "fiyatlar"
+  | "para-birimi"
+  | "depolar"
+  | "kullanicilar"
+  | "baglantilar"
+  | "whatsapp"
+  | "kural-onay"
+  | "ai-onay"
+  | "belgeler"
+  | "veri-yukleme"
+  | "guvenlik";
 
-type SettingsTabId = (typeof TABS)[number]["id"];
+const CATEGORIES: { id: SettingsCategoryId; label: string }[] = [
+  { id: "firma", label: "Firma" },
+  { id: "fiyatlar", label: "Fiyatlar" },
+  { id: "para-birimi", label: "Para Birimi" },
+  { id: "depolar", label: "Depolar" },
+  { id: "kullanicilar", label: "Kullanıcılar" },
+  { id: "baglantilar", label: "Bağlantılar" },
+  { id: "whatsapp", label: "WhatsApp" },
+  { id: "kural-onay", label: "Kural ve Onay" },
+  { id: "ai-onay", label: "AI ve Onay" },
+  { id: "belgeler", label: "Belgeler" },
+  { id: "veri-yukleme", label: "Veri Yükleme" },
+  { id: "guvenlik", label: "Güvenlik" }
+];
 
 function cloneSettings(settings: PlatformSettings): PlatformSettings {
   return JSON.parse(JSON.stringify(settings)) as PlatformSettings;
@@ -34,66 +73,139 @@ function parseNumber(input: string, fallback = 0): number {
   return Number.isFinite(parsed) ? parsed : fallback;
 }
 
+function companyProfileStatus(c: PlatformSettings["company"]): "Dolu" | "Eksik" {
+  const ok =
+    c.companyName.trim().length > 0 &&
+    c.taxNumber.trim().length > 0 &&
+    c.email.trim().length > 0 &&
+    c.phone.trim().length > 0;
+  return ok ? "Dolu" : "Eksik";
+}
+
+function connectionsSummary(s: PlatformSettings): string {
+  let n = 0;
+  if (s.erp.enabled) n++;
+  if (s.whatsapp.enabled) n++;
+  if (s.ai.enabled) n++;
+  if (n >= 3) return "Hazır";
+  if (n === 0) return "Eksik";
+  return "Kısmi";
+}
+
+function erpLabel(provider: PlatformSettings["erp"]["provider"]): string {
+  switch (provider) {
+    case "netsis":
+      return "Netsis";
+    case "sap":
+      return "SAP";
+    case "custom":
+      return "Özel";
+    default:
+      return "Kapalı";
+  }
+}
+
 export function SettingsPage() {
-  const [activeTab, setActiveTab] = useState<SettingsTabId>("company");
+  const router = useRouter();
+  const { pushToast } = useToast();
+  const baselineRef = useRef<PlatformSettings | null>(null);
+
+  const [activeCategory, setActiveCategory] = useState<SettingsCategoryId>("firma");
   const [settings, setSettings] = useState<PlatformSettings | null>(null);
   const [rolePresets, setRolePresets] = useState<RolePresetItem[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [feedbackIsError, setFeedbackIsError] = useState(false);
   const [newUserName, setNewUserName] = useState("");
   const [newUserEmail, setNewUserEmail] = useState("");
   const [newUserRoleCode, setNewUserRoleCode] = useState("satis");
+  const [selectedRuleIntentId, setSelectedRuleIntentId] = useState<WhatsAppIntent>("stok");
+  const [ruleSidebarEditMode, setRuleSidebarEditMode] = useState(false);
 
-  useEffect(() => {
-    let alive = true;
+  const loadData = useCallback(() => {
     setLoading(true);
+    setLoadError(null);
     setFeedback(null);
     void getPilotSetupData()
       .then((data) => {
-        if (!alive) return;
-        setSettings(cloneSettings(data.settings));
+        const next = cloneSettings(data.settings);
+        setSettings(next);
+        baselineRef.current = cloneSettings(data.settings);
         setRolePresets(data.rolePresets);
         setUsers(data.users);
       })
       .catch((error) => {
-        if (!alive) return;
-        setFeedback(error instanceof Error ? error.message : "Ayarlar yuklenemedi.");
+        setLoadError(error instanceof Error ? error.message : "Ayarlar yüklenemedi.");
       })
       .finally(() => {
-        if (alive) setLoading(false);
+        setLoading(false);
       });
-
-    return () => {
-      alive = false;
-    };
   }, []);
+
+  useEffect(() => {
+    loadData();
+  }, [loadData]);
+
+  useEffect(() => {
+    if (activeCategory === "kural-onay") {
+      setSelectedRuleIntentId("stok");
+      setRuleSidebarEditMode(false);
+    }
+  }, [activeCategory]);
 
   const checklistDone = useMemo(() => {
     if (!settings) return 0;
     return settings.pilotSetup.checklist.filter((item) => item.completed).length;
   }, [settings]);
 
+  const activePriceSlots = useMemo(() => {
+    if (!settings) return 0;
+    return settings.priceSlots.slots.filter((s) => s.active).length;
+  }, [settings]);
+
+  const activeWarehouses = useMemo(() => {
+    if (!settings) return 0;
+    return settings.warehouses.filter((w) => w.active).length;
+  }, [settings]);
+
   const handleSave = async () => {
     if (!settings) return;
     setSaving(true);
     setFeedback(null);
+    setFeedbackIsError(false);
     try {
       const next = await savePlatformSettings(settings);
-      setSettings(cloneSettings(next));
-      setFeedback("Ayarlar kaydedildi.");
+      const cloned = cloneSettings(next);
+      setSettings(cloned);
+      baselineRef.current = cloned;
+      pushToast("Ayarlar kaydedildi.");
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : "Kaydetme sirasinda hata olustu.");
+      const msg = error instanceof Error ? error.message : "Kaydetme sırasında hata oluştu.";
+      setFeedback(msg);
+      setFeedbackIsError(true);
     } finally {
       setSaving(false);
     }
   };
 
+  const handleRevert = () => {
+    if (!baselineRef.current) {
+      pushToast("Geri alınacak kayıtlı sürüm yok.");
+      return;
+    }
+    setSettings(cloneSettings(baselineRef.current));
+    setFeedback(null);
+    setFeedbackIsError(false);
+    pushToast("Son kaydedilen sürüme dönüldü.");
+  };
+
   const handleUserCreate = async (event: FormEvent) => {
     event.preventDefault();
     if (!newUserName || !newUserEmail) {
-      setFeedback("Ad soyad ve e-posta zorunludur.");
+      pushToast("Ad soyad ve e-posta zorunludur.");
       return;
     }
     try {
@@ -102,501 +214,1230 @@ export function SettingsPage() {
         email: newUserEmail,
         status: "active",
         roleCode: newUserRoleCode,
-        title: "Yerel Gelistirme Kullanicisi"
+        title: "Yerel Geliştirme Kullanıcısı"
       });
       setUsers((previous) => [created, ...previous]);
       setNewUserName("");
       setNewUserEmail("");
-      setFeedback("Kullanici eklendi.");
+      pushToast("Kullanıcı eklendi.");
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : "Kullanici eklenemedi.");
+      pushToast(error instanceof Error ? error.message : "Kullanıcı eklenemedi.");
     }
   };
 
-  if (loading || !settings) {
+  const assistantCopy = useMemo(() => {
+    const map: Record<SettingsCategoryId, { hint: string; next: string }> = {
+      firma: {
+        hint: "Vergi numarası ve IBAN belge çıktılarında kullanılır.",
+        next: "Firma bilgileri tamamsa fiyat gruplarını kontrol edin."
+      },
+      fiyatlar: {
+        hint: "Varsayılan fiyat grubu satış ekranında öne çıkar.",
+        next: "Fiyatlar tamamsa döviz ve yuvarlama ayarlarını gözden geçirin."
+      },
+      "para-birimi": {
+        hint: "Kur güncellemesi fiyatlandırmayı doğrudan etkiler.",
+        next: "Kur ayarlarından sonra depo listesini doğrulayın."
+      },
+      depolar: {
+        hint: "Varsayılan depo sipariş ve stok hareketlerinde kullanılır.",
+        next: "Depolar hazırsa kullanıcı ve rolleri kontrol edin."
+      },
+      kullanicilar: {
+        hint: "Roller, menü ve onay kapsamını belirler.",
+        next: "Kullanıcılar sonrası bağlantı ve kanal ayarlarına geçin."
+      },
+      baglantilar: {
+        hint: "Dış sistemlerle veri uyumu buradan izlenir.",
+        next: "Bağlantılar tamamsa WhatsApp mesaj akışını açın."
+      },
+      whatsapp: {
+        hint: "Mesajların onaya düşmesi riski azaltır.",
+        next: "WhatsApp sonrası kural matrisi ve AI onaylarını gözden geçirin."
+      },
+      "kural-onay": {
+        hint: "Niyet bazlı Evet / Hayır / Koşullu kararlar ve şablonlar burada.",
+        next: "Matrisi kaydettikten sonra AI ve onay güvenlik ayarlarını kontrol edin."
+      },
+      "ai-onay": {
+        hint: "Kritik işlemler için insan onayı önerilir.",
+        next: "AI ayarlarından sonra belge ve arşiv seçeneklerini kontrol edin."
+      },
+      belgeler: {
+        hint: "PDF arşivi bulunabilirlik sağlar.",
+        next: "Belge ayarlarından sonra toplu veri yüklemeyi planlayın."
+      },
+      "veri-yukleme": {
+        hint: "Şablonlarla hızlı içe aktarım yapılır.",
+        next: "Veri yükledikten sonra canlıya hazırlık kontrolünü çalıştırın."
+      },
+      guvenlik: {
+        hint: "Ayar değişiklikleri kaydetmeden uygulanmaz.",
+        next: "Kurulum maddelerini tamamlayıp hazırlık ekranına gidin."
+      }
+    };
+    return map[activeCategory];
+  }, [activeCategory]);
+
+  if (loading && !settings) {
     return (
-      <div className="hz-page-stack">
-        <PageHeader title="Ayarlar" description="Kurulum bilgileri yukleniyor..." />
+      <div className="hz-settings-page">
+        <div className="hz-settings-loading">
+          <div className="hz-settings-loading-inner">
+            <p className="hz-settings-loading-title">Ayarlar yükleniyor</p>
+            <p className="hz-settings-loading-sub">Firma ve kullanıcı bilgileri hazırlanıyor.</p>
+            <div className="hz-settings-skel-line" style={{ width: "88%" }} />
+            <div className="hz-settings-skel-line" style={{ width: "72%" }} />
+            <div className="hz-settings-skel-line" style={{ width: "64%" }} />
+          </div>
+        </div>
       </div>
     );
   }
 
-  return (
-    <div className="hz-page-stack">
-      <PageHeader
-        title="Ayarlar"
-        description="Kendi firmaniz icin canli kullanim hazirligi, tenant profili ve entegrasyon ayarlarini yonetin."
-        actions={
-          <div className="hz-inline-actions">
-            <Link href="/ayarlar/kullanim-hazirligi" className="hz-btn hz-btn-secondary">
-              Kullanim Hazirligi
-            </Link>
-            <Link href="/ayarlar/staging-kontrol" className="hz-btn hz-btn-secondary">
-              Staging Kontrol
-            </Link>
-            <Link href="/ayarlar/veri-yukleme" className="hz-btn hz-btn-secondary">
-              Veri Yukleme
-            </Link>
+  if (!settings && loadError) {
+    return (
+      <div className="hz-settings-page">
+        <div className="hz-settings-error">
+          <div className="hz-settings-error-card">
+            <h2>Ayarlar yüklenemedi</h2>
+            <p>{loadError}</p>
+            <button type="button" className="hz-settings-retry-btn" onClick={loadData}>
+              Tekrar dene
+            </button>
           </div>
-        }
-      />
-
-      <section className="hz-metric-grid">
-        <MetricCard title="Sirket" value={settings.company.companyName} detail={settings.company.legalName} tone="info" />
-        <MetricCard title="Varsayilan Depo" value={settings.company.defaultWarehouseId} detail="Operasyon merkezi" tone="success" />
-        <MetricCard title="Fiyat Slotu" value={`Fiyat ${settings.company.defaultPriceSlotNo}`} detail="Varsayilan satis" tone="warning" />
-        <MetricCard
-          title="Kurulum Durumu"
-          value={`${checklistDone}/${settings.pilotSetup.checklist.length}`}
-          detail={settings.pilotSetup.importReady ? "Import-ready" : "Hazirlaniyor"}
-          tone={settings.pilotSetup.importReady ? "success" : "danger"}
-        />
-      </section>
-
-      <PrimaryActionToolbar>
-        <button className="hz-btn hz-toolbar-btn hz-btn-primary" type="button" disabled={saving} onClick={handleSave}>
-          {saving ? "Kaydediliyor..." : "Ayarlari Kaydet"}
-        </button>
-        <button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button" onClick={() => setSettings(cloneSettings(settings))}>
-          Degisiklikleri Sifirla
-        </button>
-      </PrimaryActionToolbar>
-
-      {feedback ? (
-        <div className="hz-content-card">
-          <p className="muted">{feedback}</p>
         </div>
-      ) : null}
+      </div>
+    );
+  }
 
-      <section className="hz-content-card">
-        <TabSwitcher
-          items={TABS.map((tab) => ({ key: tab.id, label: tab.label }))}
-          activeKey={activeTab}
-          onChange={(key: string) => setActiveTab(key as SettingsTabId)}
-        />
+  if (!settings) {
+    return null;
+  }
 
-        <div className="hz-tab-content">
-          {activeTab === "company" ? (
-            <div className="hz-split-layout">
-              <div className="hz-split-main">
-                <div className="hz-modal-panel-grid">
-                  <label className="hz-field-label">
-                    Sirket Adi
-                    <input className="hz-control" value={settings.company.companyName} onChange={(event) => setSettings({ ...settings, company: { ...settings.company, companyName: event.target.value } })} />
+  const s = settings;
+  const selectedIntentRow =
+    s.whatsappIntentRules.intents.find((r) => r.intentId === selectedRuleIntentId) ?? s.whatsappIntentRules.intents[0];
+
+  return (
+    <div className="hz-settings-page">
+      <div className="hz-settings-layout">
+        <div className="hz-settings-main">
+          <header className="hz-settings-topbar">
+            <div className="hz-settings-topbar-text">
+              <h1 className="hz-settings-topbar-title">Sistem Ayar Merkezi</h1>
+              <p className="hz-settings-topbar-sub">Firma bilgileri, kullanıcılar, bağlantılar ve AI ayarlarını tek yerden yönetin.</p>
+            </div>
+            <div className="hz-settings-topbar-actions">
+              <button
+                type="button"
+                className="hz-settings-toolbar-btn hz-settings-toolbar-btn--primary"
+                disabled={saving}
+                onClick={() => void handleSave()}
+              >
+                <IconSave size={14} />
+                {saving ? "Kaydediliyor…" : "Kaydet"}
+              </button>
+              <button type="button" className="hz-settings-toolbar-btn hz-settings-toolbar-btn--outline" onClick={handleRevert}>
+                <IconRotateCcw size={14} />
+                Geri Al
+              </button>
+              <button
+                type="button"
+                className="hz-settings-toolbar-btn hz-settings-toolbar-btn--outline"
+                onClick={() => router.push("/ayarlar/veri-yukleme")}
+              >
+                <IconUpload size={14} />
+                Veri
+              </button>
+              <button
+                type="button"
+                className="hz-settings-toolbar-btn hz-settings-toolbar-btn--outline"
+                onClick={() => router.push("/ayarlar/kullanim-hazirligi")}
+              >
+                <IconClipboardCheck size={14} />
+                Canlıya
+              </button>
+            </div>
+          </header>
+
+          <section className="hz-settings-kpi-strip" aria-label="Özet durum">
+            <div className="hz-settings-kpi">
+              <span className="hz-settings-kpi-ico" aria-hidden>
+                <IconBuilding size={13} />
+              </span>
+              <span className="hz-settings-kpi-text">
+                <span className="hz-settings-kpi-label">Firma bilgisi</span>
+                <span className="hz-settings-kpi-value">{companyProfileStatus(s.company)}</span>
+              </span>
+            </div>
+            <div className="hz-settings-kpi">
+              <span className="hz-settings-kpi-ico" aria-hidden>
+                <IconUser size={13} />
+              </span>
+              <span className="hz-settings-kpi-text">
+                <span className="hz-settings-kpi-label">Kullanıcı</span>
+                <span className="hz-settings-kpi-value">{users.length}</span>
+              </span>
+            </div>
+            <div className="hz-settings-kpi">
+              <span className="hz-settings-kpi-ico" aria-hidden>
+                <IconTag size={13} />
+              </span>
+              <span className="hz-settings-kpi-text">
+                <span className="hz-settings-kpi-label">Fiyatlar</span>
+                <span className="hz-settings-kpi-value">{activePriceSlots} aktif</span>
+              </span>
+            </div>
+            <div className="hz-settings-kpi">
+              <span className="hz-settings-kpi-ico" aria-hidden>
+                <IconWarehouse size={13} />
+              </span>
+              <span className="hz-settings-kpi-text">
+                <span className="hz-settings-kpi-label">Depolar</span>
+                <span className="hz-settings-kpi-value">{activeWarehouses} aktif</span>
+              </span>
+            </div>
+            <div className="hz-settings-kpi">
+              <span className="hz-settings-kpi-ico" aria-hidden>
+                <IconZap size={13} />
+              </span>
+              <span className="hz-settings-kpi-text">
+                <span className="hz-settings-kpi-label">Bağlantılar</span>
+                <span className="hz-settings-kpi-value">{connectionsSummary(s)}</span>
+              </span>
+            </div>
+            <div className="hz-settings-kpi">
+              <span className="hz-settings-kpi-ico" aria-hidden>
+                <IconCheckCircle size={13} />
+              </span>
+              <span className="hz-settings-kpi-text">
+                <span className="hz-settings-kpi-label">Kurulum</span>
+                <span className="hz-settings-kpi-value">
+                  {checklistDone}/{s.pilotSetup.checklist.length}
+                </span>
+              </span>
+            </div>
+          </section>
+
+          <div className="hz-settings-category-tabs" role="tablist" aria-label="Ayar bölümleri">
+            {CATEGORIES.map((c) => (
+              <button
+                key={c.id}
+                type="button"
+                role="tab"
+                aria-selected={activeCategory === c.id}
+                className={`hz-settings-category-tab${activeCategory === c.id ? " hz-settings-category-tab--active" : ""}`}
+                onClick={() => setActiveCategory(c.id)}
+              >
+                {c.label}
+              </button>
+            ))}
+          </div>
+
+          {feedback ? (
+            <div className={`hz-settings-feedback${feedbackIsError ? " hz-settings-feedback--error" : ""}`}>{feedback}</div>
+          ) : null}
+
+          <div className="hz-settings-main-scroll">
+            {activeCategory === "firma" ? (
+              <article className="hz-settings-section">
+                <div className="hz-settings-section-head">
+                  <h2 className="hz-settings-section-title">Firma bilgileri</h2>
+                  <p className="hz-settings-section-desc">Fatura, teklif ve belgelerde görünecek temel bilgiler.</p>
+                </div>
+                <div className="hz-settings-form-grid">
+                  <label className="hz-settings-label">
+                    Firma adı
+                    <input
+                      className="hz-settings-input"
+                      value={s.company.companyName}
+                      onChange={(e) => setSettings({ ...s, company: { ...s.company, companyName: e.target.value } })}
+                    />
                   </label>
-                  <label className="hz-field-label">
-                    Ticari Unvan
-                    <input className="hz-control" value={settings.company.legalName} onChange={(event) => setSettings({ ...settings, company: { ...settings.company, legalName: event.target.value } })} />
+                  <label className="hz-settings-label">
+                    Ticari unvan
+                    <input
+                      className="hz-settings-input"
+                      value={s.company.legalName}
+                      onChange={(e) => setSettings({ ...s, company: { ...s.company, legalName: e.target.value } })}
+                    />
                   </label>
-                  <label className="hz-field-label">
-                    Vergi Dairesi
-                    <input className="hz-control" value={settings.company.taxOffice} onChange={(event) => setSettings({ ...settings, company: { ...settings.company, taxOffice: event.target.value } })} />
+                  <label className="hz-settings-label">
+                    Vergi dairesi
+                    <input
+                      className="hz-settings-input"
+                      value={s.company.taxOffice}
+                      onChange={(e) => setSettings({ ...s, company: { ...s.company, taxOffice: e.target.value } })}
+                    />
                   </label>
-                  <label className="hz-field-label">
-                    Vergi Numarasi
-                    <input className="hz-control" value={settings.company.taxNumber} onChange={(event) => setSettings({ ...settings, company: { ...settings.company, taxNumber: event.target.value } })} />
+                  <label className="hz-settings-label">
+                    Vergi numarası
+                    <input
+                      className="hz-settings-input"
+                      value={s.company.taxNumber}
+                      onChange={(e) => setSettings({ ...s, company: { ...s.company, taxNumber: e.target.value } })}
+                    />
                   </label>
-                  <label className="hz-field-label">
-                    Mersis No
-                    <input className="hz-control" value={settings.company.mersisNo} onChange={(event) => setSettings({ ...settings, company: { ...settings.company, mersisNo: event.target.value } })} />
+                  <label className="hz-settings-label">
+                    Mersis no
+                    <input
+                      className="hz-settings-input"
+                      value={s.company.mersisNo}
+                      onChange={(e) => setSettings({ ...s, company: { ...s.company, mersisNo: e.target.value } })}
+                    />
                   </label>
-                  <label className="hz-field-label">
+                  <label className="hz-settings-label">
                     Telefon
-                    <input className="hz-control" value={settings.company.phone} onChange={(event) => setSettings({ ...settings, company: { ...settings.company, phone: event.target.value } })} />
+                    <input
+                      className="hz-settings-input"
+                      value={s.company.phone}
+                      onChange={(e) => setSettings({ ...s, company: { ...s.company, phone: e.target.value } })}
+                    />
                   </label>
-                  <label className="hz-field-label">
-                    E-Posta
-                    <input className="hz-control" value={settings.company.email} onChange={(event) => setSettings({ ...settings, company: { ...settings.company, email: event.target.value } })} />
+                  <label className="hz-settings-label">
+                    E-posta
+                    <input
+                      className="hz-settings-input"
+                      type="email"
+                      value={s.company.email}
+                      onChange={(e) => setSettings({ ...s, company: { ...s.company, email: e.target.value } })}
+                    />
                   </label>
-                  <label className="hz-field-label">
+                  <label className="hz-settings-label">
                     IBAN
-                    <input className="hz-control" value={settings.company.iban} onChange={(event) => setSettings({ ...settings, company: { ...settings.company, iban: event.target.value } })} />
+                    <input
+                      className="hz-settings-input"
+                      value={s.company.iban}
+                      onChange={(e) => setSettings({ ...s, company: { ...s.company, iban: e.target.value } })}
+                    />
+                  </label>
+                  <label className="hz-settings-label hz-settings-field--full">
+                    Adres
+                    <textarea
+                      className="hz-settings-textarea"
+                      value={s.company.address}
+                      onChange={(e) => setSettings({ ...s, company: { ...s.company, address: e.target.value } })}
+                      rows={3}
+                    />
                   </label>
                 </div>
+                <div className="hz-settings-subgrid">
+                  <label className="hz-settings-label">
+                    Varsayılan para birimi
+                    <input className="hz-settings-input" value={s.company.defaultCurrency} readOnly />
+                  </label>
+                  <label className="hz-settings-label">
+                    Muhasebe yılı başlangıcı
+                    <input className="hz-settings-input" value={s.company.accountingYearStart} readOnly />
+                  </label>
+                  <label className="hz-settings-label">
+                    Varsayılan vade (gün)
+                    <input
+                      className="hz-settings-input"
+                      value={s.company.defaultDueDay}
+                      onChange={(e) =>
+                        setSettings({ ...s, company: { ...s.company, defaultDueDay: parseNumber(e.target.value, s.company.defaultDueDay) } })
+                      }
+                    />
+                  </label>
+                  <label className="hz-settings-label">
+                    Varsayılan KDV (%)
+                    <input
+                      className="hz-settings-input"
+                      value={s.company.defaultVatRate}
+                      onChange={(e) =>
+                        setSettings({ ...s, company: { ...s.company, defaultVatRate: parseNumber(e.target.value, s.company.defaultVatRate) } })
+                      }
+                    />
+                  </label>
+                  <label className="hz-settings-label">
+                    Teslim şekli
+                    <input
+                      className="hz-settings-input"
+                      value={s.company.defaultDeliveryMethod}
+                      onChange={(e) => setSettings({ ...s, company: { ...s.company, defaultDeliveryMethod: e.target.value } })}
+                    />
+                  </label>
+                </div>
+              </article>
+            ) : null}
 
-                <label className="hz-field-label hz-margin-top-sm">
-                  Adres
-                  <textarea className="hz-control" value={settings.company.address} onChange={(event) => setSettings({ ...settings, company: { ...settings.company, address: event.target.value } })} rows={3} style={{ height: "auto", padding: "10px" }} />
-                </label>
-              </div>
-
-              <aside className="hz-split-side">
-                <article className="hz-side-panel">
-                  <h3>Finans ve Operasyon Varsayilanlari</h3>
-                  <div className="detail-list">
-                    <span>Varsayilan para birimi</span>
-                    <strong>{settings.company.defaultCurrency}</strong>
-                    <span>Muhasebe yil baslangici</span>
-                    <strong>{settings.company.accountingYearStart}</strong>
-                    <span>Varsayilan vade gunu</span>
-                    <strong>{settings.company.defaultDueDay}</strong>
-                    <span>Varsayilan KDV</span>
-                    <strong>%{settings.company.defaultVatRate}</strong>
-                    <span>Varsayilan teslim sekli</span>
-                    <strong>{settings.company.defaultDeliveryMethod}</strong>
+            {activeCategory === "fiyatlar" ? (
+              <>
+                <article className="hz-settings-section">
+                  <div className="hz-settings-section-head">
+                    <h2 className="hz-settings-section-title">Fiyat grupları</h2>
+                    <p className="hz-settings-section-desc">Bayi, perakende, proje gibi satış fiyatlarını düzenleyin.</p>
                   </div>
+                  {s.priceSlots.slots.map((slot) => (
+                    <div key={slot.slotNumber} className="hz-settings-slot-row">
+                      <span className="hz-settings-slot-num">{slot.slotNumber}</span>
+                      <label className="hz-settings-label">
+                        Slot adı
+                        <input
+                          className="hz-settings-input"
+                          value={slot.slotName}
+                          onChange={(e) =>
+                            setSettings({
+                              ...s,
+                              priceSlots: {
+                                slots: s.priceSlots.slots.map((item) =>
+                                  item.slotNumber === slot.slotNumber ? { ...item, slotName: e.target.value } : item
+                                )
+                              }
+                            })
+                          }
+                        />
+                      </label>
+                      <label className="hz-settings-label">
+                        Para
+                        <select
+                          className="hz-settings-select"
+                          value={slot.currency}
+                          onChange={(e) =>
+                            setSettings({
+                              ...s,
+                              priceSlots: {
+                                slots: s.priceSlots.slots.map((item) =>
+                                  item.slotNumber === slot.slotNumber
+                                    ? { ...item, currency: e.target.value as PriceSlotConfig["currency"] }
+                                    : item
+                                )
+                              }
+                            })
+                          }
+                        >
+                          <option value="TRY">TRY</option>
+                          <option value="USD">USD</option>
+                          <option value="EUR">EUR</option>
+                        </select>
+                      </label>
+                      <label className="hz-settings-label">
+                        Aktif
+                        <input
+                          type="checkbox"
+                          checked={slot.active}
+                          onChange={(e) =>
+                            setSettings({
+                              ...s,
+                              priceSlots: {
+                                slots: s.priceSlots.slots.map((item) =>
+                                  item.slotNumber === slot.slotNumber ? { ...item, active: e.target.checked } : item
+                                )
+                              }
+                            })
+                          }
+                        />
+                      </label>
+                      <div className="hz-settings-slot-actions">
+                        <label className="hz-settings-label">
+                          Varsayılan
+                          <input
+                            type="radio"
+                            checked={s.company.defaultPriceSlotNo === slot.slotNumber}
+                            onChange={() => setSettings({ ...s, company: { ...s.company, defaultPriceSlotNo: slot.slotNumber } })}
+                          />
+                        </label>
+                      </div>
+                    </div>
+                  ))}
                 </article>
-              </aside>
-            </div>
-          ) : null}
-
-          {activeTab === "pricing" ? (
-            <div className="hz-split-layout">
-              <div className="hz-split-main">
-                <article className="hz-content-card">
-                  <h3>Fiyat Slotlari (6 adet)</h3>
-                  <div className="table-wrap hz-table-wrap">
-                    <table className="table hz-table">
-                      <thead>
-                        <tr>
-                          <th>Slot</th>
-                          <th>Adi</th>
-                          <th>Para Birimi</th>
-                          <th>Aktif</th>
-                          <th>Varsayilan</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {settings.priceSlots.slots.map((slot) => (
-                          <tr key={slot.slotNumber}>
-                            <td>{slot.slotNumber}</td>
-                            <td>
-                              <input className="hz-control" value={slot.slotName} onChange={(event) => setSettings({ ...settings, priceSlots: { slots: settings.priceSlots.slots.map((item) => (item.slotNumber === slot.slotNumber ? { ...item, slotName: event.target.value } : item)) } })} />
-                            </td>
-                            <td>
-                              <select className="hz-control" value={slot.currency} onChange={(event) => setSettings({ ...settings, priceSlots: { slots: settings.priceSlots.slots.map((item) => (item.slotNumber === slot.slotNumber ? { ...item, currency: event.target.value as PriceSlotConfig["currency"] } : item)) } })}>
-                                <option value="TRY">TRY</option>
-                                <option value="USD">USD</option>
-                                <option value="EUR">EUR</option>
-                              </select>
-                            </td>
-                            <td>
-                              <input type="checkbox" checked={slot.active} onChange={(event) => setSettings({ ...settings, priceSlots: { slots: settings.priceSlots.slots.map((item) => (item.slotNumber === slot.slotNumber ? { ...item, active: event.target.checked } : item)) } })} />
-                            </td>
-                            <td>
-                              <input type="radio" checked={settings.company.defaultPriceSlotNo === slot.slotNumber} onChange={() => setSettings({ ...settings, company: { ...settings.company, defaultPriceSlotNo: slot.slotNumber } })} />
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                <article className="hz-settings-section">
+                  <div className="hz-settings-section-head">
+                    <h2 className="hz-settings-section-title">Ürün kategorisi grupları</h2>
+                    <p className="hz-settings-section-desc">Dört kategori alanı; rapor ve fiyatlandırmada kullanılır.</p>
                   </div>
+                  {s.categorySlots.slots.map((slot: CategorySlotConfig) => (
+                    <div key={slot.slotNumber} className="hz-settings-slot-row" style={{ gridTemplateColumns: "44px 1fr 52px" }}>
+                      <span className="hz-settings-slot-num">{slot.slotNumber}</span>
+                      <label className="hz-settings-label">
+                        Ad
+                        <input
+                          className="hz-settings-input"
+                          value={slot.slotName}
+                          onChange={(e) =>
+                            setSettings({
+                              ...s,
+                              categorySlots: {
+                                slots: s.categorySlots.slots.map((item) =>
+                                  item.slotNumber === slot.slotNumber ? { ...item, slotName: e.target.value } : item
+                                )
+                              }
+                            })
+                          }
+                        />
+                      </label>
+                      <label className="hz-settings-label">
+                        Aktif
+                        <input
+                          type="checkbox"
+                          checked={slot.active}
+                          onChange={(e) =>
+                            setSettings({
+                              ...s,
+                              categorySlots: {
+                                slots: s.categorySlots.slots.map((item) =>
+                                  item.slotNumber === slot.slotNumber ? { ...item, active: e.target.checked } : item
+                                )
+                              }
+                            })
+                          }
+                        />
+                      </label>
+                    </div>
+                  ))}
                 </article>
+              </>
+            ) : null}
 
-                <article className="hz-content-card">
-                  <h3>Kategori Slotlari (4 adet)</h3>
-                  <div className="table-wrap hz-table-wrap">
-                    <table className="table hz-table">
-                      <thead>
-                        <tr>
-                          <th>Slot</th>
-                          <th>Adi</th>
-                          <th>Aktif</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {settings.categorySlots.slots.map((slot) => (
-                          <tr key={slot.slotNumber}>
-                            <td>{slot.slotNumber}</td>
-                            <td>
-                              <input className="hz-control" value={slot.slotName} onChange={(event) => setSettings({ ...settings, categorySlots: { slots: settings.categorySlots.slots.map((item) => (item.slotNumber === slot.slotNumber ? { ...item, slotName: event.target.value } : item)) } })} />
-                            </td>
-                            <td>
-                              <input type="checkbox" checked={slot.active} onChange={(event) => setSettings({ ...settings, categorySlots: { slots: settings.categorySlots.slots.map((item) => (item.slotNumber === slot.slotNumber ? { ...item, active: event.target.checked } : item)) } })} />
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </article>
-              </div>
-
-              <aside className="hz-split-side">
-                <article className="hz-side-panel">
-                  <h3>Ornek Slot Seti</h3>
-                  <ul className="hz-side-list">
-                    <li>Bayi</li>
-                    <li>Perakende</li>
-                    <li>Mimar</li>
-                    <li>Usta</li>
-                    <li>Proje</li>
-                    <li>Ihracat</li>
-                  </ul>
-                </article>
-              </aside>
-            </div>
-          ) : null}
-
-          {activeTab === "currency" ? (
-            <div className="hz-split-layout">
-              <div className="hz-split-main">
-                <div className="hz-modal-panel-grid">
-                  <label className="hz-field-label">
-                    Kur kaynagi
-                    <select className="hz-control" value={settings.exchangeRate.provider} onChange={(event) => setSettings({ ...settings, exchangeRate: { ...settings.exchangeRate, provider: event.target.value as "manual" | "api" } })}>
-                      <option value="manual">Manuel</option>
-                      <option value="api">API</option>
+            {activeCategory === "para-birimi" ? (
+              <article className="hz-settings-section">
+                <div className="hz-settings-section-head">
+                  <h2 className="hz-settings-section-title">Kur ve yuvarlama</h2>
+                  <p className="hz-settings-section-desc">Döviz kuru ve fiyat yuvarlama davranışını belirleyin.</p>
+                </div>
+                <div className="hz-settings-form-grid">
+                  <label className="hz-settings-label">
+                    Kur kaynağı
+                    <select
+                      className="hz-settings-select"
+                      value={s.exchangeRate.provider}
+                      onChange={(e) =>
+                        setSettings({
+                          ...s,
+                          exchangeRate: { ...s.exchangeRate, provider: e.target.value as "manual" | "api" }
+                        })
+                      }
+                    >
+                      <option value="manual">Manuel giriş</option>
+                      <option value="api">Dış kaynak</option>
                     </select>
                   </label>
-                  <label className="hz-field-label">
+                  <label className="hz-settings-label">
                     Fiyatlama kuru
-                    <select className="hz-control" value={settings.exchangeRate.pricingRateMode ?? "mb_satis"} onChange={(event) => setSettings({ ...settings, exchangeRate: { ...settings.exchangeRate, pricingRateMode: event.target.value as "mb_satis" | "mb_satis_ek_kur" } })}>
-                      <option value="mb_satis">MB Satis</option>
-                      <option value="mb_satis_ek_kur">MB Satis + Ek Kur</option>
+                    <select
+                      className="hz-settings-select"
+                      value={s.exchangeRate.pricingRateMode ?? "mb_satis"}
+                      onChange={(e) =>
+                        setSettings({
+                          ...s,
+                          exchangeRate: { ...s.exchangeRate, pricingRateMode: e.target.value as "mb_satis" | "mb_satis_ek_kur" }
+                        })
+                      }
+                    >
+                      <option value="mb_satis">Merkez Bankası satış</option>
+                      <option value="mb_satis_ek_kur">MB satış + ek fark</option>
                     </select>
                   </label>
-                  <label className="hz-field-label">
-                    Yuvarlama tipi
-                    <select className="hz-control" value={settings.exchangeRate.roundingType ?? "matematiksel"} onChange={(event) => setSettings({ ...settings, exchangeRate: { ...settings.exchangeRate, roundingType: event.target.value as "matematiksel" | "yukari" | "asagi" } })}>
+                  <label className="hz-settings-label">
+                    Yuvarlama
+                    <select
+                      className="hz-settings-select"
+                      value={s.exchangeRate.roundingType ?? "matematiksel"}
+                      onChange={(e) =>
+                        setSettings({
+                          ...s,
+                          exchangeRate: {
+                            ...s.exchangeRate,
+                            roundingType: e.target.value as "matematiksel" | "yukari" | "asagi"
+                          }
+                        })
+                      }
+                    >
                       <option value="matematiksel">Matematiksel</option>
-                      <option value="yukari">Yukari</option>
-                      <option value="asagi">Asagi</option>
+                      <option value="yukari">Yukarı</option>
+                      <option value="asagi">Aşağı</option>
                     </select>
                   </label>
-                  <label className="hz-field-label">
-                    Ek kur farki (%)
-                    <input className="hz-control" value={settings.exchangeRate.additionalSpreadPercent ?? 0} onChange={(event) => setSettings({ ...settings, exchangeRate: { ...settings.exchangeRate, additionalSpreadPercent: parseNumber(event.target.value, 0) } })} />
+                  <label className="hz-settings-label">
+                    Ek kur farkı (%)
+                    <input
+                      className="hz-settings-input"
+                      value={s.exchangeRate.additionalSpreadPercent ?? 0}
+                      onChange={(e) =>
+                        setSettings({
+                          ...s,
+                          exchangeRate: { ...s.exchangeRate, additionalSpreadPercent: parseNumber(e.target.value, 0) }
+                        })
+                      }
+                    />
                   </label>
-                  <label className="hz-field-label">
-                    Ek kur sabit deger
-                    <input className="hz-control" value={settings.exchangeRate.spreadFixedAmount ?? 0} onChange={(event) => setSettings({ ...settings, exchangeRate: { ...settings.exchangeRate, spreadFixedAmount: parseNumber(event.target.value, 0) } })} />
+                  <label className="hz-settings-label">
+                    Ek kur sabit tutar
+                    <input
+                      className="hz-settings-input"
+                      value={s.exchangeRate.spreadFixedAmount ?? 0}
+                      onChange={(e) =>
+                        setSettings({
+                          ...s,
+                          exchangeRate: { ...s.exchangeRate, spreadFixedAmount: parseNumber(e.target.value, 0) }
+                        })
+                      }
+                    />
                   </label>
-                  <label className="hz-field-label">
-                    Otomatik guncelleme (dk)
-                    <input className="hz-control" value={settings.exchangeRate.updateIntervalMinutes} onChange={(event) => setSettings({ ...settings, exchangeRate: { ...settings.exchangeRate, updateIntervalMinutes: parseNumber(event.target.value, 60) } })} />
+                  <label className="hz-settings-label">
+                    Otomatik güncelleme (dk)
+                    <input
+                      className="hz-settings-input"
+                      value={s.exchangeRate.updateIntervalMinutes}
+                      onChange={(e) =>
+                        setSettings({
+                          ...s,
+                          exchangeRate: { ...s.exchangeRate, updateIntervalMinutes: parseNumber(e.target.value, 60) }
+                        })
+                      }
+                    />
                   </label>
                 </div>
-              </div>
-              <aside className="hz-split-side">
-                <article className="hz-side-panel">
-                  <h3>Kur Ozet</h3>
-                  <div className="detail-list">
-                    <span>USD Alis/Satis</span>
-                    <strong>API ile guncellenir</strong>
-                    <span>EUR Alis/Satis</span>
-                    <strong>API ile guncellenir</strong>
-                    <span>Son guncelleme</span>
-                    <strong>{settings.exchangeRate.lastUpdatedAt ?? "-"}</strong>
-                    <span>Kaynak</span>
-                    <strong>{settings.exchangeRate.sourceLabel ?? "Merkez Bankasi"}</strong>
-                  </div>
-                </article>
-              </aside>
-            </div>
-          ) : null}
+                <p className="hz-settings-risk-note" style={{ marginTop: "10px" }}>
+                  Son güncelleme: {s.exchangeRate.lastUpdatedAt ?? "—"} · Kaynak: {s.exchangeRate.sourceLabel ?? "—"}
+                </p>
+              </article>
+            ) : null}
 
-          {activeTab === "warehouses" ? (
-            <article className="hz-content-card">
-              <h3>Depo Kurulumu (3 depo)</h3>
-              <div className="table-wrap hz-table-wrap">
-                <table className="table hz-table">
-                  <thead>
-                    <tr>
-                      <th>Kod</th>
-                      <th>Depo Adi</th>
-                      <th>Tip</th>
-                      <th>Aktif</th>
-                      <th>Sira</th>
-                      <th>Varsayilan</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {settings.warehouses.map((warehouse: WarehouseSetupItem) => (
-                      <tr key={warehouse.id}>
-                        <td>{warehouse.code}</td>
-                        <td>
-                          <input className="hz-control" value={warehouse.name} onChange={(event) => setSettings({ ...settings, warehouses: settings.warehouses.map((item) => (item.id === warehouse.id ? { ...item, name: event.target.value } : item)) })} />
-                        </td>
-                        <td>
-                          <select className="hz-control" value={warehouse.warehouseType} onChange={(event) => setSettings({ ...settings, warehouses: settings.warehouses.map((item) => (item.id === warehouse.id ? { ...item, warehouseType: event.target.value as WarehouseSetupItem["warehouseType"] } : item)) })}>
-                            <option value="center">Merkez</option>
-                            <option value="branch">Sube</option>
-                            <option value="transfer">Transfer</option>
-                          </select>
-                        </td>
-                        <td>
-                          <input type="checkbox" checked={warehouse.active} onChange={(event) => setSettings({ ...settings, warehouses: settings.warehouses.map((item) => (item.id === warehouse.id ? { ...item, active: event.target.checked } : item)) })} />
-                        </td>
-                        <td>
-                          <input className="hz-control" value={warehouse.sortOrder} onChange={(event) => setSettings({ ...settings, warehouses: settings.warehouses.map((item) => (item.id === warehouse.id ? { ...item, sortOrder: parseNumber(event.target.value, item.sortOrder) } : item)) })} />
-                        </td>
-                        <td>
-                          <input type="radio" checked={warehouse.isDefault} onChange={() => setSettings({ ...settings, warehouses: settings.warehouses.map((item) => ({ ...item, isDefault: item.id === warehouse.id })), company: { ...settings.company, defaultWarehouseId: warehouse.id } })} />
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </article>
-          ) : null}
-
-          {activeTab === "team" ? (
-            <div className="hz-split-layout">
-              <div className="hz-split-main">
-                <article className="hz-content-card">
-                  <h3>Rol Presetleri</h3>
-                  <div className="table-wrap hz-table-wrap">
-                    <table className="table hz-table">
-                      <thead>
-                        <tr>
-                          <th>Rol</th>
-                          <th>Aciklama</th>
-                          <th>Modul Erisimi</th>
-                          <th>Approval</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {rolePresets.map((preset) => (
-                          <tr key={preset.id}>
-                            <td>{preset.name}</td>
-                            <td>{preset.description}</td>
-                            <td>{preset.moduleAccess.join(", ")}</td>
-                            <td>{preset.approvalEnabled ? "Evet" : "Hayir"}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
-                </article>
-
-                <article className="hz-content-card">
-                  <h3>Hizli Kullanici Ekle</h3>
-                  <form className="hz-filter-grid" onSubmit={handleUserCreate}>
-                    <label className="hz-field-label">
-                      Ad Soyad
-                      <input className="hz-control" value={newUserName} onChange={(event) => setNewUserName(event.target.value)} />
+            {activeCategory === "depolar" ? (
+              <article className="hz-settings-section">
+                <div className="hz-settings-section-head">
+                  <h2 className="hz-settings-section-title">Depolar</h2>
+                  <p className="hz-settings-section-desc">Merkez, şube ve transfer depolarını yönetin.</p>
+                </div>
+                {s.warehouses.map((warehouse: WarehouseSetupItem) => (
+                  <div key={warehouse.id} className="hz-settings-wh-row">
+                    <span className="hz-settings-badge hz-settings-badge--neutral">{warehouse.code}</span>
+                    <label className="hz-settings-label">
+                      Depo adı
+                      <input
+                        className="hz-settings-input"
+                        value={warehouse.name}
+                        onChange={(e) =>
+                          setSettings({
+                            ...s,
+                            warehouses: s.warehouses.map((item) => (item.id === warehouse.id ? { ...item, name: e.target.value } : item))
+                          })
+                        }
+                      />
                     </label>
-                    <label className="hz-field-label">
-                      E-Posta
-                      <input className="hz-control" type="email" value={newUserEmail} onChange={(event) => setNewUserEmail(event.target.value)} />
-                    </label>
-                    <label className="hz-field-label">
-                      Rol
-                      <select className="hz-control" value={newUserRoleCode} onChange={(event) => setNewUserRoleCode(event.target.value)}>
-                        <option value="yonetici">Yonetici</option>
-                        <option value="satis">Satis</option>
-                        <option value="muhasebe">Muhasebe</option>
-                        <option value="depo">Depo</option>
-                        <option value="pazarlama">Pazarlama</option>
+                    <label className="hz-settings-label">
+                      Tip
+                      <select
+                        className="hz-settings-select"
+                        value={warehouse.warehouseType}
+                        onChange={(e) =>
+                          setSettings({
+                            ...s,
+                            warehouses: s.warehouses.map((item) =>
+                              item.id === warehouse.id
+                                ? { ...item, warehouseType: e.target.value as WarehouseSetupItem["warehouseType"] }
+                                : item
+                            )
+                          })
+                        }
+                      >
+                        <option value="center">Merkez</option>
+                        <option value="branch">Şube</option>
+                        <option value="transfer">Transfer</option>
                       </select>
                     </label>
-                    <div className="hz-filter-actions">
-                      <button className="hz-btn hz-btn-primary" type="submit">Kullanici Ekle</button>
+                    <label className="hz-settings-label">
+                      Aktif
+                      <input
+                        type="checkbox"
+                        checked={warehouse.active}
+                        onChange={(e) =>
+                          setSettings({
+                            ...s,
+                            warehouses: s.warehouses.map((item) =>
+                              item.id === warehouse.id ? { ...item, active: e.target.checked } : item
+                            )
+                          })
+                        }
+                      />
+                    </label>
+                    <label className="hz-settings-label">
+                      Sıra
+                      <input
+                        className="hz-settings-input"
+                        value={warehouse.sortOrder}
+                        onChange={(e) =>
+                          setSettings({
+                            ...s,
+                            warehouses: s.warehouses.map((item) =>
+                              item.id === warehouse.id ? { ...item, sortOrder: parseNumber(e.target.value, item.sortOrder) } : item
+                            )
+                          })
+                        }
+                      />
+                    </label>
+                    <label className="hz-settings-label">
+                      Varsayılan
+                      <input
+                        type="radio"
+                        checked={warehouse.isDefault}
+                        onChange={() =>
+                          setSettings({
+                            ...s,
+                            warehouses: s.warehouses.map((item) => ({ ...item, isDefault: item.id === warehouse.id })),
+                            company: { ...s.company, defaultWarehouseId: warehouse.id }
+                          })
+                        }
+                      />
+                    </label>
+                  </div>
+                ))}
+              </article>
+            ) : null}
+
+            {activeCategory === "kullanicilar" ? (
+              <article className="hz-settings-section">
+                <div className="hz-settings-section-head">
+                  <h2 className="hz-settings-section-title">Kullanıcılar ve yetkiler</h2>
+                  <p className="hz-settings-section-desc">Ekibinizi ekleyin; rol özetlerini buradan izleyin.</p>
+                </div>
+                <h3 className="hz-settings-side-card-title" style={{ marginBottom: "6px" }}>
+                  Rol özetleri
+                </h3>
+                {rolePresets.map((preset) => (
+                  <div key={preset.id} className="hz-settings-preset-row">
+                    <div className="hz-settings-preset-name">{preset.name}</div>
+                    <div className="hz-settings-preset-desc">{preset.description}</div>
+                    <div className="hz-settings-preset-desc">{preset.moduleAccess.join(", ")}</div>
+                    <span className="hz-settings-badge hz-settings-badge--neutral">{preset.approvalEnabled ? "Onaylı" : "Onaysız"}</span>
+                  </div>
+                ))}
+                <form className="hz-settings-user-form" onSubmit={(e) => void handleUserCreate(e)} style={{ marginTop: "14px" }}>
+                  <label className="hz-settings-label">
+                    Ad Soyad
+                    <input className="hz-settings-input" value={newUserName} onChange={(e) => setNewUserName(e.target.value)} />
+                  </label>
+                  <label className="hz-settings-label">
+                    E-posta
+                    <input className="hz-settings-input" type="email" value={newUserEmail} onChange={(e) => setNewUserEmail(e.target.value)} />
+                  </label>
+                  <label className="hz-settings-label">
+                    Rol
+                    <select className="hz-settings-select" value={newUserRoleCode} onChange={(e) => setNewUserRoleCode(e.target.value)}>
+                      <option value="yonetici">Yönetici</option>
+                      <option value="satis">Satış</option>
+                      <option value="muhasebe">Muhasebe</option>
+                      <option value="depo">Depo</option>
+                      <option value="pazarlama">Pazarlama</option>
+                    </select>
+                  </label>
+                  <button type="submit" className="hz-settings-toolbar-btn hz-settings-toolbar-btn--primary">
+                    <IconUser size={14} />
+                    Ekle
+                  </button>
+                </form>
+                <h3 className="hz-settings-side-card-title">Kullanıcı listesi</h3>
+                {users.length === 0 ? (
+                  <p className="hz-settings-risk-note">Henüz kullanıcı yok.</p>
+                ) : (
+                  users.map((user) => (
+                    <div key={user.id} className="hz-settings-user-row">
+                      <span>{user.fullName}</span>
+                      <span>{user.email}</span>
+                      <span className="hz-settings-badge hz-settings-badge--neutral">{user.status}</span>
+                      <span>{user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString("tr-TR") : "—"}</span>
                     </div>
-                  </form>
+                  ))
+                )}
+              </article>
+            ) : null}
 
-                  <div className="table-wrap hz-table-wrap">
-                    <table className="table hz-table">
-                      <thead>
-                        <tr>
-                          <th>Ad</th>
-                          <th>E-Posta</th>
-                          <th>Durum</th>
-                          <th>Son Giris</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {users.length === 0 ? (
-                          <tr>
-                            <td className="table-empty" colSpan={4}>Henuz kullanici yok.</td>
-                          </tr>
-                        ) : (
-                          users.map((user) => (
-                            <tr key={user.id}>
-                              <td>{user.fullName}</td>
-                              <td>{user.email}</td>
-                              <td>{user.status}</td>
-                              <td>{user.lastLoginAt ? new Date(user.lastLoginAt).toLocaleDateString("tr-TR") : "-"}</td>
-                            </tr>
-                          ))
-                        )}
-                      </tbody>
-                    </table>
-                  </div>
-                </article>
-              </div>
-            </div>
-          ) : null}
+            {activeCategory === "baglantilar" ? (
+              <article className="hz-settings-section">
+                <div className="hz-settings-section-head">
+                  <h2 className="hz-settings-section-title">Bağlantılar</h2>
+                  <p className="hz-settings-section-desc">ERP, WhatsApp ve servis bağlantılarının durumunu kontrol edin.</p>
+                </div>
+                <div className="hz-settings-form-grid" style={{ marginBottom: "10px" }}>
+                  <label className="hz-settings-label">
+                    ERP bağlantısı
+                    <input
+                      type="checkbox"
+                      checked={s.erp.enabled}
+                      onChange={(e) => setSettings({ ...s, erp: { ...s.erp, enabled: e.target.checked } })}
+                    />
+                  </label>
+                  <label className="hz-settings-label">
+                    ERP türü
+                    <select
+                      className="hz-settings-select"
+                      value={s.erp.provider}
+                      onChange={(e) =>
+                        setSettings({ ...s, erp: { ...s.erp, provider: e.target.value as typeof s.erp.provider } })
+                      }
+                    >
+                      <option value="none">Kapalı</option>
+                      <option value="netsis">Netsis</option>
+                      <option value="sap">SAP</option>
+                      <option value="custom">Özel</option>
+                    </select>
+                  </label>
+                  <label className="hz-settings-label">
+                    Senkron aralığı (dk)
+                    <input
+                      className="hz-settings-input"
+                      value={s.erp.syncIntervalMinutes}
+                      onChange={(e) =>
+                        setSettings({
+                          ...s,
+                          erp: { ...s.erp, syncIntervalMinutes: parseNumber(e.target.value, s.erp.syncIntervalMinutes) }
+                        })
+                      }
+                    />
+                  </label>
+                </div>
+                <div className="hz-settings-conn-row">
+                  <span>ERP özeti</span>
+                  <span className={`hz-settings-badge ${s.erp.enabled ? "hz-settings-badge--ok" : "hz-settings-badge--bad"}`}>
+                    {erpLabel(s.erp.provider)}
+                  </span>
+                </div>
+                <div className="hz-settings-conn-row">
+                  <span>WhatsApp kanalı</span>
+                  <span className={`hz-settings-badge ${s.whatsapp.enabled ? "hz-settings-badge--ok" : "hz-settings-badge--warn"}`}>
+                    {s.whatsapp.enabled ? "Açık" : "Kapalı"}
+                  </span>
+                </div>
+                <div className="hz-settings-conn-row">
+                  <span>AI hizmeti</span>
+                  <span className={`hz-settings-badge ${s.ai.enabled ? "hz-settings-badge--ok" : "hz-settings-badge--warn"}`}>
+                    {s.ai.enabled ? "Açık" : "Kapalı"}
+                  </span>
+                </div>
+                <div className="hz-settings-conn-row">
+                  <span>Fabrika bağlantısı</span>
+                  <span className="hz-settings-badge hz-settings-badge--warn">Hazırlıkta</span>
+                </div>
+                <div className="hz-settings-conn-row">
+                  <span>Yerel servis</span>
+                  <span className="hz-settings-badge hz-settings-badge--ok">Hazır</span>
+                </div>
+                <button
+                  type="button"
+                  className="hz-settings-toolbar-btn hz-settings-toolbar-btn--outline"
+                  style={{ marginTop: "10px" }}
+                  onClick={() => router.push("/ayarlar/staging-kontrol")}
+                >
+                  <IconExternalLink size={14} />
+                  Hazırlık kontrolü
+                </button>
+              </article>
+            ) : null}
 
-          {activeTab === "setup" ? (
-            <div className="hz-split-layout">
-              <div className="hz-split-main">
-                <article className="hz-content-card">
-                  <h3>Kurulum Hazirlik Checklist</h3>
-                  <div className="table-wrap hz-table-wrap">
-                    <table className="table hz-table">
-                      <thead>
-                        <tr>
-                          <th>Adim</th>
-                          <th>Tamamlandi</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {settings.pilotSetup.checklist.map((item) => (
-                          <tr key={item.id}>
-                            <td>{item.title}</td>
-                            <td>
-                              <input
-                                type="checkbox"
-                                checked={item.completed}
-                                onChange={(event) =>
-                                  setSettings({
-                                    ...settings,
-                                    pilotSetup: {
-                                      ...settings.pilotSetup,
-                                      checklist: settings.pilotSetup.checklist.map((candidate) =>
-                                        candidate.id === item.id ? { ...candidate, completed: event.target.checked } : candidate
-                                      ),
-                                      importReady:
-                                        settings.pilotSetup.checklist.filter((candidate) =>
-                                          candidate.id === item.id ? event.target.checked : candidate.completed
-                                        ).length === settings.pilotSetup.checklist.length
-                                    }
-                                  })
-                                }
-                              />
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+            {activeCategory === "kural-onay" ? (
+              <article className="hz-settings-section hz-settings-section--rule-compact">
+                <WhatsAppIntentRulesSection
+                  value={s.whatsappIntentRules}
+                  selectedIntentId={selectedRuleIntentId}
+                  onSelectIntent={(id) => {
+                    setSelectedRuleIntentId(id);
+                    setRuleSidebarEditMode(false);
+                  }}
+                  onEditIntent={(id) => {
+                    setSelectedRuleIntentId(id);
+                    setRuleSidebarEditMode(true);
+                  }}
+                  aiHumanApprovalRequired={s.ai.humanApprovalRequired}
+                />
+              </article>
+            ) : null}
+
+            {activeCategory === "whatsapp" ? (
+              <article className="hz-settings-section">
+                <div className="hz-settings-section-head">
+                  <h2 className="hz-settings-section-title">WhatsApp ayarları</h2>
+                  <p className="hz-settings-section-desc">Mesajların nasıl alınacağını ve onaya düşeceğini belirleyin.</p>
+                </div>
+                <div className="hz-settings-form-grid">
+                  <label className="hz-settings-label">
+                    WhatsApp açık
+                    <input
+                      type="checkbox"
+                      checked={s.whatsapp.enabled}
+                      onChange={(e) => setSettings({ ...s, whatsapp: { ...s.whatsapp, enabled: e.target.checked } })}
+                    />
+                  </label>
+                  <label className="hz-settings-label">
+                    Bağlantı tipi
+                    <select
+                      className="hz-settings-select"
+                      value={s.whatsapp.provider}
+                      onChange={(e) =>
+                        setSettings({
+                          ...s,
+                          whatsapp: { ...s.whatsapp, provider: e.target.value as typeof s.whatsapp.provider }
+                        })
+                      }
+                    >
+                      <option value="meta">Meta</option>
+                      <option value="twilio">Twilio</option>
+                      <option value="custom">Özel</option>
+                    </select>
+                  </label>
+                  <label className="hz-settings-label">
+                    Gönderen adı
+                    <input
+                      className="hz-settings-input"
+                      value={s.whatsapp.defaultSenderName}
+                      onChange={(e) => setSettings({ ...s, whatsapp: { ...s.whatsapp, defaultSenderName: e.target.value } })}
+                    />
+                  </label>
+                  <label className="hz-settings-label">
+                    Mesajda onay iste
+                    <input
+                      type="checkbox"
+                      checked={s.whatsapp.approvalRequired}
+                      onChange={(e) => setSettings({ ...s, whatsapp: { ...s.whatsapp, approvalRequired: e.target.checked } })}
+                    />
+                  </label>
+                </div>
+              </article>
+            ) : null}
+
+            {activeCategory === "ai-onay" ? (
+              <article className="hz-settings-section hz-settings-section--ai-compact">
+                <div className="hz-settings-section-head">
+                  <h2 className="hz-settings-section-title">AI ve onay</h2>
+                  <p className="hz-settings-section-desc">Kısa anahtarlar; ayrıntılar Kural ve Onay sekmesindedir.</p>
+                </div>
+                <div className="hz-settings-ai-compact-grid">
+                  <div className="hz-settings-ai-toggle-card">
+                    <span className="hz-settings-ai-toggle-label">AI açık</span>
+                    <button
+                      type="button"
+                      className={`hz-settings-switch${s.ai.enabled ? " hz-settings-switch--on" : ""}`}
+                      role="switch"
+                      aria-checked={s.ai.enabled}
+                      onClick={() => setSettings({ ...s, ai: { ...s.ai, enabled: !s.ai.enabled } })}
+                    />
                   </div>
-                </article>
-              </div>
-              <aside className="hz-split-side">
-                <article className="hz-side-panel">
-                  <h3>Import Hazirlik Durumu</h3>
-                  <div className="detail-list">
-                    <span>Template</span>
-                    <strong>{settings.pilotSetup.templateName}</strong>
-                    <span>Durum</span>
-                    <strong>{settings.pilotSetup.importReady ? "Hazir" : "Hazir degil"}</strong>
-                    <span>Kalan adim</span>
-                    <strong>{settings.pilotSetup.checklist.length - checklistDone}</strong>
+                  <div className="hz-settings-ai-toggle-card">
+                    <span className="hz-settings-ai-toggle-label">Yerel AI</span>
+                    <button
+                      type="button"
+                      className={`hz-settings-switch${s.ai.localInferenceEnabled ? " hz-settings-switch--on" : ""}`}
+                      role="switch"
+                      aria-checked={s.ai.localInferenceEnabled}
+                      onClick={() =>
+                        setSettings({ ...s, ai: { ...s.ai, localInferenceEnabled: !s.ai.localInferenceEnabled } })
+                      }
+                    />
                   </div>
-                </article>
-                <article className="hz-side-panel">
-                  <h3>AI ve Ses Ayarlari (Local-First)</h3>
-                  <div className="detail-list">
-                    <span>Birincil AI Provider</span>
-                    <strong>Local (kurum ici)</strong>
-                    <span>Ikinci AI Provider</span>
-                    <strong>OpenAI (opsiyonel)</strong>
-                    <span>STT/TTS Onceligi</span>
-                    <strong>{"Local -> External -> Fallback"}</strong>
-                    <span>Mutation modeli</span>
-                    <strong>Onay zorunlu</strong>
+                  <div className="hz-settings-ai-toggle-card">
+                    <span className="hz-settings-ai-toggle-label">İnsan onayı</span>
+                    <button
+                      type="button"
+                      className={`hz-settings-switch${s.ai.humanApprovalRequired ? " hz-settings-switch--on" : ""}`}
+                      role="switch"
+                      aria-checked={s.ai.humanApprovalRequired}
+                      onClick={() =>
+                        setSettings({ ...s, ai: { ...s.ai, humanApprovalRequired: !s.ai.humanApprovalRequired } })
+                      }
+                    />
                   </div>
-                  <p className="muted">CRM, WhatsApp ve sesli komut akislarinda ayni local-first AI davranis modeli kullanilir.</p>
+                  <div className="hz-settings-ai-toggle-card">
+                    <span className="hz-settings-ai-toggle-label">Model kodu</span>
+                    <input
+                      className="hz-settings-input hz-settings-ai-model-input"
+                      value={s.ai.defaultModel}
+                      onChange={(e) => setSettings({ ...s, ai: { ...s.ai, defaultModel: e.target.value } })}
+                      aria-label="Varsayılan model"
+                    />
+                  </div>
+                </div>
+                <article className="hz-settings-info-card hz-settings-info-card--muted hz-settings-ai-matrix-card">
+                  <h3 className="hz-settings-info-card-title">AI ve kural matrisi</h3>
+                  <ul className="hz-settings-info-card-list hz-settings-ai-matrix-list">
+                    <li>AI talebi sınıflandırır.</li>
+                    <li>AI tek başına sipariş/ödeme/iade/fatura yapmaz.</li>
+                    <li>Kural ve Onay matrisine göre cevap taslağı üretir.</li>
+                    <li>Onay gerekiyorsa Onaylar ekranına düşer.</li>
+                  </ul>
                 </article>
-              </aside>
-            </div>
-          ) : null}
+              </article>
+            ) : null}
+
+            {activeCategory === "belgeler" ? (
+              <article className="hz-settings-section">
+                <div className="hz-settings-section-head">
+                  <h2 className="hz-settings-section-title">Belge ve arşiv</h2>
+                  <p className="hz-settings-section-desc">PDF şablonu, kayıt yeri ve otomatik arşiv ayarlarını yönetin.</p>
+                </div>
+                <div className="hz-settings-form-grid">
+                  <label className="hz-settings-label hz-settings-field--full">
+                    Varsayılan çıktı şablonu
+                    <input
+                      className="hz-settings-input"
+                      value={s.printSave.defaultPrintTemplate}
+                      onChange={(e) => setSettings({ ...s, printSave: { ...s.printSave, defaultPrintTemplate: e.target.value } })}
+                    />
+                  </label>
+                  <label className="hz-settings-label">
+                    Otomatik PDF arşivi
+                    <input
+                      type="checkbox"
+                      checked={s.printSave.autoPdfArchiveEnabled}
+                      onChange={(e) => setSettings({ ...s, printSave: { ...s.printSave, autoPdfArchiveEnabled: e.target.checked } })}
+                    />
+                  </label>
+                  <label className="hz-settings-label">
+                    Saklama yeri
+                    <select
+                      className="hz-settings-select"
+                      value={s.printSave.storageProvider}
+                      onChange={(e) =>
+                        setSettings({
+                          ...s,
+                          printSave: { ...s.printSave, storageProvider: e.target.value as typeof s.printSave.storageProvider }
+                        })
+                      }
+                    >
+                      <option value="local">Sunucu klasörü</option>
+                      <option value="s3">Bulut depo</option>
+                      <option value="custom">Özel</option>
+                    </select>
+                  </label>
+                </div>
+              </article>
+            ) : null}
+
+            {activeCategory === "veri-yukleme" ? (
+              <article className="hz-settings-section">
+                <div className="hz-settings-section-head">
+                  <h2 className="hz-settings-section-title">Veri yükleme</h2>
+                  <p className="hz-settings-section-desc">Cari, ürün, fiyat, depo ve stok dosyalarını buradan hazırlayın.</p>
+                </div>
+                <div className="hz-settings-link-grid">
+                  <div className="hz-settings-link-card">
+                    <h4>Cari yükle</h4>
+                    <p>Müşteri listesi şablonu ile içe aktarın.</p>
+                    <button type="button" className="hz-settings-side-link" onClick={() => pushToast("Demo: cari yükleme sihirbazı açılacak.")}>
+                      <IconUpload size={14} />
+                      Başlat
+                    </button>
+                  </div>
+                  <div className="hz-settings-link-card">
+                    <h4>Ürün yükle</h4>
+                    <p>Stok kodu ve barkodlarla ürün aktarın.</p>
+                    <button type="button" className="hz-settings-side-link" onClick={() => pushToast("Demo: ürün yükleme sihirbazı açılacak.")}>
+                      <IconPackage size={14} />
+                      Başlat
+                    </button>
+                  </div>
+                  <div className="hz-settings-link-card">
+                    <h4>Fiyat yükle</h4>
+                    <p>Fiyat listelerini toplu güncelleyin.</p>
+                    <button type="button" className="hz-settings-side-link" onClick={() => pushToast("Demo: fiyat yükleme sihirbazı açılacak.")}>
+                      <IconDatabase size={14} />
+                      Başlat
+                    </button>
+                  </div>
+                  <div className="hz-settings-link-card">
+                    <h4>Depo / stok</h4>
+                    <p>Depo ve stok hareket şablonları.</p>
+                    <button type="button" className="hz-settings-side-link" onClick={() => pushToast("Demo: stok yükleme sihirbazı açılacak.")}>
+                      <IconWarehouse size={14} />
+                      Başlat
+                    </button>
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="hz-settings-toolbar-btn hz-settings-toolbar-btn--primary"
+                  style={{ marginTop: "12px" }}
+                  onClick={() => router.push("/ayarlar/veri-yukleme")}
+                >
+                  <IconExternalLink size={14} />
+                  Veri yükleme merkezini aç
+                </button>
+              </article>
+            ) : null}
+
+            {activeCategory === "guvenlik" ? (
+              <article className="hz-settings-section">
+                <div className="hz-settings-section-head">
+                  <h2 className="hz-settings-section-title">Güvenlik ve erişim</h2>
+                  <p className="hz-settings-section-desc">Görünüm tercihleri, kurulum maddeleri ve denetim özeti.</p>
+                </div>
+                <div className="hz-settings-form-grid">
+                  <label className="hz-settings-label">
+                    Tema varsayılanı
+                    <select
+                      className="hz-settings-select"
+                      value={s.theme.defaultMode}
+                      onChange={(e) =>
+                        setSettings({ ...s, theme: { ...s.theme, defaultMode: e.target.value as typeof s.theme.defaultMode } })
+                      }
+                    >
+                      <option value="light">Açık</option>
+                      <option value="dark">Koyu</option>
+                      <option value="system">Sistem</option>
+                    </select>
+                  </label>
+                  <label className="hz-settings-label">
+                    Kullanıcı tema değiştirebilir
+                    <input
+                      type="checkbox"
+                      checked={s.theme.allowUserOverride}
+                      onChange={(e) => setSettings({ ...s, theme: { ...s.theme, allowUserOverride: e.target.checked } })}
+                    />
+                  </label>
+                  <label className="hz-settings-label">
+                    Kompakt görünüm
+                    <input
+                      type="checkbox"
+                      checked={s.theme.compactDensity}
+                      onChange={(e) => setSettings({ ...s, theme: { ...s.theme, compactDensity: e.target.checked } })}
+                    />
+                  </label>
+                </div>
+                <h3 className="hz-settings-side-card-title" style={{ marginTop: "14px" }}>
+                  Canlıya geçiş kontrolü
+                </h3>
+                {s.pilotSetup.checklist.map((item) => (
+                  <div key={item.id} className="hz-settings-check-row">
+                    <input
+                      type="checkbox"
+                      checked={item.completed}
+                      onChange={(e) =>
+                        setSettings({
+                          ...s,
+                          pilotSetup: {
+                            ...s.pilotSetup,
+                            checklist: s.pilotSetup.checklist.map((c) => (c.id === item.id ? { ...c, completed: e.target.checked } : c)),
+                            importReady:
+                              s.pilotSetup.checklist.filter((c) => (c.id === item.id ? e.target.checked : c.completed)).length ===
+                              s.pilotSetup.checklist.length
+                          }
+                        })
+                      }
+                    />
+                    <span>{item.title}</span>
+                  </div>
+                ))}
+                <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", marginTop: "12px" }}>
+                  <button type="button" className="hz-settings-toolbar-btn hz-settings-toolbar-btn--outline" onClick={() => pushToast("Demo: son girişler listesi.")}>
+                    Son girişler
+                  </button>
+                  <button type="button" className="hz-settings-toolbar-btn hz-settings-toolbar-btn--outline" onClick={() => pushToast("Demo: denetim izi.")}>
+                    Denetim izi
+                  </button>
+                </div>
+              </article>
+            ) : null}
+          </div>
         </div>
-      </section>
+
+        <aside className="hz-settings-side" aria-label="Ayar Asistanı">
+          <div className="hz-settings-side-inner">
+            <header className="hz-settings-side-head">
+              <h2 className="hz-settings-side-title">Ayar Asistanı</h2>
+              <p className="hz-settings-side-sub">Seçili ayar için eksik, risk ve sonraki adımları gösterir.</p>
+            </header>
+            <div className="hz-settings-side-stack">
+              <article className="hz-settings-side-card">
+                <h3 className="hz-settings-side-card-title">Seçili bölüm</h3>
+                <p>
+                  <strong>{CATEGORIES.find((c) => c.id === activeCategory)?.label}</strong>
+                </p>
+                <span className={`hz-settings-badge ${companyProfileStatus(s.company) === "Dolu" ? "hz-settings-badge--ok" : "hz-settings-badge--warn"}`}>
+                  {companyProfileStatus(s.company) === "Dolu" ? "Profil tamam" : "Eksik alan var"}
+                </span>
+              </article>
+              {activeCategory === "kural-onay" ? (
+                <IntentRuleAssistantPanel
+                  rule={selectedIntentRow}
+                  editMode={ruleSidebarEditMode}
+                  onEditMode={setRuleSidebarEditMode}
+                  onChangeRule={(patch) =>
+                    setSettings({
+                      ...s,
+                      whatsappIntentRules: {
+                        intents: s.whatsappIntentRules.intents.map((r) =>
+                          r.intentId === selectedRuleIntentId ? { ...r, ...patch } : r
+                        )
+                      }
+                    })
+                  }
+                />
+              ) : null}
+              <article className="hz-settings-side-card">
+                <h3 className="hz-settings-side-card-title">Dikkat gerekenler</h3>
+                <p>{assistantCopy.hint}</p>
+              </article>
+              <article className="hz-settings-side-card">
+                <h3 className="hz-settings-side-card-title">Sonraki adım</h3>
+                <p>{assistantCopy.next}</p>
+              </article>
+              <article className="hz-settings-side-card">
+                <h3 className="hz-settings-side-card-title">Hızlı bağlantılar</h3>
+                {activeCategory === "kural-onay" ? (
+                  <>
+                    <button type="button" className="hz-settings-side-link" onClick={() => router.push("/whatsapp")}>
+                      <IconMessageCircle size={14} />
+                      WhatsApp
+                    </button>
+                    <button type="button" className="hz-settings-side-link" onClick={() => router.push("/onaylar")}>
+                      <IconClipboardCheck size={14} />
+                      Onaylar
+                    </button>
+                    <button type="button" className="hz-settings-side-link" onClick={() => setActiveCategory("ai-onay")}>
+                      <IconZap size={14} />
+                      AI ve Onay
+                    </button>
+                    <button type="button" className="hz-settings-side-link" onClick={() => router.push("/ayarlar/staging-kontrol")}>
+                      <IconShieldCheck size={14} />
+                      Hazırlık kontrolü
+                    </button>
+                    <button type="button" className="hz-settings-side-link" onClick={() => router.push("/raporlar")}>
+                      <IconBarChart3 size={14} />
+                      Raporlar
+                    </button>
+                  </>
+                ) : (
+                  <>
+                    <button type="button" className="hz-settings-side-link" onClick={() => router.push("/ayarlar/veri-yukleme")}>
+                      <IconUpload size={14} />
+                      Veri yükleme
+                    </button>
+                    <button type="button" className="hz-settings-side-link" onClick={() => router.push("/ayarlar/kullanim-hazirligi")}>
+                      <IconClipboardCheck size={14} />
+                      Kullanım hazırlığı
+                    </button>
+                    <button type="button" className="hz-settings-side-link" onClick={() => router.push("/ayarlar/staging-kontrol")}>
+                      <IconShieldCheck size={14} />
+                      Hazırlık kontrolü
+                    </button>
+                    <button type="button" className="hz-settings-side-link" onClick={() => router.push("/raporlar")}>
+                      <IconBarChart3 size={14} />
+                      Raporlar
+                    </button>
+                    <button type="button" className="hz-settings-side-link" onClick={() => router.push("/archive")}>
+                      <IconArchive size={14} />
+                      Arşiv
+                    </button>
+                  </>
+                )}
+              </article>
+              {activeCategory !== "kural-onay" ? (
+                <article className="hz-settings-side-card">
+                  <h3 className="hz-settings-side-card-title">AI ve güvenlik notu</h3>
+                  <p className="hz-settings-risk-note">AI ayarları öneri üretir; kritik işlemler insan onayından geçer.</p>
+                  <p className="hz-settings-risk-note">Ayar değişiklikleri kaydetmeden uygulanmaz.</p>
+                </article>
+              ) : (
+                <article className="hz-settings-side-card">
+                  <h3 className="hz-settings-side-card-title">Kayıt</h3>
+                  <p className="hz-settings-risk-note">Değişiklikler üstteki Kaydet ile saklanır.</p>
+                </article>
+              )}
+            </div>
+          </div>
+        </aside>
+      </div>
     </div>
   );
 }
-
