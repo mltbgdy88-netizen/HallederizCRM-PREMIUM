@@ -1,5 +1,5 @@
 import type { Customer, WarehouseOrder } from "@hallederiz/types";
-import { getWarehouseOrderStatusLabel } from "../queries/warehouse-mock-data";
+import { getWarehouseOrderPrepLabel } from "../utils/warehouse-prep-status";
 
 export function WarehouseOrderHeader({ warehouseOrder, customer }: { warehouseOrder: WarehouseOrder; customer: Customer | null }) {
   return (
@@ -10,7 +10,7 @@ export function WarehouseOrderHeader({ warehouseOrder, customer }: { warehouseOr
         <p>{warehouseOrder.orderNo} / {customer?.name ?? warehouseOrder.customerId}</p>
       </div>
       <div className="stock-filter-actions">
-        <span className="hz-badge hz-badge-info">{getWarehouseOrderStatusLabel(warehouseOrder.status)}</span>
+        <span className="hz-badge hz-badge-info">{getWarehouseOrderPrepLabel(warehouseOrder)}</span>
         <span className="hz-badge hz-badge-warning">{warehouseOrder.warehouseName}</span>
       </div>
     </section>

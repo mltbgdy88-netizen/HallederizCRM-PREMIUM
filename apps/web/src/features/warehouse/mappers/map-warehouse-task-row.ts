@@ -1,6 +1,6 @@
 import type { Customer, WarehouseOrder } from "@hallederiz/types";
 import { dateLabel } from "../utils";
-import { getWarehouseOrderStatusLabel } from "../queries/warehouse-mock-data";
+import { getPrepDisplayStatus, getWarehouseOrderPrepLabel } from "../utils/warehouse-prep-status";
 
 export interface WarehouseTaskRow {
   warehouseOrderId: string;
@@ -15,18 +15,12 @@ export interface WarehouseTaskRow {
 }
 
 function resolveTone(warehouseOrder: WarehouseOrder): WarehouseTaskRow["statusTone"] {
-  if (warehouseOrder.status === "cancelled") {
-    return "danger";
-  }
-
-  if (warehouseOrder.status === "prepared" || warehouseOrder.status === "delivered") {
-    return "success";
-  }
-
-  if (warehouseOrder.tasks.some((task) => task.critical)) {
-    return "warning";
-  }
-
+  const prep = getPrepDisplayStatus(warehouseOrder);
+  if (prep === "iptal") return "neutral";
+  if (prep === "teslim_edildi") return "success";
+  if (prep === "hazirlandi") return "success";
+  if (prep === "eksik") return "danger";
+  if (prep === "beklemede") return "warning";
   return "info";
 }
 
@@ -38,7 +32,7 @@ export function mapWarehouseTaskRow(warehouseOrder: WarehouseOrder, customers: C
     customerName: customers.find((customer) => customer.id === warehouseOrder.customerId)?.name ?? warehouseOrder.customerId,
     productCountLabel: String(warehouseOrder.lines.length),
     warehouseName: warehouseOrder.warehouseName,
-    statusLabel: getWarehouseOrderStatusLabel(warehouseOrder.status),
+    statusLabel: getWarehouseOrderPrepLabel(warehouseOrder),
     statusTone: resolveTone(warehouseOrder),
     dueAtLabel: dateLabel(warehouseOrder.dueAt)
   };

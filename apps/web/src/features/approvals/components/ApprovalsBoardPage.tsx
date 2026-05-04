@@ -1,17 +1,11 @@
 "use client";
 
 import {
-  IconAlertTriangle,
   IconBanknote,
-  IconBot,
-  IconFileSearch,
   IconFileText,
   IconMessageCircle,
-  IconArrowRightCircle,
   IconRotateCcw,
   IconSend,
-  IconShieldAlert,
-  IconSparkles,
   IconTag,
   IconTruck,
   IconWarehouse,
@@ -19,8 +13,8 @@ import {
   QuickActionIcon
 } from "../../dashboard/components/dashboard-inline-icons";
 import { useToast } from "../../../providers/toast-provider";
-import type { CSSProperties, ReactNode } from "react";
-import { useState } from "react";
+import type { ReactNode } from "react";
+import { Fragment, useState } from "react";
 
 const nfTry = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", minimumFractionDigits: 2 });
 
@@ -36,13 +30,12 @@ type DemoCard = {
   description: string;
   date: string;
   rep: string;
-  accent: string;
   icon: ReactNode;
 };
 
 const RISK_LABEL: Record<RiskKey, string> = {
-  high: "Yüksek Risk",
-  medium: "Orta Risk",
+  high: "Yüksek",
+  medium: "Orta",
   critical: "Kritik",
   normal: "Normal"
 };
@@ -58,8 +51,7 @@ const DEMO_CARDS: DemoCard[] = [
     description: "Yüksek tutarlı sipariş",
     date: "03.05.2026",
     rep: "Ayşe Kaya",
-    accent: "#583bff",
-    icon: <QuickActionIcon kind="order" size={16} className="hz-approvals-card-ico-svg" />
+    icon: <QuickActionIcon kind="order" size={15} className="hz-approvals-desk-ico" />
   },
   {
     id: "2",
@@ -71,8 +63,7 @@ const DEMO_CARDS: DemoCard[] = [
     description: "Tahsilat kaydı",
     date: "03.05.2026",
     rep: "Mehmet Yılmaz",
-    accent: "#16a34a",
-    icon: <IconWallet size={16} className="hz-approvals-card-ico-svg" />
+    icon: <IconWallet size={15} className="hz-approvals-desk-ico" />
   },
   {
     id: "3",
@@ -84,8 +75,7 @@ const DEMO_CARDS: DemoCard[] = [
     description: "Eksik tahsilatlı teslim",
     date: "03.05.2026",
     rep: "Zeynep Ak",
-    accent: "#f59e0b",
-    icon: <IconTruck size={16} className="hz-approvals-card-ico-svg" />
+    icon: <IconTruck size={15} className="hz-approvals-desk-ico" />
   },
   {
     id: "4",
@@ -97,8 +87,7 @@ const DEMO_CARDS: DemoCard[] = [
     description: "Fatura kesimi",
     date: "03.05.2026",
     rep: "Mehmet Yılmaz",
-    accent: "#3b82f6",
-    icon: <IconFileText size={16} className="hz-approvals-card-ico-svg" />
+    icon: <IconFileText size={15} className="hz-approvals-desk-ico" />
   },
   {
     id: "5",
@@ -110,8 +99,7 @@ const DEMO_CARDS: DemoCard[] = [
     description: "İade talebi",
     date: "03.05.2026",
     rep: "Ayşe Kaya",
-    accent: "#ef4444",
-    icon: <IconRotateCcw size={16} className="hz-approvals-card-ico-svg" />
+    icon: <IconRotateCcw size={15} className="hz-approvals-desk-ico" />
   },
   {
     id: "6",
@@ -123,8 +111,7 @@ const DEMO_CARDS: DemoCard[] = [
     description: "Belge gönderimi",
     date: "03.05.2026",
     rep: "Mehmet Yılmaz",
-    accent: "#583bff",
-    icon: <IconMessageCircle size={16} className="hz-approvals-card-ico-svg" />
+    icon: <IconMessageCircle size={15} className="hz-approvals-desk-ico" />
   },
   {
     id: "7",
@@ -136,8 +123,7 @@ const DEMO_CARDS: DemoCard[] = [
     description: "Depo hazırlık onayı",
     date: "03.05.2026",
     rep: "Zeynep Ak",
-    accent: "#0891b2",
-    icon: <IconWarehouse size={16} className="hz-approvals-card-ico-svg" />
+    icon: <IconWarehouse size={15} className="hz-approvals-desk-ico" />
   },
   {
     id: "8",
@@ -149,8 +135,7 @@ const DEMO_CARDS: DemoCard[] = [
     description: "AI proposal onayı",
     date: "03.05.2026",
     rep: "Mehmet Yılmaz",
-    accent: "#7c3aed",
-    icon: <IconSparkles size={16} className="hz-approvals-card-ico-svg" />
+    icon: <IconFileText size={15} className="hz-approvals-desk-ico" />
   },
   {
     id: "9",
@@ -162,8 +147,7 @@ const DEMO_CARDS: DemoCard[] = [
     description: "Fiyat revizyon talebi",
     date: "03.05.2026",
     rep: "Ayşe Kaya",
-    accent: "#7c3aed",
-    icon: <IconTag size={16} className="hz-approvals-card-ico-svg" />
+    icon: <IconTag size={15} className="hz-approvals-desk-ico" />
   },
   {
     id: "10",
@@ -175,8 +159,7 @@ const DEMO_CARDS: DemoCard[] = [
     description: "Stok düzeltme onayı",
     date: "03.05.2026",
     rep: "Zeynep Ak",
-    accent: "#ea580c",
-    icon: <QuickActionIcon kind="stock" size={16} className="hz-approvals-card-ico-svg" />
+    icon: <QuickActionIcon kind="stock" size={15} className="hz-approvals-desk-ico" />
   },
   {
     id: "11",
@@ -188,8 +171,7 @@ const DEMO_CARDS: DemoCard[] = [
     description: "Belge çıkışı",
     date: "03.05.2026",
     rep: "Mehmet Yılmaz",
-    accent: "#3b82f6",
-    icon: <IconSend size={16} className="hz-approvals-card-ico-svg" />
+    icon: <IconSend size={15} className="hz-approvals-desk-ico" />
   },
   {
     id: "12",
@@ -201,8 +183,7 @@ const DEMO_CARDS: DemoCard[] = [
     description: "Planlı tahsilat",
     date: "03.05.2026",
     rep: "Mehmet Yılmaz",
-    accent: "#16a34a",
-    icon: <IconBanknote size={16} className="hz-approvals-card-ico-svg" />
+    icon: <IconBanknote size={15} className="hz-approvals-desk-ico" />
   }
 ];
 
@@ -217,12 +198,9 @@ export function ApprovalsBoardPage() {
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
   const [approvedIds, setApprovedIds] = useState<Set<string>>(() => new Set());
+  const [openId, setOpenId] = useState<string | null>(null);
 
   const totalDemoRecords = DEMO_CARDS.length;
-
-  const onCardActivate = () => {
-    pushToast("Detay modalı bir sonraki aşamada açılacak.");
-  };
 
   const onApprove = (id: string) => {
     if (approvedIds.has(id)) return;
@@ -231,182 +209,136 @@ export function ApprovalsBoardPage() {
   };
 
   return (
-    <div className="hz-approvals-page">
-      <div className="hz-approvals-layout">
-        <div className="hz-approvals-main">
-          <div className="hz-approvals-main-surface">
-            <div className="hz-approvals-grid-wrap">
-              <div className="hz-approvals-grid">
-                {DEMO_CARDS.map((card) => (
-                  <article
-                    key={card.id}
-                    className="hz-approvals-card"
-                    style={{ "--hz-ap-accent": card.accent } as CSSProperties}
-                    onClick={onCardActivate}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        onCardActivate();
-                      }
-                    }}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    <div className="hz-approvals-card-body">
-                      <div className="hz-approvals-card-top">
-                        <div className="hz-approvals-card-ico">{card.icon}</div>
-                        <span className="hz-approvals-cat">{card.categoryLabel}</span>
-                        <span className={riskClass(card.risk)}>{RISK_LABEL[card.risk]}</span>
-                      </div>
-                      <div className="hz-approvals-card-mid">
-                        <p className="hz-approvals-cust">{card.customer}</p>
-                        <p className="hz-approvals-doc">{card.docLine}</p>
-                        <p className="hz-approvals-sum">{card.summaryLine}</p>
-                      </div>
-                      <div className="hz-approvals-meta">
-                        <span>{card.date}</span>
-                        <span>{card.rep}</span>
-                      </div>
-                    </div>
-                    <div className="hz-approvals-card-actions">
-                      <button
-                        type="button"
-                        className="hz-approvals-btn hz-approvals-btn--ghost"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          pushToast("Detay modalı hazırlanıyor.");
-                        }}
-                      >
-                        Detaylar
-                      </button>
-                      <button
-                        type="button"
-                        className="hz-approvals-btn hz-approvals-btn--primary"
-                        disabled={approvedIds.has(card.id)}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onApprove(card.id);
-                        }}
-                      >
-                        Onayla
-                      </button>
-                    </div>
-                  </article>
-                ))}
-              </div>
-            </div>
+    <div className="hz-approvals-page hz-approvals-page--desk">
+      <div className="hz-approvals-desk-wrap">
+        <header className="hz-approvals-desk-bar" role="status">
+          <span>12 bekleyen</span>
+          <span className="hz-approvals-desk-bar-sep" aria-hidden>
+            ·
+          </span>
+          <span>3 kritik</span>
+        </header>
 
-            <footer className="hz-approvals-pagination">
-              <span className="hz-approvals-page-total">Toplam {totalDemoRecords} kayıt</span>
-              <div className="hz-approvals-page-nav">
-                <button type="button" className="hz-approvals-page-arrow" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} aria-label="Önceki sayfa">
-                  ‹
-                </button>
-                {[1, 2, 3].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    className={`hz-approvals-page-num ${page === n ? "hz-approvals-page-num--active" : ""}`}
-                    onClick={() => setPage(n)}
-                  >
-                    {n}
-                  </button>
-                ))}
-                <button type="button" className="hz-approvals-page-arrow" disabled={page >= 3} onClick={() => setPage((p) => Math.min(3, p + 1))} aria-label="Sonraki sayfa">
-                  ›
-                </button>
-              </div>
-              <label className="hz-approvals-page-size">
-                <select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} aria-label="Sayfa başına kayıt">
-                  <option value={12}>12 / sayfa</option>
-                  <option value={24}>24 / sayfa</option>
-                  <option value={48}>48 / sayfa</option>
-                </select>
-              </label>
-            </footer>
-          </div>
+        <div className="hz-approvals-desk-scroll">
+          <table className="hz-approvals-desk">
+            <thead>
+              <tr>
+                <th scope="col">Tür</th>
+                <th scope="col">Kayıt</th>
+                <th scope="col">Cari</th>
+                <th scope="col" className="hz-approvals-desk-num">
+                  Tutar / özet
+                </th>
+                <th scope="col">Risk</th>
+                <th scope="col" className="hz-approvals-desk-actions">
+                  İşlem
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {DEMO_CARDS.map((card) => {
+                const open = openId === card.id;
+                return (
+                  <Fragment key={card.id}>
+                    <tr
+                      className={`hz-approvals-desk-row${open ? " hz-approvals-desk-row--open" : ""}`}
+                      onClick={() => setOpenId((v) => (v === card.id ? null : card.id))}
+                    >
+                      <td>
+                        <span className="hz-approvals-desk-type">
+                          <span className="hz-approvals-desk-type-ico" aria-hidden>
+                            {card.icon}
+                          </span>
+                          {card.categoryLabel}
+                        </span>
+                      </td>
+                      <td className="hz-approvals-desk-mono">{card.docLine}</td>
+                      <td>{card.customer}</td>
+                      <td className="hz-approvals-desk-num">{card.summaryLine}</td>
+                      <td>
+                        <span className={riskClass(card.risk)}>{RISK_LABEL[card.risk]}</span>
+                      </td>
+                      <td className="hz-approvals-desk-actions">
+                        <button
+                          type="button"
+                          className="hz-approvals-desk-go"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setOpenId((v) => (v === card.id ? null : card.id));
+                          }}
+                        >
+                          {open ? "Kapat" : "Aç"}
+                        </button>
+                        <button
+                          type="button"
+                          className="hz-approvals-desk-approve"
+                          disabled={approvedIds.has(card.id)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            onApprove(card.id);
+                          }}
+                        >
+                          Onayla
+                        </button>
+                      </td>
+                    </tr>
+                    {open ? (
+                      <tr className="hz-approvals-desk-detail-row" aria-expanded>
+                        <td colSpan={6}>
+                          <div className="hz-approvals-desk-detail">
+                            <div className="hz-approvals-desk-detail-grid">
+                              <p>
+                                <span className="hz-approvals-dd-k">Not</span>
+                                {card.description}
+                              </p>
+                              <p>
+                                <span className="hz-approvals-dd-k">Tarih</span>
+                                {card.date}
+                              </p>
+                              <p>
+                                <span className="hz-approvals-dd-k">Sorumlu</span>
+                                {card.rep}
+                              </p>
+                            </div>
+                          </div>
+                        </td>
+                      </tr>
+                    ) : null}
+                  </Fragment>
+                );
+              })}
+            </tbody>
+          </table>
         </div>
 
-        <aside className="hz-approvals-side hz-approvals-assistant" aria-label="Onay Asistanı">
-          <header className="hz-approvals-assistant-head">
-            <h2 className="hz-approvals-assistant-title">Onay Asistanı</h2>
-            <p className="hz-approvals-assistant-lead">Riskli onaylar için öneri ve öncelik özeti.</p>
-          </header>
-
-          <section className="hz-approvals-assistant-card hz-approvals-assistant-card--warn">
-            <div className="hz-approvals-assistant-card-head">
-              <span className="hz-approvals-assistant-card-ico" aria-hidden>
-                <IconShieldAlert size={17} />
-              </span>
-              <h3 className="hz-approvals-assistant-card-title">Öncelikli Uyarılar</h3>
-            </div>
-            <ul className="hz-approvals-assistant-list">
-              <li>3 yüksek riskli satış onayı bekliyor.</li>
-              <li>1 teslimatta eksik tahsilat riski.</li>
-              <li>WhatsApp belgelerinde cari eşleşmesini kontrol edin.</li>
-            </ul>
-          </section>
-
-          <section className="hz-approvals-assistant-card hz-approvals-assistant-card--ai">
-            <div className="hz-approvals-assistant-card-head">
-              <span className="hz-approvals-assistant-card-ico hz-approvals-assistant-card-ico--ai" aria-hidden>
-                <IconSparkles size={17} />
-              </span>
-              <h3 className="hz-approvals-assistant-card-title">AI Önerileri</h3>
-              <span className="hz-approvals-assistant-ai-badge" aria-hidden>
-                <IconBot size={14} />
-              </span>
-            </div>
-            <ul className="hz-approvals-assistant-list">
-              <li>Önce yüksek tutarlı satışları inceleyin.</li>
-              <li>Teslimat onaylarında cari bakiyeyi kontrol edin.</li>
-              <li>AI proposal planını detaydan onaylayın.</li>
-            </ul>
-          </section>
-
-          <section className="hz-approvals-assistant-card hz-approvals-assistant-card--metrics">
-            <div className="hz-approvals-assistant-card-head">
-              <span className="hz-approvals-assistant-card-ico" aria-hidden>
-                <IconAlertTriangle size={17} />
-              </span>
-              <h3 className="hz-approvals-assistant-card-title">Bugünkü İş Yükü</h3>
-            </div>
-            <ul className="hz-approvals-metrics">
-              <li>
-                <span className="hz-approvals-metrics-label">Bekleyen</span>
-                <span className="hz-approvals-metrics-badge hz-approvals-metrics-badge--primary">12</span>
-              </li>
-              <li>
-                <span className="hz-approvals-metrics-label">Kritik</span>
-                <span className="hz-approvals-metrics-badge hz-approvals-metrics-badge--danger">3</span>
-              </li>
-              <li>
-                <span className="hz-approvals-metrics-label">Tahsilat bağlantılı</span>
-                <span className="hz-approvals-metrics-badge hz-approvals-metrics-badge--success">2</span>
-              </li>
-              <li>
-                <span className="hz-approvals-metrics-label">Belge gönderimi</span>
-                <span className="hz-approvals-metrics-badge hz-approvals-metrics-badge--info">1</span>
-              </li>
-            </ul>
-          </section>
-
-          <section className="hz-approvals-assistant-card hz-approvals-assistant-card--next">
-            <div className="hz-approvals-assistant-card-head">
-              <span className="hz-approvals-assistant-card-ico hz-approvals-assistant-card-ico--next" aria-hidden>
-                <IconFileSearch size={17} />
-              </span>
-              <h3 className="hz-approvals-assistant-card-title">Sonraki Adım</h3>
-              <span className="hz-approvals-assistant-next-ico" aria-hidden>
-                <IconArrowRightCircle size={16} />
-              </span>
-            </div>
-            <ul className="hz-approvals-assistant-list hz-approvals-assistant-list--compact">
-              <li>Kart tıklanınca detay modalı açılacak.</li>
-              <li>Modalda risk, belge ve audit; Onayla/Reddet bağlanacak.</li>
-            </ul>
-          </section>
-        </aside>
+        <footer className="hz-approvals-pagination hz-approvals-pagination--desk">
+          <span className="hz-approvals-page-total">Toplam {totalDemoRecords} kayıt</span>
+          <div className="hz-approvals-page-nav">
+            <button type="button" className="hz-approvals-page-arrow" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} aria-label="Önceki sayfa">
+              ‹
+            </button>
+            {[1, 2, 3].map((n) => (
+              <button
+                key={n}
+                type="button"
+                className={`hz-approvals-page-num ${page === n ? "hz-approvals-page-num--active" : ""}`}
+                onClick={() => setPage(n)}
+              >
+                {n}
+              </button>
+            ))}
+            <button type="button" className="hz-approvals-page-arrow" disabled={page >= 3} onClick={() => setPage((p) => Math.min(3, p + 1))} aria-label="Sonraki sayfa">
+              ›
+            </button>
+          </div>
+          <label className="hz-approvals-page-size">
+            <select value={pageSize} onChange={(e) => setPageSize(Number(e.target.value))} aria-label="Sayfa başına kayıt">
+              <option value={12}>12 / sayfa</option>
+              <option value={24}>24 / sayfa</option>
+              <option value={48}>48 / sayfa</option>
+            </select>
+          </label>
+        </footer>
       </div>
     </div>
   );

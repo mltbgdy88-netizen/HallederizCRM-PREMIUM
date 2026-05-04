@@ -333,6 +333,13 @@ export function useQuickOperationState() {
     }
   };
 
+  const replaceLines = (next: QuickOperationLine[]) => {
+    setSubmittedImpacts(null);
+    setSideActions(null);
+    setLines(next);
+    setExpandedLineId(null);
+  };
+
   const showFoundationNotice = (action: string) => {
     setNotice(`${action}: Bu turda taslak/onizleme olusturulur. Gercek gonderim/uretim sonraki asamada etkinlesecektir.`);
   };
@@ -449,6 +456,7 @@ export function useQuickOperationState() {
     setOperationNote,
     addEmptyLine,
     removeLine,
+    replaceLines,
     updateLine,
     selectProduct,
     selectSource,

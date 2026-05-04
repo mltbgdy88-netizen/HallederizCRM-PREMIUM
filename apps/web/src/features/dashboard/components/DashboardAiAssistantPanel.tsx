@@ -9,38 +9,65 @@ function greetingFirstName(fullName: string | undefined): string {
   return fullName.trim().split(/\s+/)[0] ?? "Ahmet";
 }
 
-const AI_CHIPS = [
-  { id: "summary", label: "Günlük Özeti Anlat" },
-  { id: "collect", label: "Tahsilat Durumu Söyle" },
-  { id: "stock", label: "Stok Risklerini Kontrol Et" },
-  { id: "loss", label: "Mevcut kayıp için stok durumu nedir?" }
+const AI_CHIPS_COMPACT = [
+  { id: "summary", label: "Günlük özet" },
+  { id: "collect", label: "Tahsilat özeti" }
 ];
 
-export function DashboardAiAssistantPanel() {
+export function DashboardAiAssistantPanel({ compact }: { compact?: boolean }) {
   const { session } = useAuth();
   const { pushToast } = useToast();
   const first = greetingFirstName(session?.user.fullName);
   const [summaryDone, setSummaryDone] = useState(false);
 
+  if (compact) {
+    return (
+      <aside className="hz-ai-panel hz-ai-panel--compact" aria-label="Asistan">
+        <p className="hz-ai-compact-title">Asistan</p>
+        <div className="hz-ai-chips hz-ai-chips--compact" role="list">
+          {AI_CHIPS_COMPACT.map((c) => {
+            const isSummary = c.id === "summary";
+            const done = isSummary && summaryDone;
+            return (
+              <button
+                key={c.id}
+                type="button"
+                className={`hz-ai-chip hz-ai-chip--compact ${done ? "is-done" : ""}`}
+                disabled={done}
+                onClick={() => {
+                  if (isSummary) {
+                    pushToast("Gönderildi");
+                    setSummaryDone(true);
+                    return;
+                  }
+                  pushToast("İstek kuyruğa alındı");
+                }}
+              >
+                {done ? "Özet gönderildi" : c.label}
+              </button>
+            );
+          })}
+        </div>
+        <p className="hz-ai-compact-foot">
+          {first}, ek özetler ilgili sayfada.
+        </p>
+      </aside>
+    );
+  }
+
+  const AI_CHIPS = [
+    { id: "summary", label: "Günlük Özeti Anlat" },
+    { id: "collect", label: "Tahsilat Durumu Söyle" },
+    { id: "loss", label: "Kritik carileri özetle" }
+  ];
+
   return (
-    <div className="hz-ai-panel hz-ai-panel--premium">
+    <div className="hz-ai-panel hz-ai-panel--premium hz-ai-panel--dashboard-tone">
       <div className="hz-ai-panel-top">
         <div>
           <p className="hz-ai-panel-title">
             AI Asistan <span className="hz-ai-beta">Beta</span>
           </p>
-        </div>
-        <div className="hz-ai-panel-top-actions">
-          <button type="button" className="hz-ai-mini-ic" aria-label="Ses">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M11 5L6 9H2v6h4l5 4V5z" />
-            </svg>
-          </button>
-          <button type="button" className="hz-ai-mini-ic" aria-label="Tam ekran">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M8 3H5a2 2 0 00-2 2v3m18 0V5a2 2 0 00-2-2h-3m0 18h3a2 2 0 002-2v-3M3 16v3a2 2 0 002 2h3" />
-            </svg>
-          </button>
         </div>
       </div>
 
@@ -81,9 +108,7 @@ export function DashboardAiAssistantPanel() {
       </div>
 
       <div className="hz-ai-welcome">
-        <p className="hz-ai-welcome-line">
-          Merhaba {first}! <span aria-hidden>👋</span>
-        </p>
+        <p className="hz-ai-welcome-line">Merhaba {first}.</p>
         <p className="hz-ai-welcome-sub">Size nasıl yardımcı olabilirim?</p>
       </div>
 
