@@ -6136,8 +6136,8 @@ select.hz-qop-summary-input {
 .hz-wa-panel-title {
   margin: 0;
   font-size: 13px;
-  font-weight: 900;
-  letter-spacing: -0.02em;
+  font-weight: 600;
+  letter-spacing: -0.015em;
   color: var(--hz-wa-text);
 }
 
@@ -6155,7 +6155,7 @@ select.hz-qop-summary-input {
   align-items: center;
   gap: 8px;
   font-size: 10.5px;
-  font-weight: 700;
+  font-weight: 600;
   color: var(--hz-wa-text);
 }
 
@@ -6168,7 +6168,7 @@ select.hz-qop-summary-input {
 
 .hz-wa-dot--ok {
   background: var(--hz-wa-wa);
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--hz-wa-wa) 28%, transparent);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--hz-wa-wa) 22%, transparent);
 }
 
 .hz-wa-queue-pill {
@@ -6176,7 +6176,7 @@ select.hz-qop-summary-input {
   padding: 2px 8px;
   border-radius: 999px;
   font-size: 10px;
-  font-weight: 800;
+  font-weight: 600;
   color: var(--hz-wa-wa);
   background: color-mix(in srgb, var(--hz-wa-wa) 12%, #fff);
   border: 1px solid color-mix(in srgb, var(--hz-wa-wa) 28%, var(--hz-wa-border));
@@ -6195,7 +6195,7 @@ select.hz-qop-summary-input {
   background: #f8fafc;
   color: #475569;
   font-size: 10.5px;
-  font-weight: 800;
+  font-weight: 600;
   padding: 4px 10px;
   border-radius: 999px;
   cursor: pointer;
@@ -6324,7 +6324,7 @@ select.hz-qop-summary-input {
 
 .hz-wa-badge {
   font-size: 9.5px;
-  font-weight: 800;
+  font-weight: 600;
   padding: 2px 6px;
   border-radius: 6px;
   line-height: 1.2;
