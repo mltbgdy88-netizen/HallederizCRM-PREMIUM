@@ -1286,14 +1286,18 @@ export function SettingsPage() {
                   }
                 />
               ) : null}
-              <article className="hz-settings-side-card">
-                <h3 className="hz-settings-side-card-title">Dikkat gerekenler</h3>
-                <p>{assistantCopy.hint}</p>
-              </article>
-              <article className="hz-settings-side-card">
-                <h3 className="hz-settings-side-card-title">Sonraki adım</h3>
-                <p>{assistantCopy.next}</p>
-              </article>
+              {activeCategory !== "kural-onay" ? (
+                <>
+                  <article className="hz-settings-side-card">
+                    <h3 className="hz-settings-side-card-title">Dikkat gerekenler</h3>
+                    <p>{assistantCopy.hint}</p>
+                  </article>
+                  <article className="hz-settings-side-card">
+                    <h3 className="hz-settings-side-card-title">Sonraki adım</h3>
+                    <p>{assistantCopy.next}</p>
+                  </article>
+                </>
+              ) : null}
               <article className="hz-settings-side-card">
                 <h3 className="hz-settings-side-card-title">Hızlı bağlantılar</h3>
                 {activeCategory === "kural-onay" ? (

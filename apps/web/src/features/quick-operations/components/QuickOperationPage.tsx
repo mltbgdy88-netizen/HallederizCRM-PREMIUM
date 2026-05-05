@@ -74,7 +74,7 @@ function operationTypeLabel(type: QuickOperationType): string {
 function primaryActionLabel(tab: WorkflowTabId): string {
   switch (tab) {
     case "order":
-      return "Siparişi kaydet";
+      return "Siparişi oluştur";
     case "payment":
       return "Tahsilatı kaydet";
     case "price":
@@ -146,20 +146,6 @@ function nextStepText(tab: WorkflowTabId, hasLines: boolean): string {
   return hasLines ? "Kayıt sonrası ilgili modülde takip edin." : "Satır ekleyin veya ürün seçin.";
 }
 
-function aiHintLines(tab: WorkflowTabId, riskHigh: boolean): string[] {
-  const r = riskHigh;
-  if (tab === "delivery") {
-    return ["Bu işlem Depo Hazırlık ile eşlenir.", r ? "Yüksek riskli cari: teslimi onaylayın." : "Standart teslim akışı."];
-  }
-  if (tab === "payment") {
-    return [r ? "Bu müşteri için açık bakiye var." : "Tahsilat onay gerektirmeyebilir."];
-  }
-  if (tab === "return") {
-    return ["İade stok ve cariyi etkiler.", "Gerekirse Onaylar sayfasına düşer."];
-  }
-  return [r ? "Bu işlem onay gerektirebilir." : "Kayıt sonrası belgeyi modülde tamamlayın."];
-}
-
 export function QuickOperationPage() {
   const router = useRouter();
   const { pushToast } = useToast();
@@ -225,7 +211,7 @@ export function QuickOperationPage() {
   const handlePrimary = async () => {
     const ok = await submitOperation();
     if (ok) {
-      pushToast("Kaydedildi");
+      pushToast(activeTab === "order" ? "Taslak siparişe dönüştürüldü (demo)." : "Kaydedildi");
       setPrimaryDone(true);
     }
   };
@@ -277,15 +263,7 @@ export function QuickOperationPage() {
       <header className="hz-qop-hero">
         <div className="hz-qop-hero-text">
           <p className="hz-qop-hero-kicker">Ne yapmak istiyorsun?</p>
-          <p className="hz-qop-hero-sub">Sipariş, tahsilat, teslim ve belge işlemlerini tek akıştan başlatın.</p>
-        </div>
-        <div className="hz-qop-hero-actions">
-          <button type="button" className="hz-qop-btn hz-qop-btn--outline" onClick={handleNewOperation}>
-            Yeni işlem
-          </button>
-          <button type="button" className="hz-qop-btn hz-qop-btn--outline" onClick={() => router.push("/archive")}>
-            İşlem geçmişi
-          </button>
+          <p className="hz-qop-hero-sub">İşlem türünü seçin; taslak ve sipariş adımlarını alttaki aksiyonlarla tamamlayın.</p>
         </div>
       </header>
 
@@ -470,7 +448,13 @@ export function QuickOperationPage() {
                       </td>
                       <td className="hz-qop-cell amt">{money(lineAmount(line))}</td>
                       <td className="hz-qop-col-act">
-                        <button type="button" className="hz-qop-icon-btn hz-qop-icon-btn--v2" aria-label="Satırı sil" onClick={() => removeLine(line.id)}>
+                        <button
+                          type="button"
+                          className="hz-qop-icon-btn hz-qop-icon-btn--v2"
+                          aria-label="Satırı sil"
+                          title="Satırı sil"
+                          onClick={() => removeLine(line.id)}
+                        >
                           <IconTrash2 size={15} />
                         </button>
                       </td>
@@ -520,17 +504,30 @@ export function QuickOperationPage() {
             </details>
 
             <footer className="hz-qop-actions hz-qop-actions--v2">
+              <button type="button" className="hz-qop-btn hz-qop-btn--ghost" onClick={handleNewOperation}>
+                Yeni işlem
+              </button>
+              <button type="button" className="hz-qop-btn hz-qop-btn--outline" onClick={() => router.push("/archive")}>
+                Geçmiş
+              </button>
               <button type="button" className="hz-qop-btn hz-qop-btn--outline" onClick={() => pushToast("Taslak kaydedildi")}>
                 <IconSave size={16} aria-hidden />
-                Taslak
+                Taslak kaydet
+              </button>
+              <button type="button" className="hz-qop-btn hz-qop-btn--ghost" onClick={() => pushToast("Onaya gönderildi")}>
+                <IconSend size={16} aria-hidden />
+                Onaya gönder
               </button>
               <button type="button" className="hz-qop-btn hz-qop-btn--outline" onClick={() => pushToast("Önizleme hazırlanıyor")}>
                 <IconPrinter size={16} aria-hidden />
                 Önizleme
               </button>
+              <button type="button" className="hz-qop-btn hz-qop-btn--outline" onClick={handleClear}>
+                Temizle
+              </button>
               <button
                 type="button"
-                className="hz-qop-btn hz-qop-btn--primary"
+                className="hz-qop-btn hz-qop-btn--primary hz-qop-btn--primary-solo"
                 disabled={primaryDone || isSubmitting}
                 onClick={handlePrimary}
               >
@@ -543,49 +540,22 @@ export function QuickOperationPage() {
                   </>
                 )}
               </button>
-              <button type="button" className="hz-qop-btn hz-qop-btn--ghost" onClick={() => pushToast("Onaya gönderildi")}>
-                <IconSend size={16} aria-hidden />
-                Onaya gönder
-              </button>
-              <button type="button" className="hz-qop-btn hz-qop-btn--danger" onClick={handleClear}>
-                Vazgeç
-              </button>
             </footer>
           </div>
         </div>
 
-        <aside className="hz-qop-side hz-qop-side--v2" aria-label="İşlem özeti">
+        <aside className="hz-qop-side hz-qop-side--v2" aria-label="Cari ve işlem özeti">
           <article className="hz-qop-card hz-qop-card--v2">
-            <h2 className="hz-qop-side-h">İşlem özeti</h2>
-            <dl className="hz-qop-dl hz-qop-dl--tight">
-              <div>
-                <dt>Seçili</dt>
-                <dd>{WORKFLOW.find((w) => w.id === activeTab)?.title ?? "—"}</dd>
-              </div>
-              <div>
-                <dt>Tür</dt>
-                <dd>{operationTypeLabel(operationType)}</dd>
-              </div>
-              <div>
-                <dt>Belge</dt>
-                <dd className="hz-qop-dd-mono">SO-2026-0148</dd>
-              </div>
-              <div>
-                <dt>Genel toplam</dt>
-                <dd>{money(totals.grandTotal)} ₺</dd>
-              </div>
-            </dl>
-          </article>
-
-          <article className="hz-qop-card hz-qop-card--v2">
-            <h2 className="hz-qop-side-h">Cari / bağlam</h2>
+            <h2 className="hz-qop-side-h">Cari özeti</h2>
             <p className="hz-qop-side-lead">{selectedCustomer.name}</p>
             <dl className="hz-qop-dl hz-qop-dl--tight">
               <div>
-                <dt>Risk</dt>
-                <dd>
-                  <span className={`hz-qop-pill ${riskHigh ? "hz-qop-pill--risk" : ""}`}>{riskLabel}</span>
-                </dd>
+                <dt>Tip</dt>
+                <dd>{selectedCustomer.customerType ?? "—"}</dd>
+              </div>
+              <div>
+                <dt>Fiyat grubu</dt>
+                <dd>{selectedCustomer.priceGroup}</dd>
               </div>
               <div>
                 <dt>Alacak</dt>
@@ -595,23 +565,68 @@ export function QuickOperationPage() {
                 <dt>Verecek</dt>
                 <dd>₺{selectedCustomer.payableDisplay ?? "—"}</dd>
               </div>
+              {selectedCustomer.warningDisplay && selectedCustomer.warningDisplay !== "—" ? (
+                <div>
+                  <dt>Vade / ödeme</dt>
+                  <dd>{selectedCustomer.warningDisplay}</dd>
+                </div>
+              ) : null}
             </dl>
+            <div className="hz-qop-side-badge-row">
+              {selectedCustomer.whatsappMatched ? (
+                <span className="hz-qop-pill hz-qop-pill--wa" title="WhatsApp kanalı ile eşleşmiş cari">
+                  WhatsApp eşleşti
+                </span>
+              ) : (
+                <span className="hz-qop-pill hz-qop-pill--muted">WhatsApp: eşleşme yok</span>
+              )}
+              <span className={`hz-qop-pill${riskHigh ? " hz-qop-pill--risk" : ""}`}>Risk: {riskLabel}</span>
+            </div>
             <details className="hz-qop-side-details">
-              <summary>Detaylı bakiye ve uyarı</summary>
-              <p className="hz-qop-side-muted">{selectedCustomer.warningDisplay ?? "—"}</p>
+              <summary>Adres ve ek not</summary>
               <p className="hz-qop-side-muted">{selectedCustomer.address}</p>
             </details>
           </article>
 
-          <article className="hz-qop-card hz-qop-card--v2 hz-qop-card--next">
-            <h2 className="hz-qop-side-h">Sonraki adım</h2>
-            <p className="hz-qop-next-main">{nextStepText(activeTab, lines.length > 0)}</p>
-            <ul className="hz-qop-hint-list">
-              {aiHintLines(activeTab, riskHigh).map((t) => (
-                <li key={t}>{t}</li>
-              ))}
-            </ul>
+          <article className="hz-qop-card hz-qop-card--v2">
+            <h2 className="hz-qop-side-h">İşlem özeti</h2>
+            <dl className="hz-qop-dl hz-qop-dl--tight">
+              <div>
+                <dt>Seçili işlem</dt>
+                <dd>{WORKFLOW.find((w) => w.id === activeTab)?.title ?? "—"}</dd>
+              </div>
+              <div>
+                <dt>Tür</dt>
+                <dd>{operationTypeLabel(operationType)}</dd>
+              </div>
+              <div>
+                <dt>Belge no</dt>
+                <dd className="hz-qop-dd-mono">SO-2026-0148</dd>
+              </div>
+              <div>
+                <dt>Ara toplam</dt>
+                <dd>{money(totals.subtotal)} ₺</dd>
+              </div>
+              <div>
+                <dt>Genel toplam</dt>
+                <dd>{money(totals.grandTotal)} ₺</dd>
+              </div>
+              <div>
+                <dt>Sonraki adım</dt>
+                <dd className="hz-qop-side-next-dd">{nextStepText(activeTab, lines.length > 0)}</dd>
+              </div>
+            </dl>
           </article>
+
+          {riskHigh || (selectedCustomer.warningDisplay && selectedCustomer.warningDisplay !== "—") ? (
+            <article className="hz-qop-card hz-qop-card--v2 hz-qop-card--warn-soft">
+              <h2 className="hz-qop-side-h">Uyarı / onay</h2>
+              {riskHigh ? <p className="hz-qop-side-warn-line">Yüksek riskli cari: kayıt veya teslim öncesi onay önerilir.</p> : null}
+              {selectedCustomer.warningDisplay && selectedCustomer.warningDisplay !== "—" ? (
+                <p className="hz-qop-side-warn-line">{selectedCustomer.warningDisplay}</p>
+              ) : null}
+            </article>
+          ) : null}
         </aside>
       </div>
     </div>
