@@ -1,5 +1,5 @@
 import type { Customer, WarehouseOrder } from "@hallederiz/types";
-import { getWarehouseOrderStatusLabel } from "../queries/warehouse-mock-data";
+import { getWarehouseOrderPrepLabel } from "../utils/warehouse-prep-status";
 
 export function WarehouseTaskPreviewPanel({ warehouseOrder, customer }: { warehouseOrder: WarehouseOrder | null; customer: Customer | null }) {
   if (!warehouseOrder) {
@@ -21,7 +21,7 @@ export function WarehouseTaskPreviewPanel({ warehouseOrder, customer }: { wareho
         <li>Musteri: {customer?.name ?? warehouseOrder.customerId}</li>
         <li>Siparis: {warehouseOrder.orderNo}</li>
         <li>Depo: {warehouseOrder.warehouseName}</li>
-        <li>Durum: {getWarehouseOrderStatusLabel(warehouseOrder.status)}</li>
+        <li>Durum: {getWarehouseOrderPrepLabel(warehouseOrder)}</li>
         <li>Hazirlanan: {preparedTotal} / {requestedTotal}</li>
         <li>WhatsApp: depocu gorev bildirimi placeholder.</li>
       </ul>

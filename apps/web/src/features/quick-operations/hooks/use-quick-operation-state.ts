@@ -54,6 +54,8 @@ export const demoCustomers: QuickOperationCustomer[] = [
     contactName: "Mehmet Yıldız",
     phone: "+90 312 555 01 48",
     priceGroup: "Bayi / Slot 1",
+    customerType: "Bayi",
+    whatsappMatched: true,
     risk: "Orta",
     balance: 72100,
     address: "Ostim OSB, 1232. Cad. No:4, Ankara",
@@ -67,6 +69,8 @@ export const demoCustomers: QuickOperationCustomer[] = [
     contactName: "Elif Aksoy",
     phone: "+90 232 444 90 12",
     priceGroup: "Perakende",
+    customerType: "Perakende",
+    whatsappMatched: false,
     risk: "Dusuk",
     balance: 12400,
     address: "İzmir Atatürk OSB, No:88",
@@ -80,6 +84,8 @@ export const demoCustomers: QuickOperationCustomer[] = [
     contactName: "Can Öztürk",
     phone: "+90 266 333 77 65",
     priceGroup: "Üretici",
+    customerType: "Üretici",
+    whatsappMatched: true,
     risk: "Dusuk",
     balance: 8800,
     address: "Bandırma Lojistik Üssü",
@@ -333,6 +339,13 @@ export function useQuickOperationState() {
     }
   };
 
+  const replaceLines = (next: QuickOperationLine[]) => {
+    setSubmittedImpacts(null);
+    setSideActions(null);
+    setLines(next);
+    setExpandedLineId(null);
+  };
+
   const showFoundationNotice = (action: string) => {
     setNotice(`${action}: Bu turda taslak/onizleme olusturulur. Gercek gonderim/uretim sonraki asamada etkinlesecektir.`);
   };
@@ -449,6 +462,7 @@ export function useQuickOperationState() {
     setOperationNote,
     addEmptyLine,
     removeLine,
+    replaceLines,
     updateLine,
     selectProduct,
     selectSource,

@@ -18,8 +18,6 @@ import { useToast } from "../../../providers/toast-provider";
 import {
   IconArchive,
   IconBarChart3,
-  IconBuilding,
-  IconCheckCircle,
   IconClipboardCheck,
   IconDatabase,
   IconExternalLink,
@@ -28,7 +26,6 @@ import {
   IconRotateCcw,
   IconSave,
   IconShieldCheck,
-  IconTag,
   IconUpload,
   IconUser,
   IconWarehouse,
@@ -80,16 +77,6 @@ function companyProfileStatus(c: PlatformSettings["company"]): "Dolu" | "Eksik" 
     c.email.trim().length > 0 &&
     c.phone.trim().length > 0;
   return ok ? "Dolu" : "Eksik";
-}
-
-function connectionsSummary(s: PlatformSettings): string {
-  let n = 0;
-  if (s.erp.enabled) n++;
-  if (s.whatsapp.enabled) n++;
-  if (s.ai.enabled) n++;
-  if (n >= 3) return "Hazır";
-  if (n === 0) return "Eksik";
-  return "Kısmi";
 }
 
 function erpLabel(provider: PlatformSettings["erp"]["provider"]): string {
@@ -159,16 +146,6 @@ export function SettingsPage() {
   const checklistDone = useMemo(() => {
     if (!settings) return 0;
     return settings.pilotSetup.checklist.filter((item) => item.completed).length;
-  }, [settings]);
-
-  const activePriceSlots = useMemo(() => {
-    if (!settings) return 0;
-    return settings.priceSlots.slots.filter((s) => s.active).length;
-  }, [settings]);
-
-  const activeWarehouses = useMemo(() => {
-    if (!settings) return 0;
-    return settings.warehouses.filter((w) => w.active).length;
   }, [settings]);
 
   const handleSave = async () => {
@@ -325,8 +302,12 @@ export function SettingsPage() {
         <div className="hz-settings-main">
           <header className="hz-settings-topbar">
             <div className="hz-settings-topbar-text">
-              <h1 className="hz-settings-topbar-title">Sistem Ayar Merkezi</h1>
-              <p className="hz-settings-topbar-sub">Firma bilgileri, kullanıcılar, bağlantılar ve AI ayarlarını tek yerden yönetin.</p>
+              <h1 className="hz-settings-topbar-title">
+                Ayarlar
+                <span className="hz-settings-pilot-pill" title="Pilot kurulum adımları">
+                  {checklistDone}/{s.pilotSetup.checklist.length}
+                </span>
+              </h1>
             </div>
             <div className="hz-settings-topbar-actions">
               <button
@@ -360,65 +341,6 @@ export function SettingsPage() {
               </button>
             </div>
           </header>
-
-          <section className="hz-settings-kpi-strip" aria-label="Özet durum">
-            <div className="hz-settings-kpi">
-              <span className="hz-settings-kpi-ico" aria-hidden>
-                <IconBuilding size={13} />
-              </span>
-              <span className="hz-settings-kpi-text">
-                <span className="hz-settings-kpi-label">Firma bilgisi</span>
-                <span className="hz-settings-kpi-value">{companyProfileStatus(s.company)}</span>
-              </span>
-            </div>
-            <div className="hz-settings-kpi">
-              <span className="hz-settings-kpi-ico" aria-hidden>
-                <IconUser size={13} />
-              </span>
-              <span className="hz-settings-kpi-text">
-                <span className="hz-settings-kpi-label">Kullanıcı</span>
-                <span className="hz-settings-kpi-value">{users.length}</span>
-              </span>
-            </div>
-            <div className="hz-settings-kpi">
-              <span className="hz-settings-kpi-ico" aria-hidden>
-                <IconTag size={13} />
-              </span>
-              <span className="hz-settings-kpi-text">
-                <span className="hz-settings-kpi-label">Fiyatlar</span>
-                <span className="hz-settings-kpi-value">{activePriceSlots} aktif</span>
-              </span>
-            </div>
-            <div className="hz-settings-kpi">
-              <span className="hz-settings-kpi-ico" aria-hidden>
-                <IconWarehouse size={13} />
-              </span>
-              <span className="hz-settings-kpi-text">
-                <span className="hz-settings-kpi-label">Depolar</span>
-                <span className="hz-settings-kpi-value">{activeWarehouses} aktif</span>
-              </span>
-            </div>
-            <div className="hz-settings-kpi">
-              <span className="hz-settings-kpi-ico" aria-hidden>
-                <IconZap size={13} />
-              </span>
-              <span className="hz-settings-kpi-text">
-                <span className="hz-settings-kpi-label">Bağlantılar</span>
-                <span className="hz-settings-kpi-value">{connectionsSummary(s)}</span>
-              </span>
-            </div>
-            <div className="hz-settings-kpi">
-              <span className="hz-settings-kpi-ico" aria-hidden>
-                <IconCheckCircle size={13} />
-              </span>
-              <span className="hz-settings-kpi-text">
-                <span className="hz-settings-kpi-label">Kurulum</span>
-                <span className="hz-settings-kpi-value">
-                  {checklistDone}/{s.pilotSetup.checklist.length}
-                </span>
-              </span>
-            </div>
-          </section>
 
           <div className="hz-settings-category-tabs" role="tablist" aria-label="Ayar bölümleri">
             {CATEGORIES.map((c) => (
@@ -1364,14 +1286,18 @@ export function SettingsPage() {
                   }
                 />
               ) : null}
-              <article className="hz-settings-side-card">
-                <h3 className="hz-settings-side-card-title">Dikkat gerekenler</h3>
-                <p>{assistantCopy.hint}</p>
-              </article>
-              <article className="hz-settings-side-card">
-                <h3 className="hz-settings-side-card-title">Sonraki adım</h3>
-                <p>{assistantCopy.next}</p>
-              </article>
+              {activeCategory !== "kural-onay" ? (
+                <>
+                  <article className="hz-settings-side-card">
+                    <h3 className="hz-settings-side-card-title">Dikkat gerekenler</h3>
+                    <p>{assistantCopy.hint}</p>
+                  </article>
+                  <article className="hz-settings-side-card">
+                    <h3 className="hz-settings-side-card-title">Sonraki adım</h3>
+                    <p>{assistantCopy.next}</p>
+                  </article>
+                </>
+              ) : null}
               <article className="hz-settings-side-card">
                 <h3 className="hz-settings-side-card-title">Hızlı bağlantılar</h3>
                 {activeCategory === "kural-onay" ? (

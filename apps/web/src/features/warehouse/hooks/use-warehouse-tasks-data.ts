@@ -32,7 +32,10 @@ export function useWarehouseTasksData(filters: WarehouseTaskFilters) {
     };
   }, []);
 
-  const filteredWarehouseOrders = useMemo(() => filterWarehouseOrders(warehouseOrders, filters), [warehouseOrders, filters]);
+  const filteredWarehouseOrders = useMemo(
+    () => filterWarehouseOrders(warehouseOrders, filters, customers),
+    [warehouseOrders, filters, customers]
+  );
   const rows = useMemo(
     () => filteredWarehouseOrders.map((warehouseOrder) => mapWarehouseTaskRow(warehouseOrder, customers)),
     [filteredWarehouseOrders, customers]

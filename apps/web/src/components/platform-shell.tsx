@@ -30,6 +30,7 @@ const NAV_SECTIONS: SidebarNavSection[] = [
     items: [
       { key: "customers", label: "Cariler", href: "/cariler", icon: <CRMIcon name="customers" /> },
       { key: "stock", label: "Ürün / Stok", href: "/stok", icon: <CRMIcon name="stock" /> },
+      { key: "warehouse-prep", label: "Depo Hazırlık", href: "/depo", icon: <CRMIcon name="warehouse" /> },
       { key: "archive", label: "Arşiv", href: "/archive", icon: <CRMIcon name="documents" /> }
     ]
   },
@@ -62,7 +63,7 @@ const PAGE_META: Array<[string, PageMeta]> = [
   ["/siparisler/", { title: "Siparis Detayi", subtitle: "Satir, operasyon etkisi ve risk paneli.", breadcrumb: "Siparisler / Detay" }],
   ["/tahsilatlar/yeni", { title: "Yeni Tahsilat", subtitle: "Tahsilat ve allocation giris ekrani.", breadcrumb: "Tahsilatlar / Yeni" }],
   ["/tahsilatlar/", { title: "Tahsilat Detayi", subtitle: "Tahsilat dogrulama ve belge paneli.", breadcrumb: "Tahsilatlar / Detay" }],
-  ["/depo/emirler/", { title: "Depo Emir Detayi", subtitle: "Toplama akisi ve operasyon aksiyonlari.", breadcrumb: "Depo / Emir Detay" }],
+  ["/depo/emirler/", { title: "Depo Hazırlık Fişi", subtitle: "Belge satırları, raf/lokasyon ve teslim öncesi özet.", breadcrumb: "Depo Hazırlık / Fiş" }],
   ["/teslimatlar/", { title: "Teslimat Detayi", subtitle: "Teslim satirlari ve dogrulama paneli.", breadcrumb: "Teslimatlar / Detay" }],
   ["/faturalar/", { title: "Fatura Detayi", subtitle: "Fatura satirlari ve belge aksiyonlari.", breadcrumb: "Faturalar / Detay" }],
   ["/iadeler/yeni", { title: "Yeni Iade", subtitle: "Siparis veya teslim baglantili iade taslagi.", breadcrumb: "Iadeler / Yeni" }],
@@ -70,7 +71,7 @@ const PAGE_META: Array<[string, PageMeta]> = [
   ["/fabrikalar/siparisler/", { title: "Fabrika Siparis Detayi", subtitle: "Fabrika durum ve senkron paneli.", breadcrumb: "Fabrikalar / Siparis Detay" }],
   ["/ai/onaylar", { title: "AI Onaylar", subtitle: "Proposal ve approval kayitlarini yonetin.", breadcrumb: "AI / Onaylar" }],
   ["/ai/icgoruler", { title: "AI Icgoruler", subtitle: "AI risk/firsat analizlerini takip edin.", breadcrumb: "AI / Icgoruler" }],
-  ["/hizli-islem", { title: "Hızlı İşlem", subtitle: "Sipariş, tahsilat, fiyat ve belge işlemlerini hızlıca hazırlayın.", breadcrumb: "Hızlı İşlem" }],
+  ["/hizli-islem", { title: "Hızlı İşlem", subtitle: "Sipariş, tahsilat, teslim ve belge işlemlerini tek akıştan başlatın.", breadcrumb: "Hızlı İşlem" }],
   ["/dashboard", { title: "Gösterge Paneli", subtitle: "", breadcrumb: "" }],
   ["/archive", { title: "Arşiv", subtitle: "Geçmiş işlemler ve belge arşivi (yer tutucu).", breadcrumb: "Arşiv" }],
   ["/kurulum/veri-yukleme", { title: "Veri Yukleme", subtitle: "CSV tabanli import merkezi ile cari, urun, fiyat ve stok yukleyin.", breadcrumb: "Kurulum / Veri Yukleme" }],
@@ -84,7 +85,7 @@ const PAGE_META: Array<[string, PageMeta]> = [
   ["/teklifler", { title: "Teklifler", subtitle: "Teklif yasam dongusu ve donusum takipleri.", breadcrumb: "Teklifler" }],
   ["/siparisler", { title: "Siparisler", subtitle: "Siparis, kaynak plani ve operasyon etkisi.", breadcrumb: "Siparisler" }],
   ["/tahsilatlar", { title: "Tahsilatlar", subtitle: "Tahsilat kayitlari ve allocation yonetimi.", breadcrumb: "Tahsilatlar" }],
-  ["/depo", { title: "Depo", subtitle: "Toplama emirleri ve depo operasyonlari.", breadcrumb: "Depo" }],
+  ["/depo", { title: "Depo Hazırlık", subtitle: "Satılan ürünlerin depo toplama ve teslim öncesi hazırlığı.", breadcrumb: "Depo Hazırlık" }],
   ["/teslimatlar", { title: "Teslimatlar", subtitle: "Teslimat planlama ve dogrulama paneli.", breadcrumb: "Teslimatlar" }],
   ["/faturalar", { title: "Faturalar", subtitle: "Fatura kayitlari ve belge baglantilari.", breadcrumb: "Faturalar" }],
   ["/iadeler", { title: "Iadeler", subtitle: "Iade sureci ve neden bazli takip.", breadcrumb: "Iadeler" }],
@@ -177,6 +178,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
   const isArchiveList = normalizedPath === "/archive";
   const isReportsList = normalizedPath === "/raporlar";
   const isSettingsCenter = normalizedPath === "/ayarlar";
+  const isWarehousePrep = normalizedPath === "/depo" || normalizedPath.startsWith("/depo/");
 
   const dashboardGreeting = useMemo(() => {
     const display = session?.user.fullName?.trim() || "Ahmet Yılmaz";
@@ -213,7 +215,8 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
             isStockList ||
             isArchiveList ||
             isReportsList ||
-            isSettingsCenter
+            isSettingsCenter ||
+            isWarehousePrep
           }
           title={pageMeta.title}
           subtitle={pageMeta.subtitle}
@@ -230,7 +233,9 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
                     ? "Cari, telefon, vergi no, şehir veya bakiye ara..."
                     : isStockList
                       ? "Ürün kodu, barkod, marka, depo, raf veya fiyat ara..."
-                      : isArchiveList
+                      : isWarehousePrep
+                        ? "Belge no, cari, ürün, raf veya depo görevlisi ara..."
+                        : isArchiveList
                         ? "Belge no, cari, işlem, tarih, kullanıcı veya etiket ara..."
                         : isReportsList
                           ? "Rapor, cari, belge, tarih, metrik veya kullanıcı ara..."

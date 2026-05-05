@@ -250,37 +250,41 @@ export function WhatsAppPage() {
                         <span className="hz-wa-conversation-time">{meta?.timeLabel ?? ""}</span>
                       </span>
                       <p className="hz-wa-conversation-snippet">{meta?.subtitle ?? c.lastMessagePreview}</p>
-                      <span className="hz-wa-conversation-meta">
-                        <span className="hz-wa-badge hz-wa-badge--intent">Intent: {meta?.intentLabel ?? "—"}</span>
-                        <span className="hz-wa-badge hz-wa-badge--neutral">{meta?.statusLine}</span>
+                      <p className="hz-wa-conversation-meta">
+                        <span className="hz-wa-conversation-meta-strong">{meta?.intentLabel ?? "Genel"}</span>
+                        {" · "}
+                        {meta?.statusLine ?? "—"}
                         {c.pendingActionCount > 0 ? (
-                          <span className="hz-wa-badge hz-wa-badge--action">
-                            {c.pendingActionCount} aksiyon
-                          </span>
+                          <>
+                            {" · "}
+                            <span className="hz-wa-conversation-meta-strong">{c.pendingActionCount} onay</span>
+                          </>
                         ) : null}
-                      </span>
+                      </p>
                     </span>
                   </button>
                 );
               })}
             </div>
-            <div className="hz-wa-today-card">
-              <p className="hz-wa-today-title">Bugünkü durum</p>
-              <div className="hz-wa-today-grid">
-                <div>
-                  <span className="hz-wa-today-k">Okunmamış</span>
-                  <span className="hz-wa-today-v">{unreadTotal || 4}</span>
-                </div>
-                <div>
-                  <span className="hz-wa-today-k">Onay bekleyen</span>
-                  <span className="hz-wa-today-v">{approvalTotal || 7}</span>
-                </div>
-                <div>
-                  <span className="hz-wa-today-k">Hata</span>
-                  <span className="hz-wa-today-v hz-wa-today-v--bad">1</span>
+            <details className="hz-wa-today-details">
+              <summary>Bugünkü durum</summary>
+              <div className="hz-wa-today-card">
+                <div className="hz-wa-today-grid">
+                  <div>
+                    <span className="hz-wa-today-k">Okunmamış</span>
+                    <span className="hz-wa-today-v">{unreadTotal || 4}</span>
+                  </div>
+                  <div>
+                    <span className="hz-wa-today-k">Onay bekleyen</span>
+                    <span className="hz-wa-today-v">{approvalTotal || 7}</span>
+                  </div>
+                  <div>
+                    <span className="hz-wa-today-k">Hata</span>
+                    <span className="hz-wa-today-v hz-wa-today-v--bad">1</span>
+                  </div>
                 </div>
               </div>
-            </div>
+            </details>
           </section>
 
           {/* Orta: Mesaj + composer */}

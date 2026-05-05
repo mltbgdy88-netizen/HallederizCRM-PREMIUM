@@ -11,6 +11,7 @@ export interface StockTableProps {
   onOpenDetail: (row: StockRow) => void;
   onStockMovement: (row: StockRow) => void;
   onLabelAction: (row: StockRow) => void;
+  onQuickOperation: (row: StockRow) => void;
   emptyFiltered?: boolean;
 }
 
@@ -47,6 +48,7 @@ export function StockTable({
   onOpenDetail,
   onStockMovement,
   onLabelAction,
+  onQuickOperation,
   emptyFiltered
 }: StockTableProps) {
   return (
@@ -114,7 +116,13 @@ export function StockTable({
                   <span className={statusBadgeClass(row.displayStatus)}>{statusLabel(row.displayStatus)}</span>
                 </div>
                 <div className="hz-stock-cell hz-stock-actions" onClick={(e) => e.stopPropagation()}>
-                  <button type="button" className="hz-stock-act-btn" onClick={() => onOpenDetail(row)}>
+                  <button
+                    type="button"
+                    className="hz-stock-act-btn"
+                    aria-label="Ürün detayını aç"
+                    title="Ürün detayını aç"
+                    onClick={() => onOpenDetail(row)}
+                  >
                     <IconFileText size={14} aria-hidden />
                     Detay
                   </button>
@@ -131,7 +139,13 @@ export function StockTable({
                     <IconTag size={16} />
                   </button>
                   {isStockDemoRowId(row.productId) ? null : (
-                    <button type="button" className="hz-stock-act-icon" aria-label="Hızlı işlem" title="Hızlı işlem" onClick={() => onOpenDetail(row)}>
+                    <button
+                      type="button"
+                      className="hz-stock-act-icon"
+                      aria-label="Hızlı işlem ekranına git"
+                      title="Hızlı işlem ekranına git"
+                      onClick={() => onQuickOperation(row)}
+                    >
                       <IconZap size={16} />
                     </button>
                   )}

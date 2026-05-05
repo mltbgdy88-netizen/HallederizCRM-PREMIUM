@@ -273,6 +273,7 @@ export function StockPage() {
   const { filters, updateFilter, resetFilters } = useStockFilters();
   const { loading, products, rows, brands, factories, warehouses, categorySlots, priceSlots } = useStockData(filters);
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
+  const [detailModalProductId, setDetailModalProductId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [topCtaDone, setTopCtaDone] = useState<Record<string, boolean>>({});
   const [radarDone, setRadarDone] = useState<Record<string, boolean>>({});
@@ -301,11 +302,11 @@ export function StockPage() {
   }, [displayRows, selectedProductId]);
 
   const selectedProduct = useMemo<Product | null>(() => {
-    if (!selectedProductId || isStockDemoRowId(selectedProductId)) {
+    if (!detailModalProductId || isStockDemoRowId(detailModalProductId)) {
       return null;
     }
-    return products.find((p) => p.id === selectedProductId) ?? null;
-  }, [products, selectedProductId]);
+    return products.find((p) => p.id === detailModalProductId) ?? null;
+  }, [products, detailModalProductId]);
 
   const selectedRow = useMemo(() => {
     if (!selectedProductId) {
@@ -351,8 +352,22 @@ export function StockPage() {
         return;
       }
       setSelectedProductId(row.productId);
+      setDetailModalProductId(row.productId);
     },
     [demoRowToast]
+  );
+
+  const handleQuickOperationFromRow = useCallback(
+    (row: StockRow) => {
+      if (isStockDemoRowId(row.productId)) {
+        demoRowToast();
+        return;
+      }
+      setSelectedProductId(row.productId);
+      pushToast("Hızlı İşlem ekranına yönlendiriliyor (demo).");
+      router.push("/hizli-islem");
+    },
+    [demoRowToast, pushToast, router]
   );
 
   const handleStockMovement = useCallback(
@@ -514,6 +529,7 @@ export function StockPage() {
                 onOpenDetail={handleOpenDetail}
                 onStockMovement={handleStockMovement}
                 onLabelAction={handleLabelAction}
+                onQuickOperation={handleQuickOperationFromRow}
                 emptyFiltered={emptyFiltered}
               />
               <div className="hz-stock-pagination">
@@ -541,7 +557,7 @@ export function StockPage() {
         warehouses={warehouses}
         priceSlots={priceSlots}
         categorySlots={categorySlots}
-        onClose={() => setSelectedProductId(null)}
+        onClose={() => setDetailModalProductId(null)}
       />
     </div>
   );

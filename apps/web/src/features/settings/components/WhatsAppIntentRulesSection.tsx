@@ -40,16 +40,11 @@ function decisionLabel(v: RuleDecision): string {
   return "Koşullu";
 }
 
-function decisionShort(v: RuleDecision): string {
-  if (v === "yes") return "E";
-  if (v === "no") return "H";
-  return "K";
-}
-
-function pillClass(v: RuleDecision): string {
-  if (v === "yes") return "hz-settings-rule-pill hz-settings-rule-pill--yes";
-  if (v === "no") return "hz-settings-rule-pill hz-settings-rule-pill--no";
-  return "hz-settings-rule-pill hz-settings-rule-pill--conditional";
+function decisionValClass(v: RuleDecision): string {
+  const base = "hz-settings-rule-val";
+  if (v === "yes") return `${base} hz-settings-rule-val--ok`;
+  if (v === "conditional") return `${base} hz-settings-rule-val--warn`;
+  return base;
 }
 
 function templatePreview(text: string, max = 60): string {
@@ -109,28 +104,31 @@ export function WhatsAppIntentRulesSection({
             yönetin.
           </p>
         </div>
-        <div className="hz-settings-rule-summary-strip" role="list">
-          <div className="hz-settings-rule-summary-chip" role="listitem">
-            <span className="hz-settings-rule-summary-chip-label">Güvenli varsayılan</span>
-            <span className="hz-settings-rule-summary-chip-value hz-settings-rule-summary-chip-value--ok">Aktif</span>
+        <details className="hz-settings-rule-summary-details">
+          <summary>Özet sayaçlar</summary>
+          <div className="hz-settings-rule-summary-strip" role="list">
+            <div className="hz-settings-rule-summary-chip" role="listitem">
+              <span className="hz-settings-rule-summary-chip-label">Güvenli varsayılan</span>
+              <span className="hz-settings-rule-summary-chip-value hz-settings-rule-summary-chip-value--ok">Aktif</span>
+            </div>
+            <div className="hz-settings-rule-summary-chip" role="listitem">
+              <span className="hz-settings-rule-summary-chip-label">Talep türü</span>
+              <span className="hz-settings-rule-summary-chip-value">{stats.intentCount}</span>
+            </div>
+            <div className="hz-settings-rule-summary-chip" role="listitem">
+              <span className="hz-settings-rule-summary-chip-label">Onay isteyen</span>
+              <span className="hz-settings-rule-summary-chip-value">{stats.approvalHeavy}</span>
+            </div>
+            <div className="hz-settings-rule-summary-chip" role="listitem">
+              <span className="hz-settings-rule-summary-chip-label">Otomatik cevap</span>
+              <span className="hz-settings-rule-summary-chip-value">{stats.autoReplyLabel}</span>
+            </div>
+            <div className="hz-settings-rule-summary-chip" role="listitem">
+              <span className="hz-settings-rule-summary-chip-label">AI güvenliği</span>
+              <span className="hz-settings-rule-summary-chip-value">{stats.aiSafety}</span>
+            </div>
           </div>
-          <div className="hz-settings-rule-summary-chip" role="listitem">
-            <span className="hz-settings-rule-summary-chip-label">Talep türü</span>
-            <span className="hz-settings-rule-summary-chip-value">{stats.intentCount}</span>
-          </div>
-          <div className="hz-settings-rule-summary-chip" role="listitem">
-            <span className="hz-settings-rule-summary-chip-label">Onay isteyen</span>
-            <span className="hz-settings-rule-summary-chip-value">{stats.approvalHeavy}</span>
-          </div>
-          <div className="hz-settings-rule-summary-chip" role="listitem">
-            <span className="hz-settings-rule-summary-chip-label">Otomatik cevap</span>
-            <span className="hz-settings-rule-summary-chip-value">{stats.autoReplyLabel}</span>
-          </div>
-          <div className="hz-settings-rule-summary-chip" role="listitem">
-            <span className="hz-settings-rule-summary-chip-label">AI güvenliği</span>
-            <span className="hz-settings-rule-summary-chip-value">{stats.aiSafety}</span>
-          </div>
-        </div>
+        </details>
       </div>
 
       <article className="hz-settings-info-card hz-settings-info-card--muted hz-settings-rule-security-inline">
@@ -151,28 +149,28 @@ export function WhatsAppIntentRulesSection({
               Risk / özet
             </div>
             <div className="hz-settings-rule-th hz-settings-rule-th-pill" role="columnheader" title="Kayıtlı telefon">
-              Tel
+              Kayıtlı tel.
             </div>
-            <div className="hz-settings-rule-th hz-settings-rule-th-pill" role="columnheader" title="Cari">
-              Cari
+            <div className="hz-settings-rule-th hz-settings-rule-th-pill" role="columnheader" title="Cari eşleşmesi">
+              Cari eşl.
             </div>
             <div className="hz-settings-rule-th hz-settings-rule-th-pill" role="columnheader" title="Otomatik cevap">
-              Oto
+              Oto. cevap
             </div>
             <div className="hz-settings-rule-th hz-settings-rule-th-pill" role="columnheader" title="Müşteri teyidi">
               Teyit
             </div>
             <div className="hz-settings-rule-th hz-settings-rule-th-pill" role="columnheader" title="İç onay">
-              İç
+              İç onay
             </div>
             <div className="hz-settings-rule-th hz-settings-rule-th-pill" role="columnheader" title="Satış onayı">
-              Satış
+              Satış onay
             </div>
             <div className="hz-settings-rule-th hz-settings-rule-th-pill" role="columnheader" title="Muhasebe onayı">
-              Muh.
+              Muh. onay
             </div>
             <div className="hz-settings-rule-th hz-settings-rule-th-pill" role="columnheader" title="CRM onayı">
-              CRM
+              CRM onay
             </div>
             <div className="hz-settings-rule-preview hz-settings-rule-th" role="columnheader">
               Şablon
@@ -208,8 +206,8 @@ export function WhatsAppIntentRulesSection({
                       ? `${title}: ${setting.note}`
                       : `${title}: ${decisionLabel(setting.value)}`;
                   return (
-                    <span key={key} className={pillClass(setting.value)} title={tip} role="cell">
-                      {decisionShort(setting.value)}
+                    <span key={key} className={decisionValClass(setting.value)} title={tip} role="cell">
+                      {decisionLabel(setting.value)}
                     </span>
                   );
                 })}
@@ -281,7 +279,7 @@ export function IntentRuleAssistantPanel({
         <h3 className="hz-settings-side-card-title">Seçili talep türü</h3>
         <p className="hz-settings-rule-detail-name">{ROW_DISPLAY[rule.intentId]}</p>
         <p className="hz-settings-rule-detail-risk">Risk: {rule.riskTag}</p>
-        <p className="hz-settings-rule-detail-lead">Özet tabloda E/H/K pill değerleri; tam şablon ve düzenleme sağda.</p>
+        <p className="hz-settings-rule-detail-lead">Özet tabloda kısa kullanıcı dili görünür; ayrıntılı Evet / Hayır / Koşullu seçimleri düzenleme modunda yönetilir.</p>
       </article>
 
       <article className="hz-settings-side-card">

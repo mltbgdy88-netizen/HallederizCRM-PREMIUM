@@ -8,6 +8,10 @@ export interface QuickOperationCustomer {
   contactName: string;
   phone: string;
   priceGroup: string;
+  /** Cari tipi (ör. Bayi, Perakende) — özet panelde */
+  customerType?: string;
+  /** WhatsApp ile eşleşmiş gösterimi */
+  whatsappMatched?: boolean;
   risk: "Dusuk" | "Orta" | "Yuksek";
   balance: number;
   address: string;
