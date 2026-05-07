@@ -9,11 +9,6 @@ function greetingFirstName(fullName: string | undefined): string {
   return fullName.trim().split(/\s+/)[0] ?? "Ahmet";
 }
 
-const AI_CHIPS_COMPACT = [
-  { id: "summary", label: "Günlük özet" },
-  { id: "collect", label: "Tahsilat özeti" }
-];
-
 export function DashboardAiAssistantPanel({ compact }: { compact?: boolean }) {
   const { session } = useAuth();
   const { pushToast } = useToast();
@@ -22,35 +17,9 @@ export function DashboardAiAssistantPanel({ compact }: { compact?: boolean }) {
 
   if (compact) {
     return (
-      <aside className="hz-ai-panel hz-ai-panel--compact" aria-label="Asistan">
-        <p className="hz-ai-compact-title">Asistan</p>
-        <div className="hz-ai-chips hz-ai-chips--compact" role="list">
-          {AI_CHIPS_COMPACT.map((c) => {
-            const isSummary = c.id === "summary";
-            const done = isSummary && summaryDone;
-            return (
-              <button
-                key={c.id}
-                type="button"
-                className={`hz-ai-chip hz-ai-chip--compact ${done ? "is-done" : ""}`}
-                disabled={done}
-                onClick={() => {
-                  if (isSummary) {
-                    pushToast("Gönderildi");
-                    setSummaryDone(true);
-                    return;
-                  }
-                  pushToast("İstek kuyruğa alındı");
-                }}
-              >
-                {done ? "Özet gönderildi" : c.label}
-              </button>
-            );
-          })}
-        </div>
-        <p className="hz-ai-compact-foot">
-          {first}, ek özetler ilgili sayfada.
-        </p>
+      <aside className="hz-ai-panel hz-ai-panel--compact hz-dash-assistant-stub" aria-label="Asistan">
+        <p className="hz-dash-assistant-stub-title">Asistan</p>
+        <p className="hz-dash-assistant-stub-note">Sağ kolon ayrı çalışma ile tasarlanacak.</p>
       </aside>
     );
   }

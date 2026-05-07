@@ -21,8 +21,8 @@ const NAV_SECTIONS: SidebarNavSection[] = [
     items: [
       { key: "dashboard", label: "Gösterge Paneli", href: "/dashboard", icon: <CRMIcon name="dashboard" /> },
       { key: "quick-operations", label: "Hızlı İşlem", href: "/hizli-islem", icon: <CRMIcon name="orders" /> },
-      { key: "approvals", label: "Onaylar", href: "/onaylar", icon: <CRMIcon name="roles" />, badge: "7" },
-      { key: "whatsapp", label: "WhatsApp", href: "/whatsapp", icon: <CRMIcon name="whatsapp" />, badge: "12" }
+      { key: "approvals", label: "Onaylar", href: "/onaylar", icon: <CRMIcon name="roles" /> },
+      { key: "whatsapp", label: "WhatsApp", href: "/whatsapp", icon: <CRMIcon name="whatsapp" /> }
     ]
   },
   {
@@ -245,8 +245,14 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
           }
           toolbarSlot={
             isDashboard ? (
-              <button type="button" className="hz-header-quick-primary" onClick={() => router.push("/hizli-islem")}>
-                + Hızlı İşlem
+              <button
+                type="button"
+                className="hz-header-quick-primary"
+                onClick={() => {
+                  window.dispatchEvent(new CustomEvent("dashboard:open-card-editor"));
+                }}
+              >
+                Kartları Düzenle
               </button>
             ) : null
           }
