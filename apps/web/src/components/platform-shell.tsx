@@ -44,7 +44,17 @@ const NAV_SECTIONS: SidebarNavSection[] = [
   }
 ];
 
-const ALL_SHELL_NAV_ITEMS: AppShellNavItem[] = NAV_SECTIONS.flatMap((s) => s.items);
+/** Sidebar’da sayı badge’i gösterilmez (PR #31); kaynak veride olsa bile kaldırılır. */
+function stripNavBadges(sections: SidebarNavSection[]): SidebarNavSection[] {
+  return sections.map((section) => ({
+    ...section,
+    items: section.items.map(({ badge: _removed, ...rest }) => rest)
+  }));
+}
+
+const NAV_SECTIONS_FOR_SHELL = stripNavBadges(NAV_SECTIONS);
+
+const ALL_SHELL_NAV_ITEMS: AppShellNavItem[] = NAV_SECTIONS_FOR_SHELL.flatMap((s) => s.items);
 
 interface PageMeta {
   title: string;
@@ -198,7 +208,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
         <Sidebar
           logoMarkLabel="LOGO ALANI"
           appTitle="HallederizCRM Premium"
-          navSections={NAV_SECTIONS}
+          navSections={NAV_SECTIONS_FOR_SHELL}
           activeHref={activeHref}
           companyCard={{ name: "Hallederiz A.Ş.", branch: "Merkez", status: "Çevrimiçi" }}
           onNavigate={(href) => router.push(href)}
