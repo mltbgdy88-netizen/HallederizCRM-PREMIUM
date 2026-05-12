@@ -84,3 +84,10 @@ Bu handler'lar `dry_run` modundadir ve gercek provider veya gercek mutation yazm
 - `DatabaseOutboxJobRepository` claim/complete/fail/dead-letter akisini kalici tablo sozlesmesine baglayacak foundation olarak eklendi.
 - `postgres` persistence mode zorunlu tutuldu; demo mode fail-open davranmaz.
 - Sonraki faz: runtime wiring, distributed lock/lease hardening ve DLQ replay operasyonlari.
+
+## Transactional Approval-Outbox Bridge Foundation (Phase)
+
+- Approval execution dispatch sonucu, execution/audit/timeline persistence adimlari ile outbox enqueue tek bridge akisi olarak modellenmistir.
+- Outbox payload tenantId, actionKey, approvalRequestId, executionId ve handler mode bilgilerini tasir.
+- Duplicate idempotencyKey ikinci outbox kaydini uretmez.
+- Runtime worker lifecycle ve production orchestration sonraki faz olarak kalir.

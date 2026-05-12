@@ -68,3 +68,9 @@ Bu batch'te audit olaylari in-memory tutulur. Sonraki batch'te DB persistence (`
 - Execution/audit/timeline write-back icin DB repository adapter foundation eklendi.
 - Transaction boundary helper ile execution log + audit event draft + timeline event draft atomik yazim modeli tanimlandi.
 - Bu fazda canli runtime wiring zorunlu kilinmadi; DB client baglantisi sonraki gorevde production akisina baglanacak.
+
+## Transactional Execution-to-Outbox Bridge (Phase)
+
+- Execution sonucundan uretilecek audit/timeline write-back draft'lari artik transactional bridge icinde outbox enqueue adimiyla birlikte ele alinabilir.
+- Bridge sonucu executionLog/auditEvent/timelineEvent/outbox adimlarinin hangilerinin persisted oldugunu explicit metadata ile raporlar.
+- Transaction/repository eksiginde fail-open davranis yoktur; explicit unsupported/failed sonucu donulur.
