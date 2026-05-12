@@ -136,3 +136,11 @@ Bu handler'lar `dry_run` modundadir ve gercek provider veya gercek mutation yazm
   - DLQ replay/admin API
   - monitoring/metrics/alerts
   - real mutation handler activation
+
+## Worker Runtime Processing Pack Foundation (Phase)
+
+- `createWorkerRuntimeApp` lifecycle contract eklendi; import sirasinda sonsuz worker loop baslatilmaz.
+- Outbox processor tick summary (`processed`, `completed`, `failed`, `deadLettered`, `retried`, `noJob`, `mode`, `workerId`, `persistenceMode`) foundation seviyesinde modellenir.
+- Worker admin API foundation eklendi: `/worker/health`, `/worker/outbox`, `/worker/dead-letter`, `/worker/dead-letter/:jobId/replay`.
+- DLQ replay foundation yalnizca guvenli test adapter ile pending job uretir; gercek provider/mutation calistirmaz.
+- Production daemon lifecycle, metrics exporter ve admin UI sonraki fazdir.
