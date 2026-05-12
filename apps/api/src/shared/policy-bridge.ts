@@ -1,11 +1,11 @@
 import {
   evaluatePolicy,
-  getDefaultPendingApprovalRepository,
   listPendingApprovalRequests,
   type PendingApprovalRepository
 } from "@hallederiz/domain";
 import type { PolicyChannel, PolicyCheckRequest } from "@hallederiz/types";
 import type { RequestContext } from "./request-context";
+import { resolvePendingApprovalRepository } from "./approval-repository-runtime";
 
 export function evaluatePolicyForContext(
   context: RequestContext,
@@ -93,25 +93,31 @@ export function evaluateRoutePolicy(
   return evaluatePolicyForContext(contextOrArgs, actionKeyOrOptions ?? "unknown.action", options);
 }
 
-export function enforcePolicyDecision(
+export async function enforcePolicyDecision(
   decision: RoutePolicyDecisionLike,
   context?: RequestContext,
   options?: PolicyPersistenceOptions
-): RoutePolicyEnforcementResult {
+): Promise<RoutePolicyEnforcementResult> {
   if (!decision || decision.decision === "allow") {
     return { handled: false };
   }
 
   if (decision.decision === "require_approval") {
-    const repository =
+    const runtimeResolution =
       options?.pendingApprovalRepository === undefined
-        ? getDefaultPendingApprovalRepository()
-        : options.pendingApprovalRepository;
+        ? resolvePendingApprovalRepository(context)
+        : {
+            repository: options.pendingApprovalRepository,
+            mode: options.pendingApprovalRepository ? "memory" : "none",
+            skipped: options.pendingApprovalRepository === null,
+            reasons: options.pendingApprovalRepository === null ? ["pending_approval_repository_not_provided"] : []
+          };
+    const repository = runtimeResolution.repository;
 
     if (!repository) {
       return {
         handled: true,
-        statusCode: 202,
+        statusCode: 503,
         body: {
           ok: false,
           status: "require_approval",
@@ -122,15 +128,18 @@ export function enforcePolicyDecision(
           reasons: decision.reasons ?? [],
           auditRequired: decision.auditRequired ?? true,
           timelineRequired: decision.timelineRequired ?? true,
+          approvalPersisted: false,
           approvalPersistenceSkipped: true,
-          persistenceMode: "none"
+          approvalPersistenceMode: runtimeResolution.mode,
+          persistenceMode: runtimeResolution.mode,
+          persistenceReasons: runtimeResolution.reasons
         }
       };
     }
 
     let pendingRequest;
     try {
-      pendingRequest = repository.createPendingApprovalRequest({
+      pendingRequest = await repository.createPendingApprovalRequest({
         tenantId: context?.tenantId ?? "tenant_unknown",
         actorId: context?.userId ?? "unknown_actor",
         actionKey: decision.actionKey ?? "unknown.action",
@@ -155,7 +164,9 @@ export function enforcePolicyDecision(
           reasons: [...(decision.reasons ?? []), "approval_persistence_failed", reason],
           auditRequired: decision.auditRequired ?? true,
           timelineRequired: decision.timelineRequired ?? true,
+          approvalPersisted: false,
           approvalPersistenceSkipped: false,
+          approvalPersistenceMode: runtimeResolution.mode,
           persistenceMode: "error"
         }
       };
@@ -174,8 +185,10 @@ export function enforcePolicyDecision(
         reasons: decision.reasons ?? [],
         auditRequired: decision.auditRequired ?? true,
         timelineRequired: decision.timelineRequired ?? true,
+        approvalPersisted: true,
         approvalPersistenceSkipped: false,
-        persistenceMode: "repository"
+        approvalPersistenceMode: runtimeResolution.mode,
+        persistenceMode: runtimeResolution.mode
       }
     };
   }

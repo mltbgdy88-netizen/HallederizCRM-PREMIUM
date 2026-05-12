@@ -80,9 +80,9 @@ test("pending approval state transitions enforce approve/reject guards", () => {
   assert.equal(approveRejected.ok ? "" : approveRejected.reason, "approval_already_rejected");
 });
 
-test("policy bridge require_approval persists when repository exists", () => {
+test("policy bridge require_approval persists when repository exists", async () => {
   const repository = new InMemoryPendingApprovalRepository();
-  const result = enforcePolicyDecision(
+  const result = await enforcePolicyDecision(
     {
       decision: "require_approval",
       actionKey: "platform.users.create",
@@ -108,8 +108,8 @@ test("policy bridge require_approval persists when repository exists", () => {
   assert.ok(saved);
 });
 
-test("policy bridge require_approval with no repository marks persistence skipped", () => {
-  const result = enforcePolicyDecision(
+test("policy bridge require_approval with no repository marks persistence skipped", async () => {
+  const result = await enforcePolicyDecision(
     {
       decision: "require_approval",
       actionKey: "platform.users.create",
@@ -127,12 +127,12 @@ test("policy bridge require_approval with no repository marks persistence skippe
 
   assert.equal(result.handled, true);
   if (!result.handled) return;
-  assert.equal(result.statusCode, 202);
+  assert.equal(result.statusCode, 503);
   assert.equal(result.body.approvalPersistenceSkipped, true);
   assert.equal(result.body.persistenceMode, "none");
 });
 
-test("policy bridge repository failure does not fail-open", () => {
+test("policy bridge repository failure does not fail-open", async () => {
   const failingRepository: PendingApprovalRepository = {
     createPendingApprovalRequest: () => {
       throw new Error("repository_unavailable");
@@ -146,7 +146,7 @@ test("policy bridge repository failure does not fail-open", () => {
     reset: () => {}
   };
 
-  const result = enforcePolicyDecision(
+  const result = await enforcePolicyDecision(
     {
       decision: "require_approval",
       actionKey: "platform.users.create",

@@ -45,6 +45,8 @@ test("require_approval returns approvalRequestId and keeps mutation blocked", as
     const payload = response.json();
     assert.equal(payload.policyDecision, "require_approval");
     assert.equal(payload.approvalRequired, true);
+    assert.equal(payload.approvalPersistenceMode, "memory");
+    assert.equal(payload.approvalPersisted, true);
     assert.ok(typeof payload.approvalRequestId === "string");
     assert.ok(payload.approvalRequestId.length > 0);
 

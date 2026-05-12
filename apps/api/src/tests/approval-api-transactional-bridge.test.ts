@@ -197,6 +197,7 @@ test("GET list/detail returns pending approvals", async () => {
       headers: authHeaders(login.accessToken)
     });
     assert.equal(list.statusCode, 200);
+    assert.ok(typeof list.json().repositoryMode === "string");
     assert.ok(list.json().items.some((item: PendingApprovalRequest) => item.approvalRequestId === approvalRequestId));
 
     const detail = await server.inject({
@@ -276,6 +277,7 @@ test("POST approve triggers transactional bridge and returns metadata", async ()
     assert.equal(payload.status, "approved");
     assert.ok(typeof payload.executionId === "string");
     assert.ok(typeof payload.outboxJobId === "string");
+    assert.ok(typeof payload.approvalPersistenceMode === "string");
     assert.equal(payload.auditMetadata.eventKey, "approval.execution.audit");
     assert.equal(payload.timelineMetadata.eventKey, "approval.execution.timeline");
     await server.close();
@@ -355,6 +357,7 @@ test("POST reject marks request rejected and blocks approve", async () => {
     });
     assert.equal(reject.statusCode, 200);
     assert.equal(reject.json().status, "rejected");
+    assert.ok(typeof reject.json().approvalPersistenceMode === "string");
     assert.equal(reject.json().reason, "manual_review_failed");
 
     const approveAfterReject = await server.inject({

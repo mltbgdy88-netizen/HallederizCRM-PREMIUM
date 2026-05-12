@@ -125,3 +125,17 @@
   - production runtime repository wiring
   - approval inbox UI
   - WhatsApp/Instagram approval command binding
+
+## Phase 10 Approval Runtime DB Wiring Foundation
+
+- Pending approval repository secimi runtime resolver uzerinden standardize edildi.
+- `resolvePendingApprovalRepository` ile mode bazli secim:
+  - development/test/demo: in-memory repository
+  - postgres mode: DB pending approval repository adapter
+  - unsupported/eksik config: explicit unsupported (fail-open yok)
+- Production ortaminda silent in-memory fallback kapatildi.
+- Policy bridge ve approval API ayni runtime resolver kontratini kullanir.
+- Sonraki faz:
+  - production DB connection lifecycle/pool hardening
+  - approval inbox UI
+  - worker runtime process lifecycle

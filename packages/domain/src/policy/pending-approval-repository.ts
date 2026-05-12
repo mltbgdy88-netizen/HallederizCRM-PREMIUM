@@ -1,5 +1,7 @@
 export type PendingApprovalRequestStatus = "pending" | "approved" | "rejected" | "expired" | "cancelled";
 
+type MaybePromise<T> = T | Promise<T>;
+
 export interface PendingApprovalRequestInput {
   tenantId: string;
   actorId: string;
@@ -56,18 +58,24 @@ export interface PendingApprovalMarkRejectedInput {
 export interface PendingApprovalRepository {
   createPendingApprovalRequest: (
     input: PendingApprovalRequestInput & { approvalRequestId?: string }
-  ) => PendingApprovalRequest;
-  getPendingApprovalRequest: (approvalRequestId: string, tenantId: string) => PendingApprovalRequest | undefined;
-  listPendingApprovalRequests: (tenantId: string) => PendingApprovalRequest[];
-  listApprovalRequests: (tenantId: string) => PendingApprovalRequest[];
+  ) => MaybePromise<PendingApprovalRequest>;
+  getPendingApprovalRequest: (
+    approvalRequestId: string,
+    tenantId: string
+  ) => MaybePromise<PendingApprovalRequest | undefined>;
+  listPendingApprovalRequests: (tenantId: string) => MaybePromise<PendingApprovalRequest[]>;
+  listApprovalRequests: (tenantId: string) => MaybePromise<PendingApprovalRequest[]>;
   markPendingApprovalApproved: (
     input: PendingApprovalMarkApprovedInput
-  ) => { ok: true; item: PendingApprovalRequest } | { ok: false; reason: string };
+  ) => MaybePromise<{ ok: true; item: PendingApprovalRequest } | { ok: false; reason: string }>;
   markPendingApprovalRejected: (
     input: PendingApprovalMarkRejectedInput
-  ) => { ok: true; item: PendingApprovalRequest } | { ok: false; reason: string };
-  findByIdempotencyKey: (tenantId: string, idempotencyKey: string) => PendingApprovalRequest | undefined;
-  reset: () => void;
+  ) => MaybePromise<{ ok: true; item: PendingApprovalRequest } | { ok: false; reason: string }>;
+  findByIdempotencyKey: (
+    tenantId: string,
+    idempotencyKey: string
+  ) => MaybePromise<PendingApprovalRequest | undefined>;
+  reset: () => MaybePromise<void>;
 }
 
 function assertNonEmpty(value: string | undefined, fieldName: string) {
