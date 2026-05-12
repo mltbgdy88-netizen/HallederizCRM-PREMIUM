@@ -1,6 +1,14 @@
 import type { ActionRegistryEntry } from "@hallederiz/types";
 import { getActionRegistryEntry } from "../policy/action-registry";
 import { getActionExecutionHandler } from "./handler-registry";
+import {
+  createExecutionEventDrafts,
+  createExecutionLogEntry,
+  markExecutionLogCompleted,
+  type ExecutionAuditEventDraft,
+  type ExecutionLogEntry,
+  type ExecutionTimelineEventDraft
+} from "./execution-log";
 
 export interface ApprovalExecutionRequest {
   tenantId: string;
@@ -26,6 +34,11 @@ export interface ApprovalExecutionResult {
   auditRequired: boolean;
   timelineRequired: boolean;
   idempotencyKey: string;
+  handlerKey: string;
+  handlerMode: "noop" | "dry_run" | "execute";
+  executionLog: ExecutionLogEntry;
+  auditEvent?: ExecutionAuditEventDraft;
+  timelineEvent?: ExecutionTimelineEventDraft;
 }
 
 const idempotencyStore = new Map<string, ApprovalExecutionResult>();
@@ -40,18 +53,46 @@ function resultFrom(
   reasons: string[],
   action?: ActionRegistryEntry,
   executionId?: string,
-  ok?: boolean
+  ok?: boolean,
+  handlerContext?: {
+    handlerKey?: string;
+    handlerMode?: "noop" | "dry_run" | "execute";
+  }
 ): ApprovalExecutionResult {
+  const resolvedExecutionId = executionId ?? makeExecutionId(request);
+  const handlerKey = handlerContext?.handlerKey ?? "handler.unresolved";
+  const handlerMode = handlerContext?.handlerMode ?? "noop";
+  const executionLog = markExecutionLogCompleted(
+    createExecutionLogEntry({
+      executionId: resolvedExecutionId,
+      request,
+      status,
+      mode: handlerMode,
+      handlerKey,
+      handlerMode,
+      auditRequired: action?.auditRequired ?? true,
+      timelineRequired: action?.timelineRequired ?? true,
+      reasons
+    }),
+    status,
+    reasons
+  );
+  const eventDrafts = createExecutionEventDrafts(executionLog);
   return {
     ok: ok ?? status === "executed",
     status,
     actionKey: request.actionKey,
     approvalRequestId: request.approvalRequestId,
-    executionId: executionId ?? makeExecutionId(request),
+    executionId: resolvedExecutionId,
     reasons,
     auditRequired: action?.auditRequired ?? true,
     timelineRequired: action?.timelineRequired ?? true,
-    idempotencyKey: request.idempotencyKey
+    idempotencyKey: request.idempotencyKey,
+    handlerKey,
+    handlerMode,
+    executionLog,
+    auditEvent: eventDrafts.auditEvent,
+    timelineEvent: eventDrafts.timelineEvent
   };
 }
 
@@ -70,7 +111,8 @@ export function dispatchApprovedAction(request: ApprovalExecutionRequest): Appro
     return {
       ...existing,
       status: "duplicate",
-      reasons: [...existing.reasons, "duplicate_idempotency_key"]
+      reasons: [...existing.reasons, "duplicate_idempotency_key"],
+      executionLog: markExecutionLogCompleted(existing.executionLog, "duplicate", [...existing.reasons, "duplicate_idempotency_key"])
     };
   }
 
@@ -88,7 +130,16 @@ export function dispatchApprovedAction(request: ApprovalExecutionRequest): Appro
     return resultFrom(request, "unsupported_action", ["no_handler_registered"], action);
   }
   if (!handler.supported) {
-    return resultFrom(request, "unsupported_action", ["handler_marked_unsupported"], action);
+    return resultFrom(request, "unsupported_action", ["handler_marked_unsupported"], action, undefined, undefined, {
+      handlerKey: handler.handlerKey,
+      handlerMode: handler.mode
+    });
+  }
+  if (handler.safetyChecklist.requiresApproval && !request.approvalRequestId) {
+    return resultFrom(request, "blocked", ["handler_requires_approval_request"], action, undefined, undefined, {
+      handlerKey: handler.handlerKey,
+      handlerMode: handler.mode
+    });
   }
 
   try {
@@ -100,7 +151,11 @@ export function dispatchApprovedAction(request: ApprovalExecutionRequest): Appro
       handlerResult.reasons ?? [handlerResult.ok ? "handler_executed" : "handler_failed"],
       action,
       makeExecutionId(request),
-      handlerResult.ok
+      handlerResult.ok,
+      {
+        handlerKey: handler.handlerKey,
+        handlerMode: handler.mode
+      }
     );
 
     idempotencyStore.set(idempotencyComposite, result);

@@ -44,3 +44,10 @@
 
 - Retryable vs non-retryable hata siniflamasi DB seviyesinde saklanacak.
 - Job retry policy ve backoff stratejisi eklenecek.
+
+## Phase 1 Execution Log + Audit/Timeline Event Draft
+
+- Dispatcher sonucu artik domain-level `executionLog` metadata'si uretir.
+- `auditEvent` ve `timelineEvent` draft payload'lari tenant/action/approval/execution baglami ile result icinde tasinir.
+- Bu fazda DB kaliciligi yoktur; sadece foundation metadata uretimi vardir.
+- Gercek audit/timeline write-back ve execution log persistence sonraki fazlara birakilmistir.
