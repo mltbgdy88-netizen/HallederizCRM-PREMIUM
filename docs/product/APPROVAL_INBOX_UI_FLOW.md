@@ -18,8 +18,10 @@ Uygulama menüsünde kanonik Türkçe route `/onaylar` ile uyumlu kalınır; API
 - `GET /platform/approvals/:approvalRequestId`
 - `POST /platform/approvals/:approvalRequestId/approve`
 - `POST /platform/approvals/:approvalRequestId/reject`
+- `GET /worker/health`
+- `GET /worker/safety`
 
-Operations engine veya legacy `/approvals` uçları ile path çakışması önlenir.
+Web alias route'lar `/approvals` ve `/dashboard/approvals` kanonik `/onaylar` sayfasina yonlendirilir.
 
 ---
 
