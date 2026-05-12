@@ -205,3 +205,32 @@
   - production runtime bridge wiring hardening
   - UI approval inbox integration
   - WhatsApp/Instagram approval command integration
+
+## 2026-05-12 - Pending Approval Repository Foundation
+
+- Status: completed (foundation)
+- Added pending approval repository contract and in-memory adapter:
+  - `PendingApprovalRepository`
+  - `InMemoryPendingApprovalRepository`
+- `require_approval` flow now supports optional repository persistence behavior:
+  - repository exists -> pending request persisted and `approvalRequestId` returned
+  - repository missing -> explicit `approvalPersistenceSkipped` metadata
+  - repository failure -> fail-closed error response (no fail-open success)
+- Approval API routes now use repository contract for list/detail/approve/reject transitions.
+- Current migration set does not include a dedicated `pending_approval_requests` table.
+- Remaining gap (next phase):
+  - add `pending_approval_requests` DB table + migration
+  - implement DB-backed pending approval repository adapter
+  - wire production runtime to DB-backed pending approval persistence
+
+## 2026-05-12 - Pending Approval DB-Backed Foundation
+
+- Status: completed (migration/schema/repository foundation)
+- Added migration: `packages/database/src/migrations/0006_pending_approval_requests.sql`.
+- Added schema export: `pendingApprovalRequestsSchemaSql`.
+- Added DB adapter foundation: `DatabasePendingApprovalRepository`.
+- Pending approval persistence now has migration + schema + repository foundation.
+- Remaining gap (next phase):
+  - production runtime DB wiring/config
+  - approval inbox UI wiring
+  - WhatsApp/Instagram approval command wiring

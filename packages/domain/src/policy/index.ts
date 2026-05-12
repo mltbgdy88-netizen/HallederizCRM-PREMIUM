@@ -5,3 +5,4 @@ export * from "./channel-policy";
 export * from "./ai-action-policy";
 export * from "./evaluate-policy";
 export * from "./pending-approval-request";
+export * from "./pending-approval-repository";

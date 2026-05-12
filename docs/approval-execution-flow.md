@@ -106,3 +106,22 @@
 - `reject` akisinda execution bridge tetiklenmez.
 - Duplicate approve/reject state gecisleri idempotent ve fail-closed ele alinir.
 - Route prefix `/platform` secimi, mevcut operations-engine `/approvals` endpointleriyle runtime path cakismasini engellemek icindir.
+
+## Phase 8 Pending Approval Repository Foundation
+
+- `require_approval` kararinda pending approval kaydi repository kontrati uzerinden olusturulabilir hale getirildi.
+- Repository varsa pending request kalici model kontratina uygun metadata ile kaydedilir.
+- Repository yoksa response acikca `approvalPersistenceSkipped` metadata'si tasir.
+- Repository hatasinda fail-open yerine fail-closed error donulur.
+- Bu fazda DB-backed `pending_approval_requests` tablosu eklenmedi; ayrik migration gorevi olarak planlandi.
+
+## Phase 9 Pending Approval DB Schema + Repository Foundation
+
+- `pending_approval_requests` migration foundation eklendi (`0006_pending_approval_requests.sql`).
+- Pending approval schema exportu eklendi (`pendingApprovalRequestsSchemaSql`).
+- DB repository adapter foundation eklendi (`DatabasePendingApprovalRepository`).
+- Bu fazda production runtime wiring ve canli DB config zorunlu kilinmadi.
+- Sonraki fazlar:
+  - production runtime repository wiring
+  - approval inbox UI
+  - WhatsApp/Instagram approval command binding

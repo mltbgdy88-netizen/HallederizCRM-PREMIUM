@@ -2,13 +2,9 @@ import type { FastifyInstance } from "fastify";
 import {
   InMemoryApprovalExecutionLogRepository,
   InMemoryOutboxJobRepository,
-  approveApprovalRequest,
   dispatchApprovedAction,
-  getApprovalRequestById,
-  listApprovalRequests,
-  listPendingApprovalRequests,
-  rejectApprovalRequest,
-  type PendingApprovalRequest
+  getDefaultPendingApprovalRepository,
+  type PendingApprovalRepository
 } from "@hallederiz/domain";
 import {
   createDatabaseTransactionRunner,
@@ -24,10 +20,8 @@ import { readPermissions, requireReadAccess } from "../../shared/read-guards";
 import type { RequestContext } from "../../shared/request-context";
 
 interface ApprovalPendingRepository {
-  mode: "domain_in_memory_foundation";
-  listPending: (tenantId: string) => PendingApprovalRequest[];
-  listAll: (tenantId: string) => PendingApprovalRequest[];
-  getById: (tenantId: string, approvalRequestId: string) => PendingApprovalRequest | undefined;
+  mode: string;
+  repository: PendingApprovalRepository;
 }
 
 type ApprovalBridgeTrigger = (
@@ -43,9 +37,7 @@ export interface ApprovalRouteDeps {
 function createDefaultPendingRepository(): ApprovalPendingRepository {
   return {
     mode: "domain_in_memory_foundation",
-    listPending: (tenantId: string) => listPendingApprovalRequests(tenantId),
-    listAll: (tenantId: string) => listApprovalRequests(tenantId),
-    getById: (tenantId: string, approvalRequestId: string) => getApprovalRequestById(approvalRequestId, tenantId)
+    repository: getDefaultPendingApprovalRepository()
   };
 }
 
@@ -152,7 +144,7 @@ export async function registerApprovalRoutes(server: FastifyInstance, deps: Appr
         });
       }
 
-      const items = pendingRepository.listPending(context.tenantId);
+      const items = pendingRepository.repository.listPendingApprovalRequests(context.tenantId);
       return {
         items,
         total: items.length,
@@ -171,7 +163,7 @@ export async function registerApprovalRoutes(server: FastifyInstance, deps: Appr
         });
       }
 
-      const item = pendingRepository.getById(context.tenantId, request.params.approvalRequestId);
+      const item = pendingRepository.repository.getPendingApprovalRequest(request.params.approvalRequestId, context.tenantId);
       if (!item) {
         return reply.status(404).send({
           ok: false,
@@ -206,7 +198,10 @@ export async function registerApprovalRoutes(server: FastifyInstance, deps: Appr
             });
           }
 
-          const approvalRequest = pendingRepository.getById(context.tenantId, request.params.approvalRequestId);
+          const approvalRequest = pendingRepository.repository.getPendingApprovalRequest(
+            request.params.approvalRequestId,
+            context.tenantId
+          );
           if (!approvalRequest) {
             return reply.status(404).send({
               ok: false,
@@ -263,7 +258,7 @@ export async function registerApprovalRoutes(server: FastifyInstance, deps: Appr
             });
           }
 
-          const decision = approveApprovalRequest({
+          const decision = pendingRepository.repository.markPendingApprovalApproved({
             approvalRequestId: approvalRequest.approvalRequestId,
             tenantId: context.tenantId,
             approvedBy: context.userId,
@@ -318,7 +313,10 @@ export async function registerApprovalRoutes(server: FastifyInstance, deps: Appr
             });
           }
 
-          const approvalRequest = pendingRepository.getById(context.tenantId, request.params.approvalRequestId);
+          const approvalRequest = pendingRepository.repository.getPendingApprovalRequest(
+            request.params.approvalRequestId,
+            context.tenantId
+          );
           if (!approvalRequest) {
             return reply.status(404).send({
               ok: false,
@@ -327,7 +325,7 @@ export async function registerApprovalRoutes(server: FastifyInstance, deps: Appr
             });
           }
 
-          const decision = rejectApprovalRequest({
+          const decision = pendingRepository.repository.markPendingApprovalRejected({
             approvalRequestId: approvalRequest.approvalRequestId,
             tenantId: context.tenantId,
             rejectedBy: context.userId,
