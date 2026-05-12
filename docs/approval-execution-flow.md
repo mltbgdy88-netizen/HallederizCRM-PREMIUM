@@ -79,3 +79,17 @@
 - Transaction boundary helper ile execution log + audit/timeline event draft yazimlari tek transaction sozlesmesine alinabildi.
 - Fail-closed guvenlik: demo mode persistence denemeleri sessiz basari donmez, explicit hata uretir.
 - Bu fazda production runtime wiring, distributed lock/lease orchestration ve replay pipeline kapsam disinda tutuldu.
+
+## Phase 6 Transactional Approval + Outbox Bridge Foundation
+
+- `executeApprovalWithOutboxBridge(request, options)` eklendi.
+- Bridge adimlari transaction boundary icinde modellenir:
+  1. approval execution dispatch
+  2. execution log persistence
+  3. audit event draft persistence
+  4. timeline event draft persistence
+  5. outbox enqueue
+- Repository veya transaction eksikse fail-open yerine explicit `unsupported/failed` sonucu doner.
+- Dry-run/noop execution durumunda da bridge metadata ve outbox payload tenant/action/approval/execution baglamini korur.
+- Duplicate idempotency durumunda ikinci outbox job olusturulmaz.
+- Bu fazda gercek domain mutation, provider write ve production worker loop kapsam disidir.

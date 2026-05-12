@@ -162,3 +162,27 @@
   - transactional approval-execution + outbox enqueue orchestration
   - distributed lock/lease hardening for job claim concurrency
   - DLQ admin replay and operational tooling
+
+## 2026-05-12 - Transactional Approval Execution + Outbox Bridge Foundation
+
+- Status: completed (foundation)
+- Added transactional bridge function:
+  - `executeApprovalWithOutboxBridge(request, options)`
+- Bridge models these steps in one transaction boundary contract:
+  1. approval execution dispatch
+  2. execution log persistence
+  3. audit event draft persistence
+  4. timeline event draft persistence
+  5. outbox enqueue
+- Fail-closed behavior:
+  - Missing transaction runner/repositories/dispatch returns explicit `unsupported`/`failed` (no fail-open success).
+  - Partial persistence is not reported as success.
+- Outbox behavior:
+  - tenant-aware + idempotency-aware
+  - payload carries `tenantId`, `actionKey`, `approvalRequestId`, `executionId`, handler mode and audit/timeline metadata
+  - duplicate idempotency does not create second outbox job
+- Remaining gap (next phase):
+  - production DB transaction wiring into runtime
+  - approval approve/reject API wiring
+  - worker lifecycle orchestration and distributed lease hardening
+  - real mutation handler activation under approval controls
