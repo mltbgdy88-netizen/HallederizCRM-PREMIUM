@@ -77,3 +77,10 @@ Bu handler'lar `dry_run` modundadir ve gercek provider veya gercek mutation yazm
   - `outbox_jobs`
   - `dead_letter_jobs`
 - Bu faz sadece schema temelidir; distributed lock/lease, claim timeout recovery, DLQ replay UI ve provider-specific handlerlar sonraki adimlardadir.
+
+## DB Repository + Transaction Foundation (Phase)
+
+- Worker/outbox foundation icin DB repository adapter + transaction boundary katmani eklendi.
+- `DatabaseOutboxJobRepository` claim/complete/fail/dead-letter akisini kalici tablo sozlesmesine baglayacak foundation olarak eklendi.
+- `postgres` persistence mode zorunlu tutuldu; demo mode fail-open davranmaz.
+- Sonraki faz: runtime wiring, distributed lock/lease hardening ve DLQ replay operasyonlari.

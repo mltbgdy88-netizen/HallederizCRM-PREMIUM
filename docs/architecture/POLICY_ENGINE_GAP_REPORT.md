@@ -143,3 +143,22 @@
   - retry/DLQ admin UI and replay
   - provider-specific real handlers
   - production migration apply/release sequencing validation
+
+## 2026-05-12 - DB Repository + Transaction Foundation Phase
+
+- Status: completed (foundation)
+- Added database transaction boundary contract:
+  - `withDatabaseTransaction(...)`
+  - `createDatabaseTransactionRunner(...)`
+  - transactional write helper for execution/audit/timeline grouping
+- Added DB repository adapter foundations:
+  - `DatabaseApprovalExecutionLogRepository`
+  - `DatabaseOutboxJobRepository`
+- Repository adapters are tenant-aware and idempotency-aware by contract.
+- Persistence mode is fail-closed: `postgres` is required, demo mode does not silently succeed.
+- Added repository mapping helpers and contract-level tests without requiring a live DB instance.
+- Remaining gap (next phase):
+  - real production DB client wiring into API/worker runtime
+  - transactional approval-execution + outbox enqueue orchestration
+  - distributed lock/lease hardening for job claim concurrency
+  - DLQ admin replay and operational tooling

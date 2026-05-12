@@ -72,3 +72,10 @@
 - `approval_execution_logs`, `timeline_events`, `outbox_jobs` ve `dead_letter_jobs` icin kalici tablo migration foundation'i eklendi.
 - `audit_events` tablosu mevcut AI foundation ile cakismayi onlemek icin `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` ile genisletildi.
 - Bu faz sadece schema/migration hazirligidir; gercek transaction boundary, replay orchestration ve worker process lifecycle sonraki fazlardadir.
+
+## Phase 5 DB Repository + Transaction Boundary Foundation
+
+- `approval_execution_logs`, `audit_events`, `timeline_events`, `outbox_jobs`, `dead_letter_jobs` tablolari icin DB repository adapter foundation eklendi.
+- Transaction boundary helper ile execution log + audit/timeline event draft yazimlari tek transaction sozlesmesine alinabildi.
+- Fail-closed guvenlik: demo mode persistence denemeleri sessiz basari donmez, explicit hata uretir.
+- Bu fazda production runtime wiring, distributed lock/lease orchestration ve replay pipeline kapsam disinda tutuldu.
