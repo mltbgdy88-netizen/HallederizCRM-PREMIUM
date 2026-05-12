@@ -96,6 +96,9 @@ export interface ApprovalSandboxSeedResponse {
 export interface WorkerHealthResponse {
   ok: boolean;
   tenantId?: string;
+  /** Present on /worker/safety — operator smoke uses for security signals */
+  providerWritesEnabled?: boolean;
+  realExecutionEnabled?: boolean;
   workerPersistenceMode?: string;
   health?: {
     ok: boolean;

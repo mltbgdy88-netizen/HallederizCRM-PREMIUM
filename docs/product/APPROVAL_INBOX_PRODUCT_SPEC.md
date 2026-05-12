@@ -13,7 +13,7 @@ Inbox şunları yapar:
 
 Bu doküman backend foundation (policy, pending approval repository, outbox, worker, audit/timeline) tamamlanırken paralel ürün ve UX standardını tanımlar. Uygulama kodu bu fazda kapsam dışıdır.
 
-**İlgili mimari referanslar:** [approval-execution-flow.md](../approval-execution-flow.md), [audit-timeline-model.md](../audit-timeline-model.md), [POLICY_ENGINE_GAP_REPORT.md](../architecture/POLICY_ENGINE_GAP_REPORT.md), [WORKER_OUTBOX_RETRY_DLQ.md](../architecture/WORKER_OUTBOX_RETRY_DLQ.md).
+**İlgili mimari referanslar:** [approval-execution-flow.md](../approval-execution-flow.md), [audit-timeline-model.md](../audit-timeline-model.md), [POLICY_ENGINE_GAP_REPORT.md](../architecture/POLICY_ENGINE_GAP_REPORT.md), [WORKER_OUTBOX_RETRY_DLQ.md](../architecture/WORKER_OUTBOX_RETRY_DLQ.md). Local/demo operatör doğrulaması için: [OPERATOR_SANDBOX_SMOKE_CHECKLIST.md](./OPERATOR_SANDBOX_SMOKE_CHECKLIST.md).
 
 ---
 

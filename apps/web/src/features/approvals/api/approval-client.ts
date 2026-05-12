@@ -66,19 +66,34 @@ function readReasons(payload: unknown): string[] | undefined {
 }
 
 function defaultApprovalClientErrorMessage(status: number, endpoint: ApprovalApiEndpointKind): string {
+  if (status === 400) {
+    return "Gecersiz istek (400). Validasyon veya zorunlu alanlar API tarafindan reddedildi.";
+  }
+  if (status === 401) {
+    return "Kimlik dogrulama gerekli (401). Oturum token'i gecersiz veya eksik.";
+  }
+  if (status === 403) {
+    return "Yetki yok (403). Bu islem icin gerekli izinler tenant/rol bazinda kapali olabilir.";
+  }
   if (status === 404) {
     if (endpoint === "worker_health" || endpoint === "worker_safety") {
-      return "Worker health/safety endpoint bu ortamda yayinlanmiyor. API foundation route eslemesini kontrol edin.";
+      return "Worker health/safety endpoint bu ortamda yayinlanmiyor (404). API route eslemesini kontrol edin.";
     }
-    return "Approval inbox endpoint bu ortamda yayinlanmiyor. Foundation route eslemesi ve API sunucu surumu kontrol edilmelidir.";
+    return "Approval endpoint bulunamadi (404). Foundation route eslemesi ve API surumu kontrol edilmelidir.";
+  }
+  if (status === 409) {
+    return "Cakisma (409). Kayit zaten islendi veya mevcut durumda islem tekrarlanamaz.";
   }
   if (status === 503) {
     if (endpoint === "worker_health" || endpoint === "worker_safety") {
-      return "Worker foundation modu hazir degil veya persistence baglantisi mevcut degil.";
+      return "Worker foundation hazir degil (503). Persistence veya repository baglantisi yok.";
     }
-    return "Approval inbox foundation modu hazir degil veya persistence baglantisi mevcut degil.";
+    return "Approval foundation hazir degil (503). Persistence baglantisi veya runtime modu uygun degil.";
   }
-  return "Approval API istegi tamamlanamadi.";
+  if (status >= 500) {
+    return `Sunucu hatasi (${status}). Approval API beklenmeyen hatayla dondu.`;
+  }
+  return `Approval API istegi tamamlanamadi (HTTP ${status}).`;
 }
 
 export function mapApprovalClientError(
@@ -172,7 +187,7 @@ async function requestJson<T>(
       ok: false,
       error: {
         kind: "network",
-        message: "Approval API baglantisi kurulamadi."
+        message: "Ag hatasi: fetch basarisiz (sunucu erisilemiyor, CORS veya TLS)."
       }
     };
   }

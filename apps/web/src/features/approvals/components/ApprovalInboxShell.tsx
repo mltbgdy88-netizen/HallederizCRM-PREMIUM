@@ -17,9 +17,17 @@ import {
   summarizeWorkerHealth,
   type ApprovalInboxSortMode
 } from "../utils/inbox-helpers";
+import {
+  buildLastApprovalActionSummary,
+  buildOperatorSmokeChecklist,
+  formatSandboxSeedOutcome,
+  summarizeOperatorSmokeResult,
+  type LastApprovalActionSummary
+} from "../utils/operator-smoke";
 import { ApprovalDetailPanel } from "./ApprovalDetailPanel";
 import { EmptyState, ErrorState, LoadingState } from "./ApprovalInboxStates";
 import { ApprovalList } from "./ApprovalList";
+import { ApprovalOperatorSmokePanel } from "./ApprovalOperatorSmokePanel";
 import { ApprovalSafetyBadge } from "./ApprovalSafetyBadge";
 import { ApprovalSandboxToolbar } from "./ApprovalSandboxToolbar";
 
@@ -66,6 +74,11 @@ export function ApprovalInboxShell() {
   const [loadingList, setLoadingList] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [busyAction, setBusyAction] = useState(false);
+  const [lastSeedCounts, setLastSeedCounts] = useState<{ created: number; skipped: number } | null>(null);
+  const [lastSeedLine, setLastSeedLine] = useState<string | null>(null);
+  const [lastApproveOk, setLastApproveOk] = useState(false);
+  const [lastApproveHadBridgeSignal, setLastApproveHadBridgeSignal] = useState(false);
+  const [lastApprovalSummary, setLastApprovalSummary] = useState<LastApprovalActionSummary | null>(null);
 
   const stats = useMemo(() => computeInboxStats(items), [items]);
   const visibleItems = useMemo(
@@ -112,6 +125,40 @@ export function ApprovalInboxShell() {
     if (!summary) return "Ozete veri yok.";
     return `DLQ: ${summary.deadLettered} · Failed: ${summary.failed} · Retried: ${summary.retried}`;
   }, [workerSafety]);
+
+  const operatorSmokeSummary = useMemo(() => {
+    const steps = buildOperatorSmokeChecklist({
+      nodeEnv: process.env.NODE_ENV,
+      listLoading: loadingList,
+      listError,
+      items,
+      detailLoading: loadingDetail,
+      detailError,
+      selectedId,
+      detail,
+      sandboxAvailability,
+      workerHealth,
+      workerSafety,
+      lastSeedCounts,
+      lastApproveOk,
+      lastApproveHadBridgeSignal
+    });
+    return summarizeOperatorSmokeResult(steps);
+  }, [
+    detail,
+    detailError,
+    items,
+    lastApproveHadBridgeSignal,
+    lastApproveOk,
+    lastSeedCounts,
+    listError,
+    loadingDetail,
+    loadingList,
+    sandboxAvailability,
+    selectedId,
+    workerHealth,
+    workerSafety
+  ]);
 
   const refreshList = useCallback(async () => {
     setLoadingList(true);
@@ -216,8 +263,17 @@ export function ApprovalInboxShell() {
       pushToast(mapApprovalUiErrorMessage(result.error));
       return;
     }
+    setLastApproveOk(true);
+    const bridgeSignal =
+      Boolean(result.data.duplicate) ||
+      Boolean(result.data.executionId) ||
+      Boolean(result.data.outboxJobId) ||
+      Boolean(result.data.bridgeResult?.outboxJobEnqueued) ||
+      Boolean(result.data.bridgeMode);
+    setLastApproveHadBridgeSignal(bridgeSignal);
+    setLastApprovalSummary(buildLastApprovalActionSummary(result.data, new Date().toISOString()));
     if (result.data.duplicate) {
-      pushToast("Kayit zaten islenmis; tekrar onay gonderilmedi.");
+      pushToast("Bu onay zaten islenmis; tekrar execution gonderilmedi (idempotent).");
     } else {
       pushToast("Onay istegi onaylandi.");
     }
@@ -282,10 +338,21 @@ export function ApprovalInboxShell() {
         </div>
       </div>
 
+      <ApprovalOperatorSmokePanel
+        production={process.env.NODE_ENV === "production"}
+        summary={operatorSmokeSummary}
+        lastSeedLine={lastSeedLine}
+        lastApprovalSummary={lastApprovalSummary}
+      />
+
       <ApprovalSandboxToolbar
         client={client}
         visible={sandboxToolbarVisible}
         availabilityHelp={sandboxAvailabilityHelp}
+        onSeedCounts={(counts) => {
+          setLastSeedCounts(counts);
+          setLastSeedLine(formatSandboxSeedOutcome(counts.created, counts.skipped).message);
+        }}
         onAfterSeed={async () => {
           await refreshList();
           await refreshSandboxAvailability();
@@ -362,7 +429,13 @@ export function ApprovalInboxShell() {
           {loadingDetail ? <LoadingState label="Detay yukleniyor..." /> : null}
           {!loadingDetail && detailError ? <ErrorState error={detailError} onRetry={() => selectedId && void refreshDetail(selectedId)} /> : null}
           {!loadingDetail && !detailError ? (
-            <ApprovalDetailPanel item={detail} busy={busyAction} onApprove={() => void handleApprove()} onReject={(reason) => void handleReject(reason)} />
+            <ApprovalDetailPanel
+              item={detail}
+              busy={busyAction}
+              lastApprovalSummary={lastApprovalSummary}
+              onApprove={() => void handleApprove()}
+              onReject={(reason) => void handleReject(reason)}
+            />
           ) : null}
         </section>
       </div>

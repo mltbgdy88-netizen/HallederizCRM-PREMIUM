@@ -2,6 +2,7 @@
   "name": "@hallederiz/web",
   "version": "0.1.0",
   "private": true,
+  "type": "module",
   "scripts": {
     "dev": "node scripts/dev.cjs",
     "dev:clean": "node -e \"const fs=require('fs'); for (const p of ['.runtime-next','.runtime-next-dev','tsconfig.tsbuildinfo']) { try { fs.rmSync(p,{recursive:true,force:true}); } catch {} } console.log('web dev cache cleaned');\"",
