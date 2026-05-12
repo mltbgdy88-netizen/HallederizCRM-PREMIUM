@@ -56,6 +56,8 @@ test("supported action returns executionId without real mutation", () => {
   assert.equal(result.handlerMode, "dry_run");
   assert.ok(result.handlerKey.length > 0);
   assert.equal(result.executionLog.mode, "dry_run");
+  assert.equal(result.persistenceMode, "none");
+  assert.equal(result.persistenceSkipped, true);
 });
 
 test("dispatcher keeps audit/timeline flags and tenant/action metadata", () => {

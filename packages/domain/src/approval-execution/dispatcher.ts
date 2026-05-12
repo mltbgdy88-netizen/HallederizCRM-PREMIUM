@@ -9,6 +9,7 @@ import {
   type ExecutionLogEntry,
   type ExecutionTimelineEventDraft
 } from "./execution-log";
+import type { ApprovalExecutionLogRepository } from "./persistence";
 
 export interface ApprovalExecutionRequest {
   tenantId: string;
@@ -39,6 +40,8 @@ export interface ApprovalExecutionResult {
   executionLog: ExecutionLogEntry;
   auditEvent?: ExecutionAuditEventDraft;
   timelineEvent?: ExecutionTimelineEventDraft;
+  persistenceMode: "none" | "repository";
+  persistenceSkipped: boolean;
 }
 
 const idempotencyStore = new Map<string, ApprovalExecutionResult>();
@@ -92,11 +95,16 @@ function resultFrom(
     handlerMode,
     executionLog,
     auditEvent: eventDrafts.auditEvent,
-    timelineEvent: eventDrafts.timelineEvent
+    timelineEvent: eventDrafts.timelineEvent,
+    persistenceMode: "none",
+    persistenceSkipped: true
   };
 }
 
-export function dispatchApprovedAction(request: ApprovalExecutionRequest): ApprovalExecutionResult {
+export function dispatchApprovedAction(
+  request: ApprovalExecutionRequest,
+  options?: { repository?: ApprovalExecutionLogRepository }
+): ApprovalExecutionResult {
   if (!request.approvalRequestId) {
     return resultFrom(request, "blocked", ["missing_approval_request_id"]);
   }
@@ -107,12 +115,35 @@ export function dispatchApprovedAction(request: ApprovalExecutionRequest): Appro
 
   const idempotencyComposite = `${request.tenantId}:${request.idempotencyKey}`;
   const existing = idempotencyStore.get(idempotencyComposite);
-  if (existing) {
+  const existingFromRepository = options?.repository?.findByIdempotencyKey(request.tenantId, request.idempotencyKey);
+  if (existingFromRepository && !existing) {
+    const recoveredResult = resultFrom(
+      request,
+      "executed",
+      existingFromRepository.reasons,
+      getActionRegistryEntry(existingFromRepository.actionKey),
+      existingFromRepository.executionId,
+      true,
+      {
+        handlerKey: existingFromRepository.handlerKey,
+        handlerMode: existingFromRepository.handlerMode
+      }
+    );
+    recoveredResult.executionLog = existingFromRepository;
+    recoveredResult.persistenceMode = "repository";
+    recoveredResult.persistenceSkipped = false;
+    idempotencyStore.set(idempotencyComposite, recoveredResult);
+  }
+
+  const existingResolved = idempotencyStore.get(idempotencyComposite);
+  if (existingResolved) {
     return {
-      ...existing,
+      ...existingResolved,
       status: "duplicate",
-      reasons: [...existing.reasons, "duplicate_idempotency_key"],
-      executionLog: markExecutionLogCompleted(existing.executionLog, "duplicate", [...existing.reasons, "duplicate_idempotency_key"])
+      reasons: [...existingResolved.reasons, "duplicate_idempotency_key"],
+      executionLog: markExecutionLogCompleted(existingResolved.executionLog, "duplicate", [...existingResolved.reasons, "duplicate_idempotency_key"]),
+      persistenceMode: options?.repository ? "repository" : existingResolved.persistenceMode,
+      persistenceSkipped: options?.repository ? false : existingResolved.persistenceSkipped
     };
   }
 
@@ -157,6 +188,33 @@ export function dispatchApprovedAction(request: ApprovalExecutionRequest): Appro
         handlerMode: handler.mode
       }
     );
+
+    if (options?.repository) {
+      try {
+        const savedLog = options.repository.saveExecutionLog(result.executionLog);
+        const savedAuditEvent = result.auditEvent ? options.repository.saveAuditEventDraft(result.auditEvent) : undefined;
+        const savedTimelineEvent = result.timelineEvent ? options.repository.saveTimelineEventDraft(result.timelineEvent) : undefined;
+        result.executionLog = savedLog;
+        result.auditEvent = savedAuditEvent;
+        result.timelineEvent = savedTimelineEvent;
+        result.persistenceMode = "repository";
+        result.persistenceSkipped = false;
+      } catch (error) {
+        const reason = error instanceof Error ? error.message : "execution_persistence_failed";
+        return resultFrom(
+          request,
+          "failed",
+          ["execution_persistence_failed", reason],
+          action,
+          makeExecutionId(request),
+          false,
+          {
+            handlerKey: handler.handlerKey,
+            handlerMode: handler.mode
+          }
+        );
+      }
+    }
 
     idempotencyStore.set(idempotencyComposite, result);
     return result;

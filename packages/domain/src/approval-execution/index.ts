@@ -3,6 +3,7 @@ import { validateAiMutationGuard } from "../ai";
 export * from "./dispatcher";
 export * from "./handler-registry";
 export * from "./execution-log";
+export * from "./persistence";
 
 export function canExecuteApproval(approval: Approval): boolean {
   return approval.status === "approved" && approval.execution.executable && Boolean(approval.policySnapshot.serverActionKey);

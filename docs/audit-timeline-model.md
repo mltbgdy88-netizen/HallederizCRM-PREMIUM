@@ -49,3 +49,10 @@ Bu batch'te audit olaylari in-memory tutulur. Sonraki batch'te DB persistence (`
 - Local output print/file job start-complete-fail eventleri timeline'a yazilir.
 - Approval execution cancel eventleri timeline'a yazilir.
 
+
+## Execution Write-Back Foundation (Phase 1)
+
+- Approval execution sonucu uretilecek execution log ve audit/timeline eventleri icin repository portu tanimlandi.
+- Port sadece write-back kontratini netlestirir; bu fazda production DB write zorunlu kilinmadi.
+- Event draft payload minimum olarak `tenantId`, `actionKey`, `approvalRequestId`, `executionId`, `idempotencyKey` alanlarini tasir.
+- Kalici DB schema/migration, transactional write-back ve retry/DLQ stratejisi sonraki fazlara birakildi.

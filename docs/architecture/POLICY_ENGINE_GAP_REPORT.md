@@ -74,3 +74,20 @@
 - `platform.users.create` and `platform.settings.update` remain `dry_run` with `realExecutionEnabled=false`.
 - Duplicate idempotency remains fail-closed and does not re-run handler execution.
 - Remaining gap (next phase): persistent execution log storage, real audit/timeline DB write-back, real handler wiring, rollback/replay strategy.
+
+## 2026-05-12 - DB-Backed Execution Log/Audit/Timeline Phase 1
+
+- Status: completed (persistence-ready foundation)
+- Added execution persistence port contract:
+  - `saveExecutionLog`
+  - `saveAuditEventDraft`
+  - `saveTimelineEventDraft`
+  - `findByIdempotencyKey`
+  - `getExecutionLog`
+- Added safe in-memory repository adapter for test/development foundation.
+- Dispatcher now accepts optional repository:
+  - Repository provided: execution log and audit/timeline draft events are persisted via port.
+  - Repository missing: result keeps current behavior with explicit `persistenceMode=none` and `persistenceSkipped=true`.
+  - Repository save failure: fail-closed `failed` result with explicit persistence failure reasons.
+- Duplicate idempotency behavior remains guarded and does not re-run handler execution.
+- Remaining gap (next phase): real DB schema/migration, transaction boundary, retry/DLQ handling, worker write-back integration.
