@@ -70,3 +70,10 @@ Bu handler'lar `dry_run` modundadir ve gercek provider veya gercek mutation yazm
 - Provider-specific real handlers
 - Real audit/timeline write-back pipeline
 - Metrics, alerts, tracing
+
+## DB-Backed Table Phase
+
+- Bu dokumandaki domain-level worker/outbox foundation artik DB migration tabanli tablo hazirligina sahip:
+  - `outbox_jobs`
+  - `dead_letter_jobs`
+- Bu faz sadece schema temelidir; distributed lock/lease, claim timeout recovery, DLQ replay UI ve provider-specific handlerlar sonraki adimlardadir.

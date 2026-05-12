@@ -56,3 +56,9 @@ Bu batch'te audit olaylari in-memory tutulur. Sonraki batch'te DB persistence (`
 - Port sadece write-back kontratini netlestirir; bu fazda production DB write zorunlu kilinmadi.
 - Event draft payload minimum olarak `tenantId`, `actionKey`, `approvalRequestId`, `executionId`, `idempotencyKey` alanlarini tasir.
 - Kalici DB schema/migration, transactional write-back ve retry/DLQ stratejisi sonraki fazlara birakildi.
+
+## Database-Backed Execution and Worker Event Tables (Phase 2)
+
+- `audit_events` mevcut tablo yapisi bozulmadan kolon-genisletme ile execution/action metadata tasiyacak hale getirildi.
+- Yeni `timeline_events` tablosu subject bazli timeline okumalarini kalici hale getirmek icin migration foundation olarak eklendi.
+- Event write-back transaction boundary ve retention/archival policy sonraki release gorevlerindedir.

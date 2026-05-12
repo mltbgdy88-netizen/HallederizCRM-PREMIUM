@@ -66,3 +66,9 @@
 - Worker flow su an domain-level ve dry_run odaklidir; production loop veya provider write acilmadi.
 - Outbox job contract idempotency, retry backoff ve dead-letter gecisini fail-closed prensibiyle tanimlar.
 - Sonraki fazda DB-backed outbox/dead-letter tablolari, distributed claim lock ve gercek handler wiring eklenecek.
+
+## Phase 4 Database Table Foundation (Execution + Worker)
+
+- `approval_execution_logs`, `timeline_events`, `outbox_jobs` ve `dead_letter_jobs` icin kalici tablo migration foundation'i eklendi.
+- `audit_events` tablosu mevcut AI foundation ile cakismayi onlemek icin `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` ile genisletildi.
+- Bu faz sadece schema/migration hazirligidir; gercek transaction boundary, replay orchestration ve worker process lifecycle sonraki fazlardadir.
