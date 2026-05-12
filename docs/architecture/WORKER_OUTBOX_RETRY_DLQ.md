@@ -144,3 +144,10 @@ Bu handler'lar `dry_run` modundadir ve gercek provider veya gercek mutation yazm
 - Worker admin API foundation eklendi: `/worker/health`, `/worker/outbox`, `/worker/dead-letter`, `/worker/dead-letter/:jobId/replay`.
 - DLQ replay foundation yalnizca guvenli test adapter ile pending job uretir; gercek provider/mutation calistirmaz.
 - Production daemon lifecycle, metrics exporter ve admin UI sonraki fazdir.
+
+## Approval Execution Runtime Handoff (Phase)
+
+- Approval approve runtime orchestration, bridge sonrasi outbox handoff metadata'sini API response'una standardize eder.
+- `approval.execution.dispatch` payload contract'i (`tenantId`, `actionKey`, `approvalRequestId`, `executionId`) worker runtime ile uyumlu kalir.
+- Duplicate approve outbox tekrar uretmez; worker tarafina yeni job dispatch edilmez.
+- Bridge failure approval status'u `approved` yapmadan fail-closed kalir; worker queue'ya yanlis handoff yapilmaz.

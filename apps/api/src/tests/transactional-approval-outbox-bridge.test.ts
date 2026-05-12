@@ -253,6 +253,7 @@ test("successful dry_run dispatch persists execution/audit/timeline and enqueues
   assert.equal(result.timelineEventPersisted, true);
   assert.equal(result.outboxJobEnqueued, true);
   assert.equal(result.outboxDuplicate, false);
+  assert.equal(result.outboxJobId, result.outboxJob?.jobId);
   assert.equal(result.transactionMode, "transaction");
   assert.equal(result.persistenceMode, "repository");
   assert.equal(opts.runner.calls, 1);

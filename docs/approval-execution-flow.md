@@ -163,3 +163,17 @@
 - Worker lifecycle app contract, outbox processor tick summary ve worker health/metrics foundation eklendi.
 - Worker admin route foundation tenant/auth/permission guard zinciri ile calisir; repository unsupported durumunda fail-open success donmez.
 - Production daemon lifecycle, metrics exporter ve admin UI sonraki fazdir.
+
+## Phase 14 Approval Execution Production Wiring Pack
+
+- Approval approve endpoint runtime orchestration servisi ile standardize edildi.
+- Approve akisinda pending approval repository -> transactional bridge -> approval state transition zinciri tek kontratta modellenir.
+- Bridge basarisiz oldugunda approval status `approved` yapilmaz; fail-closed pending kalir.
+- Duplicate approve ikinci execution/outbox uretmez, idempotent `already_approved` metadata doner.
+- Outbox handoff metadata (`outboxJobId`, `outboxQueued`, `bridgeMode`, `workerProcessingRecommended`) response seviyesinde gorunur.
+- Bu fazda gercek domain mutation/provider call acilmamistir.
+- Sonraki faz:
+  - production DB transaction hardening
+  - real audit/timeline write-back
+  - monitoring/alerts
+  - approval inbox UI

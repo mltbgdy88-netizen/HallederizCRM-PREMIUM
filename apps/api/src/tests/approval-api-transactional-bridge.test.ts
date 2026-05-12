@@ -278,6 +278,9 @@ test("POST approve triggers transactional bridge and returns metadata", async ()
     assert.ok(typeof payload.executionId === "string");
     assert.ok(typeof payload.outboxJobId === "string");
     assert.ok(typeof payload.approvalPersistenceMode === "string");
+    assert.ok(typeof payload.bridgeMode === "string");
+    assert.equal(payload.outboxQueued, true);
+    assert.equal(payload.workerProcessingRecommended, true);
     assert.equal(payload.auditMetadata.eventKey, "approval.execution.audit");
     assert.equal(payload.timelineMetadata.eventKey, "approval.execution.timeline");
     await server.close();
@@ -329,6 +332,7 @@ test("duplicate approve is safe and does not produce new execution", async () =>
     assert.equal(first.statusCode, 200);
     assert.equal(second.statusCode, 200);
     assert.equal(second.json().duplicate, true);
+    assert.equal(second.json().status, "approved");
     assert.equal(second.json().executionId, first.json().executionId);
     assert.equal(second.json().outboxJobId, first.json().outboxJobId);
     assert.equal(seen.length, 1);
@@ -401,6 +405,51 @@ test("approved request cannot be rejected", async () => {
       payload: { reason: "too_late" }
     });
     assert.equal(rejectAfterApprove.statusCode, 409);
+    await server.close();
+  });
+});
+
+test("bridge failure does not mark approval as approved", async () => {
+  await withDemoAuth(async () => {
+    resetPendingApprovalRequests();
+    resetExecutionDispatcherState();
+    const server = Fastify();
+    await registerPlatformCoreRoutes(server, {
+      approvalRoutes: {
+        bridgeTrigger: async (_context, request) =>
+          bridgeFixture(request, {
+            ok: false,
+            status: "failed",
+            executionResult: undefined,
+            outboxJobEnqueued: false,
+            outboxDuplicate: false,
+            reasons: ["bridge_failed_for_test"]
+          })
+      }
+    });
+
+    const login = createSession({
+      tenantSlug: "hallederiz",
+      email: "admin@hallederiz.com",
+      password: "demo"
+    });
+    const approvalRequestId = await createPendingApproval(server, login.accessToken);
+
+    const approve = await server.inject({
+      method: "POST",
+      url: `/platform/approvals/${approvalRequestId}/approve`,
+      headers: authHeaders(login.accessToken)
+    });
+    assert.equal(approve.statusCode, 409);
+    assert.equal(approve.json().ok, false);
+
+    const detail = await server.inject({
+      method: "GET",
+      url: `/platform/approvals/${approvalRequestId}`,
+      headers: authHeaders(login.accessToken)
+    });
+    assert.equal(detail.statusCode, 200);
+    assert.equal(detail.json().item.status, "pending");
     await server.close();
   });
 });

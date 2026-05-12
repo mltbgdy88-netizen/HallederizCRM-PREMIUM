@@ -78,6 +78,7 @@ export interface ExecuteApprovalWithOutboxBridgeResult {
   outboxJobEnqueued: boolean;
   outboxDuplicate: boolean;
   outboxJob?: DbWorkerJobRecord;
+  outboxJobId?: string;
   transactionMode: "transaction" | "unsupported";
   persistenceMode: "repository" | "none";
   reasons: string[];
@@ -264,6 +265,7 @@ export async function executeApprovalWithOutboxBridge(
         outboxJobEnqueued,
         outboxDuplicate,
         outboxJob,
+        outboxJobId: outboxJob?.jobId,
         transactionMode: "transaction",
         persistenceMode: "repository",
         reasons: outboxDuplicate ? ["outbox_duplicate_idempotency"] : ["bridge_completed"]

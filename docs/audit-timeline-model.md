@@ -81,6 +81,13 @@ Bu batch'te audit olaylari in-memory tutulur. Sonraki batch'te DB persistence (`
 - Bu fazda metadata write-back foundation seviyesinde kalir; real provider write veya mutation activation acilmaz.
 - Tenant/auth/permission guard zinciri korunur; repository/bridge eksiginde fail-open success yoktur.
 
+## Approval Runtime Orchestration Metadata (Phase)
+
+- Approval approve runtime orchestration sonucu audit/timeline metadata endpoint response'una tasinir.
+- `bridgeResult`, `bridgeMode`, `outboxJobId`, `outboxQueued` ve `workerProcessingRecommended` alanlari operasyonel takip icin acik sekilde doner.
+- Bridge failure senaryosunda approval state degisimi yapilmadan fail-closed davranis korunur.
+- Bu fazda kalici audit/timeline DB write-back still foundation seviyesindedir; real writer activation sonraki fazdadir.
+
 ## Pending Approval Persistence Foundation (Phase)
 
 - Approval akisi icin pending request metadata artik repository kontrati ile tasinabilir.
