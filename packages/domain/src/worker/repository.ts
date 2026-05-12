@@ -1,9 +1,14 @@
 import type { WorkerJob } from "./model";
 import { markJobCompleted, markJobFailed, markJobProcessing, moveJobToDeadLetter } from "./outbox";
 
+export interface WorkerJobClaimOptions {
+  workerId?: string;
+  claimLeaseMs?: number;
+}
+
 export interface OutboxJobRepository {
   enqueue: (job: WorkerJob) => WorkerJob;
-  claimNext: (now?: string) => WorkerJob | undefined;
+  claimNext: (now?: string, options?: WorkerJobClaimOptions) => WorkerJob | undefined;
   complete: (jobId: string, completedAt?: string) => WorkerJob | undefined;
   fail: (jobId: string, errorMessage: string, nextAvailableAt: string, failedAt?: string) => WorkerJob | undefined;
   moveToDeadLetter: (jobId: string, reason: string, movedAt?: string) => WorkerJob | undefined;
@@ -26,15 +31,20 @@ export class InMemoryOutboxJobRepository implements OutboxJobRepository {
     return job;
   }
 
-  claimNext(now = new Date().toISOString()): WorkerJob | undefined {
+  claimNext(now = new Date().toISOString(), options?: WorkerJobClaimOptions): WorkerJob | undefined {
     const candidates = [...this.jobsById.values()]
-      .filter((job) => (job.status === "pending" || job.status === "failed") && job.availableAt <= now)
+      .filter(
+        (job) =>
+          (job.status === "pending" || job.status === "failed") &&
+          job.availableAt <= now &&
+          (!job.lockedAt || !job.leaseExpiresAt || job.leaseExpiresAt <= now)
+      )
       .sort((a, b) => a.availableAt.localeCompare(b.availableAt));
     const next = candidates[0];
     if (!next) {
       return undefined;
     }
-    const processing = markJobProcessing(next, now);
+    const processing = markJobProcessing(next, now, options);
     this.jobsById.set(processing.jobId, processing);
     this.jobsByIdempotency.set(`${processing.tenantId}:${processing.idempotencyKey}`, processing);
     return processing;

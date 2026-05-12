@@ -9,6 +9,46 @@ export interface WorkerJobHandler {
 const registry = new Map<string, WorkerJobHandler>();
 
 function createFoundationHandler(jobType: string): WorkerJobHandler {
+  if (jobType === "approval.execution.dispatch") {
+    return {
+      jobType,
+      mode: "dry_run",
+      handle: (job) => {
+        const payload = job.payload ?? {};
+        const hasTenantId = typeof payload.tenantId === "string" && payload.tenantId.length > 0;
+        const hasActionKey = typeof payload.actionKey === "string" && payload.actionKey.length > 0;
+        const hasApprovalRequestId =
+          typeof payload.approvalRequestId === "string" && payload.approvalRequestId.length > 0;
+        const hasExecutionId = typeof payload.executionId === "string" && payload.executionId.length > 0;
+
+        if (!hasTenantId || !hasActionKey || !hasApprovalRequestId || !hasExecutionId) {
+          return {
+            ok: false,
+            retryable: false,
+            reasons: [
+              "invalid_approval_execution_dispatch_payload",
+              "non_retryable_missing_required_payload",
+              "mutation_executed:false",
+              "provider_call_executed:false"
+            ]
+          };
+        }
+
+        return {
+          ok: true,
+          retryable: false,
+          reasons: [
+            "approval_execution_dispatch_dry_run_handled",
+            "handled:true",
+            "mode:dry_run",
+            "mutation_executed:false",
+            "provider_call_executed:false"
+          ]
+        };
+      }
+    };
+  }
+
   return {
     jobType,
     mode: "dry_run",

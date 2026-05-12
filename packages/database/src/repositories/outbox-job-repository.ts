@@ -45,6 +45,32 @@ interface DatabaseRepositoryOptions {
   persistenceMode: "demo" | "postgres";
 }
 
+export interface OutboxClaimLeaseOptions {
+  workerId?: string;
+  claimLeaseMs?: number;
+}
+
+export function normalizeOutboxClaimLeaseOptions(options?: OutboxClaimLeaseOptions): Required<OutboxClaimLeaseOptions> {
+  return {
+    workerId: options?.workerId ?? "worker.foundation",
+    claimLeaseMs: Math.max(1000, options?.claimLeaseMs ?? 5 * 60 * 1000)
+  };
+}
+
+export function mapOutboxClaimLeaseParams(nowIso: string, options?: OutboxClaimLeaseOptions): {
+  nowIso: string;
+  workerId: string;
+  leaseExpiredBeforeIso: string;
+} {
+  const normalized = normalizeOutboxClaimLeaseOptions(options);
+  const cutoff = new Date(new Date(nowIso).getTime() - normalized.claimLeaseMs).toISOString();
+  return {
+    nowIso,
+    workerId: normalized.workerId,
+    leaseExpiredBeforeIso: cutoff
+  };
+}
+
 function assertNonEmpty(value: string, fieldName: string) {
   if (!value) {
     throw new Error(`missing_${fieldName}`);
@@ -170,15 +196,21 @@ export class DatabaseOutboxJobRepository {
     return mapOutboxRowToDomainRecord(rows[0]);
   }
 
-  async claimNext(now = new Date().toISOString(), lockOwner = "worker.foundation"): Promise<DbWorkerJobRecord | undefined> {
+  async claimNext(
+    now = new Date().toISOString(),
+    claimOptions?: string | OutboxClaimLeaseOptions
+  ): Promise<DbWorkerJobRecord | undefined> {
     this.assertPersistenceSupported();
+    const resolvedOptions =
+      typeof claimOptions === "string" ? normalizeOutboxClaimLeaseOptions({ workerId: claimOptions }) : claimOptions;
+    const claimParams = mapOutboxClaimLeaseParams(now, resolvedOptions);
     const rows = await this.executor.query<OutboxJobRow>(
       `WITH picked AS (
         SELECT id
         FROM outbox_jobs
         WHERE status IN ('pending', 'failed')
           AND available_at <= $1::timestamptz
-          AND (locked_at IS NULL OR locked_at <= $1::timestamptz - interval '5 minutes')
+          AND (locked_at IS NULL OR locked_at <= $3::timestamptz)
         ORDER BY available_at ASC
         LIMIT 1
         FOR UPDATE SKIP LOCKED
@@ -196,7 +228,7 @@ export class DatabaseOutboxJobRepository {
         jobs.id, jobs.tenant_id, jobs.job_type, jobs.action_key, jobs.payload, jobs.status, jobs.attempts, jobs.max_attempts,
         jobs.idempotency_key, jobs.available_at, jobs.created_at, jobs.updated_at, jobs.last_error, NULL::text AS dead_letter_reason,
         jobs.locked_at, jobs.locked_by`,
-      [now, lockOwner]
+      [claimParams.nowIso, claimParams.workerId, claimParams.leaseExpiredBeforeIso]
     );
     return rows[0] ? mapOutboxRowToDomainRecord(rows[0]) : undefined;
   }

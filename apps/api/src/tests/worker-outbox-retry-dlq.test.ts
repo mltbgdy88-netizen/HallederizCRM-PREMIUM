@@ -13,7 +13,13 @@ function baseJobInput(overrides: Partial<Parameters<typeof createOutboxJob>[1]> 
     tenantId: "tenant_worker_1",
     jobType: "approval.execution.dispatch",
     actionKey: "platform.users.create",
-    payload: { source: "test" },
+    payload: {
+      source: "test",
+      tenantId: "tenant_worker_1",
+      actionKey: "platform.users.create",
+      approvalRequestId: "apr_worker_1",
+      executionId: "exec_worker_1"
+    },
     idempotencyKey: "idem_worker_1",
     maxAttempts: 3,
     ...overrides

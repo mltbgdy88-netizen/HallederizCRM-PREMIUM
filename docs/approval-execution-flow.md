@@ -139,3 +139,15 @@
   - production DB connection lifecycle/pool hardening
   - approval inbox UI
   - worker runtime process lifecycle
+
+## Phase 11 Worker Runtime Claim/Lease + Approval Outbox Processing Foundation
+
+- Worker runtime tick modeli eklendi: claim -> handle -> complete/fail/dead_letter.
+- Claim lease metadata (`workerId`, `lockedAt`, `claimLeaseMs`) foundation seviyesinde modele tasindi.
+- Approval outbox `approval.execution.dispatch` handler'i dry_run modda payload validation yapar; gercek mutation/provider call yoktur.
+- Production infinite worker loop bu fazda acilmamistir.
+- Sonraki faz:
+  - production daemon lifecycle
+  - DB-level distributed lock/lease hardening
+  - DLQ replay/admin UI
+  - real mutation handler activation
