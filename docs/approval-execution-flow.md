@@ -93,3 +93,16 @@
 - Dry-run/noop execution durumunda da bridge metadata ve outbox payload tenant/action/approval/execution baglamini korur.
 - Duplicate idempotency durumunda ikinci outbox job olusturulmaz.
 - Bu fazda gercek domain mutation, provider write ve production worker loop kapsam disidir.
+
+## Phase 7 Approval API + Transactional Bridge Trigger Foundation
+
+- Platform-core approval API foundation route'lari eklendi:
+  - `GET /platform/approvals`
+  - `GET /platform/approvals/:approvalRequestId`
+  - `POST /platform/approvals/:approvalRequestId/approve`
+  - `POST /platform/approvals/:approvalRequestId/reject`
+- Guard zinciri korunur: tenant + auth + permission fail-closed.
+- `approve` akisinda transactional bridge guvenli sekilde tetiklenir.
+- `reject` akisinda execution bridge tetiklenmez.
+- Duplicate approve/reject state gecisleri idempotent ve fail-closed ele alinir.
+- Route prefix `/platform` secimi, mevcut operations-engine `/approvals` endpointleriyle runtime path cakismasini engellemek icindir.

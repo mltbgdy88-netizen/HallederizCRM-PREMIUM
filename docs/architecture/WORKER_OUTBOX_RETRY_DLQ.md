@@ -91,3 +91,9 @@ Bu handler'lar `dry_run` modundadir ve gercek provider veya gercek mutation yazm
 - Outbox payload tenantId, actionKey, approvalRequestId, executionId ve handler mode bilgilerini tasir.
 - Duplicate idempotencyKey ikinci outbox kaydini uretmez.
 - Runtime worker lifecycle ve production orchestration sonraki faz olarak kalir.
+
+## Approval API -> Outbox Trigger Foundation (Phase)
+
+- Approval API `approve` endpoint'i transactional bridge tetikleyerek outbox payload uretimini baslatir.
+- Outbox payload tenant/action/approval/execution baglamini tasir.
+- Bu fazda production worker lifecycle ve real provider handler wiring kapsam disidir.

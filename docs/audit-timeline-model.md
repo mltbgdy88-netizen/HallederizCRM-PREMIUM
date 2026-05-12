@@ -74,3 +74,9 @@ Bu batch'te audit olaylari in-memory tutulur. Sonraki batch'te DB persistence (`
 - Execution sonucundan uretilecek audit/timeline write-back draft'lari artik transactional bridge icinde outbox enqueue adimiyla birlikte ele alinabilir.
 - Bridge sonucu executionLog/auditEvent/timelineEvent/outbox adimlarinin hangilerinin persisted oldugunu explicit metadata ile raporlar.
 - Transaction/repository eksiginde fail-open davranis yoktur; explicit unsupported/failed sonucu donulur.
+
+## Approval API Trigger Foundation (Phase)
+
+- Approval API approve flow, execution/audit/timeline/outbox metadata'sini response seviyesinde gorunur kilar.
+- Bu fazda metadata write-back foundation seviyesinde kalir; real provider write veya mutation activation acilmaz.
+- Tenant/auth/permission guard zinciri korunur; repository/bridge eksiginde fail-open success yoktur.
