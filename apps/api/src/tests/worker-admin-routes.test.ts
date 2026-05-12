@@ -64,6 +64,8 @@ test("worker health endpoint returns foundation metadata", async () => {
     assert.equal(payload.health.ok, true);
     assert.equal(payload.health.mode, "foundation");
     assert.equal(payload.health.workerId, "worker_admin_test");
+    assert.equal(payload.productionSafety.ok, true);
+    assert.equal(payload.productionSafety.providerWritesEnabled, false);
     assert.equal(typeof payload.health.summary.noJob, "boolean");
     await server.close();
   });

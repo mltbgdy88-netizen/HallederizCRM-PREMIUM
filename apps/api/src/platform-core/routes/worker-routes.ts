@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import {
   InMemoryOutboxJobRepository,
   createWorkerRuntimeApp,
+  evaluateProductionSafety,
   type WorkerJob
 } from "@hallederiz/domain";
 import {
@@ -156,7 +157,69 @@ export async function registerWorkerRoutes(server: FastifyInstance, deps: Worker
           ok: true,
           tenantId: context.tenantId,
           workerPersistenceMode: repositoryResolution.mode,
-          health
+          health,
+          productionSafety: evaluateProductionSafety({
+            mode: process.env.NODE_ENV === "production" ? "production" : "foundation",
+            approvalRuntimeMode: context.persistenceMode,
+            workerRuntimeMode: repositoryResolution.mode,
+            pendingApprovalRepositoryMode: context.persistenceMode,
+            workerRepositoryMode: repositoryResolution.mode,
+            realExecutionEnabled: false,
+            providerWritesEnabled: false,
+            workerAutoStartEnabled: false,
+            repositoryUnsupportedFailsClosed: true
+          })
+        };
+      }
+    )
+  );
+
+  server.get("/worker/safety", async (request, reply) =>
+    withGuards(
+      request,
+      reply,
+      [assertAuthenticated, (context) => assertAnyPermission(context, workerReadPermissions)],
+      async (context) => {
+        const repositoryResolution = resolveRepository(context);
+        if (!repositoryResolution.repository) {
+          return reply.status(503).send({
+            ok: false,
+            error: "worker_repository_unavailable",
+            message: "Worker repository foundation baglantisi mevcut degil.",
+            workerPersistenceMode: repositoryResolution.mode,
+            reasons: repositoryResolution.reasons,
+            productionSafety: evaluateProductionSafety({
+              mode: process.env.NODE_ENV === "production" ? "production" : "foundation",
+              approvalRuntimeMode: context.persistenceMode,
+              workerRuntimeMode: repositoryResolution.mode,
+              pendingApprovalRepositoryMode: context.persistenceMode,
+              workerRepositoryMode: repositoryResolution.mode,
+              repositoryUnsupportedFailsClosed: true
+            })
+          });
+        }
+
+        const productionSafety = evaluateProductionSafety({
+          mode: process.env.NODE_ENV === "production" ? "production" : "foundation",
+          approvalRuntimeMode: context.persistenceMode,
+          workerRuntimeMode: repositoryResolution.mode,
+          pendingApprovalRepositoryMode: context.persistenceMode,
+          workerRepositoryMode: repositoryResolution.mode,
+          realExecutionEnabled: false,
+          providerWritesEnabled: false,
+          workerAutoStartEnabled: false,
+          repositoryUnsupportedFailsClosed: true
+        });
+
+        return {
+          ok: productionSafety.ok,
+          tenantId: context.tenantId,
+          productionSafety,
+          approvalRuntimeMode: context.persistenceMode,
+          workerRuntimeMode: repositoryResolution.mode,
+          realExecutionEnabled: productionSafety.realExecutionEnabled,
+          providerWritesEnabled: productionSafety.providerWritesEnabled,
+          unsafeBlockers: productionSafety.blockers
         };
       }
     )

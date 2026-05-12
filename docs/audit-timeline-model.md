@@ -122,3 +122,9 @@ Bu batch'te audit olaylari in-memory tutulur. Sonraki batch'te DB persistence (`
 - Approval execution gate, execute mode icin audit/timeline metadata varligini zorunlu hale getirir.
 - Gate kararinda `requiredAudit`, `requiredTimeline`, `idempotencyRequired`, `mutationAllowed` ve `externalWriteAllowed` metadata'si tutulur.
 - Controlled handler foundation sonucunda audit/timeline metadata outbox payload'ina tasinir, ancak real DB mutation veya external provider write bu fazda acilmaz.
+
+## Production Safety Smoke Note
+
+- Production safety smoke testi audit/timeline metadata'nin approval approve -> outbox -> worker dry-run zincirinde gorunur kaldigini dogrular.
+- Safety report external provider write ve real mutation activation kapali oldugunu acik metadata ile bildirir.
+- Real audit/timeline DB transaction hardening ayrica production database uzerinde dogrulanmalidir.

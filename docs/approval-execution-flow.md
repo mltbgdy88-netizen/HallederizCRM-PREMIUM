@@ -195,3 +195,11 @@
 - `platform.users.create` real execution dry_run-only/blocked davranisini korur.
 - Dispatcher, transactional bridge ve worker handoff payload'lari gate decision metadata'sini tasir.
 - External provider/ERP/factory/document write bu fazda kapali kalir.
+
+## Phase 17 Production Safety Smoke Monitoring Pack
+
+- Production safety report/assertion foundation eklendi.
+- Worker health response'u production safety metadata'sini tasir; detayli `/worker/safety` endpoint'i auth/permission guard ile korunur.
+- `pnpm smoke:production-safety` komutu production safety smoke testini calistirir.
+- Readiness raporu `docs/architecture/PRODUCTION_READINESS_REPORT.md` altinda tutulur.
+- Bu faz gercek mutation/provider write veya production worker loop acmaz.
