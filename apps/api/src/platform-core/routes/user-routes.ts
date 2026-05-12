@@ -22,7 +22,7 @@ export async function registerUserRoutes(server: FastifyInstance) {
       [assertAuthenticated, (context) => assertAnyPermission(context, ["platform.users.write", "users.manage"])],
       async (context) => {
         const decision = evaluateRoutePolicy(context, { actionKey: "platform.users.create" });
-        const policyResult = enforcePolicyDecision(decision);
+        const policyResult = enforcePolicyDecision(decision, context);
         if (policyResult.handled) {
           return reply.status(policyResult.statusCode).send(policyResult.body);
         }
