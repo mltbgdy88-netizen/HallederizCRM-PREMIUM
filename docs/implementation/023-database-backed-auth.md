@@ -27,6 +27,7 @@ Demo/mock/header fallback davranislari production guvenlik kurallarini bozmadan 
 - `LOCAL_PILOT_AUTH_*` akisi sadece `NODE_ENV !== production` ve explicit flag ile calismaya devam eder.
 - Postgres modunda once DB auth denenir; local pilot auth sadece explicit local gelistirme senaryosu icin fallback olarak kalir.
 - `mock_access` ve header principal fallback production/postgres guvenlik politikasina aykiri sekilde acilmaz.
+- `PERSISTENCE_MODE=demo` ve `NODE_ENV=development` iken `DEMO_AUTH_ENABLED` unset ise demo login aciktir; `DEMO_AUTH_ENABLED=false` ise fail-closed kalir.
 
 ## Admin Seed (Idempotent)
 - Script: `apps/api/src/scripts/seed-admin-user.ts`

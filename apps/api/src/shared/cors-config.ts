@@ -5,11 +5,20 @@ const DEFAULT_DEVELOPMENT_ORIGINS = [
   "http://localhost:3001",
   "http://localhost:3002",
   "http://localhost:3010",
+  "http://127.0.0.1:3000",
+  "http://127.0.0.1:3001",
+  "http://127.0.0.1:3002",
   "http://127.0.0.1:3010"
 ];
 
 export const API_CORS_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"];
-export const API_CORS_HEADERS = ["content-type", "authorization", "x-session-token", "x-tenant-id"];
+export const API_CORS_HEADERS = [
+  "content-type",
+  "authorization",
+  "x-session-token",
+  "x-tenant-id",
+  "x-user-id"
+];
 
 export function parseApiCorsOrigins(input: string | undefined, nodeEnv = process.env.NODE_ENV): string[] {
   const explicitOrigins = (input ?? "")

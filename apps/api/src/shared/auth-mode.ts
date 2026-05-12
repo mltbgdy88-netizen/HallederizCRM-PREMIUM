@@ -19,7 +19,10 @@ function isEnabled(value: string | undefined): boolean {
 export function getAuthMode(): AuthMode {
   const isProduction = process.env.NODE_ENV === "production";
   const persistenceMode = process.env.PERSISTENCE_MODE === "postgres" ? "postgres" : "demo";
-  const demoAuthEnabled = isEnabled(process.env.DEMO_AUTH_ENABLED) && !isProduction;
+  const demoAuthFlag = process.env.DEMO_AUTH_ENABLED;
+  const demoAuthEnabled =
+    !isProduction &&
+    (demoAuthFlag === "true" || (demoAuthFlag !== "false" && persistenceMode === "demo"));
   const localPilotAuthEnabled = isEnabled(process.env.LOCAL_PILOT_AUTH_ENABLED) && !isProduction;
   const localPilotAuthEmail = process.env.LOCAL_PILOT_AUTH_EMAIL?.trim();
   const localPilotAuthPassword = process.env.LOCAL_PILOT_AUTH_PASSWORD?.trim();
