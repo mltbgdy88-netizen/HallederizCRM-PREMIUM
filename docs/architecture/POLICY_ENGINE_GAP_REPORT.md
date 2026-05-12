@@ -34,3 +34,19 @@
 - Handlers for `platform.users.create` and `platform.settings.update` are intentionally safe no-op (no real mutation wiring in this phase).
 - `auditRequired` and `timelineRequired` flags are preserved from action registry into execution result.
 - Note: idempotency store is in-memory foundation only; persistent idempotency storage remains a separate phase.
+
+## 2026-05-12 - Action Execution Handler Registry Phase 1
+
+- Status: completed (foundation)
+- Added action execution handler contract and registry API:
+  - `registerActionExecutionHandler`
+  - `getActionExecutionHandler`
+  - `hasActionExecutionHandler`
+  - `listActionExecutionHandlers`
+- Dispatcher now resolves handlers from handler registry (not inline map).
+- Foundation handlers are registered for:
+  - `platform.users.create`
+  - `platform.settings.update`
+- Both handlers are intentionally `supported=true` and `mode=dry_run`.
+- No real domain mutation wiring is introduced in this phase.
+- Duplicate idempotency guard and fail-closed `unsupported_action` behavior remain unchanged.

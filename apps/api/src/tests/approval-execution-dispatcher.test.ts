@@ -1,6 +1,12 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { dispatchApprovedAction, resetExecutionDispatcherState } from "@hallederiz/domain";
+import {
+  dispatchApprovedAction,
+  getActionExecutionHandler,
+  hasActionExecutionHandler,
+  listActionExecutionHandlers,
+  resetExecutionDispatcherState
+} from "@hallederiz/domain";
 
 function baseRequest(overrides: Partial<Parameters<typeof dispatchApprovedAction>[0]> = {}) {
   return {
@@ -45,6 +51,7 @@ test("supported action returns executionId without real mutation", () => {
   assert.equal(result.status, "executed");
   assert.equal(result.ok, true);
   assert.ok(result.executionId.length > 0);
+  assert.ok(result.reasons.includes("no_real_mutation_executed"));
 });
 
 test("dispatcher keeps audit/timeline flags and tenant/action metadata", () => {
@@ -54,4 +61,19 @@ test("dispatcher keeps audit/timeline flags and tenant/action metadata", () => {
   assert.equal(result.actionKey, "platform.users.create");
   assert.equal(result.auditRequired, true);
   assert.equal(result.timelineRequired, true);
+});
+
+test("handler registry lists foundation handlers", () => {
+  const handlers = listActionExecutionHandlers();
+  assert.ok(handlers.some((handler) => handler.actionKey === "platform.users.create"));
+  assert.ok(handlers.some((handler) => handler.actionKey === "platform.settings.update"));
+  assert.equal(hasActionExecutionHandler("platform.users.create"), true);
+  assert.equal(hasActionExecutionHandler("unknown.action"), false);
+});
+
+test("settings handler is supported in dry_run mode", () => {
+  const handler = getActionExecutionHandler("platform.settings.update");
+  assert.ok(handler);
+  assert.equal(handler.supported, true);
+  assert.equal(handler.mode, "dry_run");
 });
