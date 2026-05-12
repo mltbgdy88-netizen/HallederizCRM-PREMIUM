@@ -1,10 +1,11 @@
 import type { FastifyInstance } from "fastify";
 import type { PlatformSettings } from "@hallederiz/types";
 import { platformSettingsSchema } from "@hallederiz/types";
-import { requireTenantPermissionGuards, withGuards } from "../../shared/auth-guards";
+import { assertAnyPermission, assertAuthenticated, withGuards } from "../../shared/auth-guards";
 import { getTenantSettingsState, setTenantSettingsState } from "../settings-state";
 import { buildPilotReadiness } from "../pilot-readiness";
 import { readPermissions, requireReadAccess } from "../../shared/read-guards";
+import { enforcePolicyDecision, evaluateRoutePolicy } from "../../shared/policy-bridge";
 
 export async function registerSettingsRoutes(server: FastifyInstance) {
   server.get("/settings", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.settings), async () => {
@@ -18,8 +19,14 @@ export async function registerSettingsRoutes(server: FastifyInstance) {
     return withGuards(
       request,
       reply,
-      requireTenantPermissionGuards(["platform.settings.write", "settings.manage"]),
-      async () => {
+      [assertAuthenticated, (context) => assertAnyPermission(context, ["platform.settings.write", "settings.manage"])],
+      async (context) => {
+        const decision = evaluateRoutePolicy(context, { actionKey: "platform.settings.update" });
+        const policyResult = enforcePolicyDecision(decision);
+        if (policyResult.handled) {
+          return reply.status(policyResult.statusCode).send(policyResult.body);
+        }
+
         const tenantSettingsState = getTenantSettingsState();
         const patch = request.body ?? {};
         const nextState: PlatformSettings = {

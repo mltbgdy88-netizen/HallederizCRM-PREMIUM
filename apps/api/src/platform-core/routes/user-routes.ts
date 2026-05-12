@@ -1,8 +1,9 @@
 import type { FastifyInstance } from "fastify";
 import type { User } from "@hallederiz/types";
 import { mockTenant, mockUsers } from "../mock-data";
-import { requireTenantPermissionGuards, withGuards } from "../../shared/auth-guards";
+import { assertAnyPermission, assertAuthenticated, withGuards } from "../../shared/auth-guards";
 import { readPermissions, requireReadAccess } from "../../shared/read-guards";
+import { enforcePolicyDecision, evaluateRoutePolicy } from "../../shared/policy-bridge";
 
 export async function registerUserRoutes(server: FastifyInstance) {
   let usersState: User[] = [...mockUsers];
@@ -18,8 +19,14 @@ export async function registerUserRoutes(server: FastifyInstance) {
     return withGuards(
       request,
       reply,
-      requireTenantPermissionGuards(["platform.users.write", "users.manage"], () => request.body?.tenantId),
+      [assertAuthenticated, (context) => assertAnyPermission(context, ["platform.users.write", "users.manage"])],
       async (context) => {
+        const decision = evaluateRoutePolicy(context, { actionKey: "platform.users.create" });
+        const policyResult = enforcePolicyDecision(decision);
+        if (policyResult.handled) {
+          return reply.status(policyResult.statusCode).send(policyResult.body);
+        }
+
         const body = request.body ?? {};
         if (!body.email || !body.fullName) {
           return reply.status(400).send({ message: "email ve fullName alanlari zorunludur." });
@@ -27,7 +34,7 @@ export async function registerUserRoutes(server: FastifyInstance) {
 
         const user: User = {
           id: `user_${usersState.length + 1}`,
-          tenantId: body.tenantId ?? context.tenantId ?? mockTenant.id,
+          tenantId: mockTenant.id,
           email: body.email,
           fullName: body.fullName,
           status: body.status ?? "active",
