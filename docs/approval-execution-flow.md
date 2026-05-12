@@ -157,3 +157,9 @@
 - DB outbox claim SQL/contract foundation eklendi; claim lease metadata (`workerId`, `lockedBy`, `lockedAt`, `leaseExpiresAt`) mapping aciklandi.
 - Expired lease reclaim ve aktif lease concurrent claim engeli foundation testleriyle dogrulanir.
 - Production distributed worker daemon lifecycle, DLQ replay/admin API, monitoring/metrics ve real mutation handler activation sonraki fazdir.
+
+## Phase 13 Worker Runtime Processing Pack Foundation
+
+- Worker lifecycle app contract, outbox processor tick summary ve worker health/metrics foundation eklendi.
+- Worker admin route foundation tenant/auth/permission guard zinciri ile calisir; repository unsupported durumunda fail-open success donmez.
+- Production daemon lifecycle, metrics exporter ve admin UI sonraki fazdir.

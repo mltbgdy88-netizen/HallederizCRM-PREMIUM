@@ -4,9 +4,11 @@ import { registerAuthRoutes } from "./auth-routes";
 import { registerRoleRoutes } from "./role-routes";
 import { registerSettingsRoutes } from "./settings-routes";
 import { registerUserRoutes } from "./user-routes";
+import { registerWorkerRoutes, type WorkerRouteDeps } from "./worker-routes";
 
 export interface PlatformCoreRouteDeps {
   approvalRoutes?: ApprovalRouteDeps;
+  workerRoutes?: WorkerRouteDeps;
 }
 
 export async function registerPlatformCoreRoutes(server: FastifyInstance, deps: PlatformCoreRouteDeps = {}) {
@@ -15,4 +17,5 @@ export async function registerPlatformCoreRoutes(server: FastifyInstance, deps: 
   await registerRoleRoutes(server);
   await registerSettingsRoutes(server);
   await registerApprovalRoutes(server, deps.approvalRoutes);
+  await registerWorkerRoutes(server, deps.workerRoutes);
 }

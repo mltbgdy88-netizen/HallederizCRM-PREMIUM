@@ -14,6 +14,9 @@ export interface OutboxJobRepository {
   moveToDeadLetter: (jobId: string, reason: string, movedAt?: string) => WorkerJob | undefined;
   findByIdempotencyKey: (tenantId: string, idempotencyKey: string) => WorkerJob | undefined;
   listJobs: () => WorkerJob[];
+  listOutboxJobs?: (tenantId: string) => WorkerJob[];
+  listDeadLetterJobs?: (tenantId: string) => WorkerJob[];
+  replayDeadLetterJob?: (jobId: string, tenantId: string, replayedAt?: string) => WorkerJob | undefined;
 }
 
 export class InMemoryOutboxJobRepository implements OutboxJobRepository {
@@ -89,5 +92,34 @@ export class InMemoryOutboxJobRepository implements OutboxJobRepository {
 
   listJobs(): WorkerJob[] {
     return [...this.jobsById.values()].sort((a, b) => a.createdAt.localeCompare(b.createdAt));
+  }
+
+  listOutboxJobs(tenantId: string): WorkerJob[] {
+    return this.listJobs().filter((job) => job.tenantId === tenantId && job.status !== "dead_letter");
+  }
+
+  listDeadLetterJobs(tenantId: string): WorkerJob[] {
+    return this.listJobs().filter((job) => job.tenantId === tenantId && job.status === "dead_letter");
+  }
+
+  replayDeadLetterJob(jobId: string, tenantId: string, replayedAt = new Date().toISOString()): WorkerJob | undefined {
+    const job = this.jobsById.get(jobId);
+    if (!job || job.tenantId !== tenantId || job.status !== "dead_letter") {
+      return undefined;
+    }
+    const replayed: WorkerJob = {
+      ...job,
+      status: "pending",
+      availableAt: replayedAt,
+      updatedAt: replayedAt,
+      deadLetterReason: undefined,
+      lastError: undefined,
+      lockedAt: undefined,
+      lockedBy: undefined,
+      leaseExpiresAt: undefined
+    };
+    this.jobsById.set(jobId, replayed);
+    this.jobsByIdempotency.set(`${replayed.tenantId}:${replayed.idempotencyKey}`, replayed);
+    return replayed;
   }
 }

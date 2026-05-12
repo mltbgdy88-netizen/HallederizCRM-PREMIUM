@@ -272,3 +272,16 @@
   - DLQ replay/admin API
   - monitoring/metrics/alerts
   - real mutation handler activation
+
+## 2026-05-12 - Worker Runtime Processing Pack Foundation
+
+- Status: completed (foundation)
+- Added worker lifecycle app contract (`createWorkerRuntimeApp`) without import-time infinite loop.
+- Strengthened outbox processor tick summary and worker health/metrics foundation model.
+- Added worker admin API foundation for health, outbox list, dead-letter list and safe replay.
+- DLQ replay remains foundation-only and does not execute real provider/mutation handlers.
+- Remaining gap (next phase):
+  - production worker daemon lifecycle orchestration
+  - metrics exporter / monitoring pipeline
+  - admin UI
+  - real mutation handler activation
