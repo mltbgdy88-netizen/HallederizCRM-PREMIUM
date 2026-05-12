@@ -259,3 +259,16 @@
   - worker daemon lifecycle orchestration
   - DLQ replay/admin operations
   - monitoring/metrics/alerts
+
+## 2026-05-12 - DB-Level Atomic Worker Claim Foundation
+
+- Status: completed (foundation)
+- Added explicit DB outbox atomic claim SQL/contract helpers and lease metadata mapping (`workerId`, `lockedBy`, `lockedAt`, `leaseExpiresAt`).
+- Claim eligibility enforces pending/failed + availableAt + unlocked/expired lease; active lease blocks reclaim at contract level.
+- Foundation uses PostgreSQL `FOR UPDATE SKIP LOCKED`; full production distributed worker daemon lifecycle remains next phase.
+- Demo/non-postgres persistence does not fail-open successful claim behavior.
+- Remaining gap (next phase):
+  - production worker daemon lifecycle orchestration
+  - DLQ replay/admin API
+  - monitoring/metrics/alerts
+  - real mutation handler activation

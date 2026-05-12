@@ -123,3 +123,16 @@ Bu handler'lar `dry_run` modundadir ve gercek provider veya gercek mutation yazm
 - `approval.execution.dispatch` handler'i dry_run/noop guvenli modda payload validation yapar.
 - Bu fazda production sonsuz worker loop/daemon baslatilmaz.
 - Sonraki faz: DB-level atomic distributed claim lock/lease hardening ve runtime lifecycle orchestration.
+
+## DB-Level Atomic Worker Claim Foundation (Phase)
+
+- DB outbox claim contract foundation eklendi: `buildClaimNextOutboxJobSql`, `mapClaimedOutboxJobRow`, `calculateLeaseExpiresAt`, `isOutboxJobClaimEligible`.
+- Claim yalnizca `pending|failed`, `available_at <= now` ve `locked_at IS NULL OR lease expired` kosullarinda calisir.
+- `FOR UPDATE SKIP LOCKED` foundation seviyesinde kullanilir; production distributed worker daemon lifecycle sonraki fazdir.
+- `leaseExpiresAt` domain metadata olarak `locked_at + claimLeaseMs` turetilir; ayri DB kolonu yoktur.
+- Demo/non-postgres persistence fail-open claim success uretmez.
+- Sonraki faz:
+  - production worker daemon lifecycle orchestration
+  - DLQ replay/admin API
+  - monitoring/metrics/alerts
+  - real mutation handler activation
