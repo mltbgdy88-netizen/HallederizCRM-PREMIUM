@@ -14,8 +14,17 @@ export const APPROVAL_API_PATHS = {
   detail: (approvalRequestId: string) => `/platform/approvals/${approvalRequestId}`,
   approve: (approvalRequestId: string) => `/platform/approvals/${approvalRequestId}/approve`,
   reject: (approvalRequestId: string) => `/platform/approvals/${approvalRequestId}/reject`,
-  workerHealth: "/worker/health"
+  workerHealth: "/worker/health",
+  workerSafety: "/worker/safety"
 } as const;
+
+export type ApprovalApiEndpointKind =
+  | "approvals_list"
+  | "approval_detail"
+  | "approval_approve"
+  | "approval_reject"
+  | "worker_health"
+  | "worker_safety";
 
 export interface ApprovalClientConfig {
   apiBaseUrl: string;
@@ -50,8 +59,28 @@ function readReasons(payload: unknown): string[] | undefined {
   return reasons.filter((reason): reason is string => typeof reason === "string");
 }
 
-export function mapApprovalClientError(status: number, payload?: unknown): ApprovalClientError {
-  const message = readErrorMessage(payload, "Approval API istegi tamamlanamadi.");
+function defaultApprovalClientErrorMessage(status: number, endpoint: ApprovalApiEndpointKind): string {
+  if (status === 404) {
+    if (endpoint === "worker_health" || endpoint === "worker_safety") {
+      return "Worker health/safety endpoint bu ortamda yayinlanmiyor. API foundation route eslemesini kontrol edin.";
+    }
+    return "Approval inbox endpoint bu ortamda yayinlanmiyor. Foundation route eslemesi ve API sunucu surumu kontrol edilmelidir.";
+  }
+  if (status === 503) {
+    if (endpoint === "worker_health" || endpoint === "worker_safety") {
+      return "Worker foundation modu hazir degil veya persistence baglantisi mevcut degil.";
+    }
+    return "Approval inbox foundation modu hazir degil veya persistence baglantisi mevcut degil.";
+  }
+  return "Approval API istegi tamamlanamadi.";
+}
+
+export function mapApprovalClientError(
+  status: number,
+  payload?: unknown,
+  endpoint: ApprovalApiEndpointKind = "approvals_list"
+): ApprovalClientError {
+  const message = readErrorMessage(payload, defaultApprovalClientErrorMessage(status, endpoint));
   const reasons = readReasons(payload);
   let kind: ApprovalClientErrorKind = "unknown";
   if (status === 401) kind = "unauthorized";
@@ -59,6 +88,12 @@ export function mapApprovalClientError(status: number, payload?: unknown): Appro
   else if (status === 404) kind = "not_found";
   else if (status === 503) kind = "unsupported";
   return { kind, status, message, reasons };
+}
+
+export function joinApprovalApiUrl(apiBaseUrl: string, path: string): string {
+  const normalizedBase = apiBaseUrl.trim().replace(/\/+$/, "");
+  const normalizedPath = path.startsWith("/") ? path : `/${path}`;
+  return `${normalizedBase}${normalizedPath}`;
 }
 
 export function getApprovalStatusBadge(status: ApprovalInboxStatus): {
@@ -93,6 +128,7 @@ export function buildApprovalRejectBody(reason?: string): { reason?: string } {
 async function requestJson<T>(
   config: ApprovalClientConfig,
   path: string,
+  endpoint: ApprovalApiEndpointKind,
   init?: RequestInit
 ): Promise<RequestResult<T>> {
   if (!config.accessToken) {
@@ -106,7 +142,7 @@ async function requestJson<T>(
   }
 
   try {
-    const response = await fetch(`${config.apiBaseUrl}${path}`, {
+    const response = await fetch(joinApprovalApiUrl(config.apiBaseUrl, path), {
       ...init,
       headers: {
         "content-type": "application/json",
@@ -120,7 +156,7 @@ async function requestJson<T>(
 
     const payload = (await response.json().catch(() => undefined)) as unknown;
     if (!response.ok) {
-      return { ok: false, error: mapApprovalClientError(response.status, payload) };
+      return { ok: false, error: mapApprovalClientError(response.status, payload, endpoint) };
     }
     return { ok: true, data: payload as T };
   } catch {
@@ -136,20 +172,21 @@ async function requestJson<T>(
 
 export function createApprovalClient(config: ApprovalClientConfig) {
   return {
-    listApprovals: () => requestJson<ApprovalListResponse>(config, APPROVAL_API_PATHS.list),
+    listApprovals: () => requestJson<ApprovalListResponse>(config, APPROVAL_API_PATHS.list, "approvals_list"),
     getApproval: (approvalRequestId: string) =>
-      requestJson<ApprovalDetailResponse>(config, APPROVAL_API_PATHS.detail(approvalRequestId)),
+      requestJson<ApprovalDetailResponse>(config, APPROVAL_API_PATHS.detail(approvalRequestId), "approval_detail"),
     approveApproval: (approvalRequestId: string) =>
-      requestJson<ApprovalActionResponse>(config, APPROVAL_API_PATHS.approve(approvalRequestId), {
+      requestJson<ApprovalActionResponse>(config, APPROVAL_API_PATHS.approve(approvalRequestId), "approval_approve", {
         method: "POST",
         body: JSON.stringify({})
       }),
     rejectApproval: (approvalRequestId: string, reason?: string) =>
-      requestJson<ApprovalActionResponse>(config, APPROVAL_API_PATHS.reject(approvalRequestId), {
+      requestJson<ApprovalActionResponse>(config, APPROVAL_API_PATHS.reject(approvalRequestId), "approval_reject", {
         method: "POST",
         body: JSON.stringify(buildApprovalRejectBody(reason))
       }),
-    getWorkerHealth: () => requestJson<WorkerHealthResponse>(config, APPROVAL_API_PATHS.workerHealth)
+    getWorkerHealth: () => requestJson<WorkerHealthResponse>(config, APPROVAL_API_PATHS.workerHealth, "worker_health"),
+    getWorkerSafety: () => requestJson<WorkerHealthResponse>(config, APPROVAL_API_PATHS.workerSafety, "worker_safety")
   };
 }
 
