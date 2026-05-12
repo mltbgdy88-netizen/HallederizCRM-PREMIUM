@@ -50,3 +50,27 @@
 - Both handlers are intentionally `supported=true` and `mode=dry_run`.
 - No real domain mutation wiring is introduced in this phase.
 - Duplicate idempotency guard and fail-closed `unsupported_action` behavior remain unchanged.
+
+## 2026-05-12 - Execution Audit/Timeline Phase 1
+
+- Status: completed (foundation)
+- Dispatcher result now includes domain-level `executionLog` metadata.
+- `auditEvent` and `timelineEvent` draft payloads are generated with:
+  - `tenantId`
+  - `actionKey`
+  - `approvalRequestId`
+  - `executionId`
+  - `idempotencyKey`
+  - `handlerKey` and `handlerMode`
+- Handler safety checklist added:
+  - `requiresApproval`
+  - `mutatesState`
+  - `externalWrite`
+  - `idempotencyRequired`
+  - `auditRequired`
+  - `timelineRequired`
+  - `dryRunOnly`
+  - `realExecutionEnabled`
+- `platform.users.create` and `platform.settings.update` remain `dry_run` with `realExecutionEnabled=false`.
+- Duplicate idempotency remains fail-closed and does not re-run handler execution.
+- Remaining gap (next phase): persistent execution log storage, real audit/timeline DB write-back, real handler wiring, rollback/replay strategy.

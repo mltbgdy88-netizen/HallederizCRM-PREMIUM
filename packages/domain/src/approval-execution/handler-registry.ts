@@ -9,10 +9,23 @@ export interface ActionExecutionHandlerResult {
   reasons?: string[];
 }
 
+export interface ActionExecutionHandlerSafetyChecklist {
+  requiresApproval: boolean;
+  mutatesState: boolean;
+  externalWrite: boolean;
+  idempotencyRequired: boolean;
+  auditRequired: boolean;
+  timelineRequired: boolean;
+  dryRunOnly: boolean;
+  realExecutionEnabled: boolean;
+}
+
 export interface ActionExecutionHandler {
+  handlerKey: string;
   actionKey: string;
   supported: boolean;
   mode: ActionExecutionMode;
+  safetyChecklist: ActionExecutionHandlerSafetyChecklist;
   execute: (request: ApprovalExecutionRequest, action: ActionRegistryEntry) => ActionExecutionHandlerResult;
 }
 
@@ -20,9 +33,20 @@ const handlerRegistry = new Map<string, ActionExecutionHandler>();
 
 function createFoundationHandler(actionKey: string): ActionExecutionHandler {
   return {
+    handlerKey: `handler.${actionKey}`,
     actionKey,
     supported: true,
     mode: "dry_run",
+    safetyChecklist: {
+      requiresApproval: true,
+      mutatesState: true,
+      externalWrite: false,
+      idempotencyRequired: false,
+      auditRequired: true,
+      timelineRequired: true,
+      dryRunOnly: true,
+      realExecutionEnabled: false
+    },
     execute: (request) => ({
       ok: true,
       status: "executed",
