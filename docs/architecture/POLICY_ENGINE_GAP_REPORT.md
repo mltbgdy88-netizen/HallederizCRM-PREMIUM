@@ -186,3 +186,22 @@
   - approval approve/reject API wiring
   - worker lifecycle orchestration and distributed lease hardening
   - real mutation handler activation under approval controls
+
+## 2026-05-12 - Approval API + Transactional Bridge Trigger Foundation
+
+- Status: completed (foundation)
+- Added platform-core approval endpoints (prefixed to avoid route collisions):
+  - `GET /platform/approvals`
+  - `GET /platform/approvals/:approvalRequestId`
+  - `POST /platform/approvals/:approvalRequestId/approve`
+  - `POST /platform/approvals/:approvalRequestId/reject`
+- Guard chain kept fail-closed: tenant/auth/permission checks enforced before approval actions.
+- `approve` now triggers transactional approval-outbox bridge safely.
+- `reject` does not trigger execution bridge.
+- Duplicate approve/reject transitions handled safely (`already_processed` / conflict).
+- Missing repository/bridge returns explicit unsupported/unavailable errors (no fail-open success).
+- Remaining gap (next phase):
+  - DB-backed pending approval repository/table
+  - production runtime bridge wiring hardening
+  - UI approval inbox integration
+  - WhatsApp/Instagram approval command integration
