@@ -80,3 +80,17 @@ Bu batch'te audit olaylari in-memory tutulur. Sonraki batch'te DB persistence (`
 - Approval API approve flow, execution/audit/timeline/outbox metadata'sini response seviyesinde gorunur kilar.
 - Bu fazda metadata write-back foundation seviyesinde kalir; real provider write veya mutation activation acilmaz.
 - Tenant/auth/permission guard zinciri korunur; repository/bridge eksiginde fail-open success yoktur.
+
+## Pending Approval Persistence Foundation (Phase)
+
+- Approval akisi icin pending request metadata artik repository kontrati ile tasinabilir.
+- `approvalRequestId`, `tenantId`, `actorId`, `actionKey`, `reasons`, status ve zaman damgalari repository modeliyle korunur.
+- Repository mevcut degilse veya hata verirse response metadata'sinda bu durum acikca isaretlenir; fail-open success yoktur.
+- DB-backed pending approval event/persistence tablosu bu fazda eklenmedi, ayri migration gorevi olarak birakildi.
+
+## Pending Approval DB Persistence Foundation (Phase)
+
+- `pending_approval_requests` migration + schema foundation eklendi.
+- Pending approval lifecycle metadata'si DB repository kontratiyla tasinabilir hale geldi.
+- Bu fazda production DB wiring acilmadi; fail-open davranis eklenmedi.
+- Sonraki faz: runtime wiring + UI inbox + channel command binding.

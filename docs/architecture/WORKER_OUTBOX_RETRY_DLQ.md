@@ -97,3 +97,16 @@ Bu handler'lar `dry_run` modundadir ve gercek provider veya gercek mutation yazm
 - Approval API `approve` endpoint'i transactional bridge tetikleyerek outbox payload uretimini baslatir.
 - Outbox payload tenant/action/approval/execution baglamini tasir.
 - Bu fazda production worker lifecycle ve real provider handler wiring kapsam disidir.
+
+## Pending Approval Repository Foundation Note
+
+- Approval API ve policy bridge tarafi pending approval request lifecycle'ini repository kontratiyla yonetecek sekilde standardize edildi.
+- Bu faz in-memory/test adapter ile sinirlidir.
+- DB-backed `pending_approval_requests` tablo + adapter wiring sonraki fazdadir.
+
+## Pending Approval DB Foundation Update
+
+- `pending_approval_requests` migration ve schema foundation eklendi.
+- DB pending approval repository adapter foundation eklendi.
+- Worker/outbox dokumani acisindan pending approval kaliciligi artik migration + adapter seviyesinde hazirdir.
+- Kalan faz: production runtime wiring, UI inbox ve channel command entegrasyonu.
