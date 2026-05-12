@@ -50,6 +50,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       const storedSession = readStoredSession();
       const storedToken = window.localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
       if (!storedSession || !storedToken) {
+        if (storedToken) {
+          window.localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+        }
+        if (storedSession) {
+          window.localStorage.removeItem(STORAGE_KEY);
+        }
         setSession(null);
         setAccessToken(null);
         setState("anonymous");
@@ -60,7 +66,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const response = await fetch(`${API_BASE_URL}/auth/session`, {
           headers: {
             "x-session-token": storedToken,
-            authorization: `Bearer ${storedToken}`
+            authorization: `Bearer ${storedToken}`,
+            "x-tenant-id": storedSession.tenant.id
           },
           cache: "no-store"
         });
@@ -70,6 +77,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         const payload = (await response.json()) as { item: SessionModel };
+        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload.item));
         setSession(payload.item);
         setAccessToken(storedToken);
         setState("authenticated");
@@ -93,7 +101,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       };
     }
 
-    let loginResponse = null as Awaited<ReturnType<typeof fetch>> | null;
+    let loginResponse = null as Response | null;
+    let networkError = false;
     try {
       loginResponse = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
@@ -102,10 +111,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       });
     } catch {
       loginResponse = null;
+      networkError = true;
     }
 
     if (!loginResponse?.ok && !ENABLE_DEMO_AUTH) {
-      let message = "Giris yapilamadi. Lutfen auth saglayici ayarlarini kontrol edin.";
+      let message = networkError
+        ? `API'ye ulasilamadi (${API_BASE_URL}). API sunucusunun calistigini ve CORS ayarlarini kontrol edin.`
+        : "Giris yapilamadi. Lutfen auth saglayici ayarlarini kontrol edin.";
       try {
         const errorPayload = loginResponse ? ((await loginResponse.json()) as { message?: string }) : null;
         message = errorPayload?.message ?? message;

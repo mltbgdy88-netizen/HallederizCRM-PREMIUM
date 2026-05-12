@@ -23,13 +23,33 @@ test("API CORS allows configured local web origin", async () => {
     headers: {
       origin: "http://localhost:3010",
       "access-control-request-method": "POST",
-      "access-control-request-headers": "content-type,authorization,x-session-token,x-tenant-id"
+      "access-control-request-headers": "content-type,authorization,x-session-token,x-tenant-id,x-user-id"
     }
   });
 
   assert.equal(response.statusCode, 204);
   assert.equal(response.headers["access-control-allow-origin"], "http://localhost:3010");
   assert.match(String(response.headers["access-control-allow-methods"]), /POST/);
+  await server.close();
+});
+
+test("API CORS allows default development origin on 127.0.0.1", async () => {
+  const server = await buildCorsServer({
+    NODE_ENV: "development"
+  });
+
+  const response = await server.inject({
+    method: "OPTIONS",
+    url: "/auth/login",
+    headers: {
+      origin: "http://127.0.0.1:3002",
+      "access-control-request-method": "POST",
+      "access-control-request-headers": "content-type,authorization,x-session-token,x-tenant-id"
+    }
+  });
+
+  assert.equal(response.statusCode, 204);
+  assert.equal(response.headers["access-control-allow-origin"], "http://127.0.0.1:3002");
   await server.close();
 });
 

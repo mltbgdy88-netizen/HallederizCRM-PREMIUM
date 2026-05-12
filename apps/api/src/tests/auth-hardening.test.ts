@@ -59,6 +59,65 @@ test("demo auth enabled in development: /auth/login creates session", async () =
   });
 });
 
+test("development demo persistence enables demo auth when DEMO_AUTH_ENABLED is unset", async () => {
+  await withEnv(
+    {
+      NODE_ENV: "development",
+      PERSISTENCE_MODE: "demo",
+      DEMO_AUTH_ENABLED: undefined,
+      LOCAL_PILOT_AUTH_ENABLED: "false"
+    },
+    async () => {
+      const server = await buildAuthServer();
+      const response = await server.inject({
+        method: "POST",
+        url: "/auth/login",
+        payload: {
+          tenantSlug: "hallederiz",
+          email: "admin@hallederiz.com",
+          password: "demo"
+        }
+      });
+
+      assert.equal(response.statusCode, 200);
+      assert.ok(response.json().accessToken);
+      await server.close();
+    }
+  );
+});
+
+test("login session restore returns active session for matching tenant header", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildAuthServer();
+    const loginResponse = await server.inject({
+      method: "POST",
+      url: "/auth/login",
+      payload: {
+        tenantSlug: "hallederiz",
+        email: "admin@hallederiz.com",
+        password: "demo"
+      }
+    });
+
+    assert.equal(loginResponse.statusCode, 200);
+    const loginPayload = loginResponse.json() as { accessToken: string; session: { tenant: { id: string } } };
+
+    const sessionResponse = await server.inject({
+      method: "GET",
+      url: "/auth/session",
+      headers: {
+        "x-session-token": loginPayload.accessToken,
+        authorization: `Bearer ${loginPayload.accessToken}`,
+        "x-tenant-id": loginPayload.session.tenant.id
+      }
+    });
+
+    assert.equal(sessionResponse.statusCode, 200);
+    assert.equal(sessionResponse.json().item.tenant.id, loginPayload.session.tenant.id);
+    await server.close();
+  });
+});
+
 test("createSession throws when demo auth is disabled", async () => {
   await withEnv(
     {
