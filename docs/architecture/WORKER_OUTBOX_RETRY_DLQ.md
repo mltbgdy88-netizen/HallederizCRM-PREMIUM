@@ -170,3 +170,10 @@ Bu handler'lar `dry_run` modundadir ve gercek provider veya gercek mutation yazm
 - Execute payload'inda gate metadata eksikse worker handler non-retryable fail-closed davranisina gider.
 - Gate allowed olsa bile worker handler real provider call veya real mutation calistirmaz; metadata `mutation_executed:false` ve `provider_call_executed:false` olarak kalir.
 - `platform.settings.update` controlled execution foundation payload'i worker tarafinda dogrulanabilir; real settings DB mutation ayri explicit PR gerektirir.
+
+## Production Safety Visibility (Phase)
+
+- Worker health response'u production safety report metadata'sini dondurur.
+- `/worker/safety` endpoint'i detayli runtime mode, provider write ve unsafe blocker bilgisini auth/permission guard arkasinda sunar.
+- Safety route repository eksiginde fail-open success donmez; explicit `worker_repository_unavailable` doner.
+- Production worker infinite loop bu fazda baslatilmaz.

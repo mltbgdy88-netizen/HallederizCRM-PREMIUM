@@ -334,3 +334,16 @@
   - production DB transaction hardening
   - monitoring/alerts
   - approval inbox UI
+
+## 2026-05-13 - Production Safety Smoke Monitoring Pack
+
+- Status: completed (foundation)
+- Added production safety report/assertion foundation for approval and worker runtime modes.
+- Worker health/safety visibility now surfaces runtime mode, provider write and unsafe blocker metadata behind existing auth/permission guards.
+- Added `pnpm smoke:production-safety` smoke command and production readiness report.
+- Real provider writes, ERP/factory/document writes, production worker infinite loop and real mutation activation remain closed.
+- Remaining gap (next phase):
+  - production worker daemon lifecycle and metrics/alerts
+  - real settings mutation activation PR
+  - production database transaction hardening
+  - approval inbox UI

@@ -21,7 +21,8 @@
     "local-ai:health": "node scripts/local-ai/health.cjs",
     "smoke:routes": "node scripts/smoke/routes.cjs",
     "smoke:navigation": "node scripts/smoke/navigation.cjs",
-    "smoke:e2e": "node scripts/smoke/e2e.cjs"
+    "smoke:e2e": "node scripts/smoke/e2e.cjs",
+    "smoke:production-safety": "pnpm --filter @hallederiz/api... build && pnpm --filter @hallederiz/api exec node --loader ts-node/esm --experimental-specifier-resolution=node --test src/tests/production-safety-smoke.test.ts"
   },
   "devDependencies": {
     "@types/node": "^22.7.4",
