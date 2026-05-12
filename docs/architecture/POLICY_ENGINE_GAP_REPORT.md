@@ -91,3 +91,35 @@
   - Repository save failure: fail-closed `failed` result with explicit persistence failure reasons.
 - Duplicate idempotency behavior remains guarded and does not re-run handler execution.
 - Remaining gap (next phase): real DB schema/migration, transaction boundary, retry/DLQ handling, worker write-back integration.
+
+## 2026-05-12 - Worker/Outbox/Retry/DLQ Foundation
+
+- Status: completed (domain-level foundation)
+- Added worker job model with tenant-aware idempotent metadata and dead-letter fields.
+- Added outbox contract primitives:
+  - `createOutboxJob`
+  - `markJobProcessing`
+  - `markJobCompleted`
+  - `markJobFailed`
+  - `moveJobToDeadLetter`
+  - `shouldRetryJob`
+  - `calculateNextRetryAt`
+- Added outbox repository port and in-memory adapter:
+  - `enqueue`
+  - `claimNext`
+  - `complete`
+  - `fail`
+  - `moveToDeadLetter`
+  - `findByIdempotencyKey`
+  - `listJobs`
+- Added worker handler registry and default safe handlers:
+  - `approval.execution.dispatch`
+  - `audit.timeline.writeback`
+  - `notification.dispatch`
+- Added worker runner foundation `processNextJob(...)` with fail-closed behavior:
+  - no job -> `no_job`
+  - unknown handler -> `dead_letter`
+  - retryable failures -> `failed` + next retry time
+  - max attempts / non-retryable -> `dead_letter`
+- Duplicate idempotency key does not create/execute second job.
+- Remaining gap (next phase): DB-backed outbox/dead-letter migrations, distributed claim lock/lease, worker lifecycle, retry-DLQ admin UI, provider-specific real handlers, real audit/timeline write-back, monitoring/alerts.

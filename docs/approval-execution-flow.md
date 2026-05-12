@@ -59,3 +59,10 @@
 - Repository yoksa davranis bozulmaz; result `persistenceMode` ve `persistenceSkipped` alanlari ile acikca isaretlenir.
 - Repository save hatalarinda fail-closed `failed` sonucu uretilir.
 - Bu fazda gercek DB schema/migration, transaction boundary, retry/DLQ ve worker write-back kapsam disinda kalir.
+
+## Phase 3 Worker Outbox Retry DLQ Foundation
+
+- Approval execution sonrasi write-back isleri icin worker/outbox/retry/DLQ foundation katmani eklendi.
+- Worker flow su an domain-level ve dry_run odaklidir; production loop veya provider write acilmadi.
+- Outbox job contract idempotency, retry backoff ve dead-letter gecisini fail-closed prensibiyle tanimlar.
+- Sonraki fazda DB-backed outbox/dead-letter tablolari, distributed claim lock ve gercek handler wiring eklenecek.
