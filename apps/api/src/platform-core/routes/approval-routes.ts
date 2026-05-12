@@ -20,6 +20,7 @@ import {
   type PendingApprovalRepositoryResolution
 } from "../../shared/approval-repository-runtime";
 import { executeApprovedPendingApproval, type ApprovalBridgeTrigger } from "../../shared/approval-execution-runtime";
+import { isApprovalSandboxSeedRouteEnabled, runApprovalSandboxSeed } from "../../shared/approval-sandbox-seed";
 
 interface ApprovalPendingRepository {
   mode: string;
@@ -145,6 +146,61 @@ export async function registerApprovalRoutes(server: FastifyInstance, deps: Appr
 
     return resolvePendingApprovalRepository(context);
   }
+
+  server.get("/platform/approvals/sandbox/availability", async (request, reply) =>
+    withGuards(request, reply, requireReadAccess(readPermissions.approvals), async (context) => {
+      const enabled = isApprovalSandboxSeedRouteEnabled();
+      const repositoryResolution = resolveRepository(context);
+      const repositoryReady = Boolean(repositoryResolution.repository);
+      return {
+        sandboxSeedAvailable: enabled && repositoryReady,
+        sandboxSeedRouteEnabled: enabled,
+        approvalRepositoryReady: repositoryReady,
+        approvalPersistenceMode: repositoryResolution.mode,
+        reasons: enabled
+          ? repositoryReady
+            ? []
+            : repositoryResolution.reasons
+          : ["approval_sandbox_seed_disabled_non_demo_or_production"]
+      };
+    })
+  );
+
+  server.post("/platform/approvals/sandbox/seed", async (request, reply) =>
+    withGuards(
+      request,
+      reply,
+      [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.write", "approvals.manage"])],
+      async (context) => {
+        if (!isApprovalSandboxSeedRouteEnabled()) {
+          return reply.status(403).send({
+            ok: false,
+            error: "sandbox_disabled",
+            message: "Approval sandbox seed yalnizca development/demo/test ortaminda aciktir."
+          });
+        }
+
+        const repositoryResolution = resolveRepository(context);
+        if (!repositoryResolution.repository) {
+          return reply.status(503).send({
+            ok: false,
+            error: "approval_repository_unavailable",
+            message: "Approval repository foundation baglantisi mevcut degil.",
+            approvalPersistenceMode: repositoryResolution.mode,
+            reasons: repositoryResolution.reasons
+          });
+        }
+
+        const seed = await runApprovalSandboxSeed(repositoryResolution.repository, context);
+        return {
+          ok: true,
+          repositoryMode: repositoryResolution.mode,
+          created: seed.created,
+          skipped: seed.skipped
+        };
+      }
+    )
+  );
 
   server.get("/platform/approvals", async (request, reply) =>
     withGuards(request, reply, requireReadAccess(readPermissions.approvals), async (context) => {
@@ -310,12 +366,21 @@ export async function registerApprovalRoutes(server: FastifyInstance, deps: Appr
             });
           }
 
+          const rejectReason = typeof request.body?.reason === "string" ? request.body.reason.trim() : "";
+          if (!rejectReason) {
+            return reply.status(400).send({
+              ok: false,
+              error: "reject_reason_required",
+              message: "Reddetme nedeni zorunludur."
+            });
+          }
+
           const decision = await repositoryResolution.repository.markPendingApprovalRejected({
             approvalRequestId: approvalRequest.approvalRequestId,
             tenantId: context.tenantId,
             rejectedBy: context.userId,
             rejectedAt: new Date().toISOString(),
-            reason: request.body?.reason
+            reason: rejectReason
           });
 
           if (!decision.ok) {

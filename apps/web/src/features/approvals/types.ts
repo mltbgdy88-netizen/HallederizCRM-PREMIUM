@@ -26,6 +26,11 @@ export interface ApprovalInboxItem {
   bridgeReasons?: string[];
   bridgeTransactionMode?: string;
   bridgePersistenceMode?: string;
+  /** Present after approve bridge when API returns enriched item */
+  approvalPersisted?: boolean;
+  workerProcessingRecommended?: boolean;
+  auditTimelineWritebackQueued?: boolean;
+  gateDecision?: Record<string, unknown>;
 }
 
 export interface ApprovalListResponse {
@@ -43,9 +48,16 @@ export interface ApprovalActionResponse {
   duplicate?: boolean;
   approvalRequestId?: string;
   status?: string;
+  approvalStatus?: string;
   executionId?: string;
   outboxJobId?: string;
   approvalPersistenceMode?: string;
+  bridgeMode?: string;
+  outboxMode?: string;
+  outboxQueued?: boolean;
+  workerProcessingRecommended?: boolean;
+  auditTimelineWritebackQueued?: boolean;
+  gateDecision?: Record<string, unknown>;
   reasons?: string[];
   bridgeResult?: {
     transactionMode?: string;
@@ -54,6 +66,29 @@ export interface ApprovalActionResponse {
     outboxDuplicate?: boolean;
     reasons?: string[];
   };
+  error?: string;
+  message?: string;
+}
+
+export interface ApprovalSandboxAvailabilityResponse {
+  sandboxSeedAvailable: boolean;
+  sandboxSeedRouteEnabled: boolean;
+  approvalRepositoryReady: boolean;
+  approvalPersistenceMode?: string;
+  reasons?: string[];
+}
+
+export interface ApprovalSandboxSeedSkipped {
+  idempotencyKey: string;
+  approvalRequestId: string;
+  status: string;
+}
+
+export interface ApprovalSandboxSeedResponse {
+  ok: boolean;
+  repositoryMode?: string;
+  created?: ApprovalInboxItem[];
+  skipped?: ApprovalSandboxSeedSkipped[];
   error?: string;
   message?: string;
 }
@@ -89,7 +124,15 @@ export interface WorkerHealthResponse {
   };
 }
 
-export type ApprovalClientErrorKind = "network" | "unauthorized" | "forbidden" | "unsupported" | "not_found" | "unknown";
+export type ApprovalClientErrorKind =
+  | "network"
+  | "unauthorized"
+  | "forbidden"
+  | "unsupported"
+  | "not_found"
+  | "conflict"
+  | "invalid_request"
+  | "unknown";
 
 export interface ApprovalClientError {
   kind: ApprovalClientErrorKind;

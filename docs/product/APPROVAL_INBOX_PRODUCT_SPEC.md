@@ -186,3 +186,10 @@ Tüm mutation benzeri UI aksiyonları demo/backend yoksa **demo toast** + disabl
 - Sidebar `Onaylar` linki `/onaylar` route'una baglidir; dashboard hizli erisim karti eklendi.
 - Filtre, arama ve siralama mevcut API listesi uzerinden client-side calisir; fake count gosterilmez.
 - Approve/reject UX pending disi durumda disabled kalir; runtime action guvenligi backend gate'e baglidir.
+
+## 2026-05-13 — Operator UI runtime integration (sandbox)
+
+- Local/demo/test ortaminda `GET /platform/approvals/sandbox/availability` ve `POST /platform/approvals/sandbox/seed` ile **idempotent** sandbox pending kayitlari olusturulabilir; production `NODE_ENV` veya auth production modunda **kapalidir** (403 / route flag false).
+- UI `ApprovalSandboxToolbar` yalnizca development build ve API `sandboxSeedAvailable` true iken gorunur; client-side fake liste uretmez.
+- Liste/detay `normalizeApproval` ile API contract alanlarina maplenir; approve/reject sonrasi **refetch** zorunludur; reject icin bos reason API `400 reject_reason_required` doner.
+- Worker health + safety/DLQ ozeti inbox ust bandinda read-only kartlarda gosterilir.

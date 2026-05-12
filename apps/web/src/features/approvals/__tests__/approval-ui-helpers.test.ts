@@ -2,12 +2,17 @@ import assert from "node:assert/strict";
 import test from "node:test";
 import {
   buildActiveFilterSummary,
+  canApproveApproval,
+  canRejectApproval,
   computeInboxStats,
   filterInboxItems,
   isApprovalActionAvailable,
+  isSandboxAvailable,
   mapApprovalUiErrorMessage,
+  normalizeApproval,
   searchInboxItems,
   sortInboxItems,
+  summarizeGateDecision,
   validateRejectReason
 } from "../utils/inbox-helpers";
 import type { ApprovalInboxItem } from "../types";
@@ -69,6 +74,8 @@ test("error message mapper returns readable auth and runtime messages", () => {
   assert.match(mapApprovalUiErrorMessage({ kind: "forbidden", message: "x" }), /yetkiniz yok/i);
   assert.match(mapApprovalUiErrorMessage({ kind: "unsupported", message: "foundation unavailable" }), /foundation/i);
   assert.match(mapApprovalUiErrorMessage({ kind: "network", message: "x" }), /baglantisi kurulamadi/i);
+  assert.match(mapApprovalUiErrorMessage({ kind: "conflict", message: "cakisma" }), /cakisma/i);
+  assert.match(mapApprovalUiErrorMessage({ kind: "invalid_request", message: "neden" }), /neden/i);
 });
 
 test("reject reason validation requires non-empty text", () => {
@@ -84,4 +91,40 @@ test("stats and filter summary helpers use live list data", () => {
     buildActiveFilterSummary({ filter: "pending", query: "apr", sort: "newest", visibleCount: 1, totalCount: 2 }),
     /pending/
   );
+});
+
+test("normalizeApproval keeps valid API rows and drops malformed", () => {
+  const row = normalizeApproval({
+    approvalRequestId: "apr_x",
+    tenantId: "t1",
+    actorId: "u1",
+    actionKey: "platform.settings.update",
+    status: "pending",
+    reasons: ["r1"],
+    idempotencyKey: "idem_x",
+    requestedAt: "2026-05-12T10:00:00.000Z",
+    createdAt: "2026-05-12T10:00:00.000Z",
+    updatedAt: "2026-05-12T10:00:00.000Z",
+    auditRequired: true,
+    timelineRequired: true
+  });
+  assert.ok(row);
+  assert.equal(row?.approvalRequestId, "apr_x");
+  assert.equal(normalizeApproval({ status: "pending" }), null);
+});
+
+test("canApprove and canReject helpers align with pending policy", () => {
+  assert.equal(canApproveApproval(SAMPLE[0]), true);
+  assert.equal(canApproveApproval(SAMPLE[1]), false);
+  assert.equal(canRejectApproval(SAMPLE[0], "").ok, false);
+  assert.equal(canRejectApproval(SAMPLE[0], "x").ok, true);
+});
+
+test("summarizeGateDecision renders key gate fields", () => {
+  assert.match(summarizeGateDecision({ allowed: false, mode: "dry_run", blockers: ["external_write_forbidden"], reasons: ["r"] }), /external_write_forbidden/);
+});
+
+test("isSandboxAvailable respects production build flag", () => {
+  assert.equal(isSandboxAvailable({ sandboxSeedAvailable: true } as never, "production"), false);
+  assert.equal(isSandboxAvailable({ sandboxSeedAvailable: true } as never, "development"), true);
 });

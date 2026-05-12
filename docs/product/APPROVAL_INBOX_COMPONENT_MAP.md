@@ -217,3 +217,8 @@ Inbox implementasyonu Dashboard AI bileşenini **import etmez**; ortak tipografi
 - `ApprovalInboxShell`, `ApprovalList`, `ApprovalDetailPanel`, `ApprovalActionBar`, `ApprovalStatusBadge`, `ApprovalRiskSummary`, `ApprovalTimelinePreview`, `ApprovalOutboxStatusCard`, `ApprovalSafetyBadge`, `LoadingState`, `EmptyState`, `ErrorState`
 - Client foundation: `apps/web/src/features/approvals/api/approval-client.ts`
 - UI helpers: `apps/web/src/features/approvals/utils/inbox-helpers.ts`
+
+## 2026-05-13 — Sandbox toolbar + runtime cards
+
+- `ApprovalSandboxToolbar` (dev/demo + API availability): `POST /platform/approvals/sandbox/seed` cagrisi, liste refetch.
+- Inbox ustunde worker health + safety/DLQ strip; `normalizeApproval` ile API contract map.
