@@ -11,3 +11,4 @@ export * from "./customer-offer";
 export * from "./commercial-operations";
 export * from "./whatsapp-workflow";
 export * from "./whatsapp-intent-rules";
+export * from "./policy";
