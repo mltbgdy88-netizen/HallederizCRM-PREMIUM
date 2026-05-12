@@ -1,7 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import type { PlatformSettings } from "@hallederiz/types";
 import { platformSettingsSchema } from "@hallederiz/types";
-import { assertAnyPermission, assertAuthenticated, withGuards } from "../../shared/auth-guards";
+import { requireTenantPermissionGuards, withGuards } from "../../shared/auth-guards";
 import { getTenantSettingsState, setTenantSettingsState } from "../settings-state";
 import { buildPilotReadiness } from "../pilot-readiness";
 import { readPermissions, requireReadAccess } from "../../shared/read-guards";
@@ -18,7 +18,7 @@ export async function registerSettingsRoutes(server: FastifyInstance) {
     return withGuards(
       request,
       reply,
-      [assertAuthenticated, (context) => assertAnyPermission(context, ["platform.settings.write", "settings.manage"])],
+      requireTenantPermissionGuards(["platform.settings.write", "settings.manage"]),
       async () => {
         const tenantSettingsState = getTenantSettingsState();
         const patch = request.body ?? {};

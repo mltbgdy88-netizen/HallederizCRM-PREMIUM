@@ -60,6 +60,21 @@ export function assertAnyPermission(context: RequestContext, requiredPermissions
   });
 }
 
+export function requireTenantPermissionGuards(
+  requiredPermissions: readonly string[],
+  resolveTenantId?: (context: RequestContext) => string | undefined
+): Array<(context: RequestContext) => void> {
+  return [
+    assertAuthenticated,
+    (context: RequestContext) => {
+      if (resolveTenantId) {
+        assertTenantAccess(context, resolveTenantId(context));
+      }
+      assertAnyPermission(context, requiredPermissions);
+    }
+  ];
+}
+
 export async function withGuards<T>(
   request: FastifyRequest,
   reply: FastifyReply,
