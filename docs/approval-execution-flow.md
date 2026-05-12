@@ -51,3 +51,11 @@
 - `auditEvent` ve `timelineEvent` draft payload'lari tenant/action/approval/execution baglami ile result icinde tasinir.
 - Bu fazda DB kaliciligi yoktur; sadece foundation metadata uretimi vardir.
 - Gercek audit/timeline write-back ve execution log persistence sonraki fazlara birakilmistir.
+
+## Phase 2 DB-Backed Persistence Preparation
+
+- Dispatcher artik opsiyonel execution persistence repository portu alabilir.
+- Repository verildiginde execution log + audit/timeline draft eventleri repository kontrati uzerinden kaydedilir.
+- Repository yoksa davranis bozulmaz; result `persistenceMode` ve `persistenceSkipped` alanlari ile acikca isaretlenir.
+- Repository save hatalarinda fail-closed `failed` sonucu uretilir.
+- Bu fazda gercek DB schema/migration, transaction boundary, retry/DLQ ve worker write-back kapsam disinda kalir.
