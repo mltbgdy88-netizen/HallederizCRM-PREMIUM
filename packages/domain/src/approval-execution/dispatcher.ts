@@ -1,5 +1,6 @@
 import type { ActionRegistryEntry } from "@hallederiz/types";
 import { getActionRegistryEntry } from "../policy/action-registry";
+import { getActionExecutionHandler } from "./handler-registry";
 
 export interface ApprovalExecutionRequest {
   tenantId: string;
@@ -27,33 +28,7 @@ export interface ApprovalExecutionResult {
   idempotencyKey: string;
 }
 
-type ExecutionHandlerResult = {
-  ok: boolean;
-  reasons?: string[];
-};
-
-type ExecutionHandler = (request: ApprovalExecutionRequest, action: ActionRegistryEntry) => ExecutionHandlerResult;
-
 const idempotencyStore = new Map<string, ApprovalExecutionResult>();
-
-const handlers: Record<string, ExecutionHandler> = {
-  "platform.users.create": (request) => ({
-    ok: true,
-    reasons: [
-      "supported_action_noop",
-      "execution_foundation_phase_only",
-      `action:${request.actionKey}`
-    ]
-  }),
-  "platform.settings.update": (request) => ({
-    ok: true,
-    reasons: [
-      "supported_action_noop",
-      "execution_foundation_phase_only",
-      `action:${request.actionKey}`
-    ]
-  })
-};
 
 function makeExecutionId(request: ApprovalExecutionRequest) {
   return `exec_${request.approvalRequestId}_${request.idempotencyKey}`;
@@ -108,16 +83,20 @@ export function dispatchApprovedAction(request: ApprovalExecutionRequest): Appro
     return resultFrom(request, "blocked", ["approval_required_missing_request"], action);
   }
 
-  const handler = handlers[request.actionKey];
+  const handler = getActionExecutionHandler(request.actionKey);
   if (!handler) {
     return resultFrom(request, "unsupported_action", ["no_handler_registered"], action);
   }
+  if (!handler.supported) {
+    return resultFrom(request, "unsupported_action", ["handler_marked_unsupported"], action);
+  }
 
   try {
-    const handlerResult = handler(request, action);
+    const handlerResult = handler.execute(request, action);
+    const status = handlerResult.status ?? (handlerResult.ok ? "executed" : "failed");
     const result = resultFrom(
       request,
-      handlerResult.ok ? "executed" : "failed",
+      status,
       handlerResult.reasons ?? [handlerResult.ok ? "handler_executed" : "handler_failed"],
       action,
       makeExecutionId(request),

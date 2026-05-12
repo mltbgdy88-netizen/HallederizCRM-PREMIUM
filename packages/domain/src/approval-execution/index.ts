@@ -1,6 +1,7 @@
 import type { AiExecutionResult, AiOperation, Approval, ApprovalExecution } from "@hallederiz/types";
 import { validateAiMutationGuard } from "../ai";
 export * from "./dispatcher";
+export * from "./handler-registry";
 
 export function canExecuteApproval(approval: Approval): boolean {
   return approval.status === "approved" && approval.execution.executable && Boolean(approval.policySnapshot.serverActionKey);
