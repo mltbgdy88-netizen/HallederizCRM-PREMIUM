@@ -1,11 +1,24 @@
-const workerName = "operations-worker";
+import {
+  InMemoryOutboxJobRepository,
+  processWorkerTick,
+  type WorkerRuntimeOptions
+} from "@hallederiz/domain";
 
-async function bootstrapWorker() {
-  // TODO: Connect queue provider and register job processors.
-  console.info(`[${workerName}] started`);
+export interface WorkerBootstrapResult {
+  mode: "foundation_dry_run";
+  tickResult: ReturnType<typeof processWorkerTick>;
 }
 
-bootstrapWorker().catch((error) => {
-  console.error(`[${workerName}] failed`, error);
-  process.exit(1);
-});
+export function runWorkerFoundationTick(options?: WorkerRuntimeOptions): WorkerBootstrapResult {
+  const repository = new InMemoryOutboxJobRepository();
+  const tickResult = processWorkerTick(repository, {
+    dryRun: true,
+    maxJobsPerTick: 1,
+    ...options
+  });
+
+  return {
+    mode: "foundation_dry_run",
+    tickResult
+  };
+}

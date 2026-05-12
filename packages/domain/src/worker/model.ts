@@ -15,6 +15,9 @@ export interface WorkerJob {
   updatedAt: string;
   lastError?: string;
   deadLetterReason?: string;
+  lockedAt?: string;
+  lockedBy?: string;
+  leaseExpiresAt?: string;
 }
 
 export type WorkerHandlerMode = "noop" | "dry_run" | "execute";
@@ -27,6 +30,7 @@ export interface WorkerJobHandleResult {
 
 export interface ProcessNextJobResult {
   status: "no_job" | "completed" | "failed" | "dead_letter" | "duplicate";
+  claimedJob?: WorkerJob;
   job?: WorkerJob;
   reasons: string[];
   handlerMode?: WorkerHandlerMode;

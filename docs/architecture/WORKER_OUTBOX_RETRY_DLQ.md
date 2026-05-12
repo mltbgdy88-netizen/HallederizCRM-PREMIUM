@@ -110,3 +110,16 @@ Bu handler'lar `dry_run` modundadir ve gercek provider veya gercek mutation yazm
 - DB pending approval repository adapter foundation eklendi.
 - Worker/outbox dokumani acisindan pending approval kaliciligi artik migration + adapter seviyesinde hazirdir.
 - Kalan faz: production runtime wiring, UI inbox ve channel command entegrasyonu.
+
+## Worker Runtime Claim/Lease Foundation (Phase)
+
+- Outbox job processing icin tick-bazli runtime claim/lease foundation eklendi.
+- `processWorkerTick` ve `processClaimedJob` ile:
+  - claim (pending|failed + availableAt)
+  - lease metadata (workerId/lockedAt/claimLeaseMs)
+  - retry/dead-letter karar akisi
+  - duplicate idempotency korumasi
+  modelleri foundation seviyesinde calisir.
+- `approval.execution.dispatch` handler'i dry_run/noop guvenli modda payload validation yapar.
+- Bu fazda production sonsuz worker loop/daemon baslatilmaz.
+- Sonraki faz: DB-level atomic distributed claim lock/lease hardening ve runtime lifecycle orchestration.

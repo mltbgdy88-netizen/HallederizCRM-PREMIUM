@@ -246,3 +246,16 @@
   - production DB connection lifecycle and runtime config hardening
   - approval inbox UI integration
   - channel command integrations (WhatsApp/Instagram)
+
+## 2026-05-12 - Worker Runtime Claim/Lease + Approval Outbox Processing Foundation
+
+- Status: completed (foundation)
+- Added worker runtime claim/lease contract and tick processor foundation.
+- Added safe `approval.execution.dispatch` dry_run processing behavior with payload validation.
+- Outbox repository claim mapping now exposes lease option helpers for runtime wiring/tests.
+- No production infinite loop/daemon in this phase.
+- Remaining gap (next phase):
+  - DB-level atomic distributed lock/lease hardening
+  - worker daemon lifecycle orchestration
+  - DLQ replay/admin operations
+  - monitoring/metrics/alerts

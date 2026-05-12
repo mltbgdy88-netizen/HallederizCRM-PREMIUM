@@ -26,6 +26,7 @@ export function processNextJob(
     const dead = repository.moveToDeadLetter(job.jobId, "missing_tenant_context", now);
     return {
       status: "dead_letter",
+      claimedJob: job,
       job: dead,
       reasons: ["missing_tenant_context"]
     };
@@ -36,6 +37,7 @@ export function processNextJob(
     const dead = repository.moveToDeadLetter(job.jobId, "missing_worker_handler", now);
     return {
       status: "dead_letter",
+      claimedJob: job,
       job: dead,
       reasons: ["missing_worker_handler"]
     };
@@ -49,6 +51,7 @@ export function processNextJob(
       const completed = repository.complete(job.jobId, now);
       return {
         status: "completed",
+        claimedJob: job,
         job: completed,
         reasons,
         handlerMode: handler.mode
@@ -66,6 +69,7 @@ export function processNextJob(
       const failed = repository.fail(job.jobId, reasons.join(";"), nextRetryAt, now);
       return {
         status: "failed",
+        claimedJob: job,
         job: failed,
         reasons,
         handlerMode: handler.mode
@@ -75,6 +79,7 @@ export function processNextJob(
     const dead = repository.moveToDeadLetter(job.jobId, retryable ? "max_attempts_reached" : "non_retryable_failure", now);
     return {
       status: "dead_letter",
+      claimedJob: job,
       job: dead,
       reasons,
       handlerMode: handler.mode
@@ -91,6 +96,7 @@ export function processNextJob(
       const failed = repository.fail(job.jobId, classified.message, nextRetryAt, now);
       return {
         status: "failed",
+        claimedJob: job,
         job: failed,
         reasons: [classified.message]
       };
@@ -103,6 +109,7 @@ export function processNextJob(
     );
     return {
       status: "dead_letter",
+      claimedJob: job,
       job: dead,
       reasons: [classified.message]
     };

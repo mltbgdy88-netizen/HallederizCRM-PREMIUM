@@ -57,12 +57,24 @@ export function createOutboxJob(
   return { job: repository.enqueue(job), created: true, duplicate: false };
 }
 
-export function markJobProcessing(job: WorkerJob, at = nowIso()): WorkerJob {
+export function markJobProcessing(
+  job: WorkerJob,
+  at = nowIso(),
+  options?: {
+    workerId?: string;
+    claimLeaseMs?: number;
+  }
+): WorkerJob {
+  const leaseMs = Math.max(0, options?.claimLeaseMs ?? 0);
+  const leaseExpiresAt = leaseMs > 0 ? new Date(new Date(at).getTime() + leaseMs).toISOString() : undefined;
   return {
     ...job,
     status: "processing",
     attempts: job.attempts + 1,
-    updatedAt: at
+    updatedAt: at,
+    lockedAt: at,
+    lockedBy: options?.workerId,
+    leaseExpiresAt
   };
 }
 
@@ -70,7 +82,10 @@ export function markJobCompleted(job: WorkerJob, at = nowIso()): WorkerJob {
   return {
     ...job,
     status: "completed",
-    updatedAt: at
+    updatedAt: at,
+    lockedAt: undefined,
+    lockedBy: undefined,
+    leaseExpiresAt: undefined
   };
 }
 
@@ -80,7 +95,10 @@ export function markJobFailed(job: WorkerJob, errorMessage: string, nextAvailabl
     status: "failed",
     lastError: errorMessage,
     availableAt: nextAvailableAt,
-    updatedAt: at
+    updatedAt: at,
+    lockedAt: undefined,
+    lockedBy: undefined,
+    leaseExpiresAt: undefined
   };
 }
 
@@ -89,7 +107,10 @@ export function moveJobToDeadLetter(job: WorkerJob, reason: string, at = nowIso(
     ...job,
     status: "dead_letter",
     deadLetterReason: reason,
-    updatedAt: at
+    updatedAt: at,
+    lockedAt: undefined,
+    lockedBy: undefined,
+    leaseExpiresAt: undefined
   };
 }
 
