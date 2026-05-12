@@ -19,6 +19,7 @@ export interface DbWorkerJobRecord {
   deadLetterReason?: string;
   lockedAt?: string;
   lockedBy?: string;
+  leaseExpiresAt?: string;
 }
 
 interface OutboxJobRow extends QueryResultRow {
@@ -60,6 +61,7 @@ export function normalizeOutboxClaimLeaseOptions(options?: OutboxClaimLeaseOptio
 export function mapOutboxClaimLeaseParams(nowIso: string, options?: OutboxClaimLeaseOptions): {
   nowIso: string;
   workerId: string;
+  claimLeaseMs: number;
   leaseExpiredBeforeIso: string;
 } {
   const normalized = normalizeOutboxClaimLeaseOptions(options);
@@ -67,8 +69,123 @@ export function mapOutboxClaimLeaseParams(nowIso: string, options?: OutboxClaimL
   return {
     nowIso,
     workerId: normalized.workerId,
+    claimLeaseMs: normalized.claimLeaseMs,
     leaseExpiredBeforeIso: cutoff
   };
+}
+
+export const OUTBOX_ATOMIC_CLAIM_FOUNDATION_METADATA = {
+  level: "foundation",
+  productionDistributedLock: false,
+  usesPostgresSkipLocked: true,
+  leaseStorage: "locked_at_locked_by",
+  leaseExpiresAtDerived: true,
+  claimableStatuses: ["pending", "failed"] as const,
+  claimEligibility: {
+    availableAtLteNow: true,
+    lockedAtNullOrLeaseExpired: true,
+    activeLeaseBlocksClaim: true
+  }
+} as const;
+
+export function buildClaimNextOutboxJobSql(): string {
+  return `WITH picked AS (
+        SELECT id
+        FROM outbox_jobs
+        WHERE status IN ('pending', 'failed')
+          AND available_at <= $1::timestamptz
+          AND (locked_at IS NULL OR locked_at <= $3::timestamptz)
+        ORDER BY available_at ASC
+        LIMIT 1
+        FOR UPDATE SKIP LOCKED
+      )
+      UPDATE outbox_jobs AS jobs
+      SET
+        status = 'processing',
+        attempts = jobs.attempts + 1,
+        updated_at = $1::timestamptz,
+        locked_at = $1::timestamptz,
+        locked_by = $2
+      FROM picked
+      WHERE jobs.id = picked.id
+      RETURNING
+        jobs.id, jobs.tenant_id, jobs.job_type, jobs.action_key, jobs.payload, jobs.status, jobs.attempts, jobs.max_attempts,
+        jobs.idempotency_key, jobs.available_at, jobs.created_at, jobs.updated_at, jobs.last_error, NULL::text AS dead_letter_reason,
+        jobs.locked_at, jobs.locked_by`;
+}
+
+export function calculateLeaseExpiresAt(lockedAt: string, claimLeaseMs: number): string {
+  return new Date(new Date(lockedAt).getTime() + Math.max(0, claimLeaseMs)).toISOString();
+}
+
+export interface OutboxJobClaimEligibilityInput {
+  status: DbWorkerJobStatus;
+  availableAt: string;
+  lockedAt?: string | null;
+  nowIso: string;
+  leaseExpiredBeforeIso: string;
+}
+
+export function isOutboxJobClaimEligible(input: OutboxJobClaimEligibilityInput): boolean {
+  return (
+    (input.status === "pending" || input.status === "failed") &&
+    input.availableAt <= input.nowIso &&
+    (input.lockedAt == null || input.lockedAt <= input.leaseExpiredBeforeIso)
+  );
+}
+
+export function mapClaimedOutboxJobRow(row: OutboxJobRow, claimLeaseMs: number): DbWorkerJobRecord {
+  const record = mapOutboxRowToDomainRecord(row);
+  if (!record.lockedAt) {
+    return record;
+  }
+  return {
+    ...record,
+    leaseExpiresAt: calculateLeaseExpiresAt(record.lockedAt, claimLeaseMs)
+  };
+}
+
+export interface FoundationOutboxClaimableJob {
+  jobId: string;
+  status: DbWorkerJobStatus;
+  availableAt: string;
+  lockedAt?: string | null;
+  lockedBy?: string | null;
+}
+
+export class FoundationOutboxClaimSimulator {
+  private readonly jobs: Map<string, FoundationOutboxClaimableJob>;
+
+  constructor(seed: FoundationOutboxClaimableJob[]) {
+    this.jobs = new Map(seed.map((job) => [job.jobId, { ...job }]));
+  }
+
+  claimNext(now = new Date().toISOString(), options?: OutboxClaimLeaseOptions): FoundationOutboxClaimableJob | undefined {
+    const claimParams = mapOutboxClaimLeaseParams(now, options);
+    const candidates = [...this.jobs.values()]
+      .filter((job) =>
+        isOutboxJobClaimEligible({
+          status: job.status,
+          availableAt: job.availableAt,
+          lockedAt: job.lockedAt,
+          nowIso: claimParams.nowIso,
+          leaseExpiredBeforeIso: claimParams.leaseExpiredBeforeIso
+        })
+      )
+      .sort((a, b) => a.availableAt.localeCompare(b.availableAt));
+    const next = candidates[0];
+    if (!next) {
+      return undefined;
+    }
+    const claimed: FoundationOutboxClaimableJob = {
+      ...next,
+      status: "processing",
+      lockedAt: claimParams.nowIso,
+      lockedBy: claimParams.workerId
+    };
+    this.jobs.set(claimed.jobId, claimed);
+    return claimed;
+  }
 }
 
 function assertNonEmpty(value: string, fieldName: string) {
@@ -204,33 +321,12 @@ export class DatabaseOutboxJobRepository {
     const resolvedOptions =
       typeof claimOptions === "string" ? normalizeOutboxClaimLeaseOptions({ workerId: claimOptions }) : claimOptions;
     const claimParams = mapOutboxClaimLeaseParams(now, resolvedOptions);
-    const rows = await this.executor.query<OutboxJobRow>(
-      `WITH picked AS (
-        SELECT id
-        FROM outbox_jobs
-        WHERE status IN ('pending', 'failed')
-          AND available_at <= $1::timestamptz
-          AND (locked_at IS NULL OR locked_at <= $3::timestamptz)
-        ORDER BY available_at ASC
-        LIMIT 1
-        FOR UPDATE SKIP LOCKED
-      )
-      UPDATE outbox_jobs AS jobs
-      SET
-        status = 'processing',
-        attempts = jobs.attempts + 1,
-        updated_at = $1::timestamptz,
-        locked_at = $1::timestamptz,
-        locked_by = $2
-      FROM picked
-      WHERE jobs.id = picked.id
-      RETURNING
-        jobs.id, jobs.tenant_id, jobs.job_type, jobs.action_key, jobs.payload, jobs.status, jobs.attempts, jobs.max_attempts,
-        jobs.idempotency_key, jobs.available_at, jobs.created_at, jobs.updated_at, jobs.last_error, NULL::text AS dead_letter_reason,
-        jobs.locked_at, jobs.locked_by`,
-      [claimParams.nowIso, claimParams.workerId, claimParams.leaseExpiredBeforeIso]
-    );
-    return rows[0] ? mapOutboxRowToDomainRecord(rows[0]) : undefined;
+    const rows = await this.executor.query<OutboxJobRow>(buildClaimNextOutboxJobSql(), [
+      claimParams.nowIso,
+      claimParams.workerId,
+      claimParams.leaseExpiredBeforeIso
+    ]);
+    return rows[0] ? mapClaimedOutboxJobRow(rows[0], claimParams.claimLeaseMs) : undefined;
   }
 
   async complete(jobId: string, completedAt = new Date().toISOString()): Promise<DbWorkerJobRecord | undefined> {

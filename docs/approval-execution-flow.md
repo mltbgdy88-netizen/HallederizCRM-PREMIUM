@@ -151,3 +151,9 @@
   - DB-level distributed lock/lease hardening
   - DLQ replay/admin UI
   - real mutation handler activation
+
+## Phase 12 DB-Level Atomic Worker Claim Foundation
+
+- DB outbox claim SQL/contract foundation eklendi; claim lease metadata (`workerId`, `lockedBy`, `lockedAt`, `leaseExpiresAt`) mapping aciklandi.
+- Expired lease reclaim ve aktif lease concurrent claim engeli foundation testleriyle dogrulanir.
+- Production distributed worker daemon lifecycle, DLQ replay/admin API, monitoring/metrics ve real mutation handler activation sonraki fazdir.
