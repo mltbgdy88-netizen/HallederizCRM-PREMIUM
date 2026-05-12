@@ -62,3 +62,9 @@ Bu batch'te audit olaylari in-memory tutulur. Sonraki batch'te DB persistence (`
 - `audit_events` mevcut tablo yapisi bozulmadan kolon-genisletme ile execution/action metadata tasiyacak hale getirildi.
 - Yeni `timeline_events` tablosu subject bazli timeline okumalarini kalici hale getirmek icin migration foundation olarak eklendi.
 - Event write-back transaction boundary ve retention/archival policy sonraki release gorevlerindedir.
+
+## Repository + Transaction Write-Back Foundation (Phase)
+
+- Execution/audit/timeline write-back icin DB repository adapter foundation eklendi.
+- Transaction boundary helper ile execution log + audit event draft + timeline event draft atomik yazim modeli tanimlandi.
+- Bu fazda canli runtime wiring zorunlu kilinmadi; DB client baglantisi sonraki gorevde production akisina baglanacak.
