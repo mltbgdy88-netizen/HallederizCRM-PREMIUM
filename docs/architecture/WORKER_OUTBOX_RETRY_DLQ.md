@@ -163,3 +163,10 @@ Bu handler'lar `dry_run` modundadir ve gercek provider veya gercek mutation yazm
   - `auditTimelineWritebackPayload`
 - Missing/invalid payload non-retryable dead-letter davranisina gider.
 - Valid payload foundation modda guvenli tamamlanir; external provider/mutation execution acikca kapali kalir.
+
+## Controlled Execution Gate Handoff (Phase)
+
+- `approval.execution.dispatch` outbox payload'i requested/effective mode ve `gateDecision` metadata'sini tasiyabilir.
+- Execute payload'inda gate metadata eksikse worker handler non-retryable fail-closed davranisina gider.
+- Gate allowed olsa bile worker handler real provider call veya real mutation calistirmaz; metadata `mutation_executed:false` ve `provider_call_executed:false` olarak kalir.
+- `platform.settings.update` controlled execution foundation payload'i worker tarafinda dogrulanabilir; real settings DB mutation ayri explicit PR gerektirir.

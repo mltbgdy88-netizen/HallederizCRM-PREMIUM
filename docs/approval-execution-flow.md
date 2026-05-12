@@ -186,3 +186,12 @@
 - Valid payload foundation modda guvenli sonuc uretir; `mutation_executed:false` ve `provider_call_executed:false` acik metadata doner.
 - Approve runtime response'lari write-back queue/payload/event-id metadata'sini acik sekilde bildirir.
 - Bu fazda real external provider write ve real mutation activation acilmamistir.
+
+## Phase 16 Controlled Real Handler Gate Pack
+
+- Approval execution icin `execution-gate` kontrati eklendi.
+- Execute mode default kapali kalir; action allowlist, approvalRequestId, idempotencyKey, audit/timeline metadata ve handler safety checklist zorunlu gate girdileridir.
+- `platform.settings.update` controlled execution foundation sonucu uretebilir; gercek DB settings mutation halen kapali kalir.
+- `platform.users.create` real execution dry_run-only/blocked davranisini korur.
+- Dispatcher, transactional bridge ve worker handoff payload'lari gate decision metadata'sini tasir.
+- External provider/ERP/factory/document write bu fazda kapali kalir.

@@ -1,6 +1,10 @@
 import type { ActionRegistryEntry } from "@hallederiz/types";
 import { getActionRegistryEntry } from "../policy/action-registry";
-import { getActionExecutionHandler } from "./handler-registry";
+import { getActionExecutionHandler, type ActionExecutionMode } from "./handler-registry";
+import {
+  evaluateExecutionGate,
+  type ExecutionGateDecision
+} from "./execution-gate";
 import {
   createExecutionEventDrafts,
   createExecutionLogEntry,
@@ -42,6 +46,23 @@ export interface ApprovalExecutionResult {
   timelineEvent?: ExecutionTimelineEventDraft;
   persistenceMode: "none" | "repository";
   persistenceSkipped: boolean;
+  requestedMode: ActionExecutionMode;
+  effectiveMode: ActionExecutionMode;
+  gateDecision?: ExecutionGateDecision;
+  mutationExecuted: boolean;
+  externalProviderCallExecuted: boolean;
+  rollbackPlan?: string;
+  foundationControlledExecution?: boolean;
+}
+
+export interface DispatchApprovedActionOptions {
+  repository?: ApprovalExecutionLogRepository;
+  executionMode?: ActionExecutionMode;
+  executionAllowlist?: readonly string[];
+  auditMetadataPresent?: boolean;
+  timelineMetadataPresent?: boolean;
+  realExecutionEnabled?: boolean;
+  environment?: "production" | "staging" | "development" | "test" | "foundation";
 }
 
 const idempotencyStore = new Map<string, ApprovalExecutionResult>();
@@ -60,6 +81,13 @@ function resultFrom(
   handlerContext?: {
     handlerKey?: string;
     handlerMode?: "noop" | "dry_run" | "execute";
+    requestedMode?: ActionExecutionMode;
+    effectiveMode?: ActionExecutionMode;
+    gateDecision?: ExecutionGateDecision;
+    mutationExecuted?: boolean;
+    externalProviderCallExecuted?: boolean;
+    rollbackPlan?: string;
+    foundationControlledExecution?: boolean;
   }
 ): ApprovalExecutionResult {
   const resolvedExecutionId = executionId ?? makeExecutionId(request);
@@ -97,13 +125,36 @@ function resultFrom(
     auditEvent: eventDrafts.auditEvent,
     timelineEvent: eventDrafts.timelineEvent,
     persistenceMode: "none",
-    persistenceSkipped: true
+    persistenceSkipped: true,
+    requestedMode: handlerContext?.requestedMode ?? handlerMode,
+    effectiveMode: handlerContext?.effectiveMode ?? handlerMode,
+    gateDecision: handlerContext?.gateDecision,
+    mutationExecuted: handlerContext?.mutationExecuted ?? false,
+    externalProviderCallExecuted: handlerContext?.externalProviderCallExecuted ?? false,
+    rollbackPlan: handlerContext?.rollbackPlan,
+    foundationControlledExecution: handlerContext?.foundationControlledExecution
   };
+}
+
+function resolveRequestedMode(request: ApprovalExecutionRequest, options?: DispatchApprovedActionOptions): ActionExecutionMode {
+  if (options?.executionMode) return options.executionMode;
+  const payloadMode = request.payload?.executionMode;
+  if (payloadMode === "execute" || payloadMode === "dry_run" || payloadMode === "noop") return payloadMode;
+  return "dry_run";
+}
+
+function resolveAllowlist(request: ApprovalExecutionRequest, options?: DispatchApprovedActionOptions): readonly string[] {
+  if (options?.executionAllowlist) return options.executionAllowlist;
+  const payloadAllowlist = request.payload?.executionAllowlist;
+  if (Array.isArray(payloadAllowlist)) {
+    return payloadAllowlist.filter((value): value is string => typeof value === "string");
+  }
+  return [];
 }
 
 export function dispatchApprovedAction(
   request: ApprovalExecutionRequest,
-  options?: { repository?: ApprovalExecutionLogRepository }
+  options?: DispatchApprovedActionOptions
 ): ApprovalExecutionResult {
   if (!request.approvalRequestId) {
     return resultFrom(request, "blocked", ["missing_approval_request_id"]);
@@ -174,18 +225,67 @@ export function dispatchApprovedAction(
   }
 
   try {
-    const handlerResult = handler.execute(request, action);
+    const executionId = makeExecutionId(request);
+    const requestedMode = resolveRequestedMode(request, options);
+    const gateDecision = evaluateExecutionGate({
+      tenantId: request.tenantId,
+      actionKey: request.actionKey,
+      approvalRequestId: request.approvalRequestId,
+      executionId,
+      actorId: request.actorId,
+      approverId: request.approvedBy,
+      mode: requestedMode,
+      handlerSafetyChecklist: handler.safetyChecklist,
+      idempotencyKey: request.idempotencyKey,
+      auditRequired: action.auditRequired,
+      timelineRequired: action.timelineRequired,
+      auditMetadataPresent: options?.auditMetadataPresent ?? request.payload?.auditMetadataPresent === true,
+      timelineMetadataPresent: options?.timelineMetadataPresent ?? request.payload?.timelineMetadataPresent === true,
+      realExecutionEnabled: options?.realExecutionEnabled,
+      allowlist: resolveAllowlist(request, options),
+      environment: options?.environment
+    });
+
+    if (!gateDecision.allowed) {
+      return resultFrom(
+        request,
+        "blocked",
+        ["execution_gate_blocked", ...gateDecision.blockers],
+        action,
+        executionId,
+        false,
+        {
+          handlerKey: handler.handlerKey,
+          handlerMode: requestedMode === "execute" ? "execute" : handler.mode,
+          requestedMode,
+          effectiveMode: "dry_run",
+          gateDecision,
+          mutationExecuted: false,
+          externalProviderCallExecuted: false,
+          rollbackPlan: "no_mutation_to_rollback"
+        }
+      );
+    }
+
+    const handlerResult = handler.execute(request, action, gateDecision);
     const status = handlerResult.status ?? (handlerResult.ok ? "executed" : "failed");
     const result = resultFrom(
       request,
       status,
       handlerResult.reasons ?? [handlerResult.ok ? "handler_executed" : "handler_failed"],
       action,
-      makeExecutionId(request),
+      executionId,
       handlerResult.ok,
       {
         handlerKey: handler.handlerKey,
-        handlerMode: handler.mode
+        handlerMode: handlerResult.effectiveMode ?? handler.mode,
+        requestedMode: handlerResult.requestedMode ?? requestedMode,
+        effectiveMode: handlerResult.effectiveMode ?? handler.mode,
+        gateDecision: handlerResult.gateDecision ?? gateDecision,
+        mutationExecuted: handlerResult.mutationExecuted ?? false,
+        externalProviderCallExecuted: handlerResult.externalProviderCallExecuted ?? false,
+        rollbackPlan: handlerResult.rollbackPlan,
+        foundationControlledExecution: handlerResult.foundationControlledExecution
       }
     );
 

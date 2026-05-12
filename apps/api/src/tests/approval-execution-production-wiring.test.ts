@@ -92,7 +92,24 @@ function bridgeFixture(
         }
       },
       persistenceMode: "repository",
-      persistenceSkipped: false
+      persistenceSkipped: false,
+      requestedMode: "dry_run",
+      effectiveMode: "dry_run",
+      gateDecision: {
+        allowed: true,
+        mode: "dry_run",
+        actionKey: request.actionKey,
+        reasons: ["dry_run_or_noop_execution_gate_allowed"],
+        blockers: [],
+        requiredAudit: true,
+        requiredTimeline: true,
+        idempotencyRequired: true,
+        mutationAllowed: false,
+        externalWriteAllowed: false
+      },
+      mutationExecuted: false,
+      externalProviderCallExecuted: false,
+      rollbackPlan: "no_mutation_to_rollback"
     },
     executionLogPersisted: true,
     auditEventPersisted: true,
@@ -212,6 +229,8 @@ test("approve runtime resolves pending approval and returns execution/outbox met
   assert.equal(result.outboxQueued, true);
   assert.equal(result.auditTimelineWritebackQueued, true);
   assert.ok(result.auditTimelinePayload);
+  assert.ok(result.gateDecision);
+  assert.equal(result.gateDecision.mutationAllowed, false);
   assert.ok(typeof result.auditEventId === "string");
   assert.ok(typeof result.timelineEventId === "string");
   assert.equal(result.workerProcessingRecommended, true);

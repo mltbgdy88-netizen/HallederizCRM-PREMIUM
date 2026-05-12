@@ -40,6 +40,9 @@ function createFoundationHandler(jobType: string): WorkerJobHandler {
         const hasApprovalRequestId =
           typeof payload.approvalRequestId === "string" && payload.approvalRequestId.length > 0;
         const hasExecutionId = typeof payload.executionId === "string" && payload.executionId.length > 0;
+        const requestedMode = typeof payload.requestedMode === "string" ? payload.requestedMode : payload.mode;
+        const effectiveMode = typeof payload.effectiveMode === "string" ? payload.effectiveMode : payload.mode;
+        const gateDecision = asRecord(payload.gateDecision);
 
         if (!hasTenantId || !hasActionKey || !hasApprovalRequestId || !hasExecutionId) {
           return {
@@ -54,11 +57,38 @@ function createFoundationHandler(jobType: string): WorkerJobHandler {
           };
         }
 
+        if ((requestedMode === "execute" || effectiveMode === "execute") && !gateDecision) {
+          return {
+            ok: false,
+            retryable: false,
+            reasons: [
+              "missing_execution_gate_metadata",
+              "non_retryable_missing_required_payload",
+              "mutation_executed:false",
+              "provider_call_executed:false"
+            ]
+          };
+        }
+
+        if (effectiveMode === "execute" && gateDecision?.allowed !== true) {
+          return {
+            ok: false,
+            retryable: false,
+            reasons: [
+              "execution_gate_not_allowed_for_worker_dispatch",
+              "non_retryable_blocked_execution_payload",
+              "mutation_executed:false",
+              "provider_call_executed:false"
+            ]
+          };
+        }
+
         return {
           ok: true,
           retryable: false,
           reasons: [
             "approval_execution_dispatch_dry_run_handled",
+            gateDecision ? "execution_gate_metadata_verified" : "execution_gate_metadata_not_required_for_dry_run",
             "handled:true",
             "mode:dry_run",
             "mutation_executed:false",

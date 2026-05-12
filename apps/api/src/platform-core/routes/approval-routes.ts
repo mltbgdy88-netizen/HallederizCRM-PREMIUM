@@ -270,6 +270,7 @@ export async function registerApprovalRoutes(server: FastifyInstance, deps: Appr
             auditTimelinePayload: runtimeResult.auditTimelinePayload,
             auditEventId: runtimeResult.auditEventId,
             timelineEventId: runtimeResult.timelineEventId,
+            gateDecision: runtimeResult.gateDecision,
             auditMetadata: runtimeResult.auditEvent,
             timelineMetadata: runtimeResult.timelineEvent,
             reasons: runtimeResult.reasons

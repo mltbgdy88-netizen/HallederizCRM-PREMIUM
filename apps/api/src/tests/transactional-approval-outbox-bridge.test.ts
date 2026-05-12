@@ -188,6 +188,23 @@ function dispatchedResultFixture(
     timelineEvent,
     persistenceMode: "none",
     persistenceSkipped: true,
+    requestedMode: "dry_run",
+    effectiveMode: "dry_run",
+    gateDecision: {
+      allowed: true,
+      mode: "dry_run",
+      actionKey: request.actionKey,
+      reasons: ["dry_run_or_noop_execution_gate_allowed"],
+      blockers: [],
+      requiredAudit: true,
+      requiredTimeline: true,
+      idempotencyRequired: true,
+      mutationAllowed: false,
+      externalWriteAllowed: false
+    },
+    mutationExecuted: false,
+    externalProviderCallExecuted: false,
+    rollbackPlan: "no_mutation_to_rollback",
     ...overrides
   };
 }
@@ -267,6 +284,11 @@ test("successful dry_run dispatch persists execution/audit/timeline and enqueues
   assert.equal(result.outboxJob?.payload.actionKey, request.actionKey);
   assert.equal(result.outboxJob?.payload.approvalRequestId, request.approvalRequestId);
   assert.equal(result.outboxJob?.payload.executionId, result.executionResult?.executionId);
+  assert.equal(result.outboxJob?.payload.requestedMode, "dry_run");
+  assert.equal(result.outboxJob?.payload.effectiveMode, "dry_run");
+  assert.equal(result.outboxJob?.payload.mutationExecuted, false);
+  assert.equal(result.outboxJob?.payload.externalProviderCallExecuted, false);
+  assert.ok(result.outboxJob?.payload.gateDecision);
   const writebackPayload = result.outboxJob?.payload.auditTimelineWritebackPayload as Record<string, unknown>;
   assert.equal(writebackPayload.tenantId, request.tenantId);
   assert.equal(writebackPayload.actionKey, request.actionKey);

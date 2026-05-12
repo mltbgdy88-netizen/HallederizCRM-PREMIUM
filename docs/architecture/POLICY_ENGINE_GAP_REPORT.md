@@ -320,3 +320,17 @@
   - real external provider write activation (still closed)
   - monitoring/alerts
   - approval inbox UI
+
+## 2026-05-13 - Controlled Real Handler Gate Pack
+
+- Status: completed (foundation)
+- Added execution gate contract for approval execution handlers.
+- Execute mode now requires action allowlist, approvalRequestId, idempotencyKey, audit/timeline metadata and handler safety checklist approval.
+- `platform.settings.update` has controlled execution foundation metadata but does not perform real DB mutation.
+- `platform.users.create` remains dry_run-only/blocked for real execution.
+- Worker `approval.execution.dispatch` validates execute gate metadata and keeps provider/mutation execution closed.
+- Remaining gap (next phase):
+  - explicit real settings mutation activation PR
+  - production DB transaction hardening
+  - monitoring/alerts
+  - approval inbox UI

@@ -37,6 +37,13 @@ export interface TransactionalApprovalExecutionResult {
   timelineEvent?: ApprovalExecutionTimelineEventDraftRecord;
   persistenceMode?: "none" | "repository";
   persistenceSkipped?: boolean;
+  requestedMode?: "noop" | "dry_run" | "execute";
+  effectiveMode?: "noop" | "dry_run" | "execute";
+  gateDecision?: unknown;
+  mutationExecuted?: boolean;
+  externalProviderCallExecuted?: boolean;
+  rollbackPlan?: string;
+  foundationControlledExecution?: boolean;
 }
 
 export interface TransactionalApprovalExecutionLogRepositoryContract {
@@ -236,6 +243,13 @@ export async function executeApprovalWithOutboxBridge(
           approvalRequestId: request.approvalRequestId,
           executionId: executionResult.executionId,
           mode: executionResult.handlerMode,
+          requestedMode: executionResult.requestedMode ?? executionResult.handlerMode,
+          effectiveMode: executionResult.effectiveMode ?? executionResult.handlerMode,
+          gateDecision: executionResult.gateDecision,
+          mutationExecuted: executionResult.mutationExecuted ?? false,
+          externalProviderCallExecuted: executionResult.externalProviderCallExecuted ?? false,
+          rollbackPlan: executionResult.rollbackPlan,
+          foundationControlledExecution: executionResult.foundationControlledExecution ?? false,
           executionStatus: executionResult.status,
           auditRequired: executionResult.auditRequired,
           timelineRequired: executionResult.timelineRequired,
