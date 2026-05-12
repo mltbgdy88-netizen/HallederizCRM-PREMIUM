@@ -17,9 +17,73 @@ export function DashboardAiAssistantPanel({ compact }: { compact?: boolean }) {
 
   if (compact) {
     return (
-      <aside className="hz-ai-panel hz-ai-panel--compact hz-dash-assistant-stub" aria-label="Asistan">
-        <p className="hz-dash-assistant-stub-title">Asistan</p>
-        <p className="hz-dash-assistant-stub-note">Sağ kolon ayrı çalışma ile tasarlanacak.</p>
+      <aside className="hz-ai-panel hz-ai-panel--compact hz-live-assistant" aria-label="Canlı Asistan">
+        <header className="hz-live-assistant-head">
+          <p className="hz-live-assistant-title">Canlı Asistan</p>
+          <p className="hz-live-assistant-note">Tanıtım ve canlı uyarılar burada gösterilir.</p>
+        </header>
+
+        <section className="hz-live-assistant-broadcast" aria-live="polite">
+          <div className="hz-live-assistant-screen">
+            <div className="hz-live-assistant-screen-base">
+              <div className="hz-live-assistant-screen-stack">
+                <span className="hz-live-assistant-screen-play" aria-hidden>
+                  <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+                    <path
+                      d="M9.5 7.5v9L16.5 12 9.5 7.5z"
+                      fill="currentColor"
+                      stroke="currentColor"
+                      strokeWidth="1.2"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                </span>
+                <p className="hz-live-assistant-screen-line1">Tanıtım yayını</p>
+                <p className="hz-live-assistant-screen-line2">Video kaynağı sonradan bağlanacak</p>
+              </div>
+              <p className="hz-live-assistant-screen-caption">HallederizCRM kampanya ve eğitim alanı</p>
+            </div>
+          </div>
+        </section>
+
+        <section className="hz-live-assistant-local" aria-label="Lokal Asistan">
+          <header className="hz-live-assistant-local-head">
+            <p className="hz-live-assistant-local-title">Lokal Asistan</p>
+            <p className="hz-live-assistant-local-note">Yazılı veya sesli komutla CRM işlemlerini başlatın.</p>
+          </header>
+          <div className="hz-live-assistant-local-row">
+            <input
+              type="text"
+              className="hz-live-assistant-local-input"
+              placeholder="Örn: Nova Gıda için bekleyen tahsilatları göster"
+              autoComplete="off"
+            />
+            <button
+              type="button"
+              className="hz-live-assistant-local-icon"
+              aria-label="Sesli komut"
+              title="Sesli komut (yakında)"
+              disabled
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M12 14a3 3 0 003-3V5a3 3 0 10-6 0v6a3 3 0 003 3z" />
+                <path d="M19 10v1a7 7 0 01-14 0v-1M12 18v3M8 22h8" />
+              </svg>
+            </button>
+            <button
+              type="button"
+              className="hz-live-assistant-local-icon"
+              aria-label="Gönder"
+              title="Gönder (yakında)"
+              disabled
+            >
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" strokeLinejoin="round" />
+              </svg>
+            </button>
+          </div>
+          <p className="hz-live-assistant-local-status">Yerel asistan bağlantısı sonradan bağlanacak</p>
+        </section>
       </aside>
     );
   }
