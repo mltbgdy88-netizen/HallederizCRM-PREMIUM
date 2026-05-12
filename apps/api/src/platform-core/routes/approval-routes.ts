@@ -10,9 +10,7 @@ import {
   createQueryExecutor,
   DatabaseApprovalExecutionLogRepository,
   DatabaseOutboxJobRepository,
-  executeApprovalWithOutboxBridge,
-  type ExecuteApprovalWithOutboxBridgeResult,
-  type TransactionalApprovalExecutionRequest
+  executeApprovalWithOutboxBridge
 } from "@hallederiz/database";
 import { assertAnyPermission, assertAuthenticated, withGuards } from "../../shared/auth-guards";
 import { readPermissions, requireReadAccess } from "../../shared/read-guards";
@@ -21,16 +19,12 @@ import {
   resolvePendingApprovalRepository,
   type PendingApprovalRepositoryResolution
 } from "../../shared/approval-repository-runtime";
+import { executeApprovedPendingApproval, type ApprovalBridgeTrigger } from "../../shared/approval-execution-runtime";
 
 interface ApprovalPendingRepository {
   mode: string;
   repository: PendingApprovalRepository;
 }
-
-type ApprovalBridgeTrigger = (
-  context: RequestContext,
-  request: TransactionalApprovalExecutionRequest
-) => Promise<ExecuteApprovalWithOutboxBridgeResult>;
 
 export interface ApprovalRouteDeps {
   pendingRepository?: ApprovalPendingRepository | null;
@@ -227,103 +221,55 @@ export async function registerApprovalRoutes(server: FastifyInstance, deps: Appr
               message: "Transactional approval bridge foundation baglantisi mevcut degil."
             });
           }
-
-          const approvalRequest = await repositoryResolution.repository.getPendingApprovalRequest(
-            request.params.approvalRequestId,
-            context.tenantId
-          );
-          if (!approvalRequest) {
-            return reply.status(404).send({
-              ok: false,
-              error: "not_found",
-              message: "Approval istegi bulunamadi."
-            });
-          }
-
-          if (approvalRequest.status === "approved") {
-            return {
-              ok: true,
-              duplicate: true,
-              approvalRequestId: approvalRequest.approvalRequestId,
-              status: "approved",
-              executionId: approvalRequest.executionId,
-              outboxJobId: approvalRequest.outboxJobId,
-              reasons: ["already_approved"]
-            };
-          }
-
-          if (approvalRequest.status === "rejected") {
-            return reply.status(409).send({
-              ok: false,
-              approvalRequestId: approvalRequest.approvalRequestId,
-              status: "rejected",
-              reasons: ["approval_already_rejected"]
-            });
-          }
-
-          const bridgeRequest: TransactionalApprovalExecutionRequest = {
-            tenantId: approvalRequest.tenantId,
-            approvalRequestId: approvalRequest.approvalRequestId,
-            actionKey: approvalRequest.actionKey,
-            actorId: approvalRequest.actorId,
-            approvedBy: context.userId,
-            payload: approvalRequest.payload ?? {},
-            idempotencyKey: approvalRequest.idempotencyKey,
-            requestedAt: approvalRequest.requestedAt,
-            approvedAt: new Date().toISOString()
-          };
-
-          const bridgeResult = await bridgeTrigger(context, bridgeRequest);
-          if (!bridgeResult.ok || !bridgeResult.executionResult) {
-            return reply.status(409).send({
-              ok: false,
-              approvalRequestId: approvalRequest.approvalRequestId,
-              status: "pending",
-              bridgeResult: {
-                status: bridgeResult.status,
-                reasons: bridgeResult.reasons,
-                transactionMode: bridgeResult.transactionMode,
-                persistenceMode: bridgeResult.persistenceMode
-              }
-            });
-          }
-
-          const decision = await repositoryResolution.repository.markPendingApprovalApproved({
-            approvalRequestId: approvalRequest.approvalRequestId,
-            tenantId: context.tenantId,
-            approvedBy: context.userId,
-            approvedAt: new Date().toISOString(),
-            executionId: bridgeResult.executionResult.executionId,
-            outboxJobId: bridgeResult.outboxJob?.jobId,
-            bridgeReasons: bridgeResult.reasons,
-            bridgeTransactionMode: bridgeResult.transactionMode,
-            bridgePersistenceMode: bridgeResult.persistenceMode
+          const runtimeResult = await executeApprovedPendingApproval({
+            context,
+            approvalRequestId: request.params.approvalRequestId,
+            approverId: context.userId,
+            repositoryResolution: {
+              repository: repositoryResolution.repository,
+              mode: repositoryResolution.mode,
+              reasons: repositoryResolution.reasons
+            },
+            bridgeTrigger
           });
 
-          if (!decision.ok) {
-            const failure = mapDecisionFailure(decision.reason);
-            return reply.status(failure.statusCode).send(failure.body);
+          if (!runtimeResult.ok && runtimeResult.status === "repository_unavailable") {
+            return reply.status(runtimeResult.httpStatus).send({
+              ok: false,
+              error: "approval_repository_unavailable",
+              message: "Approval repository foundation baglantisi mevcut degil.",
+              approvalPersistenceMode: runtimeResult.approvalPersistenceMode,
+              reasons: runtimeResult.reasons
+            });
           }
 
-          return {
-            ok: true,
-            approvalRequestId: decision.item.approvalRequestId,
-            status: decision.item.status,
-            executionId: bridgeResult.executionResult.executionId,
-            outboxJobId: bridgeResult.outboxJob?.jobId,
-            executionResult: bridgeResult.executionResult,
-            bridgeResult: {
-              transactionMode: bridgeResult.transactionMode,
-              persistenceMode: bridgeResult.persistenceMode,
-              outboxJobEnqueued: bridgeResult.outboxJobEnqueued,
-              outboxDuplicate: bridgeResult.outboxDuplicate,
-              reasons: bridgeResult.reasons
-            },
-            approvalPersistenceMode: repositoryResolution.mode,
-            auditMetadata: bridgeResult.executionResult.auditEvent,
-            timelineMetadata: bridgeResult.executionResult.timelineEvent,
-            reasons: bridgeResult.executionResult.reasons
-          };
+          if (!runtimeResult.ok && runtimeResult.status === "bridge_unavailable") {
+            return reply.status(runtimeResult.httpStatus).send({
+              ok: false,
+              error: "approval_bridge_unavailable",
+              message: "Transactional approval bridge foundation baglantisi mevcut degil.",
+              reasons: runtimeResult.reasons
+            });
+          }
+
+          return reply.status(runtimeResult.httpStatus).send({
+            ok: runtimeResult.ok,
+            duplicate: runtimeResult.duplicate,
+            approvalRequestId: runtimeResult.approvalRequestId,
+            status: runtimeResult.approvalStatus ?? runtimeResult.status,
+            approvalStatus: runtimeResult.approvalStatus,
+            executionId: runtimeResult.executionId,
+            outboxJobId: runtimeResult.outboxJobId,
+            bridgeResult: runtimeResult.bridgeResult,
+            approvalPersistenceMode: runtimeResult.approvalPersistenceMode,
+            bridgeMode: runtimeResult.bridgeMode,
+            outboxMode: runtimeResult.outboxMode,
+            outboxQueued: runtimeResult.outboxQueued,
+            workerProcessingRecommended: runtimeResult.workerProcessingRecommended,
+            auditMetadata: runtimeResult.auditEvent,
+            timelineMetadata: runtimeResult.timelineEvent,
+            reasons: runtimeResult.reasons
+          });
         }
       )
   );

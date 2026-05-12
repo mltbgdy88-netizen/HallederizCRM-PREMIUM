@@ -285,3 +285,21 @@
   - metrics exporter / monitoring pipeline
   - admin UI
   - real mutation handler activation
+
+## 2026-05-12 - Approval Execution Production Wiring Pack
+
+- Status: completed (foundation)
+- Added approval approve runtime orchestration service to standardize:
+  - pending approval lookup
+  - transactional bridge trigger
+  - approval state transition
+  - outbox/audit/timeline metadata response
+- Approve flow idempotency strengthened:
+  - duplicate approve returns already processed metadata
+  - no second execution/outbox generation
+- Bridge failure keeps approval pending (fail-closed), not silently approved.
+- Remaining gap (next phase):
+  - production DB transaction hardening
+  - real audit/timeline write-back
+  - monitoring/alerts
+  - approval inbox UI
