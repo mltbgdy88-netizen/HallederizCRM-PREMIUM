@@ -28,3 +28,12 @@ Mevcut repo ile hedef policy / action / feature / approval omurgası arasındaki
 ## Sonraki görev
 
 **004 — Policy Engine, Action Registry, Approval Policy foundation** (`docs/codex-prompts/004-policy-engine-foundation.md`).
+
+## 004 durumu (2026-05-12)
+
+- Policy Engine foundation eklendi: `evaluatePolicy(request)`.
+- Action Registry ve Feature Registry icin ilk runtime kayitlari eklendi.
+- Approval policy evaluator foundation eklendi (`require_approval` fail-closed).
+- AI ve channel policy helperlari (crm_ui + whatsapp temel kurallari) policy akisina baglandi.
+- API icin ince policy bridge eklendi (`evaluatePolicyForContext`).
+- Tum route'lara zorunlu baglama bilerek sonraki goreve birakildi.

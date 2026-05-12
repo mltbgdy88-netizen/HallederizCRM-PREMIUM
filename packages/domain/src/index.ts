@@ -22,3 +22,4 @@ export * from "./tasks";
 export * from "./warehouse";
 export * from "./workflows";
 export * from "./whatsapp";
+export * from "./policy";

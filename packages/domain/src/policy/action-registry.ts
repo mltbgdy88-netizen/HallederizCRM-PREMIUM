@@ -1,0 +1,109 @@
+import type { ActionRegistryEntry } from "@hallederiz/types";
+
+export const actionRegistry: readonly ActionRegistryEntry[] = [
+  {
+    actionKey: "customer.read",
+    description: "Cari okuma",
+    requiredPermissions: ["customer.read", "customers.read"],
+    requiredFeature: "core.customer",
+    requiredModule: "core",
+    isMutation: false,
+    isCritical: false,
+    approvalRequired: false,
+    allowedActors: ["user", "ai", "system", "channel"],
+    allowedChannels: ["crm_ui", "api", "worker", "whatsapp"],
+    aiMode: "read_only",
+    auditRequired: true,
+    timelineRequired: false,
+    idempotencyRequired: false
+  },
+  {
+    actionKey: "order.create",
+    description: "Siparis olusturma",
+    requiredPermissions: ["order.create", "orders.write"],
+    requiredFeature: "core.qop",
+    requiredModule: "core",
+    isMutation: true,
+    isCritical: true,
+    approvalRequired: true,
+    approvalPolicyKey: "approval.order.create",
+    allowedActors: ["user", "ai", "system"],
+    allowedChannels: ["crm_ui", "api", "worker"],
+    aiMode: "request_approval",
+    auditRequired: true,
+    timelineRequired: true,
+    idempotencyRequired: false
+  },
+  {
+    actionKey: "finance.payment.create",
+    description: "Tahsilat olusturma",
+    requiredPermissions: ["finance.payment.create", "payments.write"],
+    requiredFeature: "core.qop",
+    requiredModule: "core",
+    isMutation: true,
+    isCritical: true,
+    approvalRequired: true,
+    approvalPolicyKey: "approval.finance.payment.create",
+    allowedActors: ["user", "ai", "system"],
+    allowedChannels: ["crm_ui", "api", "worker"],
+    aiMode: "request_approval",
+    auditRequired: true,
+    timelineRequired: true,
+    idempotencyRequired: true
+  },
+  {
+    actionKey: "erp.sync.write",
+    description: "ERP yazma senkronu",
+    requiredPermissions: ["erp.sync.write", "erp.write", "integrations.write"],
+    requiredFeature: "premium.erp",
+    requiredModule: "erp",
+    isMutation: true,
+    isCritical: true,
+    approvalRequired: true,
+    approvalPolicyKey: "approval.erp.sync.write",
+    allowedActors: ["user", "system"],
+    allowedChannels: ["crm_ui", "api", "worker"],
+    aiMode: "blocked",
+    externalProviders: ["erp"],
+    auditRequired: true,
+    timelineRequired: true,
+    idempotencyRequired: true
+  },
+  {
+    actionKey: "channel.whatsapp.reply",
+    description: "WhatsApp yanit gonderimi",
+    requiredPermissions: ["channel.whatsapp.reply", "whatsapp.write", "integrations.write"],
+    requiredFeature: "premium.whatsapp",
+    requiredModule: "whatsapp",
+    isMutation: true,
+    isCritical: false,
+    approvalRequired: false,
+    allowedActors: ["user", "ai", "system", "channel"],
+    allowedChannels: ["whatsapp", "crm_ui", "api"],
+    aiMode: "draft",
+    externalProviders: ["whatsapp"],
+    auditRequired: true,
+    timelineRequired: true,
+    idempotencyRequired: true
+  },
+  {
+    actionKey: "ai.proposal.create",
+    description: "AI proposal olusturma",
+    requiredPermissions: ["ai.proposal.create", "ai.actions.write"],
+    requiredFeature: "premium.ai.operator",
+    requiredModule: "ai",
+    isMutation: true,
+    isCritical: false,
+    approvalRequired: false,
+    allowedActors: ["user", "ai", "system"],
+    allowedChannels: ["crm_ui", "api"],
+    aiMode: "propose",
+    auditRequired: true,
+    timelineRequired: true,
+    idempotencyRequired: false
+  }
+] as const;
+
+export function getActionRegistryEntry(actionKey: string): ActionRegistryEntry | undefined {
+  return actionRegistry.find((entry) => entry.actionKey === actionKey);
+}
