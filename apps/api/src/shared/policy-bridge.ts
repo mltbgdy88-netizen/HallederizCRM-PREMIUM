@@ -1,4 +1,4 @@
-import { evaluatePolicy } from "@hallederiz/domain";
+import { createPendingApprovalRequest, evaluatePolicy, listPendingApprovalRequests } from "@hallederiz/domain";
 import type { PolicyChannel, PolicyCheckRequest } from "@hallederiz/types";
 import type { RequestContext } from "./request-context";
 
@@ -74,30 +74,53 @@ export function evaluateRoutePolicy(
   return evaluatePolicyForContext(contextOrArgs, actionKeyOrOptions ?? "unknown.action", options);
 }
 
-export function enforcePolicyDecision(...args: any[]): RoutePolicyEnforcementResult {
-  const decision = args.find(
-    (arg) => arg && typeof arg === "object" && "decision" in arg
-  ) as RoutePolicyDecisionLike | undefined;
-
+export function enforcePolicyDecision(
+  decision: RoutePolicyDecisionLike,
+  context?: RequestContext
+): RoutePolicyEnforcementResult {
   if (!decision || decision.decision === "allow") {
     return { handled: false };
   }
 
-  const statusCode = decision.decision === "require_approval" ? 202 : 403;
-  const body: Record<string, unknown> = {
-    ok: false,
-    status: decision.decision,
-    policyDecision: decision.decision,
-    actionKey: decision.actionKey,
-    reasons: decision.reasons ?? [],
-    auditRequired: decision.auditRequired ?? true,
-    timelineRequired: decision.timelineRequired ?? true,
-    idempotencyRequired: decision.idempotencyRequired ?? false
-  };
+  if (decision.decision === "require_approval") {
+    const pendingRequest = createPendingApprovalRequest({
+      tenantId: context?.tenantId ?? "tenant_unknown",
+      actorId: context?.userId ?? "unknown_actor",
+      actionKey: decision.actionKey ?? "unknown.action",
+      reasons: decision.reasons ?? []
+    });
+
+    return {
+      handled: true,
+      statusCode: 202,
+      body: {
+        ok: false,
+        status: "require_approval",
+        policyDecision: "require_approval",
+        approvalRequired: true,
+        actionKey: decision.actionKey,
+        approvalRequestId: pendingRequest.approvalRequestId,
+        reasons: decision.reasons ?? [],
+        auditRequired: decision.auditRequired ?? true,
+        timelineRequired: decision.timelineRequired ?? true
+      }
+    };
+  }
 
   return {
     handled: true,
-    statusCode,
-    body
+    statusCode: 403,
+    body: {
+      ok: false,
+      status: decision.decision,
+      policyDecision: decision.decision,
+      actionKey: decision.actionKey,
+      reasons: decision.reasons ?? [],
+      auditRequired: decision.auditRequired ?? true,
+      timelineRequired: decision.timelineRequired ?? true,
+      idempotencyRequired: decision.idempotencyRequired ?? false
+    }
   };
 }
+
+export { listPendingApprovalRequests };
