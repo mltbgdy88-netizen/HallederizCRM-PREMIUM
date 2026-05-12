@@ -35,12 +35,14 @@ export interface ApprovalExecutionAuditEventDraftRecord {
   eventKey: "approval.execution.audit";
   payload: ApprovalExecutionEventDraftPayloadRecord;
   createdAt: string;
+  eventId?: string;
 }
 
 export interface ApprovalExecutionTimelineEventDraftRecord {
   eventKey: "approval.execution.timeline";
   payload: ApprovalExecutionEventDraftPayloadRecord;
   createdAt: string;
+  eventId?: string;
 }
 
 interface DatabaseRepositoryOptions {
@@ -241,7 +243,10 @@ export class DatabaseApprovalExecutionLogRepository {
         event.createdAt
       ]
     );
-    return event;
+    return {
+      ...event,
+      eventId: event.eventId ?? `audit_${event.payload.executionId}`
+    };
   }
 
   async saveTimelineEventDraft(
@@ -272,7 +277,10 @@ export class DatabaseApprovalExecutionLogRepository {
         event.createdAt
       ]
     );
-    return event;
+    return {
+      ...event,
+      eventId: event.eventId ?? `timeline_${event.payload.executionId}`
+    };
   }
 
   async findByIdempotencyKey(

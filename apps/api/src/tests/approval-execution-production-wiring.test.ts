@@ -61,6 +61,7 @@ function bridgeFixture(
       },
       auditEvent: {
         eventKey: "approval.execution.audit",
+        eventId: `audit_${executionId}`,
         createdAt: "2026-05-12T12:00:01.000Z",
         payload: {
           tenantId: request.tenantId,
@@ -76,6 +77,7 @@ function bridgeFixture(
       },
       timelineEvent: {
         eventKey: "approval.execution.timeline",
+        eventId: `timeline_${executionId}`,
         createdAt: "2026-05-12T12:00:01.000Z",
         payload: {
           tenantId: request.tenantId,
@@ -106,7 +108,22 @@ function bridgeFixture(
         tenantId: request.tenantId,
         actionKey: request.actionKey,
         approvalRequestId: request.approvalRequestId,
-        executionId
+        executionId,
+        auditTimelineWritebackPayload: {
+          tenantId: request.tenantId,
+          actionKey: request.actionKey,
+          approvalRequestId: request.approvalRequestId,
+          executionId,
+          idempotencyKey: request.idempotencyKey,
+          auditEvent: {
+            eventId: `audit_${executionId}`,
+            eventKey: "approval.execution.audit"
+          },
+          timelineEvent: {
+            eventId: `timeline_${executionId}`,
+            eventKey: "approval.execution.timeline"
+          }
+        }
       },
       status: "pending",
       attempts: 0,
@@ -119,6 +136,22 @@ function bridgeFixture(
     outboxJobId: `job_${request.approvalRequestId}`,
     transactionMode: "transaction",
     persistenceMode: "repository",
+    auditTimelineWritebackPayload: {
+      tenantId: request.tenantId,
+      actionKey: request.actionKey,
+      approvalRequestId: request.approvalRequestId,
+      executionId,
+      idempotencyKey: request.idempotencyKey,
+      auditEvent: {
+        eventId: `audit_${executionId}`,
+        eventKey: "approval.execution.audit"
+      },
+      timelineEvent: {
+        eventId: `timeline_${executionId}`,
+        eventKey: "approval.execution.timeline"
+      }
+    },
+    auditTimelineWritebackQueued: true,
     reasons: ["bridge_completed"],
     ...overrides
   };
@@ -177,6 +210,10 @@ test("approve runtime resolves pending approval and returns execution/outbox met
   assert.equal(result.executionId, `exec_${pending.approvalRequestId}`);
   assert.equal(result.outboxJobId, `job_${pending.approvalRequestId}`);
   assert.equal(result.outboxQueued, true);
+  assert.equal(result.auditTimelineWritebackQueued, true);
+  assert.ok(result.auditTimelinePayload);
+  assert.ok(typeof result.auditEventId === "string");
+  assert.ok(typeof result.timelineEventId === "string");
   assert.equal(result.workerProcessingRecommended, true);
   assert.equal(calls, 1);
 

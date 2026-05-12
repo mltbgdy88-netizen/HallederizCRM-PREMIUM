@@ -127,6 +127,91 @@ test("approval.execution.dispatch remains dry_run noop", () => {
   assert.equal(reasons.includes("provider_call_executed:false"), true);
 });
 
+test("audit.timeline.writeback missing payload moves job to dead_letter", () => {
+  resetWorkerJobHandlers();
+  const repository = new InMemoryOutboxJobRepository();
+  createOutboxJob(
+    repository,
+    baseJobInput({
+      jobType: "audit.timeline.writeback",
+      idempotencyKey: "idem_pack_writeback_missing",
+      payload: {
+        tenantId: "tenant_worker_pack_1",
+        actionKey: "platform.users.create"
+      }
+    })
+  );
+  const app = createWorkerRuntimeApp({ repository });
+  const result = app.processTick({ maxJobsPerTick: 1 });
+  assert.equal(result.deadLettered, 1);
+  assert.equal(result.results[0]?.status, "dead_letter");
+  assert.equal(result.results[0]?.job?.deadLetterReason, "non_retryable_failure");
+});
+
+test("audit.timeline.writeback valid payload returns safe foundation success", () => {
+  resetWorkerJobHandlers();
+  const repository = new InMemoryOutboxJobRepository();
+  createOutboxJob(
+    repository,
+    baseJobInput({
+      jobType: "audit.timeline.writeback",
+      idempotencyKey: "idem_pack_writeback_valid",
+      payload: {
+        tenantId: "tenant_worker_pack_1",
+        actionKey: "platform.users.create",
+        approvalRequestId: "apr_req_pack_1",
+        executionId: "exec_pack_1",
+        auditTimelineWritebackPayload: {
+          tenantId: "tenant_worker_pack_1",
+          actionKey: "platform.users.create",
+          approvalRequestId: "apr_req_pack_1",
+          executionId: "exec_pack_1",
+          auditEvent: {
+            eventKey: "approval.execution.audit",
+            eventId: "audit_exec_pack_1",
+            createdAt: "2026-05-13T08:00:00.000Z",
+            payload: {
+              tenantId: "tenant_worker_pack_1",
+              actionKey: "platform.users.create",
+              approvalRequestId: "apr_req_pack_1",
+              executionId: "exec_pack_1",
+              status: "executed",
+              idempotencyKey: "idem_pack_writeback_valid",
+              handlerKey: "handler.platform.users.create",
+              handlerMode: "dry_run",
+              reasons: ["bridge_dispatched"]
+            }
+          },
+          timelineEvent: {
+            eventKey: "approval.execution.timeline",
+            eventId: "timeline_exec_pack_1",
+            createdAt: "2026-05-13T08:00:00.000Z",
+            payload: {
+              tenantId: "tenant_worker_pack_1",
+              actionKey: "platform.users.create",
+              approvalRequestId: "apr_req_pack_1",
+              executionId: "exec_pack_1",
+              status: "executed",
+              idempotencyKey: "idem_pack_writeback_valid",
+              handlerKey: "handler.platform.users.create",
+              handlerMode: "dry_run",
+              reasons: ["bridge_dispatched"]
+            }
+          }
+        }
+      }
+    })
+  );
+  const app = createWorkerRuntimeApp({ repository });
+  const result = app.processTick({ maxJobsPerTick: 1 });
+  const reasons = result.results[0]?.reasons ?? [];
+  assert.equal(result.completed, 1);
+  assert.equal(reasons.includes("auditPersisted:false"), true);
+  assert.equal(reasons.includes("timelinePersisted:false"), true);
+  assert.equal(reasons.includes("mutation_executed:false"), true);
+  assert.equal(reasons.includes("provider_call_executed:false"), true);
+});
+
 test("worker runtime summary exposes metrics contract", () => {
   resetWorkerJobHandlers();
   const repository = new InMemoryOutboxJobRepository();

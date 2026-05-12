@@ -55,6 +55,10 @@ export interface ExecuteApprovedPendingApprovalResult {
   };
   auditEvent?: Record<string, unknown>;
   timelineEvent?: Record<string, unknown>;
+  auditEventId?: string;
+  timelineEventId?: string;
+  auditTimelineWritebackQueued: boolean;
+  auditTimelinePayload?: Record<string, unknown>;
   approvalPersistenceMode: string;
   bridgeMode: string;
   outboxMode: "queued" | "duplicate" | "none";
@@ -80,6 +84,20 @@ function mapDecisionFailure(reason: string): { status: ApprovalExecutionRuntimeS
   return { status: "invalid_state", httpStatus: 409, reasons: [reason] };
 }
 
+function resolveWritebackPayload(
+  bridgeResult: ExecuteApprovalWithOutboxBridgeResult
+): Record<string, unknown> | undefined {
+  const payloadFromBridge = bridgeResult.auditTimelineWritebackPayload;
+  if (payloadFromBridge && typeof payloadFromBridge === "object") {
+    return payloadFromBridge;
+  }
+  const payloadFromOutbox = bridgeResult.outboxJob?.payload?.auditTimelineWritebackPayload;
+  if (payloadFromOutbox && typeof payloadFromOutbox === "object") {
+    return payloadFromOutbox as Record<string, unknown>;
+  }
+  return undefined;
+}
+
 export async function executeApprovedPendingApproval(
   input: ExecuteApprovedPendingApprovalInput
 ): Promise<ExecuteApprovedPendingApprovalResult> {
@@ -94,6 +112,7 @@ export async function executeApprovedPendingApproval(
       bridgeMode: "none",
       outboxMode: "none",
       outboxQueued: false,
+      auditTimelineWritebackQueued: false,
       workerProcessingRecommended: false,
       reasons: input.repositoryResolution.reasons.length > 0
         ? input.repositoryResolution.reasons
@@ -113,6 +132,7 @@ export async function executeApprovedPendingApproval(
       bridgeMode: "none",
       outboxMode: "none",
       outboxQueued: false,
+      auditTimelineWritebackQueued: false,
       workerProcessingRecommended: false,
       reasons: ["approval_not_found"],
       httpStatus: 404
@@ -132,6 +152,7 @@ export async function executeApprovedPendingApproval(
       bridgeMode: approvalRequest.bridgeTransactionMode ?? "already_processed",
       outboxMode: approvalRequest.outboxJobId ? "duplicate" : "none",
       outboxQueued: false,
+      auditTimelineWritebackQueued: false,
       workerProcessingRecommended: Boolean(approvalRequest.outboxJobId),
       reasons: ["approval_already_approved"],
       httpStatus: 200
@@ -149,6 +170,7 @@ export async function executeApprovedPendingApproval(
       bridgeMode: "none",
       outboxMode: "none",
       outboxQueued: false,
+      auditTimelineWritebackQueued: false,
       workerProcessingRecommended: false,
       reasons: ["approval_already_rejected"],
       httpStatus: 409
@@ -166,6 +188,7 @@ export async function executeApprovedPendingApproval(
       bridgeMode: "none",
       outboxMode: "none",
       outboxQueued: false,
+      auditTimelineWritebackQueued: false,
       workerProcessingRecommended: false,
       reasons: ["approval_not_pending"],
       httpStatus: 409
@@ -183,6 +206,7 @@ export async function executeApprovedPendingApproval(
       bridgeMode: "none",
       outboxMode: "none",
       outboxQueued: false,
+      auditTimelineWritebackQueued: false,
       workerProcessingRecommended: false,
       reasons: ["approval_bridge_unavailable"],
       httpStatus: 503
@@ -204,6 +228,7 @@ export async function executeApprovedPendingApproval(
   const bridgeResult = await input.bridgeTrigger(input.context, bridgeRequest);
   const bridgeMode = `${bridgeResult.transactionMode}:${bridgeResult.persistenceMode}`;
   const outboxMode = bridgeResult.outboxJobEnqueued ? "queued" : bridgeResult.outboxDuplicate ? "duplicate" : "none";
+  const writebackPayload = resolveWritebackPayload(bridgeResult);
 
   if (!bridgeResult.ok || !bridgeResult.executionResult) {
     return {
@@ -216,6 +241,8 @@ export async function executeApprovedPendingApproval(
       bridgeMode,
       outboxMode,
       outboxQueued: bridgeResult.outboxJobEnqueued,
+      auditTimelineWritebackQueued: Boolean(bridgeResult.auditTimelineWritebackQueued),
+      auditTimelinePayload: writebackPayload,
       workerProcessingRecommended: false,
       bridgeResult: {
         status: bridgeResult.status,
@@ -259,6 +286,7 @@ export async function executeApprovedPendingApproval(
         bridgeMode: latest?.bridgeTransactionMode ?? bridgeMode,
         outboxMode: latest?.outboxJobId ? "duplicate" : outboxMode,
         outboxQueued: false,
+        auditTimelineWritebackQueued: false,
         workerProcessingRecommended: Boolean(latest?.outboxJobId ?? bridgeResult.outboxJob?.jobId),
         bridgeResult: {
           status: bridgeResult.status,
@@ -284,6 +312,8 @@ export async function executeApprovedPendingApproval(
       bridgeMode,
       outboxMode,
       outboxQueued: bridgeResult.outboxJobEnqueued,
+      auditTimelineWritebackQueued: Boolean(bridgeResult.auditTimelineWritebackQueued),
+      auditTimelinePayload: writebackPayload,
       workerProcessingRecommended: false,
       bridgeResult: {
         status: bridgeResult.status,
@@ -322,7 +352,11 @@ export async function executeApprovedPendingApproval(
     bridgeMode,
     outboxMode,
     outboxQueued: bridgeResult.outboxJobEnqueued,
+    auditTimelineWritebackQueued: Boolean(bridgeResult.auditTimelineWritebackQueued),
+    auditTimelinePayload: writebackPayload,
     workerProcessingRecommended: Boolean(bridgeResult.outboxJobEnqueued || bridgeResult.outboxDuplicate),
+    auditEventId: bridgeResult.executionResult.auditEvent?.eventId,
+    timelineEventId: bridgeResult.executionResult.timelineEvent?.eventId,
     reasons: bridgeResult.executionResult.reasons,
     httpStatus: 200
   };

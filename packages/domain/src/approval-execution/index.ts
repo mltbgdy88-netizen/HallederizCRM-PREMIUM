@@ -4,6 +4,7 @@ export * from "./dispatcher";
 export * from "./handler-registry";
 export * from "./execution-log";
 export * from "./persistence";
+export * from "./audit-timeline-writeback";
 
 export function canExecuteApproval(approval: Approval): boolean {
   return approval.status === "approved" && approval.execution.executable && Boolean(approval.policySnapshot.serverActionKey);

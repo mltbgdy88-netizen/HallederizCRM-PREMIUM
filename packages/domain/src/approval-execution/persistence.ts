@@ -31,13 +31,21 @@ export class InMemoryApprovalExecutionLogRepository implements ApprovalExecution
   }
 
   saveAuditEventDraft(event: ExecutionAuditEventDraft): ExecutionAuditEventDraft {
-    this.auditEvents.set(event.payload.executionId, event);
-    return event;
+    const withId = {
+      ...event,
+      eventId: event.eventId ?? `audit_${event.payload.executionId}`
+    };
+    this.auditEvents.set(withId.eventId, withId);
+    return withId;
   }
 
   saveTimelineEventDraft(event: ExecutionTimelineEventDraft): ExecutionTimelineEventDraft {
-    this.timelineEvents.set(event.payload.executionId, event);
-    return event;
+    const withId = {
+      ...event,
+      eventId: event.eventId ?? `timeline_${event.payload.executionId}`
+    };
+    this.timelineEvents.set(withId.eventId, withId);
+    return withId;
   }
 
   findByIdempotencyKey(tenantId: string, idempotencyKey: string): ExecutionLogEntry | undefined {
