@@ -13,4 +13,4 @@ Bu klasor proje dokumantasyonunun merkezidir.
 - `ui`: Tasarim sistemi, ekran envanteri, UX kurallari
 - `codex-prompts`: Gelistirme ve operasyon icin tekrar kullanilabilir prompt setleri
 - `development`: Branch/PR, Codex/Cursor gorev standardi, kalite kapilari, release kontrol listesi
-- `architecture`: Platform cekirdegi (tenant/auth/permission/modul) mimari dokumanlari
+- `architecture`: Platform cekirdegi ve policy engine mimari dokumanlari
