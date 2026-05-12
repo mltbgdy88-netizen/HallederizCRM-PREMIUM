@@ -173,3 +173,10 @@ Tüm mutation benzeri UI aksiyonları demo/backend yoksa **demo toast** + disabl
 - WhatsApp `ONAY`/`RED` komutlarının inbox UI’si (kanal bağlama sonraki faz).
 
 **Sonraki dokümanlar:** [APPROVAL_INBOX_UI_FLOW.md](./APPROVAL_INBOX_UI_FLOW.md), [APPROVAL_INBOX_COMPONENT_MAP.md](./APPROVAL_INBOX_COMPONENT_MAP.md), [OPERATOR_WORKSPACE_PRODUCT_SPEC.md](./OPERATOR_WORKSPACE_PRODUCT_SPEC.md).
+
+## 2026-05-13 — Approval Inbox UI foundation (web)
+
+- `/onaylar` route API-backed Approval Inbox shell ile calisir; sahte production onay verisi gosterilmez.
+- Approve/reject aksiyonlari mevcut platform approval API contract'ina baglidir; mutation guvenligi backend gate'e baglidir.
+- Worker/safety metadata read-only gosterilir.
+- Sonraki is: UI polish, operator workflow, notification badge, realtime refresh.

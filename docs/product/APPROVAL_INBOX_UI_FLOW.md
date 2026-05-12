@@ -186,3 +186,9 @@ stateDiagram-v2
 - [APPROVAL_INBOX_PRODUCT_SPEC.md](./APPROVAL_INBOX_PRODUCT_SPEC.md)
 - [APPROVAL_INBOX_COMPONENT_MAP.md](./APPROVAL_INBOX_COMPONENT_MAP.md)
 - [approval-execution-flow.md](../approval-execution-flow.md)
+
+## 2026-05-13 — Approval Inbox UI foundation
+
+- Liste/detay/approve/reject akisi `ApprovalInboxShell` uzerinden API client ile calisir.
+- 401/403/503 ve bos durumlar ayri UI state olarak gosterilir.
+- Worker health ve production safety badge'leri read-only foundation metadata kullanir.

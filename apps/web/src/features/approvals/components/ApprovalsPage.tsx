@@ -6,7 +6,7 @@ import { FilterActions, FilterBar, PageHeader, SplitContentLayout } from "@halle
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { approveApprovalMutation, executeApprovalMutation, rejectApprovalMutation } from "../mutations";
-import { ApprovalsBoardPage } from "./ApprovalsBoardPage";
+import { ApprovalInboxShell } from "./ApprovalInboxShell";
 
 const statusLabels: Record<Approval["status"], string> = { pending: "Bekliyor", approved: "Onaylandi", rejected: "Reddedildi", expired: "Suresi Doldu", executed: "Icra Edildi" };
 const typeLabels: Record<Approval["type"], string> = { order_high_value: "Yuksek Tutar", delivery_payment_missing: "Eksik Tahsilatli Teslim", return_approval: "Iade Onayi", price_override: "Fiyat Override", ai_action_proposal: "AI Proposal", manual_operation: "Manuel Operasyon" };
@@ -27,7 +27,7 @@ export function ApprovalPreviewPanel({ approval }: { approval: Approval | null }
 }
 
 export function ApprovalsPage() {
-  return <ApprovalsBoardPage />;
+  return <ApprovalInboxShell />;
 }
 
 export function ApprovalHeaderInfo({ approval }: { approval: Approval }) {

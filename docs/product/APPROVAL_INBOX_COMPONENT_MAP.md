@@ -211,3 +211,8 @@ Inbox implementasyonu Dashboard AI bileşenini **import etmez**; ortak tipografi
 
 - [APPROVAL_INBOX_PRODUCT_SPEC.md](./APPROVAL_INBOX_PRODUCT_SPEC.md)
 - [APPROVAL_INBOX_UI_FLOW.md](./APPROVAL_INBOX_UI_FLOW.md)
+
+## 2026-05-13 — Implemented web components
+
+- `ApprovalInboxShell`, `ApprovalList`, `ApprovalDetailPanel`, `ApprovalActionBar`, `ApprovalStatusBadge`, `ApprovalRiskSummary`, `ApprovalTimelinePreview`, `ApprovalOutboxStatusCard`, `ApprovalSafetyBadge`, `LoadingState`, `EmptyState`, `ErrorState`
+- Client foundation: `apps/web/src/features/approvals/api/approval-client.ts`
