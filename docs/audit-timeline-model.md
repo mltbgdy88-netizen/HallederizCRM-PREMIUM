@@ -116,3 +116,9 @@ Bu batch'te audit olaylari in-memory tutulur. Sonraki batch'te DB persistence (`
 - Pending approval persistence runtime secimi policy bridge ve approval API katmanlarinda ortak resolver uzerinden yapilir.
 - Production ortaminda in-memory fallback fail-open davranisina izin verilmez.
 - Postgres mode icin runtime DB config zorunludur; eksikse explicit unsupported donulur.
+
+## Controlled Real Handler Gate Note
+
+- Approval execution gate, execute mode icin audit/timeline metadata varligini zorunlu hale getirir.
+- Gate kararinda `requiredAudit`, `requiredTimeline`, `idempotencyRequired`, `mutationAllowed` ve `externalWriteAllowed` metadata'si tutulur.
+- Controlled handler foundation sonucunda audit/timeline metadata outbox payload'ina tasinir, ancak real DB mutation veya external provider write bu fazda acilmaz.

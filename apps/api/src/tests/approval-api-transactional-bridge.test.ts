@@ -109,7 +109,24 @@ function bridgeFixture(
         }
       },
       persistenceMode: "repository",
-      persistenceSkipped: false
+      persistenceSkipped: false,
+      requestedMode: "dry_run",
+      effectiveMode: "dry_run",
+      gateDecision: {
+        allowed: true,
+        mode: "dry_run",
+        actionKey: request.actionKey,
+        reasons: ["dry_run_or_noop_execution_gate_allowed"],
+        blockers: [],
+        requiredAudit: true,
+        requiredTimeline: true,
+        idempotencyRequired: true,
+        mutationAllowed: false,
+        externalWriteAllowed: false
+      },
+      mutationExecuted: false,
+      externalProviderCallExecuted: false,
+      rollbackPlan: "no_mutation_to_rollback"
     },
     executionLogPersisted: true,
     auditEventPersisted: true,
@@ -318,6 +335,8 @@ test("POST approve triggers transactional bridge and returns metadata", async ()
     assert.ok(typeof payload.auditEventId === "string");
     assert.ok(typeof payload.timelineEventId === "string");
     assert.ok(payload.auditTimelinePayload);
+    assert.ok(payload.gateDecision);
+    assert.equal(payload.gateDecision.mutationAllowed, false);
     assert.equal(payload.auditMetadata.eventKey, "approval.execution.audit");
     assert.equal(payload.timelineMetadata.eventKey, "approval.execution.timeline");
     await server.close();

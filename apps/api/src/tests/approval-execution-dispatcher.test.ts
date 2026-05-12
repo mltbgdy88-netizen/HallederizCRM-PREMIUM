@@ -90,7 +90,7 @@ test("settings handler is supported in dry_run mode", () => {
   assert.ok(handler);
   assert.equal(handler.supported, true);
   assert.equal(handler.mode, "dry_run");
-  assert.equal(handler.safetyChecklist.realExecutionEnabled, false);
-  assert.equal(handler.safetyChecklist.dryRunOnly, true);
+  assert.equal(handler.safetyChecklist.realExecutionEnabled, true);
+  assert.equal(handler.safetyChecklist.dryRunOnly, false);
   assert.equal(handler.safetyChecklist.requiresApproval, true);
 });

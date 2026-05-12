@@ -55,6 +55,7 @@ export interface ExecuteApprovedPendingApprovalResult {
   };
   auditEvent?: Record<string, unknown>;
   timelineEvent?: Record<string, unknown>;
+  gateDecision?: Record<string, unknown>;
   auditEventId?: string;
   timelineEventId?: string;
   auditTimelineWritebackQueued: boolean;
@@ -348,6 +349,7 @@ export async function executeApprovedPendingApproval(
     },
     auditEvent: (bridgeResult.executionResult.auditEvent ?? undefined) as Record<string, unknown> | undefined,
     timelineEvent: (bridgeResult.executionResult.timelineEvent ?? undefined) as Record<string, unknown> | undefined,
+    gateDecision: bridgeResult.executionResult.gateDecision as Record<string, unknown> | undefined,
     approvalPersistenceMode: input.repositoryResolution.mode,
     bridgeMode,
     outboxMode,
