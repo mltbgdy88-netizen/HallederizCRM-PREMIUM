@@ -6,6 +6,8 @@ import type {
   ApprovalInboxItem,
   ApprovalInboxStatus,
   ApprovalListResponse,
+  ApprovalSandboxAvailabilityResponse,
+  ApprovalSandboxSeedResponse,
   WorkerHealthResponse
 } from "../types";
 
@@ -14,6 +16,8 @@ export const APPROVAL_API_PATHS = {
   detail: (approvalRequestId: string) => `/platform/approvals/${approvalRequestId}`,
   approve: (approvalRequestId: string) => `/platform/approvals/${approvalRequestId}/approve`,
   reject: (approvalRequestId: string) => `/platform/approvals/${approvalRequestId}/reject`,
+  sandboxAvailability: "/platform/approvals/sandbox/availability",
+  sandboxSeed: "/platform/approvals/sandbox/seed",
   workerHealth: "/worker/health",
   workerSafety: "/worker/safety"
 } as const;
@@ -23,6 +27,8 @@ export type ApprovalApiEndpointKind =
   | "approval_detail"
   | "approval_approve"
   | "approval_reject"
+  | "approval_sandbox_availability"
+  | "approval_sandbox_seed"
   | "worker_health"
   | "worker_safety";
 
@@ -87,6 +93,8 @@ export function mapApprovalClientError(
   else if (status === 403) kind = "forbidden";
   else if (status === 404) kind = "not_found";
   else if (status === 503) kind = "unsupported";
+  else if (status === 409) kind = "conflict";
+  else if (status === 400) kind = "invalid_request";
   return { kind, status, message, reasons };
 }
 
@@ -175,6 +183,17 @@ export function createApprovalClient(config: ApprovalClientConfig) {
     listApprovals: () => requestJson<ApprovalListResponse>(config, APPROVAL_API_PATHS.list, "approvals_list"),
     getApproval: (approvalRequestId: string) =>
       requestJson<ApprovalDetailResponse>(config, APPROVAL_API_PATHS.detail(approvalRequestId), "approval_detail"),
+    getSandboxAvailability: () =>
+      requestJson<ApprovalSandboxAvailabilityResponse>(
+        config,
+        APPROVAL_API_PATHS.sandboxAvailability,
+        "approval_sandbox_availability"
+      ),
+    seedSandboxApprovals: () =>
+      requestJson<ApprovalSandboxSeedResponse>(config, APPROVAL_API_PATHS.sandboxSeed, "approval_sandbox_seed", {
+        method: "POST",
+        body: JSON.stringify({})
+      }),
     approveApproval: (approvalRequestId: string) =>
       requestJson<ApprovalActionResponse>(config, APPROVAL_API_PATHS.approve(approvalRequestId), "approval_approve", {
         method: "POST",

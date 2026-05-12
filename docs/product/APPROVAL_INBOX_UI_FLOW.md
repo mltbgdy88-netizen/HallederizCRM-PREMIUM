@@ -200,3 +200,9 @@ stateDiagram-v2
 - `/approvals` ve `/dashboard/approvals` alias redirect'leri `/onaylar`a yonlenir.
 - Dashboard ve AI panelinden Onaylar hizli erisimi eklendi.
 - Filtre/search/sort ve hata mesajlari UI helper katmaninda toplandi.
+
+## 2026-05-13 — Operator runtime + sandbox
+
+- Sandbox: `GET /platform/approvals/sandbox/availability` -> UI toolbar gorunurlugu; `POST .../seed` -> idempotent create -> liste yenileme.
+- Reject: bos reason -> API `400`; duplicate approve -> bilgi mesaji + refetch.
+- Worker health + `/worker/safety` DLQ ozeti inbox akisinda read-only.

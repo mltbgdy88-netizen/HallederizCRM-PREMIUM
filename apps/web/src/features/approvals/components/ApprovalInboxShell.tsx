@@ -4,20 +4,24 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../../providers/auth-provider";
 import { useToast } from "../../../providers/toast-provider";
 import { createApprovalClient } from "../api/approval-client";
-import type { ApprovalClientError, ApprovalInboxItem, ApprovalInboxStatusFilter, WorkerHealthResponse } from "../types";
+import type { ApprovalClientError, ApprovalInboxItem, ApprovalInboxStatusFilter, ApprovalSandboxAvailabilityResponse, WorkerHealthResponse } from "../types";
 import {
   buildActiveFilterSummary,
   computeInboxStats,
   filterInboxItems,
+  isSandboxAvailable,
   mapApprovalUiErrorMessage,
+  normalizeApproval,
   searchInboxItems,
   sortInboxItems,
+  summarizeWorkerHealth,
   type ApprovalInboxSortMode
 } from "../utils/inbox-helpers";
 import { ApprovalDetailPanel } from "./ApprovalDetailPanel";
 import { EmptyState, ErrorState, LoadingState } from "./ApprovalInboxStates";
 import { ApprovalList } from "./ApprovalList";
 import { ApprovalSafetyBadge } from "./ApprovalSafetyBadge";
+import { ApprovalSandboxToolbar } from "./ApprovalSandboxToolbar";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
@@ -57,6 +61,8 @@ export function ApprovalInboxShell() {
   const [listError, setListError] = useState<ApprovalClientError | null>(null);
   const [detailError, setDetailError] = useState<ApprovalClientError | null>(null);
   const [workerHealth, setWorkerHealth] = useState<WorkerHealthResponse | null>(null);
+  const [workerSafety, setWorkerSafety] = useState<WorkerHealthResponse | null>(null);
+  const [sandboxAvailability, setSandboxAvailability] = useState<ApprovalSandboxAvailabilityResponse | null>(null);
   const [loadingList, setLoadingList] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
   const [busyAction, setBusyAction] = useState(false);
@@ -78,6 +84,35 @@ export function ApprovalInboxShell() {
     [filter, items.length, searchQuery, sortMode, visibleItems.length]
   );
 
+  const sandboxToolbarVisible = useMemo(
+    () => isSandboxAvailable(sandboxAvailability, process.env.NODE_ENV),
+    [sandboxAvailability]
+  );
+
+  const sandboxAvailabilityHelp = useMemo(() => {
+    if (process.env.NODE_ENV === "production") {
+      return null;
+    }
+    if (!sandboxAvailability) {
+      return "Sandbox durumu alinamadi (API veya oturum).";
+    }
+    if (!sandboxAvailability.sandboxSeedRouteEnabled) {
+      const r = sandboxAvailability.reasons?.length ? sandboxAvailability.reasons.join(", ") : "demo disi persistence";
+      return `Sandbox seed kapali: ${r}`;
+    }
+    if (!sandboxAvailability.approvalRepositoryReady) {
+      const r = sandboxAvailability.reasons?.length ? sandboxAvailability.reasons.join(", ") : "repository yok";
+      return `Approval repository hazir degil: ${r}`;
+    }
+    return null;
+  }, [sandboxAvailability]);
+
+  const dlqSummary = useMemo(() => {
+    const summary = workerSafety?.health?.summary;
+    if (!summary) return "Ozete veri yok.";
+    return `DLQ: ${summary.deadLettered} · Failed: ${summary.failed} · Retried: ${summary.retried}`;
+  }, [workerSafety]);
+
   const refreshList = useCallback(async () => {
     setLoadingList(true);
     setListError(null);
@@ -89,7 +124,7 @@ export function ApprovalInboxShell() {
       setLoadingList(false);
       return;
     }
-    setItems(result.data.items ?? []);
+    setItems((result.data.items ?? []).map(normalizeApproval).filter((row): row is ApprovalInboxItem => Boolean(row)));
     setRepositoryMode(result.data.repositoryMode);
     setLoadingList(false);
   }, [client]);
@@ -105,11 +140,21 @@ export function ApprovalInboxShell() {
         setLoadingDetail(false);
         return;
       }
-      setDetail(result.data.item);
+      const normalized = normalizeApproval(result.data.item);
+      setDetail(normalized);
       setLoadingDetail(false);
     },
     [client]
   );
+
+  const refreshSandboxAvailability = useCallback(async () => {
+    const result = await client.getSandboxAvailability();
+    if (!result.ok) {
+      setSandboxAvailability(null);
+      return;
+    }
+    setSandboxAvailability(result.data);
+  }, [client]);
 
   const refreshWorkerHealth = useCallback(async () => {
     const result = await client.getWorkerHealth();
@@ -124,6 +169,19 @@ export function ApprovalInboxShell() {
     setWorkerHealth(result.data);
   }, [client]);
 
+  const refreshWorkerSafety = useCallback(async () => {
+    const result = await client.getWorkerSafety();
+    if (!result.ok) {
+      setWorkerSafety({
+        ok: false,
+        error: mapApprovalUiErrorMessage(result.error),
+        reasons: result.error.reasons
+      });
+      return;
+    }
+    setWorkerSafety(result.data);
+  }, [client]);
+
   useEffect(() => {
     if (state !== "authenticated") {
       setLoadingList(false);
@@ -131,7 +189,9 @@ export function ApprovalInboxShell() {
     }
     void refreshList();
     void refreshWorkerHealth();
-  }, [refreshList, refreshWorkerHealth, state]);
+    void refreshWorkerSafety();
+    void refreshSandboxAvailability();
+  }, [refreshList, refreshWorkerHealth, refreshWorkerSafety, refreshSandboxAvailability, state]);
 
   useEffect(() => {
     if (!selectedId && visibleItems[0]) {
@@ -210,6 +270,34 @@ export function ApprovalInboxShell() {
         <span>Reddedilen {stats.rejected}</span>
       </div>
 
+      <div className="hz-approvals-worker-strip" aria-label="Worker ve guvenlik ozeti">
+        <div className="hz-approvals-worker-card">
+          <h4>Worker health</h4>
+          <p>{summarizeWorkerHealth(workerHealth)}</p>
+        </div>
+        <div className="hz-approvals-worker-card">
+          <h4>Production safety / DLQ</h4>
+          <p>{workerSafety?.productionSafety?.labels?.join(" · ") || summarizeWorkerHealth(workerSafety)}</p>
+          <p className="hz-approvals-inbox-muted">{dlqSummary}</p>
+        </div>
+      </div>
+
+      <ApprovalSandboxToolbar
+        client={client}
+        visible={sandboxToolbarVisible}
+        availabilityHelp={sandboxAvailabilityHelp}
+        onAfterSeed={async () => {
+          await refreshList();
+          await refreshSandboxAvailability();
+        }}
+      />
+
+      {!sandboxToolbarVisible && process.env.NODE_ENV !== "production" && sandboxAvailabilityHelp ? (
+        <p className="hz-approvals-inbox-muted" role="status">
+          {sandboxAvailabilityHelp}
+        </p>
+      ) : null}
+
       <div className="hz-approvals-inbox-filters" role="toolbar" aria-label="Durum filtresi">
         {FILTER_OPTIONS.map((option) => (
           <button
@@ -253,7 +341,14 @@ export function ApprovalInboxShell() {
           {loadingList ? <LoadingState /> : null}
           {!loadingList && listError ? <ErrorState error={listError} onRetry={() => void refreshList()} /> : null}
           {!loadingList && !listError && items.length === 0 ? (
-            <EmptyState description="API bos dondu. Sahte onay kaydi gosterilmez." />
+            <EmptyState
+              title="Liste bos"
+              description={
+                sandboxToolbarVisible
+                  ? "API gercek zamanli bos dondu. Sahte kayit gosterilmez; asagidaki sandbox araci ile demo onaylari olusturabilirsiniz."
+                  : "API gercek zamanli bos dondu. Sahte kayit gosterilmez."
+              }
+            />
           ) : null}
           {!loadingList && !listError && items.length > 0 && visibleItems.length === 0 ? (
             <EmptyState title="Filtreye uygun onay yok" description="Durum, arama veya siralama kriterlerini degistirin." />

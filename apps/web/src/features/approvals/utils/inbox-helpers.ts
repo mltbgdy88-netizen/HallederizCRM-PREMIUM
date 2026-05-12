@@ -1,4 +1,11 @@
-import type { ApprovalClientError, ApprovalInboxItem, ApprovalInboxStatusFilter } from "../types";
+import type {
+  ApprovalClientError,
+  ApprovalInboxItem,
+  ApprovalInboxStatus,
+  ApprovalInboxStatusFilter,
+  ApprovalSandboxAvailabilityResponse,
+  WorkerHealthResponse
+} from "../types";
 
 export type ApprovalInboxSortMode = "newest" | "oldest" | "actionKey";
 
@@ -80,6 +87,161 @@ export function isApprovalActionAvailable(item: ApprovalInboxItem | null | undef
   return item?.status === "pending";
 }
 
+const INBOX_STATUSES: ApprovalInboxStatus[] = ["pending", "approved", "rejected", "expired", "cancelled"];
+
+function readString(record: Record<string, unknown>, key: string): string | undefined {
+  const v = record[key];
+  return typeof v === "string" ? v : undefined;
+}
+
+function readBoolean(record: Record<string, unknown>, key: string): boolean | undefined {
+  const v = record[key];
+  return typeof v === "boolean" ? v : undefined;
+}
+
+function readRecord(record: Record<string, unknown>, key: string): Record<string, unknown> | undefined {
+  const v = record[key];
+  if (v && typeof v === "object" && !Array.isArray(v)) {
+    return v as Record<string, unknown>;
+  }
+  return undefined;
+}
+
+/** Maps API list/detail item to UI model; drops invalid rows instead of fabricating data. */
+export function normalizeApproval(raw: unknown): ApprovalInboxItem | null {
+  if (!raw || typeof raw !== "object") return null;
+  const r = raw as Record<string, unknown>;
+  const status = r.status;
+  if (typeof status !== "string" || !INBOX_STATUSES.includes(status as ApprovalInboxStatus)) {
+    return null;
+  }
+  const approvalRequestId = readString(r, "approvalRequestId");
+  const tenantId = readString(r, "tenantId");
+  const actorId = readString(r, "actorId");
+  const actionKey = readString(r, "actionKey");
+  const idempotencyKey = readString(r, "idempotencyKey");
+  const requestedAt = readString(r, "requestedAt");
+  const createdAt = readString(r, "createdAt");
+  const updatedAt = readString(r, "updatedAt");
+  if (!approvalRequestId || !tenantId || !actorId || !actionKey || !idempotencyKey || !requestedAt || !createdAt || !updatedAt) {
+    return null;
+  }
+  const reasons = Array.isArray(r.reasons) ? r.reasons.filter((x): x is string => typeof x === "string") : [];
+  const auditRequired = readBoolean(r, "auditRequired") ?? true;
+  const timelineRequired = readBoolean(r, "timelineRequired") ?? true;
+  const payload = readRecord(r, "payload");
+  const gateDecision = readRecord(r, "gateDecision");
+
+  return {
+    approvalRequestId,
+    tenantId,
+    actorId,
+    actionKey,
+    status: status as ApprovalInboxStatus,
+    reasons,
+    payload,
+    idempotencyKey,
+    requestedAt,
+    createdAt,
+    updatedAt,
+    auditRequired,
+    timelineRequired,
+    approvedBy: readString(r, "approvedBy"),
+    approvedAt: readString(r, "approvedAt"),
+    rejectedBy: readString(r, "rejectedBy"),
+    rejectedAt: readString(r, "rejectedAt"),
+    rejectReason: readString(r, "rejectReason"),
+    executionId: readString(r, "executionId"),
+    outboxJobId: readString(r, "outboxJobId"),
+    bridgeReasons: Array.isArray(r.bridgeReasons)
+      ? r.bridgeReasons.filter((x): x is string => typeof x === "string")
+      : undefined,
+    bridgeTransactionMode: readString(r, "bridgeTransactionMode"),
+    bridgePersistenceMode: readString(r, "bridgePersistenceMode"),
+    approvalPersisted: readBoolean(r, "approvalPersisted"),
+    workerProcessingRecommended: readBoolean(r, "workerProcessingRecommended"),
+    auditTimelineWritebackQueued: readBoolean(r, "auditTimelineWritebackQueued"),
+    gateDecision
+  };
+}
+
+export function mapApprovalStatusLabel(status: ApprovalInboxStatus): string {
+  switch (status) {
+    case "pending":
+      return "Bekliyor";
+    case "approved":
+      return "Onaylandi";
+    case "rejected":
+      return "Reddedildi";
+    case "expired":
+      return "Suresi doldu";
+    case "cancelled":
+      return "Iptal";
+    default:
+      return status;
+  }
+}
+
+export function mapRuntimeErrorMessage(error: ApprovalClientError): string {
+  return mapApprovalUiErrorMessage(error);
+}
+
+export function canApproveApproval(item: ApprovalInboxItem | null | undefined): boolean {
+  return item?.status === "pending";
+}
+
+export function canRejectApproval(
+  item: ApprovalInboxItem | null | undefined,
+  reasonDraft: string
+): { ok: true } | { ok: false; message: string } {
+  if (item?.status !== "pending") {
+    return { ok: false, message: "Yalnizca bekleyen kayitlar reddedilebilir." };
+  }
+  const reasonError = validateRejectReason(reasonDraft);
+  if (reasonError) {
+    return { ok: false, message: reasonError };
+  }
+  return { ok: true };
+}
+
+export function summarizeGateDecision(gate?: Record<string, unknown> | null): string {
+  if (!gate || typeof gate !== "object") {
+    return "Gate karari API yaniti ile gelmedi.";
+  }
+  const allowed = gate.allowed;
+  const mode = gate.mode;
+  const blockers = Array.isArray(gate.blockers) ? gate.blockers.filter((b): b is string => typeof b === "string") : [];
+  const reasons = Array.isArray(gate.reasons) ? gate.reasons.filter((b): b is string => typeof b === "string") : [];
+  const parts: string[] = [];
+  if (typeof allowed === "boolean") parts.push(`allowed=${allowed}`);
+  if (typeof mode === "string") parts.push(`mode=${mode}`);
+  if (blockers.length) parts.push(`blockers: ${blockers.join(", ")}`);
+  if (reasons.length) parts.push(`reasons: ${reasons.join(", ")}`);
+  return parts.length ? parts.join(" · ") : "Gate detayi bos.";
+}
+
+export function summarizeWorkerHealth(worker: WorkerHealthResponse | null | undefined): string {
+  if (!worker) return "Worker health verisi yok.";
+  if (!worker.ok) return worker.message || worker.error || "Worker health kullanilamiyor.";
+  const h = worker.health;
+  if (!h) return "Worker health govdesi bos.";
+  const summary = h.summary;
+  if (summary) {
+    return `mode=${h.mode} processed=${summary.processed} completed=${summary.completed} failed=${summary.failed} dlq=${summary.deadLettered}`;
+  }
+  return `mode=${h.mode} workerId=${h.workerId}`;
+}
+
+export function isSandboxAvailable(
+  availability: ApprovalSandboxAvailabilityResponse | null | undefined,
+  buildTimeNodeEnv: string | undefined
+): boolean {
+  if (buildTimeNodeEnv === "production") {
+    return false;
+  }
+  return Boolean(availability?.sandboxSeedAvailable);
+}
+
 export function validateRejectReason(reason: string): string | null {
   if (!reason.trim()) {
     return "Reddetme nedeni yazin.";
@@ -99,6 +261,12 @@ export function mapApprovalUiErrorMessage(error: ApprovalClientError): string {
   }
   if (error.kind === "not_found") {
     return error.message || "Approval inbox endpoint bu ortamda yayinlanmiyor.";
+  }
+  if (error.kind === "conflict") {
+    return error.message || "Onay istegi bu durumda islenemez veya cakisma olustu.";
+  }
+  if (error.kind === "invalid_request") {
+    return error.message || "Istek gecersiz; alanlari kontrol edin.";
   }
   if (error.kind === "network") {
     return "Approval API baglantisi kurulamadi.";

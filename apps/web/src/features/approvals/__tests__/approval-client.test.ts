@@ -14,6 +14,8 @@ test("approval client endpoint paths are correct", () => {
   assert.equal(APPROVAL_API_PATHS.detail("apr_1"), "/platform/approvals/apr_1");
   assert.equal(APPROVAL_API_PATHS.approve("apr_1"), "/platform/approvals/apr_1/approve");
   assert.equal(APPROVAL_API_PATHS.reject("apr_1"), "/platform/approvals/apr_1/reject");
+  assert.equal(APPROVAL_API_PATHS.sandboxAvailability, "/platform/approvals/sandbox/availability");
+  assert.equal(APPROVAL_API_PATHS.sandboxSeed, "/platform/approvals/sandbox/seed");
   assert.equal(APPROVAL_API_PATHS.workerHealth, "/worker/health");
   assert.equal(APPROVAL_API_PATHS.workerSafety, "/worker/safety");
 });
@@ -28,10 +30,12 @@ test("approve/reject request body mapping is correct", () => {
   assert.deepEqual(buildApprovalRejectBody("   "), {});
 });
 
-test("401/403/503 error mapping is explicit", () => {
+test("401/403/503/409/400 error mapping is explicit", () => {
   assert.equal(mapApprovalClientError(401).kind, "unauthorized");
   assert.equal(mapApprovalClientError(403).kind, "forbidden");
   assert.equal(mapApprovalClientError(503).kind, "unsupported");
+  assert.equal(mapApprovalClientError(409).kind, "conflict");
+  assert.equal(mapApprovalClientError(400).kind, "invalid_request");
 });
 
 test("404/503 error mapping does not fake success", () => {

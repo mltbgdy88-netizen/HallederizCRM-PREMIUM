@@ -203,3 +203,9 @@
 - `pnpm smoke:production-safety` komutu production safety smoke testini calistirir.
 - Readiness raporu `docs/architecture/PRODUCTION_READINESS_REPORT.md` altinda tutulur.
 - Bu faz gercek mutation/provider write veya production worker loop acmaz.
+
+## Phase 18 Operator UI Runtime Sandbox Pack
+
+- `POST /platform/approvals/sandbox/seed` ve `GET .../sandbox/availability` yalnizca non-production + demo/test ortaminda acik; pending approval repository contract'ina idempotent yazar.
+- Reject endpoint bos reason icin `400 reject_reason_required` fail-closed doner.
+- Web inbox sandbox toolbar API uzerinden seed cagirir; approve/reject sonrasi refetch ile optimistic fake status yok.

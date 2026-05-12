@@ -8,6 +8,7 @@ import { ApprovalRiskSummary } from "./ApprovalRiskSummary";
 import { ApprovalStatusBadge } from "./ApprovalStatusBadge";
 import { ApprovalTimelinePreview } from "./ApprovalTimelinePreview";
 import { EmptyState } from "./ApprovalInboxStates";
+import { summarizeGateDecision } from "../utils/inbox-helpers";
 
 function formatDate(value?: string): string {
   if (!value) return "-";
@@ -93,6 +94,10 @@ export function ApprovalDetailPanel({
             <dd>{item.idempotencyKey}</dd>
           </div>
           <div>
+            <dt>Red nedeni</dt>
+            <dd>{item.rejectReason ?? "-"}</dd>
+          </div>
+          <div>
             <dt>Tenant</dt>
             <dd>{item.tenantId}</dd>
           </div>
@@ -101,6 +106,37 @@ export function ApprovalDetailPanel({
           <summary>Payload ozeti</summary>
           <pre className="hz-approvals-inbox-payload">{payloadPreview}</pre>
         </details>
+      </section>
+
+      <section className="hz-approvals-inbox-card">
+        <h3 className="hz-approvals-inbox-card-title">Runtime / bridge</h3>
+        <dl className="hz-approvals-inbox-meta hz-approvals-inbox-meta--grid">
+          <div>
+            <dt>Execution id</dt>
+            <dd>{item.executionId ?? "-"}</dd>
+          </div>
+          <div>
+            <dt>Outbox job</dt>
+            <dd>{item.outboxJobId ?? "-"}</dd>
+          </div>
+          <div>
+            <dt>Bridge transaction</dt>
+            <dd>{item.bridgeTransactionMode ?? "-"}</dd>
+          </div>
+          <div>
+            <dt>Bridge persistence</dt>
+            <dd>{item.bridgePersistenceMode ?? "-"}</dd>
+          </div>
+          <div>
+            <dt>Audit writeback (UI)</dt>
+            <dd>{item.auditTimelineWritebackQueued === true ? "Kuyruk/onay yaniti" : item.auditRequired ? "Gerekli" : "Hayir"}</dd>
+          </div>
+          <div>
+            <dt>Worker onerisi</dt>
+            <dd>{item.workerProcessingRecommended ? "Islenmesi onerilir" : "Beklemede / yok"}</dd>
+          </div>
+        </dl>
+        <p className="hz-approvals-inbox-muted">Gate ozeti: {summarizeGateDecision(item.gateDecision)}</p>
       </section>
 
       {gateReasons.length ? (

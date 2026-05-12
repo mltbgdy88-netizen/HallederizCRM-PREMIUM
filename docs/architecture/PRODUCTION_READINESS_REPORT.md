@@ -70,3 +70,8 @@ Current state: foundation ready, production guarded.
 
 - Dashboard hizli erisim ve sidebar navigasyonu Onaylar inbox'una baglandi.
 - Worker/safety badge foundation modunu success gibi abartmaz; UI fake production data gostermez.
+
+## 2026-05-13 — Operator UI runtime integration
+
+- Sandbox seed route production'da kapali; UI toolbar production build'de gizli.
+- Approval inbox API contract ile test edilebilir; client-side fake approval yok.
