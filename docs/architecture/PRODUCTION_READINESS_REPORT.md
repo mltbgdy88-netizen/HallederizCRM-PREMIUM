@@ -59,3 +59,9 @@ Current state: foundation ready, production guarded.
 - Worker daemon lifecycle, metrics and alerting still need a production runtime pack.
 - Real mutation handler activation needs action-specific rollback plans.
 - Approval inbox UI remains a separate product task.
+
+## 2026-05-13 — Approval Inbox UI foundation
+
+- Web Approval Inbox foundation eklendi; API-backed liste/detay/approve/reject UI calisir.
+- Fake production approval data gosterilmez; worker/safety metadata read-only kalir.
+- Sonraki risk: UI polish, realtime refresh, operator notification badge.
