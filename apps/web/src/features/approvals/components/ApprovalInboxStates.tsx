@@ -1,4 +1,5 @@
 import type { ApprovalClientError } from "../types";
+import { mapApprovalUiErrorMessage } from "../utils/inbox-helpers";
 
 export function LoadingState({ label = "Onay kayitlari yukleniyor..." }: { label?: string }) {
   return (
@@ -12,7 +13,7 @@ export function ErrorState({ error, onRetry }: { error: ApprovalClientError; onR
   return (
     <div className="hz-approvals-inbox-state hz-approvals-inbox-state--error" role="alert">
       <p className="hz-approvals-inbox-state-title">Onay verisi alinamadi</p>
-      <p className="hz-approvals-inbox-state-message">{error.message}</p>
+      <p className="hz-approvals-inbox-state-message">{mapApprovalUiErrorMessage(error)}</p>
       {error.reasons?.length ? (
         <ul className="hz-approvals-inbox-state-reasons">
           {error.reasons.map((reason) => (

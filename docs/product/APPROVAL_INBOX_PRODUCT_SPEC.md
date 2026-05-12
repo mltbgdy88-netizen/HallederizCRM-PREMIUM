@@ -180,3 +180,9 @@ Tüm mutation benzeri UI aksiyonları demo/backend yoksa **demo toast** + disabl
 - Approve/reject aksiyonlari mevcut platform approval API contract'ina baglidir; mutation guvenligi backend gate'e baglidir.
 - Worker/safety metadata read-only gosterilir.
 - Sonraki is: UI polish, operator workflow, notification badge, realtime refresh.
+
+## 2026-05-13 — Approval Inbox navigation polish
+
+- Sidebar `Onaylar` linki `/onaylar` route'una baglidir; dashboard hizli erisim karti eklendi.
+- Filtre, arama ve siralama mevcut API listesi uzerinden client-side calisir; fake count gosterilmez.
+- Approve/reject UX pending disi durumda disabled kalir; runtime action guvenligi backend gate'e baglidir.

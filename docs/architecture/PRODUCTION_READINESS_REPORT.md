@@ -65,3 +65,8 @@ Current state: foundation ready, production guarded.
 - Web Approval Inbox foundation eklendi; API-backed liste/detay/approve/reject UI calisir.
 - Fake production approval data gosterilmez; worker/safety metadata read-only kalir.
 - Sonraki risk: UI polish, realtime refresh, operator notification badge.
+
+## 2026-05-13 — Approval Inbox navigation polish
+
+- Dashboard hizli erisim ve sidebar navigasyonu Onaylar inbox'una baglandi.
+- Worker/safety badge foundation modunu success gibi abartmaz; UI fake production data gostermez.

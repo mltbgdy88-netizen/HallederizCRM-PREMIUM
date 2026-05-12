@@ -216,3 +216,4 @@ Inbox implementasyonu Dashboard AI bileşenini **import etmez**; ortak tipografi
 
 - `ApprovalInboxShell`, `ApprovalList`, `ApprovalDetailPanel`, `ApprovalActionBar`, `ApprovalStatusBadge`, `ApprovalRiskSummary`, `ApprovalTimelinePreview`, `ApprovalOutboxStatusCard`, `ApprovalSafetyBadge`, `LoadingState`, `EmptyState`, `ErrorState`
 - Client foundation: `apps/web/src/features/approvals/api/approval-client.ts`
+- UI helpers: `apps/web/src/features/approvals/utils/inbox-helpers.ts`

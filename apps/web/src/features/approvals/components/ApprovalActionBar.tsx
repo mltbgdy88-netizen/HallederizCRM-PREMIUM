@@ -1,4 +1,8 @@
+"use client";
+
+import { useState } from "react";
 import type { ApprovalInboxItem } from "../types";
+import { isApprovalActionAvailable, validateRejectReason } from "../utils/inbox-helpers";
 
 export function ApprovalActionBar({
   item,
@@ -11,26 +15,47 @@ export function ApprovalActionBar({
   onApprove: () => void;
   onReject: (reason: string) => void;
 }) {
-  const pending = item.status === "pending";
+  const [rejectReason, setRejectReason] = useState("");
+  const [rejectWarning, setRejectWarning] = useState<string | null>(null);
+  const pending = isApprovalActionAvailable(item);
+
+  const handleReject = () => {
+    const validation = validateRejectReason(rejectReason);
+    if (validation) {
+      setRejectWarning(validation);
+      return;
+    }
+    setRejectWarning(null);
+    onReject(rejectReason);
+  };
+
   return (
     <section className="hz-approvals-inbox-card hz-approvals-inbox-actionbar" aria-label="Onay aksiyonlari">
       <h3 className="hz-approvals-inbox-card-title">Operator aksiyonlari</h3>
-      <label className="hz-approvals-inbox-field">
-        <span>Red gerekcesi</span>
+      <label className="hz-approvals-inbox-field" htmlFor="approval-reject-reason">
+        <span>Reddetme nedeni</span>
         <input
           type="text"
           name="rejectReason"
           className="hz-approvals-inbox-input"
-          placeholder="Opsiyonel red gerekcesi"
+          placeholder="Reddetme nedeni yazin"
           disabled={!pending || busy}
+          value={rejectReason}
+          onChange={(event) => {
+            setRejectReason(event.target.value);
+            if (rejectWarning) {
+              setRejectWarning(null);
+            }
+          }}
           onKeyDown={(event) => {
             if (event.key === "Enter" && pending && !busy) {
-              onReject((event.currentTarget as HTMLInputElement).value);
+              handleReject();
             }
           }}
           id="approval-reject-reason"
         />
       </label>
+      {rejectWarning ? <p className="hz-approvals-inbox-action-warning">{rejectWarning}</p> : null}
       <div className="hz-approvals-inbox-actions">
         <button
           type="button"
@@ -38,18 +63,15 @@ export function ApprovalActionBar({
           disabled={!pending || busy}
           onClick={onApprove}
         >
-          Onayla
+          {busy ? "Onaylaniyor..." : "Onayla"}
         </button>
         <button
           type="button"
           className="hz-approvals-inbox-btn hz-approvals-inbox-btn--danger"
           disabled={!pending || busy}
-          onClick={() => {
-            const input = document.getElementById("approval-reject-reason") as HTMLInputElement | null;
-            onReject(input?.value ?? "");
-          }}
+          onClick={handleReject}
         >
-          Reddet
+          {busy ? "Reddediliyor..." : "Reddet"}
         </button>
       </div>
       {!pending ? <p className="hz-approvals-inbox-muted">Bu kayit pending degil; aksiyonlar kapali.</p> : null}
