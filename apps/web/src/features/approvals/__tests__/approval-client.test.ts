@@ -41,7 +41,7 @@ test("401/403/503/409/400 error mapping is explicit", () => {
 test("404/503 error mapping does not fake success", () => {
   const list404 = mapApprovalClientError(404, undefined, "approvals_list");
   assert.equal(list404.kind, "not_found");
-  assert.match(list404.message, /endpoint bu ortamda yayinlanmiyor/i);
+  assert.match(list404.message, /404|bulunamadi|yayinlanmiyor/i);
 
   const worker404 = mapApprovalClientError(404, undefined, "worker_health");
   assert.equal(worker404.kind, "not_found");
@@ -49,7 +49,15 @@ test("404/503 error mapping does not fake success", () => {
 
   const list503 = mapApprovalClientError(503, undefined, "approvals_list");
   assert.equal(list503.kind, "unsupported");
-  assert.match(list503.message, /foundation modu hazir degil/i);
+  assert.match(list503.message, /503|foundation|hazir degil/i);
+});
+
+test("default messages for 400 401 403 409 500 are explicit", () => {
+  assert.match(mapApprovalClientError(400, undefined, "approval_reject").message, /400|Gecersiz/i);
+  assert.match(mapApprovalClientError(401, undefined, "approvals_list").message, /401|Kimlik|Oturum/i);
+  assert.match(mapApprovalClientError(403, undefined, "approvals_list").message, /403|Yetki/i);
+  assert.match(mapApprovalClientError(409, undefined, "approval_approve").message, /409|Cakisma|islendi/i);
+  assert.match(mapApprovalClientError(500, undefined, "approvals_list").message, /500|Sunucu/i);
 });
 
 test("approval status badge mapper returns readable labels", () => {

@@ -44,6 +44,7 @@ Current state: foundation ready, production guarded.
 
 - `pnpm typecheck`
 - `pnpm test`
+- `pnpm test:web-approvals`
 - `pnpm build`
 - `pnpm smoke:production-safety`
 
@@ -75,3 +76,9 @@ Current state: foundation ready, production guarded.
 
 - Sandbox seed route production'da kapali; UI toolbar production build'de gizli.
 - Approval inbox API contract ile test edilebilir; client-side fake approval yok.
+
+## 2026-05-13 — Operator E2E smoke polish (web)
+
+- Onay Inbox ustunde local/demo `ApprovalOperatorSmokePanel` smoke checklist; production buildde sahte basari yok.
+- `operator-smoke` yardimcisi, sandbox seed mesajlari ve client HTTP hata mesajlari netlestirildi.
+- Web paketinde `type: module` ile Node 22 uyumlu onay birim testleri; `pnpm test:web-approvals`.

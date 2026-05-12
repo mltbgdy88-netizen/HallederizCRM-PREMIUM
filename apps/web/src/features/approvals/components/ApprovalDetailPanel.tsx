@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import type { ApprovalInboxItem } from "../types";
+import type { LastApprovalActionSummary } from "../utils/operator-smoke";
 import { ApprovalActionBar } from "./ApprovalActionBar";
 import { ApprovalOutboxStatusCard } from "./ApprovalOutboxStatusCard";
 import { ApprovalRiskSummary } from "./ApprovalRiskSummary";
@@ -18,11 +19,14 @@ function formatDate(value?: string): string {
 export function ApprovalDetailPanel({
   item,
   busy,
+  lastApprovalSummary,
   onApprove,
   onReject
 }: {
   item: ApprovalInboxItem | null;
   busy: boolean;
+  /** Son basarili / idempotent onay API yaniti ozeti */
+  lastApprovalSummary?: LastApprovalActionSummary | null;
   onApprove: () => void;
   onReject: (reason: string) => void;
 }) {
@@ -128,8 +132,16 @@ export function ApprovalDetailPanel({
             <dd>{item.bridgePersistenceMode ?? "-"}</dd>
           </div>
           <div>
-            <dt>Audit writeback (UI)</dt>
-            <dd>{item.auditTimelineWritebackQueued === true ? "Kuyruk/onay yaniti" : item.auditRequired ? "Gerekli" : "Hayir"}</dd>
+            <dt>Audit / timeline writeback</dt>
+            <dd>
+              {item.auditTimelineWritebackQueued === true
+                ? "Kuyruklandi veya yanitta true"
+                : item.auditTimelineWritebackQueued === false
+                  ? "Yanitta false"
+                  : item.auditRequired
+                    ? "Gerekli (detay alani bos)"
+                    : "Hayir"}
+            </dd>
           </div>
           <div>
             <dt>Worker onerisi</dt>
@@ -138,6 +150,49 @@ export function ApprovalDetailPanel({
         </dl>
         <p className="hz-approvals-inbox-muted">Gate ozeti: {summarizeGateDecision(item.gateDecision)}</p>
       </section>
+
+      {lastApprovalSummary ? (
+        <section className="hz-approvals-inbox-card hz-approvals-inbox-card--last-action" aria-label="Son islem sonucu">
+          <h3 className="hz-approvals-inbox-card-title">Son islem sonucu (onay API)</h3>
+          <p className="hz-approvals-inbox-muted">
+            {lastApprovalSummary.duplicate
+              ? "Idempotent yanit: kayit zaten islenmis; yeni execution gonderilmedi."
+              : "Onay API basarili dondu; asagidaki alanlar son yanittan."}
+          </p>
+          <dl className="hz-approvals-inbox-meta hz-approvals-inbox-meta--grid">
+            <div>
+              <dt>executionId</dt>
+              <dd>{lastApprovalSummary.executionId ?? "-"}</dd>
+            </div>
+            <div>
+              <dt>outboxJobId</dt>
+              <dd>{lastApprovalSummary.outboxJobId ?? "-"}</dd>
+            </div>
+            <div>
+              <dt>Bridge</dt>
+              <dd className="hz-approvals-inbox-mono-wrap">{lastApprovalSummary.bridgeLine}</dd>
+            </div>
+            <div>
+              <dt>auditTimelineWritebackQueued</dt>
+              <dd>
+                {lastApprovalSummary.auditTimelineWritebackQueued === true
+                  ? "true"
+                  : lastApprovalSummary.auditTimelineWritebackQueued === false
+                    ? "false"
+                    : "-"}
+              </dd>
+            </div>
+            <div>
+              <dt>gateDecision</dt>
+              <dd className="hz-approvals-inbox-mono-wrap">{lastApprovalSummary.gateLine}</dd>
+            </div>
+            <div>
+              <dt>Yanit zamani</dt>
+              <dd>{new Date(lastApprovalSummary.at).toLocaleString("tr-TR")}</dd>
+            </div>
+          </dl>
+        </section>
+      ) : null}
 
       {gateReasons.length ? (
         <section className="hz-approvals-inbox-card hz-approvals-inbox-card--warn" aria-label="Gate uyarilari">

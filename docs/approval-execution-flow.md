@@ -209,3 +209,8 @@
 - `POST /platform/approvals/sandbox/seed` ve `GET .../sandbox/availability` yalnizca non-production + demo/test ortaminda acik; pending approval repository contract'ina idempotent yazar.
 - Reject endpoint bos reason icin `400 reject_reason_required` fail-closed doner.
 - Web inbox sandbox toolbar API uzerinden seed cagirir; approve/reject sonrasi refetch ile optimistic fake status yok.
+
+## Phase 19 Operator smoke checklist (web)
+
+- `apps/web/src/features/approvals/utils/operator-smoke.ts` ile smoke adimlari ve son islem metadata ozeti tek sozlesmede toplanir; `ApprovalOperatorSmokePanel` yalnizca development ortaminda checklist gosterir, production'da kisitli bilgilendirme.
+- Onay API client HTTP kodlari (400/401/403/404/409/503/ag) kullaniciya acik mesajlarla eslenir; backend hatasi basari gibi gosterilmez.

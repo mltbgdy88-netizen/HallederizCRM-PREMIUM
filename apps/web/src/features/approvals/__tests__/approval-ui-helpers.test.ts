@@ -5,6 +5,7 @@ import {
   canApproveApproval,
   canRejectApproval,
   computeInboxStats,
+  describeApprovalActionDisabledReason,
   filterInboxItems,
   isApprovalActionAvailable,
   isSandboxAvailable,
@@ -71,11 +72,11 @@ test("action availability helper disables non-pending approvals", () => {
 });
 
 test("error message mapper returns readable auth and runtime messages", () => {
-  assert.match(mapApprovalUiErrorMessage({ kind: "forbidden", message: "x" }), /yetkiniz yok/i);
-  assert.match(mapApprovalUiErrorMessage({ kind: "unsupported", message: "foundation unavailable" }), /foundation/i);
-  assert.match(mapApprovalUiErrorMessage({ kind: "network", message: "x" }), /baglantisi kurulamadi/i);
-  assert.match(mapApprovalUiErrorMessage({ kind: "conflict", message: "cakisma" }), /cakisma/i);
-  assert.match(mapApprovalUiErrorMessage({ kind: "invalid_request", message: "neden" }), /neden/i);
+  assert.match(mapApprovalUiErrorMessage({ kind: "forbidden", message: "x" }), /403|yetki/i);
+  assert.match(mapApprovalUiErrorMessage({ kind: "unsupported", message: "foundation unavailable" }), /503|foundation|kullanilamiyor/i);
+  assert.match(mapApprovalUiErrorMessage({ kind: "network", message: "x" }), /Ag|baglanti/i);
+  assert.match(mapApprovalUiErrorMessage({ kind: "conflict", message: "cakisma" }), /409|cakisma/i);
+  assert.match(mapApprovalUiErrorMessage({ kind: "invalid_request", message: "neden" }), /400|neden/i);
 });
 
 test("reject reason validation requires non-empty text", () => {
@@ -127,4 +128,10 @@ test("summarizeGateDecision renders key gate fields", () => {
 test("isSandboxAvailable respects production build flag", () => {
   assert.equal(isSandboxAvailable({ sandboxSeedAvailable: true } as never, "production"), false);
   assert.equal(isSandboxAvailable({ sandboxSeedAvailable: true } as never, "development"), true);
+});
+
+test("describeApprovalActionDisabledReason explains non-pending and empty selection", () => {
+  assert.match(describeApprovalActionDisabledReason(null) ?? "", /secin/i);
+  assert.match(describeApprovalActionDisabledReason(SAMPLE[1]) ?? "", /Onaylandi|bekleyen/i);
+  assert.equal(describeApprovalActionDisabledReason(SAMPLE[0]), null);
 });

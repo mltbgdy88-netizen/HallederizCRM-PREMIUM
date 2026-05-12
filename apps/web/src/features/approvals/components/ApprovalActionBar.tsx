@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import type { ApprovalInboxItem } from "../types";
-import { isApprovalActionAvailable, validateRejectReason } from "../utils/inbox-helpers";
+import { isApprovalActionAvailable, validateRejectReason, describeApprovalActionDisabledReason } from "../utils/inbox-helpers";
 
 export function ApprovalActionBar({
   item,
@@ -18,6 +18,7 @@ export function ApprovalActionBar({
   const [rejectReason, setRejectReason] = useState("");
   const [rejectWarning, setRejectWarning] = useState<string | null>(null);
   const pending = isApprovalActionAvailable(item);
+  const disabledHint = describeApprovalActionDisabledReason(item);
 
   const handleReject = () => {
     const validation = validateRejectReason(rejectReason);
@@ -74,7 +75,7 @@ export function ApprovalActionBar({
           {busy ? "Reddediliyor..." : "Reddet"}
         </button>
       </div>
-      {!pending ? <p className="hz-approvals-inbox-muted">Bu kayit pending degil; aksiyonlar kapali.</p> : null}
+      {!pending && disabledHint ? <p className="hz-approvals-inbox-muted hz-approvals-inbox-action-disabled-reason">{disabledHint}</p> : null}
     </section>
   );
 }

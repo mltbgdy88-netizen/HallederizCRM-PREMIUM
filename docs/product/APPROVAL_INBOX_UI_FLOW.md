@@ -23,6 +23,8 @@ Uygulama menüsünde kanonik Türkçe route `/onaylar` ile uyumlu kalınır; API
 
 Web alias route'lar `/approvals` ve `/dashboard/approvals` kanonik `/onaylar` sayfasina yonlendirilir.
 
+**Local/demo smoke:** Manuel adımlar için [OPERATOR_SANDBOX_SMOKE_CHECKLIST.md](./OPERATOR_SANDBOX_SMOKE_CHECKLIST.md); yardımcı modül testleri için repo kökünde `pnpm test:web-approvals`.
+
 ---
 
 ## Kullanıcı akışları

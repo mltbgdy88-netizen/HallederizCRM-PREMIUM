@@ -251,25 +251,45 @@ export function validateRejectReason(reason: string): string | null {
 
 export function mapApprovalUiErrorMessage(error: ApprovalClientError): string {
   if (error.kind === "unauthorized") {
-    return "Oturum gerekli. Lutfen tekrar giris yapin.";
+    return error.message?.trim()
+      ? `Oturum sorunu (401): ${error.message}`
+      : "Oturum gecersiz veya suresi doldu (401). Lutfen tekrar giris yapin.";
   }
   if (error.kind === "forbidden") {
-    return "Bu onay aksiyonu icin yetkiniz yok.";
+    return error.message?.trim()
+      ? `Yetki yok (403): ${error.message}`
+      : "Yetki reddedildi (403). Bu tenant veya rol icin onay API'si kapali olabilir.";
   }
   if (error.kind === "unsupported") {
-    return error.message || "Foundation/runtime modu su an kullanilamiyor.";
+    return error.message || "Servis kullanilamiyor (503). Foundation/runtime veya persistence hazir degil.";
   }
   if (error.kind === "not_found") {
-    return error.message || "Approval inbox endpoint bu ortamda yayinlanmiyor.";
+    return error.message || "Kaynak bulunamadi (404). Approval route yayinlanmiyor veya yanlis path.";
   }
   if (error.kind === "conflict") {
-    return error.message || "Onay istegi bu durumda islenemez veya cakisma olustu.";
+    return (
+      error.message ||
+      "Cakisma (409). Kayit zaten islendi, durum uyusmuyor veya tekrarlanamaz islem; detay icin API mesajina bakin."
+    );
   }
   if (error.kind === "invalid_request") {
-    return error.message || "Istek gecersiz; alanlari kontrol edin.";
+    return error.message || "Gecersiz istek (400). Validasyon veya zorunlu alanlari kontrol edin.";
   }
   if (error.kind === "network") {
-    return "Approval API baglantisi kurulamadi.";
+    return error.message?.trim()
+      ? `Ag / baglanti: ${error.message}`
+      : "Ag hatasi: Approval API'ye ulasilamadi (CORS, DNS, sunucu kapali veya zaman asimi).";
   }
-  return error.message;
+  return error.message || "Bilinmeyen hata.";
+}
+
+/** Aciklayici metin: aksiyonlar neden kapali (pending disi veya secim yok). */
+export function describeApprovalActionDisabledReason(item: ApprovalInboxItem | null | undefined): string | null {
+  if (!item) {
+    return "Once listeden bir onay secin.";
+  }
+  if (item.status !== "pending") {
+    return `Bu kayit durumu "${mapApprovalStatusLabel(item.status)}"; Onayla/Reddet yalnizca bekleyen kayitlarda aciktir.`;
+  }
+  return null;
 }
