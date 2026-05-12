@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { SplitContentLayout } from "@hallederiz/ui";
 import { DashboardAiAssistantPanel } from "./DashboardAiAssistantPanel";
@@ -175,9 +176,21 @@ export function DashboardHomePage() {
                     <h3>Kritik Görev</h3>
                   </header>
                   <p className="hz-dash-work-mini-value">3 yüksek risk</p>
-                  <button type="button" className="hz-dash-work-mini-link">
+                  <Link href="/onaylar" className="hz-dash-work-mini-link">
                     Onaylara git
-                  </button>
+                  </Link>
+                </article>
+                <article className="hz-dash-approvals-quick" aria-label="Onaylar hizli erisim">
+                  <header className="hz-dash-approvals-quick-head">
+                    <h3>Onaylar</h3>
+                  </header>
+                  <p className="hz-dash-approvals-quick-copy">
+                    Bekleyen onaylari, worker/outbox durumunu ve guvenlik sinyallerini izle.
+                  </p>
+                  <p className="hz-dash-approvals-quick-note">Canli durum Onaylar ekraninda.</p>
+                  <Link href="/onaylar" className="hz-dash-approvals-quick-cta">
+                    Onaylara Git
+                  </Link>
                 </article>
                 <article className="hz-dash-work-mini">
                   <header className="hz-dash-work-mini-head">

@@ -80,6 +80,13 @@ export interface WorkerHealthResponse {
   error?: string;
   message?: string;
   reasons?: string[];
+  productionSafety?: {
+    ok?: boolean;
+    blockers?: string[];
+    labels?: string[];
+    reasons?: string[];
+    signals?: Record<string, boolean | string>;
+  };
 }
 
 export type ApprovalClientErrorKind = "network" | "unauthorized" | "forbidden" | "unsupported" | "not_found" | "unknown";

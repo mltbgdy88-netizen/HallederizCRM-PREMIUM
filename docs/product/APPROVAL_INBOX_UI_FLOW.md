@@ -194,3 +194,9 @@ stateDiagram-v2
 - Liste/detay/approve/reject akisi `ApprovalInboxShell` uzerinden API client ile calisir.
 - 401/403/503 ve bos durumlar ayri UI state olarak gosterilir.
 - Worker health ve production safety badge'leri read-only foundation metadata kullanir.
+
+## 2026-05-13 — Navigation and inbox polish
+
+- `/approvals` ve `/dashboard/approvals` alias redirect'leri `/onaylar`a yonlenir.
+- Dashboard ve AI panelinden Onaylar hizli erisimi eklendi.
+- Filtre/search/sort ve hata mesajlari UI helper katmaninda toplandi.

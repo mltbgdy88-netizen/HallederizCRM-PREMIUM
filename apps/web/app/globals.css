@@ -14677,3 +14677,124 @@ select.hz-qop-summary-input {
   border-radius: 8px;
   padding: 8px 10px;
 }
+
+.hz-approvals-inbox-stats,
+.hz-approvals-inbox-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  font-size: 0.8rem;
+  color: var(--hz-text-muted, #64748b);
+}
+
+.hz-approvals-inbox-toolbar {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(180px, 0.6fr);
+  gap: 10px;
+}
+
+.hz-approvals-inbox-search,
+.hz-approvals-inbox-sort {
+  display: grid;
+  gap: 4px;
+}
+
+.hz-approvals-inbox-search-label,
+.hz-approvals-inbox-sort-label {
+  font-size: 0.75rem;
+  color: var(--hz-text-muted, #64748b);
+}
+
+.hz-approvals-inbox-meta--grid {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.hz-approvals-inbox-detail-id-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hz-approvals-inbox-copy {
+  border: 1px solid var(--hz-border);
+  border-radius: 999px;
+  padding: 4px 10px;
+  background: #fff;
+  font-size: 0.75rem;
+}
+
+.hz-approvals-inbox-payload-details summary {
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.hz-approvals-inbox-card--warn {
+  border-color: #f59e0b;
+}
+
+.hz-approvals-inbox-action-warning {
+  color: #b45309;
+  font-size: 0.8rem;
+}
+
+.hz-approvals-inbox-safety-badge--neutral {
+  border-color: #94a3b8;
+  color: #334155;
+}
+
+.hz-approvals-inbox-safety-badge--danger {
+  border-color: #dc2626;
+  color: #991b1b;
+}
+
+.hz-dash-approvals-quick {
+  border: 1px solid var(--hz-border);
+  border-radius: 12px;
+  background: #fff;
+  padding: 12px;
+  display: grid;
+  gap: 8px;
+}
+
+.hz-dash-approvals-quick--compact {
+  margin-top: 10px;
+}
+
+.hz-dash-approvals-quick-head h3 {
+  margin: 0;
+  font-size: 0.95rem;
+}
+
+.hz-dash-approvals-quick-copy,
+.hz-dash-approvals-quick-note {
+  margin: 0;
+  color: var(--hz-text-muted, #64748b);
+  font-size: 0.82rem;
+}
+
+.hz-dash-approvals-quick-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  border-radius: 8px;
+  padding: 8px 12px;
+  background: #583bff;
+  color: #fff;
+  text-decoration: none;
+}
+
+@media (max-width: 960px) {
+  .hz-approvals-inbox-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .hz-approvals-inbox-toolbar {
+    grid-template-columns: 1fr;
+  }
+
+  .hz-approvals-inbox-meta--grid {
+    grid-template-columns: 1fr;
+  }
+}

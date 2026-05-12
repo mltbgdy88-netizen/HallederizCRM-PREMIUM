@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useState } from "react";
 import { useAuth } from "../../../providers/auth-provider";
 import { useToast } from "../../../providers/toast-provider";
@@ -83,6 +84,19 @@ export function DashboardAiAssistantPanel({ compact }: { compact?: boolean }) {
             </button>
           </div>
           <p className="hz-live-assistant-local-status">Yerel asistan bağlantısı sonradan bağlanacak</p>
+        </section>
+
+        <section className="hz-dash-approvals-quick hz-dash-approvals-quick--compact" aria-label="Onaylar hizli erisim">
+          <header className="hz-dash-approvals-quick-head">
+            <h3>Onaylar</h3>
+          </header>
+          <p className="hz-dash-approvals-quick-copy">
+            Bekleyen onaylari, worker/outbox durumunu ve guvenlik sinyallerini izle.
+          </p>
+          <p className="hz-dash-approvals-quick-note">Canli durum Onaylar ekraninda.</p>
+          <Link href="/onaylar" className="hz-dash-approvals-quick-cta">
+            Onaylara Git
+          </Link>
         </section>
       </aside>
     );
