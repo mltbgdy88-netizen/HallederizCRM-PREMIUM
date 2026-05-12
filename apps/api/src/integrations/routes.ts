@@ -4,7 +4,7 @@ import { hashInboundMessageContent, parseWhatsAppApprovalCommand } from "@halled
 import type { ErpConnection, ErpMapping, FactoryOrder, WhatsAppActionRequest, WhatsAppMessage } from "@hallederiz/types";
 import { IntegrationsService } from "../modules/integrations/service";
 import { whatsAppWorkflowStoreService } from "../modules/whatsapp-workflow/store";
-import { assertAnyPermission, assertAuthenticated, withGuards } from "../shared/auth-guards";
+import { requireTenantPermissionGuards, withGuards } from "../shared/auth-guards";
 import { AiRuntimeService } from "../modules/ai-runtime/service";
 import { getLocalAgentStatus } from "../ai-local-output-store";
 import { readPermissions, requireReadAccess } from "../shared/read-guards";
@@ -47,12 +47,25 @@ async function collectRawBody(payload: AsyncIterable<Buffer | string>) {
   return Buffer.concat(chunks);
 }
 
-function extractWhatsAppWebhookMessage(event: WhatsAppWebhookBody) {
+function resolveWebhookTenantId(event: WhatsAppWebhookBody): string | undefined {
+  const tenantId = typeof event.tenantId === "string" ? event.tenantId.trim() : "";
+  if (tenantId) {
+    return tenantId;
+  }
+
+  const tenantSlug = typeof event.tenantSlug === "string" ? event.tenantSlug.trim() : "";
+  if (tenantSlug) {
+    return tenantSlug;
+  }
+
+  return undefined;
+}
+
+function extractWhatsAppWebhookMessage(event: WhatsAppWebhookBody, tenantId: string) {
   const message = event.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
   const text = message?.text?.body ?? event.text ?? "";
   const from = message?.from ?? event.from ?? "";
   const messageType = message?.type ?? "text";
-  const tenantId = event.tenantId ?? event.tenantSlug ?? "tenant_1";
   const contentHash = hashInboundMessageContent({ from, messageType, text });
   const messageId = message?.id ?? event.messageId ?? `wa_msg_${contentHash.slice(0, 24)}`;
   return {
@@ -110,7 +123,12 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
       return reply.status(403).send({ message: "Webhook signature mismatch." });
     }
     const event = request.body as WhatsAppWebhookBody;
-    const { contentHash, from, messageBody, messageId, tenantId } = extractWhatsAppWebhookMessage(event);
+    const resolvedTenantId = resolveWebhookTenantId(event);
+    if (!resolvedTenantId && process.env.NODE_ENV === "production") {
+      return reply.status(400).send({ message: "Webhook tenant context is required." });
+    }
+    const tenantId = resolvedTenantId ?? "tenant_1";
+    const { contentHash, from, messageBody, messageId } = extractWhatsAppWebhookMessage(event, tenantId);
     const at = new Date().toISOString();
     const shouldTrackWorkflow = Boolean(from || messageBody);
     const workflowPayload = { at, contentHash, from, id: messageId };
@@ -202,28 +220,28 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   );
 
   server.post<{ Body: Partial<WhatsAppMessage> }>("/whatsapp/inbound", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "whatsapp.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "whatsapp.write"], () => request.body?.tenantId), async (context) => {
       const service = new IntegrationsService(context);
       return reply.status(201).send({ item: service.receiveWhatsAppInbound(request.body) });
     })
   );
 
   server.post<{ Body: Partial<WhatsAppMessage> }>("/whatsapp/outbound", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "whatsapp.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "whatsapp.write"], () => request.body?.tenantId), async (context) => {
       const service = new IntegrationsService(context);
       return reply.status(201).send({ item: await service.sendWhatsAppOutbound(request.body) });
     })
   );
 
   server.post<{ Body: Partial<WhatsAppActionRequest> }>("/whatsapp/action-requests", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "approvals.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "approvals.write"], () => request.body?.tenantId), async (context) => {
       const service = new IntegrationsService(context);
       return reply.status(201).send({ item: service.createWhatsAppActionRequest(request.body) });
     })
   );
 
   server.post<{ Params: { id: string } }>("/whatsapp/action-requests/:id/confirm", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "approvals.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "approvals.write"]), async (context) => {
       const service = new IntegrationsService(context);
       const item = service.confirmWhatsAppActionRequest(request.params.id);
       if (!item) return reply.status(404).send({ message: "Action request not found" });
@@ -232,7 +250,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   );
 
   server.post<{ Params: { id: string } }>("/whatsapp/action-requests/:id/reject", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "approvals.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "approvals.write"]), async (context) => {
       const service = new IntegrationsService(context);
       const item = service.rejectWhatsAppActionRequest(request.params.id);
       if (!item) return reply.status(404).send({ message: "Action request not found" });
@@ -265,14 +283,14 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   );
 
   server.post<{ Body: Partial<ErpConnection> }>("/erp/connections", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "erp.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "erp.write"], () => request.body?.tenantId), async (context) => {
       const service = new IntegrationsService(context);
       return reply.status(201).send({ item: service.createErpConnection(request.body) });
     })
   );
 
   server.patch<{ Params: { id: string }; Body: Partial<ErpConnection> }>("/erp/connections/:id", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "erp.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "erp.write"], () => request.body?.tenantId), async (context) => {
       const service = new IntegrationsService(context);
       const item = service.patchErpConnection(request.params.id, request.body);
       if (!item) return reply.status(404).send({ message: "ERP connection not found" });
@@ -281,7 +299,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   );
 
   server.post<{ Params: { id: string } }>("/erp/connections/:id/test", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "erp.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "erp.write"]), async (context) => {
       const service = new IntegrationsService(context);
       const item = await service.testErpConnection(request.params.id);
       if (!item) return reply.status(404).send({ message: "ERP connection not found" });
@@ -290,7 +308,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   );
 
   server.post<{ Params: { id: string } }>("/erp/connections/:id/sync", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "erp.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "erp.write"]), async (context) => {
       const service = new IntegrationsService(context);
       const item = await service.syncErpConnection(request.params.id);
       if (!item) return reply.status(404).send({ message: "ERP connection not found" });
@@ -306,7 +324,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   );
 
   server.patch<{ Body: ErpMapping[] }>("/erp/mappings", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "erp.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "erp.write"]), async (context) => {
       const service = new IntegrationsService(context);
       return { items: service.patchErpMappings(request.body) };
     })
@@ -341,7 +359,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   );
 
   server.post<{ Params: { id: string } }>("/factories/:id/sync-stock", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "factory.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "factory.write"]), async (context) => {
       const service = new IntegrationsService(context);
       return { item: await service.syncFactoryStock(request.params.id) };
     })
@@ -365,14 +383,14 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   );
 
   server.post<{ Body: Partial<FactoryOrder> }>("/factory-orders", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "factory.write", "orders.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "factory.write", "orders.write"], () => request.body?.tenantId), async (context) => {
       const service = new IntegrationsService(context);
       return reply.status(201).send({ item: service.createFactoryOrder(request.body) });
     })
   );
 
   server.post<{ Params: { id: string } }>("/factory-orders/:id/send", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "factory.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "factory.write"]), async (context) => {
       const service = new IntegrationsService(context);
       const item = await service.sendFactoryOrder(request.params.id);
       if (!item) return reply.status(404).send({ message: "Factory order not found" });
@@ -381,7 +399,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   );
 
   server.post<{ Params: { id: string } }>("/factory-orders/:id/confirm", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "factory.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "factory.write"]), async (context) => {
       const service = new IntegrationsService(context);
       const item = service.confirmFactoryOrder(request.params.id);
       if (!item) return reply.status(404).send({ message: "Factory order not found" });
@@ -390,7 +408,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   );
 
   server.post<{ Params: { id: string } }>("/factory-orders/:id/mark-shipped", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "factory.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "factory.write"]), async (context) => {
       const service = new IntegrationsService(context);
       const item = service.markFactoryOrderShipped(request.params.id);
       if (!item) return reply.status(404).send({ message: "Factory order not found" });
@@ -399,7 +417,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   );
 
   server.post<{ Params: { id: string } }>("/factory-orders/:id/complete", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "factory.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "factory.write"]), async (context) => {
       const service = new IntegrationsService(context);
       const item = service.completeFactoryOrder(request.params.id);
       if (!item) return reply.status(404).send({ message: "Factory order not found" });
@@ -422,7 +440,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   );
 
   server.post("/health/whatsapp/test-send", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "whatsapp.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "whatsapp.write"]), async (context) => {
       const service = new IntegrationsService(context);
       const message = await service.sendWhatsAppOutbound({
         conversationId: "wa_conv_1",
@@ -450,7 +468,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   );
 
   server.post<{ Body: { connectionId?: string } }>("/health/erp/test", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "erp.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "erp.write"]), async (context) => {
       const service = new IntegrationsService(context);
       const connectionId = request.body?.connectionId ?? "erp_conn_1";
       const test = await service.testErpConnection(connectionId);
@@ -475,7 +493,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   );
 
   server.post<{ Body: { factoryId?: string } }>("/health/factory/test-sync", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["integrations.write", "factory.write"])], async (context) => {
+    withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "factory.write"]), async (context) => {
       const service = new IntegrationsService(context);
       const factoryId = request.body?.factoryId ?? "factory_1";
       const sync = await service.syncFactoryStock(factoryId);

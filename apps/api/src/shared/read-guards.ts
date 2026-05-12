@@ -1,10 +1,25 @@
-import { assertAnyPermission, assertAuthenticated } from "./auth-guards";
+import { assertAnyPermission, assertAuthenticated, assertTenantAccess } from "./auth-guards";
 import type { RequestContext } from "./request-context";
 
 export function requireReadAccess(permissions: readonly string[]) {
   return [
     assertAuthenticated,
     (context: RequestContext) => assertAnyPermission(context, permissions)
+  ];
+}
+
+export function requireTenantReadAccess(
+  permissions: readonly string[],
+  resolveTenantId?: (context: RequestContext) => string | undefined
+) {
+  return [
+    assertAuthenticated,
+    (context: RequestContext) => {
+      if (resolveTenantId) {
+        assertTenantAccess(context, resolveTenantId(context));
+      }
+      assertAnyPermission(context, permissions);
+    }
   ];
 }
 

@@ -34,3 +34,10 @@ Mevcut repo ile `PLATFORM_CORE_ARCHITECTURE.md` hedefi arasındaki farklar. Gör
 ## Dokunulmayacaklar (gap çözümünde)
 
 Migration/schema değişikliği 003 kapsamı dışında; approval/AI davranışı gevşetilmez; webhook fail-open yapılmaz.
+
+## 003 ilerleme notu (2026-05-12)
+
+- API guard zinciri icin tenant+permission ortak helper standardizasyonu baslatildi.
+- Platform-core mutation route'larinda ortak helper kullanimina gecildi.
+- WhatsApp webhook tenant context cozumlemesinde production fail-closed davranisi netlestirildi.
+- Worker/job tenant envelope standardizasyonu halen ayri bir takip isidir (Gap #7).
