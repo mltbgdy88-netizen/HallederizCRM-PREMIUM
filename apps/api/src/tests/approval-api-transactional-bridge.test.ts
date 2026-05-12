@@ -78,6 +78,7 @@ function bridgeFixture(
       },
       auditEvent: {
         eventKey: "approval.execution.audit",
+        eventId: `audit_${executionId}`,
         createdAt: "2026-05-12T12:00:01.000Z",
         payload: {
           tenantId: request.tenantId,
@@ -93,6 +94,7 @@ function bridgeFixture(
       },
       timelineEvent: {
         eventKey: "approval.execution.timeline",
+        eventId: `timeline_${executionId}`,
         createdAt: "2026-05-12T12:00:01.000Z",
         payload: {
           tenantId: request.tenantId,
@@ -123,7 +125,22 @@ function bridgeFixture(
         tenantId: request.tenantId,
         actionKey: request.actionKey,
         approvalRequestId: request.approvalRequestId,
-        executionId
+        executionId,
+        auditTimelineWritebackPayload: {
+          tenantId: request.tenantId,
+          actionKey: request.actionKey,
+          approvalRequestId: request.approvalRequestId,
+          executionId,
+          idempotencyKey: request.idempotencyKey,
+          auditEvent: {
+            eventId: `audit_${executionId}`,
+            eventKey: "approval.execution.audit"
+          },
+          timelineEvent: {
+            eventId: `timeline_${executionId}`,
+            eventKey: "approval.execution.timeline"
+          }
+        }
       },
       status: "pending",
       attempts: 0,
@@ -136,6 +153,22 @@ function bridgeFixture(
     transactionMode: "transaction",
     persistenceMode: "repository",
     reasons: ["bridge_completed"],
+    auditTimelineWritebackPayload: {
+      tenantId: request.tenantId,
+      actionKey: request.actionKey,
+      approvalRequestId: request.approvalRequestId,
+      executionId,
+      idempotencyKey: request.idempotencyKey,
+      auditEvent: {
+        eventId: `audit_${executionId}`,
+        eventKey: "approval.execution.audit"
+      },
+      timelineEvent: {
+        eventId: `timeline_${executionId}`,
+        eventKey: "approval.execution.timeline"
+      }
+    },
+    auditTimelineWritebackQueued: true,
     ...overrides
   };
 }
@@ -281,6 +314,10 @@ test("POST approve triggers transactional bridge and returns metadata", async ()
     assert.ok(typeof payload.bridgeMode === "string");
     assert.equal(payload.outboxQueued, true);
     assert.equal(payload.workerProcessingRecommended, true);
+    assert.equal(payload.auditTimelineWritebackQueued, true);
+    assert.ok(typeof payload.auditEventId === "string");
+    assert.ok(typeof payload.timelineEventId === "string");
+    assert.ok(payload.auditTimelinePayload);
     assert.equal(payload.auditMetadata.eventKey, "approval.execution.audit");
     assert.equal(payload.timelineMetadata.eventKey, "approval.execution.timeline");
     await server.close();

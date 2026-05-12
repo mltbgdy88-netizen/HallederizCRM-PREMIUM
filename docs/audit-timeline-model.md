@@ -88,6 +88,15 @@ Bu batch'te audit olaylari in-memory tutulur. Sonraki batch'te DB persistence (`
 - Bridge failure senaryosunda approval state degisimi yapilmadan fail-closed davranis korunur.
 - Bu fazda kalici audit/timeline DB write-back still foundation seviyesindedir; real writer activation sonraki fazdadir.
 
+## Real Audit/Timeline Write-Back Foundation (Phase)
+
+- Audit/timeline draft metadata icin runtime write-back payload builder, validator ve write-back service eklendi.
+- Write-back payload `tenantId`, `approvalRequestId`, `executionId`, `actionKey` alanlarini zorunlu tasir.
+- Repository yoksa fail-open success donulmez; explicit unsupported/failure metadata doner.
+- Partial persistence (audit ok / timeline fail gibi) success gibi raporlanmaz.
+- Approval runtime response'lari `auditTimelineWritebackQueued`, `auditTimelinePayload`, `auditEventId`, `timelineEventId` metadata'sini tasir.
+- External provider call ve real ERP/domain mutation bu fazda halen kapalidir.
+
 ## Pending Approval Persistence Foundation (Phase)
 
 - Approval akisi icin pending request metadata artik repository kontrati ile tasinabilir.

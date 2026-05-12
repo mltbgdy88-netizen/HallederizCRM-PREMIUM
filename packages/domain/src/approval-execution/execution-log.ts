@@ -36,12 +36,14 @@ export interface ExecutionAuditEventDraft {
   eventKey: "approval.execution.audit";
   payload: ExecutionEventDraftPayload;
   createdAt: string;
+  eventId?: string;
 }
 
 export interface ExecutionTimelineEventDraft {
   eventKey: "approval.execution.timeline";
   payload: ExecutionEventDraftPayload;
   createdAt: string;
+  eventId?: string;
 }
 
 export function createExecutionLogEntry(input: {
@@ -105,14 +107,16 @@ export function createExecutionEventDrafts(log: ExecutionLogEntry): {
       ? {
           eventKey: "approval.execution.audit",
           payload,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          eventId: `audit_${log.executionId}`
         }
       : undefined,
     timelineEvent: log.timelineRequired
       ? {
           eventKey: "approval.execution.timeline",
           payload,
-          createdAt: new Date().toISOString()
+          createdAt: new Date().toISOString(),
+          eventId: `timeline_${log.executionId}`
         }
       : undefined
   };

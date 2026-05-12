@@ -266,6 +266,10 @@ export async function registerApprovalRoutes(server: FastifyInstance, deps: Appr
             outboxMode: runtimeResult.outboxMode,
             outboxQueued: runtimeResult.outboxQueued,
             workerProcessingRecommended: runtimeResult.workerProcessingRecommended,
+            auditTimelineWritebackQueued: runtimeResult.auditTimelineWritebackQueued,
+            auditTimelinePayload: runtimeResult.auditTimelinePayload,
+            auditEventId: runtimeResult.auditEventId,
+            timelineEventId: runtimeResult.timelineEventId,
             auditMetadata: runtimeResult.auditEvent,
             timelineMetadata: runtimeResult.timelineEvent,
             reasons: runtimeResult.reasons

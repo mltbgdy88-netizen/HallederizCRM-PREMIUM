@@ -151,3 +151,15 @@ Bu handler'lar `dry_run` modundadir ve gercek provider veya gercek mutation yazm
 - `approval.execution.dispatch` payload contract'i (`tenantId`, `actionKey`, `approvalRequestId`, `executionId`) worker runtime ile uyumlu kalir.
 - Duplicate approve outbox tekrar uretmez; worker tarafina yeni job dispatch edilmez.
 - Bridge failure approval status'u `approved` yapmadan fail-closed kalir; worker queue'ya yanlis handoff yapilmaz.
+
+## Audit/Timeline Write-Back Handoff (Phase)
+
+- Transactional bridge outbox payload'i audit/timeline write-back icin gerekli payload metadata'sini tasir.
+- `audit.timeline.writeback` handler kontrati su alanlari bekler:
+  - `tenantId`
+  - `actionKey`
+  - `approvalRequestId`
+  - `executionId`
+  - `auditTimelineWritebackPayload`
+- Missing/invalid payload non-retryable dead-letter davranisina gider.
+- Valid payload foundation modda guvenli tamamlanir; external provider/mutation execution acikca kapali kalir.

@@ -303,3 +303,20 @@
   - real audit/timeline write-back
   - monitoring/alerts
   - approval inbox UI
+
+## 2026-05-13 - Real Audit/Timeline Write-Back Pack
+
+- Status: completed (foundation)
+- Added runtime write-back payload builder/validator/service for audit/timeline drafts.
+- Approval runtime orchestration now surfaces explicit write-back metadata:
+  - `auditTimelineWritebackQueued`
+  - `auditTimelinePayload`
+  - `auditEventId`
+  - `timelineEventId`
+- Transactional bridge outbox payload now carries audit/timeline write-back payload contract.
+- Worker `audit.timeline.writeback` handler contract now validates required payload and keeps fail-closed behavior.
+- Remaining gap (next phase):
+  - production DB transaction hardening
+  - real external provider write activation (still closed)
+  - monitoring/alerts
+  - approval inbox UI

@@ -254,6 +254,8 @@ test("successful dry_run dispatch persists execution/audit/timeline and enqueues
   assert.equal(result.outboxJobEnqueued, true);
   assert.equal(result.outboxDuplicate, false);
   assert.equal(result.outboxJobId, result.outboxJob?.jobId);
+  assert.equal(result.auditTimelineWritebackQueued, true);
+  assert.ok(result.auditTimelineWritebackPayload);
   assert.equal(result.transactionMode, "transaction");
   assert.equal(result.persistenceMode, "repository");
   assert.equal(opts.runner.calls, 1);
@@ -265,6 +267,11 @@ test("successful dry_run dispatch persists execution/audit/timeline and enqueues
   assert.equal(result.outboxJob?.payload.actionKey, request.actionKey);
   assert.equal(result.outboxJob?.payload.approvalRequestId, request.approvalRequestId);
   assert.equal(result.outboxJob?.payload.executionId, result.executionResult?.executionId);
+  const writebackPayload = result.outboxJob?.payload.auditTimelineWritebackPayload as Record<string, unknown>;
+  assert.equal(writebackPayload.tenantId, request.tenantId);
+  assert.equal(writebackPayload.actionKey, request.actionKey);
+  assert.equal(writebackPayload.approvalRequestId, request.approvalRequestId);
+  assert.equal(writebackPayload.executionId, result.executionResult?.executionId);
 });
 
 test("duplicate idempotencyKey does not enqueue second outbox job", async () => {

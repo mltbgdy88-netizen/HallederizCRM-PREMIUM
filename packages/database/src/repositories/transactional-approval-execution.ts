@@ -79,6 +79,8 @@ export interface ExecuteApprovalWithOutboxBridgeResult {
   outboxDuplicate: boolean;
   outboxJob?: DbWorkerJobRecord;
   outboxJobId?: string;
+  auditTimelineWritebackPayload?: Record<string, unknown>;
+  auditTimelineWritebackQueued?: boolean;
   transactionMode: "transaction" | "unsupported";
   persistenceMode: "repository" | "none";
   reasons: string[];
@@ -202,6 +204,29 @@ export async function executeApprovalWithOutboxBridge(
       let outboxJob = existingOutboxJob;
       let outboxJobEnqueued = false;
       let outboxDuplicate = false;
+      const writebackPayload: Record<string, unknown> = {
+        tenantId: request.tenantId,
+        approvalRequestId: request.approvalRequestId,
+        executionId: executionResult.executionId,
+        actionKey: request.actionKey,
+        idempotencyKey: request.idempotencyKey,
+        auditEvent: savedAuditEvent
+          ? {
+              eventId: savedAuditEvent.eventId ?? `audit_${executionResult.executionId}`,
+              eventKey: savedAuditEvent.eventKey,
+              createdAt: savedAuditEvent.createdAt,
+              payload: savedAuditEvent.payload
+            }
+          : undefined,
+        timelineEvent: savedTimelineEvent
+          ? {
+              eventId: savedTimelineEvent.eventId ?? `timeline_${executionResult.executionId}`,
+              eventKey: savedTimelineEvent.eventKey,
+              createdAt: savedTimelineEvent.createdAt,
+              payload: savedTimelineEvent.payload
+            }
+          : undefined
+      };
 
       if (!existingOutboxJob) {
         const createdAt = new Date().toISOString();
@@ -216,16 +241,19 @@ export async function executeApprovalWithOutboxBridge(
           timelineRequired: executionResult.timelineRequired,
           auditEvent: savedAuditEvent
             ? {
+                eventId: savedAuditEvent.eventId ?? `audit_${executionResult.executionId}`,
                 eventKey: savedAuditEvent.eventKey,
                 createdAt: savedAuditEvent.createdAt
               }
             : undefined,
           timelineEvent: savedTimelineEvent
             ? {
+                eventId: savedTimelineEvent.eventId ?? `timeline_${executionResult.executionId}`,
                 eventKey: savedTimelineEvent.eventKey,
                 createdAt: savedTimelineEvent.createdAt
               }
             : undefined,
+          auditTimelineWritebackPayload: writebackPayload,
           dryRunFoundation: executionResult.handlerMode !== "execute"
         };
 
@@ -266,6 +294,8 @@ export async function executeApprovalWithOutboxBridge(
         outboxDuplicate,
         outboxJob,
         outboxJobId: outboxJob?.jobId,
+        auditTimelineWritebackPayload: writebackPayload,
+        auditTimelineWritebackQueued: outboxJobEnqueued,
         transactionMode: "transaction",
         persistenceMode: "repository",
         reasons: outboxDuplicate ? ["outbox_duplicate_idempotency"] : ["bridge_completed"]

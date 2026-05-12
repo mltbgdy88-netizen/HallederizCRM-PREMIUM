@@ -1,4 +1,9 @@
 import type { WorkerHandlerMode, WorkerJob, WorkerJobHandleResult } from "./model";
+import {
+  buildAuditTimelineWritebackPayload,
+  validateAuditTimelineWritebackPayload
+} from "../approval-execution/audit-timeline-writeback";
+import type { ExecutionAuditEventDraft, ExecutionTimelineEventDraft } from "../approval-execution/execution-log";
 
 export interface WorkerJobHandler {
   jobType: string;
@@ -7,6 +12,21 @@ export interface WorkerJobHandler {
 }
 
 const registry = new Map<string, WorkerJobHandler>();
+
+function asRecord(value: unknown): Record<string, unknown> | undefined {
+  if (!value || typeof value !== "object") {
+    return undefined;
+  }
+  return value as Record<string, unknown>;
+}
+
+function asAuditDraft(value: unknown): ExecutionAuditEventDraft | undefined {
+  return asRecord(value) as ExecutionAuditEventDraft | undefined;
+}
+
+function asTimelineDraft(value: unknown): ExecutionTimelineEventDraft | undefined {
+  return asRecord(value) as ExecutionTimelineEventDraft | undefined;
+}
 
 function createFoundationHandler(jobType: string): WorkerJobHandler {
   if (jobType === "approval.execution.dispatch") {
@@ -41,6 +61,74 @@ function createFoundationHandler(jobType: string): WorkerJobHandler {
             "approval_execution_dispatch_dry_run_handled",
             "handled:true",
             "mode:dry_run",
+            "mutation_executed:false",
+            "provider_call_executed:false"
+          ]
+        };
+      }
+    };
+  }
+
+  if (jobType === "audit.timeline.writeback") {
+    return {
+      jobType,
+      mode: "dry_run",
+      handle: (job) => {
+        const payload = job.payload ?? {};
+        const payloadTenantId = typeof payload.tenantId === "string" ? payload.tenantId : "";
+        const payloadActionKey = typeof payload.actionKey === "string" ? payload.actionKey : "";
+        const payloadApprovalRequestId =
+          typeof payload.approvalRequestId === "string" ? payload.approvalRequestId : "";
+        const payloadExecutionId = typeof payload.executionId === "string" ? payload.executionId : "";
+        const nestedRecord = asRecord(payload.auditTimelineWritebackPayload);
+        const auditEvent = asAuditDraft(nestedRecord?.auditEvent);
+        const timelineEvent = asTimelineDraft(nestedRecord?.timelineEvent);
+
+        const writebackPayload = buildAuditTimelineWritebackPayload({
+          tenantId:
+            (nestedRecord?.tenantId as string | undefined) ??
+            payloadTenantId,
+          approvalRequestId:
+            (nestedRecord?.approvalRequestId as string | undefined) ??
+            payloadApprovalRequestId,
+          executionId:
+            (nestedRecord?.executionId as string | undefined) ??
+            payloadExecutionId,
+          actionKey:
+            (nestedRecord?.actionKey as string | undefined) ??
+            payloadActionKey,
+          idempotencyKey:
+            (nestedRecord?.idempotencyKey as string | undefined) ??
+            (typeof payload.idempotencyKey === "string" ? payload.idempotencyKey : undefined),
+          auditEvent,
+          timelineEvent
+        });
+
+        const validation = validateAuditTimelineWritebackPayload(writebackPayload);
+        if (!validation.ok) {
+          return {
+            ok: false,
+            retryable: false,
+            reasons: [
+              "invalid_audit_timeline_writeback_payload",
+              ...validation.reasons,
+              "non_retryable_missing_required_payload",
+              "mutation_executed:false",
+              "provider_call_executed:false"
+            ]
+          };
+        }
+
+        return {
+          ok: true,
+          retryable: false,
+          reasons: [
+            "audit_timeline_writeback_foundation_validated",
+            "handled:true",
+            "mode:dry_run",
+            "auditPersisted:false",
+            "timelinePersisted:false",
+            "persistenceMode:foundation_none",
             "mutation_executed:false",
             "provider_call_executed:false"
           ]

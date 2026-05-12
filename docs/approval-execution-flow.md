@@ -177,3 +177,12 @@
   - real audit/timeline write-back
   - monitoring/alerts
   - approval inbox UI
+
+## Phase 15 Real Audit/Timeline Write-Back Pack
+
+- Approval execution runtime write-back payload modeli netlestirildi ve bridge outbox payload'ina tasindi.
+- `audit.timeline.writeback` worker handler kontrati payload validation ile guclendirildi.
+- Missing/invalid payload durumunda non-retryable fail-closed davranis korunur.
+- Valid payload foundation modda guvenli sonuc uretir; `mutation_executed:false` ve `provider_call_executed:false` acik metadata doner.
+- Approve runtime response'lari write-back queue/payload/event-id metadata'sini acik sekilde bildirir.
+- Bu fazda real external provider write ve real mutation activation acilmamistir.
