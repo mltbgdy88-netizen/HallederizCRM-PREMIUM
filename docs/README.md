@@ -9,7 +9,11 @@ Bu klasor proje dokumantasyonunun merkezidir.
 - `roadmap.md`: Faz bazli teslim ve evrim plani
 - `architecture`: Sistem mimarisi, bounded context ve entegrasyon akislari
 - `database`: Veri modeli, migration stratejisi ve tenancy yaklasimi
-- `product`: Urun vizyonu, roadmap, modul kapsamlari
+- `product`: Urun vizyonu, roadmap, modul kapsamlari — indeks: [product/README.md](product/README.md)
+  - [APPROVAL_INBOX_PRODUCT_SPEC.md](product/APPROVAL_INBOX_PRODUCT_SPEC.md)
+  - [APPROVAL_INBOX_UI_FLOW.md](product/APPROVAL_INBOX_UI_FLOW.md)
+  - [APPROVAL_INBOX_COMPONENT_MAP.md](product/APPROVAL_INBOX_COMPONENT_MAP.md)
+  - [OPERATOR_WORKSPACE_PRODUCT_SPEC.md](product/OPERATOR_WORKSPACE_PRODUCT_SPEC.md)
 - `ui`: Tasarim sistemi, ekran envanteri, UX kurallari
 - `codex-prompts`: Gelistirme ve operasyon icin tekrar kullanilabilir prompt setleri
 - `development`: Branch/PR, Codex/Cursor gorev standardi, kalite kapilari, release kontrol listesi

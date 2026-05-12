@@ -73,6 +73,10 @@ pnpm --filter @hallederiz/worker dev
 
 Branch/PR, Codex ve Cursor gorev standardi, kalite kapilari ve AI/onay kurallari: [docs/development/WORKFLOW.md](docs/development/WORKFLOW.md). Platform cekirdegi mimarisi: [docs/architecture/PLATFORM_CORE_ARCHITECTURE.md](docs/architecture/PLATFORM_CORE_ARCHITECTURE.md). Cursor agent kurallari: [.cursor/rules/](.cursor/rules/).
 
+## Product design docs
+
+[docs/product/README.md](docs/product/README.md)
+
 ## Sonraki Asamalar (Oneri)
 
 1. Tenant-aware auth ve RBAC omurgasi
