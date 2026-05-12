@@ -94,3 +94,9 @@ Bu batch'te audit olaylari in-memory tutulur. Sonraki batch'te DB persistence (`
 - Pending approval lifecycle metadata'si DB repository kontratiyla tasinabilir hale geldi.
 - Bu fazda production DB wiring acilmadi; fail-open davranis eklenmedi.
 - Sonraki faz: runtime wiring + UI inbox + channel command binding.
+
+## Approval Runtime Repository Selection Note
+
+- Pending approval persistence runtime secimi policy bridge ve approval API katmanlarinda ortak resolver uzerinden yapilir.
+- Production ortaminda in-memory fallback fail-open davranisina izin verilmez.
+- Postgres mode icin runtime DB config zorunludur; eksikse explicit unsupported donulur.

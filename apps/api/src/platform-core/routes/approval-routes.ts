@@ -3,7 +3,6 @@ import {
   InMemoryApprovalExecutionLogRepository,
   InMemoryOutboxJobRepository,
   dispatchApprovedAction,
-  getDefaultPendingApprovalRepository,
   type PendingApprovalRepository
 } from "@hallederiz/domain";
 import {
@@ -18,6 +17,10 @@ import {
 import { assertAnyPermission, assertAuthenticated, withGuards } from "../../shared/auth-guards";
 import { readPermissions, requireReadAccess } from "../../shared/read-guards";
 import type { RequestContext } from "../../shared/request-context";
+import {
+  resolvePendingApprovalRepository,
+  type PendingApprovalRepositoryResolution
+} from "../../shared/approval-repository-runtime";
 
 interface ApprovalPendingRepository {
   mode: string;
@@ -32,13 +35,6 @@ type ApprovalBridgeTrigger = (
 export interface ApprovalRouteDeps {
   pendingRepository?: ApprovalPendingRepository | null;
   bridgeTrigger?: ApprovalBridgeTrigger | null;
-}
-
-function createDefaultPendingRepository(): ApprovalPendingRepository {
-  return {
-    mode: "domain_in_memory_foundation",
-    repository: getDefaultPendingApprovalRepository()
-  };
 }
 
 function createDefaultBridgeTrigger(): ApprovalBridgeTrigger {
@@ -131,39 +127,70 @@ function mapDecisionFailure(reason: string): { statusCode: number; body: Record<
 }
 
 export async function registerApprovalRoutes(server: FastifyInstance, deps: ApprovalRouteDeps = {}) {
-  const pendingRepository = deps.pendingRepository === undefined ? createDefaultPendingRepository() : deps.pendingRepository;
+  const pendingRepository = deps.pendingRepository;
   const bridgeTrigger = deps.bridgeTrigger === undefined ? createDefaultBridgeTrigger() : deps.bridgeTrigger;
+
+  function resolveRepository(context: RequestContext): PendingApprovalRepositoryResolution {
+    if (pendingRepository === null) {
+      return {
+        repository: null,
+        mode: "none",
+        skipped: true,
+        reasons: ["approval_repository_dependency_missing"]
+      };
+    }
+
+    if (pendingRepository) {
+      return {
+        repository: pendingRepository.repository,
+        mode: pendingRepository.mode as PendingApprovalRepositoryResolution["mode"],
+        skipped: false,
+        reasons: []
+      };
+    }
+
+    return resolvePendingApprovalRepository(context);
+  }
 
   server.get("/platform/approvals", async (request, reply) =>
     withGuards(request, reply, requireReadAccess(readPermissions.approvals), async (context) => {
-      if (!pendingRepository) {
+      const repositoryResolution = resolveRepository(context);
+      if (!repositoryResolution.repository) {
         return reply.status(503).send({
           ok: false,
           error: "approval_repository_unavailable",
-          message: "Approval repository foundation baglantisi mevcut degil."
+          message: "Approval repository foundation baglantisi mevcut degil.",
+          approvalPersistenceMode: repositoryResolution.mode,
+          reasons: repositoryResolution.reasons
         });
       }
 
-      const items = pendingRepository.repository.listPendingApprovalRequests(context.tenantId);
+      const items = await repositoryResolution.repository.listPendingApprovalRequests(context.tenantId);
       return {
         items,
         total: items.length,
-        repositoryMode: pendingRepository.mode
+        repositoryMode: repositoryResolution.mode
       };
     })
   );
 
   server.get<{ Params: { approvalRequestId: string } }>("/platform/approvals/:approvalRequestId", async (request, reply) =>
     withGuards(request, reply, requireReadAccess(readPermissions.approvals), async (context) => {
-      if (!pendingRepository) {
+      const repositoryResolution = resolveRepository(context);
+      if (!repositoryResolution.repository) {
         return reply.status(503).send({
           ok: false,
           error: "approval_repository_unavailable",
-          message: "Approval repository foundation baglantisi mevcut degil."
+          message: "Approval repository foundation baglantisi mevcut degil.",
+          approvalPersistenceMode: repositoryResolution.mode,
+          reasons: repositoryResolution.reasons
         });
       }
 
-      const item = pendingRepository.repository.getPendingApprovalRequest(request.params.approvalRequestId, context.tenantId);
+      const item = await repositoryResolution.repository.getPendingApprovalRequest(
+        request.params.approvalRequestId,
+        context.tenantId
+      );
       if (!item) {
         return reply.status(404).send({
           ok: false,
@@ -183,11 +210,14 @@ export async function registerApprovalRoutes(server: FastifyInstance, deps: Appr
         reply,
         [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.approve", "approvals.write", "approvals.manage"])],
         async (context) => {
-          if (!pendingRepository) {
+          const repositoryResolution = resolveRepository(context);
+          if (!repositoryResolution.repository) {
             return reply.status(503).send({
               ok: false,
               error: "approval_repository_unavailable",
-              message: "Approval repository foundation baglantisi mevcut degil."
+              message: "Approval repository foundation baglantisi mevcut degil.",
+              approvalPersistenceMode: repositoryResolution.mode,
+              reasons: repositoryResolution.reasons
             });
           }
           if (!bridgeTrigger) {
@@ -198,7 +228,7 @@ export async function registerApprovalRoutes(server: FastifyInstance, deps: Appr
             });
           }
 
-          const approvalRequest = pendingRepository.repository.getPendingApprovalRequest(
+          const approvalRequest = await repositoryResolution.repository.getPendingApprovalRequest(
             request.params.approvalRequestId,
             context.tenantId
           );
@@ -258,7 +288,7 @@ export async function registerApprovalRoutes(server: FastifyInstance, deps: Appr
             });
           }
 
-          const decision = pendingRepository.repository.markPendingApprovalApproved({
+          const decision = await repositoryResolution.repository.markPendingApprovalApproved({
             approvalRequestId: approvalRequest.approvalRequestId,
             tenantId: context.tenantId,
             approvedBy: context.userId,
@@ -289,6 +319,7 @@ export async function registerApprovalRoutes(server: FastifyInstance, deps: Appr
               outboxDuplicate: bridgeResult.outboxDuplicate,
               reasons: bridgeResult.reasons
             },
+            approvalPersistenceMode: repositoryResolution.mode,
             auditMetadata: bridgeResult.executionResult.auditEvent,
             timelineMetadata: bridgeResult.executionResult.timelineEvent,
             reasons: bridgeResult.executionResult.reasons
@@ -305,15 +336,18 @@ export async function registerApprovalRoutes(server: FastifyInstance, deps: Appr
         reply,
         [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.reject", "approvals.write", "approvals.manage"])],
         async (context) => {
-          if (!pendingRepository) {
+          const repositoryResolution = resolveRepository(context);
+          if (!repositoryResolution.repository) {
             return reply.status(503).send({
               ok: false,
               error: "approval_repository_unavailable",
-              message: "Approval repository foundation baglantisi mevcut degil."
+              message: "Approval repository foundation baglantisi mevcut degil.",
+              approvalPersistenceMode: repositoryResolution.mode,
+              reasons: repositoryResolution.reasons
             });
           }
 
-          const approvalRequest = pendingRepository.repository.getPendingApprovalRequest(
+          const approvalRequest = await repositoryResolution.repository.getPendingApprovalRequest(
             request.params.approvalRequestId,
             context.tenantId
           );
@@ -325,7 +359,7 @@ export async function registerApprovalRoutes(server: FastifyInstance, deps: Appr
             });
           }
 
-          const decision = pendingRepository.repository.markPendingApprovalRejected({
+          const decision = await repositoryResolution.repository.markPendingApprovalRejected({
             approvalRequestId: approvalRequest.approvalRequestId,
             tenantId: context.tenantId,
             rejectedBy: context.userId,
@@ -344,7 +378,8 @@ export async function registerApprovalRoutes(server: FastifyInstance, deps: Appr
             status: decision.item.status,
             rejectedBy: decision.item.rejectedBy,
             rejectedAt: decision.item.rejectedAt,
-            reason: decision.item.rejectReason
+            reason: decision.item.rejectReason,
+            approvalPersistenceMode: repositoryResolution.mode
           };
         }
       )

@@ -22,7 +22,7 @@ export async function registerSettingsRoutes(server: FastifyInstance) {
       [assertAuthenticated, (context) => assertAnyPermission(context, ["platform.settings.write", "settings.manage"])],
       async (context) => {
         const decision = evaluateRoutePolicy(context, { actionKey: "platform.settings.update" });
-        const policyResult = enforcePolicyDecision(decision, context);
+        const policyResult = await enforcePolicyDecision(decision, context);
         if (policyResult.handled) {
           return reply.status(policyResult.statusCode).send(policyResult.body);
         }

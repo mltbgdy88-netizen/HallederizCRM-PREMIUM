@@ -234,3 +234,15 @@
   - production runtime DB wiring/config
   - approval inbox UI wiring
   - WhatsApp/Instagram approval command wiring
+
+## 2026-05-12 - Approval Runtime Repository Selection Wiring
+
+- Status: completed (foundation)
+- Added shared runtime resolver for pending approval repository selection.
+- Policy bridge and approval API now use the same resolver/contract.
+- Production in-memory fallback is explicitly blocked (fail-closed unsupported).
+- Postgres mode requires DB config; missing config is surfaced as explicit unsupported/failure.
+- Remaining gap (next phase):
+  - production DB connection lifecycle and runtime config hardening
+  - approval inbox UI integration
+  - channel command integrations (WhatsApp/Instagram)

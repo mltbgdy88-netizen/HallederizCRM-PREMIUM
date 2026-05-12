@@ -64,6 +64,10 @@ interface DatabaseRepositoryOptions {
   persistenceMode: "demo" | "postgres";
 }
 
+export function createDatabasePendingApprovalRepository(options: DatabaseRepositoryOptions) {
+  return new DatabasePendingApprovalRepository(options);
+}
+
 function assertNonEmpty(value: string | undefined, fieldName: string) {
   if (!value) {
     throw new Error(`missing_${fieldName}`);
@@ -248,6 +252,21 @@ export class DatabasePendingApprovalRepository {
         requested_by, approved_by, rejected_by, reject_reason, created_at, updated_at, approved_at, rejected_at, expires_at
       FROM pending_approval_requests
       WHERE tenant_id = $1 AND status = 'pending'
+      ORDER BY created_at DESC`,
+      [tenantId]
+    );
+    return rows.map((row) => mapPendingApprovalRowToDomainRecord(row));
+  }
+
+  async listApprovalRequests(tenantId: string): Promise<DbPendingApprovalRequestRecord[]> {
+    this.assertPersistenceSupported();
+    assertNonEmpty(tenantId, "tenant_id");
+    const rows = await this.executor.query<PendingApprovalRequestRow>(
+      `SELECT
+        id, tenant_id, approval_request_id, action_key, actor_id, status, reasons, payload, idempotency_key,
+        requested_by, approved_by, rejected_by, reject_reason, created_at, updated_at, approved_at, rejected_at, expires_at
+      FROM pending_approval_requests
+      WHERE tenant_id = $1
       ORDER BY created_at DESC`,
       [tenantId]
     );
