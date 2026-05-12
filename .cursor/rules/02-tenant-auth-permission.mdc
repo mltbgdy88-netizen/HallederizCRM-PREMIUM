@@ -1,0 +1,32 @@
+---
+description: Tenant, auth ve permission zorunlulukları
+globs:
+  - "apps/api/**"
+  - "apps/worker/**"
+  - "packages/domain/**"
+  - "packages/database/**"
+alwaysApply: true
+---
+
+# Tenant / auth / permission
+
+## Zorunlu
+
+- Her API, server action, worker job ve domain servisi **tenant context** ile çalışır.
+- `tenantId` istemci girdisinden güvenilmez; session/principal + guard’dan gelir.
+- **Permission guard olmadan mutation yok** (`assertPermission`, `withGuards` vb.).
+- Production/postgres: demo auth, mock token, header principal fallback **açılamaz** (fail-closed).
+
+## Okuma / yazma
+
+- Liste ve detay sorguları tenant scope’lu.
+- Cross-tenant “yardımcı” endpoint ekleme yasak.
+- Pasif kullanıcı, yetkisiz rol, eksik modül: 401/403; DB/auth hatasında silent success yok.
+
+## Değişiklikte test
+
+- Tenant isolation, permission deny, auth fail-closed senaryoları ilgiliyse zorunlu.
+
+## Referans
+
+- `docs/auth-and-tenant-flow.md`, `docs/implementation/023-database-backed-auth.md`, `docs/implementation/004-api-read-guards.md`

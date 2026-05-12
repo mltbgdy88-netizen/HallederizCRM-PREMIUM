@@ -1,0 +1,27 @@
+---
+description: PR öncesi test ve kalite kapıları
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# Test ve kalite
+
+## PR öncesi (ilgiliyse zorunlu)
+
+- `pnpm typecheck`, `pnpm lint`, `pnpm test`
+- Integration / E2E-smoke (`pnpm smoke:routes`, `pnpm smoke:navigation`, `pnpm smoke:e2e`)
+- Tenant isolation, permission guard, approval policy, webhook signature/idempotency, AI proposal snapshot, audit/timeline write
+
+## Tamamlanmış sayılmaz
+
+- Kritik guard/approval/webhook/AI action/tenant değişikliği **testsiz**.
+- `apps/web/tsconfig.tsbuildinfo` commit’e alınmaz.
+
+## UI işi
+
+`pnpm --filter @hallederiz/web typecheck`, `pnpm --filter @hallederiz/ui typecheck`, `pnpm smoke:navigation`.
+
+## Referans
+
+- `docs/development/QUALITY_GATES.md`, `.github/workflows/quality-gate.yml`

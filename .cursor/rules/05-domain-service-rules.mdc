@@ -1,0 +1,28 @@
+---
+description: Domain servis, commercial-core ve audit yazım kuralları
+globs:
+  - "packages/domain/**"
+  - "apps/api/src/modules/**"
+  - "apps/worker/**"
+alwaysApply: true
+---
+
+# Domain servis
+
+## Öncelik
+
+Yeni iş kuralı: mevcut **commercial-core** / modül servisi → registry-policy → yeni servis. Route’da iş mantığı biriktirme.
+
+## Mutation
+
+- Tek giriş: guard’lı API/worker → domain servisi → transaction.
+- Kritik write sonrası `recordAuditEvent` / timeline (merkezi helper).
+- Onaylı iş: dispatcher; policy dışı execution yasak.
+
+## Entegrasyon
+
+ERP/fabrika/WhatsApp: adapter + service; çekirdek domain adapter teknolojisine kilitlenmez. Hata: reason/details; sessiz başarı yok.
+
+## Referans
+
+- `docs/core-completion-batch.md`, `docs/audit-timeline-model.md`, `docs/product/quick-operation-center.md`

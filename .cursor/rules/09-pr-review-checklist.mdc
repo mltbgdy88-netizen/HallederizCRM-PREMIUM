@@ -1,0 +1,28 @@
+---
+description: Branch, PR ve review kontrol listesi
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# PR / review
+
+## Branch
+
+`feature|fix|refactor|docs|hardening|test/<scope>-<short-name>`
+
+## Commit
+
+`feat:`, `fix:`, `refactor:`, `docs:`, `test:`, `chore:`, `hardening:`, `security:`
+
+## Reviewer kontrolü
+
+- Amaç/kapsam/kapsam dışı net mi?
+- Tenant/auth/permission, AI/approval, DB/migration, queue/worker, webhook/kanal, UI etkisi dokümante mi?
+- Test planı ve risk/rollback var mı?
+- Fail-closed ve audit/timeline korunuyor mu?
+
+## Şablonlar
+
+- `docs/development/BRANCH_AND_PR_STANDARD.md`
+- `.github/pull_request_template.md`

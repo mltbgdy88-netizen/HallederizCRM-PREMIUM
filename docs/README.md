@@ -12,3 +12,5 @@ Bu klasor proje dokumantasyonunun merkezidir.
 - `product`: Urun vizyonu, roadmap, modul kapsamlari
 - `ui`: Tasarim sistemi, ekran envanteri, UX kurallari
 - `codex-prompts`: Gelistirme ve operasyon icin tekrar kullanilabilir prompt setleri
+- `development`: Branch/PR, Codex/Cursor gorev standardi, kalite kapilari, release kontrol listesi
+- `architecture`: Platform cekirdegi (tenant/auth/permission/modul) mimari dokumanlari

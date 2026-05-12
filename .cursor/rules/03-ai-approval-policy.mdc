@@ -1,0 +1,35 @@
+---
+description: AI proposal-only ve insan onaylı execution
+globs:
+  - "apps/api/**"
+  - "apps/ai-service/**"
+  - "apps/web/**"
+  - "packages/domain/**"
+alwaysApply: true
+---
+
+# AI ve onay
+
+## AI yapabilir
+
+- Read-only analiz/özet; proposal/taslak; risk notu; onay bileti (`waiting_approval`).
+
+## AI yapamaz
+
+- Doğrudan kritik mutation; approval bypass; tenant/permission bypass.
+
+## İnsan onayı zorunlu (örnek)
+
+Fiyat/iskonto değişimi; sipariş kesinleştirme; tahsilat; fatura; iade; stok düşme; ERP write; fabrika siparişi; teslim tamamlama; yüksek riskli outbound mesaj/belge.
+
+## Execution zinciri
+
+Onay → **execution dispatcher** → domain servisi → **audit + timeline** → outbox/queue (varsa). Red/supersede kayıt altında.
+
+## Runtime
+
+Local-first öncelik; external opsiyonel; fallback mutation execute etmez. UI’da `fallback`/`misconfigured` görünür olmalı.
+
+## Referans
+
+- `docs/ai-proposal-flow.md`, `docs/local-first-ai-decision.md`, `docs/ai-operator-mode.md`, `docs/approval-execution-flow.md`

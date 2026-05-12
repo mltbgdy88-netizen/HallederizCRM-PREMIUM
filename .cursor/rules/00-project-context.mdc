@@ -1,0 +1,28 @@
+---
+description: HallederizCRM-PREMIUM ürün bağlamı ve değişmez ilkeler
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# Proje bağlamı
+
+HallederizCRM-PREMIUM; çok kiracılı CRM + operasyon platformu (duvar kağıdı sektörü odaklı). Kanonik veri PostgreSQL; web masaüstü cockpit; WhatsApp/ERP/fabrika entegrasyonları; local-first AI; insan onaylı mutation.
+
+## Değişmez ilkeler
+
+- Tenant dışı veri erişimi yasaktır.
+- AI doğrudan kritik mutation çalıştıramaz; yalnızca öneri, taslak, özet, risk analizi ve onay bileti üretir.
+- Mutation: permission guard → policy/approval → transaction → audit/timeline → outbox.
+- Local-first AI; provider fallback veriyi sessizce bozmaz; production fail-closed.
+- Dashboard KPI vitrini değil; Quick Operation ana operasyon yüzeyidir.
+
+## Önce oku
+
+- `docs/master-project-spec.md`, `docs/DECISIONS.md`
+- `docs/development/WORKFLOW.md`
+- Mimari: `docs/architecture.md`, `docs/ai-proposal-flow.md`, `docs/audit-timeline-model.md`
+
+## Kapsam dışı (bu repoda)
+
+- Dış bayi/müşteri web portalı; kontrolsüz otomasyon; tenant’sız “global admin” kısayolları.

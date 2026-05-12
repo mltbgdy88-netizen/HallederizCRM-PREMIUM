@@ -7,6 +7,8 @@ alwaysApply: true
 
 # HallederizCRM Premium Project Context
 
+Numarali agent kurallari: `.cursor/rules/00-project-context.mdc` ve devamı. Asagidaki ozet uyumludur.
+
 Bu proje HallederizCRM-PREMIUM projesidir.
 
 Ana hedef:

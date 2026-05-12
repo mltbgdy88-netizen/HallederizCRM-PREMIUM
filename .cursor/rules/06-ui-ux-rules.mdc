@@ -1,0 +1,29 @@
+---
+description: Operasyon odaklı UI ve dashboard sınırları
+globs:
+  - "apps/web/**"
+  - "packages/ui/**"
+alwaysApply: false
+---
+
+# UI / UX
+
+## Ürün tonu
+
+Sade, kurumsal, operasyon odaklı: sonuç, uyarı, onay merkezli. Dashboard KPI vitrini değil; sıradaki iş ve yön.
+
+## Quick Operation
+
+Ana operasyon yüzeyi; sağ panel sırası: Cari Özeti → İşlem Özeti → Uyarı/Onay. Üst/alt çift aksiyon yok.
+
+## AI yüzeyi
+
+Dashboard’da Canlı Asistan yayın/uyarı alanı; ayrı sidebar “AI” menüsü yok. Diğer sayfalarda tam AI chat kolonu ekleme. AI UI mutation tetiklemez; onay akışına yönlendirir.
+
+## Mutation UI
+
+Başarılı işlem: toast + disabled/tekrar engeli. Demo mutation gerçek API yoksa açıkça demo.
+
+## Detay
+
+Kabul edilmiş sayfa yoğunluğu ve prefix kuralları: `ui-designer-rules.mdc`, `ui-rules.mdc`, `docs/DECISIONS.md`, `docs/p1-ux-reliability-report.md`.

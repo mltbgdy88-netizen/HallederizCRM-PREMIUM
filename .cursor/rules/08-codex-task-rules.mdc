@@ -1,0 +1,32 @@
+---
+description: Codex görev paketleme standardı
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# Codex görev standardı
+
+Codex işleri tek satırlık bug değil; dağılmayan net paketler.
+
+## Zorunlu başlıklar
+
+1. Görev adı  
+2. Amaç  
+3. Dokunulabilecek dosyalar  
+4. Dokunulmaması gereken dosyalar  
+5. Korunacak mevcut davranışlar  
+6. Beklenen çıktı  
+7. Test komutları  
+8. Kabul kriterleri  
+9. Geri alma notu  
+
+## Sert kurallar
+
+- Tenant/permission/approval/webhook/AI guard değişikliği → test şart.
+- Migration ve production auth gevşetmesi kullanıcı onayı olmadan yok.
+- Belirsizlikte fail-closed + insan onayı.
+
+## Şablon
+
+`docs/development/CODEX_TASK_STANDARD.md`

@@ -1,0 +1,30 @@
+---
+description: WhatsApp ve omnichannel webhook güvenliği
+globs:
+  - "apps/api/**"
+  - "packages/domain/**"
+  - "apps/web/**"
+alwaysApply: true
+---
+
+# WhatsApp / omnichannel
+
+## Kanal işlemleri
+
+WhatsApp, Instagram, Facebook, Web Chat, Email, SMS: **kanal policy + permission** olmadan outbound/mutation yok.
+
+## Webhook
+
+- Raw body üzerinde signature; secret yoksa verify **true dönmez** (fail-closed prod).
+- Duplicate guard, expiry, **token hash** (raw token saklanmaz), idempotency korunur.
+- Production’da eksik secret/config → red/503; development mock yalnızca açıkça izinli.
+
+## Onay komutları
+
+`ONAY`/`RED`/`INCELE` + ref + token: yetkili telefon, allowedCommands, hash eşleşmesi; duplicate audit.
+
+## Referans
+
+- `docs/implementation/006-whatsapp-security-rules-port.md`
+- `docs/implementation/007-whatsapp-workflow-foundation.md`
+- `docs/implementation/009-whatsapp-command-approval.md`

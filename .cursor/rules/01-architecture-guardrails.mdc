@@ -1,0 +1,35 @@
+---
+description: Monorepo mimari guardrail ve katman sınırları
+globs:
+  - "**/*"
+alwaysApply: true
+---
+
+# Mimari guardrail
+
+## Katmanlar
+
+- `apps/web`: UI; domain mutation yok; onay/execution API üzerinden.
+- `apps/api`: HTTP, auth/tenant context, orchestration, audit yazımı.
+- `apps/worker`, `apps/ai-service`, `apps/local-agent`: queue/runtime; API ile aynı policy.
+- `packages/domain`: iş kuralları, registry/policy; framework bağımlılığı minimum.
+- `packages/database`: şema/migration; iş kuralı yok.
+
+## Yasaklar
+
+- UI’dan doğrudan DB/ERP/WhatsApp write.
+- Domain servisi atlayan “route içi iş mantığı” (yeni kod).
+- Cross-tenant join veya tenantId’siz listeleme.
+- Onaysız finansal/ticari write.
+- Sessiz mock/fallback ile production mutation başarısı simülasyonu.
+
+## Yeni özellik öncesi
+
+1. Mevcut domain servisi / registry / policy var mı?
+2. Audit + timeline event tipi tanımlı mı?
+3. Permission adı ve tenant modülü net mi?
+4. AI etkisi proposal-only mi?
+
+## Referans
+
+- `docs/architecture.md`, `docs/module-map.md`, `docs/persistence-transition.md`
