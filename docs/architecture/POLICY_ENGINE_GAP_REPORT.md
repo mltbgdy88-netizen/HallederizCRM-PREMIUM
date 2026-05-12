@@ -123,3 +123,23 @@
   - max attempts / non-retryable -> `dead_letter`
 - Duplicate idempotency key does not create/execute second job.
 - Remaining gap (next phase): DB-backed outbox/dead-letter migrations, distributed claim lock/lease, worker lifecycle, retry-DLQ admin UI, provider-specific real handlers, real audit/timeline write-back, monitoring/alerts.
+
+## 2026-05-12 - DB Schema Execution Worker Audit Phase 1
+
+- Status: completed (schema/migration foundation)
+- Added new migration: `0005_execution_worker_audit.sql`.
+- Added persistent table foundations:
+  - `approval_execution_logs`
+  - `timeline_events`
+  - `outbox_jobs`
+  - `dead_letter_jobs`
+- `audit_events` existing table was extended via safe `ALTER TABLE ... ADD COLUMN IF NOT EXISTS` to avoid migration conflicts.
+- Tenant-scoped idempotency constraints/indexes added for execution and outbox tables.
+- Outbox scheduling index added: `(status, available_at)`.
+- Remaining gap (next phase):
+  - DB-backed write adapters with transaction boundaries
+  - distributed lock / claim lease semantics
+  - worker process lifecycle orchestration
+  - retry/DLQ admin UI and replay
+  - provider-specific real handlers
+  - production migration apply/release sequencing validation
