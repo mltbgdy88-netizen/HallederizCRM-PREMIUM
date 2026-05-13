@@ -4,6 +4,7 @@ import type {
   TransactionalApprovalExecutionRequest
 } from "@hallederiz/database";
 import type { RequestContext } from "./request-context";
+import { assertProductionReadyForAction } from "./production-enforcement";
 
 export type ApprovalBridgeTrigger = (
   context: RequestContext,
@@ -102,6 +103,32 @@ function resolveWritebackPayload(
 export async function executeApprovedPendingApproval(
   input: ExecuteApprovedPendingApprovalInput
 ): Promise<ExecuteApprovedPendingApprovalResult> {
+  const productionGate = await assertProductionReadyForAction({
+    context: input.context,
+    actionType: "approval_execution",
+    actionKey: "worker.approval.dispatch"
+  });
+  if (productionGate.productionGate !== "allowed") {
+    return {
+      ok: false,
+      duplicate: false,
+      status: "bridge_failed",
+      approvalRequestId: input.approvalRequestId,
+      approvalPersistenceMode: input.repositoryResolution.mode,
+      bridgeMode: "none",
+      outboxMode: "none",
+      outboxQueued: false,
+      auditTimelineWritebackQueued: false,
+      workerProcessingRecommended: false,
+      reasons: [
+        "production_gate_blocked",
+        `production_gate:${productionGate.productionGate}`,
+        ...productionGate.blockers
+      ],
+      httpStatus: 503
+    };
+  }
+
   const repository = input.repositoryResolution.repository;
   if (!repository) {
     return {

@@ -31,6 +31,7 @@ export async function registerSalesCrmRoutes(server: FastifyInstance) {
       const policyResult = await enforcePolicyForRoute(context, {
         actionKey: "platform.customers.create",
         requiredPermissions: ["customers.write", "customers.manage"],
+        productionActionType: "commercial_write",
         tenantId: request.body?.tenantId,
         payload: { customerCode: request.body?.code }
       });
@@ -56,6 +57,7 @@ export async function registerSalesCrmRoutes(server: FastifyInstance) {
       const policyResult = await enforcePolicyForRoute(context, {
         actionKey: "platform.customers.update",
         requiredPermissions: ["customers.write", "customers.manage"],
+        productionActionType: "commercial_write",
         tenantId: request.body?.tenantId,
         payload: { customerId: request.params.id }
       });
@@ -185,6 +187,7 @@ export async function registerSalesCrmRoutes(server: FastifyInstance) {
       const policyResult = await enforcePolicyForRoute(context, {
         actionKey: "platform.offers.create",
         requiredPermissions: ["offers.write", "offers.manage"],
+        productionActionType: "commercial_write",
         tenantId: request.body?.tenantId,
         payload: { customerId: request.body?.customerId }
       });

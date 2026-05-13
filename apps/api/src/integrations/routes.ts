@@ -232,6 +232,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
       const policyResult = await enforcePolicyForRoute(context, {
         actionKey: "platform.whatsapp.reply",
         requiredPermissions: ["integrations.write", "whatsapp.write"],
+        productionActionType: "whatsapp_outbound",
         tenantId: request.body?.tenantId,
         channel: "whatsapp",
         source: "api",
@@ -258,6 +259,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
       const policyResult = await enforcePolicyForRoute(context, {
         actionKey: "platform.whatsapp.action_request.confirm",
         requiredPermissions: ["integrations.write", "approvals.write"],
+        productionActionType: "approval_execution",
         channel: "api",
         source: "api",
         payload: { requestId: request.params.id }
