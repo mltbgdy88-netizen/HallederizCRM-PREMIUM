@@ -7,7 +7,7 @@ import { useEffect, useState } from "react";
 import { getAiAssistantData } from "../queries";
 
 export function AiApprovalFilterBar() {
-  return <FilterBar><div className="task-center-filter-grid"><label>Proposal No<input placeholder="AI-401" /></label><label>Durum<select defaultValue=""><option value="">Tum durumlar</option><option>Bekliyor</option><option>Onaylandi</option></select></label><label>Aksiyon Tipi<select defaultValue=""><option value="">Tum aksiyonlar</option><option>create_offer</option><option>send_document_whatsapp</option></select></label></div><FilterActions><button type="button" className="hz-btn hz-btn-secondary" disabled>Filtre Foundation</button><button type="button" className="reset-btn" disabled>Temizle</button></FilterActions><p className="muted">Bu filtreler sonraki adimda canli AI sorgularina baglanacaktir.</p></FilterBar>;
+  return <FilterBar><div className="task-center-filter-grid"><label>Proposal No<input placeholder="AI-401" /></label><label>Durum<select defaultValue=""><option value="">Tum durumlar</option><option>Bekliyor</option><option>Onaylandi</option></select></label><label>Aksiyon Tipi<select defaultValue=""><option value="">Tum aksiyonlar</option><option>create_offer</option><option>send_document_whatsapp</option></select></label></div><FilterActions><button type="button" className="hz-btn hz-btn-secondary" disabled>Filtreler read-only</button><button type="button" className="reset-btn" disabled>Temizle</button></FilterActions><p className="muted">Bu panelde filtreler bilgilendirme amaçlıdır. Canlı execute başarısı üretmez.</p></FilterBar>;
 }
 
 export function AiApprovalTable({ proposals, approvals }: { proposals: AiProposal[]; approvals: Approval[] }) {
@@ -82,7 +82,7 @@ export function AiApprovalsPage() {
 }
 
 export function AiInsightFilterBar() {
-  return <FilterBar><div className="task-center-filter-grid"><label>Modul<select defaultValue=""><option value="">Tum moduller</option><option>Risk</option><option>Stok</option><option>Fabrika</option></select></label><label>Donem<select defaultValue="today"><option value="today">Bugun</option><option value="week">Bu Hafta</option></select></label><label className="hz-toggle"><input type="checkbox" />Kritikler</label></div><FilterActions><button type="button" className="hz-btn hz-btn-secondary" disabled>Filtre Foundation</button><button type="button" className="reset-btn" disabled>Temizle</button></FilterActions><p className="muted">AI icgoru filtreleri yakinda canli veri taramasini etkileyecek.</p></FilterBar>;
+  return <FilterBar><div className="task-center-filter-grid"><label>Modul<select defaultValue=""><option value="">Tum moduller</option><option>Risk</option><option>Stok</option><option>Fabrika</option></select></label><label>Donem<select defaultValue="today"><option value="today">Bugun</option><option value="week">Bu Hafta</option></select></label><label className="hz-toggle"><input type="checkbox" />Kritikler</label></div><FilterActions><button type="button" className="hz-btn hz-btn-secondary" disabled>Filtreler read-only</button><button type="button" className="reset-btn" disabled>Temizle</button></FilterActions><p className="muted">AI içgörüler yalnız öneri üretir; canlı mutation/execute bu ekrandan yapılmaz.</p></FilterBar>;
 }
 
 export function AiInsightGrid({ insights }: { insights: AiInsight[] }) {
