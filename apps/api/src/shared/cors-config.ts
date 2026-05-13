@@ -1,15 +1,18 @@
 import type { FastifyCorsOptions } from "@fastify/cors";
 
-const DEFAULT_DEVELOPMENT_ORIGINS = [
-  "http://localhost:3000",
-  "http://localhost:3001",
-  "http://localhost:3002",
-  "http://localhost:3010",
-  "http://127.0.0.1:3000",
-  "http://127.0.0.1:3001",
-  "http://127.0.0.1:3002",
-  "http://127.0.0.1:3010"
-];
+/** Next.js `next dev` picks the first free port in a range when 3000 is busy; allow 3000–3005 for localhost and loopback. */
+const DEFAULT_DEVELOPMENT_ORIGINS: string[] = (() => {
+  const hosts = ["http://localhost", "http://127.0.0.1"] as const;
+  const out: string[] = [];
+  for (const host of hosts) {
+    for (let port = 3000; port <= 3005; port += 1) {
+      out.push(`${host}:${port}`);
+    }
+  }
+  // Legacy local tooling / explicit tests (e.g. cors-config.test.ts uses 3010)
+  out.push("http://localhost:3010", "http://127.0.0.1:3010");
+  return out;
+})();
 
 export const API_CORS_METHODS = ["GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS"];
 export const API_CORS_HEADERS = [
