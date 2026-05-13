@@ -28,43 +28,45 @@ type PolicyEnforcementOptions = {
   };
 };
 
-function enrichHandledResponseWithUsage(
+async function enrichHandledResponseWithUsage(
   context: RequestContext,
   policyDecision: unknown,
   enforcement: RoutePolicyEnforcementResult
-): RoutePolicyEnforcementResult {
+): Promise<RoutePolicyEnforcementResult> {
   if (!enforcement.handled) return enforcement;
   if (!policyDecision || typeof policyDecision !== "object") return enforcement;
 
   const decision = policyDecision as {
     effect?: string;
-    subject?: { userId?: string; channel?: string };
-    context?: {
-      tenantId?: string;
-      source?: string;
-      requestId?: string;
-      channel?: string;
-    };
+    actionKey?: string;
+    reasons?: string[];
+    usagePolicy?: { usageRecordRequired?: boolean; usageEventType?: string };
   } & Record<string, unknown>;
 
-  if (!decision.context?.tenantId || !decision.subject?.userId) {
+  if (!context.tenantId || !context.userId) {
     return enforcement;
   }
 
   const usageEvent = buildPolicyDecisionUsageEvent(
-    decision as never,
     {
-      userId: decision.subject.userId,
-      tenantId: decision.context.tenantId,
+      effect: decision.effect ?? "deny",
+      actionKey: decision.actionKey ?? "unknown_action",
+      reasons: Array.isArray(decision.reasons) ? decision.reasons : [],
+      obligations: { requireUsageRecord: Boolean(decision.usagePolicy?.usageRecordRequired) },
+      usagePolicy: decision.usagePolicy
+    } as never,
+    {
+      userId: context.userId,
+      tenantId: context.tenantId,
       roles: context.roles ?? [],
       permissions: context.permissions ?? [],
       authMode: context.sessionToken ? "session" : "demo",
       channel: "api"
     },
     {
-      requestId: decision.context.requestId ?? `req_${Date.now()}`,
-      tenantId: decision.context.tenantId,
-      source: (decision.context.source as never) ?? "api",
+      requestId: `req_${Date.now()}`,
+      tenantId: context.tenantId,
+      source: "api",
       environment: process.env.NODE_ENV === "production" ? "production" : "development",
       persistenceMode: context.persistenceMode,
       channel: "api"
@@ -88,17 +90,36 @@ function enrichHandledResponseWithUsage(
     };
   }
 
-  return {
-    handled: true,
-    statusCode: enforcement.statusCode,
-    body: {
-      ...enforcement.body,
-      usageRecordRequired: true,
-      usageRecorded: true,
-      usagePersistenceMode: resolution.mode,
-      usageEventType: usageEvent.eventType
-    }
-  };
+  try {
+    const saved = await resolution.ledger.record(usageEvent);
+    return {
+      handled: true,
+      statusCode: enforcement.statusCode,
+      body: {
+        ...enforcement.body,
+        usageRecordRequired: true,
+        usageRecorded: true,
+        usagePersistenceMode: resolution.mode,
+        usageEventType: usageEvent.eventType,
+        usageEventId: saved.id,
+        usageRecordedAt: saved.createdAt ?? saved.occurredAt
+      }
+    };
+  } catch (error) {
+    return {
+      handled: true,
+      statusCode: enforcement.statusCode,
+      body: {
+        ...enforcement.body,
+        usageRecordRequired: true,
+        usageRecorded: false,
+        usagePersistenceMode: resolution.mode,
+        usageEventType: usageEvent.eventType,
+        usageRecordError: error instanceof Error ? error.message : "usage_record_failed"
+      }
+    };
+  }
+
 }
 
 export async function enforcePolicyForRoute(
@@ -130,5 +151,5 @@ export async function enforcePolicyForRoute(
     decision && typeof decision === "object" && "policyEngine" in decision
       ? (decision as { policyEngine?: unknown }).policyEngine
       : undefined;
-  return enrichHandledResponseWithUsage(context, policyEngine, result);
+  return await enrichHandledResponseWithUsage(context, policyEngine, result);
 }

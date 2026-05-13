@@ -28,6 +28,8 @@ Critical write/execute actions are approval-first. Route mutation is blocked whe
 - Existing webhook signature/token/phone/channel-window security remains primary.
 - Policy channel metadata is additive and cannot bypass webhook security checks.
 - `platform.whatsapp.approval_command` remains constrained with channel obligations.
+- `signatureVerified`, `approvalTokenVerified`, `phoneVerified` flags are never hardcoded as `true` in HTTP operator routes.
+- HTTP authenticated confirmation routes and inbound WhatsApp approval commands are modeled as different actions (`platform.whatsapp.action_request.confirm` vs `platform.whatsapp.approval_command`).
 
 ## Worker Approved Execution Standard
 - Worker dispatch continues to require approved context, idempotency key, and audit/timeline metadata.
@@ -35,6 +37,7 @@ Critical write/execute actions are approval-first. Route mutation is blocked whe
 
 ## Usage and Obligation Handling
 Route-level enforcement now propagates obligations (`requireApproval`, `requireIdempotencyKey`, `requireAuditTimeline`, `requireUsageRecord`) in policy response metadata.
+- `usageRecorded: true` is returned only after a successful `ledger.record(...)` call; unavailable/error states return `usageRecorded: false` with explicit metadata.
 
 ## New Route Integration Checklist
 1. Add guard chain (`assertAuthenticated`, tenant, permission).

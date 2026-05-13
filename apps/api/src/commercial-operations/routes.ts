@@ -656,8 +656,7 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
         requiredPermissions: ["documents.write", "integrations.write"],
         payload: { documentId: request.params.id, channel: "whatsapp" },
         channel: "whatsapp",
-        source: "api",
-        channelPolicy: { signatureVerified: true, withinChannelWindow: true }
+        source: "api"
       });
       if (policyResult.handled) {
         return reply.status(policyResult.statusCode).send(policyResult.body);

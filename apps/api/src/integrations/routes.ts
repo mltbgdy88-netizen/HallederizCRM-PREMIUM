@@ -235,7 +235,6 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
         tenantId: request.body?.tenantId,
         channel: "whatsapp",
         source: "api",
-        channelPolicy: { signatureVerified: true, withinChannelWindow: true },
         payload: { conversationId: request.body?.conversationId }
       });
       if (policyResult.handled) {
@@ -257,16 +256,10 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
   server.post<{ Params: { id: string } }>("/whatsapp/action-requests/:id/confirm", async (request, reply) =>
     withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "approvals.write"]), async (context) => {
       const policyResult = await enforcePolicyForRoute(context, {
-        actionKey: "platform.whatsapp.approval_command",
+        actionKey: "platform.whatsapp.action_request.confirm",
         requiredPermissions: ["integrations.write", "approvals.write"],
-        channel: "whatsapp",
-        source: "whatsapp",
-        channelPolicy: {
-          signatureVerified: true,
-          approvalTokenVerified: true,
-          phoneVerified: true,
-          withinChannelWindow: true
-        },
+        channel: "api",
+        source: "api",
         payload: { requestId: request.params.id }
       });
       if (policyResult.handled) {

@@ -1,13 +1,16 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import Fastify from "fastify";
-import { evaluatePolicyEngine as evaluatePolicy } from "@hallederiz/domain";
+import { evaluatePolicyEngine as evaluatePolicy, tenantUsageLedger } from "@hallederiz/domain";
 import { registerAiLocalOutputRoutes } from "../ai-local-output-routes";
 import { registerCommercialOperationsRoutes } from "../commercial-operations/routes";
 import { registerIntegrationRoutes } from "../integrations/routes";
 import { registerPlatformCoreRoutes } from "../platform-core/routes";
 import { registerSalesCrmRoutes } from "../sales-crm/routes";
 import { createSession, getSessionByToken } from "../shared/session-store";
+import { enforcePolicyForRoute } from "../shared/policy-route-enforcement";
+import type { RequestContext } from "../shared/request-context";
+import { resetTenantUsageRuntimeForTests } from "../shared/tenant-usage-runtime";
 import { withDemoAuth, withEnv } from "./test-env";
 
 function authHeaders(token: string, extra?: Record<string, string>) {
@@ -222,4 +225,186 @@ test("WhatsApp webhook command cannot bypass signature checks", async () => {
       await server.close();
     }
   );
+});
+
+test("API confirm route uses API action and does not impersonate inbound WhatsApp command", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const session = getSessionByToken(login.accessToken);
+    if (session) {
+      const existing = new Set(session.permissions.map((permission) => permission.key));
+      const template = session.permissions[0];
+      if (template) {
+        if (!existing.has("integrations.write")) {
+          session.permissions.push({
+            ...template,
+            id: `${template.id}_int_write`,
+            key: "integrations.write",
+            name: "Integrations Write"
+          });
+        }
+        if (!existing.has("approvals.write")) {
+          session.permissions.push({
+            ...template,
+            id: `${template.id}_apr_write`,
+            key: "approvals.write",
+            name: "Approvals Write"
+          });
+        }
+      }
+    }
+
+    const response = await server.inject({
+      method: "POST",
+      url: "/whatsapp/action-requests/wa_action_req_1/confirm",
+      headers: authHeaders(login.accessToken)
+    });
+
+    assert.ok([202, 403].includes(response.statusCode));
+    const body = response.json();
+    if (typeof body === "object" && body && "actionKey" in body) {
+      assert.equal(body.actionKey, "platform.whatsapp.action_request.confirm");
+      assert.notEqual(body.actionKey, "platform.whatsapp.approval_command");
+    }
+    await server.close();
+  });
+});
+
+test("platform.whatsapp.approval_command remains inbound-only with real channel verification requirements", () => {
+  const baseInput = {
+    subject: {
+      userId: "user_1",
+      tenantId: "tenant_1",
+      roles: ["admin"],
+      permissions: ["approvals.approve"],
+      authMode: "session" as const,
+      channel: "whatsapp" as const
+    },
+    resource: {
+      resourceType: "approval",
+      tenantId: "tenant_1"
+    },
+    action: {
+      actionKey: "platform.whatsapp.approval_command",
+      actionType: "approve" as const,
+      criticality: "critical" as const
+    },
+    context: {
+      requestId: "req_wa_cmd",
+      tenantId: "tenant_1",
+      source: "whatsapp" as const,
+      environment: "development" as const,
+      persistenceMode: "demo" as const,
+      channel: "whatsapp" as const
+    }
+  };
+
+  const denied = evaluatePolicy(baseInput);
+  assert.equal(denied.effect, "deny");
+  assert.ok(denied.reasons.includes("channel_signature_required"));
+
+  const allowed = evaluatePolicy({
+    ...baseInput,
+    idempotencyKey: "wa_idem_1",
+    channelPolicy: {
+      signatureVerified: true,
+      approvalTokenVerified: true,
+      phoneVerified: true,
+      withinChannelWindow: true
+    }
+  });
+  assert.equal(allowed.effect, "allow");
+});
+
+test("usageRecorded is true only after successful ledger persistence", async () => {
+  await withDemoAuth(async () => {
+    resetTenantUsageRuntimeForTests();
+    const context: RequestContext = {
+      userId: "user_1",
+      tenantId: "tenant_1",
+      permissions: ["orders.write"],
+      roles: ["admin"],
+      persistenceMode: "demo",
+      sessionToken: "session_token",
+      isAuthenticated: true
+    };
+
+    const response = await enforcePolicyForRoute(context, {
+      actionKey: "platform.orders.create",
+      requiredPermissions: ["orders.write"],
+      source: "api",
+      payload: { customerId: "customer_1", lines: [] }
+    });
+    assert.equal(response.handled, true);
+    const body = response.body as Record<string, unknown>;
+    assert.equal(body.usageRecordRequired, true);
+    assert.equal(body.usageRecorded, true);
+    assert.equal(typeof body.usageEventId, "string");
+  });
+});
+
+test("usageRecorded is false when ledger persistence throws", async () => {
+  await withDemoAuth(async () => {
+    resetTenantUsageRuntimeForTests();
+    const originalRecord = tenantUsageLedger.record.bind(tenantUsageLedger);
+    try {
+      tenantUsageLedger.record = async () => {
+        throw new Error("usage_write_failed");
+      };
+
+      const context: RequestContext = {
+        userId: "user_1",
+        tenantId: "tenant_1",
+        permissions: ["orders.write"],
+        roles: ["admin"],
+        persistenceMode: "demo",
+        sessionToken: "session_token",
+        isAuthenticated: true
+      };
+
+      const response = await enforcePolicyForRoute(context, {
+        actionKey: "platform.orders.create",
+        requiredPermissions: ["orders.write"],
+        source: "api",
+        payload: { customerId: "customer_1", lines: [] }
+      });
+
+      assert.equal(response.handled, true);
+      const body = response.body as Record<string, unknown>;
+      assert.equal(body.usageRecordRequired, true);
+      assert.equal(body.usageRecorded, false);
+      assert.equal(body.usageRecordError, "usage_write_failed");
+    } finally {
+      tenantUsageLedger.record = originalRecord;
+    }
+  });
+});
+
+test("usageRecorded is false with explicit reason when ledger resolution is unavailable", async () => {
+  await withEnv({ NODE_ENV: "production", PERSISTENCE_MODE: "postgres" }, async () => {
+    resetTenantUsageRuntimeForTests();
+    const context: RequestContext = {
+      userId: "user_1",
+      tenantId: "tenant_1",
+      permissions: ["orders.write"],
+      roles: ["admin"],
+      persistenceMode: "postgres",
+      sessionToken: "session_token",
+      isAuthenticated: true
+    };
+
+    const response = await enforcePolicyForRoute(context, {
+      actionKey: "platform.orders.create",
+      requiredPermissions: ["orders.write"],
+      source: "api",
+      payload: { customerId: "customer_1", lines: [] }
+    });
+    assert.equal(response.handled, true);
+    const body = response.body as Record<string, unknown>;
+    assert.equal(body.usageRecordRequired, true);
+    assert.equal(body.usageRecorded, false);
+    assert.equal(body.usagePersistenceMode, "unsupported");
+    assert.ok(Array.isArray(body.usageReasons));
+  });
 });
