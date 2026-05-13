@@ -1,5 +1,5 @@
 import type { FastifyRequest } from "fastify";
-import { getSessionByToken } from "./session-store";
+import { extractSessionTokenFromCookieHeader, getSessionByToken } from "./session-store";
 import { getAuthMode } from "./auth-mode";
 
 export interface RequestContext {
@@ -111,7 +111,10 @@ export function buildRequestContext(request: FastifyRequest): RequestContext {
   const authMode = getAuthMode();
   const authHeader = request.headers.authorization;
   const bearerToken = typeof authHeader === "string" && authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : undefined;
-  const sessionToken = String(request.headers["x-session-token"] ?? bearerToken ?? "");
+  const cookieToken = extractSessionTokenFromCookieHeader(
+    typeof request.headers.cookie === "string" ? request.headers.cookie : undefined
+  );
+  const sessionToken = String(request.headers["x-session-token"] ?? bearerToken ?? cookieToken ?? "");
   const isMockAccessToken = sessionToken.startsWith("mock_access_");
   const principal = authMode.allowMockAccessTokens ? parseTokenPrincipal(sessionToken || undefined) : { roles: [], permissions: [] };
   const session =

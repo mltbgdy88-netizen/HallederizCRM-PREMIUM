@@ -9,6 +9,8 @@ dist
 .next-cache
 .runtime-next
 .runtime-next-dev
+*.tsbuildinfo
+apps/web/tsconfig.tsbuildinfo
 coverage
 
 # Logs

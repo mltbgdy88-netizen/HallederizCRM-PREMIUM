@@ -24,15 +24,7 @@ export class ApiClient {
   constructor(private readonly options: ApiClientOptions) {}
 
   private resolveSessionToken(): string | undefined {
-    if (this.options.sessionToken) {
-      return this.options.sessionToken;
-    }
-
-    if (typeof window === "undefined") {
-      return undefined;
-    }
-
-    return window.localStorage.getItem("hz_platform_access_token") ?? undefined;
+    return this.options.sessionToken;
   }
 
   async get<T>(path: string): Promise<T> {
@@ -59,7 +51,8 @@ export class ApiClient {
         ...(sessionToken ? { authorization: `Bearer ${sessionToken}` } : {})
       },
       body: init.body === undefined ? undefined : JSON.stringify(init.body),
-      cache: "no-store"
+      cache: "no-store",
+      credentials: "include"
     });
 
     if (!response.ok) {

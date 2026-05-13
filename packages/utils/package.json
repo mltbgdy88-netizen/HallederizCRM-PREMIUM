@@ -14,7 +14,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "node -e \"console.log('TODO: configure linting for @hallederiz/utils')\"",
+    "lint": "tsc -p tsconfig.json --noEmit",
     "clean": "node -e \"console.log('clean: no-op for @hallederiz/utils')\""
   },
   "devDependencies": {

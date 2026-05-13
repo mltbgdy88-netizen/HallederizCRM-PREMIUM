@@ -1,6 +1,9 @@
 name: Quality Gate
 
 on:
+  push:
+    branches:
+      - main
   pull_request:
   workflow_dispatch:
 
@@ -31,17 +34,27 @@ jobs:
       - name: Typecheck
         run: pnpm typecheck
 
+      - name: Lint
+        run: pnpm lint
+
       - name: Build
         run: pnpm build
 
       - name: API tests
         run: pnpm test
 
+      - name: Web navigation tests
+        run: pnpm test:web-navigation
+
       - name: Route smoke
         run: pnpm smoke:routes
 
       - name: Navigation smoke
         run: pnpm smoke:navigation
+
+      - name: Dependency audit
+        run: pnpm audit --audit-level moderate
+        continue-on-error: true
 
       - name: Upload quality logs on failure
         if: failure()

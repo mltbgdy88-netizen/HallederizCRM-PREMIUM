@@ -14,7 +14,7 @@
   "scripts": {
     "build": "pnpm --filter @hallederiz/types build && tsc -p tsconfig.json",
     "typecheck": "pnpm --filter @hallederiz/types build && tsc -p tsconfig.json --noEmit",
-    "lint": "node -e \"console.log('TODO: configure linting for @hallederiz/domain')\"",
+    "lint": "pnpm --filter @hallederiz/types build && tsc -p tsconfig.json --noEmit",
     "clean": "node -e \"console.log('clean: no-op for @hallederiz/domain')\""
   },
   "dependencies": {

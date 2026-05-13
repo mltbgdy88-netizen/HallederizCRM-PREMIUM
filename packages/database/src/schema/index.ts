@@ -15,3 +15,4 @@ export * from "./documents";
 export * from "./whatsapp-workflows";
 export * from "./execution-worker-audit";
 export * from "./pending-approval-requests";
+export * from "./tenant-usage-events";

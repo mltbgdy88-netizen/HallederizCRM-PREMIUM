@@ -10,7 +10,7 @@
     "seed:auth-admin": "node --experimental-specifier-resolution=node --loader ts-node/esm src/scripts/seed-admin-user.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node scripts/run-tests.cjs",
-    "lint": "node -e \"console.log('TODO: configure linting for @hallederiz/api')\"",
+    "lint": "tsc -p tsconfig.json --noEmit",
     "clean": "node -e \"console.log('clean: no-op for @hallederiz/api')\""
   },
   "dependencies": {
@@ -20,8 +20,8 @@
     "@hallederiz/domain": "workspace:*",
     "@hallederiz/types": "workspace:*",
     "@hallederiz/utils": "workspace:*",
-    "fastify": "^4.28.1",
-    "xlsx": "^0.18.5"
+    "exceljs": "^4.4.0",
+    "fastify": "^4.28.1"
   },
   "devDependencies": {
     "@types/node": "^22.7.4",

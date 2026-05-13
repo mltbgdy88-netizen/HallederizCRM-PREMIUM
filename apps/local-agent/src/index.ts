@@ -24,13 +24,13 @@ async function processQueueCycle() {
   for (const job of snapshot.fileSaveJobs) {
     await markFileSaveJobStarted(job.id);
     const result = await saveFileJob(job);
-    await markFileSaveJobCompleted(job.id, result.status === "failed" ? result.errorMessage : undefined);
+    await markFileSaveJobCompleted(job.id, result.status === "completed" ? undefined : result.errorMessage ?? result.status);
   }
 
   for (const job of snapshot.printJobs) {
     await markPrintJobStarted(job.id);
     const result = await printJob(job);
-    await markPrintJobCompleted(job.id, result.status === "failed" ? result.errorMessage : undefined);
+    await markPrintJobCompleted(job.id, result.status === "completed" ? undefined : result.errorMessage ?? result.status);
   }
 
   await reportLocalStatus("online", `Queue cycle tamamlandi. print=${snapshot.printJobs.length} save=${snapshot.fileSaveJobs.length}`);

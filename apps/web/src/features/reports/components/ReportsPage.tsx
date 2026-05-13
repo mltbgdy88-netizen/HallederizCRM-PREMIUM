@@ -21,6 +21,7 @@ import {
   IconWallet
 } from "../../dashboard/components/dashboard-inline-icons";
 import { useToast } from "../../../providers/toast-provider";
+import { useAuth } from "../../../providers/auth-provider";
 import { metricMatchesChip, REPORTS_DEMO_METRICS, REPORTS_USE_DEMO_DATA } from "../data/reports-demo-data";
 import type { ReportCategoryChip, ReportDiffTone } from "../types";
 
@@ -32,6 +33,13 @@ const KPI = {
   waDonusum: "%38",
   aiTasarruf: "14 saat"
 } as const;
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
+
+interface TenantUsageSummary {
+  totalEvents: number;
+  limitExceeded: boolean;
+}
 
 type ReportTypeSelect =
   | "genel-bakis"
@@ -91,6 +99,7 @@ function formatUpdated(iso: string): string {
 export function ReportsPage() {
   const router = useRouter();
   const { pushToast } = useToast();
+  const { session, state } = useAuth();
   const baseRows = useMemo(() => (REPORTS_USE_DEMO_DATA ? REPORTS_DEMO_METRICS : []), []);
 
   const [activeChip, setActiveChip] = useState<ReportCategoryChip | "all">("all");
@@ -107,6 +116,7 @@ export function ReportsPage() {
   const [actionLocks, setActionLocks] = useState<Record<string, boolean>>({});
   const [rowPdfLocks, setRowPdfLocks] = useState<Record<string, boolean>>({});
   const [rowXlsLocks, setRowXlsLocks] = useState<Record<string, boolean>>({});
+  const [usageSummary, setUsageSummary] = useState<TenantUsageSummary | null>(null);
 
   const chipFilter = useMemo(() => activeChip, [activeChip]);
 
@@ -123,6 +133,25 @@ export function ReportsPage() {
       return first ? first.id : null;
     });
   }, [filtered]);
+
+  useEffect(() => {
+    if (state !== "authenticated" || !session?.tenant.id) {
+      setUsageSummary(null);
+      return;
+    }
+    const controller = new AbortController();
+    void fetch(`${API_BASE_URL}/platform/tenant-usage/summary`, {
+      method: "GET",
+      headers: { "x-tenant-id": session.tenant.id },
+      credentials: "include",
+      cache: "no-store",
+      signal: controller.signal
+    })
+      .then(async (response) => (response.ok ? ((await response.json()) as { item: TenantUsageSummary }).item : null))
+      .then((item) => setUsageSummary(item))
+      .catch(() => setUsageSummary(null));
+    return () => controller.abort();
+  }, [session?.tenant.id, state]);
 
   const selected = useMemo(() => {
     if (!selectedId) return null;
@@ -409,7 +438,10 @@ export function ReportsPage() {
 
           {REPORTS_USE_DEMO_DATA ? (
             <div className="hz-reports-preview-band" role="status">
-              Önizleme modu: örnek rapor metrikleri gösteriliyor.
+              ?nizleme modu: ?rnek rapor metrikleri g?steriliyor.
+              {usageSummary
+                ? ` Tenant usage API bagli: ${usageSummary.totalEvents} olay, limit asimi ${usageSummary.limitExceeded ? "var" : "yok"}.`
+                : " Tenant usage API sonucu yok veya oturum bekleniyor."}
             </div>
           ) : null}
 

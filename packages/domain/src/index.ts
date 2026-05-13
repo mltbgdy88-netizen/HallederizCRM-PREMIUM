@@ -20,6 +20,7 @@ export * from "./returns";
 export * from "./stock";
 export * from "./tasks";
 export * from "./worker";
+export * from "./usage";
 export * from "./warehouse";
 export * from "./workflows";
 export * from "./whatsapp";

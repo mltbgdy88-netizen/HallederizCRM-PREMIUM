@@ -18,7 +18,7 @@
     "migrate:status": "node dist/cli.js migrate:status",
     "migrate:apply": "node dist/cli.js migrate:apply",
     "seed:list": "node dist/cli.js seeds",
-    "lint": "node -e \"console.log('TODO: configure linting for @hallederiz/database')\"",
+    "lint": "tsc -p tsconfig.json --noEmit",
     "clean": "node -e \"console.log('clean: no-op for @hallederiz/database')\""
   },
   "devDependencies": {

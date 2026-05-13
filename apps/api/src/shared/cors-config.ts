@@ -44,7 +44,7 @@ export function buildApiCorsOptions(env: NodeJS.ProcessEnv = process.env): Fasti
   );
 
   return {
-    credentials: false,
+    credentials: true,
     methods: API_CORS_METHODS,
     allowedHeaders: API_CORS_HEADERS,
     origin(origin, callback) {

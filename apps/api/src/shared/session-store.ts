@@ -1,9 +1,107 @@
 import type { LoginInput, LoginResponse, Permission, SessionModel } from "@hallederiz/types";
+import { createHmac, timingSafeEqual } from "node:crypto";
 import { createLoginPayload, mockRoles, mockTenant, mockUsers } from "../platform-core/mock-data";
 import { assertDemoAuthAllowed, getAuthMode } from "./auth-mode";
 import type { DatabaseAuthResult } from "./database-auth";
 
 const sessionByToken = new Map<string, LoginResponse>();
+export const SESSION_COOKIE_NAME = "hz_session";
+
+function getSessionSecret(): string {
+  const configured = process.env.AUTH_SESSION_SECRET ?? process.env.SESSION_SECRET;
+  if (configured?.trim()) {
+    return configured.trim();
+  }
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("AUTH_SESSION_SECRET or SESSION_SECRET is required in production.");
+  }
+  return "hallederiz-dev-session-secret";
+}
+
+function base64UrlJson(input: unknown): string {
+  return Buffer.from(JSON.stringify(input), "utf8").toString("base64url");
+}
+
+function signSessionPayload(encodedPayload: string): string {
+  return createHmac("sha256", getSessionSecret()).update(encodedPayload).digest("base64url");
+}
+
+function createSignedSessionToken(session: SessionModel): string {
+  const encodedPayload = base64UrlJson({
+    sid: session.id,
+    tenantId: session.tenant.id,
+    userId: session.user.id,
+    exp: new Date(session.expiresAt).getTime()
+  });
+  return `hst_${encodedPayload}.${signSessionPayload(encodedPayload)}`;
+}
+
+function verifySignedSessionToken(token: string): boolean {
+  if (!token.startsWith("hst_")) {
+    return process.env.NODE_ENV !== "production";
+  }
+  const raw = token.slice(4);
+  const [encodedPayload, signature] = raw.split(".");
+  if (!encodedPayload || !signature) {
+    return false;
+  }
+  let expected: string;
+  try {
+    expected = signSessionPayload(encodedPayload);
+  } catch {
+    return false;
+  }
+  const expectedBuffer = Buffer.from(expected);
+  const actualBuffer = Buffer.from(signature);
+  if (expectedBuffer.length !== actualBuffer.length || !timingSafeEqual(expectedBuffer, actualBuffer)) {
+    return false;
+  }
+  try {
+    const payload = JSON.parse(Buffer.from(encodedPayload, "base64url").toString("utf8")) as { exp?: number };
+    return typeof payload.exp === "number" && payload.exp > Date.now();
+  } catch {
+    return false;
+  }
+}
+
+function persistSession(response: LoginResponse): LoginResponse {
+  const signedAccessToken = createSignedSessionToken(response.session);
+  const signedResponse = {
+    ...response,
+    accessToken: signedAccessToken,
+    refreshToken: `refresh_${response.session.id}`
+  };
+  sessionByToken.set(signedResponse.accessToken, signedResponse);
+  return signedResponse;
+}
+
+export function buildSessionCookieHeader(token: string, expiresAt: string): string {
+  const maxAgeSeconds = Math.max(0, Math.floor((new Date(expiresAt).getTime() - Date.now()) / 1000));
+  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+  return `${SESSION_COOKIE_NAME}=${encodeURIComponent(token)}; HttpOnly; SameSite=Lax; Path=/; Max-Age=${maxAgeSeconds}${secure}`;
+}
+
+export function buildClearSessionCookieHeader(): string {
+  const secure = process.env.NODE_ENV === "production" ? "; Secure" : "";
+  return `${SESSION_COOKIE_NAME}=; HttpOnly; SameSite=Lax; Path=/; Max-Age=0${secure}`;
+}
+
+export function extractSessionTokenFromCookieHeader(cookieHeader?: string): string | undefined {
+  if (!cookieHeader) return undefined;
+  const match = cookieHeader
+    .split(";")
+    .map((part) => part.trim())
+    .find((part) => part.startsWith(`${SESSION_COOKIE_NAME}=`));
+  if (!match) return undefined;
+  const value = match.slice(SESSION_COOKIE_NAME.length + 1);
+  return value ? decodeURIComponent(value) : undefined;
+}
+
+export function clearSessionToken(token?: string): void {
+  if (token) {
+    sessionByToken.delete(token);
+  }
+}
 
 const demoBusinessReadPermissions = [
   "customers.read",
@@ -122,8 +220,7 @@ export function createSession(input: LoginInput): LoginResponse {
       permissions: [...rolePermissions, ...extraPermissions]
     }
   };
-  sessionByToken.set(response.accessToken, response);
-  return response;
+  return persistSession(response);
 }
 
 export function createLocalPilotSession(input: LoginInput): LoginResponse {
@@ -161,8 +258,7 @@ export function createLocalPilotSession(input: LoginInput): LoginResponse {
     }
   };
 
-  sessionByToken.set(response.accessToken, response);
-  return response;
+  return persistSession(response);
 }
 
 export function createDatabaseSession(input: LoginInput, principal: Extract<DatabaseAuthResult, { status: "success" }>): LoginResponse {
@@ -205,12 +301,12 @@ export function createDatabaseSession(input: LoginInput, principal: Extract<Data
     }
   };
 
-  sessionByToken.set(response.accessToken, response);
-  return response;
+  return persistSession(response);
 }
 
 export function getSessionByToken(token?: string): SessionModel | null {
   if (!token) return null;
+  if (!verifySignedSessionToken(token)) return null;
   const session = sessionByToken.get(token)?.session;
   if (!session) return null;
   if (new Date(session.expiresAt).getTime() <= Date.now()) return null;
