@@ -382,7 +382,7 @@ test("usageRecorded is false when ledger persistence throws", async () => {
 });
 
 test("usageRecorded is false with explicit reason when ledger resolution is unavailable", async () => {
-  await withEnv({ NODE_ENV: "production", PERSISTENCE_MODE: "postgres" }, async () => {
+  await withEnv({ NODE_ENV: "development", PERSISTENCE_MODE: "postgres" }, async () => {
     resetTenantUsageRuntimeForTests();
     const context: RequestContext = {
       userId: "user_1",

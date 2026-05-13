@@ -27,6 +27,8 @@ Bu dokuman readiness gorunurlugunu zorlayici runtime enforcemenet katmanina tasi
 
 - `NODE_ENV=production` ve readiness `blocked` ise kritik aksiyonlar fail-closed durur.
 - `NODE_ENV=production` ve readiness `degraded` ise kritik aksiyonlar live basari olarak raporlanmaz.
+- Route caller `productionActionType` vermezse enforcement katmani `actionKey` uzerinden otomatik production action type map eder.
+- Yeni kritik action ekleyen gelistirici explicit `productionActionType` vermeli veya merkezi `actionKey -> productionActionType` mapping'e eklemelidir.
 - `safe_read` aksiyonlari okunabilirlik icin acik kalabilir.
 - `mock`, `dry_run`, `foundation`, `not_configured` durumlari live success gibi donmez.
 

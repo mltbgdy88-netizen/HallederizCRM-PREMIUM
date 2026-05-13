@@ -65,13 +65,19 @@ export function mapActionKeyToProductionActionType(actionKey: string): Productio
   ) {
     return "commercial_write";
   }
+  if (actionKey === "platform.documents.generate") return "document_send";
   if (actionKey === "platform.documents.send") return "document_send";
   if (actionKey === "platform.omnichannel.reply") return "omnichannel_reply";
-  if (actionKey === "platform.whatsapp.reply" || actionKey === "platform.whatsapp.action_request.confirm") {
+  if (actionKey === "platform.whatsapp.reply") {
     return "whatsapp_outbound";
   }
+  if (actionKey === "platform.whatsapp.action_request.confirm") return "approval_execution";
   if (actionKey === "platform.ai.execute") return "ai_execute";
-  if (actionKey === "worker.approval.dispatch" || actionKey === "worker.audit.timeline.writeback") {
+  if (
+    actionKey === "worker.approval.dispatch" ||
+    actionKey === "worker.audit.timeline.writeback" ||
+    actionKey === "worker.omnichannel.reply.dispatch"
+  ) {
     return "worker_live_execution";
   }
   if (actionKey.endsWith(".read")) return "safe_read";

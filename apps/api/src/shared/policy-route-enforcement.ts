@@ -141,10 +141,11 @@ export async function enforcePolicyForRoute(
     assertAnyPermission(context, options.requiredPermissions);
   }
 
-  if (options.productionActionType) {
+  const mappedProductionActionType = options.productionActionType ?? mapActionKeyToProductionActionType(options.actionKey);
+  if (mappedProductionActionType !== "safe_read") {
     const productionGate = await assertProductionReadyForAction({
       context,
-      actionType: options.productionActionType ?? mapActionKeyToProductionActionType(options.actionKey),
+      actionType: mappedProductionActionType,
       actionKey: options.actionKey
     });
     if (productionGate.productionGate !== "allowed") {

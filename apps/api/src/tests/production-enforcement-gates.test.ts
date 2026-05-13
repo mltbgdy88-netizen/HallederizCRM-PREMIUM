@@ -148,7 +148,6 @@ test("ai source cannot bypass production gate", async () => {
         {
           actionKey: "platform.ai.execute",
           requiredPermissions: ["omnichannel.write", "integrations.write"],
-          productionActionType: "ai_execute",
           source: "ai",
           channel: "api",
           idempotencyKey: "idem-ai-1"
@@ -223,4 +222,38 @@ test("action mapping classifies critical production actions", () => {
   assert.equal(mapActionKeyToProductionActionType("platform.users.create"), "user_management");
   assert.equal(mapActionKeyToProductionActionType("platform.settings.update"), "settings_update");
   assert.equal(mapActionKeyToProductionActionType("platform.documents.send"), "document_send");
+  assert.equal(mapActionKeyToProductionActionType("platform.documents.generate"), "document_send");
+  assert.equal(mapActionKeyToProductionActionType("platform.whatsapp.action_request.confirm"), "approval_execution");
+});
+
+test("safe read action does not get blocked when productionActionType is omitted", async () => {
+  await withEnv(
+    {
+      NODE_ENV: "production",
+      PERSISTENCE_MODE: "postgres",
+      DATABASE_URL: undefined,
+      POSTGRES_URL: undefined,
+      AUTH_SESSION_SECRET: undefined
+    },
+    async () => {
+      const response = await enforcePolicyForRoute(
+        {
+          tenantId: "tenant_1",
+          userId: "user_admin",
+          persistenceMode: "postgres",
+          isAuthenticated: true,
+          permissions: ["orders.read"]
+        },
+        {
+          actionKey: "platform.orders.read",
+          requiredPermissions: ["orders.read"]
+        }
+      );
+      if (response.handled) {
+        assert.notEqual(response.statusCode, 503);
+      } else {
+        assert.equal(response.handled, false);
+      }
+    }
+  );
 });
