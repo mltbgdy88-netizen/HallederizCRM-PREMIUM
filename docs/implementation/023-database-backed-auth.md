@@ -24,6 +24,7 @@ Demo/mock/header fallback davranislari production guvenlik kurallarini bozmadan 
   - DB erisimi yok / misconfigured: `503` fail-closed
 
 ## Local/Dev ve Pilot Auth Uyumu
+- Next.js `pnpm dev` bazen 3000 dolu oldugunda **3001–3005** (ve benzeri) porta kayar. API varsayilan **development** CORS listesi `http://localhost` ve `http://127.0.0.1` uzerinde **3000–3005** araligini kapsar; ayrica `API_CORS_ORIGINS` ve `WEB_URL` ile acik origin eklemeye devam edilir. **Production** ortaminda bu varsayilan genis liste uygulanmaz; canli origin’ler env ile tanimlanmalidir.
 - `LOCAL_PILOT_AUTH_*` akisi sadece `NODE_ENV !== production` ve explicit flag ile calismaya devam eder.
 - Postgres modunda once DB auth denenir; local pilot auth sadece explicit local gelistirme senaryosu icin fallback olarak kalir.
 - `mock_access` ve header principal fallback production/postgres guvenlik politikasina aykiri sekilde acilmaz.
