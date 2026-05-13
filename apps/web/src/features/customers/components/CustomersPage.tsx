@@ -114,7 +114,7 @@ export function CustomersPage() {
   };
 
   const demoRowToast = useCallback(() => {
-    pushToast("Önizleme satırı; gerçek kayıt veya yönlendirme yok (demo).");
+    pushToast("Bu kayıt örnek veri modunda. Production'da yalnız gerçek cari kayıtları açılır.");
   }, [pushToast]);
 
   const emptyFiltered = !usingDemoFallback && !loading && data.customers.length > 0 && rows.length === 0;
@@ -133,7 +133,7 @@ export function CustomersPage() {
                 type="button"
                 className="hz-customers-toolbar-btn hz-customers-toolbar-btn--primary"
                 disabled={Boolean(topCtaDone.new)}
-                onClick={() => fireTopDemo("new", "Yeni cari akışı yakında; şimdilik demo.")}
+                onClick={() => router.push("/cariler/yeni")}
               >
                 <IconPlusCircle size={16} />
                 Yeni Cari
@@ -142,7 +142,7 @@ export function CustomersPage() {
                 type="button"
                 className="hz-customers-toolbar-btn hz-customers-toolbar-btn--outline"
                 disabled={Boolean(topCtaDone.import)}
-                onClick={() => fireTopDemo("import", "İçe aktarma sihirbazı yakında (demo).")}
+                onClick={() => router.push("/ayarlar/veri-yukleme")}
               >
                 <IconUpload size={16} />
                 İçe Aktar
@@ -154,7 +154,7 @@ export function CustomersPage() {
                 onClick={() =>
                   fireTopDemo(
                     "statement",
-                    "Ekstre gönderimi taslağa alınır; onay zinciri ve kayıt denetimi sonraki adımda uygulanır (demo)."
+                    "Ekstre gönderimi canlı kanala otomatik düşmez; policy/onay zinciri tamamlanmadan başarı raporlanmaz."
                   )
                 }
               >
@@ -259,8 +259,8 @@ export function CustomersPage() {
                     router.push(`/whatsapp?customer=${customerId}`);
                   }}
                   emptyFiltered={emptyFiltered}
-                  onEmptyNew={emptyFiltered ? undefined : () => fireTopDemo("emptyNew", "Yeni cari akışı yakında; şimdilik demo.")}
-                  onEmptyImport={emptyFiltered ? undefined : () => fireTopDemo("emptyImport", "İçe aktarma sihirbazı yakında (demo).")}
+                  onEmptyNew={emptyFiltered ? undefined : () => router.push("/cariler/yeni")}
+                  onEmptyImport={emptyFiltered ? undefined : () => router.push("/ayarlar/veri-yukleme")}
                 />
                 <div className="hz-customers-pagination">
                   <Pagination totalItems={displayRows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />

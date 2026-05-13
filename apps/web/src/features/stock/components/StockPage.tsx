@@ -203,7 +203,7 @@ function StockRadarPanel(props: {
                   type="button"
                   className="hz-stock-side-btn"
                   disabled={Boolean(radarDone.move)}
-                  onClick={() => onFireRadar("move", "Stok hareketi onay + işlem + denetim zinciri olmadan uygulanmaz (demo).")}
+                  onClick={() => onFireRadar("move", "Stok hareketi yalnız policy/onay ve execution zinciri tamamlanınca uygulanır.")}
                 >
                   <IconTruck size={14} aria-hidden />
                   Stok hareketi
@@ -212,7 +212,7 @@ function StockRadarPanel(props: {
                   type="button"
                   className="hz-stock-side-btn"
                   disabled={Boolean(radarDone.label)}
-                  onClick={() => onFireRadar("label", "Etiket / barkod çıktısı bağlandığında üretilecek (demo).")}
+                  onClick={() => onFireRadar("label", "Etiket/barkod çıktısı bu ortamda canlı üretim için hazır değil.")}
                 >
                   <IconBarcode size={14} aria-hidden />
                   Etiket / barkod
@@ -221,7 +221,7 @@ function StockRadarPanel(props: {
                   type="button"
                   className="hz-stock-side-btn"
                   disabled={Boolean(radarDone.price)}
-                  onClick={() => onFireRadar("price", "Fiyat güncellemesi politika ve onay akışına bağlanacak (demo).")}
+                  onClick={() => onFireRadar("price", "Fiyat güncellemesi policy/onay kontrolü olmadan canlıya alınmaz.")}
                 >
                   <IconTag size={14} aria-hidden />
                   Fiyat güncelle
@@ -231,7 +231,7 @@ function StockRadarPanel(props: {
                   className="hz-stock-side-btn"
                   disabled={Boolean(radarDone.quick)}
                   onClick={() => {
-                    onFireRadar("quick", "Hızlı işlem ekranına yönlendirme hazırlanıyor (demo).");
+                    onFireRadar("quick", "Hızlı İşlem ekranına yönlendirildi. Canlı mutation sonucu ayrı doğrulanır.");
                     onGoQuickOp();
                   }}
                 >
@@ -243,7 +243,7 @@ function StockRadarPanel(props: {
                   className="hz-stock-side-btn"
                   disabled={Boolean(radarDone.arch)}
                   onClick={() => {
-                    onFireRadar("arch", "Arşiv görünümü yakında (demo).");
+                    onFireRadar("arch", "Arşiv ekranına yönlendirildi. Kayıt durumu backend yanıtına göre gösterilir.");
                     onGoArchive();
                   }}
                 >
@@ -342,7 +342,7 @@ export function StockPage() {
   );
 
   const demoRowToast = useCallback(() => {
-    pushToast("Önizleme satırı; gerçek kayıt veya yönlendirme yok (demo).");
+    pushToast("Bu satır örnek veri modunda. Production'da yalnız gerçek stok kaydıyla işlem açılır.");
   }, [pushToast]);
 
   const handleOpenDetail = useCallback(
@@ -364,7 +364,7 @@ export function StockPage() {
         return;
       }
       setSelectedProductId(row.productId);
-      pushToast("Hızlı İşlem ekranına yönlendiriliyor (demo).");
+      pushToast("Hızlı İşlem ekranına yönlendirildi. Canlı execution sonucu policy/onay durumuna bağlıdır.");
       router.push("/hizli-islem");
     },
     [demoRowToast, pushToast, router]
@@ -376,7 +376,7 @@ export function StockPage() {
         demoRowToast();
         return;
       }
-      fireTopDemo("stockMove", "Stok hareketi onay + işlem + denetim zinciri olmadan uygulanmaz (demo).");
+      fireTopDemo("stockMove", "Stok hareketi yalnız onay + execution zinciri ile canlı uygulanır.");
     },
     [demoRowToast, fireTopDemo]
   );
@@ -387,7 +387,7 @@ export function StockPage() {
         demoRowToast();
         return;
       }
-      fireTopDemo("label", "Etiket / barkod çıktısı bağlandığında üretilecek (demo).");
+      fireTopDemo("label", "Etiket/barkod çıktısı bu ortamda canlı olarak üretilemez.");
     },
     [demoRowToast, fireTopDemo]
   );
@@ -414,7 +414,7 @@ export function StockPage() {
                 type="button"
                 className="hz-stock-toolbar-btn hz-stock-toolbar-btn--primary"
                 disabled={Boolean(topCtaDone.newProduct)}
-                onClick={() => fireTopDemo("newProduct", "Yeni ürün akışı yakında; şimdilik demo.")}
+                onClick={() => fireTopDemo("newProduct", "Yeni ürün açma akışı henüz canlı konfigüre değil (blocked_not_configured).")}
               >
                 <IconPlus size={16} aria-hidden />
                 Yeni ürün
@@ -423,7 +423,7 @@ export function StockPage() {
                 type="button"
                 className="hz-stock-toolbar-btn hz-stock-toolbar-btn--outline"
                 disabled={Boolean(topCtaDone.stockMoveTop)}
-                onClick={() => fireTopDemo("stockMoveTop", "Stok hareketi onay + işlem + denetim zinciri olmadan uygulanmaz (demo).")}
+                onClick={() => fireTopDemo("stockMoveTop", "Stok hareketi yalnız onay + execution zinciri ile uygulanır.")}
               >
                 <IconTruck size={16} aria-hidden />
                 Stok hareketi
@@ -432,7 +432,7 @@ export function StockPage() {
                 type="button"
                 className="hz-stock-toolbar-btn hz-stock-toolbar-btn--outline"
                 disabled={Boolean(topCtaDone.labelTop)}
-                onClick={() => fireTopDemo("labelTop", "Etiket / barkod çıktısı bağlandığında üretilecek (demo).")}
+                onClick={() => fireTopDemo("labelTop", "Etiket/barkod çıktısı canlı modda henüz not_configured.")}
               >
                 <IconBarcode size={16} aria-hidden />
                 Etiket / barkod
@@ -441,7 +441,7 @@ export function StockPage() {
                 type="button"
                 className="hz-stock-toolbar-btn hz-stock-toolbar-btn--outline"
                 disabled={Boolean(topCtaDone.import)}
-                onClick={() => fireTopDemo("import", "İçe aktarma sihirbazı yakında (demo).")}
+                onClick={() => fireTopDemo("import", "İçe aktarma bu modda canlıya açık değil; ayarlar/veri-yükleme üzerinden ilerleyin.")}
               >
                 <IconUpload size={16} aria-hidden />
                 İçe aktar

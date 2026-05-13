@@ -211,7 +211,11 @@ export function QuickOperationPage() {
   const handlePrimary = async () => {
     const ok = await submitOperation();
     if (ok) {
-      pushToast(activeTab === "order" ? "Taslak siparişe dönüştürüldü (demo)." : "Kaydedildi");
+      pushToast(
+        activeTab === "order"
+          ? "Sipariş taslağı oluşturuldu. Canlı execution için policy/onay zinciri gerekir."
+          : "İşlem taslağı kaydedildi. Bu adım canlı mutation başarısı değildir."
+      );
       setPrimaryDone(true);
     }
   };
@@ -510,15 +514,27 @@ export function QuickOperationPage() {
               <button type="button" className="hz-qop-btn hz-qop-btn--outline" onClick={() => router.push("/archive")}>
                 Geçmiş
               </button>
-              <button type="button" className="hz-qop-btn hz-qop-btn--outline" onClick={() => pushToast("Taslak kaydedildi")}>
+              <button
+                type="button"
+                className="hz-qop-btn hz-qop-btn--outline"
+                onClick={() => pushToast("Taslak kaydedildi. Canlı uygulama onay/execution durumuna bağlıdır.")}
+              >
                 <IconSave size={16} aria-hidden />
                 Taslak kaydet
               </button>
-              <button type="button" className="hz-qop-btn hz-qop-btn--ghost" onClick={() => pushToast("Onaya gönderildi")}>
+              <button
+                type="button"
+                className="hz-qop-btn hz-qop-btn--ghost"
+                onClick={() => pushToast("Onay talebi hazırlandı. Tamamlandı bilgisi yalnız onay sonrası verilir.")}
+              >
                 <IconSend size={16} aria-hidden />
                 Onaya gönder
               </button>
-              <button type="button" className="hz-qop-btn hz-qop-btn--outline" onClick={() => pushToast("Önizleme hazırlanıyor")}>
+              <button
+                type="button"
+                className="hz-qop-btn hz-qop-btn--outline"
+                onClick={() => pushToast("Önizleme hazırlanıyor. Gönderim/execute başarısı bu adımda üretilmez.")}
+              >
                 <IconPrinter size={16} aria-hidden />
                 Önizleme
               </button>

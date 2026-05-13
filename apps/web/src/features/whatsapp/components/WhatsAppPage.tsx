@@ -301,7 +301,7 @@ export function WhatsAppPage() {
                     <ChatBlock
                       key={b.id}
                       block={b}
-                      onQuoteAction={b.kind === "quote" ? () => fireDemo("quoteApprove", "Onaya gönderim onay zincirinden geçer (demo).") : undefined}
+                      onQuoteAction={b.kind === "quote" ? () => fireDemo("quoteApprove", "Onaya gönderim canlı iletim değildir; onay zinciri tamamlanınca uygulanır.") : undefined}
                     />
                   ))
                 : messages.map((m) => <MessageBubble key={m.id} message={m} />)}
@@ -310,18 +310,18 @@ export function WhatsAppPage() {
               <textarea className="hz-wa-composer-input" placeholder="Cevap yaz veya şablon seç..." rows={2} readOnly />
               <div className="hz-wa-composer-bar">
                 <div className="hz-wa-composer-actions">
-                  <button type="button" className="hz-wa-action-button hz-wa-action-button--ghost" onClick={() => fireDemo("tpl", "Şablon seçimi yakında (demo).")}>
+                  <button type="button" className="hz-wa-action-button hz-wa-action-button--ghost" onClick={() => fireDemo("tpl", "Şablon seçimi bu ortamda not_configured.")}>
                     Şablon
                   </button>
-                  <button type="button" className="hz-wa-action-button hz-wa-action-button--ghost" onClick={() => fireDemo("ai", "AI taslak üretir; otomatik gönderilmez (demo).")}>
+                  <button type="button" className="hz-wa-action-button hz-wa-action-button--ghost" onClick={() => fireDemo("ai", "AI yalnız taslak üretir; otomatik canlı gönderim kapalıdır.")}>
                     <IconSparkles size={14} aria-hidden />
                     AI Taslak
                   </button>
-                  <button type="button" className="hz-wa-action-button hz-wa-action-button--ghost" onClick={() => fireDemo("doc", "Belge ekleme yakında (demo).")}>
+                  <button type="button" className="hz-wa-action-button hz-wa-action-button--ghost" onClick={() => fireDemo("doc", "Belge ekleme bu ortamda canlıya açık değil (blocked_not_configured).")}>
                     <IconPaperclip size={14} aria-hidden />
                     Belge Ekle
                   </button>
-                  <button type="button" className="hz-wa-action-button hz-wa-action-button--ghost" onClick={() => fireDemo("mic", "Ses notu yakında (demo).")}>
+                  <button type="button" className="hz-wa-action-button hz-wa-action-button--ghost" onClick={() => fireDemo("mic", "Ses notu özelliği henüz canlıya açık değil.")}>
                     <IconMic size={14} aria-hidden />
                     Ses Notu
                   </button>
@@ -330,7 +330,7 @@ export function WhatsAppPage() {
                   type="button"
                   className="hz-wa-action-button hz-wa-action-button--send"
                   disabled={Boolean(demoDone.send)}
-                  onClick={() => fireDemo("send", "Gönderim onay ve kayıt zincirine bağlandığında iletilecek (demo).")}
+                  onClick={() => fireDemo("send", "Canlı gönderim için provider + policy + approval zinciri gerekir. Bu adım başarı iletimi üretmez.")}
                 >
                   <IconSend size={15} aria-hidden />
                   Gönder
@@ -460,13 +460,13 @@ export function WhatsAppPage() {
                 <p className="hz-wa-ai-note">Otomatik göndermez</p>
                 <p className="hz-wa-ai-draft">{aiDraft}</p>
                 <div className="hz-wa-side-btn-grid hz-wa-side-btn-grid--3">
-                  <button type="button" className="hz-wa-action-button hz-wa-action-button--secondary" onClick={() => fireDemo("take", "Taslak cevaba alındı (demo).")}>
+                  <button type="button" className="hz-wa-action-button hz-wa-action-button--secondary" onClick={() => fireDemo("take", "Taslak metin çalışma alanına alındı.")}>
                     Cevaba Al
                   </button>
-                  <button type="button" className="hz-wa-action-button hz-wa-action-button--secondary" onClick={() => fireDemo("edit", "Düzenleme yakında (demo).")}>
+                  <button type="button" className="hz-wa-action-button hz-wa-action-button--secondary" onClick={() => fireDemo("edit", "Düzenleme özelliği henüz canlıya açık değil.")}>
                     Düzenle
                   </button>
-                  <button type="button" className="hz-wa-action-button hz-wa-action-button--primary" onClick={() => fireDemo("approveSend", "Onay zinciri bağlandığında iletilecek (demo).")}>
+                  <button type="button" className="hz-wa-action-button hz-wa-action-button--primary" onClick={() => fireDemo("approveSend", "Onay talebi oluşturuldu; canlı iletim sonucu ayrı olarak izlenir.")}>
                     Onaya Gönder
                   </button>
                 </div>
@@ -475,19 +475,19 @@ export function WhatsAppPage() {
               <article className="hz-wa-side-card">
                 <h3 className="hz-wa-side-card-title">İşleme dönüştür</h3>
                 <div className="hz-wa-convert-grid">
-                  <button type="button" className="hz-wa-convert-btn" onClick={() => fireDemo("ord", "Sipariş oluşturma onay + işlem zincirinden geçer (demo).")}>
+                  <button type="button" className="hz-wa-convert-btn" onClick={() => fireDemo("ord", "Sipariş oluşturma yalnız onay + execution zinciriyle çalışır.")}>
                     <IconShoppingCart size={18} className="hz-wa-convert-svg" aria-hidden />
                     Sipariş Oluştur
                   </button>
-                  <button type="button" className="hz-wa-convert-btn" onClick={() => fireDemo("offer", "Teklif hazırlama onay gerektirir (demo).")}>
+                  <button type="button" className="hz-wa-convert-btn" onClick={() => fireDemo("offer", "Teklif hazırlama onay gerektirir; bu adım canlı başarı üretmez.")}>
                     <IconFileText size={18} className="hz-wa-convert-svg" aria-hidden />
                     Teklif Hazırla
                   </button>
-                  <button type="button" className="hz-wa-convert-btn" onClick={() => fireDemo("pay", "Tahsilat hatırlatması politika ile gönderilir (demo).")}>
+                  <button type="button" className="hz-wa-convert-btn" onClick={() => fireDemo("pay", "Tahsilat aksiyonu policy gate altında değerlendirilir.")}>
                     <IconWallet size={18} className="hz-wa-convert-svg" aria-hidden />
                     Tahsilat Hatırlat
                   </button>
-                  <button type="button" className="hz-wa-convert-btn" onClick={() => fireDemo("stmt", "Ekstre / belge çıktısı onay sonrası (demo).")}>
+                  <button type="button" className="hz-wa-convert-btn" onClick={() => fireDemo("stmt", "Ekstre/belge çıktısı yalnız onay sonrası canlıya alınır.")}>
                     <IconRotateCcw size={18} className="hz-wa-convert-svg" aria-hidden />
                     Ekstre / Belge
                   </button>
