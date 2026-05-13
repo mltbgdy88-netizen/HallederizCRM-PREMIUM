@@ -1,6 +1,14 @@
-import type { FastifyInstance } from "fastify";
-import type { LoginInput } from "@hallederiz/types";
-import { createDatabaseSession, createLocalPilotSession, createSession, getSessionByToken } from "../../shared/session-store";
+import type { FastifyInstance, FastifyReply } from "fastify";
+import type { LoginInput, LoginResponse } from "@hallederiz/types";
+import {
+  buildClearSessionCookieHeader,
+  buildSessionCookieHeader,
+  clearSessionToken,
+  createDatabaseSession,
+  createLocalPilotSession,
+  createSession,
+  getSessionByToken
+} from "../../shared/session-store";
 import { buildRequestContext } from "../../shared/request-context";
 import { getAuthMode } from "../../shared/auth-mode";
 import { authenticateWithDatabase, createPostgresAuthExecutor, type DatabaseAuthResult } from "../../shared/database-auth";
@@ -15,6 +23,11 @@ export async function registerAuthRoutes(server: FastifyInstance, deps: AuthRout
   const authenticateDatabaseLogin =
     deps.authenticateDatabaseLogin ??
     (async (input: LoginInput) => authenticateWithDatabase(input, createPostgresAuthExecutor()));
+
+  function sendLoginPayload(reply: FastifyReply, loginPayload: LoginResponse) {
+    reply.header("set-cookie", buildSessionCookieHeader(loginPayload.accessToken, loginPayload.session.expiresAt));
+    return reply.send(loginPayload);
+  }
 
   server.post<{ Body: Partial<LoginInput> }>("/auth/login", async (request, reply) => {
     const body = request.body;
@@ -32,7 +45,7 @@ export async function registerAuthRoutes(server: FastifyInstance, deps: AuthRout
         email: body.email,
         password: body.password
       });
-      return reply.send(loginPayload);
+      return sendLoginPayload(reply, loginPayload);
     }
 
     if (authMode.persistenceMode === "postgres") {
@@ -51,7 +64,7 @@ export async function registerAuthRoutes(server: FastifyInstance, deps: AuthRout
             email: body.email,
             password: body.password
           });
-          return reply.send(loginPayload);
+          return sendLoginPayload(reply, loginPayload);
         }
       }
 
@@ -71,7 +84,7 @@ export async function registerAuthRoutes(server: FastifyInstance, deps: AuthRout
             },
             dbAuthResult
           );
-          return reply.send(loginPayload);
+          return sendLoginPayload(reply, loginPayload);
         }
 
         if (dbAuthResult.status === "inactive_user") {
@@ -106,7 +119,7 @@ export async function registerAuthRoutes(server: FastifyInstance, deps: AuthRout
         email: body.email,
         password: body.password
       });
-      return reply.send(loginPayload);
+      return sendLoginPayload(reply, loginPayload);
     }
 
     if (authMode.localPilotAuthEnabled && !authMode.localPilotAuthConfigured) {
@@ -136,5 +149,12 @@ export async function registerAuthRoutes(server: FastifyInstance, deps: AuthRout
       return reply.status(401).send({ message: "Oturum bulunamadi." });
     }
     return { item: session };
+  });
+
+  server.post("/auth/logout", async (request, reply) => {
+    const context = buildRequestContext(request);
+    clearSessionToken(context.sessionToken);
+    reply.header("set-cookie", buildClearSessionCookieHeader());
+    return { ok: true };
   });
 }

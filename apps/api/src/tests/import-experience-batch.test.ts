@@ -1,6 +1,6 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import { ImportsService } from "../modules/imports/service";
 
 const context = {
@@ -14,13 +14,13 @@ function toBase64(content: string): string {
   return Buffer.from(content, "utf-8").toString("base64");
 }
 
-function toXlsxBase64(sheets: Record<string, string[][]>): string {
-  const workbook = XLSX.utils.book_new();
+async function toXlsxBase64(sheets: Record<string, string[][]>): Promise<string> {
+  const workbook = new ExcelJS.Workbook();
   Object.entries(sheets).forEach(([name, rows]) => {
-    const ws = XLSX.utils.aoa_to_sheet(rows);
-    XLSX.utils.book_append_sheet(workbook, ws, name);
+    const worksheet = workbook.addWorksheet(name);
+    rows.forEach((row) => worksheet.addRow(row));
   });
-  const buffer = XLSX.write(workbook, { type: "buffer", bookType: "xlsx" });
+  const buffer = await workbook.xlsx.writeBuffer();
   return Buffer.from(buffer).toString("base64");
 }
 
@@ -28,7 +28,7 @@ test("xlsx best sheet suggestion picks closest matching headers", async () => {
   const service = new ImportsService(context);
   const file = {
     fileName: "customers.xlsx",
-    contentBase64: toXlsxBase64({
+    contentBase64: await toXlsxBase64({
       Notlar: [["A", "B"], ["1", "2"]],
       Cariler: [["Cari Kodu", "Cari Adi", "Telefon"], ["CAR-1", "Aydin", "+905001112233"]]
     })
@@ -38,6 +38,18 @@ test("xlsx best sheet suggestion picks closest matching headers", async () => {
   assert.equal(preview.fileType, "xlsx");
   assert.equal(preview.suggestedSheetName, "Cariler");
   assert.ok((preview.sheetScoreSummary?.length ?? 0) >= 2);
+});
+
+test("import preview rejects unsupported file extension", async () => {
+  const service = new ImportsService(context);
+  await assert.rejects(
+    () =>
+      service.preview("customers", {
+        fileName: "customers.xlsm",
+        contentBase64: toBase64("cari_kodu,cari_adi\nCAR-1,Aydin")
+      }),
+    /Sadece CSV veya XLSX/
+  );
 });
 
 test("header alias mapping resolves common product aliases", async () => {

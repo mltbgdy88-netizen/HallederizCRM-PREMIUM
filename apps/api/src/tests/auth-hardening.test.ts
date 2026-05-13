@@ -55,6 +55,74 @@ test("demo auth enabled in development: /auth/login creates session", async () =
 
     assert.equal(response.statusCode, 200);
     assert.ok(response.json().accessToken);
+    assert.match(String(response.headers["set-cookie"] ?? ""), /hz_session=/);
+    assert.match(String(response.headers["set-cookie"] ?? ""), /HttpOnly/);
+    await server.close();
+  });
+});
+
+test("session can be restored from HttpOnly session cookie", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildAuthServer();
+    const loginResponse = await server.inject({
+      method: "POST",
+      url: "/auth/login",
+      payload: {
+        tenantSlug: "hallederiz",
+        email: "admin@hallederiz.com",
+        password: "demo"
+      }
+    });
+
+    const cookie = String(loginResponse.headers["set-cookie"] ?? "").split(";")[0];
+    const sessionResponse = await server.inject({
+      method: "GET",
+      url: "/auth/session",
+      headers: {
+        cookie
+      }
+    });
+
+    assert.equal(sessionResponse.statusCode, 200);
+    assert.equal(sessionResponse.json().item.tenant.id, "tenant_1");
+    await server.close();
+  });
+});
+
+test("logout clears session cookie and invalidates token", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildAuthServer();
+    const loginResponse = await server.inject({
+      method: "POST",
+      url: "/auth/login",
+      payload: {
+        tenantSlug: "hallederiz",
+        email: "admin@hallederiz.com",
+        password: "demo"
+      }
+    });
+
+    const accessToken = (loginResponse.json() as { accessToken: string }).accessToken;
+    const logoutResponse = await server.inject({
+      method: "POST",
+      url: "/auth/logout",
+      headers: {
+        "x-session-token": accessToken
+      }
+    });
+
+    assert.equal(logoutResponse.statusCode, 200);
+    assert.match(String(logoutResponse.headers["set-cookie"] ?? ""), /Max-Age=0/);
+
+    const sessionResponse = await server.inject({
+      method: "GET",
+      url: "/auth/session",
+      headers: {
+        "x-session-token": accessToken
+      }
+    });
+
+    assert.equal(sessionResponse.statusCode, 401);
     await server.close();
   });
 });

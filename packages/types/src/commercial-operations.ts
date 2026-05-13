@@ -988,8 +988,8 @@ export type LocalOutputType =
   | "statement_pdf"
   | "return_note_pdf";
 export type LocalOutputDestination = "local_folder" | "printer" | "both";
-export type PrintJobStatus = "queued" | "printing" | "completed" | "failed" | "cancelled";
-export type FileSaveJobStatus = "queued" | "saving" | "completed" | "failed" | "cancelled";
+export type PrintJobStatus = "queued" | "printing" | "completed" | "failed" | "cancelled" | "not_configured";
+export type FileSaveJobStatus = "queued" | "saving" | "completed" | "failed" | "cancelled" | "not_configured";
 export type LocalAgentStatus = "online" | "offline" | "disabled" | "safe_mode" | "error";
 
 export interface LocalOutputRule {
@@ -1018,6 +1018,7 @@ export interface PrintJob {
   startedAt?: string;
   completedAt?: string;
   errorMessage?: string;
+  outputMode?: "binary" | "placeholder_disabled";
 }
 
 export interface FileSaveJob {
@@ -1032,4 +1033,6 @@ export interface FileSaveJob {
   startedAt?: string;
   completedAt?: string;
   errorMessage?: string;
+  contentBase64?: string;
+  outputMode?: "binary" | "placeholder_disabled";
 }

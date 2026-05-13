@@ -16,7 +16,7 @@
   WarehouseSetupItem
 } from "@hallederiz/types";
 import { normalizeBarcode } from "@hallederiz/domain";
-import XLSX from "xlsx";
+import ExcelJS from "exceljs";
 import type { RequestContext } from "../../shared/request-context";
 import {
   addImportHistoryRecord,
@@ -46,6 +46,11 @@ type PreviewRow = {
   values: Record<string, string>;
   normalized: Record<string, string>;
 };
+
+const MAX_IMPORT_FILE_BYTES = 5 * 1024 * 1024;
+const MAX_IMPORT_SHEETS = 20;
+const MAX_IMPORT_ROWS = 5_000;
+const ALLOWED_IMPORT_EXTENSIONS = [".csv", ".xlsx"] as const;
 
 const REQUIRED_COLUMNS: Record<ImportType, string[]> = {
   customers: ["cari_kodu", "cari_adi"],
@@ -266,12 +271,34 @@ function parseCsv(content: string): ParsedTable {
   return { headers, rows, source: { fileType: "csv" } };
 }
 
-function parseXlsx(buffer: Buffer, importType: ImportType, selectedSheetName?: string): ParsedTable {
-  const workbook = XLSX.read(buffer, { type: "buffer", cellDates: true });
-  const sheetNames = workbook.SheetNames ?? [];
+function worksheetRows(worksheet: ExcelJS.Worksheet): string[][] {
+  const rows: string[][] = [];
+  worksheet.eachRow({ includeEmpty: false }, (row) => {
+    const values = Array.isArray(row.values) ? row.values.slice(1) : [];
+    const cells = values.map((cell) => {
+      if (cell instanceof Date) return cell.toISOString();
+      if (cell && typeof cell === "object" && "text" in cell) return String((cell as { text?: unknown }).text ?? "").trim();
+      if (cell && typeof cell === "object" && "result" in cell) return String((cell as { result?: unknown }).result ?? "").trim();
+      return String(cell ?? "").trim();
+    });
+    if (cells.some((cell) => cell.length > 0)) {
+      rows.push(cells);
+    }
+  });
+  return rows;
+}
+
+async function parseXlsx(buffer: Buffer, importType: ImportType, selectedSheetName?: string): Promise<ParsedTable> {
+  const workbook = new ExcelJS.Workbook();
+  const arrayBuffer = buffer.buffer.slice(buffer.byteOffset, buffer.byteOffset + buffer.byteLength) as ArrayBuffer;
+  await workbook.xlsx.load(arrayBuffer);
+  const sheetNames = workbook.worksheets.map((worksheet) => worksheet.name);
+  if (sheetNames.length > MAX_IMPORT_SHEETS) {
+    throw new Error(`Excel dosyasi en fazla ${MAX_IMPORT_SHEETS} sheet icerebilir.`);
+  }
   const sheetScores = buildSheetSuggestionSummary(
     sheetNames.map((name) => {
-      const sheet = workbook.Sheets[name];
+      const sheet = workbook.getWorksheet(name);
       if (!sheet) {
         return {
           sheetName: name,
@@ -280,12 +307,7 @@ function parseXlsx(buffer: Buffer, importType: ImportType, selectedSheetName?: s
           missingRequiredColumns: [...REQUIRED_COLUMNS[importType]]
         };
       }
-      const headerRow = (XLSX.utils.sheet_to_json(sheet, {
-        header: 1,
-        blankrows: false,
-        raw: false,
-        defval: ""
-      }) as string[][])[0] ?? [];
+      const headerRow = worksheetRows(sheet)[0] ?? [];
       return scoreSheetHeaders(importType, headerRow.map((cell) => String(cell ?? "")), name);
     })
   );
@@ -295,18 +317,14 @@ function parseXlsx(buffer: Buffer, importType: ImportType, selectedSheetName?: s
     return { headers: [], rows: [], source: { fileType: "xlsx", sheetNames, suggestedSheetName, sheetScoreSummary: sheetScores } };
   }
 
-  const worksheet = workbook.Sheets[sheetName];
+  const worksheet = workbook.getWorksheet(sheetName);
   if (!worksheet) {
     return { headers: [], rows: [], source: { fileType: "xlsx", sheetName, sheetNames, suggestedSheetName, sheetScoreSummary: sheetScores } };
   }
-  const rawRows = (XLSX.utils.sheet_to_json(worksheet, {
-    header: 1,
-    blankrows: false,
-    raw: false,
-    defval: ""
-  }) as Array<Array<string | number | boolean | Date | null>>).filter((row) =>
-    row.some((cell) => String(cell ?? "").trim().length > 0)
-  );
+  const rawRows = worksheetRows(worksheet);
+  if (rawRows.length > MAX_IMPORT_ROWS + 1) {
+    throw new Error(`Import dosyasi en fazla ${MAX_IMPORT_ROWS} veri satiri icerebilir.`);
+  }
   if (rawRows.length === 0) {
     return { headers: [], rows: [], source: { fileType: "xlsx", sheetName, sheetNames, suggestedSheetName, sheetScoreSummary: sheetScores } };
   }
@@ -328,13 +346,24 @@ function decodeFileContent(file: ImportFilePayload): Buffer {
   return Buffer.from(file.contentBase64, "base64");
 }
 
-function parseFile(type: ImportType, file: ImportFilePayload): ParsedTable {
+async function parseFile(type: ImportType, file: ImportFilePayload): Promise<ParsedTable> {
   const fileName = file.fileName.toLowerCase();
   const buffer = decodeFileContent(file);
+  const validExtension = ALLOWED_IMPORT_EXTENSIONS.some((extension) => fileName.endsWith(extension));
+  if (!validExtension) {
+    throw new Error("Sadece CSV veya XLSX import dosyalari desteklenir.");
+  }
+  if (buffer.byteLength > MAX_IMPORT_FILE_BYTES) {
+    throw new Error(`Import dosyasi en fazla ${MAX_IMPORT_FILE_BYTES / 1024 / 1024} MB olabilir.`);
+  }
   if (fileName.endsWith(".xlsx")) {
     return parseXlsx(buffer, type, file.sheetName);
   }
-  return parseCsv(buffer.toString("utf-8"));
+  const parsed = parseCsv(buffer.toString("utf-8"));
+  if (parsed.rows.length > MAX_IMPORT_ROWS) {
+    throw new Error(`Import dosyasi en fazla ${MAX_IMPORT_ROWS} veri satiri icerebilir.`);
+  }
+  return parsed;
 }
 
 function toPreviewRows(headers: string[], rows: string[][]): PreviewRow[] {
@@ -441,7 +470,7 @@ export class ImportsService {
   }
 
   async preview(type: ImportType, file: ImportFilePayload): Promise<ImportPreviewResult> {
-    const table = parseFile(type, file);
+    const table = await parseFile(type, file);
     const mapping = resolveColumnMapping(type, table.headers);
     const rows = toPreviewRows(mapping.mappedHeaders, table.rows);
     const issues: ImportPreviewIssue[] = [];
@@ -624,7 +653,7 @@ export class ImportsService {
       };
     }
 
-    const table = parseFile(type, file);
+    const table = await parseFile(type, file);
     const mapping = resolveColumnMapping(type, table.headers);
     const rows = toPreviewRows(mapping.mappedHeaders, table.rows);
     let successCount = 0;

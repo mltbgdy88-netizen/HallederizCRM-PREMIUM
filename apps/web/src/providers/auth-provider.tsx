@@ -18,27 +18,11 @@ interface AuthContextValue {
   logout: () => void;
 }
 
-const STORAGE_KEY = "hz_platform_session";
-const ACCESS_TOKEN_STORAGE_KEY = "hz_platform_access_token";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 const ENABLE_DEMO_AUTH =
   process.env.NODE_ENV !== "production" && process.env.NEXT_PUBLIC_ENABLE_DEMO_AUTH === "true";
 
 const AuthContext = createContext<AuthContextValue | undefined>(undefined);
-
-function readStoredSession(): SessionModel | null {
-  try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      return null;
-    }
-
-    const session = JSON.parse(raw) as SessionModel;
-    return isSessionActive(session) ? session : null;
-  } catch {
-    return null;
-  }
-}
 
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [state, setState] = useState<AuthState>("loading");
@@ -47,28 +31,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const hydrateSession = async () => {
-      const storedSession = readStoredSession();
-      const storedToken = window.localStorage.getItem(ACCESS_TOKEN_STORAGE_KEY);
-      if (!storedSession || !storedToken) {
-        if (storedToken) {
-          window.localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
-        }
-        if (storedSession) {
-          window.localStorage.removeItem(STORAGE_KEY);
-        }
-        setSession(null);
-        setAccessToken(null);
-        setState("anonymous");
-        return;
-      }
-
       try {
         const response = await fetch(`${API_BASE_URL}/auth/session`, {
-          headers: {
-            "x-session-token": storedToken,
-            authorization: `Bearer ${storedToken}`,
-            "x-tenant-id": storedSession.tenant.id
-          },
+          credentials: "include",
           cache: "no-store"
         });
 
@@ -77,13 +42,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
 
         const payload = (await response.json()) as { item: SessionModel };
-        window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload.item));
-        setSession(payload.item);
-        setAccessToken(storedToken);
-        setState("authenticated");
+        if (isSessionActive(payload.item)) {
+          setSession(payload.item);
+          setAccessToken(null);
+          setState("authenticated");
+          return;
+        }
+        throw new Error("session_expired");
       } catch {
-        window.localStorage.removeItem(STORAGE_KEY);
-        window.localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
         setSession(null);
         setAccessToken(null);
         setState("anonymous");
@@ -107,7 +73,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       loginResponse = await fetch(`${API_BASE_URL}/auth/login`, {
         method: "POST",
         headers: { "content-type": "application/json" },
-        body: JSON.stringify(input)
+        body: JSON.stringify(input),
+        credentials: "include"
       });
     } catch {
       loginResponse = null;
@@ -135,18 +102,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ? ((await loginResponse.json()) as { session: SessionModel; accessToken: string })
         : createMockLoginResponse(input, defaultTenant, defaultUser, [adminRole]);
 
-    window.localStorage.setItem(STORAGE_KEY, JSON.stringify(payload.session));
-    window.localStorage.setItem(ACCESS_TOKEN_STORAGE_KEY, payload.accessToken);
     setSession(payload.session);
-    setAccessToken(payload.accessToken);
+    setAccessToken(ENABLE_DEMO_AUTH && !loginResponse?.ok ? payload.accessToken : null);
     setState("authenticated");
 
     return { success: true };
   };
 
   const logout = (): void => {
-    window.localStorage.removeItem(STORAGE_KEY);
-    window.localStorage.removeItem(ACCESS_TOKEN_STORAGE_KEY);
+    void fetch(`${API_BASE_URL}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+      cache: "no-store"
+    }).catch(() => undefined);
     setSession(null);
     setAccessToken(null);
     setState("anonymous");

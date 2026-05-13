@@ -9,7 +9,7 @@
     "build": "next build",
     "start": "next start",
     "typecheck": "tsc -p tsconfig.json --noEmit",
-    "lint": "node -e \"console.log('TODO: configure linting for @hallederiz/web')\"",
+    "lint": "tsc -p tsconfig.json --noEmit",
     "clean": "node -e \"console.log('clean: no-op for @hallederiz/web')\""
   },
   "dependencies": {
@@ -17,7 +17,7 @@
     "@hallederiz/sdk": "workspace:*",
     "@hallederiz/types": "workspace:*",
     "@hallederiz/ui": "workspace:*",
-    "next": "^14.2.15",
+    "next": "14.2.35",
     "react": "^18.3.1",
     "react-dom": "^18.3.1"
   },

@@ -15,7 +15,9 @@
       "outputs": [
         "dist/**",
         ".next/**",
-        ".next-cache/**"
+        ".next-cache/**",
+        ".runtime-next/**",
+        ".runtime-next-dev/**"
       ]
     },
     "typecheck": {

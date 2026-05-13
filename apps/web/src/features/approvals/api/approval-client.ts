@@ -154,27 +154,17 @@ async function requestJson<T>(
   endpoint: ApprovalApiEndpointKind,
   init?: RequestInit
 ): Promise<RequestResult<T>> {
-  if (!config.accessToken) {
-    return {
-      ok: false,
-      error: {
-        kind: "unauthorized",
-        message: "Oturum bulunamadi. Lutfen tekrar giris yapin."
-      }
-    };
-  }
-
   try {
     const response = await fetch(joinApprovalApiUrl(config.apiBaseUrl, path), {
       ...init,
       headers: {
         "content-type": "application/json",
-        "x-session-token": config.accessToken,
-        authorization: `Bearer ${config.accessToken}`,
+        ...(config.accessToken ? { "x-session-token": config.accessToken, authorization: `Bearer ${config.accessToken}` } : {}),
         "x-tenant-id": config.tenantId,
         ...(init?.headers ?? {})
       },
-      cache: "no-store"
+      cache: "no-store",
+      credentials: "include"
     });
 
     const payload = (await response.json().catch(() => undefined)) as unknown;
