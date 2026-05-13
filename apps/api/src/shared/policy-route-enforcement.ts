@@ -18,8 +18,8 @@ type PolicyEnforcementOptions = {
   tenantId?: string;
   payload?: Record<string, unknown>;
   idempotencyKey?: string;
-  channel?: "api" | "worker" | "whatsapp" | "email";
-  source?: "api" | "web" | "worker" | "whatsapp" | "ai" | "system";
+  channel?: "api" | "worker" | "whatsapp" | "email" | "instagram" | "facebook" | "web_chat" | "sms" | "internal_note";
+  source?: "api" | "web" | "worker" | "whatsapp" | "ai" | "system" | "local_agent";
   channelPolicy?: {
     signatureVerified?: boolean;
     approvalTokenVerified?: boolean;
@@ -153,3 +153,4 @@ export async function enforcePolicyForRoute(
       : undefined;
   return await enrichHandledResponseWithUsage(context, policyEngine, result);
 }
+

@@ -24,6 +24,7 @@ export * from "./usage";
 export * from "./warehouse";
 export * from "./workflows";
 export * from "./whatsapp";
+export * from "./omnichannel";
 export * from "./policy";
 export * as policyEngine from "./policy-engine";
 export { evaluatePolicy as evaluatePolicyEngine, getPolicyAction, listPolicyActions, getAiVisiblePolicyActions, buildPolicyDecisionUsageEvent } from "./policy-engine";

@@ -6,6 +6,8 @@ export type PolicyChannel =
   | "instagram"
   | "facebook"
   | "webchat"
+  | "web_chat"
+  | "internal_note"
   | "email"
   | "sms"
   | "api"

@@ -177,3 +177,6 @@ Bu handler'lar `dry_run` modundadir ve gercek provider veya gercek mutation yazm
 - `/worker/safety` endpoint'i detayli runtime mode, provider write ve unsafe blocker bilgisini auth/permission guard arkasinda sunar.
 - Safety route repository eksiginde fail-open success donmez; explicit `worker_repository_unavailable` doner.
 - Production worker infinite loop bu fazda baslatilmaz.
+
+- Omnichannel foundation outbox entegrasyonu sonraki fazda live provider bazli handler'larla geniþletilecektir; bu fazda mock/degraded provider sözleþmesi kullanýlýr.
+

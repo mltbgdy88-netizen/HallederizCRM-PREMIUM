@@ -214,3 +214,7 @@
 
 - `apps/web/src/features/approvals/utils/operator-smoke.ts` ile smoke adimlari ve son islem metadata ozeti tek sozlesmede toplanir; `ApprovalOperatorSmokePanel` yalnizca development ortaminda checklist gosterir, production'da kisitli bilgilendirme.
 - Onay API client HTTP kodlari (400/401/403/404/409/503/ag) kullaniciya acik mesajlarla eslenir; backend hatasi basari gibi gosterilmez.
+
+## Omnichannel Foundation Notu
+Omnichannel reply aksiyonlari policy enforcement sonrasinda approval-first karar zincirinde kalir; direct live send acilmaz.
+

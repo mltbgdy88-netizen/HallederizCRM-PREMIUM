@@ -347,3 +347,6 @@
   - real settings mutation activation PR
   - production database transaction hardening
   - approval inbox UI
+
+- Omnichannel inbox foundation eklendi: kanal-agnostik model, guarded API route seti ve provider adapter contract (mock/degraded).
+
