@@ -69,7 +69,7 @@ export function markJobProcessing(
   const leaseExpiresAt = leaseMs > 0 ? new Date(new Date(at).getTime() + leaseMs).toISOString() : undefined;
   return {
     ...job,
-    status: "processing",
+    status: "claimed",
     attempts: job.attempts + 1,
     updatedAt: at,
     lockedAt: at,

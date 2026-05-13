@@ -41,7 +41,7 @@ const sampleClaimedRow = {
   job_type: "approval.execution.dispatch",
   action_key: "platform.users.create",
   payload: { tenantId: "tenant_atomic_1" },
-  status: "processing" as const,
+  status: "claimed" as const,
   attempts: 1,
   max_attempts: 3,
   idempotency_key: "idem_atomic_1",
@@ -51,7 +51,8 @@ const sampleClaimedRow = {
   last_error: null,
   dead_letter_reason: null,
   locked_at: "2026-05-12T10:00:00.000Z",
-  locked_by: "worker_atomic_A"
+  locked_by: "worker_atomic_A",
+  lease_expires_at: "2026-05-12T10:01:00.000Z"
 };
 
 test("DB outbox atomic claim helpers are exported", () => {
@@ -73,7 +74,7 @@ test("claim SQL contract targets only available pending or failed jobs", () => {
 
 test("claim SQL contract includes unlocked or expired lease predicate", () => {
   const sql = buildClaimNextOutboxJobSql();
-  assert.ok(sql.includes("locked_at IS NULL OR locked_at <= $3::timestamptz"));
+  assert.ok(sql.includes("lease_expires_at IS NULL OR lease_expires_at <= $1::timestamptz"));
 });
 
 test("active lease blocks claim eligibility contract", () => {
@@ -83,9 +84,8 @@ test("active lease blocks claim eligibility contract", () => {
     isOutboxJobClaimEligible({
       status: "pending",
       availableAt: "2026-05-12T11:00:00.000Z",
-      lockedAt: "2026-05-12T12:00:00.000Z",
-      nowIso: params.nowIso,
-      leaseExpiredBeforeIso: params.leaseExpiredBeforeIso
+      leaseExpiresAt: "2026-05-12T12:00:30.000Z",
+      nowIso: params.nowIso
     }),
     false
   );
@@ -98,9 +98,8 @@ test("expired lease becomes claimable again", () => {
     isOutboxJobClaimEligible({
       status: "failed",
       availableAt: "2026-05-12T11:00:00.000Z",
-      lockedAt: "2026-05-12T10:00:00.000Z",
-      nowIso: params.nowIso,
-      leaseExpiredBeforeIso: params.leaseExpiredBeforeIso
+      leaseExpiresAt: "2026-05-12T11:59:00.000Z",
+      nowIso: params.nowIso
     }),
     true
   );
@@ -111,7 +110,7 @@ test("claimed row mapping preserves worker lease metadata", () => {
   const mapped = mapClaimedOutboxJobRow(sampleClaimedRow, claimLeaseMs);
   assert.equal(mapped.lockedBy, "worker_atomic_A");
   assert.equal(mapped.lockedAt, "2026-05-12T10:00:00.000Z");
-  assert.equal(mapped.leaseExpiresAt, calculateLeaseExpiresAt("2026-05-12T10:00:00.000Z", claimLeaseMs));
+  assert.equal(mapped.leaseExpiresAt, "2026-05-12T10:01:00.000Z");
 });
 
 test("claimLeaseMs drives leaseExpiresAt calculation", () => {

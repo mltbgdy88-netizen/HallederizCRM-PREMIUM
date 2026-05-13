@@ -256,7 +256,8 @@ test("outbox mapping helpers preserve tenant and idempotency", () => {
     last_error: null,
     dead_letter_reason: null,
     locked_at: null,
-    locked_by: null
+    locked_by: null,
+    lease_expires_at: null
   } as const;
   const mapped = mapOutboxRowToDomainRecord(row);
   assert.equal(mapped.tenantId, "tenant_1");
@@ -283,7 +284,8 @@ test("outbox enqueue SQL contract keeps duplicate idempotency guard", async () =
           last_error: null,
           dead_letter_reason: null,
           locked_at: null,
-          locked_by: null
+          locked_by: null,
+          lease_expires_at: null
         }
       ];
     }

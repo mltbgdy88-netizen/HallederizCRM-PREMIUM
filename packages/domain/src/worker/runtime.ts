@@ -60,6 +60,15 @@ export function processClaimedJob(
     };
   }
 
+  if (job.status === "cancelled") {
+    return {
+      status: "failed",
+      claimedJob: job,
+      job,
+      reasons: ["cancelled_job_not_executed"]
+    };
+  }
+
   if (seenIdempotencyKeys?.has(job.idempotencyKey)) {
     const completed = repository.complete(job.jobId, now);
     return {

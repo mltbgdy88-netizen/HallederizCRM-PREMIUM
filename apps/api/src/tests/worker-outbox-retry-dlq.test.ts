@@ -18,7 +18,12 @@ function baseJobInput(overrides: Partial<Parameters<typeof createOutboxJob>[1]> 
       tenantId: "tenant_worker_1",
       actionKey: "platform.users.create",
       approvalRequestId: "apr_worker_1",
-      executionId: "exec_worker_1"
+      executionId: "exec_worker_1",
+      idempotencyKey: "idem_worker_1",
+      auditRequired: true,
+      timelineRequired: true,
+      auditEvent: { eventKey: "approval.execution.audit" },
+      timelineEvent: { eventKey: "approval.execution.timeline" }
     },
     idempotencyKey: "idem_worker_1",
     maxAttempts: 3,

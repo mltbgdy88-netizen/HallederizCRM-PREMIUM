@@ -196,6 +196,24 @@ export async function executeApprovedPendingApproval(
     };
   }
 
+  if (!approvalRequest.actionKey || !approvalRequest.idempotencyKey || !approvalRequest.tenantId || !approvalRequest.actorId) {
+    return {
+      ok: false,
+      duplicate: false,
+      status: "invalid_state",
+      approvalRequestId: approvalRequest.approvalRequestId,
+      approvalStatus: approvalRequest.status,
+      approvalPersistenceMode: input.repositoryResolution.mode,
+      bridgeMode: "none",
+      outboxMode: "none",
+      outboxQueued: false,
+      auditTimelineWritebackQueued: false,
+      workerProcessingRecommended: false,
+      reasons: ["approval_request_missing_required_execution_metadata"],
+      httpStatus: 409
+    };
+  }
+
   if (!input.bridgeTrigger) {
     return {
       ok: false,

@@ -180,3 +180,9 @@ Bu handler'lar `dry_run` modundadir ve gercek provider veya gercek mutation yazm
 
 - Omnichannel foundation outbox entegrasyonu sonraki fazda live provider bazli handler'larla geniþletilecektir; bu fazda mock/degraded provider sözleþmesi kullanýlýr.
 
+
+## Durable Outbox Hardening (Phase)
+- Added lease-expiry aware claim behavior and explicit claimed/cancelled lifecycle coverage.
+- Added /platform/worker/* observability route aliases while preserving existing /worker/* routes.
+- Production persistence remains fail-closed when repository mode is unsupported.
+

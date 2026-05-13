@@ -218,3 +218,8 @@
 ## Omnichannel Foundation Notu
 Omnichannel reply aksiyonlari policy enforcement sonrasinda approval-first karar zincirinde kalir; direct live send acilmaz.
 
+
+## Durable Outbox Hardening Note
+- Approval runtime now requires full execution metadata for durable outbox handoff (tenantId/actionKey/approvalRequestId/idempotencyKey).
+- Outbox payload now carries execution and writeback metadata for tenant-safe worker dispatch validation.
+
