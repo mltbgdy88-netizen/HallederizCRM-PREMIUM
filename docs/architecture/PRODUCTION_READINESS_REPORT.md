@@ -82,3 +82,8 @@ Current state: foundation ready, production guarded.
 - Onay Inbox ustunde local/demo `ApprovalOperatorSmokePanel` smoke checklist; production buildde sahte basari yok.
 - `operator-smoke` yardimcisi, sandbox seed mesajlari ve client HTTP hata mesajlari netlestirildi.
 - Web paketinde `type: module` ile Node 22 uyumlu onay birim testleri; `pnpm test:web-approvals`.
+
+## 2026-05-13 — Production route shell (web)
+
+- `product-route-manifest` ve catch-all tabanlı rotalar ile ürün ağacı navigasyonu eklendi; eksik API için shell dili kullanılır, sahte üretim verisi gösterilmez.
+- Ayrıntılı rota haritası: `docs/product/PRODUCTION_ROUTE_MANIFEST.md`.
