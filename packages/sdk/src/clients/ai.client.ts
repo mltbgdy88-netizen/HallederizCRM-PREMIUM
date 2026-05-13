@@ -1,4 +1,5 @@
 import type { AiInsight, AiProposal } from "@hallederiz/types";
+import type { SalesAiTrainingScope } from "@hallederiz/ai-contracts";
 import type { ItemResponse, ListResponse } from "../base";
 import { ApiClient } from "../base";
 
@@ -56,5 +57,68 @@ export class AiClient {
 
   speakVoice(input: { text: string; voice?: string; speed?: number }) {
     return this.api.post<ItemResponse<{ audioRef: string; provider: string; mimeType: string }>>("/ai/voice/speak", input);
+  }
+
+  getSalesAssistantHealth() {
+    return this.api.get<ItemResponse<{
+      ok: boolean;
+      status: "healthy" | "degraded" | "not_configured";
+      provider: "ollama";
+      model: string;
+      fallbackModel: string;
+      modelReady: boolean;
+      fallbackReady: boolean;
+      reason: string;
+      availableModels: string[];
+    }>>("/platform/ai/sales-assistant/health");
+  }
+
+  classifySalesIntent(input: { message: string }) {
+    return this.api.post<ItemResponse<{ intent: string; confidence: number }>>("/platform/ai/sales-assistant/classify-intent", input);
+  }
+
+  chatSalesAssistant(input: { message: string; customerId?: string; channel?: "web" | "whatsapp" | "omnichannel" | "api" }) {
+    return this.api.post<ItemResponse<{
+      ok: boolean;
+      status: "live" | "degraded" | "not_configured" | "blocked";
+      intent: string;
+      confidence: number;
+      reply: string;
+      usedSources: Array<{ type: string; id: string; title: string; confidence: number }>;
+      suggestedActions: Array<{ actionKey: string; label: string; requiresApproval: boolean; suggestedOnly: true }>;
+      provider: { provider: "ollama"; model: string; fallbackModel: string; effectiveModel?: string; fallbackUsed: boolean };
+      mutationExecuted: false;
+      externalProviderCallExecuted: false;
+    }>>("/platform/ai/sales-assistant/chat", input);
+  }
+
+  transcribeSalesVoice(input: { audioBase64: string; mimeType?: string; language?: string }) {
+    return this.api.post<ItemResponse<{ ok: boolean; status: "live" | "degraded"; transcript: string; provider: string; reason: string }>>(
+      "/platform/ai/sales-assistant/voice/transcribe",
+      input
+    );
+  }
+
+  speakSalesVoice(input: { text: string; voice?: string; speed?: number }) {
+    return this.api.post<ItemResponse<{ ok: boolean; status: "live" | "degraded"; provider: string; reason?: string; audioRef?: string; mimeType?: string }>>(
+      "/platform/ai/sales-assistant/voice/speak",
+      input
+    );
+  }
+
+  listSalesKnowledge() {
+    return this.api.get<{ items: SalesAiTrainingScope[]; total: number; knowledgePersistenceMode: string }>("/platform/ai/sales-knowledge");
+  }
+
+  createSalesKnowledge(payload: Partial<SalesAiTrainingScope>) {
+    return this.api.post<ItemResponse<SalesAiTrainingScope>>("/platform/ai/sales-knowledge", payload);
+  }
+
+  patchSalesKnowledge(id: string, payload: Partial<SalesAiTrainingScope>) {
+    return this.api.patch<ItemResponse<SalesAiTrainingScope>>(`/platform/ai/sales-knowledge/${id}`, payload);
+  }
+
+  deleteSalesKnowledge(id: string) {
+    return this.api.delete<{ ok: boolean; id: string }>(`/platform/ai/sales-knowledge/${id}`);
   }
 }

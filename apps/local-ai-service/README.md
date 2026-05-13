@@ -44,7 +44,8 @@ Varsayilan LLM saglayicisi harici API degil, lokal Ollama'dir. Gerekli degiskenl
 
 ```env
 OLLAMA_BASE_URL=http://127.0.0.1:11434
-OLLAMA_MODEL=llama3.2:3b
+OLLAMA_MODEL=RefinedNeuro/Turkcell-LLM-7b-v1:latest
+SALES_AI_FALLBACK_MODEL=llama3.2:3b
 ```
 
 Mevcut ortama uygun baska bir lokal model secilebilir.

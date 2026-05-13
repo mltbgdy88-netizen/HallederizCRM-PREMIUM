@@ -39,6 +39,10 @@ export class ApiClient {
     return this.request<T>(path, { method: "PATCH", body });
   }
 
+  async delete<T>(path: string): Promise<T> {
+    return this.request<T>(path, { method: "DELETE" });
+  }
+
   private async request<T>(path: string, init: { method: string; body?: unknown }): Promise<T> {
     const sessionToken = this.resolveSessionToken();
     const response = await fetch(`${this.options.baseUrl}${path}`, {

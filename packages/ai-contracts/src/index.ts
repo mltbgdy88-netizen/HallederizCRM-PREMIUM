@@ -179,3 +179,5 @@ export function isForbiddenOperationType(operationType: string): operationType i
 export function isAllowedOperationType(operationType: string): operationType is AllowedOperationType {
   return AllowedOperationTypeSchema.safeParse(operationType).success;
 }
+
+export * from "./sales-assistant";

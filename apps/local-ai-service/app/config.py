@@ -61,7 +61,7 @@ def get_settings() -> Settings:
         host=os.getenv("LOCAL_AI_HOST", "127.0.0.1").strip() or "127.0.0.1",
         port=_as_int("LOCAL_AI_PORT", 8008),
         ollama_base_url=os.getenv("OLLAMA_BASE_URL", "http://127.0.0.1:11434").strip(),
-        ollama_model=os.getenv("OLLAMA_MODEL", "llama3.2:3b").strip(),
+        ollama_model=os.getenv("OLLAMA_MODEL", "RefinedNeuro/Turkcell-LLM-7b-v1:latest").strip(),
         ollama_temperature=float(os.getenv("OLLAMA_TEMPERATURE", "0.2") or 0.2),
         rag_data_path=Path(os.getenv("SECTOR_DATA_PATH", str(default_rag_path))).resolve(),
         rag_top_k=_as_int("RAG_TOP_K", 3),

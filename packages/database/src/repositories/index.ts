@@ -5,3 +5,4 @@ export * from "./transactional-approval-execution";
 export * from "./tenant-usage-repository";
 export * from "./omnichannel-conversation-repository";
 export * from "./omnichannel-message-repository";
+export * from "./sales-ai-knowledge-repository";
