@@ -3,6 +3,7 @@ import {
   buildAuditTimelineWritebackPayload,
   validateAuditTimelineWritebackPayload
 } from "../approval-execution/audit-timeline-writeback";
+import { evaluatePolicy } from "../policy-engine/evaluate-policy";
 import type { ExecutionAuditEventDraft, ExecutionTimelineEventDraft } from "../approval-execution/execution-log";
 
 export interface WorkerJobHandler {
@@ -77,6 +78,55 @@ function createFoundationHandler(jobType: string): WorkerJobHandler {
             reasons: [
               "execution_gate_not_allowed_for_worker_dispatch",
               "non_retryable_blocked_execution_payload",
+              "mutation_executed:false",
+              "provider_call_executed:false"
+            ]
+          };
+        }
+
+        const policyDecision = evaluatePolicy({
+          subject: {
+            userId: "worker_system",
+            tenantId: String(payload.tenantId),
+            roles: ["worker"],
+            permissions: ["approvals.execute"],
+            authMode: "service",
+            channel: "worker"
+          },
+          resource: {
+            resourceType: "approval_execution",
+            resourceId: String(payload.executionId),
+            tenantId: String(payload.tenantId)
+          },
+          action: {
+            actionKey: "worker.approval.dispatch",
+            actionType: "execute",
+            criticality: "critical",
+            requiresApproval: false,
+            idempotencyRequired: true,
+            auditRequired: true
+          },
+          context: {
+            requestId: `job_${job.jobId}`,
+            tenantId: String(payload.tenantId),
+            source: "worker",
+            environment: "development",
+            persistenceMode: "demo",
+            channel: "worker"
+          },
+          approval: { approved: true },
+          idempotencyKey: job.idempotencyKey,
+          auditMetadataPresent: true,
+          timelineMetadataPresent: true
+        });
+
+        if (policyDecision.effect !== "allow") {
+          return {
+            ok: false,
+            retryable: false,
+            reasons: [
+              "worker_policy_denied_dispatch",
+              ...policyDecision.reasons,
               "mutation_executed:false",
               "provider_call_executed:false"
             ]

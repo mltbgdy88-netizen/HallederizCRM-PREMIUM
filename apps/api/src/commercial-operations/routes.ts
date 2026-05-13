@@ -32,6 +32,7 @@ import { asApiErrorPayload } from "../shared/errors";
 import { assertAnyPermission, assertAuthenticated, withGuards } from "../shared/auth-guards";
 import { recordAuditEvent } from "../shared/audit-timeline";
 import { readPermissions, requireReadAccess } from "../shared/read-guards";
+import { enforcePolicyForRoute } from "../shared/policy-route-enforcement";
 
 export async function registerCommercialOperationsRoutes(server: FastifyInstance) {
   server.get("/orders", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.orders), async (context) => {
@@ -54,6 +55,16 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   server.post<{ Body: Partial<SaleOrder> }>("/orders", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["orders.write", "orders.manage"])], async (context) => {
       try {
+        const policyResult = await enforcePolicyForRoute(context, {
+          actionKey: "platform.orders.create",
+          requiredPermissions: ["orders.write", "orders.manage"],
+          tenantId: request.body?.tenantId,
+          payload: { customerId: request.body?.customerId }
+        });
+        if (policyResult.handled) {
+          return reply.status(policyResult.statusCode).send(policyResult.body);
+        }
+
         const service = new CommercialCoreService(context);
         const item = await service.createOrder(request.body);
         recordAuditEvent(context, {
@@ -193,6 +204,16 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
 
   server.post<{ Body: Partial<PaymentReceipt> }>("/payments", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["payments.write", "payments.manage"])], async (context) => {
+      const policyResult = await enforcePolicyForRoute(context, {
+        actionKey: "platform.payments.create",
+        requiredPermissions: ["payments.write", "payments.manage"],
+        tenantId: request.body?.tenantId,
+        payload: { amount: request.body?.amount }
+      });
+      if (policyResult.handled) {
+        return reply.status(policyResult.statusCode).send(policyResult.body);
+      }
+
       const service = new CommercialCoreService(context);
       const item = await service.createPayment(request.body);
       recordAuditEvent(context, {
@@ -592,6 +613,15 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   });
   server.post<{ Body: { type: DocumentType; entityType: Document["entityType"]; entityId: string; entityNo: string; customerId?: string } }>("/documents/render", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["documents.write", "documents.render"])], async (context) => {
+      const policyResult = await enforcePolicyForRoute(context, {
+        actionKey: "platform.documents.generate",
+        requiredPermissions: ["documents.write", "documents.render"],
+        payload: { documentType: request.body?.type, entityType: request.body?.entityType }
+      });
+      if (policyResult.handled) {
+        return reply.status(policyResult.statusCode).send(policyResult.body);
+      }
+
       const service = new CommercialCoreService(context);
       const item = await service.renderDocument(request.body);
       recordAuditEvent(context, {
@@ -621,6 +651,17 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   );
   server.post<{ Params: { id: string } }>("/documents/:id/send-whatsapp", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["documents.write", "integrations.write"])], async (context) => {
+      const policyResult = await enforcePolicyForRoute(context, {
+        actionKey: "platform.documents.send",
+        requiredPermissions: ["documents.write", "integrations.write"],
+        payload: { documentId: request.params.id, channel: "whatsapp" },
+        channel: "whatsapp",
+        source: "api"
+      });
+      if (policyResult.handled) {
+        return reply.status(policyResult.statusCode).send(policyResult.body);
+      }
+
       const service = new CommercialCoreService(context);
       const document = await service.sendDocumentWhatsApp(request.params.id);
       if (!document) return reply.status(404).send({ message: "Document not found" });
@@ -629,6 +670,15 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   );
   server.post<{ Params: { id: string } }>("/documents/:id/send-email", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["documents.write", "integrations.write"])], async (context) => {
+      const policyResult = await enforcePolicyForRoute(context, {
+        actionKey: "platform.documents.send",
+        requiredPermissions: ["documents.write", "integrations.write"],
+        payload: { documentId: request.params.id, channel: "email" }
+      });
+      if (policyResult.handled) {
+        return reply.status(policyResult.statusCode).send(policyResult.body);
+      }
+
       const service = new CommercialCoreService(context);
       const document = await service.sendDocumentEmail(request.params.id);
       if (!document) return reply.status(404).send({ message: "Document not found" });

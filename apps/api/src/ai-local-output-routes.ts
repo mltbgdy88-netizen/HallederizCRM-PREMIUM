@@ -30,6 +30,7 @@ import { assertAnyPermission, assertAuthenticated, withGuards } from "./shared/a
 import { recordAuditEvent } from "./shared/audit-timeline";
 import { AiRuntimeService } from "./modules/ai-runtime/service";
 import { readPermissions, requireReadAccess } from "./shared/read-guards";
+import { enforcePolicyForRoute } from "./shared/policy-route-enforcement";
 
 export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   server.post<{ Body: { message?: string } }>("/ai/chat", async (request, reply) =>
@@ -63,6 +64,15 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
     "/ai/proposals",
     async (request, reply) =>
       withGuards(request, reply, [assertAuthenticated], async (context) => {
+        const policyResult = await enforcePolicyForRoute(context, {
+          actionKey: "platform.ai.propose",
+          requiredPermissions: ["ai.actions.write", "ai.proposal.create"],
+          payload: { targetType: request.body?.targetType, targetId: request.body?.targetId }
+        });
+        if (policyResult.handled) {
+          return reply.status(policyResult.statusCode).send(policyResult.body);
+        }
+
         const prompt = request.body?.prompt?.trim();
         if (!prompt) {
           return reply.status(400).send({ message: "prompt alani zorunludur." });
@@ -187,7 +197,17 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.post<{ Params: { id: string } }>("/approval-executions/:id/run", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.write", "ai.actions.write"])], async () => {
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.write", "ai.actions.write"])], async (context) => {
+      const policyResult = await enforcePolicyForRoute(context, {
+        actionKey: "platform.ai.execute",
+        requiredPermissions: ["approvals.write", "ai.actions.write"],
+        source: "ai",
+        payload: { approvalExecutionId: request.params.id }
+      });
+      if (policyResult.handled) {
+        return reply.status(policyResult.statusCode).send(policyResult.body);
+      }
+
       const item = runApprovalExecution(request.params.id);
       if (!item) return reply.status(404).send({ message: "Approval execution not found" });
       return { item };

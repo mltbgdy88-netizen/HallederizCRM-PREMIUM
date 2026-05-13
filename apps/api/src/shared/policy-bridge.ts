@@ -6,7 +6,11 @@ import {
 import type { PolicyChannel, PolicyCheckRequest } from "@hallederiz/types";
 import type { RequestContext } from "./request-context";
 import { resolvePendingApprovalRepository } from "./approval-repository-runtime";
-import { evaluatePolicyEngineForContext, mapPolicyEngineDecisionToRouteDecision } from "./policy-engine-runtime";
+import {
+  evaluatePolicyEngineForContext,
+  mapPolicyEngineDecisionToRouteDecision,
+  type PolicyEngineRuntimeOptions
+} from "./policy-engine-runtime";
 
 export function evaluatePolicyForContext(
   context: RequestContext,
@@ -71,7 +75,9 @@ function createSkippedApprovalRequestId() {
 
 export function evaluateRoutePolicy(
   contextOrArgs: any,
-  actionKeyOrOptions?: string | ({ actionKey?: string } & Parameters<typeof evaluatePolicyForContext>[2]),
+  actionKeyOrOptions?:
+    | string
+    | ({ actionKey?: string } & Parameters<typeof evaluatePolicyForContext>[2] & Partial<PolicyEngineRuntimeOptions>),
   options?: Parameters<typeof evaluatePolicyForContext>[2]
 ) {
   const context = contextOrArgs && typeof contextOrArgs === "object" && "context" in contextOrArgs ? contextOrArgs.context : contextOrArgs;
@@ -83,12 +89,25 @@ export function evaluateRoutePolicy(
         : actionKeyOrOptions;
   const actionKey = rawActionKey ?? "unknown.action";
 
+  const policyEngineOptions =
+    typeof actionKeyOrOptions === "object" && actionKeyOrOptions !== null
+      ? (actionKeyOrOptions as Partial<PolicyEngineRuntimeOptions>)
+      : {};
+
   if (typeof actionKey === "string" && (actionKey.startsWith("platform.") || actionKey.startsWith("worker."))) {
     return mapPolicyEngineDecisionToRouteDecision(
       evaluatePolicyEngineForContext(context, {
         actionKey,
-        channel: "api",
-        source: "api"
+        channel: policyEngineOptions.channel ?? "api",
+        source: policyEngineOptions.source ?? "api",
+        idempotencyKey: policyEngineOptions.idempotencyKey,
+        channelPolicy: policyEngineOptions.channelPolicy,
+        fallbackCertainty: policyEngineOptions.fallbackCertainty,
+        auditMetadataPresent: policyEngineOptions.auditMetadataPresent,
+        timelineMetadataPresent: policyEngineOptions.timelineMetadataPresent,
+        metadata: policyEngineOptions.metadata,
+        approval: policyEngineOptions.approval,
+        resource: policyEngineOptions.resource
       })
     );
   }
@@ -123,6 +142,13 @@ export async function enforcePolicyDecision(
     return { handled: false };
   }
 
+  const policyObligations =
+    decision.policyEngine &&
+    typeof decision.policyEngine === "object" &&
+    "obligations" in decision.policyEngine
+      ? (decision.policyEngine as { obligations?: Record<string, unknown> }).obligations
+      : undefined;
+
   if (decision.decision === "require_approval") {
     const runtimeResolution =
       options?.pendingApprovalRepository === undefined
@@ -149,6 +175,7 @@ export async function enforcePolicyDecision(
           reasons: decision.reasons ?? [],
           auditRequired: decision.auditRequired ?? true,
           timelineRequired: decision.timelineRequired ?? true,
+          obligations: policyObligations,
           approvalPersisted: false,
           approvalPersistenceSkipped: true,
           approvalPersistenceMode: runtimeResolution.mode,
@@ -186,6 +213,7 @@ export async function enforcePolicyDecision(
           reasons: [...(decision.reasons ?? []), "approval_persistence_failed", reason],
           auditRequired: decision.auditRequired ?? true,
           timelineRequired: decision.timelineRequired ?? true,
+          obligations: policyObligations,
           approvalPersisted: false,
           approvalPersistenceSkipped: false,
           approvalPersistenceMode: runtimeResolution.mode,
@@ -208,10 +236,31 @@ export async function enforcePolicyDecision(
         reasons: decision.reasons ?? [],
         auditRequired: decision.auditRequired ?? true,
         timelineRequired: decision.timelineRequired ?? true,
+        obligations: policyObligations,
         approvalPersisted: true,
         approvalPersistenceSkipped: false,
         approvalPersistenceMode: runtimeResolution.mode,
         persistenceMode: runtimeResolution.mode,
+        policyEngine: decision.policyEngine
+      }
+    };
+  }
+
+  if (decision.decision === "dry_run_only") {
+    return {
+      handled: true,
+      statusCode: 202,
+      body: {
+        ok: false,
+        status: "dry_run_only",
+        policyDecision: "dry_run_only",
+        actionKey: decision.actionKey,
+        reasons: decision.reasons ?? [],
+        auditRequired: decision.auditRequired ?? true,
+        timelineRequired: decision.timelineRequired ?? true,
+        idempotencyRequired: decision.idempotencyRequired ?? false,
+        obligations: policyObligations,
+        mutationExecuted: false,
         policyEngine: decision.policyEngine
       }
     };
@@ -229,6 +278,7 @@ export async function enforcePolicyDecision(
       auditRequired: decision.auditRequired ?? true,
       timelineRequired: decision.timelineRequired ?? true,
       idempotencyRequired: decision.idempotencyRequired ?? false,
+      obligations: policyObligations,
       policyEngine: decision.policyEngine
     }
   };
