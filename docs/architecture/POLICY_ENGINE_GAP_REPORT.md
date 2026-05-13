@@ -355,3 +355,14 @@
 - Completed phase: DB-backed outbox lease/idempotency hardening and worker observability aliases.
 - Remaining: distributed scheduling, full real mutation handlers, and provider-specific live send execution.
 
+
+## 2026-05-13 - Production Real Product Cutover
+
+- Status: in progress (readiness gate phase 1)
+- Added production readiness endpoint and runtime report to block demo/mock/foundation drift in production visibility.
+- Production readiness now reports blocker/warning states for auth fallback, persistence mode, provider mock mode, worker durability and missing env.
+- Added web route `/ayarlar/canli-kullanim-hazirligi` to surface real vs degraded/blocked runtime posture.
+- Remaining gap (next phase):
+  - live provider enablement per channel with explicit rollout
+  - full real handler activation for high-risk mutations
+  - worker lifecycle autoscaling and operational monitoring

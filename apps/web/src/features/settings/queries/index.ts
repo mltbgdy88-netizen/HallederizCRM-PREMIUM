@@ -2,6 +2,7 @@ import { defaultPlatformSettings, type PlatformSettings, type RolePresetItem, ty
 import { dataSourceConfig } from "../../../lib/data-source";
 import {
   getPilotReadinessApi,
+  getProductionReadinessApi,
   getPilotTemplateApi,
   getPlatformSettingsApi,
   listImportHistoryApi,
@@ -154,4 +155,8 @@ export async function getPilotReadinessData(): Promise<PilotReadinessSummary> {
   }
 
   return getPilotReadinessApi();
+}
+
+export async function getProductionReadinessData() {
+  return getProductionReadinessApi();
 }

@@ -63,6 +63,69 @@ export interface PilotReadinessSummary {
   generatedAt: string;
 }
 
+export interface ProductionReadinessSummary {
+  ok: boolean;
+  tenantId: string;
+  overallStatus: "ready" | "degraded" | "blocked";
+  blockers: string[];
+  warnings: string[];
+  requiredEnv: string[];
+  missingEnv: string[];
+  unsafeFallbacks: string[];
+  nextActions: string[];
+  environment: {
+    nodeEnv: string;
+    isProduction: boolean;
+    persistenceMode: string;
+  };
+  persistence: {
+    mode: string;
+    databaseConfigured: boolean;
+  };
+  auth: {
+    sessionSecretConfigured: boolean;
+    demoAuthEnabled: boolean;
+    headerFallbackEnabled: boolean;
+  };
+  database: {
+    configured: boolean;
+    urlSource: "POSTGRES_URL" | "DATABASE_URL" | "missing";
+  };
+  approvalExecution: {
+    mode: string;
+    pendingApprovalPersistenceMode: string;
+    ready: boolean;
+  };
+  workerOutbox: {
+    workerMode: string;
+    ready: boolean;
+  };
+  tenantUsage: {
+    persistenceMode: string;
+    ready: boolean;
+  };
+  omnichannel: {
+    persistenceMode: string;
+    ready: boolean;
+    providerModes: Array<{ kind: string; mode: string; ok: boolean }>;
+  };
+  whatsapp: {
+    liveEnvConfigured: boolean;
+  };
+  localAi: {
+    configured: boolean;
+  };
+  localAgent: {
+    configured: boolean;
+  };
+  documentGeneration: {
+    localOutputConfigured: boolean;
+  };
+  billingUsage: {
+    dbBacked: boolean;
+  };
+}
+
 export async function getPlatformSettingsApi(): Promise<PlatformSettings> {
   const response = await sdk.platform.getSettings();
   return response.data;
@@ -95,4 +158,8 @@ export async function createUserApi(payload: Partial<User> & { roleCode?: string
 export async function listRolePresetsApi(): Promise<RolePresetItem[]> {
   const response = await sdk.platform.listRolePresets();
   return response.items;
+}
+
+export async function getProductionReadinessApi(): Promise<ProductionReadinessSummary> {
+  return sdk.platform.getProductionReadiness();
 }
