@@ -88,6 +88,71 @@ export class PlatformClient {
     }>("/settings/pilot-readiness");
   }
 
+  getProductionReadiness() {
+    return this.api.get<{
+      ok: boolean;
+      tenantId: string;
+      overallStatus: "ready" | "degraded" | "blocked";
+      blockers: string[];
+      warnings: string[];
+      requiredEnv: string[];
+      missingEnv: string[];
+      unsafeFallbacks: string[];
+      nextActions: string[];
+      environment: {
+        nodeEnv: string;
+        isProduction: boolean;
+        persistenceMode: string;
+      };
+      persistence: {
+        mode: string;
+        databaseConfigured: boolean;
+      };
+      auth: {
+        sessionSecretConfigured: boolean;
+        demoAuthEnabled: boolean;
+        headerFallbackEnabled: boolean;
+      };
+      database: {
+        configured: boolean;
+        urlSource: "POSTGRES_URL" | "DATABASE_URL" | "missing";
+      };
+      approvalExecution: {
+        mode: string;
+        pendingApprovalPersistenceMode: string;
+        ready: boolean;
+      };
+      workerOutbox: {
+        workerMode: string;
+        ready: boolean;
+      };
+      tenantUsage: {
+        persistenceMode: string;
+        ready: boolean;
+      };
+      omnichannel: {
+        persistenceMode: string;
+        ready: boolean;
+        providerModes: Array<{ kind: string; mode: string; ok: boolean }>;
+      };
+      whatsapp: {
+        liveEnvConfigured: boolean;
+      };
+      localAi: {
+        configured: boolean;
+      };
+      localAgent: {
+        configured: boolean;
+      };
+      documentGeneration: {
+        localOutputConfigured: boolean;
+      };
+      billingUsage: {
+        dbBacked: boolean;
+      };
+    }>("/platform/production-readiness");
+  }
+
   listUsers() {
     return this.api.get<ListResponse<User>>("/users");
   }

@@ -334,7 +334,7 @@ export function SettingsPage() {
               <button
                 type="button"
                 className="hz-settings-toolbar-btn hz-settings-toolbar-btn--outline"
-                onClick={() => router.push("/ayarlar/kullanim-hazirligi")}
+                onClick={() => router.push("/ayarlar/canli-kullanim-hazirligi")}
               >
                 <IconClipboardCheck size={14} />
                 Canlıya
@@ -1329,7 +1329,7 @@ export function SettingsPage() {
                       <IconUpload size={14} />
                       Veri yükleme
                     </button>
-                    <button type="button" className="hz-settings-side-link" onClick={() => router.push("/ayarlar/kullanim-hazirligi")}>
+                    <button type="button" className="hz-settings-side-link" onClick={() => router.push("/ayarlar/canli-kullanim-hazirligi")}>
                       <IconClipboardCheck size={14} />
                       Kullanım hazırlığı
                     </button>
@@ -1367,3 +1367,4 @@ export function SettingsPage() {
     </div>
   );
 }
+
