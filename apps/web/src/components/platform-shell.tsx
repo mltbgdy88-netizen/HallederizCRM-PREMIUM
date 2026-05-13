@@ -11,38 +11,10 @@ import {
 import type { SidebarNavSection } from "@hallederiz/ui";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { CRMIcon } from "./icons";
+import { buildProductSidebarNavSections } from "./product-sidebar-nav";
+import { shouldSuppressShellPageMeta } from "../navigation/product-route-manifest";
 import { useAuth } from "../providers/auth-provider";
 import { useTheme } from "../providers/theme-provider";
-
-const NAV_SECTIONS: SidebarNavSection[] = [
-  {
-    title: "ANA",
-    items: [
-      { key: "dashboard", label: "Gösterge Paneli", href: "/dashboard", icon: <CRMIcon name="dashboard" /> },
-      { key: "quick-operations", label: "Hızlı İşlem", href: "/hizli-islem", icon: <CRMIcon name="orders" /> },
-      { key: "approvals", label: "Onaylar", href: "/onaylar", icon: <CRMIcon name="roles" /> },
-      { key: "whatsapp", label: "WhatsApp", href: "/whatsapp", icon: <CRMIcon name="whatsapp" /> }
-    ]
-  },
-  {
-    title: "VERİ",
-    items: [
-      { key: "customers", label: "Cariler", href: "/cariler", icon: <CRMIcon name="customers" /> },
-      { key: "stock", label: "Ürün / Stok", href: "/stok", icon: <CRMIcon name="stock" /> },
-      { key: "warehouse-prep", label: "Depo Hazırlık", href: "/depo", icon: <CRMIcon name="warehouse" /> },
-      { key: "archive", label: "Arşiv", href: "/archive", icon: <CRMIcon name="documents" /> }
-    ]
-  },
-  {
-    title: "ANALİZ",
-    items: [{ key: "reports", label: "Raporlar", href: "/raporlar", icon: <CRMIcon name="reports" /> }]
-  },
-  {
-    title: "SİSTEM",
-    items: [{ key: "settings", label: "Ayarlar", href: "/ayarlar", icon: <CRMIcon name="settings" /> }]
-  }
-];
 
 /** Sidebar’da sayı badge’i gösterilmez (PR #31); kaynak veride olsa bile kaldırılır. */
 function stripNavBadges(sections: SidebarNavSection[]): SidebarNavSection[] {
@@ -52,7 +24,7 @@ function stripNavBadges(sections: SidebarNavSection[]): SidebarNavSection[] {
   }));
 }
 
-const NAV_SECTIONS_FOR_SHELL = stripNavBadges(NAV_SECTIONS);
+const NAV_SECTIONS_FOR_SHELL = stripNavBadges(buildProductSidebarNavSections());
 
 const ALL_SHELL_NAV_ITEMS: AppShellNavItem[] = NAV_SECTIONS_FOR_SHELL.flatMap((s) => s.items);
 
@@ -111,9 +83,10 @@ const PAGE_META: Array<[string, PageMeta]> = [
 ];
 
 function resolveActiveHref(pathname: string): string {
+  const p = normalizePathname(pathname);
   const items = [...ALL_SHELL_NAV_ITEMS].sort((a, b) => b.href.length - a.href.length);
   for (const item of items) {
-    if (pathname === item.href || pathname.startsWith(`${item.href}/`)) {
+    if (p === item.href || p.startsWith(`${item.href}/`)) {
       return item.href;
     }
   }
@@ -181,8 +154,8 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
   const activeHref = resolveActiveHref(pathname);
   const isDashboard = normalizedPath === "/dashboard";
   const isQuickOperation = normalizedPath === "/hizli-islem";
-  const isApprovalsList = normalizedPath === "/onaylar";
-  const isWhatsApp = normalizedPath === "/whatsapp";
+  const isApprovalsList = normalizedPath.startsWith("/onaylar");
+  const isWhatsApp = normalizedPath === "/whatsapp" || normalizedPath === "/gelen-kutu/whatsapp";
   const isCustomersList = normalizedPath === "/cariler";
   const isStockList = normalizedPath === "/stok";
   const isArchiveList = normalizedPath === "/archive";
@@ -226,7 +199,8 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
             isArchiveList ||
             isReportsList ||
             isSettingsCenter ||
-            isWarehousePrep
+            isWarehousePrep ||
+            shouldSuppressShellPageMeta(normalizedPath)
           }
           title={pageMeta.title}
           subtitle={pageMeta.subtitle}

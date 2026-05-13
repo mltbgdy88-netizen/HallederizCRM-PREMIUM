@@ -15,6 +15,7 @@
     "test": "pnpm test:api",
     "test:api": "pnpm --filter @hallederiz/api... build && node scripts/ci/ensure-workspace-entrypoints.cjs && pnpm --filter @hallederiz/api test",
     "test:web-approvals": "node scripts/run-web-approval-tests.cjs",
+    "test:web-navigation": "node scripts/run-web-navigation-tests.cjs",
     "ci:local": "pnpm typecheck && pnpm build && pnpm test",
     "lint": "turbo run lint",
     "clean": "turbo run clean",

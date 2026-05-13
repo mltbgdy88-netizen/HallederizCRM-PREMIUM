@@ -3,6 +3,18 @@ const path = require("node:path");
 
 const repoRoot = path.resolve(__dirname, "..", "..");
 
+const requiredRouteFiles = [
+  "apps/web/src/navigation/product-route-manifest.ts",
+  "apps/web/src/navigation/render-product-catch-all.tsx",
+  "apps/web/src/components/product-page-shell.tsx",
+  "apps/web/src/components/product-module-landing.tsx",
+  "apps/web/app/(platform)/[...productSlug]/page.tsx",
+  "apps/web/app/(platform)/gelen-kutu/konusma/[conversationId]/page.tsx",
+  "apps/web/app/(platform)/cariler/liste/page.tsx",
+  "apps/web/app/(platform)/onaylar/bekleyenler/page.tsx",
+  "docs/product/PRODUCTION_ROUTE_MANIFEST.md"
+];
+
 const checks = [
   {
     file: "apps/web/src/features/task-center/components/TaskListTable.tsx",
@@ -43,6 +55,13 @@ const checks = [
 
 function main() {
   const failures = [];
+
+  for (const rel of requiredRouteFiles) {
+    const abs = path.join(repoRoot, rel);
+    if (!fs.existsSync(abs)) {
+      failures.push(`Zorunlu route dosyasi eksik: ${rel}`);
+    }
+  }
 
   for (const check of checks) {
     const absoluteFile = path.join(repoRoot, check.file);

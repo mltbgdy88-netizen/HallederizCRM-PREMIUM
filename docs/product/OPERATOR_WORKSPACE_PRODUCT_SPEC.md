@@ -6,7 +6,7 @@ Operator Workspace, iç personelin **günlük operasyon cockpit’i**dir: müşt
 
 Workspace **mutation yapmaz**; onay ve icra backend zincirinden geçer ([approval-execution-flow.md](../approval-execution-flow.md)). AI read-only veya proposal üretir ([ai-operator-mode.md](../ai-operator-mode.md)).
 
-Bu doküman gelecek UI implementasyonu için referanstır; kod bu fazda üretilmez.
+Bu doküman gelecek UI implementasyonu için referanstır; kod bu fazda üretilmez. Üretim rota ağacı ve shell durumları için bkz. [PRODUCTION_ROUTE_MANIFEST.md](./PRODUCTION_ROUTE_MANIFEST.md).
 
 ---
 
