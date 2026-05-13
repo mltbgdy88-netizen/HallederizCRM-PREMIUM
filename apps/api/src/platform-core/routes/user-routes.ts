@@ -23,7 +23,8 @@ export async function registerUserRoutes(server: FastifyInstance) {
       async (context) => {
         const policyResult = await enforcePolicyForRoute(context, {
           actionKey: "platform.users.create",
-          requiredPermissions: ["platform.users.write", "users.manage"]
+          requiredPermissions: ["platform.users.write", "users.manage"],
+          productionActionType: "user_management"
         });
         if (policyResult.handled) {
           return reply.status(policyResult.statusCode).send(policyResult.body);

@@ -9,6 +9,10 @@ import type { ExecutionAuditEventDraft, ExecutionTimelineEventDraft } from "../a
 export interface WorkerJobHandler {
   jobType: string;
   mode: WorkerHandlerMode;
+  productionAllowed?: boolean;
+  liveReady?: boolean;
+  requiredEnv?: string[];
+  supportedActions?: string[];
   handle: (job: WorkerJob) => WorkerJobHandleResult;
 }
 
@@ -34,6 +38,9 @@ function createFoundationHandler(jobType: string): WorkerJobHandler {
     return {
       jobType,
       mode: "dry_run",
+      productionAllowed: false,
+      liveReady: false,
+      supportedActions: ["worker.approval.dispatch"],
       handle: (job) => {
         const payload = job.payload ?? {};
         const hasTenantId = typeof payload.tenantId === "string" && payload.tenantId.length > 0;
@@ -171,6 +178,9 @@ function createFoundationHandler(jobType: string): WorkerJobHandler {
     return {
       jobType,
       mode: "dry_run",
+      productionAllowed: false,
+      liveReady: false,
+      supportedActions: ["worker.audit.timeline.writeback"],
       handle: (job) => {
         const payload = job.payload ?? {};
         const payloadTenantId = typeof payload.tenantId === "string" ? payload.tenantId : "";
@@ -238,6 +248,8 @@ function createFoundationHandler(jobType: string): WorkerJobHandler {
   return {
     jobType,
     mode: "dry_run",
+    productionAllowed: false,
+    liveReady: false,
     handle: () => ({
       ok: true,
       retryable: false,

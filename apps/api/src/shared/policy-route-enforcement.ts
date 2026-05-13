@@ -11,9 +11,16 @@ import {
 } from "./policy-bridge";
 import type { RequestContext } from "./request-context";
 import { resolveTenantUsageLedger } from "./tenant-usage-runtime";
+import {
+  assertProductionReadyForAction,
+  buildProductionBlockedResponse,
+  mapActionKeyToProductionActionType,
+  type ProductionEnforcementActionType
+} from "./production-enforcement";
 
 type PolicyEnforcementOptions = {
   actionKey: string;
+  productionActionType?: ProductionEnforcementActionType;
   requiredPermissions?: readonly string[];
   tenantId?: string;
   payload?: Record<string, unknown>;
@@ -132,6 +139,22 @@ export async function enforcePolicyForRoute(
   }
   if (options.requiredPermissions?.length) {
     assertAnyPermission(context, options.requiredPermissions);
+  }
+
+  const mappedProductionActionType = options.productionActionType ?? mapActionKeyToProductionActionType(options.actionKey);
+  if (mappedProductionActionType !== "safe_read") {
+    const productionGate = await assertProductionReadyForAction({
+      context,
+      actionType: mappedProductionActionType,
+      actionKey: options.actionKey
+    });
+    if (productionGate.productionGate !== "allowed") {
+      return {
+        handled: true,
+        statusCode: 503,
+        body: buildProductionBlockedResponse(productionGate)
+      };
+    }
   }
 
   const decision = evaluateRoutePolicy(context, {

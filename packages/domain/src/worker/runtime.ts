@@ -90,6 +90,24 @@ export function processClaimedJob(
     };
   }
 
+  const isProduction = process.env.NODE_ENV === "production";
+  if (isProduction && (handler.productionAllowed !== true || handler.liveReady !== true)) {
+    const dead = repository.moveToDeadLetter(job.jobId, "foundation_blocked_in_production", now);
+    return {
+      status: "dead_letter",
+      claimedJob: job,
+      job: dead,
+      reasons: [
+        "foundation_handler_blocked_in_production",
+        `productionAllowed:${String(handler.productionAllowed === true)}`,
+        `liveReady:${String(handler.liveReady === true)}`,
+        "mutation_executed:false",
+        "provider_call_executed:false"
+      ],
+      handlerMode: handler.mode
+    };
+  }
+
   try {
     const result = handler.handle(job);
     const reasons = result.reasons ?? [result.ok ? "handler_completed" : "handler_failed"];

@@ -58,6 +58,7 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
         const policyResult = await enforcePolicyForRoute(context, {
           actionKey: "platform.orders.create",
           requiredPermissions: ["orders.write", "orders.manage"],
+          productionActionType: "commercial_write",
           tenantId: request.body?.tenantId,
           payload: { customerId: request.body?.customerId }
         });
@@ -207,6 +208,7 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
       const policyResult = await enforcePolicyForRoute(context, {
         actionKey: "platform.payments.create",
         requiredPermissions: ["payments.write", "payments.manage"],
+        productionActionType: "commercial_write",
         tenantId: request.body?.tenantId,
         payload: { amount: request.body?.amount }
       });
@@ -616,6 +618,7 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
       const policyResult = await enforcePolicyForRoute(context, {
         actionKey: "platform.documents.generate",
         requiredPermissions: ["documents.write", "documents.render"],
+        productionActionType: "critical_mutation",
         payload: { documentType: request.body?.type, entityType: request.body?.entityType }
       });
       if (policyResult.handled) {
@@ -654,6 +657,7 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
       const policyResult = await enforcePolicyForRoute(context, {
         actionKey: "platform.documents.send",
         requiredPermissions: ["documents.write", "integrations.write"],
+        productionActionType: "document_send",
         payload: { documentId: request.params.id, channel: "whatsapp" },
         channel: "whatsapp",
         source: "api"
@@ -673,6 +677,7 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
       const policyResult = await enforcePolicyForRoute(context, {
         actionKey: "platform.documents.send",
         requiredPermissions: ["documents.write", "integrations.write"],
+        productionActionType: "document_send",
         payload: { documentId: request.params.id, channel: "email" }
       });
       if (policyResult.handled) {

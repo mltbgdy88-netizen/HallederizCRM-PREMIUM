@@ -148,6 +148,7 @@ export async function registerOmnichannelRoutes(server: FastifyInstance) {
         const policy = await enforcePolicyForRoute(context, {
           actionKey: "platform.omnichannel.reply",
           requiredPermissions: writePermissions,
+          productionActionType: "omnichannel_reply",
           source: request.body?.source === "ai" ? "ai" : "api",
           channel,
           idempotencyKey: request.body?.idempotencyKey,
@@ -203,6 +204,7 @@ export async function registerOmnichannelRoutes(server: FastifyInstance) {
       const policy = await enforcePolicyForRoute(context, {
         actionKey: "platform.omnichannel.assign",
         requiredPermissions: writePermissions,
+        productionActionType: "critical_mutation",
         source: "api",
         channel: "api",
         payload: { path: "assign", conversationId: request.params.id, assignedUserId: request.body?.assignedUserId }
@@ -227,6 +229,7 @@ export async function registerOmnichannelRoutes(server: FastifyInstance) {
       const policy = await enforcePolicyForRoute(context, {
         actionKey: "platform.omnichannel.resolve",
         requiredPermissions: writePermissions,
+        productionActionType: "critical_mutation",
         source: "api",
         channel: "api",
         payload: { path: "resolve", conversationId: request.params.id }
