@@ -242,6 +242,8 @@ export async function executeApprovalWithOutboxBridge(
           actionKey: request.actionKey,
           approvalRequestId: request.approvalRequestId,
           executionId: executionResult.executionId,
+          idempotencyKey: request.idempotencyKey,
+          approvedContext: true,
           mode: executionResult.handlerMode,
           requestedMode: executionResult.requestedMode ?? executionResult.handlerMode,
           effectiveMode: executionResult.effectiveMode ?? executionResult.handlerMode,

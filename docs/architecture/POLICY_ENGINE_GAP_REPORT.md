@@ -350,3 +350,8 @@
 
 - Omnichannel inbox foundation eklendi: kanal-agnostik model, guarded API route seti ve provider adapter contract (mock/degraded).
 
+
+## Durable Workflow / Outbox Hardening
+- Completed phase: DB-backed outbox lease/idempotency hardening and worker observability aliases.
+- Remaining: distributed scheduling, full real mutation handlers, and provider-specific live send execution.
+

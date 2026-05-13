@@ -41,16 +41,34 @@ function createFoundationHandler(jobType: string): WorkerJobHandler {
         const hasApprovalRequestId =
           typeof payload.approvalRequestId === "string" && payload.approvalRequestId.length > 0;
         const hasExecutionId = typeof payload.executionId === "string" && payload.executionId.length > 0;
+        const hasIdempotencyKey = typeof payload.idempotencyKey === "string" && payload.idempotencyKey.length > 0;
         const requestedMode = typeof payload.requestedMode === "string" ? payload.requestedMode : payload.mode;
         const effectiveMode = typeof payload.effectiveMode === "string" ? payload.effectiveMode : payload.mode;
         const gateDecision = asRecord(payload.gateDecision);
+        const hasAuditMetadata = Boolean(asRecord(payload.auditEvent));
+        const hasTimelineMetadata = Boolean(asRecord(payload.timelineEvent));
+        const requiresAudit = payload.auditRequired !== false;
+        const requiresTimeline = payload.timelineRequired !== false;
 
-        if (!hasTenantId || !hasActionKey || !hasApprovalRequestId || !hasExecutionId) {
+        if (!hasTenantId || !hasActionKey || !hasApprovalRequestId || !hasExecutionId || !hasIdempotencyKey) {
           return {
             ok: false,
             retryable: false,
             reasons: [
               "invalid_approval_execution_dispatch_payload",
+              "non_retryable_missing_required_payload",
+              "mutation_executed:false",
+              "provider_call_executed:false"
+            ]
+          };
+        }
+
+        if ((requiresAudit && !hasAuditMetadata) || (requiresTimeline && !hasTimelineMetadata)) {
+          return {
+            ok: false,
+            retryable: false,
+            reasons: [
+              "missing_audit_timeline_metadata_for_worker_dispatch",
               "non_retryable_missing_required_payload",
               "mutation_executed:false",
               "provider_call_executed:false"

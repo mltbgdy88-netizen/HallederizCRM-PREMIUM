@@ -193,6 +193,11 @@ test("worker validates execution gate metadata on approval dispatch jobs", () =>
       actionKey: "platform.settings.update",
       approvalRequestId: "apr_controlled_1",
       executionId: "exec_controlled_1",
+      idempotencyKey: "idem_worker_missing_gate",
+      auditRequired: true,
+      timelineRequired: true,
+      auditEvent: { eventKey: "approval.execution.audit" },
+      timelineEvent: { eventKey: "approval.execution.timeline" },
       requestedMode: "execute",
       effectiveMode: "execute"
     },
@@ -213,6 +218,11 @@ test("worker validates execution gate metadata on approval dispatch jobs", () =>
       actionKey: "platform.settings.update",
       approvalRequestId: "apr_controlled_2",
       executionId: "exec_controlled_2",
+      idempotencyKey: "idem_worker_valid_gate",
+      auditRequired: true,
+      timelineRequired: true,
+      auditEvent: { eventKey: "approval.execution.audit" },
+      timelineEvent: { eventKey: "approval.execution.timeline" },
       requestedMode: "execute",
       effectiveMode: "execute",
       gateDecision: {

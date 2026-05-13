@@ -131,7 +131,7 @@ export async function registerWorkerRoutes(server: FastifyInstance, deps: Worker
     return resolveFoundationRepository(context);
   }
 
-  server.get("/worker/health", async (request, reply) =>
+  const healthHandler = async (request: any, reply: any) =>
     withGuards(
       request,
       reply,
@@ -153,11 +153,19 @@ export async function registerWorkerRoutes(server: FastifyInstance, deps: Worker
           maxJobsPerTick: 1
         });
 
+        const outboxItems = await listOutboxJobsForTenant(context, repositoryResolution.repository);
+        const deadLetterItems = await listDeadLetterJobsForTenant(context, repositoryResolution.repository);
         return {
           ok: true,
           tenantId: context.tenantId,
           workerPersistenceMode: repositoryResolution.mode,
           health,
+          counts: {
+            pending: outboxItems.filter((job) => job.status === "pending").length,
+            claimed: outboxItems.filter((job) => job.status === "claimed" || job.status === "processing").length,
+            failed: outboxItems.filter((job) => job.status === "failed").length,
+            deadLetter: deadLetterItems.length
+          },
           productionSafety: evaluateProductionSafety({
             mode: process.env.NODE_ENV === "production" ? "production" : "foundation",
             approvalRuntimeMode: context.persistenceMode,
@@ -172,9 +180,11 @@ export async function registerWorkerRoutes(server: FastifyInstance, deps: Worker
         };
       }
     )
-  );
+  ;
+  server.get("/worker/health", healthHandler);
+  server.get("/platform/worker/health", healthHandler);
 
-  server.get("/worker/safety", async (request, reply) =>
+  const safetyHandler = async (request: any, reply: any) =>
     withGuards(
       request,
       reply,
@@ -223,9 +233,11 @@ export async function registerWorkerRoutes(server: FastifyInstance, deps: Worker
         };
       }
     )
-  );
+  ;
+  server.get("/worker/safety", safetyHandler);
+  server.get("/platform/worker/safety", safetyHandler);
 
-  server.get("/worker/outbox", async (request, reply) =>
+  const outboxHandler = async (request: any, reply: any) =>
     withGuards(
       request,
       reply,
@@ -260,9 +272,11 @@ export async function registerWorkerRoutes(server: FastifyInstance, deps: Worker
         }
       }
     )
-  );
+  ;
+  server.get("/worker/outbox", outboxHandler);
+  server.get("/platform/worker/outbox", outboxHandler);
 
-  server.get("/worker/dead-letter", async (request, reply) =>
+  const deadLetterHandler = async (request: any, reply: any) =>
     withGuards(
       request,
       reply,
@@ -297,9 +311,11 @@ export async function registerWorkerRoutes(server: FastifyInstance, deps: Worker
         }
       }
     )
-  );
+  ;
+  server.get("/worker/dead-letter", deadLetterHandler);
+  server.get("/platform/worker/dead-letter", deadLetterHandler);
 
-  server.post<{ Params: { jobId: string } }>("/worker/dead-letter/:jobId/replay", async (request, reply) =>
+  const replayHandler = async (request: any, reply: any) =>
     withGuards(
       request,
       reply,
@@ -345,5 +361,7 @@ export async function registerWorkerRoutes(server: FastifyInstance, deps: Worker
         };
       }
     )
-  );
+  ;
+  server.post<{ Params: { jobId: string } }>("/worker/dead-letter/:jobId/replay", replayHandler);
+  server.post<{ Params: { jobId: string } }>("/platform/worker/dead-letter/:jobId/replay", replayHandler);
 }

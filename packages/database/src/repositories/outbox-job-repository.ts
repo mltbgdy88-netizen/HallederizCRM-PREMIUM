@@ -1,6 +1,6 @@
 import type { QueryExecutor, QueryResultRow } from "../types";
 
-export type DbWorkerJobStatus = "pending" | "processing" | "completed" | "failed" | "dead_letter";
+export type DbWorkerJobStatus = "pending" | "claimed" | "processing" | "completed" | "failed" | "dead_letter" | "cancelled";
 
 export interface DbWorkerJobRecord {
   jobId: string;
@@ -39,6 +39,7 @@ interface OutboxJobRow extends QueryResultRow {
   dead_letter_reason: string | null;
   locked_at: string | null;
   locked_by: string | null;
+  lease_expires_at: string | null;
 }
 
 interface DatabaseRepositoryOptions {
@@ -78,12 +79,12 @@ export const OUTBOX_ATOMIC_CLAIM_FOUNDATION_METADATA = {
   level: "foundation",
   productionDistributedLock: false,
   usesPostgresSkipLocked: true,
-  leaseStorage: "locked_at_locked_by",
-  leaseExpiresAtDerived: true,
+  leaseStorage: "locked_at_locked_by_lease_expires_at",
+  leaseExpiresAtDerived: false,
   claimableStatuses: ["pending", "failed"] as const,
   claimEligibility: {
     availableAtLteNow: true,
-    lockedAtNullOrLeaseExpired: true,
+    leaseExpiresAtLteNow: true,
     activeLeaseBlocksClaim: true
   }
 } as const;
@@ -94,24 +95,25 @@ export function buildClaimNextOutboxJobSql(): string {
         FROM outbox_jobs
         WHERE status IN ('pending', 'failed')
           AND available_at <= $1::timestamptz
-          AND (locked_at IS NULL OR locked_at <= $3::timestamptz)
+          AND (lease_expires_at IS NULL OR lease_expires_at <= $1::timestamptz)
         ORDER BY available_at ASC
         LIMIT 1
         FOR UPDATE SKIP LOCKED
       )
       UPDATE outbox_jobs AS jobs
       SET
-        status = 'processing',
+        status = 'claimed',
         attempts = jobs.attempts + 1,
         updated_at = $1::timestamptz,
         locked_at = $1::timestamptz,
-        locked_by = $2
+        locked_by = $2,
+        lease_expires_at = $4::timestamptz
       FROM picked
       WHERE jobs.id = picked.id
       RETURNING
         jobs.id, jobs.tenant_id, jobs.job_type, jobs.action_key, jobs.payload, jobs.status, jobs.attempts, jobs.max_attempts,
         jobs.idempotency_key, jobs.available_at, jobs.created_at, jobs.updated_at, jobs.last_error, NULL::text AS dead_letter_reason,
-        jobs.locked_at, jobs.locked_by`;
+        jobs.locked_at, jobs.locked_by, jobs.lease_expires_at`;
 }
 
 export function calculateLeaseExpiresAt(lockedAt: string, claimLeaseMs: number): string {
@@ -121,28 +123,23 @@ export function calculateLeaseExpiresAt(lockedAt: string, claimLeaseMs: number):
 export interface OutboxJobClaimEligibilityInput {
   status: DbWorkerJobStatus;
   availableAt: string;
-  lockedAt?: string | null;
+  leaseExpiresAt?: string | null;
   nowIso: string;
-  leaseExpiredBeforeIso: string;
 }
 
 export function isOutboxJobClaimEligible(input: OutboxJobClaimEligibilityInput): boolean {
   return (
     (input.status === "pending" || input.status === "failed") &&
     input.availableAt <= input.nowIso &&
-    (input.lockedAt == null || input.lockedAt <= input.leaseExpiredBeforeIso)
+    (input.leaseExpiresAt == null || input.leaseExpiresAt <= input.nowIso)
   );
 }
 
 export function mapClaimedOutboxJobRow(row: OutboxJobRow, claimLeaseMs: number): DbWorkerJobRecord {
   const record = mapOutboxRowToDomainRecord(row);
-  if (!record.lockedAt) {
-    return record;
-  }
-  return {
-    ...record,
-    leaseExpiresAt: calculateLeaseExpiresAt(record.lockedAt, claimLeaseMs)
-  };
+  if (record.leaseExpiresAt) return record;
+  if (!record.lockedAt) return record;
+  return { ...record, leaseExpiresAt: calculateLeaseExpiresAt(record.lockedAt, claimLeaseMs) };
 }
 
 export interface FoundationOutboxClaimableJob {
@@ -151,6 +148,7 @@ export interface FoundationOutboxClaimableJob {
   availableAt: string;
   lockedAt?: string | null;
   lockedBy?: string | null;
+  leaseExpiresAt?: string | null;
 }
 
 export class FoundationOutboxClaimSimulator {
@@ -167,9 +165,8 @@ export class FoundationOutboxClaimSimulator {
         isOutboxJobClaimEligible({
           status: job.status,
           availableAt: job.availableAt,
-          lockedAt: job.lockedAt,
-          nowIso: claimParams.nowIso,
-          leaseExpiredBeforeIso: claimParams.leaseExpiredBeforeIso
+          leaseExpiresAt: job.leaseExpiresAt,
+          nowIso: claimParams.nowIso
         })
       )
       .sort((a, b) => a.availableAt.localeCompare(b.availableAt));
@@ -179,9 +176,10 @@ export class FoundationOutboxClaimSimulator {
     }
     const claimed: FoundationOutboxClaimableJob = {
       ...next,
-      status: "processing",
+      status: "claimed",
       lockedAt: claimParams.nowIso,
-      lockedBy: claimParams.workerId
+      lockedBy: claimParams.workerId,
+      leaseExpiresAt: calculateLeaseExpiresAt(claimParams.nowIso, claimParams.claimLeaseMs)
     };
     this.jobs.set(claimed.jobId, claimed);
     return claimed;
@@ -235,7 +233,8 @@ export function mapOutboxRowToDomainRecord(row: OutboxJobRow): DbWorkerJobRecord
     lastError: row.last_error ?? undefined,
     deadLetterReason: row.dead_letter_reason ?? undefined,
     lockedAt: row.locked_at ?? undefined,
-    lockedBy: row.locked_by ?? undefined
+    lockedBy: row.locked_by ?? undefined,
+    leaseExpiresAt: row.lease_expires_at ?? undefined
   };
 }
 
@@ -244,6 +243,10 @@ export function mapOutboxDomainRecordToSqlParams(job: DbWorkerJobRecord): unknow
   assertNonEmpty(job.tenantId, "tenant_id");
   assertNonEmpty(job.jobType, "job_type");
   assertNonEmpty(job.idempotencyKey, "idempotency_key");
+  const approvalRequestId =
+    typeof job.payload?.approvalRequestId === "string"
+      ? (job.payload.approvalRequestId as string)
+      : null;
   return [
     job.jobId,
     job.tenantId,
@@ -254,12 +257,14 @@ export function mapOutboxDomainRecordToSqlParams(job: DbWorkerJobRecord): unknow
     job.attempts,
     job.maxAttempts,
     job.idempotencyKey,
+    approvalRequestId,
     job.availableAt,
     job.createdAt,
     job.updatedAt,
     job.lastError ?? null,
     job.lockedAt ?? null,
-    job.lockedBy ?? null
+    job.lockedBy ?? null,
+    job.leaseExpiresAt ?? null
   ];
 }
 
@@ -283,11 +288,11 @@ export class DatabaseOutboxJobRepository {
     const params = mapOutboxDomainRecordToSqlParams(job);
     const rows = await this.executor.query<OutboxJobRow>(
       `INSERT INTO outbox_jobs (
-        id, tenant_id, job_type, action_key, payload, status, attempts, max_attempts, idempotency_key, available_at,
-        created_at, updated_at, last_error, locked_at, locked_by
+        id, tenant_id, job_type, action_key, payload, status, attempts, max_attempts, idempotency_key, approval_request_id, available_at,
+        created_at, updated_at, last_error, locked_at, locked_by, lease_expires_at
       )
       VALUES (
-        $1,$2,$3,$4,$5::jsonb,$6,$7,$8,$9,$10::timestamptz,$11::timestamptz,$12::timestamptz,$13,$14::timestamptz,$15
+        $1,$2,$3,$4,$5::jsonb,$6,$7,$8,$9,$10,$11::timestamptz,$12::timestamptz,$13::timestamptz,$14,$15::timestamptz,$16,$17::timestamptz
       )
       ON CONFLICT (tenant_id, idempotency_key)
       DO UPDATE SET
@@ -297,14 +302,16 @@ export class DatabaseOutboxJobRepository {
         status = EXCLUDED.status,
         attempts = EXCLUDED.attempts,
         max_attempts = EXCLUDED.max_attempts,
+        approval_request_id = EXCLUDED.approval_request_id,
         available_at = EXCLUDED.available_at,
         updated_at = EXCLUDED.updated_at,
         last_error = EXCLUDED.last_error,
         locked_at = EXCLUDED.locked_at,
-        locked_by = EXCLUDED.locked_by
+        locked_by = EXCLUDED.locked_by,
+        lease_expires_at = EXCLUDED.lease_expires_at
       RETURNING
         id, tenant_id, job_type, action_key, payload, status, attempts, max_attempts, idempotency_key, available_at,
-        created_at, updated_at, last_error, NULL::text AS dead_letter_reason, locked_at, locked_by`,
+        created_at, updated_at, last_error, NULL::text AS dead_letter_reason, locked_at, locked_by, lease_expires_at`,
       params
     );
     if (!rows[0]) {
@@ -324,7 +331,8 @@ export class DatabaseOutboxJobRepository {
     const rows = await this.executor.query<OutboxJobRow>(buildClaimNextOutboxJobSql(), [
       claimParams.nowIso,
       claimParams.workerId,
-      claimParams.leaseExpiredBeforeIso
+      claimParams.leaseExpiredBeforeIso,
+      calculateLeaseExpiresAt(claimParams.nowIso, claimParams.claimLeaseMs)
     ]);
     return rows[0] ? mapClaimedOutboxJobRow(rows[0], claimParams.claimLeaseMs) : undefined;
   }
@@ -334,11 +342,11 @@ export class DatabaseOutboxJobRepository {
     assertNonEmpty(jobId, "job_id");
     const rows = await this.executor.query<OutboxJobRow>(
       `UPDATE outbox_jobs
-      SET status = 'completed', updated_at = $2::timestamptz, locked_at = NULL, locked_by = NULL
+      SET status = 'completed', updated_at = $2::timestamptz, locked_at = NULL, locked_by = NULL, lease_expires_at = NULL, completed_at = $2::timestamptz
       WHERE id = $1
       RETURNING
         id, tenant_id, job_type, action_key, payload, status, attempts, max_attempts, idempotency_key, available_at,
-        created_at, updated_at, last_error, NULL::text AS dead_letter_reason, locked_at, locked_by`,
+        created_at, updated_at, last_error, NULL::text AS dead_letter_reason, locked_at, locked_by, lease_expires_at`,
       [jobId, completedAt]
     );
     return rows[0] ? mapOutboxRowToDomainRecord(rows[0]) : undefined;
@@ -360,11 +368,12 @@ export class DatabaseOutboxJobRepository {
         last_error = $3,
         available_at = $4::timestamptz,
         locked_at = NULL,
-        locked_by = NULL
+        locked_by = NULL,
+        lease_expires_at = NULL
       WHERE id = $1
       RETURNING
         id, tenant_id, job_type, action_key, payload, status, attempts, max_attempts, idempotency_key, available_at,
-        created_at, updated_at, last_error, NULL::text AS dead_letter_reason, locked_at, locked_by`,
+        created_at, updated_at, last_error, NULL::text AS dead_letter_reason, locked_at, locked_by, lease_expires_at`,
       [jobId, failedAt, errorMessage, nextAvailableAt]
     );
     return rows[0] ? mapOutboxRowToDomainRecord(rows[0]) : undefined;
@@ -379,11 +388,13 @@ export class DatabaseOutboxJobRepository {
         status = 'dead_letter',
         updated_at = $2::timestamptz,
         locked_at = NULL,
-        locked_by = NULL
+        locked_by = NULL,
+        lease_expires_at = NULL,
+        dead_lettered_at = $2::timestamptz
       WHERE id = $1
       RETURNING
         id, tenant_id, job_type, action_key, payload, status, attempts, max_attempts, idempotency_key, available_at,
-        created_at, updated_at, last_error, $3::text AS dead_letter_reason, locked_at, locked_by`,
+        created_at, updated_at, last_error, $3::text AS dead_letter_reason, locked_at, locked_by, lease_expires_at`,
       [jobId, movedAt, reason]
     );
     const moved = movedRows[0];
@@ -426,7 +437,7 @@ export class DatabaseOutboxJobRepository {
     const activeRows = await this.executor.query<OutboxJobRow>(
       `SELECT
         id, tenant_id, job_type, action_key, payload, status, attempts, max_attempts, idempotency_key, available_at,
-        created_at, updated_at, last_error, NULL::text AS dead_letter_reason, locked_at, locked_by
+        created_at, updated_at, last_error, NULL::text AS dead_letter_reason, locked_at, locked_by, lease_expires_at
       FROM outbox_jobs
       WHERE tenant_id = $1 AND idempotency_key = $2
       LIMIT 1`,
@@ -453,7 +464,8 @@ export class DatabaseOutboxJobRepository {
         last_error,
         dead_letter_reason,
         NULL::timestamptz AS locked_at,
-        NULL::text AS locked_by
+        NULL::text AS locked_by,
+        NULL::timestamptz AS lease_expires_at
       FROM dead_letter_jobs
       WHERE tenant_id = $1 AND idempotency_key = $2
       ORDER BY moved_at DESC
@@ -469,7 +481,7 @@ export class DatabaseOutboxJobRepository {
       ? await this.executor.query<OutboxJobRow>(
           `SELECT
             id, tenant_id, job_type, action_key, payload, status, attempts, max_attempts, idempotency_key, available_at,
-            created_at, updated_at, last_error, NULL::text AS dead_letter_reason, locked_at, locked_by
+            created_at, updated_at, last_error, NULL::text AS dead_letter_reason, locked_at, locked_by, lease_expires_at
           FROM outbox_jobs
           WHERE tenant_id = $1
           ORDER BY created_at ASC`,
@@ -478,7 +490,7 @@ export class DatabaseOutboxJobRepository {
       : await this.executor.query<OutboxJobRow>(
           `SELECT
             id, tenant_id, job_type, action_key, payload, status, attempts, max_attempts, idempotency_key, available_at,
-            created_at, updated_at, last_error, NULL::text AS dead_letter_reason, locked_at, locked_by
+            created_at, updated_at, last_error, NULL::text AS dead_letter_reason, locked_at, locked_by, lease_expires_at
           FROM outbox_jobs
           ORDER BY created_at ASC`
         );
@@ -501,7 +513,8 @@ export class DatabaseOutboxJobRepository {
             last_error,
             dead_letter_reason,
             NULL::timestamptz AS locked_at,
-            NULL::text AS locked_by
+            NULL::text AS locked_by,
+            NULL::timestamptz AS lease_expires_at
           FROM dead_letter_jobs
           WHERE tenant_id = $1
           ORDER BY moved_at ASC`,
@@ -524,7 +537,8 @@ export class DatabaseOutboxJobRepository {
             last_error,
             dead_letter_reason,
             NULL::timestamptz AS locked_at,
-            NULL::text AS locked_by
+            NULL::text AS locked_by,
+            NULL::timestamptz AS lease_expires_at
           FROM dead_letter_jobs
           ORDER BY moved_at ASC`
         );

@@ -47,12 +47,16 @@ CREATE TABLE IF NOT EXISTS outbox_jobs (
   attempts INTEGER NOT NULL DEFAULT 0,
   max_attempts INTEGER NOT NULL,
   idempotency_key TEXT NOT NULL,
+  approval_request_id TEXT,
   available_at TIMESTAMP NOT NULL DEFAULT NOW(),
   created_at TIMESTAMP NOT NULL DEFAULT NOW(),
   updated_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  completed_at TIMESTAMP,
+  dead_lettered_at TIMESTAMP,
   last_error TEXT,
   locked_at TIMESTAMP,
   locked_by TEXT,
+  lease_expires_at TIMESTAMP,
   UNIQUE (tenant_id, idempotency_key)
 );
 
