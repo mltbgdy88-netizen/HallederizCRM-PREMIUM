@@ -6,6 +6,7 @@ import {
 import type { PolicyChannel, PolicyCheckRequest } from "@hallederiz/types";
 import type { RequestContext } from "./request-context";
 import { resolvePendingApprovalRepository } from "./approval-repository-runtime";
+import { evaluatePolicyEngineForContext, mapPolicyEngineDecisionToRouteDecision } from "./policy-engine-runtime";
 
 export function evaluatePolicyForContext(
   context: RequestContext,
@@ -47,6 +48,7 @@ type RoutePolicyDecisionLike = {
   auditRequired?: boolean;
   timelineRequired?: boolean;
   idempotencyRequired?: boolean;
+  policyEngine?: unknown;
 };
 
 export type RoutePolicyEnforcementResult =
@@ -72,6 +74,25 @@ export function evaluateRoutePolicy(
   actionKeyOrOptions?: string | ({ actionKey?: string } & Parameters<typeof evaluatePolicyForContext>[2]),
   options?: Parameters<typeof evaluatePolicyForContext>[2]
 ) {
+  const context = contextOrArgs && typeof contextOrArgs === "object" && "context" in contextOrArgs ? contextOrArgs.context : contextOrArgs;
+  const rawActionKey =
+    contextOrArgs && typeof contextOrArgs === "object" && "actionKey" in contextOrArgs
+      ? contextOrArgs.actionKey
+      : typeof actionKeyOrOptions === "object" && actionKeyOrOptions !== null
+        ? actionKeyOrOptions.actionKey
+        : actionKeyOrOptions;
+  const actionKey = rawActionKey ?? "unknown.action";
+
+  if (typeof actionKey === "string" && (actionKey.startsWith("platform.") || actionKey.startsWith("worker."))) {
+    return mapPolicyEngineDecisionToRouteDecision(
+      evaluatePolicyEngineForContext(context, {
+        actionKey,
+        channel: "api",
+        source: "api"
+      })
+    );
+  }
+
   if (
     contextOrArgs &&
     typeof contextOrArgs === "object" &&
@@ -132,7 +153,8 @@ export async function enforcePolicyDecision(
           approvalPersistenceSkipped: true,
           approvalPersistenceMode: runtimeResolution.mode,
           persistenceMode: runtimeResolution.mode,
-          persistenceReasons: runtimeResolution.reasons
+          persistenceReasons: runtimeResolution.reasons,
+          policyEngine: decision.policyEngine
         }
       };
     }
@@ -167,7 +189,8 @@ export async function enforcePolicyDecision(
           approvalPersisted: false,
           approvalPersistenceSkipped: false,
           approvalPersistenceMode: runtimeResolution.mode,
-          persistenceMode: "error"
+          persistenceMode: "error",
+          policyEngine: decision.policyEngine
         }
       };
     }
@@ -188,7 +211,8 @@ export async function enforcePolicyDecision(
         approvalPersisted: true,
         approvalPersistenceSkipped: false,
         approvalPersistenceMode: runtimeResolution.mode,
-        persistenceMode: runtimeResolution.mode
+        persistenceMode: runtimeResolution.mode,
+        policyEngine: decision.policyEngine
       }
     };
   }
@@ -204,9 +228,13 @@ export async function enforcePolicyDecision(
       reasons: decision.reasons ?? [],
       auditRequired: decision.auditRequired ?? true,
       timelineRequired: decision.timelineRequired ?? true,
-      idempotencyRequired: decision.idempotencyRequired ?? false
+      idempotencyRequired: decision.idempotencyRequired ?? false,
+      policyEngine: decision.policyEngine
     }
   };
 }
 
 export { listPendingApprovalRequests };
+
+
+
