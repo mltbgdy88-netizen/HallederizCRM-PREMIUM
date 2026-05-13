@@ -23,6 +23,15 @@ export function filterInboxItems(items: ApprovalInboxItem[], filter: ApprovalInb
   return items.filter((item) => item.status === filter);
 }
 
+function payloadSearchBlob(payload: Record<string, unknown> | undefined): string {
+  if (!payload) return "";
+  try {
+    return JSON.stringify(payload).toLowerCase();
+  } catch {
+    return "";
+  }
+}
+
 export function searchInboxItems(items: ApprovalInboxItem[], query: string): ApprovalInboxItem[] {
   const normalized = query.trim().toLowerCase();
   if (!normalized) {
@@ -35,7 +44,8 @@ export function searchInboxItems(items: ApprovalInboxItem[], query: string): App
       item.actorId,
       item.idempotencyKey,
       ...item.reasons,
-      item.rejectReason ?? ""
+      item.rejectReason ?? "",
+      payloadSearchBlob(item.payload)
     ]
       .join(" ")
       .toLowerCase();

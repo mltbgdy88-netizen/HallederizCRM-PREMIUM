@@ -25,6 +25,8 @@ Web alias route'lar `/approvals` ve `/dashboard/approvals` kanonik `/onaylar` sa
 
 **Local/demo smoke:** Manuel adımlar için [OPERATOR_SANDBOX_SMOKE_CHECKLIST.md](./OPERATOR_SANDBOX_SMOKE_CHECKLIST.md); yardımcı modül testleri için repo kökünde `pnpm test:web-approvals`.
 
+**Kart tabanlı inbox (güncel UI):** Liste gövdesi **kart ızgarası** olarak sunulur; durum sekmeleri üstte, sağda operatör paneli (doğrulama + istemci filtreleri + özet + hızlı işlemler), seçili kaydın tam metadata’sı kartların altında **Seçili onay detayı** bölümünde kalır. Bilgilendirme amaçlı “Onay süreci nasıl çalışır?” şeridi sayfa altındadır (canlı operasyonel durum değildir).
+
 ---
 
 ## Kullanıcı akışları
