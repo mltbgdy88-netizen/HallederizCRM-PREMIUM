@@ -5,7 +5,7 @@ import { assertAnyPermission, assertAuthenticated, withGuards } from "../../shar
 import { getTenantSettingsState, setTenantSettingsState } from "../settings-state";
 import { buildPilotReadiness } from "../pilot-readiness";
 import { readPermissions, requireReadAccess } from "../../shared/read-guards";
-import { enforcePolicyDecision, evaluateRoutePolicy } from "../../shared/policy-bridge";
+import { enforcePolicyForRoute } from "../../shared/policy-route-enforcement";
 
 export async function registerSettingsRoutes(server: FastifyInstance) {
   server.get("/settings", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.settings), async () => {
@@ -21,8 +21,10 @@ export async function registerSettingsRoutes(server: FastifyInstance) {
       reply,
       [assertAuthenticated, (context) => assertAnyPermission(context, ["platform.settings.write", "settings.manage"])],
       async (context) => {
-        const decision = evaluateRoutePolicy(context, { actionKey: "platform.settings.update" });
-        const policyResult = await enforcePolicyDecision(decision, context);
+        const policyResult = await enforcePolicyForRoute(context, {
+          actionKey: "platform.settings.update",
+          requiredPermissions: ["platform.settings.write", "settings.manage"]
+        });
         if (policyResult.handled) {
           return reply.status(policyResult.statusCode).send(policyResult.body);
         }

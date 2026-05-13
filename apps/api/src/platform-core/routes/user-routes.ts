@@ -3,7 +3,7 @@ import type { User } from "@hallederiz/types";
 import { mockTenant, mockUsers } from "../mock-data";
 import { assertAnyPermission, assertAuthenticated, withGuards } from "../../shared/auth-guards";
 import { readPermissions, requireReadAccess } from "../../shared/read-guards";
-import { enforcePolicyDecision, evaluateRoutePolicy } from "../../shared/policy-bridge";
+import { enforcePolicyForRoute } from "../../shared/policy-route-enforcement";
 
 export async function registerUserRoutes(server: FastifyInstance) {
   let usersState: User[] = [...mockUsers];
@@ -21,8 +21,10 @@ export async function registerUserRoutes(server: FastifyInstance) {
       reply,
       [assertAuthenticated, (context) => assertAnyPermission(context, ["platform.users.write", "users.manage"])],
       async (context) => {
-        const decision = evaluateRoutePolicy(context, { actionKey: "platform.users.create" });
-        const policyResult = await enforcePolicyDecision(decision, context);
+        const policyResult = await enforcePolicyForRoute(context, {
+          actionKey: "platform.users.create",
+          requiredPermissions: ["platform.users.write", "users.manage"]
+        });
         if (policyResult.handled) {
           return reply.status(policyResult.statusCode).send(policyResult.body);
         }

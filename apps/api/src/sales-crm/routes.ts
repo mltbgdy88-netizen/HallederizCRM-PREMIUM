@@ -6,6 +6,7 @@ import { asApiErrorPayload } from "../shared/errors";
 import { assertAnyPermission, assertAuthenticated, assertTenantAccess, withGuards } from "../shared/auth-guards";
 import { recordAuditEvent } from "../shared/audit-timeline";
 import { readPermissions, requireReadAccess } from "../shared/read-guards";
+import { enforcePolicyForRoute } from "../shared/policy-route-enforcement";
 
 export async function registerSalesCrmRoutes(server: FastifyInstance) {
   server.get("/customers", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.customers), async (context) => {
@@ -27,6 +28,16 @@ export async function registerSalesCrmRoutes(server: FastifyInstance) {
 
   server.post<{ Body: Partial<Customer> }>("/customers", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertPermissionSet(context, ["customers.write", "customers.manage"]), (context) => assertTenantAccess(context, request.body?.tenantId)], async (context) => {
+      const policyResult = await enforcePolicyForRoute(context, {
+        actionKey: "platform.customers.create",
+        requiredPermissions: ["customers.write", "customers.manage"],
+        tenantId: request.body?.tenantId,
+        payload: { customerCode: request.body?.code }
+      });
+      if (policyResult.handled) {
+        return reply.status(policyResult.statusCode).send(policyResult.body);
+      }
+
       const service = new SalesCrmService(context);
       const item = await service.createCustomer(request.body);
       recordAuditEvent(context, {
@@ -42,6 +53,16 @@ export async function registerSalesCrmRoutes(server: FastifyInstance) {
 
   server.patch<{ Params: { id: string }; Body: Partial<Customer> }>("/customers/:id", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertPermissionSet(context, ["customers.write", "customers.manage"]), (context) => assertTenantAccess(context, request.body?.tenantId)], async (context) => {
+      const policyResult = await enforcePolicyForRoute(context, {
+        actionKey: "platform.customers.update",
+        requiredPermissions: ["customers.write", "customers.manage"],
+        tenantId: request.body?.tenantId,
+        payload: { customerId: request.params.id }
+      });
+      if (policyResult.handled) {
+        return reply.status(policyResult.statusCode).send(policyResult.body);
+      }
+
       const service = new SalesCrmService(context);
       try {
         const customer = await service.patchCustomer(request.params.id, request.body);
@@ -161,6 +182,16 @@ export async function registerSalesCrmRoutes(server: FastifyInstance) {
 
   server.post<{ Body: Partial<Offer> }>("/offers", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertPermissionSet(context, ["offers.write", "offers.manage"]), (context) => assertTenantAccess(context, request.body?.tenantId)], async (context) => {
+      const policyResult = await enforcePolicyForRoute(context, {
+        actionKey: "platform.offers.create",
+        requiredPermissions: ["offers.write", "offers.manage"],
+        tenantId: request.body?.tenantId,
+        payload: { customerId: request.body?.customerId }
+      });
+      if (policyResult.handled) {
+        return reply.status(policyResult.statusCode).send(policyResult.body);
+      }
+
       try {
         const service = new SalesCrmService(context);
         const item = await service.createOffer(request.body);

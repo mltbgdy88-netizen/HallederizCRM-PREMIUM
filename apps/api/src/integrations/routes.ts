@@ -8,6 +8,7 @@ import { requireTenantPermissionGuards, withGuards } from "../shared/auth-guards
 import { AiRuntimeService } from "../modules/ai-runtime/service";
 import { getLocalAgentStatus } from "../ai-local-output-store";
 import { readPermissions, requireReadAccess } from "../shared/read-guards";
+import { enforcePolicyForRoute } from "../shared/policy-route-enforcement";
 
 type RequestWithRawBody = {
   rawBody?: string;
@@ -228,6 +229,19 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
 
   server.post<{ Body: Partial<WhatsAppMessage> }>("/whatsapp/outbound", async (request, reply) =>
     withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "whatsapp.write"], () => request.body?.tenantId), async (context) => {
+      const policyResult = await enforcePolicyForRoute(context, {
+        actionKey: "platform.whatsapp.reply",
+        requiredPermissions: ["integrations.write", "whatsapp.write"],
+        tenantId: request.body?.tenantId,
+        channel: "whatsapp",
+        source: "api",
+        channelPolicy: { signatureVerified: true, withinChannelWindow: true },
+        payload: { conversationId: request.body?.conversationId }
+      });
+      if (policyResult.handled) {
+        return reply.status(policyResult.statusCode).send(policyResult.body);
+      }
+
       const service = new IntegrationsService(context);
       return reply.status(201).send({ item: await service.sendWhatsAppOutbound(request.body) });
     })
@@ -242,6 +256,23 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
 
   server.post<{ Params: { id: string } }>("/whatsapp/action-requests/:id/confirm", async (request, reply) =>
     withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "approvals.write"]), async (context) => {
+      const policyResult = await enforcePolicyForRoute(context, {
+        actionKey: "platform.whatsapp.approval_command",
+        requiredPermissions: ["integrations.write", "approvals.write"],
+        channel: "whatsapp",
+        source: "whatsapp",
+        channelPolicy: {
+          signatureVerified: true,
+          approvalTokenVerified: true,
+          phoneVerified: true,
+          withinChannelWindow: true
+        },
+        payload: { requestId: request.params.id }
+      });
+      if (policyResult.handled) {
+        return reply.status(policyResult.statusCode).send(policyResult.body);
+      }
+
       const service = new IntegrationsService(context);
       const item = service.confirmWhatsAppActionRequest(request.params.id);
       if (!item) return reply.status(404).send({ message: "Action request not found" });
