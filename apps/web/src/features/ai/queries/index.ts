@@ -142,7 +142,17 @@ export async function getSalesAssistantHealth() {
         modelReady: false,
         fallbackReady: true,
         reason: "demo_mode",
-        availableModels: ["llama3.2:3b"]
+        availableModels: ["llama3.2:3b"],
+        localService: {
+          status: "degraded",
+          reason: "demo_mode",
+          speakerReady: false
+        },
+        voice: {
+          status: "degraded",
+          sttReady: false,
+          ttsReady: false
+        }
       }
     };
   }
@@ -200,4 +210,61 @@ export async function listSalesKnowledge() {
     return { items: [] as SalesAiTrainingScope[], total: 0, knowledgePersistenceMode: "memory" };
   }
   return sdk.ai.listSalesKnowledge();
+}
+
+export async function createSalesKnowledge(payload: Partial<SalesAiTrainingScope>) {
+  if (dataSourceConfig.useDemoData) {
+    return {
+      item: {
+        id: `demo_sales_kb_${Date.now()}`,
+        tenantId: dataSourceConfig.tenantId,
+        productId: payload.productId,
+        productName: payload.productName ?? "Demo Ürün",
+        category: payload.category,
+        description: payload.description,
+        salesNotes: payload.salesNotes,
+        allowedClaims: payload.allowedClaims ?? [],
+        blockedClaims: payload.blockedClaims ?? [],
+        priceVisibility: payload.priceVisibility === "visible" ? "visible" : "hidden",
+        stockVisibility: payload.stockVisibility === "visible" ? "visible" : "hidden",
+        faqSnippets: payload.faqSnippets ?? [],
+        selectedDocuments: payload.selectedDocuments ?? [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      } satisfies SalesAiTrainingScope
+    };
+  }
+  return sdk.ai.createSalesKnowledge(payload);
+}
+
+export async function updateSalesKnowledge(id: string, payload: Partial<SalesAiTrainingScope>) {
+  if (dataSourceConfig.useDemoData) {
+    return {
+      item: {
+        id,
+        tenantId: dataSourceConfig.tenantId,
+        productId: payload.productId,
+        productName: payload.productName ?? "Demo Ürün",
+        category: payload.category,
+        description: payload.description,
+        salesNotes: payload.salesNotes,
+        allowedClaims: payload.allowedClaims ?? [],
+        blockedClaims: payload.blockedClaims ?? [],
+        priceVisibility: payload.priceVisibility === "visible" ? "visible" : "hidden",
+        stockVisibility: payload.stockVisibility === "visible" ? "visible" : "hidden",
+        faqSnippets: payload.faqSnippets ?? [],
+        selectedDocuments: payload.selectedDocuments ?? [],
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      } satisfies SalesAiTrainingScope
+    };
+  }
+  return sdk.ai.patchSalesKnowledge(id, payload);
+}
+
+export async function removeSalesKnowledge(id: string) {
+  if (dataSourceConfig.useDemoData) {
+    return { ok: true, id };
+  }
+  return sdk.ai.deleteSalesKnowledge(id);
 }

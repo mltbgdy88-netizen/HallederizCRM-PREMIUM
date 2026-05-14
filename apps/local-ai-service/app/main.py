@@ -214,15 +214,38 @@ async def _stream_tts_only(message: str) -> AsyncIterator[bytes]:
     yield ndjson_line({"type": "done", "text": message.strip()})
 
 
+async def _probe_ollama_models() -> tuple[bool, bool, bool, str | None]:
+    try:
+        payload = await ollama_client.client.list()
+        models = payload.get("models", []) if isinstance(payload, dict) else []
+        names: list[str] = []
+        for model in models:
+            if isinstance(model, dict):
+                name = model.get("name")
+                if isinstance(name, str) and name.strip():
+                    names.append(name.strip())
+        primary_ready = settings.ollama_model in names
+        fallback_ready = settings.ollama_fallback_model in names
+        return True, primary_ready, fallback_ready, None
+    except Exception as exc:
+        return False, False, False, str(exc)
+
+
 @app.get("/health", response_model=HealthResponse)
 async def health(request: Request, _guard: None = Depends(_enforce)) -> HealthResponse:
     del request
+    ollama_ok, model_ready, fallback_ready, ollama_reason = await _probe_ollama_models()
     return HealthResponse(
-        ok=True,
+        ok=ollama_ok,
         model=settings.ollama_model,
+        fallback_model=settings.ollama_fallback_model,
         rag_documents=len(rag.documents),
         speaker_ready=xtts.speaker_ready(),
         whisper_model=settings.whisper_model_size,
+        ollama_ok=ollama_ok,
+        model_ready=model_ready,
+        fallback_ready=fallback_ready,
+        ollama_reason=ollama_reason,
     )
 
 

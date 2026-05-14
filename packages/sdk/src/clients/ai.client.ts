@@ -62,7 +62,7 @@ export class AiClient {
   getSalesAssistantHealth() {
     return this.api.get<ItemResponse<{
       ok: boolean;
-      status: "healthy" | "degraded" | "not_configured";
+      status: "healthy" | "degraded" | "not_configured" | "blocked";
       provider: "ollama";
       model: string;
       fallbackModel: string;
@@ -70,6 +70,18 @@ export class AiClient {
       fallbackReady: boolean;
       reason: string;
       availableModels: string[];
+      localService?: {
+        status: "healthy" | "degraded" | "not_configured" | "blocked";
+        reason: string;
+        speakerReady: boolean;
+        whisperModel?: string;
+      };
+      voice?: {
+        status: "healthy" | "degraded" | "not_configured" | "blocked";
+        sttReady: boolean;
+        ttsReady: boolean;
+        whisperModel?: string;
+      };
     }>>("/platform/ai/sales-assistant/health");
   }
 
@@ -93,14 +105,14 @@ export class AiClient {
   }
 
   transcribeSalesVoice(input: { audioBase64: string; mimeType?: string; language?: string }) {
-    return this.api.post<ItemResponse<{ ok: boolean; status: "live" | "degraded"; transcript: string; provider: string; reason: string }>>(
+    return this.api.post<ItemResponse<{ ok: boolean; status: "live" | "degraded" | "not_configured" | "blocked"; transcript: string; provider: string; reason: string }>>(
       "/platform/ai/sales-assistant/voice/transcribe",
       input
     );
   }
 
   speakSalesVoice(input: { text: string; voice?: string; speed?: number }) {
-    return this.api.post<ItemResponse<{ ok: boolean; status: "live" | "degraded"; provider: string; reason?: string; audioRef?: string; mimeType?: string }>>(
+    return this.api.post<ItemResponse<{ ok: boolean; status: "live" | "degraded" | "not_configured" | "blocked"; provider: string; reason?: string; audioRef?: string; mimeType?: string }>>(
       "/platform/ai/sales-assistant/voice/speak",
       input
     );
