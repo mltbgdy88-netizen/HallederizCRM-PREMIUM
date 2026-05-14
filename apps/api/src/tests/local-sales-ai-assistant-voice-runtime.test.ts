@@ -1,7 +1,9 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import Fastify from "fastify";
+import { AiRuntimeService } from "../modules/ai-runtime/service";
 import { registerPlatformCoreRoutes } from "../platform-core/routes";
+import type { RequestContext } from "../shared/request-context";
 import { createSession } from "../shared/session-store";
 import { resetSalesAiRuntimeForTests, resolveSalesAiKnowledgeRepository } from "../shared/sales-ai-runtime";
 import { withDemoAuth, withEnv } from "./test-env";
@@ -18,6 +20,16 @@ async function buildServer() {
   const server = Fastify();
   await registerPlatformCoreRoutes(server);
   return server;
+}
+
+function buildContext(): RequestContext {
+  return {
+    tenantId: "tenant_1",
+    userId: "user_admin",
+    persistenceMode: "demo",
+    roles: ["admin"],
+    permissions: ["*"]
+  };
 }
 
 test("sales assistant health returns degraded when ollama is unavailable", async () => {
@@ -259,4 +271,121 @@ test("voice runtime returns degraded when local providers are unavailable", asyn
       resetSalesAiRuntimeForTests();
     }
   });
+});
+
+test("sales assistant health blocks public ollama URL by default", async () => {
+  await withEnv(
+    {
+      NODE_ENV: "production",
+      OLLAMA_BASE_URL: "https://example.com",
+      LOCAL_AI_ALLOW_PUBLIC_URLS: "false"
+    },
+    async () => {
+      const service = new AiRuntimeService(buildContext());
+      const health = await service.getSalesAssistantHealth();
+      assert.equal(health.status, "blocked");
+      assert.equal(health.reason, "local_ai_url_not_allowed");
+    }
+  );
+});
+
+test("sales assistant health allows public ollama URL only with explicit override", async () => {
+  await withEnv(
+    {
+      NODE_ENV: "production",
+      OLLAMA_BASE_URL: "https://example.com",
+      LOCAL_AI_ALLOW_PUBLIC_URLS: "true"
+    },
+    async () => {
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = (async () => {
+        throw new Error("connection refused");
+      }) as typeof fetch;
+      try {
+        const service = new AiRuntimeService(buildContext());
+        const health = await service.getSalesAssistantHealth();
+        assert.equal(health.status, "degraded");
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    }
+  );
+});
+
+test("localhost and loopback local AI URLs are allowed", async () => {
+  await withEnv(
+    {
+      OLLAMA_BASE_URL: "http://localhost:11434",
+      LOCAL_AI_SERVICE_URL: "http://127.0.0.1:8008",
+      LOCAL_AI_ALLOW_PUBLIC_URLS: "false"
+    },
+    async () => {
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = (async () => {
+        throw new Error("connection refused");
+      }) as typeof fetch;
+      try {
+        const service = new AiRuntimeService(buildContext());
+        const health = await service.getSalesAssistantHealth();
+        assert.notEqual(health.status, "blocked");
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    }
+  );
+});
+
+test("private LAN local AI URL is allowed by default", async () => {
+  await withEnv(
+    {
+      OLLAMA_BASE_URL: "http://192.168.1.10:11434",
+      LOCAL_AI_ALLOW_PUBLIC_URLS: "false"
+    },
+    async () => {
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = (async () => {
+        throw new Error("connection refused");
+      }) as typeof fetch;
+      try {
+        const service = new AiRuntimeService(buildContext());
+        const health = await service.getSalesAssistantHealth();
+        assert.notEqual(health.status, "blocked");
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    }
+  );
+});
+
+test("invalid local AI URL returns blocked/not_configured and does not fake chat or voice success", async () => {
+  await withEnv(
+    {
+      OLLAMA_BASE_URL: "file:///etc/passwd",
+      LOCAL_AI_SERVICE_URL: "gopher://127.0.0.1:8008",
+      LOCAL_AI_ALLOW_PUBLIC_URLS: "false"
+    },
+    async () => {
+      const service = new AiRuntimeService(buildContext());
+      const health = await service.getSalesAssistantHealth();
+      assert.equal(health.status, "not_configured");
+      assert.equal(health.reason, "local_ai_url_protocol_not_allowed");
+
+      const chat = await service.chatSalesAssistant({
+        message: "Merhaba",
+        channel: "web",
+        knowledge: []
+      });
+      assert.equal(chat.status, "not_configured");
+      assert.equal(chat.mutationExecuted, false);
+      assert.equal(chat.externalProviderCallExecuted, false);
+
+      const transcribe = await service.transcribeSalesVoice({ audioBase64: "ZGVtbw==" });
+      assert.equal(transcribe.status, "not_configured");
+      assert.equal(transcribe.reason, "local_ai_url_protocol_not_allowed");
+
+      const speak = await service.speakSalesVoice({ text: "Merhaba" });
+      assert.equal(speak.status, "not_configured");
+      assert.equal(speak.reason, "local_ai_url_protocol_not_allowed");
+    }
+  );
 });

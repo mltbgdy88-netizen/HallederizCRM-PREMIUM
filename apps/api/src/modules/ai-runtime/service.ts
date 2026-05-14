@@ -2,6 +2,7 @@ import { buildAiProposal, buildApprovalFromAiProposal, classifyAiRequest, extrac
 import type { SalesAiGuardrailDecision, SalesAiGroundingSource, SalesAiIntent, SalesAiResponse, SalesAiTrainingScope } from "@hallederiz/ai-contracts";
 import type { AiInsight, AiInputMode, AiMessage, AiProposal, Approval } from "@hallederiz/types";
 import type { RequestContext } from "../../shared/request-context";
+import { validateLocalAiEndpointUrl } from "../../shared/local-ai-url-policy";
 import { validateAiConfig } from "../../shared/service-config";
 
 interface ProposalGenerationInput {
@@ -35,7 +36,7 @@ async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs = 1500
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    return await fetch(url, { ...init, signal: controller.signal });
+    return await fetch(url, { ...init, redirect: init.redirect ?? "error", signal: controller.signal });
   } finally {
     clearTimeout(timer);
   }
@@ -200,7 +201,7 @@ export class AiRuntimeService {
   }
 
   private get localAiServiceUrl() {
-    return normalizeBaseUrl(process.env.LOCAL_AI_SERVICE_URL ?? "http://127.0.0.1:8008");
+    return this.localAiServiceValidation.value;
   }
 
   private get localAiTimeoutMs() {
@@ -209,7 +210,27 @@ export class AiRuntimeService {
   }
 
   private get ollamaServiceUrl() {
-    return normalizeBaseUrl(process.env.OLLAMA_BASE_URL ?? "http://127.0.0.1:11434");
+    return this.ollamaServiceValidation.value;
+  }
+
+  private get allowPublicLocalAiUrls() {
+    return process.env.LOCAL_AI_ALLOW_PUBLIC_URLS === "true";
+  }
+
+  private get localAiServiceValidation() {
+    return validateLocalAiEndpointUrl({
+      rawUrl: process.env.LOCAL_AI_SERVICE_URL,
+      fallbackUrl: "http://127.0.0.1:8008",
+      allowPublicUrls: this.allowPublicLocalAiUrls
+    });
+  }
+
+  private get ollamaServiceValidation() {
+    return validateLocalAiEndpointUrl({
+      rawUrl: process.env.OLLAMA_BASE_URL,
+      fallbackUrl: "http://127.0.0.1:11434",
+      allowPublicUrls: this.allowPublicLocalAiUrls
+    });
   }
 
   private get salesAssistantModel() {
@@ -269,6 +290,32 @@ export class AiRuntimeService {
     };
   }
 
+  private buildBlockedSalesResponse(
+    intent: SalesAiIntent,
+    usedSources: SalesAiGroundingSource[],
+    suggestedActions: SalesAiResponse["suggestedActions"],
+    reason: string
+  ): SalesAiResponse {
+    return {
+      ok: false,
+      status: "blocked",
+      intent,
+      confidence: 0.1,
+      reply: "Yerel AI servis adresi guvenlik politikasi nedeniyle engellendi. Lutfen sistem yoneticisine basvurun.",
+      usedSources,
+      suggestedActions,
+      guardrail: this.buildSalesGuardrail("blocked_not_configured", [reason], usedSources),
+      provider: {
+        provider: "ollama",
+        model: this.salesAssistantModel,
+        fallbackModel: this.salesAssistantFallbackModel,
+        fallbackUsed: false
+      },
+      mutationExecuted: false,
+      externalProviderCallExecuted: false
+    };
+  }
+
   private async fetchOllamaModelNames(): Promise<string[]> {
     const response = await fetchWithTimeout(
       `${this.ollamaServiceUrl}/api/tags`,
@@ -314,6 +361,32 @@ export class AiRuntimeService {
     const provider = "ollama" as const;
     const primaryModel = this.salesAssistantModel;
     const fallbackModel = this.salesAssistantFallbackModel;
+    if (!this.ollamaServiceValidation.configured) {
+      return {
+        ok: false,
+        status: "not_configured" as const,
+        provider,
+        model: primaryModel,
+        fallbackModel,
+        modelReady: false,
+        fallbackReady: false,
+        reason: this.ollamaServiceValidation.reason ?? "local_ai_url_invalid",
+        availableModels: [] as string[]
+      };
+    }
+    if (!this.ollamaServiceValidation.allowed) {
+      return {
+        ok: false,
+        status: "blocked" as const,
+        provider,
+        model: primaryModel,
+        fallbackModel,
+        modelReady: false,
+        fallbackReady: false,
+        reason: this.ollamaServiceValidation.reason ?? "local_ai_url_not_allowed",
+        availableModels: [] as string[]
+      };
+    }
     try {
       const modelNames = await this.fetchOllamaModelNames();
       const primaryReady = modelNames.includes(primaryModel);
@@ -448,6 +521,9 @@ export class AiRuntimeService {
         externalProviderCallExecuted: false
       };
     }
+    if (health.status === "blocked") {
+      return this.buildBlockedSalesResponse(intent, usedSources, suggestedActions, health.reason ?? "local_ai_url_not_allowed");
+    }
 
     const modelNames = health.availableModels as string[];
     const primaryReady = modelNames.includes(this.salesAssistantModel);
@@ -548,6 +624,24 @@ export class AiRuntimeService {
         reason: "audio_missing"
       };
     }
+    if (!this.localAiServiceValidation.configured) {
+      return {
+        ok: false,
+        status: "not_configured" as const,
+        transcript: "",
+        provider: "local",
+        reason: this.localAiServiceValidation.reason ?? "local_ai_url_invalid"
+      };
+    }
+    if (!this.localAiServiceValidation.allowed) {
+      return {
+        ok: false,
+        status: "blocked" as const,
+        transcript: "",
+        provider: "local",
+        reason: this.localAiServiceValidation.reason ?? "local_ai_url_not_allowed"
+      };
+    }
     try {
       const body = new FormData();
       const buffer = Buffer.from(input.audioBase64, "base64");
@@ -611,6 +705,22 @@ export class AiRuntimeService {
         reason: "text_missing"
       };
     }
+    if (!this.localAiServiceValidation.configured) {
+      return {
+        ok: false,
+        status: "not_configured" as const,
+        provider: "local",
+        reason: this.localAiServiceValidation.reason ?? "local_ai_url_invalid"
+      };
+    }
+    if (!this.localAiServiceValidation.allowed) {
+      return {
+        ok: false,
+        status: "blocked" as const,
+        provider: "local",
+        reason: this.localAiServiceValidation.reason ?? "local_ai_url_not_allowed"
+      };
+    }
     try {
       const response = await fetchWithTimeout(
         `${this.localAiServiceUrl}/api/v1/tts/stream`,
@@ -668,6 +778,12 @@ export class AiRuntimeService {
   }
 
   private async callLocalAiText(prompt: string) {
+    if (!this.localAiServiceValidation.configured) {
+      throw new Error(this.localAiServiceValidation.reason ?? "local_ai_url_invalid");
+    }
+    if (!this.localAiServiceValidation.allowed) {
+      throw new Error(this.localAiServiceValidation.reason ?? "local_ai_url_not_allowed");
+    }
     const response = await fetchWithTimeout(
       `${this.localAiServiceUrl}/api/v1/chat/text-stream`,
       {
@@ -689,6 +805,22 @@ export class AiRuntimeService {
   }
 
   async checkLocalProviderHealth() {
+    if (!this.localAiServiceValidation.configured) {
+      return {
+        status: "degraded" as const,
+        configured: false,
+        reason: this.localAiServiceValidation.reason ?? "local_ai_url_invalid",
+        details: { serviceUrl: this.localAiServiceValidation.value }
+      };
+    }
+    if (!this.localAiServiceValidation.allowed) {
+      return {
+        status: "degraded" as const,
+        configured: false,
+        reason: this.localAiServiceValidation.reason ?? "local_ai_url_not_allowed",
+        details: { serviceUrl: this.localAiServiceValidation.value }
+      };
+    }
     try {
       const response = await fetchWithTimeout(
         `${this.localAiServiceUrl}/health`,

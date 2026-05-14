@@ -35,22 +35,6 @@ function resolveAiProvider(channelProvider: string | undefined) {
   return (process.env.AI_PROVIDER ?? channelProvider ?? "local").toLowerCase();
 }
 
-function validateUrl(value: string | undefined, fallback: string) {
-  const candidate = (value ?? fallback).trim();
-  try {
-    const url = new URL(candidate);
-    return {
-      configured: url.protocol === "http:" || url.protocol === "https:",
-      value: candidate
-    };
-  } catch {
-    return {
-      configured: false,
-      value: candidate
-    };
-  }
-}
-
 export function validateAiConfig() {
   const primaryProvider = (process.env.AI_PROVIDER ?? "local").toLowerCase();
   const llmProvider = resolveAiProvider(process.env.AI_LLM_PROVIDER);
@@ -58,7 +42,11 @@ export function validateAiConfig() {
   const ttsProvider = resolveAiProvider(process.env.AI_TTS_PROVIDER);
   const externalRequested = [llmProvider, sttProvider, ttsProvider].includes("openai");
   const localRequested = [llmProvider, sttProvider, ttsProvider].includes("local");
-  const localService = validateUrl(process.env.LOCAL_AI_SERVICE_URL, "http://127.0.0.1:8008");
+  const localService = validateLocalAiEndpointUrl({
+    rawUrl: process.env.LOCAL_AI_SERVICE_URL,
+    fallbackUrl: "http://127.0.0.1:8008",
+    allowPublicUrls: process.env.LOCAL_AI_ALLOW_PUBLIC_URLS === "true"
+  });
   const required = externalRequested
     ? validateRequired([
         "OPENAI_API_KEY",
@@ -72,7 +60,7 @@ export function validateAiConfig() {
     : { configured: true, missing: [] };
 
   const externalConfigured = required.configured;
-  const localConfigured = !localRequested || localService.configured;
+  const localConfigured = !localRequested || (localService.configured && localService.allowed);
   const activeMode: "local" | "external" | "fallback" = localRequested
     ? "local"
     : externalRequested && externalConfigured
@@ -98,7 +86,7 @@ export function validateAiConfig() {
     reason:
       activeMode === "local"
         ? !localConfigured
-          ? "Lokal AI servis URL ayari gecersiz."
+          ? `Lokal AI servis URL ayari gecersiz: ${localService.reason ?? "invalid_url"}.`
           : externalRequested && !externalConfigured
           ? "Lokal AI aktif. Harici provider eksik ayar nedeniyle opsiyonel modda bekliyor."
           : "Lokal AI aktif ve birincil modda hazir."
@@ -116,6 +104,7 @@ export function validateAiConfig() {
       localStatus: localRequested ? (localConfigured ? "ready" : "misconfigured") : "missing",
       externalStatus: externalRequested ? (externalConfigured ? "ready" : "missing") : "optional",
       activeProviderMode: activeMode,
+      localServiceReason: localService.reason,
       missing: [...required.missing, ...(!localConfigured ? ["LOCAL_AI_SERVICE_URL"] : [])]
     }
   } satisfies ServiceHealthResult;
@@ -232,3 +221,4 @@ export function buildIntegrationsHealthSummary(healthItems: ServiceHealthResult[
     services: healthItems
   };
 }
+import { validateLocalAiEndpointUrl } from "./local-ai-url-policy";
