@@ -10,6 +10,7 @@ import {
   deriveOrderCompletionState,
   deriveOrderDeliveryStatus,
   deriveOrderPaymentStatus,
+  resolveOrderStatusAfterDeliveryRollback,
   validateDeliveryCustomerLink,
   validateDeliveryPaymentRule,
   validateDeliveryWarehouseState,
@@ -1269,7 +1270,7 @@ export class CommercialCoreRepository {
         if (order) {
           await tx.query(
             `update sale_orders set delivery_status = $3, status = $4, updated_at = $5 where tenant_id = $1 and id = $2`,
-            [this.context.tenantId, order.id, "none", order.status === "completed" ? "partially_delivered" : order.status, nowIso()]
+            [this.context.tenantId, order.id, "none", resolveOrderStatusAfterDeliveryRollback(order.status), nowIso()]
           );
         }
         return this.loadDeliveryAggregate(tx, id);

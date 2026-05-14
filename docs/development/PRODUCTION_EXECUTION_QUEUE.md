@@ -45,8 +45,8 @@ pnpm smoke:production-safety
 
 - [x] Tahsilat **allocation** kalıcı tablo / raporlama + migration ([core-completion-batch](../core-completion-batch.md) “foundation” notu): `0011_payment_allocations.sql`, `commercial-core/repository.ts` (liste/ödeme DB allocation, onayda foundation satırlarının insert’i, GET allocations’ta DB öncelikli).
 - [x] Depo satır / görev alt modelleri DB parity: `0012_warehouse_order_lines_tasks.sql`, `warehouse_order_lines` + `warehouse_tasks`, repository toplu okuma ve `createWarehouseOrderFromOrder` + `createWarehouseOrder` transaction yazımı.
-- [ ] Teslimat → sipariş durum write-back testleri (integration).
-- [ ] Fatura / iade hatlarında stok + hesap tutarlılığı (onaylı mutation zinciri).
+- [x] Teslimat → sipariş durum write-back testleri (integration): `deriveOrderCompletionState` + rollback statü yardımcısı `resolveOrderStatusAfterDeliveryRollback` (`packages/domain`), API testleri `delivery-order-status-writeback.test.ts`; `commercial-core` rollback yolu domain helper kullanır.
+- [ ] Fatura / iade hatlarında stok + hesap tutarlılığı (onaylı mutation zinciri) — ERP/stok ledger + execution dispatcher; `calculateReturnImpact` için contract testleri aynı dosyada (foundation).
 
 ## Faz D — Onay ve worker
 
@@ -87,3 +87,4 @@ pnpm smoke:production-safety
 - [x] Postgres modu / prod: DB hatasında `persistence_unavailable` (sessiz mock başarı yok); 005 + API persistence testleri.
 - [x] Tahsilat `payment_allocations` tablosu + API repository (onayda persist, liste/get DB satırları; demo seed örnek satır).
 - [x] Depo emri satır/görev: `warehouse_order_lines`, `warehouse_tasks` migration + commercial-core DB read/write; demo seed satır/görev örneği.
+- [x] Teslimat → sipariş write-back domain contract + `delivery-order-status-writeback.test.ts` (rollback statü helper dahil).

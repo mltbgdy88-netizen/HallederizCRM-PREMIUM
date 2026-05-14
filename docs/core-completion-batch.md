@@ -35,6 +35,7 @@ olaylari icin audit write-back eklendi.
 ## Hala Foundation Olan Alanlar
 - Tahsilat allocation icin coklu hedef (fatura + siparis karma) ve operator duzenleme UI/API henuz tam degil; temel tablo + tek aday siparis foundation persist mevcut.
 - Depo satir `prepared_quantity` / gorev durumu icin operasyonel write-back (toplu toplama UI) ve cok-depo senaryolari foundation seviyesinde.
+- Fatura / iade hatlarinda ERP stok ledger + hesap mutabakatı onayli execution dispatcher ile baglanacak; `calculateReturnImpact` contract testleri API paketinde.
 - Local agent OS-level printer varyasyonlari ve ileri retry politikasi foundation seviyesinde.
 
 ## Dogrulama
