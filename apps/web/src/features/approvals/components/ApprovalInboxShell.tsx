@@ -1,5 +1,14 @@
 "use client";
 
+import {
+  FilterChip,
+  FilterToolbar,
+  FilterToolbarChips,
+  FilterToolbarRow,
+  FilterToolbarSearch,
+  FilterToolbarViews,
+  SplitContentLayout
+} from "@hallederiz/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../../providers/auth-provider";
 import { useToast } from "../../../providers/toast-provider";
@@ -25,7 +34,7 @@ import {
   type LastApprovalActionSummary
 } from "../utils/operator-smoke";
 import { ApprovalDetailPanel } from "./ApprovalDetailPanel";
-import { EmptyState, ErrorState, LoadingState } from "./ApprovalInboxStates";
+import { ApprovalInboxEmpty, ApprovalInboxError, ApprovalInboxLoading } from "./ApprovalInboxStates";
 import { ApprovalList } from "./ApprovalList";
 import { ApprovalOperatorSmokePanel } from "./ApprovalOperatorSmokePanel";
 import { ApprovalSafetyBadge } from "./ApprovalSafetyBadge";
@@ -296,12 +305,12 @@ export function ApprovalInboxShell() {
   };
 
   if (state === "loading") {
-    return <LoadingState />;
+    return <ApprovalInboxLoading />;
   }
 
   if (state === "anonymous") {
     return (
-      <EmptyState
+      <ApprovalInboxEmpty
         title="Oturum gerekli"
         description="Onay inbox verilerini gormek icin giris yapin. UI sahte onay verisi gostermez."
       />
@@ -365,80 +374,92 @@ export function ApprovalInboxShell() {
         </p>
       ) : null}
 
-      <div className="hz-approvals-inbox-filters" role="toolbar" aria-label="Durum filtresi">
-        {FILTER_OPTIONS.map((option) => (
-          <button
-            key={option.id}
-            type="button"
-            className={`hz-approvals-inbox-filter${filter === option.id ? " is-active" : ""}`}
-            onClick={() => setFilter(option.id)}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="hz-approvals-inbox-toolbar">
-        <label className="hz-approvals-inbox-search">
-          <span className="hz-approvals-inbox-search-label">Ara</span>
-          <input
-            type="search"
-            className="hz-approvals-inbox-input"
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="approvalRequestId, actionKey, actor veya reason"
-          />
-        </label>
-        <label className="hz-approvals-inbox-sort">
-          <span className="hz-approvals-inbox-sort-label">Siralama</span>
-          <select className="hz-approvals-inbox-input" value={sortMode} onChange={(event) => setSortMode(event.target.value as ApprovalInboxSortMode)}>
-            {SORT_OPTIONS.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
+      <div role="toolbar" aria-label="Onay inbox filtreleri">
+        <FilterToolbar>
+          <FilterToolbarRow>
+            <FilterToolbarChips>
+              {FILTER_OPTIONS.map((option) => (
+                <FilterChip key={option.id} active={filter === option.id} onClick={() => setFilter(option.id)}>
+                  {option.label}
+                </FilterChip>
+              ))}
+            </FilterToolbarChips>
+          </FilterToolbarRow>
+          <FilterToolbarRow>
+            <FilterToolbarSearch>
+              <label className="hz-approvals-inbox-search">
+                <span className="hz-approvals-inbox-search-label">Ara</span>
+                <input
+                  type="search"
+                  className="hz-approvals-inbox-input"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="approvalRequestId, actionKey, actor veya reason"
+                />
+              </label>
+            </FilterToolbarSearch>
+            <FilterToolbarViews>
+              <label className="hz-approvals-inbox-sort">
+                <span className="hz-approvals-inbox-sort-label">Siralama</span>
+                <select
+                  className="hz-approvals-inbox-input"
+                  value={sortMode}
+                  onChange={(event) => setSortMode(event.target.value as ApprovalInboxSortMode)}
+                >
+                  {SORT_OPTIONS.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </FilterToolbarViews>
+          </FilterToolbarRow>
+        </FilterToolbar>
       </div>
 
       <p className="hz-approvals-inbox-summary">{filterSummary}</p>
 
-      <div className="hz-approvals-inbox-layout">
-        <section className="hz-approvals-inbox-main">
-          {loadingList ? <LoadingState /> : null}
-          {!loadingList && listError ? <ErrorState error={listError} onRetry={() => void refreshList()} /> : null}
-          {!loadingList && !listError && items.length === 0 ? (
-            <EmptyState
-              title="Liste bos"
-              description={
-                sandboxToolbarVisible
-                  ? "API gercek zamanli bos dondu. Sahte kayit gosterilmez; asagidaki sandbox araci ile demo onaylari olusturabilirsiniz."
-                  : "API gercek zamanli bos dondu. Sahte kayit gosterilmez."
-              }
-            />
-          ) : null}
-          {!loadingList && !listError && items.length > 0 && visibleItems.length === 0 ? (
-            <EmptyState title="Filtreye uygun onay yok" description="Durum, arama veya siralama kriterlerini degistirin." />
-          ) : null}
-          {!loadingList && !listError && visibleItems.length > 0 ? (
-            <ApprovalList items={visibleItems} selectedId={selectedId} onSelect={setSelectedId} />
-          ) : null}
-        </section>
-
-        <section className="hz-approvals-inbox-side">
-          {loadingDetail ? <LoadingState label="Detay yukleniyor..." /> : null}
-          {!loadingDetail && detailError ? <ErrorState error={detailError} onRetry={() => selectedId && void refreshDetail(selectedId)} /> : null}
-          {!loadingDetail && !detailError ? (
-            <ApprovalDetailPanel
-              item={detail}
-              busy={busyAction}
-              lastApprovalSummary={lastApprovalSummary}
-              onApprove={() => void handleApprove()}
-              onReject={(reason) => void handleReject(reason)}
-            />
-          ) : null}
-        </section>
-      </div>
+      <SplitContentLayout
+        sideWidth="detail"
+        main={
+          <>
+            {loadingList ? <ApprovalInboxLoading /> : null}
+            {!loadingList && listError ? <ApprovalInboxError error={listError} onRetry={() => void refreshList()} /> : null}
+            {!loadingList && !listError && items.length === 0 ? (
+              <ApprovalInboxEmpty
+                title="Liste bos"
+                description={
+                  sandboxToolbarVisible
+                    ? "API gercek zamanli bos dondu. Sahte kayit gosterilmez; asagidaki sandbox araci ile demo onaylari olusturabilirsiniz."
+                    : "API gercek zamanli bos dondu. Sahte kayit gosterilmez."
+                }
+              />
+            ) : null}
+            {!loadingList && !listError && items.length > 0 && visibleItems.length === 0 ? (
+              <ApprovalInboxEmpty title="Filtreye uygun onay yok" description="Durum, arama veya siralama kriterlerini degistirin." />
+            ) : null}
+            {!loadingList && !listError && visibleItems.length > 0 ? (
+              <ApprovalList items={visibleItems} selectedId={selectedId} onSelect={setSelectedId} />
+            ) : null}
+          </>
+        }
+        side={
+          <>
+            {loadingDetail ? <ApprovalInboxLoading label="Detay yükleniyor…" /> : null}
+            {!loadingDetail && detailError ? <ApprovalInboxError error={detailError} onRetry={() => selectedId && void refreshDetail(selectedId)} /> : null}
+            {!loadingDetail && !detailError ? (
+              <ApprovalDetailPanel
+                item={detail}
+                busy={busyAction}
+                lastApprovalSummary={lastApprovalSummary}
+                onApprove={() => void handleApprove()}
+                onReject={(reason) => void handleReject(reason)}
+              />
+            ) : null}
+          </>
+        }
+      />
     </main>
   );
 }

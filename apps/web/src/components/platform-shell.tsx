@@ -3,6 +3,7 @@
 import {
   AppShell,
   Header,
+  PageContent,
   Sidebar,
   ThemeToggle,
   UserMenu,
@@ -74,6 +75,8 @@ const PAGE_META: Array<[string, PageMeta]> = [
   ["/fabrikalar", { title: "Fabrikalar", subtitle: "Fabrika stok ve siparis gorunurlugu.", breadcrumb: "Fabrikalar" }],
   ["/erp", { title: "ERP", subtitle: "Baglantilar, eslemeler ve senkron paneli.", breadcrumb: "ERP" }],
   ["/whatsapp", { title: "WhatsApp", subtitle: "Kanal bazli operasyon ve iletisim paneli.", breadcrumb: "WhatsApp" }],
+  ["/gelen-kutu", { title: "Gelen Kutu", subtitle: "Cok kanalli iletisim merkezi ve konusma kuyrugu.", breadcrumb: "Gelen Kutu" }],
+  ["/gelen-kutu/konusma/", { title: "Konusma", subtitle: "Tekil konusma ve mesaj baglami.", breadcrumb: "Gelen Kutu / Konusma" }],
   ["/ai", { title: "AI", subtitle: "Asistan, onay ve icgoru paneli.", breadcrumb: "AI" }],
   ["/belgeler", { title: "Belgeler", subtitle: "Belge uretim, dagitim ve arsiv takibi.", breadcrumb: "Belgeler" }],
   ["/raporlar", { title: "Raporlar", subtitle: "Operasyonel metrikler ve karar destek raporlari.", breadcrumb: "Raporlar" }],
@@ -156,12 +159,32 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
   const isQuickOperation = normalizedPath === "/hizli-islem";
   const isApprovalsList = normalizedPath.startsWith("/onaylar");
   const isWhatsApp = normalizedPath === "/whatsapp" || normalizedPath === "/gelen-kutu/whatsapp";
+  const isGelenKutuUnified = normalizedPath === "/gelen-kutu" || normalizedPath.startsWith("/gelen-kutu/konusma/");
   const isCustomersList = normalizedPath === "/cariler";
   const isStockList = normalizedPath === "/stok";
+  const isOrdersList = normalizedPath === "/siparisler";
+  const isOffersList = normalizedPath === "/teklifler";
+  const isPaymentsList = normalizedPath === "/tahsilatlar";
   const isArchiveList = normalizedPath === "/archive";
   const isReportsList = normalizedPath === "/raporlar";
-  const isSettingsCenter = normalizedPath === "/ayarlar";
+  const isSettingsArea = normalizedPath === "/ayarlar" || normalizedPath.startsWith("/ayarlar/");
   const isWarehousePrep = normalizedPath === "/depo" || normalizedPath.startsWith("/depo/");
+  const isTasksWorkspace = normalizedPath === "/gorevler";
+  const isCustomersEntityDetail =
+    normalizedPath.startsWith("/cariler/") && normalizedPath !== "/cariler/yeni" && normalizedPath !== "/cariler/liste";
+  const isOrdersEntityDetail =
+    normalizedPath.startsWith("/siparisler/") && normalizedPath !== "/siparisler/yeni" && normalizedPath !== "/siparisler/liste";
+  const isOffersEntityDetail =
+    normalizedPath.startsWith("/teklifler/") && normalizedPath !== "/teklifler/yeni" && normalizedPath !== "/teklifler/liste";
+  const isPaymentsEntityDetail =
+    normalizedPath.startsWith("/tahsilatlar/") &&
+    normalizedPath !== "/tahsilatlar/yeni" &&
+    normalizedPath !== "/tahsilatlar/liste";
+  const isEntityFormNew =
+    normalizedPath === "/cariler/yeni" ||
+    normalizedPath === "/siparisler/yeni" ||
+    normalizedPath === "/teklifler/yeni" ||
+    normalizedPath === "/tahsilatlar/yeni";
 
   const dashboardGreeting = useMemo(() => {
     const display = session?.user.fullName?.trim() || "Ahmet Yılmaz";
@@ -194,12 +217,22 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
             isQuickOperation ||
             isApprovalsList ||
             isWhatsApp ||
+            isGelenKutuUnified ||
             isCustomersList ||
             isStockList ||
+            isOrdersList ||
+            isOffersList ||
+            isPaymentsList ||
             isArchiveList ||
             isReportsList ||
-            isSettingsCenter ||
+            isSettingsArea ||
             isWarehousePrep ||
+            isTasksWorkspace ||
+            isCustomersEntityDetail ||
+            isOrdersEntityDetail ||
+            isOffersEntityDetail ||
+            isPaymentsEntityDetail ||
+            isEntityFormNew ||
             shouldSuppressShellPageMeta(normalizedPath)
           }
           title={pageMeta.title}
@@ -209,23 +242,43 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
           searchPlaceholder={
             isDashboard
               ? "Ara (Cari, Sipariş, Ürün, Belge...)"
-              : isApprovalsList
+              : isTasksWorkspace
+                ? "Gorev no, baslik, atanan, musteri veya kayit ara..."
+                : isApprovalsList
                 ? "Cari, onay no, belge no, tutar ara..."
                 : isWhatsApp
                   ? "Cari, telefon, mesaj, belge no veya tutar ara..."
-                  : isCustomersList
+                  : isGelenKutuUnified
+                    ? "Konuşma no, kanal, müşteri, telefon veya durum ara..."
+                    : isCustomersList
                     ? "Cari, telefon, vergi no, şehir veya bakiye ara..."
                     : isStockList
                       ? "Ürün kodu, barkod, marka, depo, raf veya fiyat ara..."
-                      : isWarehousePrep
-                        ? "Belge no, cari, ürün, raf veya depo görevlisi ara..."
-                        : isArchiveList
-                        ? "Belge no, cari, işlem, tarih, kullanıcı veya etiket ara..."
-                        : isReportsList
-                          ? "Rapor, cari, belge, tarih, metrik veya kullanıcı ara..."
-                          : isSettingsCenter
-                            ? "Ayar, kullanıcı, bağlantı, depo, fiyat veya belge ara..."
-                            : "Cari, siparis, urun kodu veya barkod ara"
+                      : isOrdersList
+                        ? "Sipariş no, müşteri, kanal, ödeme veya teslimat durumu ara..."
+                        : isOffersList
+                          ? "Teklif no, müşteri, durum, fiyat grubu veya geçerlilik ara..."
+                          : isPaymentsList
+                            ? "Fiş no, müşteri, tutar, yöntem veya belge bağlantısı ara..."
+                            : isWarehousePrep
+                              ? "Belge no, cari, ürün, raf veya depo görevlisi ara..."
+                              : isArchiveList
+                                ? "Belge no, cari, işlem, tarih, kullanıcı veya etiket ara..."
+                                : isReportsList
+                                  ? "Rapor, cari, belge, tarih, metrik veya kullanıcı ara..."
+                                  : isSettingsArea
+                                    ? "Ayar, kullanıcı, bağlantı, depo, fiyat veya belge ara..."
+                                    : isCustomersEntityDetail
+                                      ? "Cari kartı: iletişim, hesap, teklif veya ekstre notu ara..."
+                                      : isOrdersEntityDetail
+                                        ? "Sipariş detayı: satır, belge no veya referans ara..."
+                                        : isOffersEntityDetail
+                                          ? "Teklif detayı: satır, follow-up veya belge ara..."
+                                          : isPaymentsEntityDetail
+                                            ? "Tahsilat detayı: fiş, allocation veya belge ara..."
+                                            : isEntityFormNew
+                                              ? "Yeni kayıt: müşteri, belge no, tutar veya referans ara..."
+                                              : "Cari, siparis, urun kodu veya barkod ara"
           }
           toolbarSlot={
             isDashboard ? (
@@ -268,7 +321,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
         />
       }
     >
-      <div className="platform-content">{children}</div>
+      <PageContent>{children}</PageContent>
     </AppShell>
   );
 }

@@ -1,5 +1,6 @@
 "use client";
 
+import { DetailPanel } from "@hallederiz/ui";
 import { useState } from "react";
 import type { ApprovalInboxItem } from "../types";
 import type { LastApprovalActionSummary } from "../utils/operator-smoke";
@@ -8,7 +9,7 @@ import { ApprovalOutboxStatusCard } from "./ApprovalOutboxStatusCard";
 import { ApprovalRiskSummary } from "./ApprovalRiskSummary";
 import { ApprovalStatusBadge } from "./ApprovalStatusBadge";
 import { ApprovalTimelinePreview } from "./ApprovalTimelinePreview";
-import { EmptyState } from "./ApprovalInboxStates";
+import { ApprovalInboxEmpty } from "./ApprovalInboxStates";
 import { summarizeGateDecision } from "../utils/inbox-helpers";
 
 function formatDate(value?: string): string {
@@ -34,9 +35,9 @@ export function ApprovalDetailPanel({
 
   if (!item) {
     return (
-      <aside className="hz-approvals-inbox-detail">
-        <EmptyState title="Onay secin" description="Listeden bir kayit secerek detay, risk ve aksiyonlari goruntuleyin." />
-      </aside>
+      <DetailPanel className="hz-approvals-inbox-detail">
+        <ApprovalInboxEmpty title="Onay seçin" description="Listeden bir kayıt seçerek detay, risk ve aksiyonları görüntüleyin." />
+      </DetailPanel>
     );
   }
 
@@ -54,7 +55,7 @@ export function ApprovalDetailPanel({
   };
 
   return (
-    <aside className="hz-approvals-inbox-detail" aria-labelledby="approval-detail-title">
+    <DetailPanel className="hz-approvals-inbox-detail" aria-labelledby="approval-detail-title">
       <header className="hz-approvals-inbox-detail-head">
         <p className="hz-approvals-inbox-eyebrow">Approval request</p>
         <div className="hz-approvals-inbox-detail-id-row">
@@ -209,6 +210,6 @@ export function ApprovalDetailPanel({
       <ApprovalTimelinePreview item={item} />
       <ApprovalOutboxStatusCard item={item} />
       <ApprovalActionBar item={item} busy={busy} onApprove={onApprove} onReject={onReject} />
-    </aside>
+    </DetailPanel>
   );
 }

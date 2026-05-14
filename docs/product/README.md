@@ -16,6 +16,13 @@
 | Doküman | Açıklama |
 |---------|----------|
 | [quick-operation-center.md](./quick-operation-center.md) | Hızlı İşlem merkezi ürün notları |
+| [UI_INVENTORY_CHECKLIST.md](./UI_INVENTORY_CHECKLIST.md) | Route tabanlı UI envanteri (görev 01); on gruba ayrılmış checklist |
+| [DESIGN_TOKENS.md](./DESIGN_TOKENS.md) | Ortak design token referansı (görev 02); `globals.css` ile senkron |
+| [UI_PRIMITIVES.md](./UI_PRIMITIVES.md) | `@hallederiz/ui` primitive bileşenleri ve `hz-ui-*` sınıf özeti (görev 03) |
+| [APPSHELL_LAYOUT.md](./APPSHELL_LAYOUT.md) | AppShell, `PageContent`, split layout sözleşmesi (görev 04) |
+| [UI_LAYOUT_PATTERNS.md](./UI_LAYOUT_PATTERNS.md) | Filtre bandı, tablo kabuğu, liste/detay/rapor/ayar şablonları (05–07, 12, 15, 17, 19–20) |
+| [UI_SCREENS_IMPLEMENTATION_BACKLOG.md](./UI_SCREENS_IMPLEMENTATION_BACKLOG.md) | Ekran bazlı sıradaki işler (08–11, 13–14, 16, 18, 22) |
+| [UI_TRANSFORMATION_TASKS.md](./UI_TRANSFORMATION_TASKS.md) | UI dönüşüm programı kanonik görev backlog’u (Tasks 01–22) |
 
 ## Üst seviye referanslar
 

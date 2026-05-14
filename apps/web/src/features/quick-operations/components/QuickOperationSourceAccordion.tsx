@@ -8,7 +8,7 @@ interface Props {
 
 export function QuickOperationSourceAccordion({ line, onSelectSource }: Props) {
   return (
-    <div className="hz-content-card" style={{ marginTop: 6 }}>
+    <div className="hz-content-card hz-qop-source-accordion">
       <div className="crm-identity-header">
         <div>
           <h3>Satir Kaynak Secimi</h3>

@@ -42,6 +42,10 @@ Tarih: 28 Nisan 2026
 - `packages/database/src/seeds/demo-seed.sql` ile pilot senaryo uyumlu seed foundation eklendi.
 - Query executor katmani demo/postgres modlariyla ayrildi.
 
+## Yürütme kuyruğu
+
+Üretim ve gerçek ürün kesimi için faz sıralı görev listesi: [PRODUCTION_EXECUTION_QUEUE.md](./development/PRODUCTION_EXECUTION_QUEUE.md).
+
 ## Siradaki Gecis Hedefleri
 
 1. `warehouse_orders` ve `warehouse_order_lines` icin order create-warehouse-order write parity'yi genisletmek.

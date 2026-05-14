@@ -1,9 +1,10 @@
 "use client";
 
-import { EmptyState, LoadingState, PageHeader, SplitContentLayout, TabSwitcher } from "@hallederiz/ui";
+import { EmptyState, EntityDetailLayout, FormPageShell, FormValidationSummary, LoadingState, PageHeader, TabSwitcher } from "@hallederiz/ui";
 import type { Customer, Delivery, Invoice, PaymentReceipt, SaleOrder, WarehouseOrder } from "@hallederiz/types";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useToast } from "../../../providers/toast-provider";
 import { OrderActionButtons } from "./OrderActionButtons";
 import { OrderApprovalSummaryModal } from "./OrderApprovalSummaryModal";
 import { OrderHeaderInfo } from "./OrderHeaderInfo";
@@ -24,6 +25,7 @@ const tabs = ["Genel", "Satirlar", "Kaynak Plani", "Tahsilatlar", "Depo", "Tesli
 
 export function OrderDetailPage({ orderId, sourceOfferId, customerId }: { orderId?: string; sourceOfferId?: string | null; customerId?: string | null }) {
   const router = useRouter();
+  const { pushToast } = useToast();
   const [order, setOrder] = useState<SaleOrder | null>(null);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [payments, setPayments] = useState<PaymentReceipt[]>([]);
@@ -34,6 +36,7 @@ export function OrderDetailPage({ orderId, sourceOfferId, customerId }: { orderI
   const [activeTab, setActiveTab] = useState("Genel");
   const [sourcingOpen, setSourcingOpen] = useState(false);
   const [approvalOpen, setApprovalOpen] = useState(false);
+  const [draftSaved, setDraftSaved] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -60,6 +63,10 @@ export function OrderDetailPage({ orderId, sourceOfferId, customerId }: { orderI
     };
   }, [orderId, sourceOfferId, customerId]);
 
+  useEffect(() => {
+    setDraftSaved(false);
+  }, [orderId, sourceOfferId, customerId]);
+
   const customer = useMemo(() => customers.find((item) => item.id === order?.customerId) ?? null, [customers, order?.customerId]);
   const orderPayments = useMemo(
     () => payments.filter((payment) => payment.allocations.some((allocation) => allocation.targetId === order?.id)),
@@ -72,6 +79,14 @@ export function OrderDetailPage({ orderId, sourceOfferId, customerId }: { orderI
   const relatedDelivery = useMemo(() => deliveries.find((delivery) => delivery.orderId === order?.id) ?? null, [deliveries, order?.id]);
   const relatedInvoice = useMemo(() => invoices.find((invoice) => invoice.orderId === order?.id) ?? null, [invoices, order?.id]);
 
+  const newFormHints = useMemo(
+    () =>
+      !orderId
+        ? ["Taslak sipariş: kaydet yalnızca demo; kesinleştirme onay ve execution zincirinden geçer."]
+        : [],
+    [orderId]
+  );
+
   if (loading) {
     return <LoadingState title="Siparis yukleniyor" message="Satirlar, kaynak plani, tahsilat ve depo baglamlari hazirlaniyor." />;
   }
@@ -81,36 +96,69 @@ export function OrderDetailPage({ orderId, sourceOfferId, customerId }: { orderI
   }
 
   return (
-    <div className="hz-page-stack">
-      <PageHeader
-        title={orderId ? "Siparis Detayi" : "Yeni Siparis"}
-        description="Siparis merkezli operasyon, tahsilat, kaynak plani ve depo zinciri."
-      />
-      <OrderHeaderInfo order={order} customer={customer} />
-      <OrderActionButtons
-        onSourcing={() => setSourcingOpen(true)}
-        onApproval={() => setApprovalOpen(true)}
-        onPayment={() => router.push(`/tahsilatlar/yeni?order=${order.id}`)}
-        onWarehouse={() => router.push(orderWarehouseOrders[0] ? `/depo/emirler/${orderWarehouseOrders[0].id}` : "/depo")}
-        onDelivery={() => router.push(relatedDelivery ? `/teslimatlar/${relatedDelivery.id}` : "/teslimatlar")}
-        onInvoice={() => router.push(relatedInvoice ? `/faturalar/${relatedInvoice.id}` : "/faturalar")}
-      />
-
-      <SplitContentLayout
-        main={
-          <section className="hz-content-card">
-            <TabSwitcher items={tabs.map((tab) => ({ key: tab, label: tab }))} activeKey={activeTab} onChange={setActiveTab} />
-            {activeTab === "Genel" ? <div className="hz-tab-content"><OrderTopForm order={order} customer={customer} /><OrderLineEntryBar order={order} /></div> : null}
-            {activeTab === "Satirlar" ? <OrderLinesTable lines={order.lines} /> : null}
-            {activeTab === "Kaynak Plani" ? <SourcingPlanInline order={order} /> : null}
-            {activeTab === "Tahsilatlar" ? <PaymentsInline payments={orderPayments} /> : null}
-            {activeTab === "Depo" ? <WarehouseOrderPanel order={order} warehouseOrders={orderWarehouseOrders} /> : null}
-            {activeTab === "Teslim" ? <DeliveryInline order={order} warehouseOrders={orderWarehouseOrders} delivery={relatedDelivery} /> : null}
-            {activeTab === "Belgeler" ? <DocumentsInline order={order} invoice={relatedInvoice} /> : null}
-            {activeTab === "Timeline" ? <OrderTimelinePanel order={order} payments={orderPayments} warehouseOrders={orderWarehouseOrders} /> : null}
-          </section>
+    <div className="hz-orders-detail-page">
+      <EntityDetailLayout
+        summary={
+          <>
+            <PageHeader
+              title={orderId ? "Sipariş detayı" : "Yeni sipariş"}
+              description="Sipariş merkezli operasyon, tahsilat, kaynak planı ve depo zinciri."
+            />
+            <OrderHeaderInfo order={order} customer={customer} />
+            <OrderActionButtons
+              onSourcing={() => setSourcingOpen(true)}
+              onApproval={() => setApprovalOpen(true)}
+              onPayment={() => router.push(`/tahsilatlar/yeni?order=${order.id}`)}
+              onWarehouse={() => router.push(orderWarehouseOrders[0] ? `/depo/emirler/${orderWarehouseOrders[0].id}` : "/depo")}
+              onDelivery={() => router.push(relatedDelivery ? `/teslimatlar/${relatedDelivery.id}` : "/teslimatlar")}
+              onInvoice={() => router.push(relatedInvoice ? `/faturalar/${relatedInvoice.id}` : "/faturalar")}
+            />
+          </>
         }
-        side={<OrderSideSummaryPanel order={order} customer={customer} payments={orderPayments} warehouseOrders={orderWarehouseOrders} />}
+        sections={
+          <FormPageShell
+            className="hz-orders-form"
+            stickyActions={
+              !orderId ? (
+                <>
+                  <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn" onClick={() => router.push("/siparisler")}>
+                    Vazgeç
+                  </button>
+                  <button
+                    type="button"
+                    className="hz-btn hz-btn-primary hz-toolbar-btn"
+                    disabled={draftSaved}
+                    onClick={() => {
+                      pushToast("Sipariş taslağı kaydedildi (demo).");
+                      setDraftSaved(true);
+                    }}
+                  >
+                    Taslak kaydet
+                  </button>
+                </>
+              ) : undefined
+            }
+          >
+            <FormValidationSummary variant="info" title="Bilgi" messages={newFormHints} />
+            <section className="hz-content-card">
+              <TabSwitcher items={tabs.map((tab) => ({ key: tab, label: tab }))} activeKey={activeTab} onChange={setActiveTab} />
+              {activeTab === "Genel" ? (
+                <div className="hz-tab-content">
+                  <OrderTopForm order={order} customer={customer} />
+                  <OrderLineEntryBar order={order} />
+                </div>
+              ) : null}
+              {activeTab === "Satirlar" ? <OrderLinesTable lines={order.lines} /> : null}
+              {activeTab === "Kaynak Plani" ? <SourcingPlanInline order={order} /> : null}
+              {activeTab === "Tahsilatlar" ? <PaymentsInline payments={orderPayments} /> : null}
+              {activeTab === "Depo" ? <WarehouseOrderPanel order={order} warehouseOrders={orderWarehouseOrders} /> : null}
+              {activeTab === "Teslim" ? <DeliveryInline order={order} warehouseOrders={orderWarehouseOrders} delivery={relatedDelivery} /> : null}
+              {activeTab === "Belgeler" ? <DocumentsInline order={order} invoice={relatedInvoice} /> : null}
+              {activeTab === "Timeline" ? <OrderTimelinePanel order={order} payments={orderPayments} warehouseOrders={orderWarehouseOrders} /> : null}
+            </section>
+          </FormPageShell>
+        }
+        sidebar={<OrderSideSummaryPanel order={order} customer={customer} payments={orderPayments} warehouseOrders={orderWarehouseOrders} />}
       />
 
       <SourcingPlanModal open={sourcingOpen} order={order} onClose={() => setSourcingOpen(false)} />

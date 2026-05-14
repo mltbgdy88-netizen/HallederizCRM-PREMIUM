@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ImportApplyResult, ImportHistoryRecord, ImportPreviewResult, ImportType } from "@hallederiz/types";
 import { FilterActions, FilterBar, FilterGrid, MetricCard, PageHeader, Pagination, SplitContentLayout, TabSwitcher } from "@hallederiz/ui";
+import { SettingsAreaShell } from "../../settings/components/SettingsAreaShell";
 import {
   applyImportApi,
   getImportErrorReportApi,
@@ -190,7 +191,8 @@ export function DataImportPage() {
   };
 
   return (
-    <div className="hz-page-stack">
+    <SettingsAreaShell>
+      <>
       <PageHeader
         title="Veri Yukleme Merkezi"
         description="Cari, urun, fiyat, depo ve stok verilerini parse/validate/preview/apply akisiyla sisteme alin."
@@ -450,6 +452,7 @@ export function DataImportPage() {
           }
         />
       )}
-    </div>
+    </>
+    </SettingsAreaShell>
   );
 }

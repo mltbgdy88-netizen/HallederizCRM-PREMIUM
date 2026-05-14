@@ -1,7 +1,8 @@
 import type { ArchiveRecord } from "../types";
+import { dataSourceConfig } from "../../../lib/data-source";
 
-/** Gerçek API bağlandığında false yapın; önizleme bandı ve örnek satırlar gizlenir. */
-export const ARCHIVE_USE_DEMO_DATA = true;
+/** `NEXT_PUBLIC_USE_DEMO_DATA` ile uyumlu; API modunda `false` iken örnek satırlar kullanılmaz. */
+export const ARCHIVE_USE_DEMO_DATA = dataSourceConfig.useDemoData;
 
 export const ARCHIVE_DEMO_RECORDS: ArchiveRecord[] = [
   {

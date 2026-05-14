@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { MetricCard, PageHeader, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
+import { SettingsAreaShell } from "./SettingsAreaShell";
 import type { PilotReadinessItem, PilotReadinessSummary } from "../../../services/api";
 import { getPilotReadinessData } from "../queries";
 
@@ -156,6 +157,7 @@ export function PilotReadinessPage() {
   };
 
   return (
+    <SettingsAreaShell>
     <div className="hz-page-stack">
       <PageHeader
         title="Kullanim Hazirligi Merkezi"
@@ -340,5 +342,6 @@ export function PilotReadinessPage() {
         }
       />
     </div>
+    </SettingsAreaShell>
   );
 }

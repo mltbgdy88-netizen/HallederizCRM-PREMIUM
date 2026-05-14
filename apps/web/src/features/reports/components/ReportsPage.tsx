@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { ReportAnalyticsShell } from "@hallederiz/ui";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   IconArchive,
@@ -94,6 +95,24 @@ function formatUpdated(iso: string): string {
     hour: "2-digit",
     minute: "2-digit"
   }).format(new Date(iso));
+}
+
+function ReportsMiniTrendChart() {
+  const bars = [22, 32, 26, 40, 36, 44, 28];
+  const labels = ["Pt", "Sa", "Ça", "Pe", "Cu", "Ct", "Pz"];
+  return (
+    <div className="hz-reports-mini-trend" role="img" aria-label="Haftalık indeks (demonstrasyon)">
+      <div className="hz-reports-mini-trend-cap">Haftalık indeks (demo)</div>
+      <div className="hz-reports-mini-trend-inner">
+        {bars.map((h, i) => (
+          <div key={labels[i]} className="hz-reports-mini-trend-col">
+            <div className="hz-reports-mini-trend-bar" style={{ height: `${h}px` }} />
+            <span className="hz-reports-mini-trend-lbl">{labels[i]}</span>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
 }
 
 export function ReportsPage() {
@@ -255,290 +274,299 @@ export function ReportsPage() {
             </div>
           </header>
 
-          <section className="hz-reports-kpi-strip" aria-label="Özet KPI">
-            <div className="hz-reports-kpi hz-reports-kpi--primary">
-              <span className="hz-reports-kpi-ico" aria-hidden>
-                <IconTrendingUp size={12} />
-              </span>
-              <span className="hz-reports-kpi-text">
-                <span className="hz-reports-kpi-label">Ciro</span>
-                <span className="hz-reports-kpi-value">{KPI.ciro}</span>
-              </span>
-            </div>
-            <div className="hz-reports-kpi hz-reports-kpi--success">
-              <span className="hz-reports-kpi-ico" aria-hidden>
-                <IconWallet size={12} />
-              </span>
-              <span className="hz-reports-kpi-text">
-                <span className="hz-reports-kpi-label">Tahsilat</span>
-                <span className="hz-reports-kpi-value">{KPI.tahsilat}</span>
-              </span>
-            </div>
-            <div className="hz-reports-kpi hz-reports-kpi--warn">
-              <span className="hz-reports-kpi-ico" aria-hidden>
-                <IconBanknote size={12} />
-              </span>
-              <span className="hz-reports-kpi-text">
-                <span className="hz-reports-kpi-label">Açık Bakiye</span>
-                <span className="hz-reports-kpi-value">{KPI.acik}</span>
-              </span>
-            </div>
-            <div className="hz-reports-kpi hz-reports-kpi--danger">
-              <span className="hz-reports-kpi-ico" aria-hidden>
-                <IconPackage size={12} />
-              </span>
-              <span className="hz-reports-kpi-text">
-                <span className="hz-reports-kpi-label">Kritik Stok</span>
-                <span className="hz-reports-kpi-value">{KPI.kritikStok}</span>
-              </span>
-            </div>
-            <div className="hz-reports-kpi hz-reports-kpi--cyan">
-              <span className="hz-reports-kpi-ico" aria-hidden>
-                <IconMessageSquare size={12} />
-              </span>
-              <span className="hz-reports-kpi-text">
-                <span className="hz-reports-kpi-label">WhatsApp Dönüşüm</span>
-                <span className="hz-reports-kpi-value">{KPI.waDonusum}</span>
-              </span>
-            </div>
-            <div className="hz-reports-kpi hz-reports-kpi--ai">
-              <span className="hz-reports-kpi-ico" aria-hidden>
-                <IconSparkles size={12} />
-              </span>
-              <span className="hz-reports-kpi-text">
-                <span className="hz-reports-kpi-label">AI Tasarruf</span>
-                <span className="hz-reports-kpi-value">{KPI.aiTasarruf}</span>
-              </span>
-            </div>
-          </section>
-
-          <div className="hz-reports-filter-bar">
-            <div className="hz-reports-filter-row hz-reports-filter-row--single">
-              <div className="hz-reports-filter-field hz-reports-filter-field--type">
-                <label className="hz-reports-filter-label" htmlFor="hz-rep-type">
-                  Rapor tipi
-                </label>
-                <select
-                  id="hz-rep-type"
-                  className="hz-reports-filter-select"
-                  value={reportType}
-                  onChange={(e) => syncFromSelect(e.target.value as ReportTypeSelect)}
-                >
-                  <option value="genel-bakis">Genel Bakış</option>
-                  <option value="satis">Satış Raporu</option>
-                  <option value="tahsilat">Tahsilat Raporu</option>
-                  <option value="stok">Stok Raporu</option>
-                  <option value="iade">İade Raporu</option>
-                  <option value="whatsapp">WhatsApp Performansı</option>
-                  <option value="ai-op">AI Operasyon Raporu</option>
-                </select>
-              </div>
-              <div className="hz-reports-filter-field hz-reports-filter-field--dates">
-                <span className="hz-reports-filter-label" id="hz-rep-dates-lbl">
-                  Tarih aralığı
-                </span>
-                <div className="hz-reports-filter-date-pair" role="group" aria-labelledby="hz-rep-dates-lbl">
-                  <input
-                    type="date"
-                    className="hz-reports-filter-input hz-reports-filter-input--date"
-                    aria-label="Başlangıç"
-                    value={dateFrom}
-                    onChange={(e) => setDateFrom(e.target.value)}
-                  />
-                  <span className="hz-reports-filter-date-sep" aria-hidden>
-                    –
-                  </span>
-                  <input
-                    type="date"
-                    className="hz-reports-filter-input hz-reports-filter-input--date"
-                    aria-label="Bitiş"
-                    value={dateTo}
-                    onChange={(e) => setDateTo(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="hz-reports-filter-field hz-reports-filter-field--select">
-                <label className="hz-reports-filter-label" htmlFor="hz-rep-branch">
-                  Şube / depo
-                </label>
-                <select id="hz-rep-branch" className="hz-reports-filter-select" value={branch} onChange={(e) => setBranch(e.target.value)}>
-                  <option value="all">Tümü</option>
-                  <option value="merkez">Merkez</option>
-                  <option value="a-blok">A Blok</option>
-                  <option value="ana-depo">Ana Depo</option>
-                  <option value="fabrika">Fabrika</option>
-                </select>
-              </div>
-              <div className="hz-reports-filter-field hz-reports-filter-field--select">
-                <label className="hz-reports-filter-label" htmlFor="hz-rep-seg">
-                  Cari segmenti
-                </label>
-                <select id="hz-rep-seg" className="hz-reports-filter-select" value={segment} onChange={(e) => setSegment(e.target.value)}>
-                  <option value="all">Tümü</option>
-                  <option value="bayi">Bayi</option>
-                  <option value="kurumsal">Kurumsal</option>
-                  <option value="perakende">Perakende</option>
-                  <option value="riskli">Riskli</option>
-                </select>
-              </div>
-              <div className="hz-reports-filter-field hz-reports-filter-field--select">
-                <label className="hz-reports-filter-label" htmlFor="hz-rep-ch">
-                  Kanal
-                </label>
-                <select id="hz-rep-ch" className="hz-reports-filter-select" value={channel} onChange={(e) => setChannel(e.target.value)}>
-                  <option value="all">Tümü</option>
-                  <option value="crm">CRM</option>
-                  <option value="whatsapp">WhatsApp</option>
-                  <option value="ai">AI</option>
-                  <option value="erp">ERP</option>
-                </select>
-              </div>
-              <div className="hz-reports-filter-field hz-reports-filter-field--select">
-                <label className="hz-reports-filter-label" htmlFor="hz-rep-cmp">
-                  Karşılaştırma
-                </label>
-                <select id="hz-rep-cmp" className="hz-reports-filter-select" value={compare} onChange={(e) => setCompare(e.target.value)}>
-                  <option value="prev">Önceki dönem</option>
-                  <option value="last-month">Geçen ay</option>
-                  <option value="last-year">Geçen yıl</option>
-                  <option value="target">Hedefe göre</option>
-                </select>
-              </div>
-              <div className="hz-reports-filter-field hz-reports-filter-field--actions">
-                <span className="hz-reports-filter-label hz-reports-filter-label--phantom" aria-hidden="true">
-                  {"\u00a0"}
-                </span>
-                <button
-                  type="button"
-                  className="hz-reports-filter-reset hz-reports-filter-reset--icon"
-                  title="Filtreleri sıfırla"
-                  aria-label="Filtreleri sıfırla"
-                  onClick={resetFilters}
-                >
-                  <IconFilter size={15} />
-                </button>
-              </div>
-            </div>
-          </div>
-
-          <div className="hz-reports-type-tabs" role="tablist" aria-label="Rapor tipi kısayolları">
-            {chips.map((c) => (
-              <button
-                key={c.id === "all" ? "all-chip" : c.id}
-                type="button"
-                role="tab"
-                aria-selected={activeChip === c.id}
-                className={`hz-reports-type-tab${activeChip === c.id ? " hz-reports-type-tab--active" : ""}`}
-                onClick={() => syncFromChip(c.id)}
-              >
-                {c.label}
-              </button>
-            ))}
-          </div>
-
-          {REPORTS_USE_DEMO_DATA ? (
-            <div className="hz-reports-preview-band" role="status">
-              ?nizleme modu: ?rnek rapor metrikleri g?steriliyor.
-              {usageSummary
-                ? ` Tenant usage API bagli: ${usageSummary.totalEvents} olay, limit asimi ${usageSummary.limitExceeded ? "var" : "yok"}.`
-                : " Tenant usage API sonucu yok veya oturum bekleniyor."}
-            </div>
-          ) : null}
-
-          <div className="hz-reports-list-wrap">
-            <div className="hz-reports-list-header" role="row">
-              <div role="columnheader">Metrik / Rapor</div>
-              <div role="columnheader">Segment</div>
-              <div role="columnheader">Dönem</div>
-              <div role="columnheader">Gerçekleşen</div>
-              <div role="columnheader">Hedef</div>
-              <div role="columnheader">Fark</div>
-              <div role="columnheader">Aksiyon</div>
-            </div>
-            <div className="hz-reports-list-body">
-              {!filtered.length ? (
-                <div className="hz-reports-empty" role="status">
-                  <p className="hz-reports-empty-title">Kayıt yok</p>
-                  <p className="hz-reports-empty-text">Filtre veya rapor tipini değiştirin.</p>
-                </div>
-              ) : (
-                filtered.map((row) => (
-                  <div
-                    key={row.id}
-                    role="row"
-                    className={`hz-reports-row${selectedId === row.id ? " hz-reports-row--selected" : ""}`}
-                    tabIndex={0}
-                    onClick={() => setSelectedId(row.id)}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        setSelectedId(row.id);
-                      }
-                    }}
-                  >
-                    <div className="hz-reports-cell hz-reports-cell--stack" role="cell">
-                      <span className="hz-reports-metric-title">{row.title}</span>
-                      <span className="hz-reports-metric-code">{row.code}</span>
+          <ReportAnalyticsShell
+            filters={
+              <>
+                <div className="hz-reports-filter-bar">
+                  <div className="hz-reports-filter-row hz-reports-filter-row--single">
+                    <div className="hz-reports-filter-field hz-reports-filter-field--type">
+                      <label className="hz-reports-filter-label" htmlFor="hz-rep-type">
+                        Rapor tipi
+                      </label>
+                      <select
+                        id="hz-rep-type"
+                        className="hz-reports-filter-select"
+                        value={reportType}
+                        onChange={(e) => syncFromSelect(e.target.value as ReportTypeSelect)}
+                      >
+                        <option value="genel-bakis">Genel Bakış</option>
+                        <option value="satis">Satış Raporu</option>
+                        <option value="tahsilat">Tahsilat Raporu</option>
+                        <option value="stok">Stok Raporu</option>
+                        <option value="iade">İade Raporu</option>
+                        <option value="whatsapp">WhatsApp Performansı</option>
+                        <option value="ai-op">AI Operasyon Raporu</option>
+                      </select>
                     </div>
-                    <div className="hz-reports-cell" role="cell">
-                      <span className="hz-reports-strong hz-reports-ellipsis">{row.segment}</span>
+                    <div className="hz-reports-filter-field hz-reports-filter-field--dates">
+                      <span className="hz-reports-filter-label" id="hz-rep-dates-lbl">
+                        Tarih aralığı
+                      </span>
+                      <div className="hz-reports-filter-date-pair" role="group" aria-labelledby="hz-rep-dates-lbl">
+                        <input
+                          type="date"
+                          className="hz-reports-filter-input hz-reports-filter-input--date"
+                          aria-label="Başlangıç"
+                          value={dateFrom}
+                          onChange={(e) => setDateFrom(e.target.value)}
+                        />
+                        <span className="hz-reports-filter-date-sep" aria-hidden>
+                          –
+                        </span>
+                        <input
+                          type="date"
+                          className="hz-reports-filter-input hz-reports-filter-input--date"
+                          aria-label="Bitiş"
+                          value={dateTo}
+                          onChange={(e) => setDateTo(e.target.value)}
+                        />
+                      </div>
                     </div>
-                    <div className="hz-reports-cell" role="cell">
-                      <span className="hz-reports-muted">{row.periodLabel}</span>
+                    <div className="hz-reports-filter-field hz-reports-filter-field--select">
+                      <label className="hz-reports-filter-label" htmlFor="hz-rep-branch">
+                        Şube / depo
+                      </label>
+                      <select id="hz-rep-branch" className="hz-reports-filter-select" value={branch} onChange={(e) => setBranch(e.target.value)}>
+                        <option value="all">Tümü</option>
+                        <option value="merkez">Merkez</option>
+                        <option value="a-blok">A Blok</option>
+                        <option value="ana-depo">Ana Depo</option>
+                        <option value="fabrika">Fabrika</option>
+                      </select>
                     </div>
-                    <div className="hz-reports-cell" role="cell">
-                      <span className="hz-reports-strong">{row.actualDisplay}</span>
+                    <div className="hz-reports-filter-field hz-reports-filter-field--select">
+                      <label className="hz-reports-filter-label" htmlFor="hz-rep-seg">
+                        Cari segmenti
+                      </label>
+                      <select id="hz-rep-seg" className="hz-reports-filter-select" value={segment} onChange={(e) => setSegment(e.target.value)}>
+                        <option value="all">Tümü</option>
+                        <option value="bayi">Bayi</option>
+                        <option value="kurumsal">Kurumsal</option>
+                        <option value="perakende">Perakende</option>
+                        <option value="riskli">Riskli</option>
+                      </select>
                     </div>
-                    <div className="hz-reports-cell" role="cell">
-                      <span className="hz-reports-muted">{row.targetDisplay}</span>
+                    <div className="hz-reports-filter-field hz-reports-filter-field--select">
+                      <label className="hz-reports-filter-label" htmlFor="hz-rep-ch">
+                        Kanal
+                      </label>
+                      <select id="hz-rep-ch" className="hz-reports-filter-select" value={channel} onChange={(e) => setChannel(e.target.value)}>
+                        <option value="all">Tümü</option>
+                        <option value="crm">CRM</option>
+                        <option value="whatsapp">WhatsApp</option>
+                        <option value="ai">AI</option>
+                        <option value="erp">ERP</option>
+                      </select>
                     </div>
-                    <div className="hz-reports-cell" role="cell">
-                      <span className={diffBadgeClass(row.diffTone)}>{row.diffDisplay}</span>
+                    <div className="hz-reports-filter-field hz-reports-filter-field--select">
+                      <label className="hz-reports-filter-label" htmlFor="hz-rep-cmp">
+                        Karşılaştırma
+                      </label>
+                      <select id="hz-rep-cmp" className="hz-reports-filter-select" value={compare} onChange={(e) => setCompare(e.target.value)}>
+                        <option value="prev">Önceki dönem</option>
+                        <option value="last-month">Geçen ay</option>
+                        <option value="last-year">Geçen yıl</option>
+                        <option value="target">Hedefe göre</option>
+                      </select>
                     </div>
-                    <div className="hz-reports-cell hz-reports-actions" role="cell" onClick={(e) => e.stopPropagation()}>
+                    <div className="hz-reports-filter-field hz-reports-filter-field--actions">
+                      <span className="hz-reports-filter-label hz-reports-filter-label--phantom" aria-hidden="true">
+                        {"\u00a0"}
+                      </span>
                       <button
                         type="button"
-                        className="hz-reports-act-btn hz-reports-act-btn--soft"
-                        aria-label="Detay"
-                        onClick={() => {
-                          setSelectedId(row.id);
-                          pushToast("Metrik seçildi; detay sağ panelde.");
-                        }}
+                        className="hz-reports-filter-reset hz-reports-filter-reset--icon"
+                        title="Filtreleri sıfırla"
+                        aria-label="Filtreleri sıfırla"
+                        onClick={resetFilters}
                       >
-                        Detay
-                      </button>
-                      <button
-                        type="button"
-                        className="hz-reports-act-icon hz-reports-act-icon--labeled"
-                        title="PDF"
-                        aria-label="PDF indir"
-                        disabled={!!rowPdfLocks[row.id]}
-                        onClick={() => {
-                          pushToast("Demo: PDF indirme kuyruğa alındı.");
-                          setRowPdfLocks((s) => ({ ...s, [row.id]: true }));
-                        }}
-                      >
-                        <IconPrinter size={12} />
-                      </button>
-                      <button
-                        type="button"
-                        className="hz-reports-act-icon hz-reports-act-icon--labeled"
-                        title="Excel"
-                        aria-label="Excel indir"
-                        disabled={!!rowXlsLocks[row.id]}
-                        onClick={() => {
-                          pushToast("Demo: Excel indirme kuyruğa alındı.");
-                          setRowXlsLocks((s) => ({ ...s, [row.id]: true }));
-                        }}
-                      >
-                        <IconDownload size={12} />
+                        <IconFilter size={15} />
                       </button>
                     </div>
                   </div>
-                ))
-              )}
-            </div>
-          </div>
+                </div>
+
+                <div className="hz-reports-type-tabs" role="tablist" aria-label="Rapor tipi kısayolları">
+                  {chips.map((c) => (
+                    <button
+                      key={c.id === "all" ? "all-chip" : c.id}
+                      type="button"
+                      role="tab"
+                      aria-selected={activeChip === c.id}
+                      className={`hz-reports-type-tab${activeChip === c.id ? " hz-reports-type-tab--active" : ""}`}
+                      onClick={() => syncFromChip(c.id)}
+                    >
+                      {c.label}
+                    </button>
+                  ))}
+                </div>
+
+                {REPORTS_USE_DEMO_DATA ? (
+                  <div className="hz-reports-preview-band" role="status">
+                    Önizleme modu: örnek rapor metrikleri gösteriliyor.
+                    {usageSummary
+                      ? ` Kiracı kullanım API'si bağlı: ${usageSummary.totalEvents} olay, limit aşımı ${usageSummary.limitExceeded ? "var" : "yok"}.`
+                      : " Kiracı kullanım API sonucu yok veya oturum bekleniyor."}
+                  </div>
+                ) : null}
+              </>
+            }
+            kpis={
+              <section className="hz-reports-kpi-strip" aria-label="Özet KPI">
+                <div className="hz-reports-kpi hz-reports-kpi--primary">
+                  <span className="hz-reports-kpi-ico" aria-hidden>
+                    <IconTrendingUp size={12} />
+                  </span>
+                  <span className="hz-reports-kpi-text">
+                    <span className="hz-reports-kpi-label">Ciro</span>
+                    <span className="hz-reports-kpi-value">{KPI.ciro}</span>
+                  </span>
+                </div>
+                <div className="hz-reports-kpi hz-reports-kpi--success">
+                  <span className="hz-reports-kpi-ico" aria-hidden>
+                    <IconWallet size={12} />
+                  </span>
+                  <span className="hz-reports-kpi-text">
+                    <span className="hz-reports-kpi-label">Tahsilat</span>
+                    <span className="hz-reports-kpi-value">{KPI.tahsilat}</span>
+                  </span>
+                </div>
+                <div className="hz-reports-kpi hz-reports-kpi--warn">
+                  <span className="hz-reports-kpi-ico" aria-hidden>
+                    <IconBanknote size={12} />
+                  </span>
+                  <span className="hz-reports-kpi-text">
+                    <span className="hz-reports-kpi-label">Açık Bakiye</span>
+                    <span className="hz-reports-kpi-value">{KPI.acik}</span>
+                  </span>
+                </div>
+                <div className="hz-reports-kpi hz-reports-kpi--danger">
+                  <span className="hz-reports-kpi-ico" aria-hidden>
+                    <IconPackage size={12} />
+                  </span>
+                  <span className="hz-reports-kpi-text">
+                    <span className="hz-reports-kpi-label">Kritik Stok</span>
+                    <span className="hz-reports-kpi-value">{KPI.kritikStok}</span>
+                  </span>
+                </div>
+                <div className="hz-reports-kpi hz-reports-kpi--cyan">
+                  <span className="hz-reports-kpi-ico" aria-hidden>
+                    <IconMessageSquare size={12} />
+                  </span>
+                  <span className="hz-reports-kpi-text">
+                    <span className="hz-reports-kpi-label">WhatsApp Dönüşüm</span>
+                    <span className="hz-reports-kpi-value">{KPI.waDonusum}</span>
+                  </span>
+                </div>
+                <div className="hz-reports-kpi hz-reports-kpi--ai">
+                  <span className="hz-reports-kpi-ico" aria-hidden>
+                    <IconSparkles size={12} />
+                  </span>
+                  <span className="hz-reports-kpi-text">
+                    <span className="hz-reports-kpi-label">AI Tasarruf</span>
+                    <span className="hz-reports-kpi-value">{KPI.aiTasarruf}</span>
+                  </span>
+                </div>
+              </section>
+            }
+            charts={<ReportsMiniTrendChart />}
+            table={
+              <div className="hz-reports-list-wrap">
+                <div className="hz-reports-list-header" role="row">
+                  <div role="columnheader">Metrik / Rapor</div>
+                  <div role="columnheader">Segment</div>
+                  <div role="columnheader">Dönem</div>
+                  <div role="columnheader">Gerçekleşen</div>
+                  <div role="columnheader">Hedef</div>
+                  <div role="columnheader">Fark</div>
+                  <div role="columnheader">Aksiyon</div>
+                </div>
+                <div className="hz-reports-list-body">
+                  {!filtered.length ? (
+                    <div className="hz-reports-empty" role="status">
+                      <p className="hz-reports-empty-title">Kayıt yok</p>
+                      <p className="hz-reports-empty-text">Filtre veya rapor tipini değiştirin.</p>
+                    </div>
+                  ) : (
+                    filtered.map((row) => (
+                      <div
+                        key={row.id}
+                        role="row"
+                        className={`hz-reports-row${selectedId === row.id ? " hz-reports-row--selected" : ""}`}
+                        tabIndex={0}
+                        onClick={() => setSelectedId(row.id)}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSelectedId(row.id);
+                          }
+                        }}
+                      >
+                        <div className="hz-reports-cell hz-reports-cell--stack" role="cell">
+                          <span className="hz-reports-metric-title">{row.title}</span>
+                          <span className="hz-reports-metric-code">{row.code}</span>
+                        </div>
+                        <div className="hz-reports-cell" role="cell">
+                          <span className="hz-reports-strong hz-reports-ellipsis">{row.segment}</span>
+                        </div>
+                        <div className="hz-reports-cell" role="cell">
+                          <span className="hz-reports-muted">{row.periodLabel}</span>
+                        </div>
+                        <div className="hz-reports-cell" role="cell">
+                          <span className="hz-reports-strong">{row.actualDisplay}</span>
+                        </div>
+                        <div className="hz-reports-cell" role="cell">
+                          <span className="hz-reports-muted">{row.targetDisplay}</span>
+                        </div>
+                        <div className="hz-reports-cell" role="cell">
+                          <span className={diffBadgeClass(row.diffTone)}>{row.diffDisplay}</span>
+                        </div>
+                        <div className="hz-reports-cell hz-reports-actions" role="cell" onClick={(e) => e.stopPropagation()}>
+                          <button
+                            type="button"
+                            className="hz-reports-act-btn hz-reports-act-btn--soft"
+                            aria-label="Detay"
+                            onClick={() => {
+                              setSelectedId(row.id);
+                              pushToast("Metrik seçildi; detay sağ panelde.");
+                            }}
+                          >
+                            Detay
+                          </button>
+                          <button
+                            type="button"
+                            className="hz-reports-act-icon hz-reports-act-icon--labeled"
+                            title="PDF"
+                            aria-label="PDF indir"
+                            disabled={!!rowPdfLocks[row.id]}
+                            onClick={() => {
+                              pushToast("Demo: PDF indirme kuyruğa alındı.");
+                              setRowPdfLocks((s) => ({ ...s, [row.id]: true }));
+                            }}
+                          >
+                            <IconPrinter size={12} />
+                          </button>
+                          <button
+                            type="button"
+                            className="hz-reports-act-icon hz-reports-act-icon--labeled"
+                            title="Excel"
+                            aria-label="Excel indir"
+                            disabled={!!rowXlsLocks[row.id]}
+                            onClick={() => {
+                              pushToast("Demo: Excel indirme kuyruğa alındı.");
+                              setRowXlsLocks((s) => ({ ...s, [row.id]: true }));
+                            }}
+                          >
+                            <IconDownload size={12} />
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            }
+          />
         </div>
 
         <aside className="hz-reports-side" aria-label="Rapor Radarı">

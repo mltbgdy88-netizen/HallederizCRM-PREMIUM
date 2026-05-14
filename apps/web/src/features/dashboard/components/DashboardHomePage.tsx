@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { MetricCard, SplitContentLayout, UiButton, UiModal } from "@hallederiz/ui";
 import { useEffect, useMemo, useState } from "react";
-import { SplitContentLayout } from "@hallederiz/ui";
 import { DashboardAiAssistantPanel } from "./DashboardAiAssistantPanel";
 import {
   type RowListIcon,
@@ -56,6 +56,14 @@ const ALL_CARDS: DashboardCard[] = [
 ];
 
 const DEFAULT_SELECTED = ["approvals", "collections", "stock-risk", "wa", "warehouse", "deliveries"];
+
+const ACTIVITY_ITEMS = [
+  { id: "a1", time: "09:12", text: "Sipariş #4821 onay kuyruğuna eklendi.", channel: "Operasyon" },
+  { id: "a2", time: "09:04", text: "Cari “Delta Yapı” için tahsilat hatırlatması oluşturuldu.", channel: "Finans" },
+  { id: "a3", time: "08:47", text: "Depo fişi WH-118 hazırlık durumu: toplama başladı.", channel: "Depo" },
+  { id: "a4", time: "08:21", text: "Teklif TKL-903 revize edildi; onay bekliyor.", channel: "Satış" },
+  { id: "a5", time: "08:05", text: "WhatsApp üzerinden yeni belge talebi alındı.", channel: "İletişim" }
+];
 
 function miniTrendPoints(id: string): string {
   let h = 0;
@@ -143,191 +151,238 @@ export function DashboardHomePage() {
     return "is-neutral";
   };
 
+  const metricToneForCard = (id: string): "info" | "success" | "warning" | "danger" | "neutral" => {
+    if (id === "collections" || id === "customer-balance") return "success";
+    if (id === "stock-risk" || id === "overdue" || id === "critical-tasks") return "warning";
+    if (id === "customer-risk" || id === "returns" || id === "ai-approval") return "danger";
+    if (id === "wa" || id === "deliveries" || id === "orders") return "info";
+    return "neutral";
+  };
+
   return (
     <div className="hz-dashboard-page hz-dashboard-page--fit hz-dashboard-page--v2">
       <SplitContentLayout
         main={
           <div className="hz-dash-work-center">
-            <section className="hz-dash-work-hero-wrap" aria-label="Sıradaki iş merkezi">
-              <article className="hz-dash-work-hero">
-                <header className="hz-dash-work-head">
-                  <h2>Bugün Öncelik Verilecek İşler</h2>
-                </header>
-                <ol className="hz-dash-work-list">
-                  {WORK_QUEUE.map((item) => (
-                    <li key={item.id} className={`hz-dash-work-item hz-dash-work-item--${item.tone}`}>
-                      <span className="hz-dash-work-item-ico" aria-hidden>
-                        <RowListIconSvg kind={item.icon} size={14} />
-                      </span>
-                      <span>{item.text}</span>
-                    </li>
-                  ))}
-                </ol>
-                <button type="button" className="hz-dash-work-link-btn">
-                  Tüm görevleri görüntüle
-                </button>
-              </article>
-              <div className="hz-dash-work-side-stack">
-                <article className="hz-dash-work-mini">
-                  <header className="hz-dash-work-mini-head">
-                    <span className="hz-dash-work-mini-ico" aria-hidden>
-                      <RowListIconSvg kind="alert" size={14} />
-                    </span>
-                    <h3>Kritik Görev</h3>
-                  </header>
-                  <p className="hz-dash-work-mini-value">3 yüksek risk</p>
-                  <Link href="/onaylar" className="hz-dash-work-mini-link">
-                    Onaylara git
-                  </Link>
-                </article>
-                <article className="hz-dash-approvals-quick" aria-label="Onaylar hizli erisim">
-                  <header className="hz-dash-approvals-quick-head">
-                    <h3>Onaylar</h3>
-                  </header>
-                  <p className="hz-dash-approvals-quick-copy">
-                    Bekleyen onaylari, worker/outbox durumunu ve guvenlik sinyallerini izle.
-                  </p>
-                  <p className="hz-dash-approvals-quick-note">Canli durum Onaylar ekraninda.</p>
-                  <Link href="/onaylar" className="hz-dash-approvals-quick-cta">
-                    Onaylara Git
-                  </Link>
-                </article>
-                <article className="hz-dash-work-mini">
-                  <header className="hz-dash-work-mini-head">
-                    <span className="hz-dash-work-mini-ico" aria-hidden>
-                      <RowListIconSvg kind="tag" size={14} />
-                    </span>
-                    <h3>Bugün Takip</h3>
-                  </header>
-                  <p className="hz-dash-work-mini-value">5 cari bekliyor</p>
-                  <button type="button" className="hz-dash-work-mini-link">
-                    Carilere git
-                  </button>
-                </article>
-              </div>
+            <section className="hz-dash-kpi-strip" aria-label="Özet göstergeler">
+              {selectedCards.map((card) => (
+                <MetricCard
+                  key={`kpi-${card.id}`}
+                  title={card.title}
+                  value={card.value}
+                  detail={card.note}
+                  tone={metricToneForCard(card.id)}
+                />
+              ))}
             </section>
 
-            <section className="hz-dash-selected-cards" aria-label="Seçili bilgi kartları">
-              <header className="hz-dash-work-head hz-dash-work-head--cards">
-                <h2>Seçili Bilgi Kartları</h2>
-              </header>
-              <div className="hz-dash-selected-grid">
-                {selectedCards.map((card) => (
-                  <article key={card.id} className={`hz-dash-selected-card ${cardToneClass(card.id)}`}>
-                    <header className="hz-dash-selected-card-head">
-                      <div className="hz-dash-selected-card-top">
-                        <span className="hz-dash-selected-card-ico" aria-hidden>
-                          <RowListIconSvg kind={card.icon} size={16} />
+            <section className="hz-dash-ops-block" aria-label="Operasyon özeti">
+              <div className="hz-dash-work-hero-wrap">
+                <article className="hz-dash-work-hero hz-dash-ops-main">
+                  <header className="hz-dash-work-head">
+                    <h2>Bugün Öncelik Verilecek İşler</h2>
+                  </header>
+                  <ol className="hz-dash-work-list">
+                    {WORK_QUEUE.map((item) => (
+                      <li key={item.id} className={`hz-dash-work-item hz-dash-work-item--${item.tone}`}>
+                        <span className="hz-dash-work-item-ico" aria-hidden>
+                          <RowListIconSvg kind={item.icon} size={14} />
                         </span>
-                        <h3>{card.title}</h3>
-                      </div>
-                      <button type="button" className="hz-dash-selected-card-more" aria-label={`${card.title} — tümünü gör`}>
-                        <span className="hz-dash-selected-card-more-txt">Tümünü gör</span>
-                        <svg className="hz-dash-selected-card-more-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
-                          <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                        </svg>
-                      </button>
+                        <span>{item.text}</span>
+                      </li>
+                    ))}
+                  </ol>
+                  <Link href="/gorevler/merkez" className="hz-dash-work-link-btn">
+                    Tüm görevleri görüntüle
+                  </Link>
+                </article>
+                <div className="hz-dash-work-side-stack">
+                  <article className="hz-dash-work-mini">
+                    <header className="hz-dash-work-mini-head">
+                      <span className="hz-dash-work-mini-ico" aria-hidden>
+                        <RowListIconSvg kind="alert" size={14} />
+                      </span>
+                      <h3>Kritik Görev</h3>
                     </header>
-                    <p className="hz-dash-selected-card-value">{card.value}</p>
-                    <p className="hz-dash-selected-card-note">{card.note ?? card.description}</p>
-                    <div className="hz-dash-selected-card-trend" aria-hidden>
-                      <svg viewBox="0 0 42 14" preserveAspectRatio="none">
-                        <polyline
-                          fill="none"
-                          stroke="currentColor"
-                          strokeWidth="1.25"
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          points={miniTrendPoints(card.id)}
-                        />
-                      </svg>
-                    </div>
+                    <p className="hz-dash-work-mini-value">3 yüksek risk</p>
+                    <Link href="/onaylar" className="hz-dash-work-mini-link">
+                      Onaylara git
+                    </Link>
                   </article>
-                ))}
-              </div>
-            </section>
-
-            {editorOpen ? (
-              <div className="hz-dash-card-editor-overlay" role="dialog" aria-modal="true" aria-label="Kartları Düzenle">
-                <div className="hz-dash-card-editor-modal">
-                  <header className="hz-dash-card-editor-head">
-                    <div>
-                      <h2>Kartları Düzenle</h2>
-                      <p>Gösterge panelinde görmek istediğiniz bilgi kartlarını seçin.</p>
-                    </div>
-                    <button type="button" className="hz-dash-card-editor-close" aria-label="Kapat" onClick={() => setEditorOpen(false)}>
-                      ×
-                    </button>
-                  </header>
-
-                  <div className="hz-dash-card-editor-body">
-                    <section className="hz-dash-card-editor-options">
-                      {(Object.keys(groupedCards) as Array<DashboardCard["category"]>).map((group) => (
-                        <div key={group} className="hz-dash-card-editor-group">
-                          <h3>{group}</h3>
-                          <ul>
-                            {groupedCards[group].map((card) => (
-                              <li key={card.id}>
-                                <label className="hz-dash-card-option">
-                                  <span className="hz-dash-card-option-main">
-                                    <span className="hz-dash-card-option-ico" aria-hidden>
-                                      <RowListIconSvg kind={card.icon} size={15} />
-                                    </span>
-                                    <span>
-                                      <strong>{card.title}</strong>
-                                      <small>{card.description}</small>
-                                    </span>
-                                  </span>
-                                  <input
-                                    type="checkbox"
-                                    checked={draftIds.includes(card.id)}
-                                    onChange={() => toggleDraft(card.id)}
-                                    aria-label={`${card.title} kartını seç`}
-                                  />
-                                </label>
-                              </li>
-                            ))}
-                          </ul>
-                        </div>
-                      ))}
-                    </section>
-
-                    <aside className="hz-dash-card-editor-preview">
-                      <h3>Seçili Kartlar</h3>
-                      <p>Bu kartlar gösterge panelinde görünecek.</p>
-                      <ol>
-                        {draftIds.map((id) => {
-                          const card = ALL_CARDS.find((item) => item.id === id);
-                          if (!card) return null;
-                          return (
-                            <li key={id}>
-                              <span className="hz-dash-card-order-ico">
-                                <RowListIconSvg kind={card.icon} size={14} />
-                              </span>
-                              <span>{card.title}</span>
-                            </li>
-                          );
-                        })}
-                      </ol>
-                    </aside>
-                  </div>
-
-                  <footer className="hz-dash-card-editor-actions">
-                    <button type="button" className="hz-dash-editor-btn hz-dash-editor-btn--ghost" onClick={() => setEditorOpen(false)}>
-                      Vazgeç
-                    </button>
-                    <button
-                      type="button"
-                      className="hz-dash-editor-btn hz-dash-editor-btn--primary"
-                      onClick={saveSelection}
-                      disabled={draftIds.length < 1}
-                    >
-                      Kaydet
-                    </button>
-                  </footer>
+                  <article className="hz-dash-approvals-quick" aria-label="Onaylar hızlı erişim">
+                    <header className="hz-dash-approvals-quick-head">
+                      <h3>Onaylar</h3>
+                    </header>
+                    <p className="hz-dash-approvals-quick-copy">
+                      Bekleyen onayları, worker/outbox durumunu ve güvenlik sinyallerini izle.
+                    </p>
+                    <p className="hz-dash-approvals-quick-note">Canlı durum Onaylar ekranında.</p>
+                    <Link href="/onaylar" className="hz-dash-approvals-quick-cta">
+                      Onaylara Git
+                    </Link>
+                  </article>
+                  <article className="hz-dash-work-mini">
+                    <header className="hz-dash-work-mini-head">
+                      <span className="hz-dash-work-mini-ico" aria-hidden>
+                        <RowListIconSvg kind="tag" size={14} />
+                      </span>
+                      <h3>Bugün Takip</h3>
+                    </header>
+                    <p className="hz-dash-work-mini-value">5 cari bekliyor</p>
+                    <Link href="/cariler" className="hz-dash-work-mini-link">
+                      Carilere git
+                    </Link>
+                  </article>
                 </div>
               </div>
-            ) : null}
+            </section>
+
+            <nav className="hz-dash-quick-actions" aria-label="Hızlı işlemler">
+              <Link href="/hizli-islem" className="hz-dash-quick-action">
+                Hızlı İşlem
+              </Link>
+              <Link href="/onaylar" className="hz-dash-quick-action">
+                Onaylar
+              </Link>
+              <Link href="/cariler" className="hz-dash-quick-action">
+                Cariler
+              </Link>
+              <Link href="/stok" className="hz-dash-quick-action">
+                Stok
+              </Link>
+              <Link href="/raporlar" className="hz-dash-quick-action">
+                Raporlar
+              </Link>
+            </nav>
+
+            <div className="hz-dash-main-stack">
+              <section className="hz-dash-selected-cards" aria-label="Seçili bilgi kartları">
+                <header className="hz-dash-work-head hz-dash-work-head--cards">
+                  <h2>Seçili Bilgi Kartları</h2>
+                </header>
+                <div className="hz-dash-selected-grid">
+                  {selectedCards.map((card) => (
+                    <article key={card.id} className={`hz-dash-selected-card ${cardToneClass(card.id)}`}>
+                      <header className="hz-dash-selected-card-head">
+                        <div className="hz-dash-selected-card-top">
+                          <span className="hz-dash-selected-card-ico" aria-hidden>
+                            <RowListIconSvg kind={card.icon} size={16} />
+                          </span>
+                          <h3>{card.title}</h3>
+                        </div>
+                        <button type="button" className="hz-dash-selected-card-more" aria-label={`${card.title} — tümünü gör`}>
+                          <span className="hz-dash-selected-card-more-txt">Tümünü gör</span>
+                          <svg className="hz-dash-selected-card-more-ico" width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden>
+                            <path d="M9 18l6-6-6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                          </svg>
+                        </button>
+                      </header>
+                      <p className="hz-dash-selected-card-value">{card.value}</p>
+                      <p className="hz-dash-selected-card-note">{card.note ?? card.description}</p>
+                      <div className="hz-dash-selected-card-trend" aria-hidden>
+                        <svg viewBox="0 0 42 14" preserveAspectRatio="none">
+                          <polyline
+                            fill="none"
+                            stroke="currentColor"
+                            strokeWidth="1.25"
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            points={miniTrendPoints(card.id)}
+                          />
+                        </svg>
+                      </div>
+                    </article>
+                  ))}
+                </div>
+              </section>
+
+              <section className="hz-dash-activity" aria-label="Son aktivite">
+                <header className="hz-dash-activity-head">
+                  <h2>Son aktivite</h2>
+                </header>
+                <ul className="hz-dash-activity-list">
+                  {ACTIVITY_ITEMS.map((row) => (
+                    <li key={row.id} className="hz-dash-activity-row">
+                      <time className="hz-dash-activity-time">{row.time}</time>
+                      <div className="hz-dash-activity-body">
+                        <p className="hz-dash-activity-text">{row.text}</p>
+                        <span className="hz-dash-activity-channel">{row.channel}</span>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </section>
+            </div>
+
+            <UiModal
+              open={editorOpen}
+              title="Kartları Düzenle"
+              onClose={() => setEditorOpen(false)}
+              closeLabel="Kapat"
+              footer={
+                <>
+                  <UiButton type="button" variant="ghost" size="sm" onClick={() => setEditorOpen(false)}>
+                    Vazgeç
+                  </UiButton>
+                  <UiButton type="button" variant="primary" size="sm" onClick={saveSelection} disabled={draftIds.length < 1}>
+                    Kaydet
+                  </UiButton>
+                </>
+              }
+            >
+              <p className="hz-dash-card-editor-lead">Gösterge panelinde görmek istediğiniz bilgi kartlarını seçin.</p>
+              <div className="hz-dash-card-editor-body">
+                <section className="hz-dash-card-editor-options">
+                  {(Object.keys(groupedCards) as Array<DashboardCard["category"]>).map((group) => (
+                    <div key={group} className="hz-dash-card-editor-group">
+                      <h3>{group}</h3>
+                      <ul>
+                        {groupedCards[group].map((card) => (
+                          <li key={card.id}>
+                            <label className="hz-dash-card-option">
+                              <span className="hz-dash-card-option-main">
+                                <span className="hz-dash-card-option-ico" aria-hidden>
+                                  <RowListIconSvg kind={card.icon} size={15} />
+                                </span>
+                                <span>
+                                  <strong>{card.title}</strong>
+                                  <small>{card.description}</small>
+                                </span>
+                              </span>
+                              <input
+                                type="checkbox"
+                                checked={draftIds.includes(card.id)}
+                                onChange={() => toggleDraft(card.id)}
+                                aria-label={`${card.title} kartını seç`}
+                              />
+                            </label>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ))}
+                </section>
+
+                <aside className="hz-dash-card-editor-preview">
+                  <h3>Seçili Kartlar</h3>
+                  <p>Bu kartlar gösterge panelinde görünecek.</p>
+                  <ol>
+                    {draftIds.map((id) => {
+                      const card = ALL_CARDS.find((item) => item.id === id);
+                      if (!card) return null;
+                      return (
+                        <li key={id}>
+                          <span className="hz-dash-card-order-ico">
+                            <RowListIconSvg kind={card.icon} size={14} />
+                          </span>
+                          <span>{card.title}</span>
+                        </li>
+                      );
+                    })}
+                  </ol>
+                </aside>
+              </div>
+            </UiModal>
           </div>
         }
         side={<DashboardAiAssistantPanel compact />}
