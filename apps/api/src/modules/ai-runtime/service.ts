@@ -1,6 +1,8 @@
 import { buildAiProposal, buildApprovalFromAiProposal, classifyAiRequest, extractAiOperations } from "@hallederiz/domain";
+import type { SalesAiGuardrailDecision, SalesAiGroundingSource, SalesAiIntent, SalesAiResponse, SalesAiTrainingScope } from "@hallederiz/ai-contracts";
 import type { AiInsight, AiInputMode, AiMessage, AiProposal, Approval } from "@hallederiz/types";
 import type { RequestContext } from "../../shared/request-context";
+import { validateLocalAiEndpointUrl } from "../../shared/local-ai-url-policy";
 import { validateAiConfig } from "../../shared/service-config";
 
 interface ProposalGenerationInput {
@@ -23,11 +25,18 @@ interface VoiceSpeakInput {
   speed?: number;
 }
 
+interface SalesAssistantChatInput {
+  message: string;
+  customerId?: string;
+  channel?: "web" | "whatsapp" | "omnichannel" | "api";
+  knowledge: SalesAiTrainingScope[];
+}
+
 async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs = 15000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
   try {
-    return await fetch(url, { ...init, signal: controller.signal });
+    return await fetch(url, { ...init, redirect: init.redirect ?? "error", signal: controller.signal });
   } finally {
     clearTimeout(timer);
   }
@@ -118,6 +127,28 @@ function safeJsonParse<T>(text: string): T | null {
   }
 }
 
+function trimSalesReply(text: string): string {
+  const compact = text.replace(/\s+/g, " ").trim();
+  if (!compact) return "Bu bilgi sistemde görünmüyor.";
+  const sentences = compact.match(/[^.!?]+[.!?]?/g)?.map((item) => item.trim()).filter(Boolean) ?? [compact];
+  return sentences.slice(0, 4).join(" ").trim();
+}
+
+function classifySalesIntent(text: string): SalesAiIntent {
+  const value = text.toLowerCase();
+  if (/merhaba|selam|iyi günler|iyi aksamlar/.test(value)) return "greeting";
+  if (/fiyat|ücret|kaç tl|kaç ₺|indirim/.test(value)) return "price_question";
+  if (/stok|elde var|mevcut|adet/.test(value)) return "stock_question";
+  if (/sipariş|siparis|satın al|satinal/.test(value)) return "order_intent";
+  if (/teklif|fiyat çalış|fiyat çalışması|proforma/.test(value)) return "quote_request";
+  if (/iade|geri gönder|iptal/.test(value)) return "return_request";
+  if (/teslim|kargo|sevkiyat/.test(value)) return "delivery_question";
+  if (/ödeme|odeme|tahsilat|vade/.test(value)) return "payment_question";
+  if (/destek|yardım|sorun|problem/.test(value)) return "support_request";
+  if (/ürün|urun|model|özellik|ozellik/.test(value)) return "product_question";
+  return "unknown";
+}
+
 export class AiRuntimeService {
   constructor(private readonly context: RequestContext) {}
 
@@ -170,7 +201,7 @@ export class AiRuntimeService {
   }
 
   private get localAiServiceUrl() {
-    return normalizeBaseUrl(process.env.LOCAL_AI_SERVICE_URL ?? "http://127.0.0.1:8008");
+    return this.localAiServiceValidation.value;
   }
 
   private get localAiTimeoutMs() {
@@ -178,7 +209,581 @@ export class AiRuntimeService {
     return Number.isFinite(parsed) && parsed > 0 ? parsed : 30000;
   }
 
+  private get ollamaServiceUrl() {
+    return this.ollamaServiceValidation.value;
+  }
+
+  private get allowPublicLocalAiUrls() {
+    return process.env.LOCAL_AI_ALLOW_PUBLIC_URLS === "true";
+  }
+
+  private get localAiServiceValidation() {
+    return validateLocalAiEndpointUrl({
+      rawUrl: process.env.LOCAL_AI_SERVICE_URL,
+      fallbackUrl: "http://127.0.0.1:8008",
+      allowPublicUrls: this.allowPublicLocalAiUrls
+    });
+  }
+
+  private get ollamaServiceValidation() {
+    return validateLocalAiEndpointUrl({
+      rawUrl: process.env.OLLAMA_BASE_URL,
+      fallbackUrl: "http://127.0.0.1:11434",
+      allowPublicUrls: this.allowPublicLocalAiUrls
+    });
+  }
+
+  private get salesAssistantModel() {
+    return process.env.SALES_AI_MODEL ?? "RefinedNeuro/Turkcell-LLM-7b-v1:latest";
+  }
+
+  private get salesAssistantFallbackModel() {
+    return process.env.SALES_AI_FALLBACK_MODEL ?? "llama3.2:3b";
+  }
+
+  private get salesAssistantTemperature() {
+    const parsed = Number(process.env.SALES_AI_TEMPERATURE ?? 0.2);
+    return Number.isFinite(parsed) ? parsed : 0.2;
+  }
+
+  private get salesAssistantTopP() {
+    const parsed = Number(process.env.SALES_AI_TOP_P ?? 0.8);
+    return Number.isFinite(parsed) ? parsed : 0.8;
+  }
+
+  private get salesAssistantRepeatPenalty() {
+    const parsed = Number(process.env.SALES_AI_REPEAT_PENALTY ?? 1.15);
+    return Number.isFinite(parsed) ? parsed : 1.15;
+  }
+
+  private get salesAssistantNumPredict() {
+    const parsed = Number(process.env.SALES_AI_NUM_PREDICT ?? 160);
+    return Number.isFinite(parsed) ? parsed : 160;
+  }
+
+  private buildSalesSystemPrompt() {
+    return [
+      "Sen Hallederiz CRM içinde çalışan Türkçe satış asistanısın.",
+      "Sadece sistemde izin verilen ürün, stok, fiyat, teklif, sipariş, belge ve firma bilgilerini kullanırsın.",
+      "Bilmediğin şeyi uydurmazsın.",
+      "Fiyat veya stok bilgisi yoksa açıkça “Bu bilgi sistemde görünmüyor” dersin.",
+      "Müşteriyi kısa, net ve profesyonel karşılarsın.",
+      "Sipariş, teklif, ödeme, belge gönderimi veya kritik işlem yapmazsın; sadece öneri/taslak/onay akışına yönlendirirsin.",
+      "Cevapların en fazla 2-4 kısa cümle olur.",
+      "Gereksiz selamlama, İngilizce kelime, emoji ve anlamsız kapanış kullanma."
+    ].join("\n");
+  }
+
+  private buildSalesGuardrail(
+    status: SalesAiGuardrailDecision["status"],
+    reasons: string[],
+    usedSources: SalesAiGroundingSource[]
+  ): SalesAiGuardrailDecision {
+    return {
+      tenantIdRequired: true,
+      contextRequired: true,
+      dataSourcesAllowed: usedSources.map((source) => source.type),
+      criticalMutationBlocked: true,
+      hallucinationRisk: usedSources.length > 0 ? "low" : "medium",
+      status,
+      reasons
+    };
+  }
+
+  private buildBlockedSalesResponse(
+    intent: SalesAiIntent,
+    usedSources: SalesAiGroundingSource[],
+    suggestedActions: SalesAiResponse["suggestedActions"],
+    reason: string
+  ): SalesAiResponse {
+    return {
+      ok: false,
+      status: "blocked",
+      intent,
+      confidence: 0.1,
+      reply: "Yerel AI servis adresi guvenlik politikasi nedeniyle engellendi. Lutfen sistem yoneticisine basvurun.",
+      usedSources,
+      suggestedActions,
+      guardrail: this.buildSalesGuardrail("blocked_not_configured", [reason], usedSources),
+      provider: {
+        provider: "ollama",
+        model: this.salesAssistantModel,
+        fallbackModel: this.salesAssistantFallbackModel,
+        fallbackUsed: false
+      },
+      mutationExecuted: false,
+      externalProviderCallExecuted: false
+    };
+  }
+
+  private async fetchOllamaModelNames(): Promise<string[]> {
+    const response = await fetchWithTimeout(
+      `${this.ollamaServiceUrl}/api/tags`,
+      { method: "GET", headers: { accept: "application/json" } },
+      this.localAiTimeoutMs
+    );
+    if (!response.ok) {
+      throw new Error(`ollama_tags_failed_${response.status}`);
+    }
+    const payload = (await response.json()) as { models?: Array<{ name?: string }> };
+    return (payload.models ?? []).map((item) => item.name?.trim() ?? "").filter(Boolean);
+  }
+
+  private async callOllamaGenerate(model: string, prompt: string): Promise<string> {
+    const response = await fetchWithTimeout(
+      `${this.ollamaServiceUrl}/api/generate`,
+      {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          model,
+          prompt,
+          stream: false,
+          options: {
+            temperature: this.salesAssistantTemperature,
+            top_p: this.salesAssistantTopP,
+            repeat_penalty: this.salesAssistantRepeatPenalty,
+            num_predict: this.salesAssistantNumPredict
+          }
+        })
+      },
+      this.localAiTimeoutMs
+    );
+    if (!response.ok) {
+      const message = await response.text();
+      throw new Error(`ollama_generate_failed_${response.status}:${message}`);
+    }
+    const payload = (await response.json()) as { response?: string };
+    return trimSalesReply(payload.response ?? "");
+  }
+
+  async getSalesAssistantHealth() {
+    const provider = "ollama" as const;
+    const primaryModel = this.salesAssistantModel;
+    const fallbackModel = this.salesAssistantFallbackModel;
+    if (!this.ollamaServiceValidation.configured) {
+      return {
+        ok: false,
+        status: "not_configured" as const,
+        provider,
+        model: primaryModel,
+        fallbackModel,
+        modelReady: false,
+        fallbackReady: false,
+        reason: this.ollamaServiceValidation.reason ?? "local_ai_url_invalid",
+        availableModels: [] as string[]
+      };
+    }
+    if (!this.ollamaServiceValidation.allowed) {
+      return {
+        ok: false,
+        status: "blocked" as const,
+        provider,
+        model: primaryModel,
+        fallbackModel,
+        modelReady: false,
+        fallbackReady: false,
+        reason: this.ollamaServiceValidation.reason ?? "local_ai_url_not_allowed",
+        availableModels: [] as string[]
+      };
+    }
+    try {
+      const modelNames = await this.fetchOllamaModelNames();
+      const primaryReady = modelNames.includes(primaryModel);
+      const fallbackReady = modelNames.includes(fallbackModel);
+      if (!primaryReady && !fallbackReady) {
+        return {
+          ok: false,
+          status: "not_configured" as const,
+          provider,
+          model: primaryModel,
+          fallbackModel,
+          modelReady: false,
+          fallbackReady: false,
+          reason: "sales_ai_models_not_found",
+          availableModels: modelNames
+        };
+      }
+      return {
+        ok: true,
+        status: primaryReady ? ("healthy" as const) : ("degraded" as const),
+        provider,
+        model: primaryModel,
+        fallbackModel,
+        modelReady: primaryReady,
+        fallbackReady,
+        reason: primaryReady ? "sales_ai_ready" : "sales_ai_primary_missing_fallback_ready",
+        availableModels: modelNames
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        status: "degraded" as const,
+        provider,
+        model: primaryModel,
+        fallbackModel,
+        modelReady: false,
+        fallbackReady: false,
+        reason: error instanceof Error ? error.message : "ollama_unavailable",
+        availableModels: [] as string[]
+      };
+    }
+  }
+
+  async classifySalesIntent(input: { message: string }) {
+    const intent = classifySalesIntent(input.message);
+    return {
+      intent,
+      confidence: intent === "unknown" ? 0.45 : 0.82
+    };
+  }
+
+  async chatSalesAssistant(input: SalesAssistantChatInput): Promise<SalesAiResponse> {
+    const intent = classifySalesIntent(input.message);
+    const lowered = input.message.toLowerCase();
+    const matchedKnowledge = input.knowledge.filter((item) =>
+      [item.productName, item.productId, item.category].filter(Boolean).some((field) => lowered.includes(String(field).toLowerCase()))
+    );
+
+    const usedSources: SalesAiGroundingSource[] = matchedKnowledge.slice(0, 3).map((item) => ({
+      type: "product",
+      id: item.id,
+      title: item.productName,
+      confidence: 0.9
+    }));
+
+    const blockedPrice = intent === "price_question" && matchedKnowledge.some((item) => item.priceVisibility === "hidden");
+    const blockedStock = intent === "stock_question" && matchedKnowledge.some((item) => item.stockVisibility === "hidden");
+
+    if ((intent === "price_question" || intent === "stock_question") && (matchedKnowledge.length === 0 || blockedPrice || blockedStock)) {
+      return {
+        ok: true,
+        status: "live",
+        intent,
+        confidence: 0.84,
+        reply: "Bu bilgi sistemde görünmüyor. Dilerseniz yetkili ekip için onay/talep kaydı oluşturabilirim.",
+        usedSources,
+        suggestedActions: [
+          {
+            actionKey: "platform.ai.propose",
+            label: "Onay akışı için taslak oluştur",
+            requiresApproval: true,
+            suggestedOnly: true
+          }
+        ],
+        guardrail: this.buildSalesGuardrail("allow_response", ["price_or_stock_not_visible"], usedSources),
+        provider: {
+          provider: "ollama",
+          model: this.salesAssistantModel,
+          fallbackModel: this.salesAssistantFallbackModel,
+          effectiveModel: this.salesAssistantModel,
+          fallbackUsed: false
+        },
+        mutationExecuted: false,
+        externalProviderCallExecuted: false
+      };
+    }
+
+    const suggestedActions =
+      intent === "order_intent" ||
+      intent === "quote_request" ||
+      intent === "payment_question" ||
+      intent === "return_request" ||
+      intent === "delivery_question"
+        ? [
+            {
+              actionKey: "platform.ai.propose",
+              label: "Taslak oluştur ve onaya yönlendir",
+              requiresApproval: true,
+              suggestedOnly: true as const
+            }
+          ]
+        : [];
+
+    const health = await this.getSalesAssistantHealth();
+    if (health.status === "not_configured") {
+      return {
+        ok: false,
+        status: "not_configured",
+        intent,
+        confidence: 0.4,
+        reply: "Yerel satış AI modeli henüz hazır değil. Bu işlem için sistem not_configured durumda.",
+        usedSources,
+        suggestedActions,
+        guardrail: this.buildSalesGuardrail("blocked_not_configured", ["sales_ai_model_not_configured"], usedSources),
+        provider: {
+          provider: "ollama",
+          model: this.salesAssistantModel,
+          fallbackModel: this.salesAssistantFallbackModel,
+          fallbackUsed: false
+        },
+        mutationExecuted: false,
+        externalProviderCallExecuted: false
+      };
+    }
+    if (health.status === "blocked") {
+      return this.buildBlockedSalesResponse(intent, usedSources, suggestedActions, health.reason ?? "local_ai_url_not_allowed");
+    }
+
+    const modelNames = health.availableModels as string[];
+    const primaryReady = modelNames.includes(this.salesAssistantModel);
+    const fallbackReady = modelNames.includes(this.salesAssistantFallbackModel);
+    const effectiveModel = primaryReady ? this.salesAssistantModel : fallbackReady ? this.salesAssistantFallbackModel : undefined;
+    if (!effectiveModel) {
+      return {
+        ok: false,
+        status: "degraded",
+        intent,
+        confidence: 0.3,
+        reply: "Yerel satış AI servisi şu anda yanıt veremiyor. Lütfen daha sonra tekrar deneyin.",
+        usedSources,
+        suggestedActions,
+        guardrail: this.buildSalesGuardrail("degraded", ["sales_ai_model_unavailable"], usedSources),
+        provider: {
+          provider: "ollama",
+          model: this.salesAssistantModel,
+          fallbackModel: this.salesAssistantFallbackModel,
+          fallbackUsed: false
+        },
+        mutationExecuted: false,
+        externalProviderCallExecuted: false
+      };
+    }
+
+    const knowledgeContext = matchedKnowledge
+      .slice(0, 4)
+      .map(
+        (item, index) =>
+          `${index + 1}) Ürün: ${item.productName}; Kategori: ${item.category ?? "-"}; Açıklama: ${item.description ?? "-"}; Not: ${item.salesNotes ?? "-"}; İzinli iddialar: ${(item.allowedClaims ?? []).join(", ") || "-"}; Yasak iddialar: ${(item.blockedClaims ?? []).join(", ") || "-"}`
+      )
+      .join("\n");
+
+    const prompt = [
+      this.buildSalesSystemPrompt(),
+      "",
+      `Tenant: ${this.context.tenantId}`,
+      `Müşteri: ${input.customerId ?? "-"}`,
+      `Niyet: ${intent}`,
+      "İzinli bilgi kaynakları:",
+      knowledgeContext || "Bu mesaj için eşleşen bilgi bulunamadı.",
+      "",
+      `Kullanıcı mesajı: ${input.message}`
+    ].join("\n");
+
+    try {
+      const reply = await this.callOllamaGenerate(effectiveModel, prompt);
+      return {
+        ok: true,
+        status: primaryReady ? "live" : "degraded",
+        intent,
+        confidence: intent === "unknown" ? 0.55 : 0.86,
+        reply: reply || "Bu bilgi sistemde görünmüyor.",
+        usedSources,
+        suggestedActions,
+        guardrail: this.buildSalesGuardrail("allow_response", primaryReady ? ["sales_ai_primary_model"] : ["sales_ai_fallback_model"], usedSources),
+        provider: {
+          provider: "ollama",
+          model: this.salesAssistantModel,
+          fallbackModel: this.salesAssistantFallbackModel,
+          effectiveModel,
+          fallbackUsed: !primaryReady
+        },
+        mutationExecuted: false,
+        externalProviderCallExecuted: false
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        status: "degraded",
+        intent,
+        confidence: 0.3,
+        reply: "Yerel satış AI servisi şu anda yanıt veremiyor. Lütfen daha sonra tekrar deneyin.",
+        usedSources,
+        suggestedActions,
+        guardrail: this.buildSalesGuardrail("degraded", [error instanceof Error ? error.message : "sales_ai_generate_failed"], usedSources),
+        provider: {
+          provider: "ollama",
+          model: this.salesAssistantModel,
+          fallbackModel: this.salesAssistantFallbackModel,
+          effectiveModel,
+          fallbackUsed: !primaryReady
+        },
+        mutationExecuted: false,
+        externalProviderCallExecuted: false
+      };
+    }
+  }
+
+  async transcribeSalesVoice(input: VoiceTranscriptionInput) {
+    if (!input.audioBase64) {
+      return {
+        ok: false,
+        status: "degraded" as const,
+        transcript: "",
+        provider: "local",
+        reason: "audio_missing"
+      };
+    }
+    if (!this.localAiServiceValidation.configured) {
+      return {
+        ok: false,
+        status: "not_configured" as const,
+        transcript: "",
+        provider: "local",
+        reason: this.localAiServiceValidation.reason ?? "local_ai_url_invalid"
+      };
+    }
+    if (!this.localAiServiceValidation.allowed) {
+      return {
+        ok: false,
+        status: "blocked" as const,
+        transcript: "",
+        provider: "local",
+        reason: this.localAiServiceValidation.reason ?? "local_ai_url_not_allowed"
+      };
+    }
+    try {
+      const body = new FormData();
+      const buffer = Buffer.from(input.audioBase64, "base64");
+      body.append("audio", new Blob([buffer], { type: input.mimeType ?? "audio/webm" }), "voice.webm");
+      body.append("transcript_only", "true");
+      const response = await fetchWithTimeout(
+        `${this.localAiServiceUrl}/api/v1/chat/voice-stream`,
+        {
+          method: "POST",
+          body
+        },
+        this.localAiTimeoutMs
+      );
+      if (!response.ok) {
+        return {
+          ok: false,
+          status: "degraded" as const,
+          transcript: "",
+          provider: "local",
+          reason: `local_voice_stream_${response.status}`
+        };
+      }
+      const text = await response.text();
+      const transcriptMatch = text
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => {
+          try {
+            return JSON.parse(line) as { type?: string; text?: string };
+          } catch {
+            return { type: "", text: "" };
+          }
+        })
+        .find((item) => item.type === "transcript" || item.type === "done");
+      const transcript = transcriptMatch?.text?.trim() ?? "";
+      return {
+        ok: transcript.length > 0,
+        status: transcript.length > 0 ? ("live" as const) : ("degraded" as const),
+        transcript,
+        provider: "local",
+        reason: transcript.length > 0 ? "ok" : "transcript_empty"
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        status: "degraded" as const,
+        transcript: "",
+        provider: "local",
+        reason: error instanceof Error ? error.message : "local_voice_unavailable"
+      };
+    }
+  }
+
+  async speakSalesVoice(input: VoiceSpeakInput) {
+    if (!input.text.trim()) {
+      return {
+        ok: false,
+        status: "degraded" as const,
+        provider: "local",
+        reason: "text_missing"
+      };
+    }
+    if (!this.localAiServiceValidation.configured) {
+      return {
+        ok: false,
+        status: "not_configured" as const,
+        provider: "local",
+        reason: this.localAiServiceValidation.reason ?? "local_ai_url_invalid"
+      };
+    }
+    if (!this.localAiServiceValidation.allowed) {
+      return {
+        ok: false,
+        status: "blocked" as const,
+        provider: "local",
+        reason: this.localAiServiceValidation.reason ?? "local_ai_url_not_allowed"
+      };
+    }
+    try {
+      const response = await fetchWithTimeout(
+        `${this.localAiServiceUrl}/api/v1/tts/stream`,
+        {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify({ message: input.text, temperature: 0.2 })
+        },
+        this.localAiTimeoutMs
+      );
+      if (!response.ok) {
+        return {
+          ok: false,
+          status: "degraded" as const,
+          provider: "local",
+          reason: `local_tts_stream_${response.status}`
+        };
+      }
+      const lines = (await response.text())
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter(Boolean);
+      const audioEvent = lines
+        .map((line) => {
+          try {
+            return JSON.parse(line) as { type?: string; audioBase64?: string };
+          } catch {
+            return { type: "" };
+          }
+        })
+        .find((event) => event.type === "audio" && typeof event.audioBase64 === "string");
+      if (!audioEvent?.audioBase64) {
+        return {
+          ok: false,
+          status: "degraded" as const,
+          provider: "local",
+          reason: "tts_audio_missing"
+        };
+      }
+      return {
+        ok: true,
+        status: "live" as const,
+        provider: "local",
+        audioRef: `data:audio/wav;base64,${audioEvent.audioBase64}`,
+        mimeType: "audio/wav"
+      };
+    } catch (error) {
+      return {
+        ok: false,
+        status: "degraded" as const,
+        provider: "local",
+        reason: error instanceof Error ? error.message : "local_tts_unavailable"
+      };
+    }
+  }
+
   private async callLocalAiText(prompt: string) {
+    if (!this.localAiServiceValidation.configured) {
+      throw new Error(this.localAiServiceValidation.reason ?? "local_ai_url_invalid");
+    }
+    if (!this.localAiServiceValidation.allowed) {
+      throw new Error(this.localAiServiceValidation.reason ?? "local_ai_url_not_allowed");
+    }
     const response = await fetchWithTimeout(
       `${this.localAiServiceUrl}/api/v1/chat/text-stream`,
       {
@@ -200,6 +805,22 @@ export class AiRuntimeService {
   }
 
   async checkLocalProviderHealth() {
+    if (!this.localAiServiceValidation.configured) {
+      return {
+        status: "degraded" as const,
+        configured: false,
+        reason: this.localAiServiceValidation.reason ?? "local_ai_url_invalid",
+        details: { serviceUrl: this.localAiServiceValidation.value }
+      };
+    }
+    if (!this.localAiServiceValidation.allowed) {
+      return {
+        status: "degraded" as const,
+        configured: false,
+        reason: this.localAiServiceValidation.reason ?? "local_ai_url_not_allowed",
+        details: { serviceUrl: this.localAiServiceValidation.value }
+      };
+    }
     try {
       const response = await fetchWithTimeout(
         `${this.localAiServiceUrl}/health`,

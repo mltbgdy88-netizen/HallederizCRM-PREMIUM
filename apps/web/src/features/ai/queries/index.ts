@@ -1,4 +1,5 @@
 import type { AiInsight, AiMessage, AiProposal, Approval, ApprovalExecution } from "@hallederiz/types";
+import type { SalesAiTrainingScope } from "@hallederiz/ai-contracts";
 import { dataSourceConfig, sdk } from "../../../lib/data-source";
 import { aiApprovals, aiInsights, aiMessages, aiProposals, approvalExecutions, getAiProposalById, getAiSettingsData } from "./ai-mock-data";
 
@@ -128,3 +129,75 @@ export async function runAiInsights() {
 }
 
 export { getAiSettingsData };
+
+export async function getSalesAssistantHealth() {
+  if (dataSourceConfig.useDemoData) {
+    return {
+      item: {
+        ok: false,
+        status: "degraded",
+        provider: "ollama",
+        model: "RefinedNeuro/Turkcell-LLM-7b-v1:latest",
+        fallbackModel: "llama3.2:3b",
+        modelReady: false,
+        fallbackReady: true,
+        reason: "demo_mode",
+        availableModels: ["llama3.2:3b"]
+      }
+    };
+  }
+  return sdk.ai.getSalesAssistantHealth();
+}
+
+export async function classifySalesIntent(input: { message: string }) {
+  if (dataSourceConfig.useDemoData) {
+    return { item: { intent: "unknown", confidence: 0.5 } };
+  }
+  return sdk.ai.classifySalesIntent(input);
+}
+
+export async function chatSalesAssistant(input: { message: string; customerId?: string; channel?: "web" | "whatsapp" | "omnichannel" | "api" }) {
+  if (dataSourceConfig.useDemoData) {
+    return {
+      item: {
+        ok: true,
+        status: "degraded",
+        intent: "unknown",
+        confidence: 0.5,
+        reply: "Demo modunda local sales AI canlı yanıt üretmiyor.",
+        usedSources: [],
+        suggestedActions: [],
+        provider: {
+          provider: "ollama",
+          model: "RefinedNeuro/Turkcell-LLM-7b-v1:latest",
+          fallbackModel: "llama3.2:3b",
+          fallbackUsed: true
+        },
+        mutationExecuted: false,
+        externalProviderCallExecuted: false
+      }
+    };
+  }
+  return sdk.ai.chatSalesAssistant(input);
+}
+
+export async function transcribeSalesVoice(input: { audioBase64: string; mimeType?: string; language?: string }) {
+  if (dataSourceConfig.useDemoData) {
+    return { item: { ok: false, status: "degraded", transcript: "", provider: "local", reason: "demo_mode" } };
+  }
+  return sdk.ai.transcribeSalesVoice(input);
+}
+
+export async function speakSalesVoice(input: { text: string; voice?: string; speed?: number }) {
+  if (dataSourceConfig.useDemoData) {
+    return { item: { ok: false, status: "degraded", provider: "local", reason: "demo_mode" } };
+  }
+  return sdk.ai.speakSalesVoice(input);
+}
+
+export async function listSalesKnowledge() {
+  if (dataSourceConfig.useDemoData) {
+    return { items: [] as SalesAiTrainingScope[], total: 0, knowledgePersistenceMode: "memory" };
+  }
+  return sdk.ai.listSalesKnowledge();
+}

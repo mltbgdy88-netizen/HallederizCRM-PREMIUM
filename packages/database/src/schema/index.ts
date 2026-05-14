@@ -17,3 +17,4 @@ export * from "./execution-worker-audit";
 export * from "./pending-approval-requests";
 export * from "./tenant-usage-events";
 export * from "./omnichannel-inbox";
+export * from "./sales-ai-knowledge";
