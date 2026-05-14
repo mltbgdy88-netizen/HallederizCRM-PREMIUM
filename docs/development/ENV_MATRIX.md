@@ -30,7 +30,7 @@ Prod veya pilot “gerçek veri” için tipik kombinasyon:
 - `NEXT_PUBLIC_USE_DEMO_DATA=false`
 - `ALLOW_DEMO_FALLBACK=false`
 
-Doğrulama: [production-real-product-cutover.md](../production-real-product-cutover.md), API testleri `apps/api/src/tests/production-enforcement-gates.test.ts`, `production-real-product-cutover.test.ts`.
+Doğrulama: [production-real-product-cutover.md](../production-real-product-cutover.md), API testleri `apps/api/src/tests/production-enforcement-gates.test.ts`, `production-real-product-cutover.test.ts`, Postgres fallback / fail-closed: `persistence-policy.test.ts`, `whatsapp-workflow-persistence.test.ts` ([005-postgres-fallback-hardening.md](../implementation/005-postgres-fallback-hardening.md)).
 
 ## Migration ve seed (CI / manuel)
 

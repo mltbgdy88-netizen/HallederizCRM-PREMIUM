@@ -39,7 +39,7 @@ pnpm smoke:production-safety
 
 - [x] `NEXT_PUBLIC_USE_DEMO_DATA=false` ile kalan kritik yüzeyler: sipariş detay yan verileri (`getOrderDetailSideData` — tahsilat/depo/teslim/fatura listelerinden süzme); WhatsApp / Hızlı İşlem / onaylar önceki commitlerde.
 - [x] Raporlar / arşiv demo bayrakları `dataSourceConfig.useDemoData` (`NEXT_PUBLIC_USE_DEMO_DATA`) ile hizalı.
-- [ ] `PERSISTENCE_MODE=postgres` iken DB hatasında sessiz mock başarı yok ([005-postgres-fallback-hardening](../implementation/005-postgres-fallback-hardening.md)).
+- [x] `PERSISTENCE_MODE=postgres` iken DB hatasında sessiz mock başarı yok ([005-postgres-fallback-hardening](../implementation/005-postgres-fallback-hardening.md)); policy: `apps/api/src/shared/persistence-policy.ts`, `db-runtime.ts`; testler: `persistence-policy.test.ts`, `whatsapp-workflow-persistence.test.ts`.
 
 ## Faz C — Ticari omurga (domain + DB)
 
@@ -84,3 +84,4 @@ pnpm smoke:production-safety
 - [x] Hızlı İşlem: demo/canlı bilgi şeridi (`NEXT_PUBLIC_USE_DEMO_DATA`).
 - [x] `@hallederiz/ui` primitivleri (modal, drawer, entity şablonları, form/rapor kabukları) + `packages/ui` exportları.
 - [x] Sipariş detay: canlı modda tahsilat/depo/teslim/fatura `sdk.*.list()` ile siparişe göre süzülür; demo modda mock zincir.
+- [x] Postgres modu / prod: DB hatasında `persistence_unavailable` (sessiz mock başarı yok); 005 + API persistence testleri.
