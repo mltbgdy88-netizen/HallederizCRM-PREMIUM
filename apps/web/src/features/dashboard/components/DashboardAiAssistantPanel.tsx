@@ -128,7 +128,7 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
             aria-label="Tanıtım paneli — oynatma yok"
             title="Önizleme"
           >
-            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <path d="M8 5v14l11-7L8 5z" />
             </svg>
           </button>

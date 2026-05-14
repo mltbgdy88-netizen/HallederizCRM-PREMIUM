@@ -27,8 +27,9 @@ Dashboard sag kolonundaki AI Asistan panelini fake video/fake voice/fake success
 
 ## Dashboard entegrasyonu
 - Panel dashboard split side bolgesinde calisir.
-- Desktop sag kolon genisligi 380-440px bandinda tutulur.
-- Sohbet listesi scroll alir, composer altta gorunur kalir.
+- Desktop sag kolon genisligi ~380-420px (viewport-fit compact).
+- Hero onizleme 16:9, yaklasik 140-170px bandi; sohbet listesi scroll alir, composer altta sabit kalir.
+- Dashboard ana icerik (gorev karti + bilgi kartlari) daha compact padding/gap ile laptop (or. 1366x768) ekraninda daha cok satir/kart gorunur.
 - Mobil/tablet duzende panel full width stack olur.
 
 ## Guvenlik kurallari
