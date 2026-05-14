@@ -2,8 +2,21 @@
 
 import { MetricCard, PageHeader } from "@hallederiz/ui";
 import { dataSourceConfig } from "../../../lib/data-source";
-import { OPS_TRACE_PREVIEW_ROWS } from "../data/operational-observability-mock";
+import type { PilotWeeklyStatus } from "../data/operational-observability-mock";
+import { OPS_TRACE_PREVIEW_ROWS, PILOT_WEEKLY_PREVIEW_ROWS } from "../data/operational-observability-mock";
 import { SettingsAreaShell } from "./SettingsAreaShell";
+
+function pilotWeeklyBadgeClass(status: PilotWeeklyStatus): string {
+  if (status === "pozitif") return "hz-badge hz-badge-success";
+  if (status === "risk") return "hz-badge hz-badge-danger";
+  return "hz-badge hz-badge-warning";
+}
+
+function pilotWeeklyBadgeLabel(status: PilotWeeklyStatus): string {
+  if (status === "pozitif") return "Pozitif";
+  if (status === "risk") return "Risk";
+  return "Beklemede";
+}
 
 export function OperationalObservabilityPage() {
   return (
@@ -80,9 +93,49 @@ export function OperationalObservabilityPage() {
             <li>Entegrasyon: canli yoksa kontrollu hata; sessiz basari yok.</li>
             <li>Operasyon: rollback plani; pilot durum dokumanlari guncel.</li>
           </ul>
-          <p className="muted hz-ops-obs-foot">
-            Haftalik pilot geri bildirimi is sureci; bu ekran teknik hazirlik ve korelasyon politikasini hatirlatir.
+          <p className="muted hz-ops-obs-foot">Asagida haftalik pilot geri bildirimi sablonu ve ornek ozet satirlari yer alir.</p>
+        </section>
+
+        <section className="hz-content-card hz-ops-obs-card hz-ops-obs-pilot-block">
+          <h3>Haftalik pilot geri bildirimi (sablon)</h3>
+          <p className="muted hz-ops-obs-lead">
+            Operasyon ekibi her hafta ayni basliklari doldurur; kalici kayit icin harici arac (Notion, e-posta, bilet) onerilir.
+            Bu tablo yalnizca ornek gorunum ve egitim amaclidir.
           </p>
+          <p className="muted hz-ops-obs-pilot-micro" role="status">
+            Sablon verisi: asagidaki hafta satirlari CRM veritabanina yazilmaz; canli pilot notlari ayri tutulmalidir.
+          </p>
+          <ul className="hz-ops-obs-checklist hz-ops-obs-pilot-checklist">
+            <li>Kritik akislar: Hizli Islem, Onaylar, WhatsApp — bloklayici hata var mi?</li>
+            <li>Performans: yavas ekran, zaman asimi, API hata orani gozlemi.</li>
+            <li>Veri dogrulugu: stok, tahsilat, belge teslimi tutarliligi (pilot notu).</li>
+            <li>Egitim / UX: kullanicinin takildigi adimlar ve dokumantasyon ihtiyaci.</li>
+            <li>Sonraki hafta odagi: en fazla uc maddelik kisa liste.</li>
+          </ul>
+          <div className="table-wrap hz-table-wrap hz-ops-obs-table-wrap">
+            <table className="table hz-table hz-ops-obs-pilot-table">
+              <thead>
+                <tr>
+                  <th>Hafta bitisi</th>
+                  <th>Pilot tenant</th>
+                  <th>Durum</th>
+                  <th>Ozet</th>
+                </tr>
+              </thead>
+              <tbody>
+                {PILOT_WEEKLY_PREVIEW_ROWS.map((row) => (
+                  <tr key={row.id}>
+                    <td>{new Date(row.weekEnding).toLocaleDateString("tr-TR")}</td>
+                    <td>{row.tenantLabel}</td>
+                    <td>
+                      <span className={pilotWeeklyBadgeClass(row.status)}>{pilotWeeklyBadgeLabel(row.status)}</span>
+                    </td>
+                    <td className="hz-ops-obs-pilot-summary">{row.summary}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </section>
       </div>
     </SettingsAreaShell>

@@ -18887,3 +18887,21 @@ select.hz-qop-summary-input {
   margin-bottom: 0;
   font-size: 11px;
 }
+
+.hz-ops-obs-pilot-block .hz-ops-obs-pilot-micro {
+  margin: 4px 0 10px;
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.hz-ops-obs-pilot-checklist {
+  margin-bottom: 10px;
+}
+
+.hz-ops-obs-pilot-table {
+  font-size: 12px;
+}
+
+.hz-ops-obs-pilot-summary {
+  line-height: 1.4;
+}

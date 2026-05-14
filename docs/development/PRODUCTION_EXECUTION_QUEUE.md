@@ -69,7 +69,13 @@ pnpm smoke:production-safety
 
 - [x] Log/metric/trace (tenant korelasyonu) — **Web:** `/ayarlar/operasyon-gozlem` demo trace tablosu + politika metni; canli telemetry/log pipeline API/infra ile baglanacak.
 - [x] `RELEASE_CHECKLIST` / pilot kabul — **Web:** ayni sayfada salt okunur ozet; tam liste `docs/development/RELEASE_CHECKLIST.md` ve [016-pilot-acceptance-checklist](../implementation/016-pilot-acceptance-checklist.md).
-- [ ] İlk pilot tenant haftalık kullanım geri bildirimi.
+- [x] İlk pilot tenant haftalık kullanım geri bildirimi — **Web:** `/ayarlar/operasyon-gozlem` altında haftalık şablon maddeleri + demo özet tablosu (`PILOT_WEEKLY_PREVIEW_ROWS`); kalıcı kayıt harici araç / süreç.
+
+---
+
+## Sonraki yonlendirme
+
+Uretim kuyrugu **Faz A–G** tamamlandi; yeni maddeler `docs/core-completion-batch.md`, `docs/module-map.md` ve urun blueprint/backlog dosyalari uzerinden acilmalidir.
 
 ---
 
@@ -93,4 +99,4 @@ pnpm smoke:production-safety
 - [x] Onaylar: worker kuyruk/DLQ/idempotency gözlem paneli + istemci `/worker/outbox` ve `/worker/dead-letter` okuması.
 - [x] Faz E — WhatsApp prod checklist UI, ERP politika bandi, fabrika iletim seridi (web).
 - [x] Faz F — AI proposal snapshot + `requiresApproval` gorunurlugu; belgeler sablon/teslim/arsiv UI (`apps/web`).
-- [x] Faz G (kismi) — `/ayarlar/operasyon-gozlem` trace/tenant ozeti + release/pilot checklist hatirlatmasi; haftalik geri bildirim is sureci.
+- [x] Faz G — `/ayarlar/operasyon-gozlem`: trace/tenant, release/pilot checklist, haftalik pilot sablonu + `PILOT_WEEKLY_PREVIEW_ROWS` demo tablosu; kuyruk A–G kapanisi ve sonraki yonlendirme notu.

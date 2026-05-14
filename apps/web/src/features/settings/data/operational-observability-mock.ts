@@ -68,3 +68,38 @@ export const OPS_TRACE_PREVIEW_ROWS: OpsTracePreviewRow[] = [
     occurredAt: "2026-05-13T08:19:11.000Z"
   }
 ];
+
+export type PilotWeeklyStatus = "beklemede" | "pozitif" | "risk";
+
+export type PilotWeeklyPreviewRow = {
+  id: string;
+  weekEnding: string;
+  tenantLabel: string;
+  status: PilotWeeklyStatus;
+  summary: string;
+};
+
+/** Haftalik retro ornek satirlari — kayit CRM disi (Notion / e-posta) tutulabilir. */
+export const PILOT_WEEKLY_PREVIEW_ROWS: PilotWeeklyPreviewRow[] = [
+  {
+    id: "pw_1",
+    weekEnding: "2026-05-11",
+    tenantLabel: "Pilot tenant A",
+    status: "pozitif",
+    summary: "Hizli islem ve onaylar sorunsuz; tek UI notu (filtre etiketi)."
+  },
+  {
+    id: "pw_2",
+    weekEnding: "2026-05-04",
+    tenantLabel: "Pilot tenant A",
+    status: "risk",
+    summary: "WhatsApp imza testi stagingde beklemede; ERP senkron yavas."
+  },
+  {
+    id: "pw_3",
+    weekEnding: "2026-04-27",
+    tenantLabel: "Pilot tenant B",
+    status: "beklemede",
+    summary: "Hafta sonu kullanim dusuk; geri bildirim toplanacak."
+  }
+];
