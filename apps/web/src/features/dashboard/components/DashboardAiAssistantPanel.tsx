@@ -29,6 +29,9 @@ type LocalMessage = {
   ts: number;
 };
 
+/** Yalnızca UI karşılaması; API yanıtı değildir. */
+const UI_GREETING = "Merhaba! Size nasıl yardımcı olabilirim?";
+
 function formatMsgTime(ts: number): string {
   return new Date(ts).toLocaleTimeString("tr-TR", { hour: "2-digit", minute: "2-digit" });
 }
@@ -56,6 +59,14 @@ function AssistantAvatar() {
   );
 }
 
+function lastAssistantMessageIndex(messages: LocalMessage[]): number {
+  for (let i = messages.length - 1; i >= 0; i -= 1) {
+    const m = messages[i];
+    if (m && m.role === "assistant") return i;
+  }
+  return -1;
+}
+
 export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolean }) {
   const [prompt, setPrompt] = useState("");
   const [loading, setLoading] = useState(false);
@@ -64,11 +75,14 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
   const [messages, setMessages] = useState<LocalMessage[]>([]);
   const [lastAssistantReply, setLastAssistantReply] = useState("");
   const [proposalFootnote, setProposalFootnote] = useState(false);
+  const [introTs] = useState(() => Date.now());
 
   const voiceReady = health?.voice?.ttsReady === true && health?.voice?.status === "healthy";
   const dotKind = useMemo(() => statusDotKind(health, healthFetchFailed), [health, healthFetchFailed]);
   const dotAria =
     dotKind === "green" ? "Durum: bağlı" : dotKind === "red" ? "Durum: bağlantı hatası" : "Durum: beklemede";
+
+  const lastAsstIdx = useMemo(() => lastAssistantMessageIndex(messages), [messages]);
 
   useEffect(() => {
     let active = true;
@@ -109,8 +123,7 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
 
       const mut = item.mutationExecuted === true;
       const ext = item.externalProviderCallExecuted === true;
-      const hasSuggestions = Array.isArray(item.suggestedActions) && item.suggestedActions.length > 0;
-      const showFoot = !mut || !ext || item.status !== "live" || hasSuggestions;
+      const showFoot = !mut || !ext || item.status !== "live";
       setProposalFootnote(Boolean(showFoot));
     } catch {
       const sysTs = Date.now();
@@ -130,8 +143,6 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
     }
   };
 
-  const showEmptyCanvas = messages.length === 0 && !loading;
-
   return (
     <aside
       className={`hz-ai-panel hz-dash-ai-rail hz-dash-ai-rail--final hz-right-rail-ai-simple ${compact ? "hz-dash-ai-rail--compact" : "hz-ai-panel--premium"}`}
@@ -145,7 +156,8 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
       <div className="hz-dash-ai-hero hz-dash-ai-hero--wide" aria-hidden>
         <div className="hz-dash-ai-hero-frame">
           <div className="hz-dash-ai-hero-visual">
-            <div className="hz-dash-ai-hero-glow" />
+            <div className="hz-dash-ai-hero-vignette" aria-hidden />
+            <div className="hz-dash-ai-hero-glow" aria-hidden />
             <div className="hz-dash-ai-hero-ring" aria-hidden />
             <div className="hz-dash-ai-hero-orb" aria-hidden />
             <button type="button" className="hz-dash-ai-hero-play" disabled aria-label="Önizleme kullanılamıyor">
@@ -158,62 +170,75 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
       </div>
 
       <section className="hz-right-rail-chat-stack" aria-label="AI sohbet">
-        <div className="hz-dash-ai-msg-list hz-right-rail-simple-messages">
-          {showEmptyCanvas ? (
-            <div className="hz-dash-ai-chat-empty">
-              <div className="hz-dash-ai-chat-empty-pulse" />
-            </div>
-          ) : null}
-
-          {messages.map((message) =>
-            message.role === "user" ? (
-              <div key={message.id} className="hz-dash-ai-msg hz-dash-ai-msg--user">
-                <div className="hz-dash-ai-msg-col hz-dash-ai-msg-col--user">
-                  <div className="hz-ai-bubble hz-ai-bubble--user hz-dash-ai-msg-bubble">
-                    <p>{message.text}</p>
-                  </div>
-                  <time className="hz-dash-ai-msg-time hz-dash-ai-msg-time--user" dateTime={new Date(message.ts).toISOString()}>
-                    {formatMsgTime(message.ts)}
-                  </time>
+        <div className="hz-dash-ai-chat-surface">
+          <div className="hz-dash-ai-msg-list hz-right-rail-simple-messages">
+            <div className="hz-dash-ai-msg hz-dash-ai-msg--assistant hz-dash-ai-msg--intro">
+              <AssistantAvatar />
+              <div className="hz-dash-ai-msg-col">
+                <div className="hz-ai-bubble hz-ai-bubble--ai hz-dash-ai-msg-bubble">
+                  <p>{UI_GREETING}</p>
                 </div>
-              </div>
-            ) : message.role === "system" ? (
-              <div key={message.id} className="hz-dash-ai-msg hz-dash-ai-msg--system">
-                <div className="hz-ai-bubble hz-ai-bubble--ai hz-dash-ai-msg-bubble hz-dash-ai-msg-bubble--system">
-                  <p>{message.text}</p>
-                </div>
-                <time className="hz-dash-ai-msg-time hz-dash-ai-msg-time--system" dateTime={new Date(message.ts).toISOString()}>
-                  {formatMsgTime(message.ts)}
+                <time className="hz-dash-ai-msg-time hz-dash-ai-msg-time--assistant" dateTime={new Date(introTs).toISOString()}>
+                  {formatMsgTime(introTs)}
                 </time>
               </div>
-            ) : (
-              <div key={message.id} className="hz-dash-ai-msg hz-dash-ai-msg--assistant">
-                <AssistantAvatar />
-                <div className="hz-dash-ai-msg-col">
-                  <div className="hz-ai-bubble hz-ai-bubble--ai hz-dash-ai-msg-bubble">
+            </div>
+
+            {messages.map((message, index) =>
+              message.role === "user" ? (
+                <div key={message.id} className="hz-dash-ai-msg hz-dash-ai-msg--user">
+                  <div className="hz-dash-ai-msg-col hz-dash-ai-msg-col--user">
+                    <div className="hz-ai-bubble hz-ai-bubble--user hz-dash-ai-msg-bubble">
+                      <p>{message.text}</p>
+                    </div>
+                    <time className="hz-dash-ai-msg-time hz-dash-ai-msg-time--user" dateTime={new Date(message.ts).toISOString()}>
+                      {formatMsgTime(message.ts)}
+                    </time>
+                  </div>
+                </div>
+              ) : message.role === "system" ? (
+                <div key={message.id} className="hz-dash-ai-msg hz-dash-ai-msg--system">
+                  <div className="hz-ai-bubble hz-ai-bubble--ai hz-dash-ai-msg-bubble hz-dash-ai-msg-bubble--system">
                     <p>{message.text}</p>
                   </div>
-                  <time className="hz-dash-ai-msg-time hz-dash-ai-msg-time--assistant" dateTime={new Date(message.ts).toISOString()}>
+                  <time className="hz-dash-ai-msg-time hz-dash-ai-msg-time--system" dateTime={new Date(message.ts).toISOString()}>
                     {formatMsgTime(message.ts)}
                   </time>
                 </div>
-              </div>
-            )
-          )}
+              ) : (
+                <div key={message.id} className="hz-dash-ai-msg hz-dash-ai-msg--assistant">
+                  <AssistantAvatar />
+                  <div className="hz-dash-ai-msg-col">
+                    <div className="hz-ai-bubble hz-ai-bubble--ai hz-dash-ai-msg-bubble">
+                      <p>{message.text}</p>
+                    </div>
+                    {proposalFootnote && !loading && index === lastAsstIdx ? (
+                      <p className="hz-dash-ai-footnote hz-dash-ai-footnote--attached">öneri modu · canlı işlem yapılmadı</p>
+                    ) : null}
+                    <time className="hz-dash-ai-msg-time hz-dash-ai-msg-time--assistant" dateTime={new Date(message.ts).toISOString()}>
+                      {formatMsgTime(message.ts)}
+                    </time>
+                  </div>
+                </div>
+              )
+            )}
 
-          {loading ? (
-            <div className="hz-dash-ai-msg hz-dash-ai-msg--assistant hz-dash-ai-msg--typing" aria-live="polite">
-              <AssistantAvatar />
-              <div className="hz-dash-ai-typing-dots" aria-label="Yanıt bekleniyor">
-                <span />
-                <span />
-                <span />
+            {loading ? (
+              <div className="hz-dash-ai-msg hz-dash-ai-msg--assistant hz-dash-ai-msg--typing" aria-live="polite">
+                <AssistantAvatar />
+                <div className="hz-dash-ai-msg-col">
+                  <div className="hz-ai-bubble hz-ai-bubble--ai hz-dash-ai-msg-bubble hz-dash-ai-msg-bubble--typing-wrap">
+                    <div className="hz-dash-ai-typing-dots" aria-label="Yanıt bekleniyor">
+                      <span />
+                      <span />
+                      <span />
+                    </div>
+                  </div>
+                </div>
               </div>
-            </div>
-          ) : null}
+            ) : null}
+          </div>
         </div>
-
-        {proposalFootnote ? <p className="hz-dash-ai-footnote">öneri modu · canlı işlem yapılmadı</p> : null}
 
         <footer className="hz-dash-ai-composer hz-right-rail-simple-composer">
           <input
@@ -225,7 +250,7 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
             onChange={(event) => setPrompt(event.target.value)}
             autoComplete="off"
             onKeyDown={(event) => {
-              if (event.key === "Enter") {
+              if (event.key === "Enter" && !event.shiftKey) {
                 event.preventDefault();
                 const nextPrompt = prompt.trim();
                 if (!nextPrompt || loading) return;
