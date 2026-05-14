@@ -32,6 +32,20 @@ interface SalesAssistantChatInput {
   knowledge: SalesAiTrainingScope[];
 }
 
+type SalesLocalServiceHealth =
+  | {
+      status: "healthy";
+      reason: string;
+      speakerReady: boolean;
+      whisperModel?: string;
+    }
+  | {
+      status: "degraded" | "not_configured" | "blocked";
+      reason: string;
+      speakerReady: false;
+      whisperModel?: string;
+    };
+
 async function fetchWithTimeout(url: string, init: RequestInit, timeoutMs = 15000) {
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -274,6 +288,51 @@ export class AiRuntimeService {
     ].join("\n");
   }
 
+  private async checkLocalAiServiceHealth(): Promise<SalesLocalServiceHealth> {
+    if (!this.localAiServiceValidation.configured) {
+      return {
+        status: "not_configured",
+        reason: this.localAiServiceValidation.reason ?? "local_ai_url_invalid",
+        speakerReady: false
+      };
+    }
+    if (!this.localAiServiceValidation.allowed) {
+      return {
+        status: "blocked",
+        reason: this.localAiServiceValidation.reason ?? "local_ai_url_not_allowed",
+        speakerReady: false
+      };
+    }
+
+    try {
+      const response = await fetchWithTimeout(
+        `${this.localAiServiceUrl}/health`,
+        { method: "GET", headers: { accept: "application/json" } },
+        this.localAiTimeoutMs
+      );
+      if (!response.ok) {
+        return {
+          status: "degraded",
+          reason: `local_ai_service_health_${response.status}`,
+          speakerReady: false
+        };
+      }
+      const payload = (await response.json()) as { speaker_ready?: boolean; whisper_model?: string };
+      return {
+        status: "healthy",
+        reason: "local_ai_service_ready",
+        speakerReady: payload.speaker_ready === true,
+        whisperModel: payload.whisper_model
+      };
+    } catch (error) {
+      return {
+        status: "degraded",
+        reason: error instanceof Error ? error.message : "local_ai_service_unavailable",
+        speakerReady: false
+      };
+    }
+  }
+
   private buildSalesGuardrail(
     status: SalesAiGuardrailDecision["status"],
     reasons: string[],
@@ -361,6 +420,7 @@ export class AiRuntimeService {
     const provider = "ollama" as const;
     const primaryModel = this.salesAssistantModel;
     const fallbackModel = this.salesAssistantFallbackModel;
+    const localService = await this.checkLocalAiServiceHealth();
     if (!this.ollamaServiceValidation.configured) {
       return {
         ok: false,
@@ -371,7 +431,14 @@ export class AiRuntimeService {
         modelReady: false,
         fallbackReady: false,
         reason: this.ollamaServiceValidation.reason ?? "local_ai_url_invalid",
-        availableModels: [] as string[]
+        availableModels: [] as string[],
+        localService,
+        voice: {
+          status: localService.status,
+          sttReady: false,
+          ttsReady: localService.speakerReady,
+          whisperModel: localService.whisperModel
+        }
       };
     }
     if (!this.ollamaServiceValidation.allowed) {
@@ -384,7 +451,14 @@ export class AiRuntimeService {
         modelReady: false,
         fallbackReady: false,
         reason: this.ollamaServiceValidation.reason ?? "local_ai_url_not_allowed",
-        availableModels: [] as string[]
+        availableModels: [] as string[],
+        localService,
+        voice: {
+          status: localService.status,
+          sttReady: false,
+          ttsReady: localService.speakerReady,
+          whisperModel: localService.whisperModel
+        }
       };
     }
     try {
@@ -401,7 +475,14 @@ export class AiRuntimeService {
           modelReady: false,
           fallbackReady: false,
           reason: "sales_ai_models_not_found",
-          availableModels: modelNames
+          availableModels: modelNames,
+          localService,
+          voice: {
+            status: localService.status,
+            sttReady: localService.status === "healthy",
+            ttsReady: localService.speakerReady,
+            whisperModel: localService.whisperModel
+          }
         };
       }
       return {
@@ -413,7 +494,14 @@ export class AiRuntimeService {
         modelReady: primaryReady,
         fallbackReady,
         reason: primaryReady ? "sales_ai_ready" : "sales_ai_primary_missing_fallback_ready",
-        availableModels: modelNames
+        availableModels: modelNames,
+        localService,
+        voice: {
+          status: localService.status,
+          sttReady: localService.status === "healthy",
+          ttsReady: localService.speakerReady,
+          whisperModel: localService.whisperModel
+        }
       };
     } catch (error) {
       return {
@@ -425,7 +513,14 @@ export class AiRuntimeService {
         modelReady: false,
         fallbackReady: false,
         reason: error instanceof Error ? error.message : "ollama_unavailable",
-        availableModels: [] as string[]
+        availableModels: [] as string[],
+        localService,
+        voice: {
+          status: localService.status,
+          sttReady: localService.status === "healthy",
+          ttsReady: localService.speakerReady,
+          whisperModel: localService.whisperModel
+        }
       };
     }
   }

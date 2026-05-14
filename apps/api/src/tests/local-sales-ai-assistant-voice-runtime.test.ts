@@ -84,6 +84,33 @@ test("sales assistant health returns not_configured when configured models are m
   });
 });
 
+test("sales assistant health returns healthy when primary model exists", async () => {
+  await withDemoAuth(async () => {
+    const service = new AiRuntimeService(buildContext());
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input) => {
+      const url = String(input);
+      if (url.includes("11434") && url.includes("/api/tags")) {
+        return new Response(JSON.stringify({ models: [{ name: "RefinedNeuro/Turkcell-LLM-7b-v1:latest" }] }), { status: 200 });
+      }
+      if (url.includes("8008") && url.includes("/health")) {
+        return new Response(JSON.stringify({ ok: true, speaker_ready: false, whisper_model: "small" }), { status: 200 });
+      }
+      throw new Error(`unexpected_fetch_${url}`);
+    }) as typeof fetch;
+
+    try {
+      const health = await service.getSalesAssistantHealth();
+      assert.equal(health.status, "healthy");
+      assert.equal(health.modelReady, true);
+      assert.equal(health.fallbackReady, false);
+    } finally {
+      globalThis.fetch = originalFetch;
+      resetSalesAiRuntimeForTests();
+    }
+  });
+});
+
 test("sales assistant chat denies unauthenticated access", async () => {
   const server = await buildServer();
   const response = await server.inject({
@@ -131,6 +158,22 @@ test("sales knowledge CRUD does not fallback when postgres repository is unavail
       resetSalesAiRuntimeForTests();
     }
   );
+});
+
+test("sales knowledge CRUD requires authentication", async () => {
+  const server = await buildServer();
+  const list = await server.inject({
+    method: "GET",
+    url: "/platform/ai/sales-knowledge"
+  });
+  assert.equal(list.statusCode, 401);
+  const create = await server.inject({
+    method: "POST",
+    url: "/platform/ai/sales-knowledge",
+    payload: { productName: "Alpha" }
+  });
+  assert.equal(create.statusCode, 401);
+  await server.close();
 });
 
 test("chat uses tenant scoped knowledge and does not hallucinate hidden price", async () => {
@@ -233,6 +276,105 @@ test("order intent only returns suggested actions and never executes mutation", 
     } finally {
       globalThis.fetch = originalFetch;
       await server.close();
+      resetSalesAiRuntimeForTests();
+    }
+  });
+});
+
+test("fallback model is used when primary model is missing", async () => {
+  await withDemoAuth(async () => {
+    const service = new AiRuntimeService(buildContext());
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input);
+      if (url.includes("8008") && url.includes("/health")) {
+        return new Response(JSON.stringify({ ok: true, speaker_ready: false, whisper_model: "small" }), { status: 200 });
+      }
+      if (url.includes("/api/tags")) {
+        return new Response(JSON.stringify({ models: [{ name: "llama3.2:3b" }] }), { status: 200 });
+      }
+      if (url.includes("/api/generate")) {
+        const payload = JSON.parse(String(init?.body ?? "{}")) as { model?: string };
+        assert.equal(payload.model, "llama3.2:3b");
+        return new Response(JSON.stringify({ response: "Fallback model ile güvenli yanıt." }), { status: 200 });
+      }
+      throw new Error(`unexpected_fetch_${url}`);
+    }) as typeof fetch;
+
+    try {
+      const result = await service.chatSalesAssistant({
+        message: "Alpha pompa hakkında bilgi verir misin?",
+        channel: "web",
+        knowledge: [
+          {
+            id: "kb_1",
+            tenantId: "tenant_1",
+            productName: "Alpha Pompa",
+            allowedClaims: ["debi"],
+            blockedClaims: [],
+            priceVisibility: "hidden",
+            stockVisibility: "hidden",
+            faqSnippets: [],
+            selectedDocuments: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        ]
+      });
+      assert.equal(result.status, "degraded");
+      assert.equal(result.provider.fallbackUsed, true);
+      assert.equal(result.provider.effectiveModel, "llama3.2:3b");
+    } finally {
+      globalThis.fetch = originalFetch;
+      resetSalesAiRuntimeForTests();
+    }
+  });
+});
+
+test("empty generate response returns safe non-hallucinated message", async () => {
+  await withDemoAuth(async () => {
+    const service = new AiRuntimeService(buildContext());
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input) => {
+      const url = String(input);
+      if (url.includes("8008") && url.includes("/health")) {
+        return new Response(JSON.stringify({ ok: true, speaker_ready: false, whisper_model: "small" }), { status: 200 });
+      }
+      if (url.includes("/api/tags")) {
+        return new Response(JSON.stringify({ models: [{ name: "RefinedNeuro/Turkcell-LLM-7b-v1:latest" }] }), { status: 200 });
+      }
+      if (url.includes("/api/generate")) {
+        return new Response(JSON.stringify({ response: "" }), { status: 200 });
+      }
+      throw new Error(`unexpected_fetch_${url}`);
+    }) as typeof fetch;
+
+    try {
+      const result = await service.chatSalesAssistant({
+        message: "Alpha pompa hakkında bilgi verir misin?",
+        channel: "web",
+        knowledge: [
+          {
+            id: "kb_1",
+            tenantId: "tenant_1",
+            productName: "Alpha Pompa",
+            allowedClaims: ["debi"],
+            blockedClaims: [],
+            priceVisibility: "visible",
+            stockVisibility: "visible",
+            faqSnippets: [],
+            selectedDocuments: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        ]
+      });
+      assert.equal(result.status, "live");
+      assert.match(result.reply, /Bu bilgi sistemde/i);
+      assert.equal(result.mutationExecuted, false);
+      assert.equal(result.externalProviderCallExecuted, false);
+    } finally {
+      globalThis.fetch = originalFetch;
       resetSalesAiRuntimeForTests();
     }
   });

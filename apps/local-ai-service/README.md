@@ -36,6 +36,14 @@ Saglik kontrolu:
 pnpm local-ai:health
 ```
 
+Kapsamli smoke:
+
+```powershell
+pnpm local-ai:smoke
+```
+
+Bu smoke raporu `8008 local-ai-service` ve `11434 Ollama` durumunu ayri gosterir.
+
 Servis varsayilan olarak `http://127.0.0.1:8008` uzerinde baslar.
 
 ## Ollama

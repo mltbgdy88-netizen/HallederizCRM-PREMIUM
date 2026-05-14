@@ -18,7 +18,12 @@ class RagReloadResponse(BaseModel):
 class HealthResponse(BaseModel):
     ok: bool
     model: str
+    fallback_model: str
     rag_documents: int
     speaker_ready: bool
     whisper_model: str
+    ollama_ok: bool
+    model_ready: bool
+    fallback_ready: bool
+    ollama_reason: str | None = None
 
