@@ -37,7 +37,7 @@ pnpm smoke:production-safety
 
 ## Faz B — Tek veri kaynağı (web + API)
 
-- [ ] `NEXT_PUBLIC_USE_DEMO_DATA=false` ile kalan yüzeyler: **sipariş detay** mock yan zinciri (tahsilat/depo/teslimat/fatura özetleri) ve benzeri derinlemesine API/SDK hizası.
+- [x] `NEXT_PUBLIC_USE_DEMO_DATA=false` ile kalan kritik yüzeyler: sipariş detay yan verileri (`getOrderDetailSideData` — tahsilat/depo/teslim/fatura listelerinden süzme); WhatsApp / Hızlı İşlem / onaylar önceki commitlerde.
 - [x] Raporlar / arşiv demo bayrakları `dataSourceConfig.useDemoData` (`NEXT_PUBLIC_USE_DEMO_DATA`) ile hizalı.
 - [ ] `PERSISTENCE_MODE=postgres` iken DB hatasında sessiz mock başarı yok ([005-postgres-fallback-hardening](../implementation/005-postgres-fallback-hardening.md)).
 
@@ -83,4 +83,4 @@ pnpm smoke:production-safety
 - [x] WhatsApp: SDK `whatsapp` istemcisi (`/whatsapp/conversations`); demo modda mock; canlı modda API + yükleme/hata UX.
 - [x] Hızlı İşlem: demo/canlı bilgi şeridi (`NEXT_PUBLIC_USE_DEMO_DATA`).
 - [x] `@hallederiz/ui` primitivleri (modal, drawer, entity şablonları, form/rapor kabukları) + `packages/ui` exportları.
-- [x] Gelen kutusu (`/gelen-kutu`) omnichannel inbox iskeleti; ayarlar `SettingsAreaShell` / alt nav; görevler operatör bağlam paneli; platform shell ve ilgili sayfa düzenlemeleri (dashboard, sipariş/ödeme/teklif listeleri, içe aktarma, raporlar vb.).
+- [x] Sipariş detay: canlı modda tahsilat/depo/teslim/fatura `sdk.*.list()` ile siparişe göre süzülür; demo modda mock zincir.

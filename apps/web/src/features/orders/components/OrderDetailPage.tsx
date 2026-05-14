@@ -4,6 +4,7 @@ import { EmptyState, EntityDetailLayout, FormPageShell, FormValidationSummary, L
 import type { Customer, Delivery, Invoice, PaymentReceipt, SaleOrder, WarehouseOrder } from "@hallederiz/types";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { dataSourceConfig } from "../../../lib/data-source";
 import { useToast } from "../../../providers/toast-provider";
 import { OrderActionButtons } from "./OrderActionButtons";
 import { OrderApprovalSummaryModal } from "./OrderApprovalSummaryModal";
@@ -16,10 +17,7 @@ import { OrderTopForm } from "./OrderTopForm";
 import { SourcingPlanModal } from "./SourcingPlanModal";
 import { WarehouseOrderPanel } from "./WarehouseOrderPanel";
 import { getOrderDetail } from "../queries/get-orders";
-import { getPaymentMockData } from "../../payments/queries/payment-mock-data";
-import { getWarehouseOrderMockData } from "../../warehouse/queries/warehouse-mock-data";
-import { getDeliveryMockData } from "../../deliveries/queries/delivery-mock-data";
-import { getInvoiceMockData } from "../../invoices/queries/invoice-mock-data";
+import { getOrderDetailSideData } from "../queries/get-order-detail-side-data";
 
 const tabs = ["Genel", "Satirlar", "Kaynak Plani", "Tahsilatlar", "Depo", "Teslim", "Belgeler", "Timeline"];
 
@@ -41,15 +39,15 @@ export function OrderDetailPage({ orderId, sourceOfferId, customerId }: { orderI
   useEffect(() => {
     let mounted = true;
 
-    Promise.all([getOrderDetail(orderId, sourceOfferId, customerId), getPaymentMockData(), getWarehouseOrderMockData(), getDeliveryMockData(), getInvoiceMockData()])
-      .then(([orderResult, paymentResult, warehouseResult, deliveryResult, invoiceResult]) => {
+    Promise.all([getOrderDetail(orderId, sourceOfferId, customerId), getOrderDetailSideData(orderId)])
+      .then(([orderResult, side]) => {
         if (mounted) {
           setOrder(orderResult.order);
           setCustomers(orderResult.customers);
-          setPayments(paymentResult);
-          setWarehouseOrders(warehouseResult);
-          setDeliveries(deliveryResult);
-          setInvoices(invoiceResult);
+          setPayments(side.payments);
+          setWarehouseOrders(side.warehouseOrders);
+          setDeliveries(side.deliveries);
+          setInvoices(side.invoices);
         }
       })
       .finally(() => {
@@ -82,7 +80,11 @@ export function OrderDetailPage({ orderId, sourceOfferId, customerId }: { orderI
   const newFormHints = useMemo(
     () =>
       !orderId
-        ? ["Taslak sipariş: kaydet yalnızca demo; kesinleştirme onay ve execution zincirinden geçer."]
+        ? [
+            dataSourceConfig.useDemoData
+              ? "Taslak sipariş: kaydet yalnızca demo; kesinleştirme onay ve execution zincirinden geçer."
+              : "Taslak sipariş: kaydetme canlıda policy ve onay zincirine bağlıdır; yan sekmeler API verisiyle dolar."
+          ]
         : [],
     [orderId]
   );
@@ -129,7 +131,11 @@ export function OrderDetailPage({ orderId, sourceOfferId, customerId }: { orderI
                     className="hz-btn hz-btn-primary hz-toolbar-btn"
                     disabled={draftSaved}
                     onClick={() => {
-                      pushToast("Sipariş taslağı kaydedildi (demo).");
+                      pushToast(
+                        dataSourceConfig.useDemoData
+                          ? "Sipariş taslağı kaydedildi (demo)."
+                          : "Taslak kaydı canlıda policy ve onay akışına bağlıdır; bu adım yalnızca arayüz bildirimidir."
+                      );
                       setDraftSaved(true);
                     }}
                   >
