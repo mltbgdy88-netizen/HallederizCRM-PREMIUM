@@ -1,7 +1,7 @@
 ﻿"use client";
 
 import Link from "next/link";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { useAuth } from "../../../providers/auth-provider";
 import { chatSalesAssistant, getSalesAssistantHealth, listSalesKnowledge, speakSalesVoice } from "../../ai/queries";
 
@@ -42,13 +42,13 @@ type LocalMessage = {
   text: string;
 };
 
-const QUICK_PROMPTS = [
-  "Urun bilgisi sor",
-  "Fiyat sor",
-  "Stok sor",
-  "Teklif iste",
-  "Bugunku oncelikleri sor",
-  "Tahsilat durumunu sor"
+const QUICK_PROMPTS: Array<{ label: string; prompt: string }> = [
+  { label: "Urun", prompt: "Urun bilgisi sor" },
+  { label: "Fiyat", prompt: "Fiyat sor" },
+  { label: "Stok", prompt: "Stok sor" },
+  { label: "Teklif", prompt: "Teklif iste" },
+  { label: "Oncelik", prompt: "Bugunku oncelikleri sor" },
+  { label: "Tahsilat", prompt: "Tahsilat durumunu sor" }
 ];
 
 function greetingFirstName(fullName: string | undefined): string {
@@ -70,11 +70,16 @@ function statusLabel(status: SalesHealthStatus | "live"): string {
 }
 
 function resolveMediaInfo(health: SalesHealth | null): string {
-  if (!health) return "Saglik bilgisi yukleniyor";
-  if (health.status === "healthy") return "Yerel model hazir, chat canli";
-  if (health.status === "degraded") return "Kismi hazirlik: model veya servis bekleniyor";
-  if (health.status === "not_configured") return "Model veya servis henuz yapilandirilmadi";
-  return "Production gate bu modda canli kullanim izni vermiyor";
+  if (!health) return "Durum yukleniyor";
+  if (health.status === "healthy") return "Yerel model hazir";
+  if (health.status === "degraded") return "Kismi hazir";
+  if (health.status === "not_configured") return "Model/servis eksik";
+  return "Production gate blocked";
+}
+
+function compactReason(reason: string | undefined): string {
+  if (!reason) return "-";
+  return reason.length > 44 ? `${reason.slice(0, 44)}...` : reason;
 }
 
 export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolean }) {
@@ -92,11 +97,6 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
 
   const canSend = !loading && prompt.trim().length > 0;
   const isVoiceReady = health?.voice?.ttsReady === true && (health?.voice?.status === "healthy" || health?.voice?.status === "degraded");
-
-  const healthSummary = useMemo(() => {
-    if (!health) return "Durum yukleniyor";
-    return `${statusLabel(health.status)} | model: ${health.model} | fallback: ${health.fallbackModel}`;
-  }, [health]);
 
   useEffect(() => {
     let mounted = true;
@@ -140,89 +140,86 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
 
   const handleVoiceSpeak = async () => {
     if (!chatResult?.reply) {
-      setVoiceMessage("Sesli oynatim icin once bir asistan yaniti olusmali.");
+      setVoiceMessage("Once bir yanit olusmali.");
       return;
     }
     if (!isVoiceReady) {
-      setVoiceMessage("Ses servisi su an hazir degil.");
+      setVoiceMessage("Ses servisi hazir degil.");
       return;
     }
     try {
       const result = await speakSalesVoice({ text: chatResult.reply });
       if (result.item.status !== "live") {
-        setVoiceMessage(`Ses cikisi ${result.item.status}: ${result.item.reason ?? "provider degil"}`);
+        setVoiceMessage(`Ses ${result.item.status}: ${result.item.reason ?? "provider"}`);
         return;
       }
-      setVoiceMessage("Ses cikisi canli durumda hazirlandi.");
+      setVoiceMessage("Ses cikisi hazirlandi.");
     } catch (nextError) {
       setVoiceMessage(nextError instanceof Error ? nextError.message : "Ses cikisi olusturulamadi.");
     }
   };
 
   return (
-    <aside className={`hz-ai-panel hz-ai-panel--compact hz-live-assistant ${compact ? "" : "hz-ai-panel--premium"}`} aria-label="Sag kolon AI asistan">
-      <header className="hz-live-assistant-head">
+    <aside className={`hz-ai-panel hz-ai-panel--compact hz-live-assistant hz-right-rail-ai ${compact ? "" : "hz-ai-panel--premium"}`} aria-label="Sag kolon AI asistan">
+      <header className="hz-live-assistant-head hz-right-rail-ai-head">
         <p className="hz-live-assistant-title">AI Asistan</p>
-        <p className="hz-live-assistant-note">{`${first} icin local sales AI paneli`}</p>
+        <div className="hz-inline-actions" style={{ gap: "6px", flexWrap: "wrap" }}>
+          <span className="hz-badge hz-badge-info">Guvenli oneriler</span>
+          <span className="hz-badge hz-badge-info">{first}</span>
+        </div>
       </header>
 
       <section className="hz-live-assistant-broadcast" aria-label="Asistan gorsel paneli">
         <div className="hz-live-assistant-screen">
           <div className="hz-live-assistant-screen-base">
             <div className="hz-live-assistant-screen-stack">
-              <span className="hz-live-assistant-screen-play" aria-hidden>
+              <button type="button" className="hz-live-assistant-screen-play" disabled aria-label="Video kaynagi bagli degil" title="Video kaynagi bagli degil">
                 <svg width="18" height="18" viewBox="0 0 24 24" fill="none">
                   <path d="M8 6v12l10-6-10-6Z" fill="currentColor" />
                 </svg>
-              </span>
+              </button>
               <p className="hz-live-assistant-screen-line1">Media paneli</p>
               <p className="hz-live-assistant-screen-line2">{resolveMediaInfo(health)}</p>
             </div>
-            <p className="hz-live-assistant-screen-caption">Gercek video kaynagi yoksa playback acilmaz</p>
+            <p className="hz-live-assistant-screen-caption">Video kaynagi bagli degil</p>
           </div>
-        </div>
-        <div className="hz-inline-actions" style={{ marginTop: "6px", flexWrap: "wrap", gap: "6px" }}>
-          <span className={statusBadge(health?.status ?? "degraded")}>{`AI: ${statusLabel(health?.status ?? "degraded")}`}</span>
-          <span className={statusBadge(health?.localService?.status ?? "degraded")}>{`local-ai-service: ${statusLabel(health?.localService?.status ?? "degraded")}`}</span>
-          <span className={statusBadge(health?.voice?.status ?? "degraded")}>{`voice: ${statusLabel(health?.voice?.status ?? "degraded")}`}</span>
         </div>
       </section>
 
-      <section className="hz-live-assistant-local" aria-label="Health bilgisi">
-        <header className="hz-live-assistant-local-head">
-          <p className="hz-live-assistant-local-title">Saglik ve model</p>
-          <p className="hz-live-assistant-local-note">{healthSummary}</p>
-        </header>
-        <div className="hz-inline-actions" style={{ flexWrap: "wrap", gap: "6px" }}>
-          <span className="hz-badge hz-badge-info">{`Primary: ${health?.modelReady ? "hazir" : "hazir degil"}`}</span>
-          <span className="hz-badge hz-badge-info">{`Fallback: ${health?.fallbackReady ? "hazir" : "hazir degil"}`}</span>
-          <span className="hz-badge hz-badge-info">{`Knowledge: ${knowledgeCount}`}</span>
+      <section className="hz-live-assistant-local hz-right-rail-ai-health" aria-label="Health bilgisi">
+        <div className="hz-right-rail-chip-grid">
+          <span className={statusBadge(health?.status ?? "degraded")}>{`AI ${statusLabel(health?.status ?? "degraded")}`}</span>
+          <span className="hz-badge hz-badge-info" title={health?.model ?? ""}>{`Model ${health?.modelReady ? "hazir" : "eksik"}`}</span>
+          <span className={statusBadge(health?.localService?.status ?? "degraded")} title={health?.localService?.reason ?? ""}>{`Ollama ${statusLabel(health?.localService?.status ?? "degraded")}`}</span>
+          <span className={statusBadge(health?.voice?.status ?? "degraded")}>{`Ses ${statusLabel(health?.voice?.status ?? "degraded")}`}</span>
+          <span className="hz-badge hz-badge-info">{`Bilgi ${knowledgeCount}`}</span>
+          <span className="hz-badge hz-badge-warning" title={health?.reason ?? ""}>{compactReason(health?.reason)}</span>
         </div>
       </section>
 
       <section className="hz-live-assistant-local" aria-label="Hizli aksiyonlar">
         <header className="hz-live-assistant-local-head">
           <p className="hz-live-assistant-local-title">Hizli aksiyonlar</p>
-          <p className="hz-live-assistant-local-note">Kritik islemler yalnizca onerilir; otomatik execute edilmez.</p>
         </header>
-        <div className="hz-ai-chips">
+        <div className="hz-right-rail-quick-grid">
           {QUICK_PROMPTS.map((item) => (
-            <button key={item} type="button" className="hz-ai-chip" disabled={loading} onClick={() => void runChat(item)}>
-              {item}
+            <button key={item.label} type="button" className="hz-ai-chip" disabled={loading} onClick={() => void runChat(item.prompt)}>
+              {item.label}
             </button>
           ))}
         </div>
       </section>
 
-      <section className="hz-live-assistant-local" aria-label="Sohbet">
-        <header className="hz-live-assistant-local-head">
-          <p className="hz-live-assistant-local-title">Asistan sohbeti</p>
-          <p className="hz-live-assistant-local-note">Sadece endpoint yaniti gosterilir; fake basari yok.</p>
+      <section className="hz-live-assistant-local hz-right-rail-chat" aria-label="Sohbet">
+        <header className="hz-live-assistant-local-head hz-right-rail-chat-head">
+          <p className="hz-live-assistant-local-title">Sohbet</p>
+          {chatResult ? <span className={`hz-badge ${chatResult.status === "live" ? "hz-badge-success" : "hz-badge-warning"}`}>{chatResult.intent}</span> : null}
         </header>
-        <div className="hz-ai-thread" style={{ maxHeight: "180px", overflowY: "auto" }}>
+
+        <div className="hz-ai-thread hz-right-rail-chat-list">
           {messages.length === 0 ? (
             <div className="hz-ai-bubble hz-ai-bubble--ai">
-              <p>Prompt gondererek satis odakli yanit alabilirsiniz.</p>
+              <p>Prompt ile baslayin.</p>
             </div>
           ) : (
             messages.map((message) => (
@@ -234,37 +231,20 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
         </div>
 
         {chatResult ? (
-          <div className="hz-inline-actions" style={{ flexWrap: "wrap", gap: "6px" }}>
-            <span className={`hz-badge ${chatResult.status === "live" ? "hz-badge-success" : "hz-badge-warning"}`}>{`intent: ${chatResult.intent}`}</span>
-            <span className="hz-badge hz-badge-info">{`confidence: ${chatResult.confidence.toFixed(2)}`}</span>
-            <span className="hz-badge hz-badge-warning">{`mutationExecuted: ${String(chatResult.mutationExecuted)}`}</span>
-            <span className="hz-badge hz-badge-warning">{`externalProviderCallExecuted: ${String(chatResult.externalProviderCallExecuted)}`}</span>
+          <div className="hz-inline-actions hz-right-rail-chat-meta" style={{ flexWrap: "wrap", gap: "6px" }}>
+            <span className="hz-badge hz-badge-info">{`conf ${chatResult.confidence.toFixed(2)}`}</span>
+            <span className="hz-badge hz-badge-warning">mutation:false</span>
+            <span className="hz-badge hz-badge-warning">provider:false</span>
+            {chatResult.usedSources.length > 0 ? <span className="hz-badge hz-badge-info" title={chatResult.usedSources.map((source) => source.title).join(", ")}>source:{chatResult.usedSources.length}</span> : null}
+            {chatResult.suggestedActions.length > 0 ? <span className="hz-badge hz-badge-info">{`action:${chatResult.suggestedActions.length}`}</span> : null}
           </div>
         ) : null}
 
-        {chatResult?.usedSources?.length ? (
-          <p className="hz-live-assistant-local-status">
-            {`Sources: ${chatResult.usedSources
-              .slice(0, 2)
-              .map((source) => source.title)
-              .join(", ")}`}
-          </p>
-        ) : null}
-
-        {chatResult?.suggestedActions?.length ? (
-          <p className="hz-live-assistant-local-status">
-            {`Suggested: ${chatResult.suggestedActions
-              .slice(0, 2)
-              .map((action) => action.label)
-              .join(", ")}`}
-          </p>
-        ) : null}
-
-        <div className="hz-live-assistant-local-row">
+        <div className="hz-live-assistant-local-row hz-right-rail-chat-composer">
           <input
             type="text"
             className="hz-live-assistant-local-input"
-            placeholder="Musteri niyetini yazin"
+            placeholder="Musteri niyeti"
             value={prompt}
             onChange={(event) => setPrompt(event.target.value)}
             autoComplete="off"
@@ -287,30 +267,21 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
             </svg>
           </button>
         </div>
+
         {error ? <p className="hz-live-assistant-local-status">{`Hata: ${error}`}</p> : null}
       </section>
 
       <section className="hz-live-assistant-local" aria-label="Sesli kullanim">
-        <header className="hz-live-assistant-local-head">
-          <p className="hz-live-assistant-local-title">Sesli kullanim</p>
-          <p className="hz-live-assistant-local-note">Provider hazir degilse transcript veya audio fake uretimi yapilmaz.</p>
-        </header>
         <div className="hz-inline-actions" style={{ flexWrap: "wrap", gap: "6px" }}>
           <button type="button" className="hz-btn hz-btn-secondary" onClick={() => void handleVoiceSpeak()}>
             Son yaniti seslendir
           </button>
-          <span className={statusBadge(health?.voice?.status ?? "degraded")}>{`voice: ${statusLabel(health?.voice?.status ?? "degraded")}`}</span>
+          <span className={statusBadge(health?.voice?.status ?? "degraded")}>{`Ses ${statusLabel(health?.voice?.status ?? "degraded")}`}</span>
         </div>
-        <p className="hz-live-assistant-local-status">
-          {voiceMessage ?? "Ses servisi yoksa durum degraded/not_configured olarak kalir."}
-        </p>
+        <p className="hz-live-assistant-local-status">{voiceMessage ?? "Voice hazir degilse fake output yok."}</p>
       </section>
 
       <section className="hz-dash-approvals-quick hz-dash-approvals-quick--compact" aria-label="Detay ekranlari">
-        <header className="hz-dash-approvals-quick-head">
-          <h3>Detay ekranlari</h3>
-        </header>
-        <p className="hz-dash-approvals-quick-copy">Tam AI yonetimi, knowledge ve onay metadatasi icin ilgili ekranlara gecin.</p>
         <div className="hz-inline-actions" style={{ gap: "8px", flexWrap: "wrap" }}>
           <Link href="/ai" className="hz-dash-approvals-quick-cta">
             AI Ekrani

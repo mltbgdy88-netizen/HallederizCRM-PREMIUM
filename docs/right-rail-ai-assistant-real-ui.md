@@ -29,8 +29,10 @@ Dashboard sag kolonundaki AI Asistan panelini fake video/fake voice/fake success
 
 ## Dashboard entegrasyonu
 - Panel dashboard split side bolgesinde calisir.
+- Desktop sag kolon genisligi ferah olacak sekilde buyutuldu (yaklasik 380-440px bandi).
+- Sag panel kendi icinde scroll edebilir; chat/composer kesilme yapmaz.
 - Ana grid akisi bozulmadan compact varyantta sunulur.
-- Mobil/tablet duzende mevcut split davranisi korunur.
+- Mobil/tablet duzende split davranisi korunur ve panel full width stack olur.
 
 ## Guvenlik kurallari
 - API cagrilarinda mevcut cookie tabanli auth modeli korunur.
