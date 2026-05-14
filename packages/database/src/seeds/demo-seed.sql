@@ -24,6 +24,25 @@ INSERT INTO payment_receipts (id, tenant_id, receipt_no, customer_id, amount, st
 VALUES ('payment_1', 'tenant_1', 'PAY-930', 'customer_1', 45000, 'confirmed', 'transfer')
 ON CONFLICT (id) DO NOTHING;
 
+INSERT INTO payment_allocations (
+  id, tenant_id, payment_id, customer_id, target_type, target_id, target_no,
+  target_total, open_balance, allocated_amount, currency
+)
+VALUES (
+  'allocation_payment_1_order_1',
+  'tenant_1',
+  'payment_1',
+  'customer_1',
+  'order',
+  'order_1',
+  'SO-2481',
+  128500,
+  83500,
+  45000,
+  'TRY'
+)
+ON CONFLICT (id) DO NOTHING;
+
 INSERT INTO warehouse_orders (id, tenant_id, warehouse_order_no, order_id, status)
 VALUES ('warehouse_order_1', 'tenant_1', 'WO-114', 'order_1', 'picking')
 ON CONFLICT (id) DO NOTHING;

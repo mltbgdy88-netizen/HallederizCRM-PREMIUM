@@ -13,7 +13,7 @@ Bu batch, cekirdek operasyon omurgasinda kalan kritik bosluklari kapatmak icin u
 - Commercial core repository icinde `payments` ve `warehouse_orders` icin DB-first read/write path eklendi.
 - `payment_receipts` tablosu uzerinden list/get/create/confirm/reverse zinciri guclendirildi.
 - `warehouse_orders` tablosu uzerinden list/get/create/assign/start/prepared/cancel zinciri guclendirildi.
-- `payment allocations` icin DB modunda deterministic foundation hesaplamasi eklendi.
+- `payment allocations` icin satir bazli kalici tablo (`payment_allocations`) ve migration `0011_payment_allocations.sql`; commercial-core repository onayda foundation onerisini bu tabloya yazar, liste/get odemeleri DB allocation ile dondurur.
 
 3. Approval execution completion
 - Execution failure mesajina retryability etiketi eklendi: `[RETRYABLE]` / `[NON_RETRYABLE]`.
@@ -33,7 +33,7 @@ Bu batch, cekirdek operasyon omurgasinda kalan kritik bosluklari kapatmak icin u
 olaylari icin audit write-back eklendi.
 
 ## Hala Foundation Olan Alanlar
-- Payment allocations icin tam line-level kalici tablo yapisi yok; foundation hesaplamasi kullaniliyor.
+- Tahsilat allocation icin coklu hedef (fatura + siparis karma) ve operator duzenleme UI/API henuz tam degil; temel tablo + tek aday siparis foundation persist mevcut.
 - Warehouse line/task alt tablolari DB tarafinda temel seviyede.
 - Local agent OS-level printer varyasyonlari ve ileri retry politikasi foundation seviyesinde.
 

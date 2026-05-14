@@ -14,7 +14,23 @@ import {
   validateOrderTransition
 } from "@hallederiz/domain";
 import type { QueryExecutor } from "@hallederiz/database";
-import type { Delivery, DeliveryLine, Document, DocumentDelivery, DocumentType, Invoice, InvoiceLine, PaymentReceipt, Return, ReturnLine, SaleOrder, SaleOrderLine, WarehouseOrder, OrderSourcePlan } from "@hallederiz/types";
+import type {
+  Delivery,
+  DeliveryLine,
+  Document,
+  DocumentDelivery,
+  DocumentType,
+  Invoice,
+  InvoiceLine,
+  PaymentAllocation,
+  PaymentReceipt,
+  Return,
+  ReturnLine,
+  SaleOrder,
+  SaleOrderLine,
+  WarehouseOrder,
+  OrderSourcePlan
+} from "@hallederiz/types";
 import { ApiDomainError, assertOptimisticConcurrency } from "../../shared/errors";
 import type { RequestContext } from "../../shared/request-context";
 import { buildRepositoryRuntime } from "../../shared/db-runtime";
@@ -304,7 +320,24 @@ function mapDocumentDeliveryRow(row: Row): DocumentDelivery {
   };
 }
 
-function mapPaymentRow(row: Row): PaymentReceipt {
+function mapPaymentAllocationRow(row: Row): PaymentAllocation {
+  return {
+    id: asString(row.id),
+    tenantId: asString(row.tenant_id, "tenant_1"),
+    paymentId: asString(row.payment_id),
+    customerId: asString(row.customer_id),
+    targetType: asString(row.target_type, "order") as PaymentAllocation["targetType"],
+    targetId: asString(row.target_id, undefined),
+    targetNo: asString(row.target_no),
+    targetTotal: asNumber(row.target_total, 0),
+    openBalance: asNumber(row.open_balance, 0),
+    allocatedAmount: asNumber(row.allocated_amount, 0),
+    currency: asString(row.currency, "TRY") as PaymentAllocation["currency"],
+    createdAt: asString(row.created_at, nowIso())
+  };
+}
+
+function mapPaymentRow(row: Row, allocations: PaymentAllocation[] = []): PaymentReceipt {
   return {
     id: asString(row.id),
     tenantId: asString(row.tenant_id, "tenant_1"),
@@ -321,7 +354,7 @@ function mapPaymentRow(row: Row): PaymentReceipt {
     createdBy: asString(row.created_by, "user_admin"),
     createdAt: asString(row.created_at, nowIso()),
     confirmedAt: asString(row.confirmed_at, undefined),
-    allocations: []
+    allocations
   };
 }
 
@@ -376,6 +409,50 @@ function validateSourcePlanQuantities(lines: SaleOrderLine[], plans: OrderSource
 
 export class CommercialCoreRepository {
   constructor(private readonly context: RequestContext) {}
+
+  private buildFoundationPaymentAllocations(payment: PaymentReceipt, orders: SaleOrder[]): PaymentAllocation[] {
+    const candidateOrder = orders.find((order) => order.customerId === payment.customerId && order.status !== "cancelled");
+    if (!candidateOrder) return [];
+    return [
+      {
+        id: `allocation_${payment.id}_${candidateOrder.id}`,
+        tenantId: this.context.tenantId,
+        paymentId: payment.id,
+        customerId: payment.customerId,
+        targetType: "order",
+        targetId: candidateOrder.id,
+        targetNo: candidateOrder.orderNo,
+        targetTotal: candidateOrder.grandTotal,
+        openBalance: Math.max(0, candidateOrder.grandTotal - payment.amount),
+        allocatedAmount: Math.min(payment.amount, candidateOrder.grandTotal),
+        currency: payment.currency,
+        createdAt: payment.confirmedAt ?? payment.createdAt
+      }
+    ];
+  }
+
+  private async fetchPaymentAllocationsMap(runtime: ReturnType<typeof buildRepositoryRuntime>, paymentIds: string[]): Promise<Map<string, PaymentAllocation[]>> {
+    const result = new Map<string, PaymentAllocation[]>();
+    if (paymentIds.length === 0) return result;
+    const params: unknown[] = [this.context.tenantId, ...paymentIds];
+    const placeholders = paymentIds.map((_, index) => `$${index + 2}`).join(", ");
+    const rows = await runtime.executor.query<Row>(
+      `select * from payment_allocations where tenant_id = $1 and payment_id in (${placeholders}) order by created_at asc`,
+      params
+    );
+    for (const row of rows) {
+      const pid = asString(row.payment_id);
+      const list = result.get(pid) ?? [];
+      list.push(mapPaymentAllocationRow(row));
+      result.set(pid, list);
+    }
+    return result;
+  }
+
+  private async loadPaymentAllocationsForPayment(runtime: ReturnType<typeof buildRepositoryRuntime>, paymentId: string): Promise<PaymentAllocation[]> {
+    const map = await this.fetchPaymentAllocationsMap(runtime, [paymentId]);
+    return map.get(paymentId) ?? [];
+  }
 
   private runtime() {
     return buildRepositoryRuntime(this.context);
@@ -1378,7 +1455,9 @@ export class CommercialCoreRepository {
     if (!runtime.dbEnabled) return listPayments();
     try {
       const rows = await runtime.executor.query<Row>(`select * from payment_receipts where tenant_id = $1 order by created_at desc`, [this.context.tenantId]);
-      return rows.map(mapPaymentRow);
+      const paymentIds = rows.map((row) => asString(row.id));
+      const allocationMap = await this.fetchPaymentAllocationsMap(runtime, paymentIds);
+      return rows.map((row) => mapPaymentRow(row, allocationMap.get(asString(row.id)) ?? []));
     } catch (error) {
       runtime.handleDbFailure(error);
       return listPayments();
@@ -1390,7 +1469,10 @@ export class CommercialCoreRepository {
     if (!runtime.dbEnabled) return getPayment(id);
     try {
       const row = (await runtime.executor.query<Row>(`select * from payment_receipts where tenant_id = $1 and (id = $2 or receipt_no = $2) limit 1`, [this.context.tenantId, id]))[0];
-      return row ? mapPaymentRow(row) : undefined;
+      if (!row) return undefined;
+      const paymentId = asString(row.id);
+      const allocations = await this.loadPaymentAllocationsForPayment(runtime, paymentId);
+      return mapPaymentRow(row, allocations);
     } catch (error) {
       runtime.handleDbFailure(error);
       return getPayment(id);
@@ -1439,11 +1521,39 @@ export class CommercialCoreRepository {
     try {
       const payment = await this.getPayment(id);
       if (!payment) return null;
-      const nextStatus: PaymentReceipt["status"] = payment.allocations.length > 0 ? "allocated" : "confirmed";
-      await runtime.executor.query(
-        `update payment_receipts set status = $3, confirmed_at = $4 where tenant_id = $1 and id = $2`,
-        [this.context.tenantId, payment.id, nextStatus, nowIso()]
-      );
+      const orders = await this.listOrders();
+      const foundation = this.buildFoundationPaymentAllocations(payment, orders);
+      const nextStatus: PaymentReceipt["status"] =
+        payment.allocations.length > 0 || foundation.length > 0 ? "allocated" : "confirmed";
+      await runtime.executor.transaction(async (tx) => {
+        await tx.query(
+          `update payment_receipts set status = $3, confirmed_at = $4 where tenant_id = $1 and id = $2`,
+          [this.context.tenantId, payment.id, nextStatus, nowIso()]
+        );
+        if (payment.allocations.length === 0 && foundation.length > 0) {
+          for (const allocation of foundation) {
+            await tx.query(
+              `insert into payment_allocations
+            (id, tenant_id, payment_id, customer_id, target_type, target_id, target_no, target_total, open_balance, allocated_amount, currency, created_at)
+            values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+              [
+                allocation.id,
+                this.context.tenantId,
+                allocation.paymentId,
+                allocation.customerId,
+                allocation.targetType,
+                allocation.targetId ?? null,
+                allocation.targetNo,
+                allocation.targetTotal,
+                allocation.openBalance,
+                allocation.allocatedAmount,
+                allocation.currency,
+                allocation.createdAt
+              ]
+            );
+          }
+        }
+      });
       return this.getPayment(payment.id);
     } catch (error) {
       runtime.handleDbFailure(error);
@@ -1477,25 +1587,9 @@ export class CommercialCoreRepository {
     if (!runtime.dbEnabled) return getPaymentAllocations(id);
     const payment = await this.getPayment(id);
     if (!payment) return [];
+    if (payment.allocations.length > 0) return payment.allocations;
     const orders = await this.listOrders();
-    const candidateOrder = orders.find((order) => order.customerId === payment.customerId && order.status !== "cancelled");
-    if (!candidateOrder) return [];
-    return [
-      {
-        id: `allocation_${payment.id}`,
-        tenantId: this.context.tenantId,
-        paymentId: payment.id,
-        customerId: payment.customerId,
-        targetType: "order",
-        targetId: candidateOrder.id,
-        targetNo: candidateOrder.orderNo,
-        targetTotal: candidateOrder.grandTotal,
-        openBalance: Math.max(0, candidateOrder.grandTotal - payment.amount),
-        allocatedAmount: Math.min(payment.amount, candidateOrder.grandTotal),
-        currency: payment.currency,
-        createdAt: payment.confirmedAt ?? payment.createdAt
-      }
-    ];
+    return this.buildFoundationPaymentAllocations(payment, orders);
   }
 
   async listWarehouseOrders() {
