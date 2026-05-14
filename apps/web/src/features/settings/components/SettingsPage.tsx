@@ -1321,6 +1321,10 @@ export function SettingsPage() {
                       <IconShieldCheck size={14} />
                       Hazırlık kontrolü
                     </button>
+                    <button type="button" className="hz-settings-side-link" onClick={() => router.push("/ayarlar/operasyon-gozlem")}>
+                      <IconDatabase size={14} />
+                      Operasyon ve gözlem
+                    </button>
                     <button type="button" className="hz-settings-side-link" onClick={() => router.push("/raporlar")}>
                       <IconBarChart3 size={14} />
                       Raporlar
@@ -1339,6 +1343,10 @@ export function SettingsPage() {
                     <button type="button" className="hz-settings-side-link" onClick={() => router.push("/ayarlar/staging-kontrol")}>
                       <IconShieldCheck size={14} />
                       Hazırlık kontrolü
+                    </button>
+                    <button type="button" className="hz-settings-side-link" onClick={() => router.push("/ayarlar/operasyon-gozlem")}>
+                      <IconDatabase size={14} />
+                      Operasyon ve gözlem
                     </button>
                     <button type="button" className="hz-settings-side-link" onClick={() => router.push("/raporlar")}>
                       <IconBarChart3 size={14} />

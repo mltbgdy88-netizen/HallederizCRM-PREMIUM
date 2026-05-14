@@ -278,7 +278,8 @@ export const PRODUCT_ROUTE_FOREST: ProductRouteNode[] = [
     ])
   }),
   n("ayarlar", "", "/ayarlar", "Ayarlar", "Settings", "settings", "implemented", OWNER, "Platform ayarları.", {
-    children: ch("/ayarlar", "Settings", "settings", OWNER, [
+    children: [
+      ...ch("/ayarlar", "Settings", "settings", OWNER, [
       ["tenant", "Tenant", "shell", "Kiracı ayarları; modül API bağlantısı eksik olabilir."],
       ["moduller", "Modüller", "needs-api", "Modül aç/kapa."],
       ["kanallar", "Kanallar", "needs-api", "Kanal politikaları."],
@@ -289,7 +290,20 @@ export const PRODUCT_ROUTE_FOREST: ProductRouteNode[] = [
       ["tema", "Tema", "needs-api", "Görünüm ayarları."],
       ["faturalama-ve-paket", "Faturalama ve paket", "needs-api", "Abonelik ve faturalama."],
       ["gelistirici", "Geliştirici", "needs-api", "API anahtarları ve webhooks."]
-    ])
+    ]),
+      n(
+        "settings-operasyon-gozlem",
+        "operasyon-gozlem",
+        "/ayarlar",
+        "Operasyon ve Gözlem",
+        "Settings",
+        "settings",
+        "implemented",
+        OWNER,
+        "Trace/tenant korelasyonu, release/pilot checklist ve haftalık pilot geri bildirimi şablonu.",
+        { existingFeature: "link:/ayarlar/operasyon-gozlem", suppressHeader: true }
+      )
+    ]
   })
 ];
 

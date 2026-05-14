@@ -151,6 +151,7 @@ Bu doküman, `apps/web/app` altındaki **gerçek `page.tsx` dosyaları** ile `do
 - [ ] `/ayarlar/pilot-veri-yukleme` — Pilot veri yükleme
 - [ ] `/ayarlar/canli-kullanim-hazirligi` — Canlı kullanım hazırlığı
 - [ ] `/ayarlar/kullanim-hazirligi` — Kullanım hazırlığı
+- [ ] `/ayarlar/operasyon-gozlem` — Operasyon ve gözlem (trace/tenant, release, haftalık pilot şablonu)
 - [ ] `/kurulum/[...kurulumSlug]` — Kurulum sihirbazı catch-all
 - [ ] `/kurulum/veri-yukleme` — Kurulum veri yükleme
 - [ ] `/kullanicilar` — Kullanıcı yönetimi (liste + ayarlar sınırı)
