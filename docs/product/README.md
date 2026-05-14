@@ -2,6 +2,11 @@
 
 Ürün vizyonu, onay inbox’ı, operatör workspace ve modül kapsamları.
 
+## Operasyon ve release (web)
+
+- Route: `/ayarlar/operasyon-gozlem` — trace/tenant korelasyonu, release/pilot checklist özeti, haftalık pilot geri bildirimi şablonu (salt okunur / demo veri).
+- Üretim yürütme kuyruğu (Faz A–G): [PRODUCTION_EXECUTION_QUEUE.md](../development/PRODUCTION_EXECUTION_QUEUE.md).
+
 ## Approval Inbox ve operatör yüzeyi
 
 | Doküman | Açıklama |

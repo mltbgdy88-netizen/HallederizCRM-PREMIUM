@@ -75,7 +75,7 @@ pnpm smoke:production-safety
 
 ## Sonraki yonlendirme
 
-Uretim kuyrugu **Faz A–G** tamamlandi; yeni maddeler `docs/core-completion-batch.md`, `docs/module-map.md` ve urun blueprint/backlog dosyalari uzerinden acilmalidir.
+Uretim kuyrugu **Faz A–G** tamamlandi; yeni maddeler `docs/core-completion-batch.md`, `docs/module-map.md` ve urun blueprint/backlog dosyalari uzerinden acilmalidir. Ekran bazli UI isleri: [UI_SCREENS_IMPLEMENTATION_BACKLOG.md](../product/UI_SCREENS_IMPLEMENTATION_BACKLOG.md).
 
 ---
 
@@ -100,3 +100,4 @@ Uretim kuyrugu **Faz A–G** tamamlandi; yeni maddeler `docs/core-completion-bat
 - [x] Faz E — WhatsApp prod checklist UI, ERP politika bandi, fabrika iletim seridi (web).
 - [x] Faz F — AI proposal snapshot + `requiresApproval` gorunurlugu; belgeler sablon/teslim/arsiv UI (`apps/web`).
 - [x] Faz G — `/ayarlar/operasyon-gozlem`: trace/tenant, release/pilot checklist, haftalik pilot sablonu + `PILOT_WEEKLY_PREVIEW_ROWS` demo tablosu; kuyruk A–G kapanisi ve sonraki yonlendirme notu.
+- [x] Dokuman: `docs/product/README` operasyon bolumu, `PRODUCTION_ROUTE_MANIFEST` ayarlar alt rotasi; `smoke:navigation` zorunlu route + `SettingsSubNav` pattern.
