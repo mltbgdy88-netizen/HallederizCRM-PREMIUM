@@ -4,35 +4,32 @@
 Dashboard sag kolonundaki AI Asistan panelini fake video/fake voice/fake success davranislarindan arindirip gercek endpoint tabanli, production-safe bir UX'e tasimak.
 
 ## Component yapisi
-- `DashboardAiAssistantPanel` dashboard right-rail compact paneli olarak calisir.
-- Full AI yonetimi ve knowledge CRUD icin `/ai` sayfasi korunur.
+- `DashboardAiAssistantPanel` sade chat asistani olarak calisir.
+- Panel uc bolumden olusur: header, sohbet listesi, composer.
 
 ## Media panel durust davranis standardi
-- Gercek video kaynagi yoksa oynatma simulasyonu yok.
-- Panel, model/servis hazirlik durumunu acikca gosterir.
-- `ready`, `degraded`, `not_configured`, `blocked` durumlari kullanilir.
+- Sag panelde media/video/player katmani tamamen kaldirildi.
+- Fake playback, fake waveform, fake timer kullanilmaz.
 
 ## Chat ve quick action davranisi
-- Hizli aksiyonlar gercek prompt tetikler.
 - Chat sonucu endpointten donen yaniti gosterir.
-- `mutationExecuted:false` ve `externalProviderCallExecuted:false` bilgisi gizlenmez.
+- Bos durumda tek placeholder metni kullanilir.
 - Asistan cevabi mutation veya canli kanal gonderimi olarak sunulmaz.
+- Suggested action varsa kisa sistem mesaji ile belirtilir, otomatik execute edilmez.
 
 ## Voice davranisi
-- Voice provider hazir degilse fake transcript/audio uretilmez.
-- "Son yaniti seslendir" aksiyonu yalnizca provider durumu uygunsa calisir.
-- Hata/degraded/not_configured nedenleri acik metinle gosterilir.
+- Composer icindeki mikrofon butonu provider uygun degilse disabled kalir.
+- Fake transcript/audio uretilmez.
 
 ## Health/degraded state standardi
-- Health banner model, fallback, local-ai-service ve voice durumlarini birlikte verir.
-- 8008 kapali ama 11434 acik senaryosu partial/degraded olarak yansitilir.
+- Header sadece kisa durum etiketi gosterir: hazir / kisitli / kapali.
+- Teknik health detaylari panelde kalabalik yaratmaz.
 
 ## Dashboard entegrasyonu
 - Panel dashboard split side bolgesinde calisir.
-- Desktop sag kolon genisligi ferah olacak sekilde buyutuldu (yaklasik 380-440px bandi).
-- Sag panel kendi icinde scroll edebilir; chat/composer kesilme yapmaz.
-- Ana grid akisi bozulmadan compact varyantta sunulur.
-- Mobil/tablet duzende split davranisi korunur ve panel full width stack olur.
+- Desktop sag kolon genisligi 380-440px bandinda tutulur.
+- Sohbet listesi scroll alir, composer altta gorunur kalir.
+- Mobil/tablet duzende panel full width stack olur.
 
 ## Guvenlik kurallari
 - API cagrilarinda mevcut cookie tabanli auth modeli korunur.
