@@ -14,7 +14,10 @@ import {
   validateDeliveryCustomerLink,
   validateDeliveryPaymentRule,
   validateDeliveryWarehouseState,
-  validateOrderTransition
+  validateInvoiceLineArithmetic,
+  validateInvoiceLinesAgainstOrder,
+  validateOrderTransition,
+  validateReturnLinesAgainstOrder
 } from "@hallederiz/domain";
 import type { QueryExecutor } from "@hallederiz/database";
 import type {
@@ -1320,7 +1323,7 @@ export class CommercialCoreRepository {
       return await runtime.executor.transaction(async (tx) => {
         const id = payload.id ?? `invoice_${Date.now()}`;
         const now = nowIso();
-        const order = payload.orderId ? await this.loadOrderAggregate(tx, payload.orderId) : null;
+        const order = payload.orderId ? (await this.loadOrderAggregate(tx, payload.orderId)) ?? null : null;
         const lines: InvoiceLine[] = (payload.lines ?? []).map((line) => ({
           id: line.id ?? `invoice_line_${Date.now()}_${Math.random().toString(36).slice(2, 6)}`,
           invoiceId: id,
@@ -1336,6 +1339,11 @@ export class CommercialCoreRepository {
           lineTotal: line.lineTotal ?? Number((line.quantity * line.unitPrice).toFixed(2))
         }));
         const totals = calculateInvoiceTotals(lines, payload.currency ?? order?.currency ?? "TRY");
+        const qtyCheck = validateInvoiceLinesAgainstOrder(order, lines);
+        const mathCheck = validateInvoiceLineArithmetic(lines);
+        if (!qtyCheck.valid || !mathCheck.valid) {
+          throw new ApiDomainError("validation_error", [...qtyCheck.blockers, ...mathCheck.blockers].join(" | "));
+        }
         await tx.query(
           `insert into invoices (id, tenant_id, invoice_no, order_id, status, grand_total, created_at)
            values ($1,$2,$3,$4,$5,$6,$7)`,
@@ -1431,6 +1439,11 @@ export class CommercialCoreRepository {
           reasonCategory: line.reasonCategory ?? "other",
           note: line.note
         }));
+        const order = payload.orderId ? (await this.loadOrderAggregate(tx, payload.orderId)) ?? null : null;
+        const retCheck = validateReturnLinesAgainstOrder(order, lines);
+        if (!retCheck.valid) {
+          throw new ApiDomainError("validation_error", retCheck.blockers.join(" | "));
+        }
         await tx.query(
           `insert into returns (id, tenant_id, return_no, customer_id, status, created_at)
            values ($1,$2,$3,$4,$5,$6)`,
