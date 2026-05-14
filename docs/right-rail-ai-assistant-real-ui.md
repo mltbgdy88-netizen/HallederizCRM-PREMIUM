@@ -1,45 +1,26 @@
 ﻿# Production-safe Right Rail AI Assistant UI
 
 ## Amac
-Dashboard sag kolonundaki AI Asistan panelini fake video/fake voice/fake success davranislarindan arindirip gercek endpoint tabanli, production-safe bir UX'e tasimak.
+Dashboard sag kolonundaki AI Asistan paneli: premium hero + gercek sohbet + composer; fake video/voice/success yok.
 
-## Component yapisi
-- `DashboardAiAssistantPanel` sag rail satis asistani olarak calisir.
-- Panel dort bolum: baslik (durum rozeti), kucuk tanitim/hero onizleme (16:9, oynatma yok), sohbet listesi, composer.
+## Gorunum
+- Baslik: yalnizca "AI Asistan" + renkli durum noktasi (yazi etiketi yok).
+- Ust hero: 16/10, ~220-250px bandi, CSS gradient + glow + orb + merkez play (disari asset yok, oynatma yok).
+- Sohbet: bos durumda metin yok; hafif bos canvas / pulse. Mesajlar kullanici sag / asistan sol; zaman damgasi kucuk gri.
+- Yukleme: uc nokta animasyonu.
+- Dipnot (API oneri modu): yalniz `oneri modu · canli islem yapilmadi` uygun cevaplarda.
+- Composer: bos placeholder; `aria-label="AI asistana mesaj yaz"`; Enter / gonder; mikrofon yalniz `title` ile "Ses servisi hazir degil" veya seslendirme.
 
-## Media panel durust davranis standardi
-- Ustte kucuk premium hero/video **onizleme** alani kalir; ortada yalnizca dekoratif play gorunumu (devre disi dugme, tiklaninca oynatma yok).
-- Fake playback, fake waveform, fake timer, sahte sure cubugu kullanilmaz.
+## Davranis
+- `chatSalesAssistant` gercek cagri; demo modda bile SDK/demo stub, sahte client-side cevap yok.
+- Suggested actions otomatik execute edilmez.
+- Ses: `speakSalesVoice`; provider yoksa disabled, fake kayit yok.
 
-## Chat ve quick action davranisi
-- Chat sonucu endpointten donen yaniti gosterir.
-- Bos durumda tek placeholder metni kullanilir.
-- Asistan cevabi mutation veya canli kanal gonderimi olarak sunulmaz.
-- Suggested action varsa kisa sistem mesaji ile belirtilir, otomatik execute edilmez.
-
-## Voice davranisi
-- Composer icindeki mikrofon butonu provider uygun degilse disabled kalir.
-- Fake transcript/audio uretilmez.
-
-## Health/degraded state standardi
-- Header sadece kisa durum etiketi gosterir: hazir / kisitli / kapali.
-- Teknik health detaylari panelde kalabalik yaratmaz; asistan yaniti sonrasi gerekirse tek satir `oneri modu · canli islem yapilmadi` dipnotu.
-
-## Dashboard entegrasyonu
-- Panel dashboard split side bolgesinde calisir.
-- Desktop sag kolon genisligi ~380-420px (viewport-fit compact).
-- Hero onizleme 16:9, yaklasik 140-170px bandi; sohbet listesi scroll alir, composer altta sabit kalir.
-- Dashboard ana icerik (gorev karti + bilgi kartlari) daha compact padding/gap ile laptop (or. 1366x768) ekraninda daha cok satir/kart gorunur.
-- Mobil/tablet duzende panel full width stack olur.
-
-## Guvenlik kurallari
-- API cagrilarinda mevcut cookie tabanli auth modeli korunur.
-- localStorage/sessionStorage token kullanimi eklenmez.
-- Production gate/degraded cevaplari basari gibi gosterilmez.
-- Otonom kritik action veya canli auto-send acilmaz.
+## Guvenlik
+- Cookie tabanli auth (`credentials: include` SDK ile); panelde token storage yok.
 
 ## Bilerek yapilmayanlar
-- Gercek video stream altyapisi
+- Gercek video stream
 - Otonom AI execution
-- Full mikrofon streaming implementasyonu
+- Full mikrofon streaming
 - WhatsApp live auto-send
