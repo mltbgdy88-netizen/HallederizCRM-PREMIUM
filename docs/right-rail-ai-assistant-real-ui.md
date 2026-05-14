@@ -4,12 +4,12 @@
 Dashboard sag kolonundaki AI Asistan panelini fake video/fake voice/fake success davranislarindan arindirip gercek endpoint tabanli, production-safe bir UX'e tasimak.
 
 ## Component yapisi
-- `DashboardAiAssistantPanel` sade chat asistani olarak calisir.
-- Panel uc bolumden olusur: header, sohbet listesi, composer.
+- `DashboardAiAssistantPanel` sag rail satis asistani olarak calisir.
+- Panel dort bolum: baslik (durum rozeti), kucuk tanitim/hero onizleme (16:9, oynatma yok), sohbet listesi, composer.
 
 ## Media panel durust davranis standardi
-- Sag panelde media/video/player katmani tamamen kaldirildi.
-- Fake playback, fake waveform, fake timer kullanilmaz.
+- Ustte kucuk premium hero/video **onizleme** alani kalir; ortada yalnizca dekoratif play gorunumu (devre disi dugme, tiklaninca oynatma yok).
+- Fake playback, fake waveform, fake timer, sahte sure cubugu kullanilmaz.
 
 ## Chat ve quick action davranisi
 - Chat sonucu endpointten donen yaniti gosterir.
@@ -23,7 +23,7 @@ Dashboard sag kolonundaki AI Asistan panelini fake video/fake voice/fake success
 
 ## Health/degraded state standardi
 - Header sadece kisa durum etiketi gosterir: hazir / kisitli / kapali.
-- Teknik health detaylari panelde kalabalik yaratmaz.
+- Teknik health detaylari panelde kalabalik yaratmaz; asistan yaniti sonrasi gerekirse tek satir `oneri modu · canli islem yapilmadi` dipnotu.
 
 ## Dashboard entegrasyonu
 - Panel dashboard split side bolgesinde calisir.

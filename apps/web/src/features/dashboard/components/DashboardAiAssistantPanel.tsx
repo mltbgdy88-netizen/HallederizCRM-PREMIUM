@@ -26,7 +26,7 @@ type LocalMessage = {
 };
 
 function statusLabel(status: SalesHealthStatus | null): string {
-  if (!status) return "kisıtlı";
+  if (!status) return "kısıtlı";
   if (status === "healthy") return "hazır";
   if (status === "degraded") return "kısıtlı";
   return "kapalı";
@@ -49,6 +49,7 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
 
   const voiceReady = health?.voice?.ttsReady === true && health?.voice?.status === "healthy";
   const panelStatus = useMemo(() => statusLabel(health?.status ?? null), [health?.status]);
+  const hasAssistantTurn = useMemo(() => messages.some((m) => m.role === "assistant"), [messages]);
 
   useEffect(() => {
     let active = true;
@@ -87,8 +88,6 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
 
       if (item.status !== "live") {
         setSystemMessage("Asistan kısıtlı modda yanıt üretti.");
-      } else if (item.suggestedActions.length > 0) {
-        setSystemMessage("Öneri üretildi. Canlı işlem otomatik çalıştırılmadı.");
       }
     } catch (error) {
       setSystemMessage(error instanceof Error ? error.message : "Asistan yanıt üretemedi.");
@@ -111,16 +110,36 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
   };
 
   return (
-    <aside className={`hz-ai-panel hz-ai-panel--compact hz-right-rail-ai-simple ${compact ? "" : "hz-ai-panel--premium"}`} aria-label="Sag kolon AI asistan">
+    <aside
+      className={`hz-ai-panel hz-dash-ai-rail hz-right-rail-ai-simple ${compact ? "hz-dash-ai-rail--compact" : "hz-ai-panel--premium"}`}
+      aria-label="Sağ kolon AI asistan"
+    >
       <header className="hz-right-rail-simple-head">
         <h3 className="hz-right-rail-simple-title">AI Asistan</h3>
         <span className={`hz-badge ${statusTone(health?.status ?? null)}`}>{panelStatus}</span>
       </header>
 
-      <section className="hz-right-rail-simple-chat" aria-label="Asistan sohbeti">
+      <div className="hz-dash-ai-hero" aria-label="Tanıtım önizlemesi">
+        <div className="hz-dash-ai-hero-frame">
+          <button
+            type="button"
+            className="hz-dash-ai-hero-play"
+            disabled
+            aria-label="Tanıtım paneli — oynatma yok"
+            title="Önizleme"
+          >
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
+              <path d="M8 5v14l11-7L8 5z" />
+            </svg>
+          </button>
+        </div>
+        <p className="hz-dash-ai-hero-caption">{voiceReady ? "Tanıtım paneli" : "Sesli mod için servis bekleniyor."}</p>
+      </div>
+
+      <section className="hz-right-rail-chat-stack" aria-label="Asistan sohbeti">
         <div className="hz-right-rail-simple-messages">
           {messages.length === 0 ? (
-            <div className="hz-ai-bubble hz-ai-bubble--ai">
+            <div className="hz-ai-bubble hz-ai-bubble--ai hz-dash-ai-empty-bubble">
               <p>Satış asistanına müşteri niyetini yazın.</p>
             </div>
           ) : (
@@ -140,6 +159,8 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
             </div>
           ) : null}
         </div>
+
+        {hasAssistantTurn ? <p className="hz-dash-ai-footnote">öneri modu · canlı işlem yapılmadı</p> : null}
 
         <footer className="hz-right-rail-simple-composer">
           <input
@@ -162,9 +183,9 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
           <button
             type="button"
             className="hz-live-assistant-local-icon"
-            aria-label="Sesli kullanim"
-            title={voiceReady ? "Son yaniti seslendir" : "Ses özelliği hazır değil"}
-            disabled={!voiceReady}
+            aria-label="Ses"
+            title={voiceReady ? "Son yanıtı seslendir" : "Ses servisi hazır değil"}
+            disabled={!voiceReady || !lastAssistantReply}
             onClick={() => void handleVoiceButton()}
           >
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -175,8 +196,8 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
           <button
             type="button"
             className="hz-live-assistant-local-icon"
-            aria-label="Gonder"
-            title="Asistana gonder"
+            aria-label="Gönder"
+            title="Asistana gönder"
             disabled={loading || prompt.trim().length === 0}
             onClick={() => {
               const nextPrompt = prompt.trim();

@@ -2064,12 +2064,12 @@ p {
 .hz-dashboard-page--fit .hz-split-layout {
   flex: 1;
   min-height: 0;
-  height: calc(100dvh - var(--hz-header-height) - 22px);
-  max-height: calc(100dvh - var(--hz-header-height) - 22px);
+  height: calc(100dvh - var(--hz-header-height) - 24px);
+  max-height: calc(100dvh - var(--hz-header-height) - 24px);
   align-items: stretch;
-  grid-template-columns: minmax(0, 1fr) minmax(380px, 440px);
+  grid-template-columns: minmax(0, 1fr) minmax(400px, 440px);
   grid-template-rows: minmax(0, 1fr);
-  gap: 8px;
+  gap: 10px;
 }
 
 .hz-dashboard-page .hz-split-side {
@@ -2080,6 +2080,8 @@ p {
 }
 
 .hz-dashboard-page--fit .hz-split-main {
+  flex: 1 1 0;
+  min-width: 0;
   min-height: 0;
   display: flex;
   flex-direction: column;
@@ -2090,15 +2092,24 @@ p {
 .hz-dashboard-page--fit .hz-split-side {
   position: sticky;
   top: calc(var(--hz-header-height) + 8px);
-  max-height: calc(100dvh - var(--hz-header-height) - 20px);
-  height: calc(100dvh - var(--hz-header-height) - 20px);
+  max-height: calc(100dvh - var(--hz-header-height) - 24px);
+  height: calc(100dvh - var(--hz-header-height) - 24px);
   align-self: stretch;
   min-height: 0;
-  overflow-y: auto;
+  overflow: hidden;
   overflow-x: hidden;
   overscroll-behavior: contain;
   display: flex;
   flex-direction: column;
+}
+
+.hz-dashboard-page--fit .hz-split-side > aside {
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .hz-dash-main-column {
@@ -3376,14 +3387,105 @@ p {
   gap: 8px;
 }
 
+.hz-dash-ai-rail {
+  flex: 1 1 0;
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.hz-dash-ai-hero {
+  flex-shrink: 0;
+  display: grid;
+  gap: 6px;
+}
+
+.hz-dash-ai-hero-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  max-height: 210px;
+  min-height: 0;
+  border-radius: 12px;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, #312e81 28%, var(--hz-border));
+  background:
+    radial-gradient(90% 80% at 50% 0%, rgba(129, 140, 248, 0.45) 0%, rgba(30, 27, 75, 0.2) 42%, #0f172a 100%);
+  display: grid;
+  place-items: center;
+  box-shadow: 0 4px 14px rgba(15, 23, 42, 0.12);
+}
+
+.hz-dash-ai-hero-play {
+  width: 48px;
+  height: 48px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, #ffffff 35%, transparent);
+  background: color-mix(in srgb, #0f172a 35%, rgba(255, 255, 255, 0.12));
+  color: rgba(248, 250, 252, 0.95);
+  display: grid;
+  place-items: center;
+  padding: 0;
+  margin: 0;
+  cursor: default;
+  opacity: 0.95;
+}
+
+.hz-dash-ai-hero-play:disabled {
+  opacity: 0.95;
+  cursor: default;
+}
+
+.hz-dash-ai-hero-play svg {
+  margin-left: 3px;
+}
+
+.hz-dash-ai-hero-caption {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--hz-text-muted);
+  line-height: 1.35;
+  padding: 0 2px;
+}
+
+.hz-right-rail-chat-stack {
+  flex: 1 1 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  overflow: hidden;
+}
+
 .hz-right-rail-simple-messages {
-  flex: 1 1 auto;
-  min-height: 280px;
+  flex: 1 1 0;
+  min-height: 0;
   overflow-y: auto;
+  overflow-x: hidden;
   display: grid;
   align-content: start;
   gap: 6px;
   padding-right: 2px;
+  overscroll-behavior: contain;
+}
+
+.hz-dash-ai-empty-bubble {
+  max-width: 100%;
+}
+
+.hz-dash-ai-footnote {
+  flex-shrink: 0;
+  margin: 0;
+  padding: 0 2px 2px;
+  font-size: 9px;
+  font-weight: 600;
+  color: #94a3b8;
+  letter-spacing: 0.01em;
+  line-height: 1.3;
 }
 
 .hz-right-rail-system-bubble {
@@ -3394,13 +3496,13 @@ p {
 
 .hz-right-rail-simple-composer {
   flex-shrink: 0;
-  position: sticky;
-  bottom: 0;
   display: flex;
   align-items: center;
   gap: 6px;
-  padding-top: 6px;
-  background: linear-gradient(180deg, rgba(248, 250, 252, 0), rgba(248, 250, 252, 0.92) 35%, rgba(248, 250, 252, 1) 100%);
+  padding-top: 8px;
+  margin-top: auto;
+  border-top: 1px solid color-mix(in srgb, var(--hz-border) 85%, transparent);
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0), #f8fafc 28%, #f8fafc 100%);
 }
 
 .hz-ai-panel {
@@ -3894,7 +3996,7 @@ p {
   }
 
   .hz-right-rail-simple-messages {
-    min-height: 180px;
+    min-height: 0;
   }
 }
 
@@ -14135,6 +14237,9 @@ select.hz-qop-summary-input {
   display: grid;
   gap: 10px;
   min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+  overscroll-behavior: contain;
 }
 
 .hz-dash-work-head--cards {
