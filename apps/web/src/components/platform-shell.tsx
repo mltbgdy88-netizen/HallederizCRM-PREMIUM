@@ -171,7 +171,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
   const isReportsList = normalizedPath === "/raporlar";
   const isSettingsArea = normalizedPath === "/ayarlar" || normalizedPath.startsWith("/ayarlar/");
   const isWarehousePrep = normalizedPath === "/depo" || normalizedPath.startsWith("/depo/");
-  const isTasksWorkspace = normalizedPath === "/gorevler";
+  const isTasksWorkspace = normalizedPath === "/gorevler" || normalizedPath.startsWith("/gorevler/");
   const isAiWorkspace = normalizedPath === "/ai" || normalizedPath.startsWith("/ai/");
   const isDocumentsWorkspace = normalizedPath === "/belgeler" || normalizedPath.startsWith("/belgeler/");
   const isCustomersEntityDetail =

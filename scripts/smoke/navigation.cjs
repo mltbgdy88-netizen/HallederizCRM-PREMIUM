@@ -58,6 +58,16 @@ const checks = [
     description: "Gorevler sag panel operasyon gozlem kisayolu"
   },
   {
+    file: "apps/web/src/components/platform-shell.tsx",
+    patterns: ["normalizedPath.startsWith(\"/gorevler/\")"],
+    description: "Gorev alt rotalari icin tasks workspace bayragi"
+  },
+  {
+    file: "apps/web/src/features/tasks/components/TasksPage.tsx",
+    patterns: ["/ayarlar/operasyon-gozlem"],
+    description: "Gorev detay TaskActionsBar operasyon kisayolu"
+  },
+  {
     file: "apps/web/src/features/ai/components/AIAssistantPage.tsx",
     patterns: ["/ai/onaylar", "/ai/icgoruler"],
     description: "AI merkezi onay ve icgoru gecisleri"

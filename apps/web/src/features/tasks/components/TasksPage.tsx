@@ -416,6 +416,9 @@ export function TaskActionsBar({ task }: { task: Task }) {
             Onay inbox
           </button>
         ) : null}
+        <button className="hz-btn hz-btn-secondary" type="button" onClick={() => router.push("/ayarlar/operasyon-gozlem")}>
+          Operasyon ve gozlem
+        </button>
       </div>
     </section>
   );

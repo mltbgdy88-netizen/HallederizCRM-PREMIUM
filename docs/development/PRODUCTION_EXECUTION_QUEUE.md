@@ -101,4 +101,5 @@ Uretim kuyrugu **Faz A–G** tamamlandi; yeni maddeler `docs/core-completion-bat
 - [x] Faz F — AI proposal snapshot + `requiresApproval` gorunurlugu; belgeler sablon/teslim/arsiv UI (`apps/web`).
 - [x] Faz G — `/ayarlar/operasyon-gozlem`: trace/tenant, release/pilot checklist, haftalik pilot sablonu + `PILOT_WEEKLY_PREVIEW_ROWS` demo tablosu; kuyruk A–G kapanisi ve sonraki yonlendirme notu.
 - [x] Dokuman: `docs/product/README` operasyon bolumu, `PRODUCTION_ROUTE_MANIFEST` ayarlar alt rotasi; `smoke:navigation` zorunlu route + `SettingsSubNav` pattern.
-- [x] Gorevler: `OperatorWorkspaceContextPanel` sag panelden `/ayarlar/operasyon-gozlem` kisayolu; navigation smoke pattern.
+- [x] Gorevler: `OperatorWorkspaceContextPanel` + `TaskActionsBar` → `/ayarlar/operasyon-gozlem`; navigation smoke patternlari (`TasksPage`, `OperatorWorkspaceContextPanel`).
+- [x] Shell: `isTasksWorkspace` artik `/gorevler/` tum alt rotalari kapsar (PageMeta + arama placeholder); smoke `platform-shell` `startsWith("/gorevler/")` korumasi.
