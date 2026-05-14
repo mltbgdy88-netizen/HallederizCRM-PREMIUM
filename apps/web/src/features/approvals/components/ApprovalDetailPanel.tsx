@@ -10,6 +10,7 @@ import { ApprovalRiskSummary } from "./ApprovalRiskSummary";
 import { ApprovalStatusBadge } from "./ApprovalStatusBadge";
 import { ApprovalTimelinePreview } from "./ApprovalTimelinePreview";
 import { ApprovalInboxEmpty } from "./ApprovalInboxStates";
+import { getApprovalWaitingReasonSummary } from "../utils/inbox-helpers";
 import { summarizeGateDecision } from "../utils/inbox-helpers";
 
 function formatDate(value?: string): string {
@@ -70,6 +71,10 @@ export function ApprovalDetailPanel({
       <section className="hz-approvals-inbox-card">
         <h3 className="hz-approvals-inbox-card-title">Ozet</h3>
         <dl className="hz-approvals-inbox-meta hz-approvals-inbox-meta--grid">
+          <div>
+            <dt>{item.status === "pending" ? "Bekleme nedeni" : item.status === "rejected" ? "Red özeti" : "Karar özeti"}</dt>
+            <dd className="hz-approvals-inbox-wait-reason">{getApprovalWaitingReasonSummary(item)}</dd>
+          </div>
           <div>
             <dt>Action key</dt>
             <dd>{item.actionKey}</dd>

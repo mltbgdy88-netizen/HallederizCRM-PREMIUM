@@ -202,7 +202,7 @@ export const PRODUCT_ROUTE_FOREST: ProductRouteNode[] = [
       ["bekleyenler", "Bekleyenler", "implemented", "Bekleyen onaylar.", undefined, "redirect:/onaylar"],
       ["inceleme", "İnceleme", "shell", "İnceleme kuyruğu; API bağlantısı bekleniyor."],
       ["tamamlananlar", "Tamamlananlar", "shell", "Tamamlanan onaylar; API bağlantısı bekleniyor."],
-      ["kurallar", "Kurallar", "needs-api", "Onay politikaları."],
+      ["kurallar", "Kurallar", "implemented", "Politika matrisi; domain kayitlarindan onay gerektiren aksiyonlar."],
       ["limitler", "Limitler", "needs-api", "Limit ve eşikler."]
     ])
   }),

@@ -1,5 +1,5 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+import { ApprovalPolicyMatrixPage } from "../../../../src/features/approvals/components/ApprovalPolicyMatrixPage";
 
 export default function OnaylarKurallarPage() {
-  return renderProductCatchAll(["onaylar", "kurallar"]);
+  return <ApprovalPolicyMatrixPage />;
 }

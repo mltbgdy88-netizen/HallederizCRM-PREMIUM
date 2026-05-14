@@ -60,6 +60,13 @@ export function FactoryOrdersPage({ orders }: { orders: FactoryOrder[] }) {
     if (!orders.length || !selectedOrderId) return null;
     return orders.find((order) => order.id === selectedOrderId) ?? null;
   }, [orders, selectedOrderId]);
+  const transmissionHint = useMemo(() => {
+    if (!orders.length) return "Liste bos - geri bildirim bekleniyor.";
+    const sorted = [...orders].sort((a, b) => Date.parse(b.lastUpdatedAt) - Date.parse(a.lastUpdatedAt));
+    const newest = sorted[0];
+    if (!newest) return "Liste bos - geri bildirim bekleniyor.";
+    return `Son kayit guncellemesi: ${new Date(newest.lastUpdatedAt).toLocaleString("tr-TR")}`;
+  }, [orders]);
   useEffect(() => {
     if (!orders.length) {
       setSelectedOrderId(null);
@@ -69,7 +76,53 @@ export function FactoryOrdersPage({ orders }: { orders: FactoryOrder[] }) {
       setSelectedOrderId(orders[0]?.id ?? null);
     }
   }, [orders, selectedOrderId]);
-  return <div className="hz-page-stack"><PageHeader title="Fabrika Siparisleri" description="Fabrikaya acilan siparisleri, bagli satis ve entegrasyon durumuyla takip edin." /><PrimaryActionToolbar><button className="hz-btn hz-toolbar-btn hz-btn-primary" type="button" disabled>Yeni Fabrika Siparisi (Foundation)</button><button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button" disabled>Durum Sorgula (Foundation)</button><button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button" disabled>Senkron Loglari (Foundation)</button></PrimaryActionToolbar><section className="hz-content-card"><p className="muted">Not: Siparis acma/durum sorgu aksiyonlari foundation modundadir. Gercek adapter baglantisi acildiginda canli hale gelir.</p></section><FactoryOrderFilterBar /><SplitContentLayout main={<><FactoryOrderTable orders={pagedOrders} selectedId={selectedOrderId} onSelect={setSelectedOrderId} onOpen={(id) => router.push(`/fabrikalar/siparisler/${id}`)} /><Pagination totalItems={orders.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} /></>} side={<FactoryOrderPreviewPanel order={selected} />} /></div>;
+  return (
+    <div className="hz-page-stack hz-factory-orders-page">
+      <PageHeader
+        title="Fabrika Siparisleri"
+        description="Fabrikaya acilan siparisleri, bagli satis ve entegrasyon durumuyla takip edin."
+      />
+      <section className="hz-factory-orders-transmit" aria-label="Iletim ve fabrika geri bildirimi">
+        <span className="hz-factory-orders-transmit-pill">Iletim: adapter foundation</span>
+        <span className="hz-factory-orders-transmit-pill">Durum kanali: webhook / queue (tenant)</span>
+        <span className="hz-factory-orders-transmit-pill hz-factory-orders-transmit-pill--meta" title={transmissionHint}>
+          Geri bildirim: {transmissionHint}
+        </span>
+      </section>
+      <PrimaryActionToolbar>
+        <button className="hz-btn hz-toolbar-btn hz-btn-primary" type="button" disabled>
+          Yeni Fabrika Siparisi (Foundation)
+        </button>
+        <button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button" disabled>
+          Durum Sorgula (Foundation)
+        </button>
+        <button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button" disabled>
+          Senkron Loglari (Foundation)
+        </button>
+      </PrimaryActionToolbar>
+      <section className="hz-content-card">
+        <p className="muted">
+          Not: Siparis acma/durum sorgu aksiyonlari foundation modundadir. Gercek adapter baglantisi acildiginda canli hale
+          gelir.
+        </p>
+      </section>
+      <FactoryOrderFilterBar />
+      <SplitContentLayout
+        main={
+          <>
+            <FactoryOrderTable
+              orders={pagedOrders}
+              selectedId={selectedOrderId}
+              onSelect={setSelectedOrderId}
+              onOpen={(id) => router.push(`/fabrikalar/siparisler/${id}`)}
+            />
+            <Pagination totalItems={orders.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
+          </>
+        }
+        side={<FactoryOrderPreviewPanel order={selected} />}
+      />
+    </div>
+  );
 }
 
 export function FactoryOrderHeaderInfo({ order }: { order: FactoryOrder }) { return <section className="hz-content-card"><p className="drawer-eyebrow">{order.factoryOrderNo}</p><h2>{order.factoryName}</h2><p className="muted">Bagli satis: {order.saleOrderNo ?? "-"}</p><span className="hz-badge hz-badge-info">{order.status}</span></section>; }

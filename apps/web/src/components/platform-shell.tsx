@@ -37,6 +37,7 @@ interface PageMeta {
 
 const PAGE_META: Array<[string, PageMeta]> = [
   ["/gorevler/", { title: "Gorev Detayi", subtitle: "Gorev yorumlari, durum ve aksiyonlari.", breadcrumb: "Gorevler / Detay" }],
+  ["/onaylar/kurallar", { title: "Politika Matrisi", subtitle: "Onay gerektiren aksiyonlar ve politika anahtarlarinin ozeti.", breadcrumb: "Onaylar / Kurallar" }],
   ["/onaylar/", { title: "Onay Detayi", subtitle: "Approval payload, risk ve icra hazirligi.", breadcrumb: "Onaylar / Detay" }],
   ["/workflow/", { title: "Workflow Timeline", subtitle: "Entity bazli operasyon adimlari.", breadcrumb: "Workflow" }],
   ["/cariler/", { title: "Cari Karti", subtitle: "Musteri detayini finans ve operasyon baglamiyla yonetin.", breadcrumb: "Cariler / Detay" }],
@@ -170,6 +171,8 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
   const isSettingsArea = normalizedPath === "/ayarlar" || normalizedPath.startsWith("/ayarlar/");
   const isWarehousePrep = normalizedPath === "/depo" || normalizedPath.startsWith("/depo/");
   const isTasksWorkspace = normalizedPath === "/gorevler";
+  const isAiWorkspace = normalizedPath === "/ai" || normalizedPath.startsWith("/ai/");
+  const isDocumentsWorkspace = normalizedPath === "/belgeler" || normalizedPath.startsWith("/belgeler/");
   const isCustomersEntityDetail =
     normalizedPath.startsWith("/cariler/") && normalizedPath !== "/cariler/yeni" && normalizedPath !== "/cariler/liste";
   const isOrdersEntityDetail =
@@ -228,6 +231,8 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
             isSettingsArea ||
             isWarehousePrep ||
             isTasksWorkspace ||
+            isAiWorkspace ||
+            isDocumentsWorkspace ||
             isCustomersEntityDetail ||
             isOrdersEntityDetail ||
             isOffersEntityDetail ||
@@ -244,11 +249,15 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
               ? "Ara (Cari, Sipariş, Ürün, Belge...)"
               : isTasksWorkspace
                 ? "Gorev no, baslik, atanan, musteri veya kayit ara..."
-                : isApprovalsList
-                ? "Cari, onay no, belge no, tutar ara..."
-                : isWhatsApp
-                  ? "Cari, telefon, mesaj, belge no veya tutar ara..."
-                  : isGelenKutuUnified
+                : isAiWorkspace
+                  ? "AI: proposal, onay no, session, icgoru veya musteri ara..."
+                  : isDocumentsWorkspace
+                    ? "Belge no, cari, entity, tip veya gonderim durumu ara..."
+                    : isApprovalsList
+                      ? "Cari, onay no, belge no, tutar ara..."
+                      : isWhatsApp
+                        ? "Cari, telefon, mesaj, belge no veya tutar ara..."
+                        : isGelenKutuUnified
                     ? "Konuşma no, kanal, müşteri, telefon veya durum ara..."
                     : isCustomersList
                     ? "Cari, telefon, vergi no, şehir veya bakiye ara..."

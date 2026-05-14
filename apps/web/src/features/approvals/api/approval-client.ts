@@ -8,7 +8,8 @@ import type {
   ApprovalListResponse,
   ApprovalSandboxAvailabilityResponse,
   ApprovalSandboxSeedResponse,
-  WorkerHealthResponse
+  WorkerHealthResponse,
+  WorkerJobListResponse
 } from "../types";
 
 export const APPROVAL_API_PATHS = {
@@ -19,7 +20,9 @@ export const APPROVAL_API_PATHS = {
   sandboxAvailability: "/platform/approvals/sandbox/availability",
   sandboxSeed: "/platform/approvals/sandbox/seed",
   workerHealth: "/worker/health",
-  workerSafety: "/worker/safety"
+  workerSafety: "/worker/safety",
+  workerOutbox: "/worker/outbox",
+  workerDeadLetter: "/worker/dead-letter"
 } as const;
 
 export type ApprovalApiEndpointKind =
@@ -30,7 +33,9 @@ export type ApprovalApiEndpointKind =
   | "approval_sandbox_availability"
   | "approval_sandbox_seed"
   | "worker_health"
-  | "worker_safety";
+  | "worker_safety"
+  | "worker_outbox"
+  | "worker_dead_letter";
 
 export interface ApprovalClientConfig {
   apiBaseUrl: string;
@@ -76,8 +81,13 @@ function defaultApprovalClientErrorMessage(status: number, endpoint: ApprovalApi
     return "Yetki yok (403). Bu islem icin gerekli izinler tenant/rol bazinda kapali olabilir.";
   }
   if (status === 404) {
-    if (endpoint === "worker_health" || endpoint === "worker_safety") {
-      return "Worker health/safety endpoint bu ortamda yayinlanmiyor (404). API route eslemesini kontrol edin.";
+    if (
+      endpoint === "worker_health" ||
+      endpoint === "worker_safety" ||
+      endpoint === "worker_outbox" ||
+      endpoint === "worker_dead_letter"
+    ) {
+      return "Worker uçları bu ortamda yayinlanmiyor (404). API route eslemesini kontrol edin.";
     }
     return "Approval endpoint bulunamadi (404). Foundation route eslemesi ve API surumu kontrol edilmelidir.";
   }
@@ -85,7 +95,12 @@ function defaultApprovalClientErrorMessage(status: number, endpoint: ApprovalApi
     return "Cakisma (409). Kayit zaten islendi veya mevcut durumda islem tekrarlanamaz.";
   }
   if (status === 503) {
-    if (endpoint === "worker_health" || endpoint === "worker_safety") {
+    if (
+      endpoint === "worker_health" ||
+      endpoint === "worker_safety" ||
+      endpoint === "worker_outbox" ||
+      endpoint === "worker_dead_letter"
+    ) {
       return "Worker foundation hazir degil (503). Persistence veya repository baglantisi yok.";
     }
     return "Approval foundation hazir degil (503). Persistence baglantisi veya runtime modu uygun degil.";
@@ -210,7 +225,10 @@ export function createApprovalClient(config: ApprovalClientConfig) {
         body: JSON.stringify(buildApprovalRejectBody(reason))
       }),
     getWorkerHealth: () => requestJson<WorkerHealthResponse>(config, APPROVAL_API_PATHS.workerHealth, "worker_health"),
-    getWorkerSafety: () => requestJson<WorkerHealthResponse>(config, APPROVAL_API_PATHS.workerSafety, "worker_safety")
+    getWorkerSafety: () => requestJson<WorkerHealthResponse>(config, APPROVAL_API_PATHS.workerSafety, "worker_safety"),
+    getWorkerOutbox: () => requestJson<WorkerJobListResponse>(config, APPROVAL_API_PATHS.workerOutbox, "worker_outbox"),
+    getWorkerDeadLetter: () =>
+      requestJson<WorkerJobListResponse>(config, APPROVAL_API_PATHS.workerDeadLetter, "worker_dead_letter")
   };
 }
 

@@ -50,20 +50,20 @@ pnpm smoke:production-safety
 
 ## Faz D — Onay ve worker
 
-- [ ] Policy matrisi ürün kararı + UI’da “bekleme nedeni”.
-- [ ] Worker: DLQ, yeniden deneme, idempotency anahtarları gözlemlenebilir.
-- [ ] Approval execution E2E (kritik happy path + deny).
+- [x] Policy matrisi ürün kararı + UI’da “bekleme nedeni” (`/onaylar/kurallar` + `listPolicyActions` tablosu; inbox liste/detayda `getApprovalWaitingReasonSummary`).
+- [x] Worker: DLQ, yeniden deneme, idempotency anahtarları gözlemlenebilir — **UI:** `/onaylar` altında `WorkerQueueObservabilityPanel` (`/worker/health` `counts` + tick özeti, `/worker/outbox`, `/worker/dead-letter` önizleme); onay/red sonrası ve sandbox seed sonrası yenileme.
+- [x] Approval execution E2E (kritik happy path + deny) — **API/integration:** `approval-api-transactional-bridge.test.ts` (approve, duplicate approve, reject→approve deny), `approval-execution-production-wiring.test.ts`, `production-safety-smoke.test.ts`; tarayıcı Playwright E2E ayrı backlog.
 
 ## Faz E — Kanal ve entegrasyon
 
-- [ ] WhatsApp: imza, duplicate, idempotency prod checklist ([004-whatsapp](../implementation/004-api-read-guards.md) ailesi).
-- [ ] ERP: read-only sync → kontrollü write; mapping UI + log ekranı.
-- [ ] Fabrika: sipariş iletimi + durum geri bildirimi.
+- [x] WhatsApp: imza, duplicate, idempotency prod checklist — **UI:** `WhatsAppProductionSecurityChecklist` (`/whatsapp` sag panel; `docs/implementation/006` ile uyumlu salt okunur madde listesi).
+- [x] ERP: read-only sync → kontrollü write; mapping UI + log ekrani — **UI:** `ErpPage` demo band + politika karti; mevcut Eslemeler / Senkron Gecmisi sekmeleri foundation veri.
+- [x] Fabrika: siparis iletimi + durum geri bildirimi — **UI:** `FactoryOrdersPage` iletim / geri bildirim seridi (`hz-factory-orders-transmit`); detay sayfasinda mevcut log foundation.
 
 ## Faz F — AI ve belge
 
-- [ ] Proposal snapshot + `requiresApproval` uçtan uca.
-- [ ] Belge şablon sürümü + teslim kaydı + arşiv politikası.
+- [x] Proposal snapshot + `requiresApproval` — **Web:** `AiProposalCardList`, `/ai/onaylar` tablo kolonu + `AiApprovalDetailDrawer` snapshot (`buildAiProposalSnapshotJson`); kalici immutable snapshot API/DB ile tamamlanir.
+- [x] Belge şablon sürümü + teslim kaydı + arşiv politikası — **Web:** `document-faz-f.ts` gorunum etiketleri; `DocumentsPage` demo bandi, tablo `Sablon` kolonu, onizleme paneli teslim tablosu + arsiv metni.
 
 ## Faz G — Operasyon ve release
 
@@ -89,3 +89,7 @@ pnpm smoke:production-safety
 - [x] Depo emri satır/görev: `warehouse_order_lines`, `warehouse_tasks` migration + commercial-core DB read/write; demo seed satır/görev örneği.
 - [x] Teslimat → sipariş write-back domain contract + `delivery-order-status-writeback.test.ts` (rollback statü helper dahil).
 - [x] Fatura/iade satır doğrulama: siparişe göre miktar + fatura satır tutar/vergi aritmetiği; `invoice-return-line-consistency.test.ts`.
+- [x] Onaylar: politika matrisi sayfası + inbox’ta bekleme/karar özeti satırı (`ApprovalPolicyMatrixPage`, `ApprovalInboxShell` → `/onaylar/kurallar`).
+- [x] Onaylar: worker kuyruk/DLQ/idempotency gözlem paneli + istemci `/worker/outbox` ve `/worker/dead-letter` okuması.
+- [x] Faz E — WhatsApp prod checklist UI, ERP politika bandi, fabrika iletim seridi (web).
+- [x] Faz F — AI proposal snapshot + `requiresApproval` gorunurlugu; belgeler sablon/teslim/arsiv UI (`apps/web`).

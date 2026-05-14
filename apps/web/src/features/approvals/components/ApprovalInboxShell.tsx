@@ -9,11 +9,19 @@ import {
   FilterToolbarViews,
   SplitContentLayout
 } from "@hallederiz/ui";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useAuth } from "../../../providers/auth-provider";
 import { useToast } from "../../../providers/toast-provider";
 import { createApprovalClient } from "../api/approval-client";
-import type { ApprovalClientError, ApprovalInboxItem, ApprovalInboxStatusFilter, ApprovalSandboxAvailabilityResponse, WorkerHealthResponse } from "../types";
+import type {
+  ApprovalClientError,
+  ApprovalInboxItem,
+  ApprovalInboxStatusFilter,
+  ApprovalSandboxAvailabilityResponse,
+  WorkerHealthResponse,
+  WorkerJobListResponse
+} from "../types";
 import {
   buildActiveFilterSummary,
   computeInboxStats,
@@ -39,6 +47,7 @@ import { ApprovalList } from "./ApprovalList";
 import { ApprovalOperatorSmokePanel } from "./ApprovalOperatorSmokePanel";
 import { ApprovalSafetyBadge } from "./ApprovalSafetyBadge";
 import { ApprovalSandboxToolbar } from "./ApprovalSandboxToolbar";
+import { WorkerQueueObservabilityPanel } from "./WorkerQueueObservabilityPanel";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
@@ -79,6 +88,11 @@ export function ApprovalInboxShell() {
   const [detailError, setDetailError] = useState<ApprovalClientError | null>(null);
   const [workerHealth, setWorkerHealth] = useState<WorkerHealthResponse | null>(null);
   const [workerSafety, setWorkerSafety] = useState<WorkerHealthResponse | null>(null);
+  const [workerOutbox, setWorkerOutbox] = useState<WorkerJobListResponse | null>(null);
+  const [workerDeadLetter, setWorkerDeadLetter] = useState<WorkerJobListResponse | null>(null);
+  const [workerQueuesLoading, setWorkerQueuesLoading] = useState(false);
+  const [workerOutboxError, setWorkerOutboxError] = useState<ApprovalClientError | null>(null);
+  const [workerDeadLetterError, setWorkerDeadLetterError] = useState<ApprovalClientError | null>(null);
   const [sandboxAvailability, setSandboxAvailability] = useState<ApprovalSandboxAvailabilityResponse | null>(null);
   const [loadingList, setLoadingList] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -130,10 +144,20 @@ export function ApprovalInboxShell() {
   }, [sandboxAvailability]);
 
   const dlqSummary = useMemo(() => {
-    const summary = workerSafety?.health?.summary;
-    if (!summary) return "Ozete veri yok.";
-    return `DLQ: ${summary.deadLettered} · Failed: ${summary.failed} · Retried: ${summary.retried}`;
-  }, [workerSafety]);
+    const summary = workerHealth?.health?.summary;
+    const counts = workerHealth?.counts;
+    const parts: string[] = [];
+    if (counts) {
+      parts.push(`Repo: bekleyen ${counts.pending}, claim ${counts.claimed}, hata ${counts.failed}, DLQ ${counts.deadLetter}`);
+    }
+    if (summary) {
+      const dup = typeof summary.duplicates === "number" ? `, dup ${summary.duplicates}` : "";
+      parts.push(
+        `Tick: islenen ${summary.processed}, tamamlanan ${summary.completed}, hata ${summary.failed}, DLQ ${summary.deadLettered}, retry ${summary.retried}${dup}`
+      );
+    }
+    return parts.length ? parts.join(" · ") : "Ozete veri yok (worker health ozeti veya sayim gelmedi).";
+  }, [workerHealth]);
 
   const operatorSmokeSummary = useMemo(() => {
     const steps = buildOperatorSmokeChecklist({
@@ -238,6 +262,26 @@ export function ApprovalInboxShell() {
     setWorkerSafety(result.data);
   }, [client]);
 
+  const refreshWorkerQueues = useCallback(async () => {
+    setWorkerQueuesLoading(true);
+    setWorkerOutboxError(null);
+    setWorkerDeadLetterError(null);
+    const [o, d] = await Promise.all([client.getWorkerOutbox(), client.getWorkerDeadLetter()]);
+    if (o.ok) {
+      setWorkerOutbox(o.data);
+    } else {
+      setWorkerOutbox(null);
+      setWorkerOutboxError(o.error);
+    }
+    if (d.ok) {
+      setWorkerDeadLetter(d.data);
+    } else {
+      setWorkerDeadLetter(null);
+      setWorkerDeadLetterError(d.error);
+    }
+    setWorkerQueuesLoading(false);
+  }, [client]);
+
   useEffect(() => {
     if (state !== "authenticated") {
       setLoadingList(false);
@@ -246,8 +290,9 @@ export function ApprovalInboxShell() {
     void refreshList();
     void refreshWorkerHealth();
     void refreshWorkerSafety();
+    void refreshWorkerQueues();
     void refreshSandboxAvailability();
-  }, [refreshList, refreshWorkerHealth, refreshWorkerSafety, refreshSandboxAvailability, state]);
+  }, [refreshList, refreshWorkerHealth, refreshWorkerQueues, refreshWorkerSafety, refreshSandboxAvailability, state]);
 
   useEffect(() => {
     if (!selectedId && visibleItems[0]) {
@@ -288,6 +333,8 @@ export function ApprovalInboxShell() {
     }
     await refreshList();
     await refreshDetail(selectedId);
+    void refreshWorkerHealth();
+    void refreshWorkerQueues();
   };
 
   const handleReject = async (reason: string) => {
@@ -302,6 +349,8 @@ export function ApprovalInboxShell() {
     pushToast("Onay istegi reddedildi.");
     await refreshList();
     await refreshDetail(selectedId);
+    void refreshWorkerHealth();
+    void refreshWorkerQueues();
   };
 
   if (state === "loading") {
@@ -324,6 +373,15 @@ export function ApprovalInboxShell() {
           <p className="hz-approvals-inbox-eyebrow">Operator workspace</p>
           <h1 className="hz-approvals-inbox-title">Onaylar</h1>
           <p className="hz-approvals-inbox-subtitle">Approval Inbox / operator onaylari, worker ve outbox sinyalleri.</p>
+          <p className="hz-approvals-inbox-top-links">
+            <Link href="/onaylar/kurallar" className="hz-approvals-inbox-policy-link">
+              Politika matrisi
+            </Link>
+            <span className="hz-approvals-inbox-top-links-sep" aria-hidden="true">
+              ·
+            </span>
+            <span className="hz-approvals-inbox-muted">Domain kayitlarindan onay gerektiren aksiyonlar</span>
+          </p>
         </div>
         <ApprovalSafetyBadge repositoryMode={repositoryMode} workerHealth={workerHealth} />
       </header>
@@ -347,6 +405,15 @@ export function ApprovalInboxShell() {
         </div>
       </div>
 
+      <WorkerQueueObservabilityPanel
+        workerHealth={workerHealth}
+        outbox={workerOutbox}
+        deadLetter={workerDeadLetter}
+        outboxError={workerOutboxError}
+        deadLetterError={workerDeadLetterError}
+        loading={workerQueuesLoading}
+      />
+
       <ApprovalOperatorSmokePanel
         production={process.env.NODE_ENV === "production"}
         summary={operatorSmokeSummary}
@@ -358,13 +425,15 @@ export function ApprovalInboxShell() {
         client={client}
         visible={sandboxToolbarVisible}
         availabilityHelp={sandboxAvailabilityHelp}
-        onSeedCounts={(counts) => {
+        onSeedCounts={(counts: { created: number; skipped: number }) => {
           setLastSeedCounts(counts);
           setLastSeedLine(formatSandboxSeedOutcome(counts.created, counts.skipped).message);
         }}
         onAfterSeed={async () => {
           await refreshList();
           await refreshSandboxAvailability();
+          void refreshWorkerHealth();
+          void refreshWorkerQueues();
         }}
       />
 

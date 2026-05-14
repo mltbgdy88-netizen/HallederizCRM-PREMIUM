@@ -236,11 +236,22 @@ export function ErpPage() {
   );
 
   return (
-    <div className="hz-page-stack">
+    <div className="hz-erp-page hz-page-stack">
       <PageHeader
         title="ERP"
         description="API ve Excel tabanli ERP baglantilarini, eslemeleri, health ve sync loglarini tek merkezde yonetin."
       />
+      <div className="hz-erp-preview-band" role="status">
+        Foundation demo veri - baglanti, esleme ve senkron loglari yerel ornek; canli ERP tenant ve API ile gelir.
+      </div>
+      <section className="hz-content-card hz-erp-write-policy">
+        <p className="drawer-eyebrow">Faz E — entegrasyon politikasi</p>
+        <h3>Salt okunur senkron, kontrollu yazim</h3>
+        <p className="muted">
+          Varsayilan guvenli mod: okuma ve log izleme. ERP tarafina yazim (stok, fiyat, siparis) yalniz policy + onay + audit
+          zincirinden; UI bu ekranda foundation aksiyonlarini gosterir, canli execute uretmez.
+        </p>
+      </section>
 
       <section className="hz-metric-grid">
         <MetricCard title="Aktif Baglanti" value={String(data.health.activeConnectionCount)} detail="API + Excel" tone="info" />

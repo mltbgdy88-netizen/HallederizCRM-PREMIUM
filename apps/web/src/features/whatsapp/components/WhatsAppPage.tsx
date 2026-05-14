@@ -21,6 +21,7 @@ import { useToast } from "../../../providers/toast-provider";
 import { useWhatsAppInbox } from "../hooks/use-whatsapp-inbox";
 import { type WaRichBlock, WA_QUEUE_META } from "../queries/whatsapp-mock-data";
 import { waConversationQueueLine, type WaQueueLineMeta } from "../utils/wa-conversation-helpers";
+import { WhatsAppProductionSecurityChecklist } from "./WhatsAppProductionSecurityChecklist";
 
 type QueueChip = "all" | "unread" | "approval" | "risk";
 
@@ -499,6 +500,8 @@ export function WhatsAppPage() {
                   </li>
                 </ul>
               </article>
+
+              <WhatsAppProductionSecurityChecklist />
 
               <article className="hz-wa-side-card hz-wa-side-card--ai">
                 <div className="hz-wa-side-card-head">
