@@ -60,6 +60,7 @@ const PAGE_META: Array<[string, PageMeta]> = [
   ["/archive", { title: "Arşiv", subtitle: "Geçmiş işlemler ve belge arşivi (yer tutucu).", breadcrumb: "Arşiv" }],
   ["/kurulum/veri-yukleme", { title: "Veri Yukleme", subtitle: "CSV tabanli import merkezi ile cari, urun, fiyat ve stok yukleyin.", breadcrumb: "Kurulum / Veri Yukleme" }],
   ["/ayarlar/veri-yukleme", { title: "Veri Yukleme", subtitle: "Template indir, dosya yukle, onizle ve ice aktar.", breadcrumb: "Ayarlar / Veri Yukleme" }],
+  ["/ayarlar/operasyon-gozlem", { title: "Operasyon ve Gozlem", subtitle: "Trace, tenant korelasyonu ve release/pilot kontrol ozeti.", breadcrumb: "Ayarlar / Operasyon" }],
   ["/ayarlar/kullanim-hazirligi", { title: "Kullanim Hazirligi", subtitle: "Canli kullanim oncesi kritik eksik ve servis durumunu izleyin.", breadcrumb: "Ayarlar / Kullanim Hazirligi" }],
   ["/", { title: "Gösterge Paneli", subtitle: "Yönlendiriliyor…", breadcrumb: "Gösterge Paneli" }],
   ["/gorevler", { title: "Gorevler", subtitle: "Workflow ve dashboard kaynakli operasyon gorevleri.", breadcrumb: "Gorevler" }],

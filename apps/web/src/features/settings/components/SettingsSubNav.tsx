@@ -8,6 +8,7 @@ const NAV_ITEMS: { href: string; label: string }[] = [
   { href: "/ayarlar/veri-yukleme", label: "Veri yükleme" },
   { href: "/ayarlar/staging-kontrol", label: "Hazırlık kontrolü" },
   { href: "/ayarlar/kullanim-hazirligi", label: "Kullanım hazırlığı" },
+  { href: "/ayarlar/operasyon-gozlem", label: "Operasyon ve gözlem" },
   { href: "/ayarlar/canli-kullanim-hazirligi", label: "Canlıya hazırlık" }
 ];
 

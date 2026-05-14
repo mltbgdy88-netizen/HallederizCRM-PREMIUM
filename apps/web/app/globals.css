@@ -18821,3 +18821,69 @@ select.hz-qop-summary-input {
   color: var(--hz-text-muted);
   font-family: ui-monospace, monospace;
 }
+
+/* Ayarlar — operasyon ve gozlem (Faz G, scoped hz-ops-obs-*) */
+.hz-ops-obs-page .hz-ops-obs-preview-band {
+  flex-shrink: 0;
+  height: 20px;
+  min-height: 18px;
+  max-height: 22px;
+  padding: 0 8px;
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--hz-primary) 18%, var(--hz-border));
+  background: color-mix(in srgb, var(--hz-primary) 6%, #fff);
+  font-size: 9px;
+  font-weight: 700;
+  color: #475569;
+  box-sizing: border-box;
+}
+
+.hz-ops-obs-metrics {
+  min-height: 0;
+}
+
+.hz-ops-obs-card h3 {
+  margin-top: 0;
+}
+
+.hz-ops-obs-lead {
+  margin-top: 0;
+  line-height: 1.45;
+}
+
+.hz-ops-obs-table-wrap {
+  margin-top: 8px;
+}
+
+.hz-ops-obs-mono {
+  font-family: ui-monospace, monospace;
+  font-size: 11px;
+}
+
+.hz-ops-obs-route {
+  font-size: 11px;
+  white-space: nowrap;
+}
+
+.hz-ops-obs-code {
+  font-size: 11px;
+  padding: 1px 4px;
+  border-radius: 4px;
+  background: var(--hz-surface-soft);
+  border: 1px solid var(--hz-border);
+}
+
+.hz-ops-obs-checklist {
+  margin: 8px 0 0;
+  padding-left: 18px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--hz-text-default);
+}
+
+.hz-ops-obs-foot {
+  margin-bottom: 0;
+  font-size: 11px;
+}
