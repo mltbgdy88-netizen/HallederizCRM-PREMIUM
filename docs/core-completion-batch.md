@@ -10,9 +10,9 @@ Bu batch, cekirdek operasyon omurgasinda kalan kritik bosluklari kapatmak icin u
 - `assertAuthenticated` guard'i tenant mismatch durumunu `403 forbidden` olarak netlestirdi.
 
 2. Remaining write parity (DB-first guclendirme)
-- Commercial core repository icinde `payments` ve `warehouse_orders` icin DB-first read/write path eklendi.
+- Commercial core repository icinde `payments` ve depo emirleri icin DB-first read/write path eklendi.
 - `payment_receipts` tablosu uzerinden list/get/create/confirm/reverse zinciri guclendirildi.
-- `warehouse_orders` tablosu uzerinden list/get/create/assign/start/prepared/cancel zinciri guclendirildi.
+- `warehouse_orders` + `warehouse_order_lines` + `warehouse_tasks` DB-first path; siparisten emir `buildWarehouseOrderFromSale` + transaction insert; liste/get cocuk satirlari DB'den.
 - `payment allocations` icin satir bazli kalici tablo (`payment_allocations`) ve migration `0011_payment_allocations.sql`; commercial-core repository onayda foundation onerisini bu tabloya yazar, liste/get odemeleri DB allocation ile dondurur.
 
 3. Approval execution completion
@@ -34,7 +34,7 @@ olaylari icin audit write-back eklendi.
 
 ## Hala Foundation Olan Alanlar
 - Tahsilat allocation icin coklu hedef (fatura + siparis karma) ve operator duzenleme UI/API henuz tam degil; temel tablo + tek aday siparis foundation persist mevcut.
-- Warehouse line/task alt tablolari DB tarafinda temel seviyede.
+- Depo satir `prepared_quantity` / gorev durumu icin operasyonel write-back (toplu toplama UI) ve cok-depo senaryolari foundation seviyesinde.
 - Local agent OS-level printer varyasyonlari ve ileri retry politikasi foundation seviyesinde.
 
 ## Dogrulama

@@ -44,7 +44,7 @@ pnpm smoke:production-safety
 ## Faz C — Ticari omurga (domain + DB)
 
 - [x] Tahsilat **allocation** kalıcı tablo / raporlama + migration ([core-completion-batch](../core-completion-batch.md) “foundation” notu): `0011_payment_allocations.sql`, `commercial-core/repository.ts` (liste/ödeme DB allocation, onayda foundation satırlarının insert’i, GET allocations’ta DB öncelikli).
-- [ ] Depo satır / görev alt modelleri DB parity.
+- [x] Depo satır / görev alt modelleri DB parity: `0012_warehouse_order_lines_tasks.sql`, `warehouse_order_lines` + `warehouse_tasks`, repository toplu okuma ve `createWarehouseOrderFromOrder` + `createWarehouseOrder` transaction yazımı.
 - [ ] Teslimat → sipariş durum write-back testleri (integration).
 - [ ] Fatura / iade hatlarında stok + hesap tutarlılığı (onaylı mutation zinciri).
 
@@ -86,3 +86,4 @@ pnpm smoke:production-safety
 - [x] Sipariş detay: canlı modda tahsilat/depo/teslim/fatura `sdk.*.list()` ile siparişe göre süzülür; demo modda mock zincir.
 - [x] Postgres modu / prod: DB hatasında `persistence_unavailable` (sessiz mock başarı yok); 005 + API persistence testleri.
 - [x] Tahsilat `payment_allocations` tablosu + API repository (onayda persist, liste/get DB satırları; demo seed örnek satır).
+- [x] Depo emri satır/görev: `warehouse_order_lines`, `warehouse_tasks` migration + commercial-core DB read/write; demo seed satır/görev örneği.

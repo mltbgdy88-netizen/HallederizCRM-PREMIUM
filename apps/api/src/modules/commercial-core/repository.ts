@@ -2,6 +2,8 @@ import {
   buildDocumentDeliveryRequest,
   buildDocumentRecord,
   buildOrderSourcePlan,
+  buildWarehouseOrderFromSale,
+  buildWarehouseTaskList,
   calculateInvoiceTotals,
   calculateOrderTotals,
   calculateReturnImpact,
@@ -29,6 +31,8 @@ import type {
   SaleOrder,
   SaleOrderLine,
   WarehouseOrder,
+  WarehouseOrderLine,
+  WarehouseTask,
   OrderSourcePlan
 } from "@hallederiz/types";
 import { ApiDomainError, assertOptimisticConcurrency } from "../../shared/errors";
@@ -358,7 +362,38 @@ function mapPaymentRow(row: Row, allocations: PaymentAllocation[] = []): Payment
   };
 }
 
-function mapWarehouseOrderRow(row: Row): WarehouseOrder {
+function mapWarehouseOrderLineRow(row: Row): WarehouseOrderLine {
+  return {
+    id: asString(row.id),
+    warehouseOrderId: asString(row.warehouse_order_id),
+    orderLineId: asString(row.order_line_id),
+    productId: asString(row.product_id),
+    productCode: asString(row.product_code),
+    productName: asString(row.product_name),
+    requestedQuantity: asNumber(row.requested_quantity, 0),
+    preparedQuantity: asNumber(row.prepared_quantity, 0),
+    warehouseId: asString(row.warehouse_id, undefined),
+    warehouseName: asString(row.warehouse_name, "Merkez Depo"),
+    rackNo: asString(row.rack_no, undefined),
+    locationCode: asString(row.location_code, undefined)
+  };
+}
+
+function mapWarehouseTaskRow(row: Row): WarehouseTask {
+  return {
+    id: asString(row.id),
+    tenantId: asString(row.tenant_id, "tenant_1"),
+    warehouseOrderId: asString(row.warehouse_order_id),
+    taskNo: asString(row.task_no),
+    title: asString(row.title),
+    status: asString(row.status, "open") as WarehouseTask["status"],
+    assigneeName: asString(row.assignee_name, undefined),
+    dueAt: asString(row.due_at, nowIso()),
+    critical: Boolean(row.critical ?? false)
+  };
+}
+
+function mapWarehouseOrderRow(row: Row, lines: WarehouseOrderLine[] = [], tasks: WarehouseTask[] = []): WarehouseOrder {
   return {
     id: asString(row.id),
     tenantId: asString(row.tenant_id, "tenant_1"),
@@ -376,8 +411,8 @@ function mapWarehouseOrderRow(row: Row): WarehouseOrder {
     note: asString(row.note, undefined),
     createdAt: asString(row.created_at, nowIso()),
     updatedAt: asString(row.updated_at, asString(row.created_at, nowIso())),
-    lines: [],
-    tasks: []
+    lines,
+    tasks
   };
 }
 
@@ -472,6 +507,129 @@ export class CommercialCoreRepository {
     order.lines = lineRows.map(mapOrderLineRow);
     order.sourcePlans = planRows.map(mapSourcePlanRow);
     return order;
+  }
+
+  private async fetchWarehouseLinesMap(executor: QueryExecutor, warehouseOrderIds: string[]): Promise<Map<string, WarehouseOrderLine[]>> {
+    const result = new Map<string, WarehouseOrderLine[]>();
+    if (warehouseOrderIds.length === 0) return result;
+    const params: unknown[] = [this.context.tenantId, ...warehouseOrderIds];
+    const placeholders = warehouseOrderIds.map((_, index) => `$${index + 2}`).join(", ");
+    const rows = await executor.query<Row>(
+      `select * from warehouse_order_lines where tenant_id = $1 and warehouse_order_id in (${placeholders}) order by created_at asc`,
+      params
+    );
+    for (const row of rows) {
+      const wid = asString(row.warehouse_order_id);
+      const list = result.get(wid) ?? [];
+      list.push(mapWarehouseOrderLineRow(row));
+      result.set(wid, list);
+    }
+    return result;
+  }
+
+  private async fetchWarehouseTasksMap(executor: QueryExecutor, warehouseOrderIds: string[]): Promise<Map<string, WarehouseTask[]>> {
+    const result = new Map<string, WarehouseTask[]>();
+    if (warehouseOrderIds.length === 0) return result;
+    const params: unknown[] = [this.context.tenantId, ...warehouseOrderIds];
+    const placeholders = warehouseOrderIds.map((_, index) => `$${index + 2}`).join(", ");
+    const rows = await executor.query<Row>(
+      `select * from warehouse_tasks where tenant_id = $1 and warehouse_order_id in (${placeholders}) order by created_at asc`,
+      params
+    );
+    for (const row of rows) {
+      const wid = asString(row.warehouse_order_id);
+      const list = result.get(wid) ?? [];
+      list.push(mapWarehouseTaskRow(row));
+      result.set(wid, list);
+    }
+    return result;
+  }
+
+  private async loadWarehouseOrderAggregate(executor: QueryExecutor, idOrNo: string): Promise<WarehouseOrder | undefined> {
+    const row = (
+      await executor.query<Row>(
+        `select * from warehouse_orders where tenant_id = $1 and (id = $2 or warehouse_order_no = $2) limit 1`,
+        [this.context.tenantId, idOrNo]
+      )
+    )[0];
+    if (!row) return undefined;
+    const wid = asString(row.id);
+    const [lineMap, taskMap] = await Promise.all([
+      this.fetchWarehouseLinesMap(executor, [wid]),
+      this.fetchWarehouseTasksMap(executor, [wid])
+    ]);
+    return mapWarehouseOrderRow(row, lineMap.get(wid) ?? [], taskMap.get(wid) ?? []);
+  }
+
+  private async insertWarehouseOrderHeaderTx(tx: QueryExecutor, wo: WarehouseOrder) {
+    await tx.query(
+      `insert into warehouse_orders
+      (id, tenant_id, warehouse_order_no, order_id, warehouse_id, status, order_no, customer_id, warehouse_name, assigned_to, due_at, note, created_at, updated_at, started_at, prepared_at)
+      values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)`,
+      [
+        wo.id,
+        wo.tenantId,
+        wo.warehouseOrderNo,
+        wo.orderId,
+        wo.warehouseId ?? null,
+        wo.status,
+        wo.orderNo,
+        wo.customerId,
+        wo.warehouseName,
+        wo.assignedTo ?? null,
+        wo.dueAt,
+        wo.note ?? null,
+        wo.createdAt,
+        wo.updatedAt,
+        wo.startedAt ?? null,
+        wo.preparedAt ?? null
+      ]
+    );
+  }
+
+  private async insertWarehouseOrderChildrenTx(tx: QueryExecutor, wo: WarehouseOrder) {
+    for (const line of wo.lines) {
+      await tx.query(
+        `insert into warehouse_order_lines
+        (id, tenant_id, warehouse_order_id, order_line_id, product_id, product_code, product_name, requested_quantity, prepared_quantity, warehouse_id, warehouse_name, rack_no, location_code, created_at)
+        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
+        [
+          line.id,
+          wo.tenantId,
+          wo.id,
+          line.orderLineId,
+          line.productId,
+          line.productCode,
+          line.productName,
+          line.requestedQuantity,
+          line.preparedQuantity,
+          line.warehouseId ?? null,
+          line.warehouseName,
+          line.rackNo ?? null,
+          line.locationCode ?? null,
+          wo.createdAt
+        ]
+      );
+    }
+    for (const task of wo.tasks) {
+      await tx.query(
+        `insert into warehouse_tasks
+        (id, tenant_id, warehouse_order_id, task_no, title, status, assignee_name, due_at, critical, created_at)
+        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)`,
+        [
+          task.id,
+          wo.tenantId,
+          wo.id,
+          task.taskNo,
+          task.title,
+          task.status,
+          task.assigneeName ?? null,
+          task.dueAt,
+          task.critical,
+          wo.createdAt
+        ]
+      );
+    }
   }
 
   private async replaceOrderLinesTx(tx: QueryExecutor, orderId: string, lines: SaleOrderLine[]) {
@@ -879,36 +1037,42 @@ export class CommercialCoreRepository {
     const runtime = this.runtime();
     if (!runtime.dbEnabled) return createWarehouseOrderFromOrder(id);
     try {
-      return await runtime.executor.transaction(async (tx) => {
+      let resultId: string | undefined;
+      await runtime.executor.transaction(async (tx) => {
         const order = await this.loadOrderAggregate(tx, id);
-        if (!order) return null;
-        const warehouseOrderId = `warehouse_order_${Date.now()}`;
-        await tx.query(
-          `insert into warehouse_orders (id, tenant_id, warehouse_order_no, order_id, warehouse_id, status, created_at)
-           values ($1,$2,$3,$4,$5,$6,$7)`,
-          [warehouseOrderId, this.context.tenantId, `WO-${Date.now().toString().slice(-5)}`, id, "wh_1", "waiting", nowIso()]
-        );
-        await tx.query(
-          `update sale_orders set status = $3, delivery_status = $4, updated_at = $5 where tenant_id = $1 and id = $2`,
-          [this.context.tenantId, id, "in_preparation", "preparing", nowIso()]
-        );
-        return {
-          id: warehouseOrderId,
-          tenantId: this.context.tenantId,
-          warehouseOrderNo: `WO-${Date.now().toString().slice(-5)}`,
-          orderId: id,
-          orderNo: order.orderNo,
-          customerId: order.customerId,
-          warehouseId: "wh_1",
-          warehouseName: "Merkez Depo",
-          status: "waiting",
-          dueAt: nowIso(),
-          createdAt: nowIso(),
-          updatedAt: nowIso(),
-          lines: [],
-          tasks: []
-        } satisfies WarehouseOrder;
+        if (!order) {
+          resultId = undefined;
+          return;
+        }
+        const wo = buildWarehouseOrderFromSale(order);
+        wo.tenantId = this.context.tenantId;
+        const existing = (
+          await tx.query<Row>(`select id from warehouse_orders where tenant_id = $1 and id = $2 limit 1`, [this.context.tenantId, wo.id])
+        )[0];
+        if (existing) {
+          resultId = asString(existing.id);
+          await tx.query(`update sale_orders set status = $3, delivery_status = $4, updated_at = $5 where tenant_id = $1 and id = $2`, [
+            this.context.tenantId,
+            id,
+            "in_preparation",
+            "preparing",
+            nowIso()
+          ]);
+          return;
+        }
+        await this.insertWarehouseOrderHeaderTx(tx, wo);
+        await this.insertWarehouseOrderChildrenTx(tx, wo);
+        await tx.query(`update sale_orders set status = $3, delivery_status = $4, updated_at = $5 where tenant_id = $1 and id = $2`, [
+          this.context.tenantId,
+          id,
+          "in_preparation",
+          "preparing",
+          nowIso()
+        ]);
+        resultId = wo.id;
       });
+      if (!resultId) return null;
+      return (await this.loadWarehouseOrderAggregate(runtime.executor, resultId)) ?? null;
     } catch (error) {
       runtime.handleDbFailure(error);
       return createWarehouseOrderFromOrder(id);
@@ -1597,7 +1761,15 @@ export class CommercialCoreRepository {
     if (!runtime.dbEnabled) return listWarehouseOrders();
     try {
       const rows = await runtime.executor.query<Row>(`select * from warehouse_orders where tenant_id = $1 order by created_at desc`, [this.context.tenantId]);
-      return rows.map(mapWarehouseOrderRow);
+      const warehouseOrderIds = rows.map((row) => asString(row.id));
+      const [lineMap, taskMap] = await Promise.all([
+        this.fetchWarehouseLinesMap(runtime.executor, warehouseOrderIds),
+        this.fetchWarehouseTasksMap(runtime.executor, warehouseOrderIds)
+      ]);
+      return rows.map((row) => {
+        const wid = asString(row.id);
+        return mapWarehouseOrderRow(row, lineMap.get(wid) ?? [], taskMap.get(wid) ?? []);
+      });
     } catch (error) {
       runtime.handleDbFailure(error);
       return listWarehouseOrders();
@@ -1608,8 +1780,7 @@ export class CommercialCoreRepository {
     const runtime = this.runtime();
     if (!runtime.dbEnabled) return getWarehouseOrder(id);
     try {
-      const row = (await runtime.executor.query<Row>(`select * from warehouse_orders where tenant_id = $1 and (id = $2 or warehouse_order_no = $2) limit 1`, [this.context.tenantId, id]))[0];
-      return row ? mapWarehouseOrderRow(row) : undefined;
+      return (await this.loadWarehouseOrderAggregate(runtime.executor, id)) ?? undefined;
     } catch (error) {
       runtime.handleDbFailure(error);
       return getWarehouseOrder(id);
@@ -1622,29 +1793,39 @@ export class CommercialCoreRepository {
     try {
       const id = payload.id ?? `warehouse_order_${Date.now()}`;
       const now = nowIso();
-      await runtime.executor.query(
-        `insert into warehouse_orders
-        (id, tenant_id, warehouse_order_no, order_id, warehouse_id, status, order_no, customer_id, warehouse_name, assigned_to, due_at, note, created_at, updated_at)
-        values ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)`,
-        [
+      const warehouseOrderNo = payload.warehouseOrderNo ?? `WO-${Date.now().toString().slice(-5)}`;
+      const lines = payload.lines ?? [];
+      const wo: WarehouseOrder = {
+        id,
+        tenantId: this.context.tenantId,
+        warehouseOrderNo,
+        orderId: payload.orderId ?? "order_1",
+        orderNo: payload.orderNo ?? "",
+        customerId: payload.customerId ?? "",
+        warehouseId: payload.warehouseId ?? "wh_1",
+        warehouseName: payload.warehouseName ?? "Merkez Depo",
+        status: payload.status ?? "waiting",
+        assignedTo: payload.assignedTo,
+        dueAt: payload.dueAt ?? now,
+        startedAt: payload.startedAt,
+        preparedAt: payload.preparedAt,
+        note: payload.note,
+        createdAt: now,
+        updatedAt: now,
+        lines,
+        tasks: buildWarehouseTaskList({
           id,
-          this.context.tenantId,
-          payload.warehouseOrderNo ?? `WO-${Date.now().toString().slice(-5)}`,
-          payload.orderId ?? "order_1",
-          payload.warehouseId ?? null,
-          payload.status ?? "waiting",
-          payload.orderNo ?? null,
-          payload.customerId ?? null,
-          payload.warehouseName ?? "Merkez Depo",
-          payload.assignedTo ?? null,
-          payload.dueAt ?? now,
-          payload.note ?? null,
-          now,
-          now
-        ]
-      );
-      const created = await this.getWarehouseOrder(id);
-      return created ?? createWarehouseOrder(payload);
+          tenantId: this.context.tenantId,
+          warehouseOrderNo,
+          lines,
+          dueAt: payload.dueAt ?? now
+        })
+      };
+      await runtime.executor.transaction(async (tx) => {
+        await this.insertWarehouseOrderHeaderTx(tx, wo);
+        await this.insertWarehouseOrderChildrenTx(tx, wo);
+      });
+      return (await this.loadWarehouseOrderAggregate(runtime.executor, id)) ?? createWarehouseOrder(payload);
     } catch (error) {
       runtime.handleDbFailure(error);
       return createWarehouseOrder(payload);

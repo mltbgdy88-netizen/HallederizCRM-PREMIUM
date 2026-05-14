@@ -20,6 +20,18 @@ INSERT INTO sale_orders (id, tenant_id, order_no, customer_id, status, payment_s
 VALUES ('order_1', 'tenant_1', 'SO-2481', 'customer_1', 'in_preparation', 'partial', 'preparing', 128500)
 ON CONFLICT (id) DO NOTHING;
 
+INSERT INTO sale_order_lines (
+  id, tenant_id, order_id, product_id, product_code, product_name, quantity, unit_price, currency,
+  exchange_rate, tl_unit_price, line_total, tl_line_total, price_slot_no, price_slot_label_snapshot,
+  source_preference, center_stock_snapshot, factory_stock_snapshot, prepared_quantity, delivered_quantity
+)
+VALUES (
+  'order_line_1', 'tenant_1', 'order_1', 'prod_1', 'DK-1001', 'Atlas Seri 10m', 40, 3212.5, 'TRY',
+  1, 3212.5, 128500, 128500, 4, 'Bayi',
+  'warehouse', 120, 200, 8, 0
+)
+ON CONFLICT (id) DO NOTHING;
+
 INSERT INTO payment_receipts (id, tenant_id, receipt_no, customer_id, amount, status, method)
 VALUES ('payment_1', 'tenant_1', 'PAY-930', 'customer_1', 45000, 'confirmed', 'transfer')
 ON CONFLICT (id) DO NOTHING;
@@ -43,8 +55,49 @@ VALUES (
 )
 ON CONFLICT (id) DO NOTHING;
 
-INSERT INTO warehouse_orders (id, tenant_id, warehouse_order_no, order_id, status)
-VALUES ('warehouse_order_1', 'tenant_1', 'WO-114', 'order_1', 'picking')
+INSERT INTO warehouse_orders (
+  id, tenant_id, warehouse_order_no, order_id, warehouse_id, status,
+  order_no, customer_id, warehouse_name, due_at, created_at, updated_at, started_at
+)
+VALUES (
+  'warehouse_order_1', 'tenant_1', 'WO-114', 'order_1', 'wh_1', 'picking',
+  'SO-2481', 'customer_1', 'Merkez Depo', NOW(), NOW(), NOW(), NOW()
+)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO warehouse_order_lines (
+  id, tenant_id, warehouse_order_id, order_line_id, product_id, product_code, product_name,
+  requested_quantity, prepared_quantity, warehouse_id, warehouse_name
+)
+VALUES (
+  'warehouse_line_order_line_1',
+  'tenant_1',
+  'warehouse_order_1',
+  'order_line_1',
+  'prod_1',
+  'DK-1001',
+  'Atlas Seri 10m',
+  40,
+  8,
+  'wh_1',
+  'Merkez Depo'
+)
+ON CONFLICT (id) DO NOTHING;
+
+INSERT INTO warehouse_tasks (
+  id, tenant_id, warehouse_order_id, task_no, title, status, assignee_name, due_at, critical
+)
+VALUES (
+  'task_warehouse_order_1_warehouse_line_order_line_1',
+  'tenant_1',
+  'warehouse_order_1',
+  'WO-114-T1',
+  'DK-1001 icin 40 adet hazirla',
+  'open',
+  'Depo Ekibi',
+  NOW(),
+  true
+)
 ON CONFLICT (id) DO NOTHING;
 
 INSERT INTO deliveries (id, tenant_id, delivery_no, order_id, status)
