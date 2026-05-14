@@ -13,5 +13,6 @@ Aşağıdaki maddeler **şablon ve primitive’ler hazır** olduktan sonra sayfa
 | **16 Detay sayfaları** | `*DetailPage.tsx` entity feature’larında | `EntityDetailLayout` + `DetailPanel` |
 | **18 Unified inbox** | `gelen-kutu`, `whatsapp` feature’ları | CRM merkezi; üç sütun denge |
 | **22 Final polish** | Tüm `hz-*` / `globals.css` | spacing, focus, a11y smoke |
+| **23 Operasyon / release hub** | `settings/OperationalObservabilityPage`, route `/ayarlar/operasyon-gozlem` | Faz G: trace/tenant, release checklist, haftalik pilot sablonu; gorevler sag panelden kisayol |
 
 Task **21** için ortak state bileşenleri zaten `packages/ui` + `hz-ui-*` altında genişletildi; sayfalarda kademeli kullanım devam eder.

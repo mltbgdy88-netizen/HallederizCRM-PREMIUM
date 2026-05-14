@@ -153,6 +153,9 @@ export function OperatorWorkspaceContextPanel({
             Onaylara git
           </UiButton>
         ) : null}
+        <UiButton variant="secondary" type="button" onClick={() => router.push("/ayarlar/operasyon-gozlem")}>
+          Operasyon ve gozlem
+        </UiButton>
       </footer>
     </DetailPanel>
   );

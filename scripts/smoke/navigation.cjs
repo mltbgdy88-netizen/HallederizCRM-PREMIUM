@@ -53,6 +53,11 @@ const checks = [
     description: "Ayarlar ic navigasyon operasyon gozlem rotasi"
   },
   {
+    file: "apps/web/src/features/tasks/components/OperatorWorkspaceContextPanel.tsx",
+    patterns: ["/ayarlar/operasyon-gozlem"],
+    description: "Gorevler sag panel operasyon gozlem kisayolu"
+  },
+  {
     file: "apps/web/src/features/ai/components/AIAssistantPage.tsx",
     patterns: ["/ai/onaylar", "/ai/icgoruler"],
     description: "AI merkezi onay ve icgoru gecisleri"
