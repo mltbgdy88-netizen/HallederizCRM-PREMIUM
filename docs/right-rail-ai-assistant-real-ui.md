@@ -4,8 +4,9 @@
 Dashboard sag kolonundaki AI Asistan paneli: premium hero + gercek sohbet + composer; fake video/voice/success yok.
 
 ## Gorunum
-- Baslik: yalnizca "AI Asistan" + renkli durum noktasi (yazi etiketi yok).
-- Ust hero: 16/10, ~220-250px bandi, CSS gradient + glow + orb + merkez play (disari asset yok, oynatma yok).
+- Baslik: yalnizca "AI Asistan" + renkli durum noktasi (yazi etiketi yok); alt ince ayirici.
+- Ust hero: 16/10, ~220-250px bandi, CSS gradient + glow + teknik halka (ring) + orb + merkez play (disari asset yok, oynatma yok).
+- Composer: acik gri yuvarlak mikrofon, mor dolu yuvarlak gonder dugmesi (mockup hizasi).
 - Sohbet: bos durumda metin yok; hafif bos canvas / pulse. Mesajlar kullanici sag / asistan sol; zaman damgasi kucuk gri.
 - Yukleme: uc nokta animasyonu.
 - Dipnot (API oneri modu): yalniz `oneri modu · canli islem yapilmadi` uygun cevaplarda.

@@ -146,7 +146,8 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
         <div className="hz-dash-ai-hero-frame">
           <div className="hz-dash-ai-hero-visual">
             <div className="hz-dash-ai-hero-glow" />
-            <div className="hz-dash-ai-hero-orb" />
+            <div className="hz-dash-ai-hero-ring" aria-hidden />
+            <div className="hz-dash-ai-hero-orb" aria-hidden />
             <button type="button" className="hz-dash-ai-hero-play" disabled aria-label="Önizleme kullanılamıyor">
               <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor" aria-hidden>
                 <path d="M8 5v14l11-7L8 5z" />
@@ -235,9 +236,9 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
           />
           <button
             type="button"
-            className="hz-live-assistant-local-icon hz-dash-ai-composer-icon"
+            className="hz-live-assistant-local-icon hz-dash-ai-composer-icon hz-dash-ai-composer-mic"
             aria-label="Ses"
-            title={voiceReady ? "Son yanıtı seslendir" : "Ses servisi hazır değil"}
+            title={!voiceReady || !lastAssistantReply ? "Ses servisi hazır değil" : undefined}
             disabled={!voiceReady || !lastAssistantReply}
             onClick={() => void handleVoiceButton()}
           >
@@ -248,7 +249,7 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
           </button>
           <button
             type="button"
-            className="hz-live-assistant-local-icon hz-dash-ai-composer-icon"
+            className="hz-live-assistant-local-icon hz-dash-ai-composer-icon hz-dash-ai-composer-send"
             aria-label="Gönder"
             disabled={loading || prompt.trim().length === 0}
             onClick={() => {
