@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingState, Pagination } from "@hallederiz/ui";
+import { EntityListPageTemplate, LoadingState, Pagination } from "@hallederiz/ui";
 import type { Product } from "@hallederiz/types";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
@@ -21,6 +21,7 @@ import {
   IconZap
 } from "../../dashboard/components/dashboard-inline-icons";
 import { useToast } from "../../../providers/toast-provider";
+import { dataSourceConfig } from "../../../lib/data-source";
 import {
   computeStockKpisFromDisplayedRows,
   filterStockDemoRows,
@@ -280,7 +281,7 @@ export function StockPage() {
 
   const pageSize = 20;
 
-  const usingDemoFallback = !loading && products.length === 0;
+  const usingDemoFallback = dataSourceConfig.useDemoData && !loading && products.length === 0;
 
   const displayRows = useMemo(() => {
     if (usingDemoFallback) {
@@ -296,8 +297,17 @@ export function StockPage() {
   }, [filters]);
 
   useEffect(() => {
-    if (selectedProductId && !displayRows.some((r) => r.productId === selectedProductId)) {
+    if (!displayRows.length) {
       setSelectedProductId(null);
+      return;
+    }
+    const first = displayRows[0];
+    if (!first) {
+      setSelectedProductId(null);
+      return;
+    }
+    if (!selectedProductId || !displayRows.some((r) => r.productId === selectedProductId)) {
+      setSelectedProductId(first.productId);
     }
   }, [displayRows, selectedProductId]);
 
@@ -395,117 +405,121 @@ export function StockPage() {
   const emptyFiltered = !usingDemoFallback && !loading && products.length > 0 && rows.length === 0;
 
   return (
-    <div className="hz-stock-page">
-      <div className="hz-stock-layout">
-        <div className="hz-stock-main">
-          {usingDemoFallback ? (
-            <div className="hz-stock-preview-band" role="status">
-              Önizleme modu: örnek stok kayıtları gösteriliyor.
-            </div>
-          ) : null}
+    <>
+      <EntityListPageTemplate
+        className="hz-stock-page"
+        header={
+          <>
+            {usingDemoFallback ? (
+              <div className="hz-stock-preview-band" role="status">
+                Önizleme modu: örnek stok kayıtları gösteriliyor.
+              </div>
+            ) : null}
 
-          <header className="hz-stock-topbar">
-            <div className="hz-stock-topbar-text">
-              <h1 className="hz-stock-topbar-title">Ürün / Stok Merkezi</h1>
-              <p className="hz-stock-topbar-sub">Merkez, fabrika, depo, raf ve fiyat görünürlüğünü tek ekranda yönetin.</p>
-            </div>
-            <div className="hz-stock-topbar-actions">
-              <button
-                type="button"
-                className="hz-stock-toolbar-btn hz-stock-toolbar-btn--primary"
-                disabled={Boolean(topCtaDone.newProduct)}
-                onClick={() => fireTopDemo("newProduct", "Yeni ürün açma akışı henüz canlı konfigüre değil (blocked_not_configured).")}
-              >
-                <IconPlus size={16} aria-hidden />
-                Yeni ürün
-              </button>
-              <button
-                type="button"
-                className="hz-stock-toolbar-btn hz-stock-toolbar-btn--outline"
-                disabled={Boolean(topCtaDone.stockMoveTop)}
-                onClick={() => fireTopDemo("stockMoveTop", "Stok hareketi yalnız onay + execution zinciri ile uygulanır.")}
-              >
-                <IconTruck size={16} aria-hidden />
-                Stok hareketi
-              </button>
-              <button
-                type="button"
-                className="hz-stock-toolbar-btn hz-stock-toolbar-btn--outline"
-                disabled={Boolean(topCtaDone.labelTop)}
-                onClick={() => fireTopDemo("labelTop", "Etiket/barkod çıktısı canlı modda henüz not_configured.")}
-              >
-                <IconBarcode size={16} aria-hidden />
-                Etiket / barkod
-              </button>
-              <button
-                type="button"
-                className="hz-stock-toolbar-btn hz-stock-toolbar-btn--outline"
-                disabled={Boolean(topCtaDone.import)}
-                onClick={() => fireTopDemo("import", "İçe aktarma bu modda canlıya açık değil; ayarlar/veri-yükleme üzerinden ilerleyin.")}
-              >
-                <IconUpload size={16} aria-hidden />
-                İçe aktar
-              </button>
-            </div>
-          </header>
+            <header className="hz-stock-topbar">
+              <div className="hz-stock-topbar-text">
+                <h1 className="hz-stock-topbar-title">Ürün / Stok Merkezi</h1>
+                <p className="hz-stock-topbar-sub">Merkez, fabrika, depo, raf ve fiyat görünürlüğünü tek ekranda yönetin.</p>
+              </div>
+              <div className="hz-stock-topbar-actions">
+                <button
+                  type="button"
+                  className="hz-stock-toolbar-btn hz-stock-toolbar-btn--primary"
+                  disabled={Boolean(topCtaDone.newProduct)}
+                  onClick={() => fireTopDemo("newProduct", "Yeni ürün açma akışı henüz canlı konfigüre değil (blocked_not_configured).")}
+                >
+                  <IconPlus size={16} aria-hidden />
+                  Yeni ürün
+                </button>
+                <button
+                  type="button"
+                  className="hz-stock-toolbar-btn hz-stock-toolbar-btn--outline"
+                  disabled={Boolean(topCtaDone.stockMoveTop)}
+                  onClick={() => fireTopDemo("stockMoveTop", "Stok hareketi yalnız onay + execution zinciri ile uygulanır.")}
+                >
+                  <IconTruck size={16} aria-hidden />
+                  Stok hareketi
+                </button>
+                <button
+                  type="button"
+                  className="hz-stock-toolbar-btn hz-stock-toolbar-btn--outline"
+                  disabled={Boolean(topCtaDone.labelTop)}
+                  onClick={() => fireTopDemo("labelTop", "Etiket/barkod çıktısı canlı modda henüz not_configured.")}
+                >
+                  <IconBarcode size={16} aria-hidden />
+                  Etiket / barkod
+                </button>
+                <button
+                  type="button"
+                  className="hz-stock-toolbar-btn hz-stock-toolbar-btn--outline"
+                  disabled={Boolean(topCtaDone.import)}
+                  onClick={() => fireTopDemo("import", "İçe aktarma bu modda canlıya açık değil; ayarlar/veri-yükleme üzerinden ilerleyin.")}
+                >
+                  <IconUpload size={16} aria-hidden />
+                  İçe aktar
+                </button>
+              </div>
+            </header>
 
-          <div className="hz-stock-kpi-strip" aria-label="Stok KPI özeti">
-            <div className="hz-stock-kpi hz-stock-kpi--info">
-              <span className="hz-stock-kpi-ico" aria-hidden>
-                <IconPackage size={16} />
-              </span>
-              <div>
-                <span className="hz-stock-kpi-label">Toplam ürün</span>
-                <span className="hz-stock-kpi-value">{kpi.totalProducts}</span>
+            <div className="hz-stock-kpi-strip" aria-label="Stok KPI özeti">
+              <div className="hz-stock-kpi hz-stock-kpi--info">
+                <span className="hz-stock-kpi-ico" aria-hidden>
+                  <IconPackage size={16} />
+                </span>
+                <div>
+                  <span className="hz-stock-kpi-label">Toplam ürün</span>
+                  <span className="hz-stock-kpi-value">{kpi.totalProducts}</span>
+                </div>
+              </div>
+              <div className="hz-stock-kpi hz-stock-kpi--danger">
+                <span className="hz-stock-kpi-ico" aria-hidden>
+                  <IconAlertTriangle size={16} />
+                </span>
+                <div>
+                  <span className="hz-stock-kpi-label">Kritik stok</span>
+                  <span className="hz-stock-kpi-value">{kpi.criticalCount}</span>
+                </div>
+              </div>
+              <div className="hz-stock-kpi hz-stock-kpi--ok">
+                <span className="hz-stock-kpi-ico" aria-hidden>
+                  <IconWarehouse size={16} />
+                </span>
+                <div>
+                  <span className="hz-stock-kpi-label">Merkez stok</span>
+                  <span className="hz-stock-kpi-value">{kpi.totalCenterStock}</span>
+                </div>
+              </div>
+              <div className="hz-stock-kpi hz-stock-kpi--warn">
+                <span className="hz-stock-kpi-ico" aria-hidden>
+                  <IconBuilding size={16} />
+                </span>
+                <div>
+                  <span className="hz-stock-kpi-label">Fabrika stok</span>
+                  <span className="hz-stock-kpi-value">{kpi.totalFactoryStock}</span>
+                </div>
+              </div>
+              <div className="hz-stock-kpi hz-stock-kpi--cyan">
+                <span className="hz-stock-kpi-ico" aria-hidden>
+                  <IconMapPin size={16} />
+                </span>
+                <div>
+                  <span className="hz-stock-kpi-label">Depo / raf</span>
+                  <span className="hz-stock-kpi-value">{kpi.depotRafCount}</span>
+                </div>
+              </div>
+              <div className="hz-stock-kpi hz-stock-kpi--primary">
+                <span className="hz-stock-kpi-ico" aria-hidden>
+                  <IconTag size={16} />
+                </span>
+                <div>
+                  <span className="hz-stock-kpi-label">Fiyat grubu</span>
+                  <span className="hz-stock-kpi-value">{kpi.priceGroupCount}</span>
+                </div>
               </div>
             </div>
-            <div className="hz-stock-kpi hz-stock-kpi--danger">
-              <span className="hz-stock-kpi-ico" aria-hidden>
-                <IconAlertTriangle size={16} />
-              </span>
-              <div>
-                <span className="hz-stock-kpi-label">Kritik stok</span>
-                <span className="hz-stock-kpi-value">{kpi.criticalCount}</span>
-              </div>
-            </div>
-            <div className="hz-stock-kpi hz-stock-kpi--ok">
-              <span className="hz-stock-kpi-ico" aria-hidden>
-                <IconWarehouse size={16} />
-              </span>
-              <div>
-                <span className="hz-stock-kpi-label">Merkez stok</span>
-                <span className="hz-stock-kpi-value">{kpi.totalCenterStock}</span>
-              </div>
-            </div>
-            <div className="hz-stock-kpi hz-stock-kpi--warn">
-              <span className="hz-stock-kpi-ico" aria-hidden>
-                <IconBuilding size={16} />
-              </span>
-              <div>
-                <span className="hz-stock-kpi-label">Fabrika stok</span>
-                <span className="hz-stock-kpi-value">{kpi.totalFactoryStock}</span>
-              </div>
-            </div>
-            <div className="hz-stock-kpi hz-stock-kpi--cyan">
-              <span className="hz-stock-kpi-ico" aria-hidden>
-                <IconMapPin size={16} />
-              </span>
-              <div>
-                <span className="hz-stock-kpi-label">Depo / raf</span>
-                <span className="hz-stock-kpi-value">{kpi.depotRafCount}</span>
-              </div>
-            </div>
-            <div className="hz-stock-kpi hz-stock-kpi--primary">
-              <span className="hz-stock-kpi-ico" aria-hidden>
-                <IconTag size={16} />
-              </span>
-              <div>
-                <span className="hz-stock-kpi-label">Fiyat grubu</span>
-                <span className="hz-stock-kpi-value">{kpi.priceGroupCount}</span>
-              </div>
-            </div>
-          </div>
-
+          </>
+        }
+        filters={
           <StockFilterBar
             filters={filters}
             brands={brands}
@@ -517,8 +531,9 @@ export function StockPage() {
             onFilterChange={updateFilter}
             onReset={resetFilters}
           />
-
-          {loading ? (
+        }
+        list={
+          loading ? (
             <LoadingState title="Stok verisi yükleniyor" message="Merkez depo ve fabrika özetleri getiriliyor." />
           ) : (
             <div className="hz-stock-list-wrap">
@@ -536,18 +551,19 @@ export function StockPage() {
                 <Pagination totalItems={displayRows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
               </div>
             </div>
-          )}
-        </div>
-
-        <StockRadarPanel
-          row={selectedRow}
-          radarDone={radarDone}
-          onFireRadar={fireRadarDemo}
-          onOpenDetail={handleOpenDetail}
-          onGoArchive={() => router.push("/archive")}
-          onGoQuickOp={() => router.push("/hizli-islem")}
-        />
-      </div>
+          )
+        }
+        preview={
+          <StockRadarPanel
+            row={selectedRow}
+            radarDone={radarDone}
+            onFireRadar={fireRadarDemo}
+            onOpenDetail={handleOpenDetail}
+            onGoArchive={() => router.push("/archive")}
+            onGoQuickOp={() => router.push("/hizli-islem")}
+          />
+        }
+      />
 
       <ProductDetailModal
         open={Boolean(selectedProduct)}
@@ -559,6 +575,6 @@ export function StockPage() {
         categorySlots={categorySlots}
         onClose={() => setDetailModalProductId(null)}
       />
-    </div>
+    </>
   );
 }

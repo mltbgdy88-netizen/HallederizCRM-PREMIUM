@@ -46,11 +46,8 @@ jobs:
       - name: Web navigation tests
         run: pnpm test:web-navigation
 
-      - name: Route smoke
-        run: pnpm smoke:routes
-
-      - name: Navigation smoke
-        run: pnpm smoke:navigation
+      - name: Route + navigation smoke (ürün öncesi kapı)
+        run: pnpm smoke:routes && pnpm smoke:navigation
 
       - name: Dependency audit
         run: pnpm audit --audit-level moderate
