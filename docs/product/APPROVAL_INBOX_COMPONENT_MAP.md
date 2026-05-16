@@ -2,7 +2,7 @@
 
 Future React implementasyonu için önerilen bileşen ayrımı. Stil: **shadcn/ui** primitives + **Tailwind** utility; sayfa özelinde `hz-approvals-*` prefix (mevcut Onaylar sayfası ile uyum). Genel `button` / `div` selector’larından kaçınılır.
 
-**Layout standardı:** Sol **liste** (`minmax(0, 1fr)`) + sağ **detay paneli** (~320–350px); kök `max-width: 1604px`, `height: 100%`, `min-height: 0`, `overflow: hidden`.
+**Layout standardı (güncel):** Sol **kart ızgarası** (`minmax(0, 1fr)`, masaüstünde 3 kolon) + sağ **operatör paneli** (~280–320px, sticky); altında tam genişlikte **seçili onay detayı**; en altta bilgilendirme **süreç şeridi**. Kök `max-width: 1604px`, `height: 100%`, `min-height: 0`, `overflow: hidden`.
 
 **AI Assistant ile birlikte:** Approval Inbox **ayrı route** (`/approvals` / `/onaylar`); tam genişlikli AI hero kolonu yalnızca Dashboard’da. Inbox’ta `ApprovalAiExplanationPanel` (component map dışı ince sarmalayıcı) detay içinde read-only blok; Operator Workspace’te sağ bağlam kolonunda AI özeti inbox seçimine göre güncellenir (bkz. [OPERATOR_WORKSPACE_PRODUCT_SPEC.md](./OPERATOR_WORKSPACE_PRODUCT_SPEC.md)).
 
@@ -18,6 +18,34 @@ Future React implementasyonu için önerilen bileşen ayrımı. Stil: **shadcn/u
 | **Error** | Sayfa düzeyi hata kartı + liste/detay ayrık hata |
 | **Loading** | Liste + detay skeleton; shell PageMeta gizli (sayfa kendi başlığını çizer) |
 | **A11y** | `main` landmark; başlık hiyerarşisi; canlı bölge onay sonucu için `aria-live="polite"` |
+
+---
+
+## ApprovalCardGrid & ApprovalTaskCard
+
+| Özellik | Tanım |
+|---------|--------|
+| **Props (grid)** | `items`, `selectedId`, `onSelect`, `actionBusy`, `actingOnId`, `onApprove(id)`, `onReject(id, reason)` |
+| **Kart** | Risk rozeti, kaynak rozeti (WhatsApp/Web/AI/Platform), başlık/etiket yardımcıları, tutar özeti, `Onayla` / `Reddet` (kart üzerinde red nedeni alanı) |
+| **Veri** | Yalnızca normalize edilmiş API satırları |
+
+---
+
+## ApprovalOperatorSidePanel
+
+| Özellik | Tanım |
+|---------|--------|
+| **Bölümler** | Operatör doğrulama (worker/sandbox/provider/execution sinyalleri), istemci filtreleri, özet sayımlar, hızlı işlemler |
+| **Production** | Seed butonu gizli; smoke metni kısaltılmış |
+
+---
+
+## ApprovalInboxStatusCards & ApprovalProcessStrip
+
+| Bileşen | Tanım |
+|---------|--------|
+| **StatusCards** | Worker, Outbox, otomatik yenileme bandı, opsiyonel demo seed slot |
+| **ProcessStrip** | Statik eğitim adımları; operasyonel status göstermez |
 
 ---
 

@@ -13,17 +13,17 @@ Bu liste, Approval Inbox (`/onaylar`) ve demo sandbox akisinin **manuel** dogrul
 1. **Sayfa acilir** — `/onaylar` yuklenir; anonim ise oturum mesaji, authenticated ise liste alani.
 2. **Redirect** — `/approvals` ve `/dashboard/approvals` adresleri `/onaylar`a yonlenmeli.
 3. **Worker health** — Worker health karti 200/ok veya aciklayici uyari; sahte "basarili" uydurma yok.
-4. **Operatör dogrulama paneli** — Development ortaminda "Operatör dogrulama (local/demo)" paneli gorunur; production derlemesinde yalnizca kisa bilgilendirme bandi (sandbox smoke gosterilmez).
-5. **Sandbox seed** — "Demo onay kaydi olustur" ile seed cagirilir; sonuc mesaji okunur:
+4. **Operatör doğrulama** — Development ortamında sağ panelde özet doğrulama metni ve smoke durumu görünür; ayrıca üst mini kartlarda worker/outbox/yenileme bilgisi yer alır. Production derlemesinde sandbox smoke listesi gösterilmez.
+5. **Sandbox seed** — Üst mini kart veya sağ paneldeki "Sandbox seed" / "Demo onay kaydı oluştur" ile seed çağrılır; sonuç mesajı okunur:
    - Yeni kayit: olusturulan sayi.
    - Idempotent: "yeni kayit yok ... hata degil" benzeri guvenli bilgi (kirmizi hata bandi degil).
-6. **Liste** — Filtre "Bekleyen" veya "Tumu" ile pending satirlar gorunur; sahte satir uretilmez.
-7. **Detay** — Ilk satir secili; execution / outbox / gate alanlari API'den geliyorsa dolu.
-8. **Onayla** — Basarili yanitta toast; "Son islem sonucu (onay API)" bolumunde `executionId`, `outboxJobId`, bridge, `auditTimelineWritebackQueued`, `gateDecision` ozeti.
-9. **Idempotent onay** — Ayni pending olmayan kayitta tekrar onay: sakin bilgi toast (zaten islenmis).
-10. **Reddet** — Bos nedenle Reddet: client tarafinda uyari; API'ye bos gitmez.
-11. **404 kontrolu** — Tarayici ag sekmesinde `/platform/approvals` ve worker path'leri icin beklenmeyen 404 olmamali.
-12. **Guvenlik sinyalleri** — Worker/safety yanitinda `providerWritesEnabled: false`, `realExecutionEnabled: false` beklenir (foundation demo).
+6. **Liste** — Sekmeler (Bekleyen / Onaylanan / Reddedilen / Tümü) ve kart ızgarası; sahte satır üretilmez. İstemci tarafı ek filtreler yalnızca mevcut liste üzerinde daraltır.
+7. **Detay** — İlk uygun kart seçili; **Seçili onay detayı** bölümünde execution / outbox / gate alanları API'den geliyorsa dolu.
+8. **Kart veya detaydan Onayla** — Başarılı yanıtta toast; "Son işlem sonucu (onay API)" bölümünde `executionId`, `outboxJobId`, bridge, `auditTimelineWritebackQueued`, `gateDecision` özeti.
+9. **Idempotent onay** — Aynı pending olmayan kayıtta tekrar onay: sakin bilgi toast (zaten işlenmiş).
+10. **Reddet** — Boş nedenle Reddet: client tarafında uyarı; API'ye boş gitmez.
+11. **404 kontrolü** — Tarayıcı ağ sekmesinde `/platform/approvals` ve worker path'leri için beklenmeyen 404 olmamalı.
+12. **Güvenlik sinyalleri** — Worker/safety yanıtında `providerWritesEnabled: false`, `realExecutionEnabled: false` beklenir (foundation demo).
 
 ## Production beklentisi
 
@@ -33,4 +33,5 @@ Bu liste, Approval Inbox (`/onaylar`) ve demo sandbox akisinin **manuel** dogrul
 ## Ilgili kod
 
 - Smoke sozlesmesi: `apps/web/src/features/approvals/utils/operator-smoke.ts`
-- UI paneli: `apps/web/src/features/approvals/components/ApprovalOperatorSmokePanel.tsx`
+- Operatör paneli (dogrulama ozeti): `apps/web/src/features/approvals/components/ApprovalOperatorSidePanel.tsx`
+- Legacy smoke listesi (opsiyonel): `apps/web/src/features/approvals/components/ApprovalOperatorSmokePanel.tsx`

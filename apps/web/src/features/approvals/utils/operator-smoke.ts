@@ -68,7 +68,10 @@ function isNotFound(err: ApprovalClientError | null | undefined): boolean {
   return err?.kind === "not_found";
 }
 
-function readSafetyBoolean(worker: WorkerHealthResponse | null | undefined, key: "providerWritesEnabled" | "realExecutionEnabled"): boolean | undefined {
+export function readSafetyBoolean(
+  worker: WorkerHealthResponse | null | undefined,
+  key: "providerWritesEnabled" | "realExecutionEnabled"
+): boolean | undefined {
   if (!worker || typeof worker !== "object") return undefined;
   const w = worker as unknown as Record<string, unknown>;
   const v = w[key];

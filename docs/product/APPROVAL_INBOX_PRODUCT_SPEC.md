@@ -13,7 +13,12 @@ Inbox şunları yapar:
 
 Bu doküman backend foundation (policy, pending approval repository, outbox, worker, audit/timeline) tamamlanırken paralel ürün ve UX standardını tanımlar. Uygulama kodu bu fazda kapsam dışıdır.
 
-**İlgili mimari referanslar:** [approval-execution-flow.md](../approval-execution-flow.md), [audit-timeline-model.md](../audit-timeline-model.md), [POLICY_ENGINE_GAP_REPORT.md](../architecture/POLICY_ENGINE_GAP_REPORT.md), [WORKER_OUTBOX_RETRY_DLQ.md](../architecture/WORKER_OUTBOX_RETRY_DLQ.md). Local/demo operatör doğrulaması için: [OPERATOR_SANDBOX_SMOKE_CHECKLIST.md](./OPERATOR_SANDBOX_SMOKE_CHECKLIST.md).
+## UI güncellemesi (kart tabanlı operatör inbox)
+
+- `/onaylar` ana görünümü **kart grid** (masaüstü 3 kolon) + **sağ operatör paneli** (doğrulama, istemci tarafı filtreler, özet, hızlı işlemler) + altta **seçili onay detayı** ve bilgilendirme amaçlı **onay süreci şeridi** olarak düzenlenmiştir.
+- Sekmeler: **Bekleyen / Onaylanan / Reddedilen / Tümü**; sayılar yalnızca API’den gelen listeden hesaplanır (sahte count yok).
+- Kartlar: WhatsApp / Web / AI / Platform kaynak rozeti, risk rozeti, iş başlığı ve bağlam metinleri `actionKey`, `reasons` ve `payload` içinden türetilir; tutar/adet yalnızca payload’da sayısal alan varsa gösterilir.
+- **Sandbox seed** ve otomatik liste yenileme yalnızca local/demo; production’da seed aracı gösterilmez.
 
 ---
 
@@ -36,6 +41,7 @@ Rol adları tenant RBAC ile eşlenir; UI her ekranda **izin + tenant modülü** 
 
 ### 1. Pending approvals listesi
 
+- Uygulamada kayıtlar **kart ızgarası** (masaüstünde 3 kolon) olarak sunulur; aşağıdaki satır/liste mantığı bilgi içeriği açısından eşdeğerdir.
 - Varsayılan görünüm: `status=pending`, tarihe göre azalan.
 - Satırda: `actionKey` (insan okunur etiket), talep eden, `requestedAt`, risk rozeti, modül/entity kısa bağlamı.
 - İlk açılışta veri varken **ilk satır seçili**; sağ detay paneli dolu (kabul edilmiş CRM liste sayfalarıyla aynı kural).
