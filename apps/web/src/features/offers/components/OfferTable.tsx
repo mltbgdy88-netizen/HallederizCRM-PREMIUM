@@ -18,13 +18,13 @@ export function OfferTable({
           <thead>
             <tr>
               <th>Teklif No</th>
-              <th>Musteri</th>
+              <th>Müşteri</th>
               <th>Toplam</th>
               <th>Durum</th>
-              <th>Son Iletisim</th>
-              <th>Gecerlilik</th>
+              <th>Son İletişim</th>
+              <th>Geçerlilik</th>
               <th>Fiyat Grubu</th>
-              <th>Olusturma</th>
+              <th>Oluşturma</th>
             </tr>
           </thead>
           <tbody>
@@ -48,7 +48,7 @@ export function OfferTable({
 
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={8}><div className="table-empty">Filtrelere uygun teklif bulunamadi.</div></td>
+                <td colSpan={8}><div className="table-empty">Filtrelere uygun teklif bulunamadı.</div></td>
               </tr>
             ) : null}
           </tbody>

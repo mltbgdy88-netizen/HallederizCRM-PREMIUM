@@ -8,9 +8,12 @@ import { OrderQuickPreviewPanel } from "./OrderQuickPreviewPanel";
 import { OrderTable } from "./OrderTable";
 import { useOrderFilters } from "../hooks/use-order-filters";
 import { useOrdersData } from "../hooks/use-orders-data";
+import { dataSourceConfig } from "../../../lib/data-source";
+import { useToast } from "../../../providers/toast-provider";
 
 export function OrdersPage() {
   const router = useRouter();
+  const { pushToast } = useToast();
   const { filters, updateFilter, resetFilters } = useOrderFilters();
   const { loading, customers, filteredOrders, rows } = useOrdersData(filters);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
@@ -75,6 +78,11 @@ export function OrdersPage() {
               tone="danger"
             />
           </section>
+          {dataSourceConfig.useDemoData ? (
+            <p className="hz-orders-preview-band" role="status">
+              Örnek veri modu: liste kayıtları demo amaçlıdır.
+            </p>
+          ) : null}
           <PrimaryActionToolbar>
             <button type="button" className="hz-btn hz-btn-primary hz-toolbar-btn" onClick={() => router.push("/siparisler/yeni")}>
               Yeni sipariş
@@ -82,7 +90,11 @@ export function OrdersPage() {
             <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn" onClick={() => router.push("/teklifler")}>
               Tekliften dönüştür
             </button>
-            <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn">
+            <button
+              type="button"
+              className="hz-btn hz-btn-secondary hz-toolbar-btn"
+              onClick={() => pushToast("Toplu durum güncellemesi canlıda onay zincirine bağlıdır; bu adım henüz bağlı değil.")}
+            >
               Toplu durum güncelle
             </button>
           </PrimaryActionToolbar>

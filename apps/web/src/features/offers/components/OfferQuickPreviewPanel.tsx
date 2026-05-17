@@ -10,8 +10,8 @@ export function OfferQuickPreviewPanel({ offer, customer }: { offer: Offer | nul
   if (!offer || !customer) {
     return (
       <section className="hz-content-card">
-        <h3>Teklif Preview</h3>
-        <p className="hz-content-card-description">Tablodan bir teklif secildiginde follow-up ve belge ozeti gorunur.</p>
+        <h3>Teklif özeti</h3>
+        <p className="hz-content-card-description">Tablodan bir teklif seçildiğinde follow-up ve belge özeti görünür.</p>
       </section>
     );
   }
@@ -21,14 +21,14 @@ export function OfferQuickPreviewPanel({ offer, customer }: { offer: Offer | nul
   return (
     <section className="hz-content-card">
       <h3>{offer.offerNo}</h3>
-      <p className="hz-content-card-description">{customer.name} icin teklif ozeti</p>
+      <p className="hz-content-card-description">{customer.name} için teklif özeti</p>
 
       <ul className="hz-side-list hz-margin-top-sm">
         <li>Toplam: {money(offer.grandTotal, offer.currency)}</li>
         <li>Durum: {getOfferStatusLabel(offer.status)}</li>
-        <li>Fiyat Grubu: {offer.priceSlotLabelSnapshot}</li>
+        <li>Fiyat grubu: {offer.priceSlotLabelSnapshot}</li>
         <li>Follow-up: {followUp.latestNote}</li>
-        <li>Son Gonderim: {offer.sentAt ? new Date(offer.sentAt).toLocaleString("tr-TR") : "Henuz gonderilmedi"}</li>
+        <li>Son gönderim: {offer.sentAt ? new Date(offer.sentAt).toLocaleString("tr-TR") : "Henüz gönderilmedi"}</li>
       </ul>
     </section>
   );

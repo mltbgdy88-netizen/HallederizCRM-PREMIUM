@@ -8,9 +8,12 @@ import { OfferQuickPreviewPanel } from "./OfferQuickPreviewPanel";
 import { OfferTable } from "./OfferTable";
 import { useOfferFilters } from "../hooks/use-offer-filters";
 import { useOffersData } from "../hooks/use-offers-data";
+import { dataSourceConfig } from "../../../lib/data-source";
+import { useToast } from "../../../providers/toast-provider";
 
 export function OffersPage() {
   const router = useRouter();
+  const { pushToast } = useToast();
   const { filters, updateFilter, resetFilters } = useOfferFilters();
   const { loading, customers, filteredOffers, rows } = useOffersData(filters);
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
@@ -75,14 +78,27 @@ export function OffersPage() {
               tone="info"
             />
           </section>
+          {dataSourceConfig.useDemoData ? (
+            <p className="hz-offers-preview-band" role="status">
+              Örnek veri modu: liste kayıtları demo amaçlıdır.
+            </p>
+          ) : null}
           <PrimaryActionToolbar>
             <button type="button" className="hz-btn hz-btn-primary hz-toolbar-btn" onClick={() => router.push("/teklifler/yeni")}>
               Yeni teklif
             </button>
-            <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn">
+            <button
+              type="button"
+              className="hz-btn hz-btn-secondary hz-toolbar-btn"
+              onClick={() => pushToast("Belge önizlemesi hazırlanır; canlı gönderim henüz bağlı değil.")}
+            >
               PDF üret
             </button>
-            <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn">
+            <button
+              type="button"
+              className="hz-btn hz-btn-secondary hz-toolbar-btn"
+              onClick={() => pushToast("Follow-up planı taslak olarak kaydedilir; canlı hatırlatma henüz bağlı değil.")}
+            >
               Follow-up planla
             </button>
           </PrimaryActionToolbar>

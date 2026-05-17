@@ -249,12 +249,12 @@ export async function getNewOfferDraft(customerId?: string | null): Promise<Offe
 export function getOfferStatusLabel(status: OfferStatus): string {
   const labels: Record<OfferStatus, string> = {
     draft: "Taslak",
-    sent: "Gonderildi",
+    sent: "Gönderildi",
     waiting_response: "Cevap Bekliyor",
-    approved: "Onaylandi",
+    approved: "Onaylandı",
     rejected: "Reddedildi",
-    expired: "Suresi Doldu",
-    converted: "Siparise Donustu"
+    expired: "Süresi Doldu",
+    converted: "Siparişe Dönüştü"
   };
 
   return labels[status];

@@ -10,13 +10,13 @@ export function OfferHeaderInfo({ offer, customers }: { offer: Offer; customers:
         <p className="drawer-eyebrow">Teklif Bilgisi</p>
         <h3>{offer.offerNo}</h3>
         <p className="hz-content-card-description">
-          {customer?.name ?? "-"} | {getOfferStatusLabel(offer.status)} | Gecerlilik: {new Date(offer.validUntil).toLocaleDateString("tr-TR")}
+          {customer?.name ?? "—"} | {getOfferStatusLabel(offer.status)} | Geçerlilik: {new Date(offer.validUntil).toLocaleDateString("tr-TR")}
         </p>
       </div>
 
       <div className="hz-modal-panel-grid offer-header-form">
         <label className="hz-field-label">
-          Musteri
+          Müşteri
           <select className="hz-control" value={offer.customerId} disabled>
             {customers.map((item) => (
               <option key={item.id} value={item.id}>{item.name}</option>

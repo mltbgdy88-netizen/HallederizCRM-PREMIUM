@@ -17,14 +17,14 @@ export function OrderTable({
         <table className="table hz-table hz-table-sticky">
           <thead>
             <tr>
-              <th>Siparis No</th>
-              <th>Musteri</th>
+              <th>Sipariş No</th>
+              <th>Müşteri</th>
               <th>Toplam</th>
-              <th>Odeme</th>
+              <th>Ödeme</th>
               <th>Teslim</th>
               <th>Kanal</th>
-              <th>Kaynak Ozeti</th>
-              <th>Son Islem</th>
+              <th>Kaynak Özeti</th>
+              <th>Son İşlem</th>
             </tr>
           </thead>
           <tbody>
@@ -47,7 +47,7 @@ export function OrderTable({
             ))}
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={8}><div className="table-empty">Filtrelere uygun siparis bulunamadi.</div></td>
+                <td colSpan={8}><div className="table-empty">Filtrelere uygun sipariş bulunamadı.</div></td>
               </tr>
             ) : null}
           </tbody>

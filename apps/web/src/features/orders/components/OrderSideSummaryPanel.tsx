@@ -21,31 +21,37 @@ export function OrderSideSummaryPanel({
   return (
     <div className="hz-page-stack">
       <section className="hz-content-card">
-        <h3>Siparis Ozeti</h3>
+        <h3>Sipariş özeti</h3>
         <ul className="hz-side-list hz-margin-top-sm">
-          <li>Musteri: {customer?.name ?? order.customerId}</li>
+          <li>Müşteri: {customer?.name ?? order.customerId}</li>
           <li>Toplam: {money(order.grandTotal, order.currency)}</li>
-          <li>Odeme: {getPaymentStatusLabel(order.paymentStatus)}</li>
+          <li>Ödeme: {getPaymentStatusLabel(order.paymentStatus)}</li>
           <li>Teslim: {getDeliveryStatusLabel(order.deliveryStatus)}</li>
         </ul>
       </section>
       <section className="hz-content-card">
-        <h3>Operasyon Etkisi</h3>
+        <h3>Operasyon etkisi</h3>
         <ul className="hz-side-list hz-margin-top-sm">
-          {impact.messages.map((message) => <li key={message}>{message}</li>)}
+          {impact.messages.map((message) => (
+            <li key={message}>{message}</li>
+          ))}
         </ul>
       </section>
       <section className="hz-content-card">
-        <h3>Risk / Uyarilar</h3>
+        <h3>Risk / uyarılar</h3>
         <ul className="hz-side-list hz-margin-top-sm">
-          {readiness.blockers.length > 0 ? readiness.blockers.map((blocker) => <li key={blocker}>{blocker}</li>) : <li>Teslimata engel kritik blokaj yok.</li>}
-          <li>Tahsilat Kaydi: {orderPayments.length}</li>
+          {readiness.blockers.length > 0 ? (
+            readiness.blockers.map((blocker) => <li key={blocker}>{blocker}</li>)
+          ) : (
+            <li>Teslimata engel kritik blokaj yok.</li>
+          )}
+          <li>Tahsilat kaydı: {orderPayments.length}</li>
         </ul>
       </section>
       <section className="hz-content-card">
-        <h3>AI Aciklamasi</h3>
+        <h3>Operasyon notu</h3>
         <p className="hz-content-card-description">
-          AI varsayilan read-only modda; bu siparis icin tahsilat, kaynak plani ve teslim hazirligi sinyallerini ozetler.
+          Bu sipariş için tahsilat, kaynak planı ve teslim hazırlığı sinyalleri özetlenir; canlı kayıt onay gerektirir.
         </p>
       </section>
     </div>

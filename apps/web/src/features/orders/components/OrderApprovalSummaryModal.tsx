@@ -13,18 +13,20 @@ export function OrderApprovalSummaryModal({ open, order, onClose }: { open: bool
       <section className="hz-modal offer-small-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
         <header className="hz-modal-header">
           <div>
-            <p className="drawer-eyebrow">Approval Ozeti</p>
-            <h3>{impact.approvalMayBeRequired ? "Onay Gerekebilir" : "Standart Akis"}</h3>
-            <p className="muted">Policy engine baglantisi icin foundation kaydi.</p>
+            <p className="drawer-eyebrow">Onay özeti</p>
+            <h3>{impact.approvalMayBeRequired ? "Onay gerekebilir" : "Standart akış"}</h3>
+            <p className="muted">Onay kararı canlıda politika ve onay kuyruğuna bağlanır.</p>
           </div>
-          <button type="button" className="hz-btn hz-btn-secondary" onClick={onClose}>Kapat</button>
+          <button type="button" className="hz-btn hz-btn-secondary" onClick={onClose}>
+            Kapat
+          </button>
         </header>
         <div className="hz-modal-content hz-tab-content">
           <ul className="hz-side-list">
-            <li>Yuksek tutar kontrolu: {order.grandTotal > 150000 ? "Gerekli" : "Gerekli degil"}</li>
-            <li>Tahsilat eksigi: {impact.paymentMissing ? "Var" : "Yok"}</li>
-            <li>Fabrika siparisi: {impact.needsFactoryOrder ? "Gerekli" : "Gerekli degil"}</li>
-            <li>Audit: onay veya red karari entity timeline'a yazilacak.</li>
+            <li>Yüksek tutar kontrolü: {order.grandTotal > 150000 ? "Gerekli" : "Gerekli değil"}</li>
+            <li>Tahsilat eksiği: {impact.paymentMissing ? "Var" : "Yok"}</li>
+            <li>Fabrika siparişi: {impact.needsFactoryOrder ? "Gerekli" : "Gerekli değil"}</li>
+            <li>Denetim: onay veya red kararı kayıt zaman çizelgesine yazılır.</li>
           </ul>
         </div>
       </section>

@@ -20,17 +20,17 @@ export function OfferSendModal({
       <section className="hz-modal offer-small-modal" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
         <header className="hz-modal-header">
           <div>
-            <p className="drawer-eyebrow">Teklif Gonder</p>
+            <p className="drawer-eyebrow">Teklif Gönder</p>
             <h3>{offer.offerNo}</h3>
-            <p className="muted">{customer?.name ?? "-"} icin gonderim kanali hazirlaniyor.</p>
+            <p className="muted">{customer?.name ?? "—"} için gönderim kanalı hazırlanıyor.</p>
           </div>
           <button type="button" className="hz-btn hz-btn-secondary" onClick={onClose}>Kapat</button>
         </header>
         <div className="hz-modal-content hz-tab-content">
           <ul className="hz-side-list">
-            <li>PDF onizleme: placeholder hazir</li>
-            <li>Gonderim kanali: WhatsApp / E-posta secilecek</li>
-            <li>Son gonderim durumu belge teslim kaydina baglanacak</li>
+            <li>PDF önizleme: taslak hazırlanır</li>
+            <li>Gönderim kanalı: WhatsApp / E-posta seçilecek</li>
+            <li>Son gönderim durumu belge teslim kaydına bağlanacak</li>
           </ul>
         </div>
       </section>
