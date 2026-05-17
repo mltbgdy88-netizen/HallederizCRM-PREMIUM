@@ -33,7 +33,7 @@ export default function LoginPage() {
     setIsSubmitting(false);
 
     if (!result.success) {
-      setErrorMessage(result.message ?? "Giris yapilamadi.");
+      setErrorMessage(result.message ?? "Giriş yapılamadı.");
       return;
     }
 
@@ -44,12 +44,12 @@ export default function LoginPage() {
     <main className="login-page">
       <section className="login-card">
         <p className="eyebrow">HallederizCRM PREMIUM</p>
-        <h1>Platform Core Giris</h1>
-        <p className="muted">Cok kiracili CRM omurgasi icin giris ekrani iskeleti.</p>
+        <h1>Platform Core Giriş</h1>
+        <p className="muted">Çok kiracılı CRM omurgası için giriş ekranı iskeleti.</p>
 
         <form className="login-form" onSubmit={handleSubmit}>
           <label>
-            Tenant
+            Kiracı
             <input value={tenantSlug} onChange={(event) => setTenantSlug(event.target.value)} />
           </label>
 
@@ -66,7 +66,7 @@ export default function LoginPage() {
           {errorMessage ? <p className="error-text">{errorMessage}</p> : null}
 
           <button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? "Giris yapiliyor..." : "Giris Yap"}
+            {isSubmitting ? "Giriş yapılıyor..." : "Giriş Yap"}
           </button>
         </form>
       </section>

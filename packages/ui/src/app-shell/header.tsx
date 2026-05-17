@@ -23,7 +23,7 @@ export function Header({
   subtitle,
   suppressPageMeta = false,
   breadcrumb,
-  searchPlaceholder = "Global arama (yakinda)",
+  searchPlaceholder = "Global arama (yakında)",
   leadingSlot,
   toolbarSlot,
   notificationSlot,

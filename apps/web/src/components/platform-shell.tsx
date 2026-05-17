@@ -36,55 +36,55 @@ interface PageMeta {
 }
 
 const PAGE_META: Array<[string, PageMeta]> = [
-  ["/gorevler/", { title: "Gorev Detayi", subtitle: "Gorev yorumlari, durum ve aksiyonlari.", breadcrumb: "Gorevler / Detay" }],
-  ["/onaylar/kurallar", { title: "Politika Matrisi", subtitle: "Onay gerektiren aksiyonlar ve politika anahtarlarinin ozeti.", breadcrumb: "Onaylar / Kurallar" }],
-  ["/onaylar/", { title: "Onay Detayi", subtitle: "Approval payload, risk ve icra hazirligi.", breadcrumb: "Onaylar / Detay" }],
-  ["/workflow/", { title: "Workflow Timeline", subtitle: "Entity bazli operasyon adimlari.", breadcrumb: "Workflow" }],
-  ["/cariler/", { title: "Cari Karti", subtitle: "Musteri detayini finans ve operasyon baglamiyla yonetin.", breadcrumb: "Cariler / Detay" }],
-  ["/teklifler/yeni", { title: "Yeni Teklif", subtitle: "Teklif olusturma editoru iskeleti.", breadcrumb: "Teklifler / Yeni" }],
-  ["/teklifler/", { title: "Teklif Detayi", subtitle: "Teklif satirlari ve follow-up yonetimi.", breadcrumb: "Teklifler / Detay" }],
-  ["/siparisler/yeni", { title: "Yeni Siparis", subtitle: "Siparis olusturma ve kaynak plani.", breadcrumb: "Siparisler / Yeni" }],
-  ["/siparisler/", { title: "Siparis Detayi", subtitle: "Satir, operasyon etkisi ve risk paneli.", breadcrumb: "Siparisler / Detay" }],
-  ["/tahsilatlar/yeni", { title: "Yeni Tahsilat", subtitle: "Tahsilat ve allocation giris ekrani.", breadcrumb: "Tahsilatlar / Yeni" }],
-  ["/tahsilatlar/", { title: "Tahsilat Detayi", subtitle: "Tahsilat dogrulama ve belge paneli.", breadcrumb: "Tahsilatlar / Detay" }],
+  ["/gorevler/", { title: "Görev Detayı", subtitle: "Görev yorumları, durum ve aksiyonları.", breadcrumb: "Görevler / Detay" }],
+  ["/onaylar/kurallar", { title: "Politika Matrisi", subtitle: "Onay gerektiren aksiyonlar ve politika anahtarlarının özeti.", breadcrumb: "Onaylar / Kurallar" }],
+  ["/onaylar/", { title: "Onay Detayı", subtitle: "Onay yükü, risk ve icra hazırlığı.", breadcrumb: "Onaylar / Detay" }],
+  ["/workflow/", { title: "İş Akışı Zaman Çizelgesi", subtitle: "Kayıt bazlı operasyon adımları.", breadcrumb: "İş Akışı" }],
+  ["/cariler/", { title: "Cari Kartı", subtitle: "Müşteri detayını finans ve operasyon bağlamıyla yönetin.", breadcrumb: "Cariler / Detay" }],
+  ["/teklifler/yeni", { title: "Yeni Teklif", subtitle: "Teklif oluşturma editörü iskeleti.", breadcrumb: "Teklifler / Yeni" }],
+  ["/teklifler/", { title: "Teklif Detayı", subtitle: "Teklif satırları ve takip yönetimi.", breadcrumb: "Teklifler / Detay" }],
+  ["/siparisler/yeni", { title: "Yeni Sipariş", subtitle: "Sipariş oluşturma ve kaynak planı.", breadcrumb: "Siparişler / Yeni" }],
+  ["/siparisler/", { title: "Sipariş Detayı", subtitle: "Satır, operasyon etkisi ve risk paneli.", breadcrumb: "Siparişler / Detay" }],
+  ["/tahsilatlar/yeni", { title: "Yeni Tahsilat", subtitle: "Tahsilat ve tahsis giriş ekranı.", breadcrumb: "Tahsilatlar / Yeni" }],
+  ["/tahsilatlar/", { title: "Tahsilat Detayı", subtitle: "Tahsilat doğrulama ve belge paneli.", breadcrumb: "Tahsilatlar / Detay" }],
   ["/depo/emirler/", { title: "Depo Hazırlık Fişi", subtitle: "Belge satırları, raf/lokasyon ve teslim öncesi özet.", breadcrumb: "Depo Hazırlık / Fiş" }],
-  ["/teslimatlar/", { title: "Teslimat Detayi", subtitle: "Teslim satirlari ve dogrulama paneli.", breadcrumb: "Teslimatlar / Detay" }],
-  ["/faturalar/", { title: "Fatura Detayi", subtitle: "Fatura satirlari ve belge aksiyonlari.", breadcrumb: "Faturalar / Detay" }],
-  ["/iadeler/yeni", { title: "Yeni Iade", subtitle: "Siparis veya teslim baglantili iade taslagi.", breadcrumb: "Iadeler / Yeni" }],
-  ["/iadeler/", { title: "Iade Detayi", subtitle: "Iade satirlari, etkileri ve onay akisi.", breadcrumb: "Iadeler / Detay" }],
-  ["/fabrikalar/siparisler/", { title: "Fabrika Siparis Detayi", subtitle: "Fabrika durum ve senkron paneli.", breadcrumb: "Fabrikalar / Siparis Detay" }],
-  ["/ai/onaylar", { title: "AI Onaylar", subtitle: "Proposal ve approval kayitlarini yonetin.", breadcrumb: "AI / Onaylar" }],
-  ["/ai/icgoruler", { title: "AI Icgoruler", subtitle: "AI risk/firsat analizlerini takip edin.", breadcrumb: "AI / Icgoruler" }],
+  ["/teslimatlar/", { title: "Teslimat Detayı", subtitle: "Teslim satırları ve doğrulama paneli.", breadcrumb: "Teslimatlar / Detay" }],
+  ["/faturalar/", { title: "Fatura Detayı", subtitle: "Fatura satırları ve belge aksiyonları.", breadcrumb: "Faturalar / Detay" }],
+  ["/iadeler/yeni", { title: "Yeni İade", subtitle: "Sipariş veya teslime bağlı iade taslağı.", breadcrumb: "İadeler / Yeni" }],
+  ["/iadeler/", { title: "İade Detayı", subtitle: "İade satırları, etkileri ve onay akışı.", breadcrumb: "İadeler / Detay" }],
+  ["/fabrikalar/siparisler/", { title: "Fabrika Sipariş Detayı", subtitle: "Fabrika durum ve senkron paneli.", breadcrumb: "Fabrikalar / Sipariş Detay" }],
+  ["/ai/onaylar", { title: "AI Onaylar", subtitle: "Taslak ve onay kayıtlarını yönetin.", breadcrumb: "AI / Onaylar" }],
+  ["/ai/icgoruler", { title: "AI İçgörüler", subtitle: "AI risk ve fırsat analizlerini takip edin.", breadcrumb: "AI / İçgörüler" }],
   ["/hizli-islem", { title: "Hızlı İşlem", subtitle: "Sipariş, tahsilat, teslim ve belge işlemlerini tek akıştan başlatın.", breadcrumb: "Hızlı İşlem" }],
   ["/dashboard", { title: "Gösterge Paneli", subtitle: "", breadcrumb: "" }],
   ["/archive", { title: "Arşiv", subtitle: "Geçmiş işlemler ve belge arşivi (yer tutucu).", breadcrumb: "Arşiv" }],
-  ["/kurulum/veri-yukleme", { title: "Veri Yukleme", subtitle: "CSV tabanli import merkezi ile cari, urun, fiyat ve stok yukleyin.", breadcrumb: "Kurulum / Veri Yukleme" }],
-  ["/ayarlar/veri-yukleme", { title: "Veri Yukleme", subtitle: "Template indir, dosya yukle, onizle ve ice aktar.", breadcrumb: "Ayarlar / Veri Yukleme" }],
-  ["/ayarlar/operasyon-gozlem", { title: "Operasyon ve Gozlem", subtitle: "Trace, tenant korelasyonu ve release/pilot kontrol ozeti.", breadcrumb: "Ayarlar / Operasyon" }],
-  ["/ayarlar/kullanim-hazirligi", { title: "Kullanim Hazirligi", subtitle: "Canli kullanim oncesi kritik eksik ve servis durumunu izleyin.", breadcrumb: "Ayarlar / Kullanim Hazirligi" }],
+  ["/kurulum/veri-yukleme", { title: "Veri Yükleme", subtitle: "CSV tabanlı içe aktarma ile cari, ürün, fiyat ve stok yükleyin.", breadcrumb: "Kurulum / Veri Yükleme" }],
+  ["/ayarlar/veri-yukleme", { title: "Veri Yükleme", subtitle: "Şablon indir, dosya yükle, önizle ve içe aktar.", breadcrumb: "Ayarlar / Veri Yükleme" }],
+  ["/ayarlar/operasyon-gozlem", { title: "Operasyon ve Gözlem", subtitle: "İz kaydı, kiracı korelasyonu ve sürüm deneme özeti.", breadcrumb: "Ayarlar / Operasyon" }],
+  ["/ayarlar/kullanim-hazirligi", { title: "Kullanım Hazırlığı", subtitle: "Canlı kullanım öncesi kritik eksik ve servis durumunu izleyin.", breadcrumb: "Ayarlar / Kullanım Hazırlığı" }],
   ["/", { title: "Gösterge Paneli", subtitle: "Yönlendiriliyor…", breadcrumb: "Gösterge Paneli" }],
-  ["/gorevler", { title: "Gorevler", subtitle: "Workflow ve dashboard kaynakli operasyon gorevleri.", breadcrumb: "Gorevler" }],
-  ["/onaylar", { title: "Onaylar", subtitle: "Approval Inbox / operator onaylari, worker ve outbox sinyalleri.", breadcrumb: "Onaylar" }],
-  ["/cariler", { title: "Cariler", subtitle: "Cari portfoyu, risk ve finans baglami.", breadcrumb: "Cariler" }],
-  ["/stok", { title: "Stok", subtitle: "Urun, depo, barkod ve fabrika gorunurlugu.", breadcrumb: "Stok" }],
-  ["/teklifler", { title: "Teklifler", subtitle: "Teklif yasam dongusu ve donusum takipleri.", breadcrumb: "Teklifler" }],
-  ["/siparisler", { title: "Siparisler", subtitle: "Siparis, kaynak plani ve operasyon etkisi.", breadcrumb: "Siparisler" }],
-  ["/tahsilatlar", { title: "Tahsilatlar", subtitle: "Tahsilat kayitlari ve allocation yonetimi.", breadcrumb: "Tahsilatlar" }],
+  ["/gorevler", { title: "Görevler", subtitle: "Gösterge paneli ve iş akışı kaynaklı operasyon görevleri.", breadcrumb: "Görevler" }],
+  ["/onaylar", { title: "Onaylar", subtitle: "Onay kutusu, operatör onayları ve arka plan sinyalleri.", breadcrumb: "Onaylar" }],
+  ["/cariler", { title: "Cariler", subtitle: "Cari portföy, risk ve finans bağlamı.", breadcrumb: "Cariler" }],
+  ["/stok", { title: "Stok", subtitle: "Ürün, depo, barkod ve fabrika görünürlüğü.", breadcrumb: "Stok" }],
+  ["/teklifler", { title: "Teklifler", subtitle: "Teklif yaşam döngüsü ve dönüşüm takipleri.", breadcrumb: "Teklifler" }],
+  ["/siparisler", { title: "Siparişler", subtitle: "Sipariş, kaynak planı ve operasyon etkisi.", breadcrumb: "Siparişler" }],
+  ["/tahsilatlar", { title: "Tahsilatlar", subtitle: "Tahsilat kayıtları ve tahsis yönetimi.", breadcrumb: "Tahsilatlar" }],
   ["/depo", { title: "Depo Hazırlık", subtitle: "Satılan ürünlerin depo toplama ve teslim öncesi hazırlığı.", breadcrumb: "Depo Hazırlık" }],
-  ["/teslimatlar", { title: "Teslimatlar", subtitle: "Teslimat planlama ve dogrulama paneli.", breadcrumb: "Teslimatlar" }],
-  ["/faturalar", { title: "Faturalar", subtitle: "Fatura kayitlari ve belge baglantilari.", breadcrumb: "Faturalar" }],
-  ["/iadeler", { title: "Iadeler", subtitle: "Iade sureci ve neden bazli takip.", breadcrumb: "Iadeler" }],
-  ["/fabrikalar", { title: "Fabrikalar", subtitle: "Fabrika stok ve siparis gorunurlugu.", breadcrumb: "Fabrikalar" }],
-  ["/erp", { title: "ERP", subtitle: "Baglantilar, eslemeler ve senkron paneli.", breadcrumb: "ERP" }],
-  ["/whatsapp", { title: "WhatsApp", subtitle: "Kanal bazli operasyon ve iletisim paneli.", breadcrumb: "WhatsApp" }],
-  ["/gelen-kutu", { title: "Gelen Kutu", subtitle: "Cok kanalli iletisim merkezi ve konusma kuyrugu.", breadcrumb: "Gelen Kutu" }],
-  ["/gelen-kutu/konusma/", { title: "Konusma", subtitle: "Tekil konusma ve mesaj baglami.", breadcrumb: "Gelen Kutu / Konusma" }],
-  ["/ai", { title: "AI", subtitle: "Asistan, onay ve icgoru paneli.", breadcrumb: "AI" }],
-  ["/belgeler", { title: "Belgeler", subtitle: "Belge uretim, dagitim ve arsiv takibi.", breadcrumb: "Belgeler" }],
-  ["/raporlar", { title: "Raporlar", subtitle: "Operasyonel metrikler ve karar destek raporlari.", breadcrumb: "Raporlar" }],
-  ["/kullanicilar/roller", { title: "Roller", subtitle: "Rol, izin matrisi ve approval yetkileri.", breadcrumb: "Kullanicilar / Roller" }],
-  ["/kullanicilar", { title: "Kullanicilar", subtitle: "Kullanici hesaplari ve erisim kapsamlarinin yonetimi.", breadcrumb: "Kullanicilar" }],
-  ["/ayarlar", { title: "Ayarlar", subtitle: "Tenant bazli platform konfigurasyonu.", breadcrumb: "Ayarlar" }]
+  ["/teslimatlar", { title: "Teslimatlar", subtitle: "Teslimat planlama ve doğrulama paneli.", breadcrumb: "Teslimatlar" }],
+  ["/faturalar", { title: "Faturalar", subtitle: "Fatura kayıtları ve belge bağlantıları.", breadcrumb: "Faturalar" }],
+  ["/iadeler", { title: "İadeler", subtitle: "İade süreci ve neden bazlı takip.", breadcrumb: "İadeler" }],
+  ["/fabrikalar", { title: "Fabrikalar", subtitle: "Fabrika stok ve sipariş görünürlüğü.", breadcrumb: "Fabrikalar" }],
+  ["/erp", { title: "ERP", subtitle: "Bağlantılar, eşlemeler ve senkron paneli.", breadcrumb: "ERP" }],
+  ["/whatsapp", { title: "WhatsApp", subtitle: "Kanal bazlı operasyon ve iletişim paneli.", breadcrumb: "WhatsApp" }],
+  ["/gelen-kutu", { title: "Gelen Kutu", subtitle: "Çok kanallı iletişim merkezi ve konuşma kuyruğu.", breadcrumb: "Gelen Kutu" }],
+  ["/gelen-kutu/konusma/", { title: "Konuşma", subtitle: "Tekil konuşma ve mesaj bağlamı.", breadcrumb: "Gelen Kutu / Konuşma" }],
+  ["/ai", { title: "AI", subtitle: "Asistan, onay ve içgörü paneli.", breadcrumb: "AI" }],
+  ["/belgeler", { title: "Belgeler", subtitle: "Belge üretim, dağıtım ve arşiv takibi.", breadcrumb: "Belgeler" }],
+  ["/raporlar", { title: "Raporlar", subtitle: "Operasyonel metrikler ve karar destek raporları.", breadcrumb: "Raporlar" }],
+  ["/kullanicilar/roller", { title: "Roller", subtitle: "Rol, izin matrisi ve onay yetkileri.", breadcrumb: "Kullanıcılar / Roller" }],
+  ["/kullanicilar", { title: "Kullanıcılar", subtitle: "Kullanıcı hesapları ve erişim kapsamlarının yönetimi.", breadcrumb: "Kullanıcılar" }],
+  ["/ayarlar", { title: "Ayarlar", subtitle: "Kiracı bazlı platform yapılandırması.", breadcrumb: "Ayarlar" }]
 ];
 
 function resolveActiveHref(pathname: string): string {
@@ -128,9 +128,9 @@ function getPageMeta(pathname: string): PageMeta {
   }
 
   return {
-    title: "Modul",
-    subtitle: "Bu alan icin sayfa iskeleti hazirdir.",
-    breadcrumb: "Modul"
+    title: "Modül",
+    subtitle: "Bu alan için sayfa iskeleti hazırdır.",
+    breadcrumb: "Modül"
   };
 }
 
@@ -249,9 +249,9 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
             isDashboard
               ? "Ara (Cari, Sipariş, Ürün, Belge...)"
               : isTasksWorkspace
-                ? "Gorev no, baslik, atanan, musteri veya kayit ara..."
+                ? "Görev no, başlık, atanan, müşteri veya kayıt ara..."
                 : isAiWorkspace
-                  ? "AI: proposal, onay no, session, icgoru veya musteri ara..."
+                  ? "AI: taslak no, onay no, oturum, içgörü veya müşteri ara..."
                   : isDocumentsWorkspace
                     ? "Belge no, cari, entity, tip veya gonderim durumu ara..."
                     : isApprovalsList
@@ -288,7 +288,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
                                             ? "Tahsilat detayı: fiş, allocation veya belge ara..."
                                             : isEntityFormNew
                                               ? "Yeni kayıt: müşteri, belge no, tutar veya referans ara..."
-                                              : "Cari, siparis, urun kodu veya barkod ara"
+                                              : "Cari, sipariş, ürün kodu veya barkod ara"
           }
           toolbarSlot={
             isDashboard ? (
@@ -323,8 +323,8 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
           themeSlot={<ThemeToggle mode={theme} onToggle={toggleTheme} compact={isDashboard} />}
           userSlot={
             <UserMenu
-              fullName={session?.user.fullName ?? "Bilinmeyen Kullanici"}
-              roleLabel={session?.roles[0]?.name ?? "Rol tanimsiz"}
+              fullName={session?.user.fullName ?? "Bilinmeyen Kullanıcı"}
+              roleLabel={session?.roles[0]?.name ?? "Rol tanımsız"}
               onLogout={logout}
             />
           }

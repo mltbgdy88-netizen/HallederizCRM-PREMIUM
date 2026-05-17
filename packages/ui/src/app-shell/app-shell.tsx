@@ -27,7 +27,7 @@ export function AppShell({
                 type="button"
                 className="hz-shell-hamburger"
                 onClick={() => onMobileSidebarOpenChange(!mobileSidebarOpen)}
-                aria-label="Menuyu ac/kapat"
+                aria-label="Menüyü aç/kapat"
               >
                 <span />
                 <span />
@@ -48,7 +48,7 @@ export function AppShell({
         className={`hz-shell-mobile-backdrop ${mobileSidebarOpen ? "is-open" : ""}`}
         onClick={() => onMobileSidebarOpenChange(false)}
         role="button"
-        aria-label="Kenar menuyu kapat"
+        aria-label="Kenar menüyü kapat"
         tabIndex={0}
         onKeyDown={(event) => {
           if (event.key === "Enter" || event.key === " ") {
