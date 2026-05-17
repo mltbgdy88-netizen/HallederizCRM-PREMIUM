@@ -7,7 +7,7 @@ interface Props {
 }
 
 function formatMoney(value: number) {
-  return `${value.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })} TL`;
+  return `₺${value.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 export function QuickOperationTotalsPanel({ totals, layout = "card" }: Props) {
@@ -17,7 +17,7 @@ export function QuickOperationTotalsPanel({ totals, layout = "card" }: Props) {
         <strong>Ara Toplam:</strong> {formatMoney(totals.subtotal)}
       </li>
       <li>
-        <strong>Iskonto:</strong> {formatMoney(totals.discountTotal)}
+        <strong>İskonto:</strong> {formatMoney(totals.discountTotal)}
       </li>
       <li>
         <strong>Toplam KDV:</strong> {formatMoney(totals.taxTotal)}
@@ -26,7 +26,7 @@ export function QuickOperationTotalsPanel({ totals, layout = "card" }: Props) {
         <strong>Genel Toplam:</strong> {formatMoney(totals.grandTotal)}
       </li>
       <li>
-        <strong>Odenen:</strong> {formatMoney(totals.paidAmount ?? 0)}
+        <strong>Ödenen:</strong> {formatMoney(totals.paidAmount ?? 0)}
       </li>
       <li>
         <strong>Kalan:</strong> {formatMoney(totals.remainingAmount ?? totals.grandTotal)}

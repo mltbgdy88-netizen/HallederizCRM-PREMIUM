@@ -72,7 +72,7 @@ export async function submitQuickOperationRecord(payload: QuickOperationSubmitRe
             paidAmount: payload.paidAmount ?? 0,
             remainingAmount: payload.lines.reduce((sum, line) => sum + line.lineTotal, 0) - (payload.paidAmount ?? 0)
           },
-          previewText: "Demo modunda belge taslagi olusturuldu."
+          previewText: "Onizleme modunda belge taslagi hazirlandi; canli kayit olusturulmaz."
         },
         whatsappDraft: {
           message:
@@ -86,10 +86,10 @@ export async function submitQuickOperationRecord(payload: QuickOperationSubmitRe
           sendEnabled: false
         },
         aiInsight: {
-          summary: "Demo modunda AI operasyon notu template kaynaktan uretildi.",
+          summary: "Onizleme modunda operasyon notu ornek olarak gosterilir.",
           warnings: [],
-          recommendations: ["Gercek gonderim ve belge uretimi sonraki asamada acilacaktir."],
-          source: "mock"
+          recommendations: ["Canli gonderim ve belge uretimi islem kuyrugu baglandiginda acilir."],
+          source: "template"
         }
       },
       mode: "foundation"
