@@ -1,20 +1,85 @@
 "use client";
 
 import { LoadingState, MetricCard, PageHeader, Pagination, SplitContentLayout } from "@hallederiz/ui";
-import type { Customer, Document } from "@hallederiz/types";
-import { useRouter } from "next/navigation";
+import type { Customer, Document, DocumentType } from "@hallederiz/types";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { dataSourceConfig, sdk } from "../../../lib/data-source";
+import { useToast } from "../../../providers/toast-provider";
 import { dateLabel } from "../utils";
-import { describeArchivePolicy, formatDocumentDeliveryChannel, formatDocumentTemplateVersion, summarizeDocumentDeliveries } from "../utils/document-faz-f";
+import {
+  describeArchivePolicy,
+  formatDocumentDeliveryChannel,
+  formatDocumentEntityType,
+  formatDocumentTemplateVersion,
+  summarizeDocumentDeliveries
+} from "../utils/document-faz-f";
 import { getDocuments } from "../queries/get-documents";
 import { getDocumentDeliveryStatusLabel, getDocumentTypeLabel } from "../queries/document-mock-data";
 
+const PREVIEW_ONLY_TOAST = "Belge önizlemesi hazırlanır; gönderim yapılmaz.";
+
 export function DocumentFilterBar() {
-  return <section className="hz-filter-card"><div className="hz-filter-grid"><label>Belge Tipi<select defaultValue=""><option value="">Tum tipler</option><option>Fatura PDF</option><option>Teslim Fisi</option><option>Iade Notu</option></select></label><label>Entity Tipi<select defaultValue=""><option value="">Tum entityler</option><option>order</option><option>delivery</option><option>invoice</option><option>return</option></select></label><label>Musteri<input placeholder="Cari adi" /></label><label>Gonderim Durumu<select defaultValue=""><option value="">Tum durumlar</option><option>Gonderildi</option><option>Kuyrukta</option><option>Basarisiz</option></select></label><label>Tarih<select defaultValue="month"><option>Bugun</option><option>Bu hafta</option><option>Bu ay</option></select></label></div><p className="muted">Bu filtre paneli yalnız görünürlük amaçlıdır; gönderim başarısı backend policy/production gate yanıtına bağlıdır.</p></section>;
+  return (
+    <section className="hz-filter-card">
+      <div className="hz-filter-grid">
+        <label>
+          Belge tipi
+          <select defaultValue="">
+            <option value="">Tüm tipler</option>
+            <option>Teklif PDF</option>
+            <option>Teslim fişi</option>
+            <option>İade notu</option>
+          </select>
+        </label>
+        <label>
+          Kayıt türü
+          <select defaultValue="">
+            <option value="">Tüm kayıtlar</option>
+            <option>Sipariş</option>
+            <option>Teslimat</option>
+            <option>Fatura</option>
+            <option>İade</option>
+          </select>
+        </label>
+        <label>
+          Müşteri
+          <input placeholder="Cari adı" />
+        </label>
+        <label>
+          İletim durumu
+          <select defaultValue="">
+            <option value="">Tüm durumlar</option>
+            <option>Kuyrukta</option>
+            <option>İletim kaydı</option>
+            <option>Başarısız</option>
+          </select>
+        </label>
+        <label>
+          Tarih
+          <select defaultValue="month">
+            <option>Bugün</option>
+            <option>Bu hafta</option>
+            <option>Bu ay</option>
+          </select>
+        </label>
+      </div>
+      <p className="muted">Filtreler önizleme amaçlıdır; canlı gönderim ve arşiv bağlantısı henüz tamamlanmadı.</p>
+    </section>
+  );
 }
 
-export function DocumentTable({ documents, customers, selectedId, onSelect }: { documents: Document[]; customers: Customer[]; selectedId: string | null; onSelect: (id: string) => void }) {
+export function DocumentTable({
+  documents,
+  customers,
+  selectedId,
+  onSelect
+}: {
+  documents: Document[];
+  customers: Customer[];
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+}) {
   const router = useRouter();
   return (
     <section className="hz-content-card hz-doc-table-wrap">
@@ -22,12 +87,12 @@ export function DocumentTable({ documents, customers, selectedId, onSelect }: { 
         <table className="table hz-table hz-table-sticky">
           <thead>
             <tr>
-              <th>Belge Tipi</th>
-              <th>Sablon</th>
-              <th>Bagli Kayit</th>
-              <th>Musteri</th>
-              <th>Olusturma</th>
-              <th>Gonderim</th>
+              <th>Belge tipi</th>
+              <th>Şablon</th>
+              <th>Bağlı kayıt</th>
+              <th>Müşteri</th>
+              <th>Oluşturma</th>
+              <th>İletim</th>
               <th>Aksiyon</th>
             </tr>
           </thead>
@@ -44,7 +109,7 @@ export function DocumentTable({ documents, customers, selectedId, onSelect }: { 
                   <td>{getDocumentTypeLabel(document.type)}</td>
                   <td className="hz-doc-table-cell-muted">{formatDocumentTemplateVersion(document)}</td>
                   <td>{document.entityNo}</td>
-                  <td>{customers.find((customer) => customer.id === document.customerId)?.name ?? document.customerId ?? "-"}</td>
+                  <td>{customers.find((customer) => customer.id === document.customerId)?.name ?? document.customerId ?? "—"}</td>
                   <td>{dateLabel(document.createdAt)}</td>
                   <td>
                     <span
@@ -54,13 +119,27 @@ export function DocumentTable({ documents, customers, selectedId, onSelect }: { 
                     </span>
                   </td>
                   <td>
-                    <button className="hz-btn hz-btn-secondary" type="button" onClick={() => router.push(`/belgeler/${document.id}`)}>
+                    <button
+                      className="hz-btn hz-btn-secondary"
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        router.push(`/belgeler/${document.id}`);
+                      }}
+                    >
                       Detay
                     </button>
                   </td>
                 </tr>
               );
             })}
+            {documents.length === 0 ? (
+              <tr>
+                <td colSpan={7}>
+                  <div className="table-empty">Filtrelere uygun belge bulunamadı.</div>
+                </td>
+              </tr>
+            ) : null}
           </tbody>
         </table>
       </div>
@@ -72,35 +151,42 @@ export function DocumentPreviewPanel({ document }: { document: Document | null }
   if (!document) {
     return (
       <section className="hz-content-card hz-doc-preview-panel">
-        <h3>Belge Preview</h3>
-        <p className="hz-content-card-description">Bir belge secin.</p>
+        <h3>Belge önizleme</h3>
+        <p className="hz-content-card-description">Bir belge seçin.</p>
       </section>
     );
   }
   const deliveries = document.deliveries;
   return (
     <section className="hz-content-card hz-doc-preview-panel">
-      <h3>Belge Preview</h3>
+      <h3>Belge önizleme</h3>
       <ul className="hz-side-list hz-doc-preview-list">
-        <li>Belge No: {document.documentNo}</li>
+        <li>Belge no: {document.documentNo}</li>
         <li>Tip: {getDocumentTypeLabel(document.type)}</li>
-        <li>Sablon surumu (gorunum): {formatDocumentTemplateVersion(document)}</li>
-        <li>Bagli entity: {document.entityType} / {document.entityNo}</li>
-        <li>Teslim kaydi: {summarizeDocumentDeliveries(deliveries)}</li>
-        <li>Arsiv politikasi: {describeArchivePolicy()}</li>
-        <li>Onizleme: {document.previewText}</li>
+        <li>Şablon sürümü: {formatDocumentTemplateVersion(document)}</li>
+        <li>
+          Bağlı kayıt: {formatDocumentEntityType(document.entityType)} / {document.entityNo}
+        </li>
+        <li>Teslim özeti: {summarizeDocumentDeliveries(deliveries)}</li>
+        <li>Arşiv: {describeArchivePolicy()}</li>
+        <li>
+          Önizleme:{" "}
+          {dataSourceConfig.useDemoData
+            ? "Şablon önizlemesi gösterilir; canlı PDF üretimi henüz bağlı değildir."
+            : document.previewText}
+        </li>
       </ul>
       {deliveries.length > 0 ? (
         <div className="hz-doc-delivery-table-wrap">
-          <p className="hz-doc-preview-subcap">Gonderim satirlari</p>
+          <p className="hz-doc-preview-subcap">İletim satırları (önizleme)</p>
           <div className="table-wrap hz-table-wrap">
             <table className="table hz-table hz-doc-delivery-table">
               <thead>
                 <tr>
                   <th>Kanal</th>
                   <th>Durum</th>
-                  <th>Istenen</th>
-                  <th>Gonderilen</th>
+                  <th>İstenen</th>
+                  <th>İletim zamanı</th>
                 </tr>
               </thead>
               <tbody>
@@ -109,7 +195,7 @@ export function DocumentPreviewPanel({ document }: { document: Document | null }
                     <td>{formatDocumentDeliveryChannel(d.channel)}</td>
                     <td>{getDocumentDeliveryStatusLabel(d.status)}</td>
                     <td>{dateLabel(d.requestedAt)}</td>
-                    <td>{d.sentAt ? dateLabel(d.sentAt) : "-"}</td>
+                    <td>{d.sentAt ? dateLabel(d.sentAt) : "—"}</td>
                   </tr>
                 ))}
               </tbody>
@@ -122,7 +208,9 @@ export function DocumentPreviewPanel({ document }: { document: Document | null }
 }
 
 function resolveDocumentEntityHref(document: Document | null): string {
-  if (!document) return "/belgeler";
+  if (!document) {
+    return "/belgeler";
+  }
   const hrefByEntity: Record<Document["entityType"], string> = {
     offer: `/teklifler/${document.entityId}`,
     order: `/siparisler/${document.entityId}`,
@@ -139,63 +227,249 @@ function resolveDocumentEntityHref(document: Document | null): string {
 
 export function DocumentActionsBar({ document }: { document: Document | null }) {
   const router = useRouter();
-  const runDocumentAction = async (action: "sendWhatsApp" | "sendEmail" | "queueSave" | "queuePrint" | "regenerate") => {
-    if (!document || dataSourceConfig.useDemoData) return;
+  const { pushToast } = useToast();
+
+  const previewOnly = (detail: string) => {
+    pushToast(detail);
+    pushToast(PREVIEW_ONLY_TOAST);
+  };
+
+  const runLiveAction = async (action: "sendWhatsApp" | "sendEmail" | "queueSave" | "queuePrint" | "regenerate") => {
+    if (!document) {
+      return;
+    }
+    if (dataSourceConfig.useDemoData) {
+      if (action === "sendWhatsApp") {
+        previewOnly("WhatsApp gönderimi için bağlantı tamamlanmalıdır.");
+        return;
+      }
+      if (action === "sendEmail") {
+        previewOnly("E-posta gönderimi henüz canlı kullanıma bağlı değil.");
+        return;
+      }
+      if (action === "regenerate") {
+        pushToast("PDF üretimi henüz canlı kullanıma bağlı değil.");
+        pushToast(PREVIEW_ONLY_TOAST);
+        return;
+      }
+      previewOnly("Belge kuyruğu işlemi henüz canlı kullanıma bağlı değil.");
+      return;
+    }
     if (action === "sendWhatsApp") await sdk.documents.sendWhatsApp(document.id);
     if (action === "sendEmail") await sdk.documents.sendEmail(document.id);
     if (action === "queueSave") await sdk.documents.queueSave(document.id);
     if (action === "queuePrint") await sdk.documents.queuePrint(document.id);
     if (action === "regenerate") await sdk.documents.regenerate(document.id);
   };
-  return <section className="hz-action-toolbar"><button className="hz-btn hz-btn-primary hz-toolbar-btn" type="button" onClick={() => document && router.push(`/belgeler/${document.id}`)}>Onizle</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => runDocumentAction("sendWhatsApp")}>WhatsApp'tan Gonder</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => runDocumentAction("sendEmail")}>E-posta</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => document && router.push(`/belgeler/${document.id}`)}>Indir</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => runDocumentAction("queueSave")}>Queue Save</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => runDocumentAction("queuePrint")}>Queue Print</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => runDocumentAction("regenerate")}>Yeniden Olustur</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => router.push(resolveDocumentEntityHref(document))}>Ilgili Kayda Git</button></section>;
+
+  return (
+    <section className="hz-action-toolbar">
+      <button
+        className="hz-btn hz-btn-primary hz-toolbar-btn"
+        type="button"
+        onClick={() => document && router.push(`/belgeler/${document.id}`)}
+      >
+        Önizle
+      </button>
+      <button
+        className="hz-btn hz-btn-secondary hz-toolbar-btn"
+        type="button"
+        onClick={() => void runLiveAction("sendWhatsApp")}
+      >
+        WhatsApp&apos;tan gönder
+      </button>
+      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void runLiveAction("sendEmail")}>
+        E-posta
+      </button>
+      <button
+        className="hz-btn hz-btn-secondary hz-toolbar-btn"
+        type="button"
+        onClick={() => {
+          pushToast("PDF üretimi henüz canlı kullanıma bağlı değil.");
+          pushToast(PREVIEW_ONLY_TOAST);
+        }}
+      >
+        İndir
+      </button>
+      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void runLiveAction("queueSave")}>
+        Arşive al
+      </button>
+      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void runLiveAction("queuePrint")}>
+        Yazdırma kuyruğu
+      </button>
+      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void runLiveAction("regenerate")}>
+        PDF yenile
+      </button>
+      <button
+        className="hz-btn hz-btn-secondary hz-toolbar-btn"
+        type="button"
+        onClick={() => router.push("/archive")}
+      >
+        Arşivde gör
+      </button>
+      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => router.push(resolveDocumentEntityHref(document))}>
+        İlgili kayda git
+      </button>
+    </section>
+  );
+}
+
+function resolveContextBanner(
+  customerId: string | null,
+  typeFilter: string | null,
+  customerName: string | null
+): string | null {
+  if (!customerId && !typeFilter) {
+    return null;
+  }
+  const parts: string[] = [];
+  if (customerId) {
+    parts.push(`Cari bağlamı: ${customerName ?? customerId}`);
+  }
+  if (typeFilter === "statement_pdf") {
+    parts.push("Ekstre taslağı — cari ekstresi önizleme bağlamı");
+  } else if (typeFilter) {
+    parts.push(`Belge tipi: ${getDocumentTypeLabel(typeFilter as DocumentType)}`);
+  }
+  return parts.join(" · ");
 }
 
 export function DocumentsPage() {
+  const searchParams = useSearchParams();
+  const customerParam = searchParams.get("customer");
+  const typeParam = searchParams.get("type");
+  const documentParam = searchParams.get("document");
+
   const [documents, setDocuments] = useState<Document[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const pageSize = 10;
+
   useEffect(() => {
+    let mounted = true;
     getDocuments()
       .then((result) => {
+        if (!mounted) {
+          return;
+        }
         setDocuments(result.documents);
         setCustomers(result.customers);
-        const params = new URLSearchParams(typeof window !== "undefined" ? window.location.search : "");
-        const requestedDocument = params.get("document");
-        const requestedCustomer = params.get("customer");
-        const initialDocument = result.documents.find((document) => document.id === requestedDocument || document.customerId === requestedCustomer) ?? result.documents[0] ?? null;
+
+        let scoped = result.documents;
+        if (customerParam) {
+          scoped = scoped.filter((document) => document.customerId === customerParam);
+        }
+        if (typeParam) {
+          scoped = scoped.filter((document) => document.type === typeParam);
+        }
+
+        const initialDocument =
+          (documentParam
+            ? result.documents.find(
+                (document) => document.id === documentParam || document.documentNo === documentParam
+              )
+            : null) ??
+          scoped[0] ??
+          result.documents[0] ??
+          null;
         setSelectedId(initialDocument?.id ?? null);
       })
-      .finally(() => setLoading(false));
-  }, []);
-  const selected = useMemo(() => documents.find((document) => document.id === selectedId) ?? documents[0] ?? null, [documents, selectedId]);
-  const pagedDocuments = useMemo(() => documents.slice((page - 1) * pageSize, page * pageSize), [documents, page]);
+      .finally(() => {
+        if (mounted) {
+          setLoading(false);
+        }
+      });
+
+    return () => {
+      mounted = false;
+    };
+  }, [customerParam, typeParam, documentParam]);
+
+  const filteredDocuments = useMemo(() => {
+    let list = documents;
+    if (customerParam) {
+      list = list.filter((document) => document.customerId === customerParam);
+    }
+    if (typeParam) {
+      list = list.filter((document) => document.type === typeParam);
+    }
+    return list;
+  }, [documents, customerParam, typeParam]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [customerParam, typeParam, documentParam]);
+
+  useEffect(() => {
+    if (!filteredDocuments.length) {
+      setSelectedId(null);
+      return;
+    }
+    if (!selectedId || !filteredDocuments.some((document) => document.id === selectedId)) {
+      setSelectedId(filteredDocuments[0]?.id ?? null);
+    }
+  }, [filteredDocuments, selectedId]);
+
+  const selected = useMemo(
+    () => filteredDocuments.find((document) => document.id === selectedId) ?? filteredDocuments[0] ?? null,
+    [filteredDocuments, selectedId]
+  );
+  const pagedDocuments = useMemo(() => filteredDocuments.slice((page - 1) * pageSize, page * pageSize), [filteredDocuments, page]);
+  const contextCustomerName = useMemo(
+    () => customers.find((customer) => customer.id === customerParam)?.name ?? null,
+    [customers, customerParam]
+  );
+  const contextBanner = resolveContextBanner(customerParam, typeParam, contextCustomerName);
+
   return (
     <div className="hz-page-stack hz-doc-page">
       {dataSourceConfig.useDemoData ? (
         <div className="hz-doc-preview-band" role="status">
-          Demo veri: sablon surumu ve arsiv metinleri gorunum amaclidir; kalici degerler API ve tenant ayarlarina baglidir.
+          Örnek veri modu: belge listesi ve önizleme demo amaçlıdır; canlı PDF üretimi veya gönderim yapılmaz.
         </div>
       ) : null}
-      <PageHeader title="Belgeler" description="Teklif, siparis, tahsilat, depo, teslim, fatura ve iade belgelerini entity baglamiyla yonetin." />
+      {contextBanner ? (
+        <p className="hz-doc-context-band" role="status">
+          {contextBanner}
+        </p>
+      ) : null}
+      <PageHeader
+        title="Belgeler"
+        description="Teklif, sipariş, tahsilat, depo, teslim, fatura ve iade belgelerini kayıt bağlamıyla yönetin."
+      />
       <section className="hz-metric-grid">
-        <MetricCard title="Belge" value={String(documents.length)} detail="Foundation record" tone="info" />
-        <MetricCard title="Gonderildi" value={String(documents.filter((item) => item.deliveries.some((delivery) => delivery.status === "sent")).length)} detail="WhatsApp/e-posta" tone="success" />
-        <MetricCard title="Kuyruk" value={String(documents.filter((item) => item.deliveries.length === 0).length)} detail="Queue save/print bekliyor" tone="warning" />
-        <MetricCard title="Tip" value={String(new Set(documents.map((item) => item.type)).size)} detail="Belge turu" tone="neutral" />
+        <MetricCard title="Belge" value={String(filteredDocuments.length)} detail="Görünen kayıt" tone="info" />
+        <MetricCard
+          title="İletim kaydı"
+          value={String(filteredDocuments.filter((item) => item.deliveries.some((delivery) => delivery.status === "sent")).length)}
+          detail="Önizleme kayıtları"
+          tone="success"
+        />
+        <MetricCard
+          title="Bekleyen"
+          value={String(filteredDocuments.filter((item) => item.deliveries.length === 0).length)}
+          detail="İletim veya arşiv bekliyor"
+          tone="warning"
+        />
+        <MetricCard title="Belge tipi" value={String(new Set(filteredDocuments.map((item) => item.type)).size)} detail="Farklı tür" tone="neutral" />
       </section>
       <DocumentActionsBar document={selected} />
       <DocumentFilterBar />
       <SplitContentLayout
         main={
           loading ? (
-            <LoadingState title="Belgeler yukleniyor" message="Entity baglantilari ve gonderim durumlari hazirlaniyor." />
+            <LoadingState title="Belgeler yükleniyor" message="Kayıt bağlantıları ve iletim durumları hazırlanıyor." />
           ) : (
             <>
-              <DocumentTable documents={pagedDocuments} customers={customers} selectedId={selected?.id ?? null} onSelect={setSelectedId} />
-              <Pagination totalItems={documents.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
+              <DocumentTable
+                documents={pagedDocuments}
+                customers={customers}
+                selectedId={selected?.id ?? null}
+                onSelect={setSelectedId}
+              />
+              <Pagination totalItems={filteredDocuments.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
             </>
           )
         }

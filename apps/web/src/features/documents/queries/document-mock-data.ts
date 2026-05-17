@@ -121,6 +121,18 @@ export async function getDocumentMockData(): Promise<Document[]> {
         })
       : null
     ,
+    customers[0]
+      ? buildDocumentRecord({
+          tenantId,
+          type: "statement_pdf",
+          entityType: "statement",
+          entityId: customers[0].id,
+          entityNo: `EXT-${customers[0].code}`,
+          customerId: customers[0].id,
+          createdBy,
+          title: "Cari Ekstre"
+        })
+      : null,
     customers[1]
       ? buildDocumentRecord({
           tenantId,
@@ -157,14 +169,14 @@ export async function getDocumentById(documentId?: string): Promise<Document | n
 export function getDocumentTypeLabel(type: DocumentType): string {
   const labels: Record<DocumentType, string> = {
     offer_pdf: "Teklif PDF",
-    order_pdf: "Siparis PDF",
-    payment_receipt_pdf: "Tahsilat Makbuzu",
-    warehouse_note_pdf: "Depo Notu",
-    delivery_note_pdf: "Teslim Fisi",
-    dispatch_note_pdf: "Irsaliye",
+    order_pdf: "Sipariş PDF",
+    payment_receipt_pdf: "Tahsilat makbuzu",
+    warehouse_note_pdf: "Depo notu",
+    delivery_note_pdf: "Teslim fişi",
+    dispatch_note_pdf: "İrsaliye",
     invoice_pdf: "Fatura PDF",
-    statement_pdf: "Ekstre",
-    return_note_pdf: "Iade Notu"
+    statement_pdf: "Cari ekstre",
+    return_note_pdf: "İade notu"
   };
   return labels[type];
 }
@@ -172,10 +184,10 @@ export function getDocumentTypeLabel(type: DocumentType): string {
 export function getDocumentDeliveryStatusLabel(status?: DocumentDeliveryStatus): string {
   const labels: Record<DocumentDeliveryStatus | "none", string> = {
     queued: "Kuyrukta",
-    sent: "Gonderildi",
-    delivered: "Teslim Edildi",
-    failed: "Basarisiz",
-    none: "Gonderilmedi"
+    sent: "İletim kaydı",
+    delivered: "Teslim kaydı",
+    failed: "Başarısız",
+    none: "Kayıt yok"
   };
   return labels[status ?? "none"];
 }

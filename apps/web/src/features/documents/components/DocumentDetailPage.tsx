@@ -7,15 +7,44 @@ import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { dataSourceConfig, sdk } from "../../../lib/data-source";
 import type { DocumentOutputJobRow, LocalAgentHealthSnapshot } from "../../../services/api/documents.service";
-import { getDocumentTypeLabel } from "../queries/document-mock-data";
+import { useToast } from "../../../providers/toast-provider";
+import { getDocumentTypeLabel, getDocumentDeliveryStatusLabel } from "../queries/document-mock-data";
 import { getDocumentDetail } from "../queries/get-documents";
+import { formatDocumentDeliveryChannel, formatDocumentEntityType } from "../utils/document-faz-f";
 import { dateLabel } from "../utils";
+
+const PREVIEW_ONLY_TOAST = "Belge önizlemesi hazırlanır; gönderim yapılmaz.";
 
 function DocumentActions({ document, onReload }: { document: Document | null; onReload: () => Promise<void> }) {
   const router = useRouter();
+  const { pushToast } = useToast();
+
+  const previewOnly = (detail: string) => {
+    pushToast(detail);
+    pushToast(PREVIEW_ONLY_TOAST);
+  };
 
   const run = async (action: "queueSave" | "queuePrint" | "regenerate" | "sendWhatsApp" | "sendEmail") => {
-    if (!document || dataSourceConfig.useDemoData) return;
+    if (!document) {
+      return;
+    }
+    if (dataSourceConfig.useDemoData) {
+      if (action === "sendWhatsApp") {
+        previewOnly("WhatsApp gönderimi için bağlantı tamamlanmalıdır.");
+        return;
+      }
+      if (action === "sendEmail") {
+        previewOnly("E-posta gönderimi henüz canlı kullanıma bağlı değil.");
+        return;
+      }
+      if (action === "regenerate") {
+        pushToast("PDF üretimi henüz canlı kullanıma bağlı değil.");
+        pushToast(PREVIEW_ONLY_TOAST);
+        return;
+      }
+      previewOnly("Belge kuyruğu işlemi henüz canlı kullanıma bağlı değil.");
+      return;
+    }
     if (action === "queueSave") await sdk.documents.queueSave(document.id);
     if (action === "queuePrint") await sdk.documents.queuePrint(document.id);
     if (action === "regenerate") await sdk.documents.regenerate(document.id);
@@ -26,23 +55,23 @@ function DocumentActions({ document, onReload }: { document: Document | null; on
 
   return (
     <section className="hz-action-toolbar">
-      <button className="hz-btn hz-btn-primary hz-toolbar-btn" type="button" onClick={() => run("regenerate")}>
-        Yeniden Olustur
+      <button className="hz-btn hz-btn-primary hz-toolbar-btn" type="button" onClick={() => void run("regenerate")}>
+        PDF yenile
       </button>
-      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => run("queueSave")}>
-        Queue Save
+      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void run("queueSave")}>
+        Arşive al
       </button>
-      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => run("queuePrint")}>
-        Queue Print
+      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void run("queuePrint")}>
+        Yazdırma kuyruğu
       </button>
-      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => run("sendWhatsApp")}>
-        WhatsApp Gonder
+      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void run("sendWhatsApp")}>
+        WhatsApp gönder
       </button>
-      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => run("sendEmail")}>
-        E-posta Gonder
+      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void run("sendEmail")}>
+        E-posta
       </button>
       <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => router.push("/belgeler")}>
-        Listeye Don
+        Listeye dön
       </button>
     </section>
   );
@@ -51,13 +80,13 @@ function DocumentActions({ document, onReload }: { document: Document | null; on
 function DocumentSummary({ document, customer }: { document: Document; customer: Customer | null }) {
   return (
     <section className="hz-content-card">
-      <h3>Belge Ozet</h3>
+      <h3>Belge özeti</h3>
       <ul className="hz-side-list">
-        <li>Belge No: {document.documentNo}</li>
-        <li>Belge Tipi: {getDocumentTypeLabel(document.type)}</li>
-        <li>Bagli Kayit: {document.entityNo}</li>
-        <li>Musteri: {customer?.name ?? "-"}</li>
-        <li>Olusturma: {dateLabel(document.createdAt)}</li>
+        <li>Belge no: {document.documentNo}</li>
+        <li>Belge tipi: {getDocumentTypeLabel(document.type)}</li>
+        <li>Bağlı kayıt: {document.entityNo}</li>
+        <li>Müşteri: {customer?.name ?? "—"}</li>
+        <li>Oluşturma: {dateLabel(document.createdAt)}</li>
       </ul>
     </section>
   );
@@ -66,12 +95,16 @@ function DocumentSummary({ document, customer }: { document: Document; customer:
 function DocumentPreview({ document }: { document: Document }) {
   return (
     <section className="hz-content-card">
-      <h3>Preview</h3>
-      <p className="hz-content-card-description">{document.previewText}</p>
+      <h3>Önizleme</h3>
+      <p className="hz-content-card-description">
+        {dataSourceConfig.useDemoData
+          ? "Şablon önizlemesi gösterilir; canlı PDF üretimi ve gönderim henüz bağlı değildir."
+          : document.previewText}
+      </p>
       <div className="hz-inline-note">
-        <span className="hz-inline-note-label">Entity</span>
+        <span className="hz-inline-note-label">Kayıt</span>
         <Link href="/belgeler" className="hz-inline-note-value">
-          {document.entityType} / {document.entityNo}
+          {formatDocumentEntityType(document.entityType)} / {document.entityNo}
         </Link>
       </div>
     </section>
@@ -81,7 +114,7 @@ function DocumentPreview({ document }: { document: Document }) {
 function DocumentDeliveryHistory({ document }: { document: Document }) {
   return (
     <section className="hz-content-card">
-      <h3>Gonderim Gecmisi</h3>
+      <h3>İletim geçmişi</h3>
       <div className="table-wrap hz-table-wrap">
         <table className="table hz-table">
           <thead>
@@ -89,21 +122,21 @@ function DocumentDeliveryHistory({ document }: { document: Document }) {
               <th>Kanal</th>
               <th>Durum</th>
               <th>Tarih</th>
-              <th>Alici</th>
+              <th>Alıcı</th>
             </tr>
           </thead>
           <tbody>
             {document.deliveries.length === 0 ? (
               <tr>
-                <td colSpan={4}>Henuz gonderim kaydi yok.</td>
+                <td colSpan={4}>Henüz iletim kaydı yok.</td>
               </tr>
             ) : (
               document.deliveries.map((delivery) => (
                 <tr key={delivery.id}>
-                  <td>{delivery.channel}</td>
-                  <td>{delivery.status}</td>
+                  <td>{formatDocumentDeliveryChannel(delivery.channel)}</td>
+                  <td>{getDocumentDeliveryStatusLabel(delivery.status)}</td>
                   <td>{dateLabel(delivery.requestedAt)}</td>
-                  <td>{delivery.recipient ?? "-"}</td>
+                  <td>{delivery.recipient ?? "—"}</td>
                 </tr>
               ))
             )}
@@ -112,6 +145,13 @@ function DocumentDeliveryHistory({ document }: { document: Document }) {
       </div>
     </section>
   );
+}
+
+function formatOutputJobStatus(status: string): string {
+  if (status === "queued") return "Kuyrukta";
+  if (status === "completed") return "Tamamlandı";
+  if (status === "failed") return "Başarısız";
+  return status;
 }
 
 function DocumentOutputJobs({
@@ -125,41 +165,41 @@ function DocumentOutputJobs({
 }) {
   return (
     <section className="hz-content-card">
-      <h3>Output Queue ve Local Agent</h3>
+      <h3>Yazdırma ve kayıt kuyruğu</h3>
       <div className="detail-list">
-        <span>Local Agent Durumu</span>
-                <strong>{localAgentHealth?.status ?? "yerel-gelistirme/fallback"}</strong>
-        <span>Calisma Modu</span>
-        <strong>{localAgentHealth?.mode ?? "-"}</strong>
-        <span>Son Kontrol</span>
-        <strong>{localAgentHealth?.lastCheckedAt ? dateLabel(localAgentHealth.lastCheckedAt) : "-"}</strong>
+        <span>Yerel aracı durumu</span>
+        <strong>{localAgentHealth?.status ?? "Bağlı değil"}</strong>
+        <span>Çalışma modu</span>
+        <strong>{localAgentHealth?.mode ?? "—"}</strong>
+        <span>Son kontrol</span>
+        <strong>{localAgentHealth?.lastCheckedAt ? dateLabel(localAgentHealth.lastCheckedAt) : "—"}</strong>
       </div>
       <div className="table-wrap hz-table-wrap" style={{ marginTop: "12px" }}>
         <table className="table hz-table">
           <thead>
             <tr>
-              <th>Is Tipi</th>
-              <th>Is No</th>
+              <th>İş tipi</th>
+              <th>İş no</th>
               <th>Durum</th>
-              <th>Kuyruga Alinma</th>
-              <th>Bitis</th>
+              <th>Kuyruğa alınma</th>
+              <th>Bitiş</th>
             </tr>
           </thead>
           <tbody>
-            {[...fileSaveJobs.map((job) => ({ ...job, kind: "Queue Save" })), ...printJobs.map((job) => ({ ...job, kind: "Queue Print" }))]
+            {[...fileSaveJobs.map((job) => ({ ...job, kind: "Arşiv kaydı" })), ...printJobs.map((job) => ({ ...job, kind: "Yazdırma" }))]
               .slice(0, 8)
               .map((job) => (
                 <tr key={job.id}>
                   <td>{job.kind}</td>
                   <td>{job.id}</td>
-                  <td>{job.status}</td>
+                  <td>{formatOutputJobStatus(job.status)}</td>
                   <td>{dateLabel(job.queuedAt)}</td>
-                  <td>{job.completedAt ? dateLabel(job.completedAt) : "-"}</td>
+                  <td>{job.completedAt ? dateLabel(job.completedAt) : "—"}</td>
                 </tr>
               ))}
             {printJobs.length + fileSaveJobs.length === 0 ? (
               <tr>
-                <td colSpan={5}>Bu belgeye bagli output isi henuz olusmadi.</td>
+                <td colSpan={5}>Bu belgeye bağlı kuyruk işi henüz oluşmadı.</td>
               </tr>
             ) : null}
           </tbody>
@@ -200,15 +240,15 @@ export function DocumentDetailPage() {
   );
 
   if (loading) {
-    return <LoadingState title="Belge yukleniyor" message="Belge detayi ve gonderim gecmisi getiriliyor." />;
+    return <LoadingState title="Belge yükleniyor" message="Belge detayı ve iletim geçmişi getiriliyor." />;
   }
 
   if (!document) {
     return (
       <div className="hz-page-stack">
-        <PageHeader title="Belge Bulunamadi" description="Istenen belge kaydi bulunamadi." />
+        <PageHeader title="Belge bulunamadı" description="İstenen belge kaydı bulunamadı veya erişim kapsamında değil." />
         <section className="hz-content-card">
-          <Link href="/belgeler">Belge listesine don</Link>
+          <Link href="/belgeler">Belge listesine dön</Link>
         </section>
       </div>
     );
@@ -216,7 +256,15 @@ export function DocumentDetailPage() {
 
   return (
     <div className="hz-page-stack">
-      <PageHeader title={`Belge ${document.documentNo}`} description="Belge preview, queue ve gonderim operasyonlarini bu ekrandan yonetin." />
+      {dataSourceConfig.useDemoData ? (
+        <p className="hz-doc-preview-band" role="status">
+          Örnek veri modu: bu belge demo amaçlıdır; PDF üretimi ve gönderim canlıda bağlı değildir.
+        </p>
+      ) : null}
+      <PageHeader
+        title={`Belge ${document.documentNo}`}
+        description="Belge önizlemesi, kuyruk ve iletim işlemleri bu ekrandan yönetilir; canlı bağlantı gerektirir."
+      />
       <DocumentActions document={document} onReload={load} />
       <SplitContentLayout
         main={

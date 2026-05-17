@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   IconAlertTriangle,
   IconArchive,
@@ -27,14 +27,21 @@ import type {
   ArchiveSourceKind
 } from "../types";
 
-const KPI = {
-  total: 128,
-  today: 14,
-  approvedDocs: 92,
-  pendingOps: 7,
-  risky: 3,
-  retention: "5 yıl"
-} as const;
+function buildArchiveKpi(rows: ArchiveRecord[]) {
+  if (!rows.length) {
+    return { total: 0, today: 0, approvedDocs: 0, pendingOps: 0, risky: 0, retention: "—" };
+  }
+  const todayStart = new Date();
+  todayStart.setHours(0, 0, 0, 0);
+  return {
+    total: rows.length,
+    today: rows.filter((row) => new Date(row.createdAt) >= todayStart).length,
+    approvedDocs: rows.filter((row) => row.status === "onaylandi" || row.status === "arsivlendi").length,
+    pendingOps: rows.filter((row) => row.status === "bekliyor").length,
+    risky: rows.filter((row) => row.status === "riskli").length,
+    retention: "5 yıl"
+  };
+}
 
 function formatArchiveDate(iso: string): string {
   return new Intl.DateTimeFormat("tr-TR", { day: "2-digit", month: "short", year: "numeric" }).format(new Date(iso));
@@ -156,6 +163,18 @@ export function ArchivePage() {
     [baseRows, search, category, source, status, dateFrom, dateTo, userFilter]
   );
 
+  const kpi = useMemo(() => buildArchiveKpi(baseRows), [baseRows]);
+
+  useEffect(() => {
+    if (!filtered.length) {
+      setSelectedId(null);
+      return;
+    }
+    if (!selectedId || !filtered.some((row) => row.id === selectedId)) {
+      setSelectedId(filtered[0]?.id ?? null);
+    }
+  }, [filtered, selectedId]);
+
   const selected = useMemo(() => {
     if (!selectedId) return null;
     return filtered.find((r) => r.id === selectedId) ?? baseRows.find((r) => r.id === selectedId) ?? null;
@@ -167,6 +186,13 @@ export function ArchivePage() {
       setActionLocks((s) => ({ ...s, [key]: true }));
     },
     [pushToast]
+  );
+
+  const notLiveAction = useCallback(
+    (key: string, detail: string) => {
+      lockAction(key, `Bu işlem henüz canlı kullanıma bağlı değil. ${detail}`);
+    },
+    [lockAction]
   );
 
   const resetFilters = useCallback(() => {
@@ -202,7 +228,7 @@ export function ArchivePage() {
                 type="button"
                 className="hz-archive-toolbar-btn hz-archive-toolbar-btn--primary"
                 disabled={!!actionLocks.upload}
-                onClick={() => lockAction("upload", "Demo: belge yükleme kuyruğa alındı.")}
+                onClick={() => notLiveAction("upload", "Belge yükleme bağlantısı gerekir.")}
               >
                 <IconUpload size={15} />
                 Belge Yükle
@@ -211,7 +237,7 @@ export function ArchivePage() {
                 type="button"
                 className="hz-archive-toolbar-btn hz-archive-toolbar-btn--outline"
                 disabled={!!actionLocks.export}
-                onClick={() => lockAction("export", "Demo: dışa aktarma hazırlanıyor.")}
+                onClick={() => notLiveAction("export", "Dışa aktarma henüz bağlı değil.")}
               >
                 <IconExternalLink size={14} />
                 Dışa Aktar
@@ -220,7 +246,7 @@ export function ArchivePage() {
                 type="button"
                 className="hz-archive-toolbar-btn hz-archive-toolbar-btn--outline"
                 disabled={!!actionLocks.bulk}
-                onClick={() => lockAction("bulk", "Demo: toplu indirme kuyruğa alındı.")}
+                onClick={() => notLiveAction("bulk", "Toplu indirme henüz bağlı değil.")}
               >
                 <IconDownload size={15} />
                 Toplu İndir
@@ -229,7 +255,7 @@ export function ArchivePage() {
                 type="button"
                 className="hz-archive-toolbar-btn hz-archive-toolbar-btn--outline"
                 disabled={!!actionLocks.audit}
-                onClick={() => lockAction("audit", "Demo: denetim raporu oluşturuluyor.")}
+                onClick={() => notLiveAction("audit", "Denetim raporu henüz bağlı değil.")}
               >
                 <IconShieldCheck size={15} />
                 Denetim Raporu
@@ -244,7 +270,7 @@ export function ArchivePage() {
               </span>
               <span className="hz-archive-kpi-text">
                 <span className="hz-archive-kpi-label">Toplam Kayıt</span>
-                <span className="hz-archive-kpi-value">{KPI.total}</span>
+                <span className="hz-archive-kpi-value">{kpi.total}</span>
               </span>
             </div>
             <div className="hz-archive-kpi hz-archive-kpi--primary">
@@ -253,7 +279,7 @@ export function ArchivePage() {
               </span>
               <span className="hz-archive-kpi-text">
                 <span className="hz-archive-kpi-label">Bugün Eklenen</span>
-                <span className="hz-archive-kpi-value">{KPI.today}</span>
+                <span className="hz-archive-kpi-value">{kpi.today}</span>
               </span>
             </div>
             <div className="hz-archive-kpi hz-archive-kpi--success">
@@ -262,7 +288,7 @@ export function ArchivePage() {
               </span>
               <span className="hz-archive-kpi-text">
                 <span className="hz-archive-kpi-label">Onaylı Belge</span>
-                <span className="hz-archive-kpi-value">{KPI.approvedDocs}</span>
+                <span className="hz-archive-kpi-value">{kpi.approvedDocs}</span>
               </span>
             </div>
             <div className="hz-archive-kpi hz-archive-kpi--warning">
@@ -271,7 +297,7 @@ export function ArchivePage() {
               </span>
               <span className="hz-archive-kpi-text">
                 <span className="hz-archive-kpi-label">Bekleyen İşlem</span>
-                <span className="hz-archive-kpi-value">{KPI.pendingOps}</span>
+                <span className="hz-archive-kpi-value">{kpi.pendingOps}</span>
               </span>
             </div>
             <div className="hz-archive-kpi hz-archive-kpi--danger">
@@ -280,7 +306,7 @@ export function ArchivePage() {
               </span>
               <span className="hz-archive-kpi-text">
                 <span className="hz-archive-kpi-label">Riskli Kayıt</span>
-                <span className="hz-archive-kpi-value">{KPI.risky}</span>
+                <span className="hz-archive-kpi-value">{kpi.risky}</span>
               </span>
             </div>
             <div className="hz-archive-kpi hz-archive-kpi--cyan">
@@ -289,7 +315,7 @@ export function ArchivePage() {
               </span>
               <span className="hz-archive-kpi-text">
                 <span className="hz-archive-kpi-label">Saklama Süresi</span>
-                <span className="hz-archive-kpi-value">{KPI.retention}</span>
+                <span className="hz-archive-kpi-value">{kpi.retention}</span>
               </span>
             </div>
           </section>
@@ -426,7 +452,11 @@ export function ArchivePage() {
 
           {ARCHIVE_USE_DEMO_DATA ? (
             <div className="hz-archive-preview-band" role="status">
-              Önizleme modu: örnek arşiv kayıtları gösteriliyor.
+              Örnek veri modu: arşiv listesi demo kayıtlarıdır; canlı arşiv ve indirme henüz bağlı değildir.
+            </div>
+          ) : !baseRows.length ? (
+            <div className="hz-archive-preview-band" role="status">
+              Canlı arşiv verisi henüz bağlı değil; kayıt listesi boş görünür.
             </div>
           ) : null}
 
@@ -504,7 +534,7 @@ export function ArchivePage() {
                         title="İndir"
                         disabled={!!rowDownloadLocks[row.id]}
                         onClick={() => {
-                          pushToast("Demo: indirme kuyruğa alındı.");
+                          pushToast("Belge indirme henüz canlı kullanıma bağlı değil.");
                           setRowDownloadLocks((s) => ({ ...s, [row.id]: true }));
                         }}
                       >
@@ -633,14 +663,18 @@ export function ArchivePage() {
                 <article className="hz-archive-side-card">
                   <h3 className="hz-archive-side-card-title">Hızlı Aksiyonlar</h3>
                   <div className="hz-archive-side-actions">
-                    <button type="button" className="hz-archive-side-btn hz-archive-side-btn--primary" onClick={() => pushToast("Demo: detay görünümü yakında.")}>
+                    <button
+                      type="button"
+                      className="hz-archive-side-btn hz-archive-side-btn--primary"
+                      onClick={() => pushToast("Arşiv detay görünümü henüz canlı kullanıma bağlı değil.")}
+                    >
                       Detay aç
                     </button>
                     <button
                       type="button"
                       className="hz-archive-side-btn"
                       disabled={!!actionLocks.sideDl}
-                      onClick={() => lockAction("sideDl", "Demo: belge indirme kuyruğa alındı.")}
+                      onClick={() => notLiveAction("sideDl", "Belge indirme henüz bağlı değil.")}
                     >
                       <IconDownload size={14} />
                       Belge indir
@@ -660,7 +694,7 @@ export function ArchivePage() {
                       type="button"
                       className="hz-archive-side-btn"
                       disabled={!!actionLocks.sideNote}
-                      onClick={() => lockAction("sideNote", "Demo: arşiv notu kaydedildi.")}
+                      onClick={() => notLiveAction("sideNote", "Arşiv notu kaydı henüz bağlı değil.")}
                     >
                       <IconTag size={14} />
                       Arşiv notu ekle

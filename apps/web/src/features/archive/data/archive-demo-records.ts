@@ -27,8 +27,8 @@ export const ARCHIVE_DEMO_RECORDS: ArchiveRecord[] = [
     auditApprovalInfo: "Onay: Merkez satış",
     auditIpDevice: "10.12.0.44 · Windows",
     relatedLinks: [
-      { label: "Cari kartı", href: "/cariler/CUS-001" },
-      { label: "Sipariş", href: "/siparisler/SO-2026-0148" }
+      { label: "Cari kartı", href: "/cariler/customer_1" },
+      { label: "Sipariş", href: "/siparisler/order_1" }
     ]
   },
   {
@@ -53,8 +53,8 @@ export const ARCHIVE_DEMO_RECORDS: ArchiveRecord[] = [
     auditApprovalInfo: "Onay bekleniyor",
     auditIpDevice: "192.168.4.2 · macOS",
     relatedLinks: [
-      { label: "Cari kartı", href: "/cariler/CUS-001" },
-      { label: "Tahsilat", href: "/tahsilatlar/TA-2026-0097" }
+      { label: "Cari kartı", href: "/cariler/customer_2" },
+      { label: "Tahsilat", href: "/tahsilatlar/payment_1" }
     ]
   },
   {
@@ -75,12 +75,12 @@ export const ARCHIVE_DEMO_RECORDS: ArchiveRecord[] = [
     retentionYears: 5,
     hashPreview: "sha256:9c44…221",
     auditCreatedBy: "Sistem",
-    auditLastAction: "Belge üretildi",
+    auditLastAction: "Belge önizlemesi hazırlandı",
     auditApprovalInfo: "Otomatik arşiv",
     auditIpDevice: "platform-worker-01",
     relatedLinks: [
-      { label: "Belge", href: "/belgeler?document=TF-2026-0189" },
-      { label: "Cari kartı", href: "/cariler/CUS-001" }
+      { label: "Belge", href: "/belgeler/document_1" },
+      { label: "Cari kartı", href: "/cariler/customer_1" }
     ]
   },
   {
@@ -154,8 +154,8 @@ export const ARCHIVE_DEMO_RECORDS: ArchiveRecord[] = [
     auditApprovalInfo: "Onaylandı",
     auditIpDevice: "10.12.0.12 · Windows",
     relatedLinks: [
-      { label: "Fatura", href: "/faturalar/FA-2026-0112" },
-      { label: "Cari kartı", href: "/cariler/CUS-001" }
+      { label: "Fatura", href: "/faturalar" },
+      { label: "Cari kartı", href: "/cariler/customer_4" }
     ]
   },
   {
@@ -194,7 +194,7 @@ export const ARCHIVE_DEMO_RECORDS: ArchiveRecord[] = [
     responsible: "Platform Admin",
     createdAt: "2026-04-25T15:02:00.000Z",
     fileName: "proposal_AP-0078.json",
-    fileTypeLabel: "Proposal",
+    fileTypeLabel: "Öneri paketi",
     fileSizeLabel: "22 KB",
     retentionYears: 5,
     hashPreview: "sha256:eedd…334",
@@ -225,7 +225,7 @@ export const ARCHIVE_DEMO_RECORDS: ArchiveRecord[] = [
     auditLastAction: "Arşivlendi",
     auditApprovalInfo: "Saklama süresi içinde",
     auditIpDevice: "document-worker",
-    relatedLinks: [{ label: "Belge", href: "/belgeler?document=BG-2026-021" }]
+    relatedLinks: [{ label: "Belge", href: "/belgeler/document_7" }]
   },
   {
     id: "r10",
