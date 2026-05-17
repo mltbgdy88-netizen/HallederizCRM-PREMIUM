@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useMemo, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import type { QuickOperationSubmitRequest } from "@hallederiz/types";
 import type {
   QuickOperationAiInsight,
@@ -15,95 +15,65 @@ import type {
   QuickOperationWhatsappDraft,
   SourceOption
 } from "../types";
+import { dataSourceConfig } from "../../../lib/data-source";
 import { submitQuickOperationRecord } from "../../../services/api/quick-operations.service";
+import {
+  buildQuickOperationCustomers,
+  findCatalogProduct,
+  findQuickOperationCustomer,
+  productToQuickOperationLine
+} from "../data/quick-operation-catalog";
+import {
+  isQuickOpPreviewCustomerId,
+  isQuickOpPreviewProductId
+} from "../data/quick-operation-guards";
+import { MSG_DRAFT_SAVED, MSG_PREVIEW_CUSTOMER, MSG_PREVIEW_PRODUCT } from "../data/quick-operation-messages";
 import { calculateQuickOperationTotals } from "../utils/calculate-quick-operation-totals";
 import { mapSourceSelectionToWorkflow } from "../utils/map-source-selection-to-workflow";
 
 export const operationTypeLabels: Record<QuickOperationType, { label: string; title: string; description: string }> = {
   offer: {
     label: "Teklif",
-    title: "Teklif hizli girisi",
-    description: "Stok rezervasyonu yapmadan teklif, belge ve WhatsApp taslagi onizlenir."
+    title: "Teklif hızlı girişi",
+    description: "Stok rezervasyonu yapmadan teklif, belge ve WhatsApp taslağı önizlenir."
   },
   sale_order: {
-    label: "Satis / Siparis",
-    title: "Satis ve siparis hizli girisi",
-    description: "Satir kaynak secimine gore depo, fabrika ve tedarik workflow etkisi onizlenir."
+    label: "Satış / Sipariş",
+    title: "Satış ve sipariş hızlı girişi",
+    description: "Satır kaynak seçimine göre depo, fabrika ve tedarik iş akışı etkisi önizlenir."
   },
   delivery: {
     label: "Teslim",
-    title: "Teslim hizli girisi",
-    description: "Mevcut siparis veya serbest teslim icin depo hazirlik ve odeme kontrolleri onizlenir."
+    title: "Teslim hızlı girişi",
+    description: "Mevcut sipariş veya serbest teslim için depo hazırlık ve ödeme kontrolleri önizlenir."
   },
   payment: {
     label: "Tahsilat",
-    title: "Tahsilat hizli girisi",
-    description: "Cari bakiye ve acik siparis/fatura allocation foundation'i onizlenir."
+    title: "Tahsilat hızlı girişi",
+    description: "Cari bakiye ve açık sipariş/fatura dağılımı önizlenir."
   },
   return: {
-    label: "Iade",
-    title: "Iade hizli girisi",
-    description: "Iade talebi, stok/finans etkisi ve gerekirse approval ihtiyaci onizlenir."
+    label: "İade",
+    title: "İade hızlı girişi",
+    description: "İade talebi, stok/finans etkisi ve gerekirse onay ihtiyacı önizlenir."
   }
 };
 
-export const demoCustomers: QuickOperationCustomer[] = [
-  {
-    id: "customer_delta",
-    name: "Delta A.Ş.",
-    contactName: "Mehmet Yıldız",
-    phone: "+90 312 555 01 48",
-    priceGroup: "Bayi / Slot 1",
-    customerType: "Bayi",
-    whatsappMatched: true,
-    risk: "Orta",
-    balance: 72100,
-    address: "Ostim OSB, 1232. Cad. No:4, Ankara",
-    receivableDisplay: "84.500",
-    payableDisplay: "12.300",
-    warningDisplay: "2 gecikmiş ödeme"
-  },
-  {
-    id: "customer_nova",
-    name: "Nova Gıda",
-    contactName: "Elif Aksoy",
-    phone: "+90 232 444 90 12",
-    priceGroup: "Perakende",
-    customerType: "Perakende",
-    whatsappMatched: false,
-    risk: "Dusuk",
-    balance: 12400,
-    address: "İzmir Atatürk OSB, No:88",
-    receivableDisplay: "42.100",
-    payableDisplay: "3.200",
-    warningDisplay: "—"
-  },
-  {
-    id: "customer_ege",
-    name: "Ege Un A.Ş.",
-    contactName: "Can Öztürk",
-    phone: "+90 266 333 77 65",
-    priceGroup: "Üretici",
-    customerType: "Üretici",
-    whatsappMatched: true,
-    risk: "Dusuk",
-    balance: 8800,
-    address: "Bandırma Lojistik Üssü",
-    receivableDisplay: "118.900",
-    payableDisplay: "6.450",
-    warningDisplay: "Vade yaklaşıyor (1)"
-  }
-];
+export const demoCustomers: QuickOperationCustomer[] = buildQuickOperationCustomers();
 
 const fallbackCustomer: QuickOperationCustomer = {
   id: "customer_fallback",
-  name: "ORNEK CARI",
-  contactName: "Yetkili",
-  phone: "-",
-  priceGroup: "Genel",
-  risk: "Dusuk",
+  name: "Cari seçilmedi",
+  contactName: "—",
+  phone: "—",
+  priceGroup: "—",
+  risk: "Düşük",
   balance: 0,
-  address: "-"
+  address: "—",
+  receivableDisplay: "—",
+  payableDisplay: "—",
+  warningDisplay: "—",
+  financeLinked: false
 };
 
 export const demoProducts: QuickOperationProduct[] = [
@@ -114,7 +84,7 @@ export const demoProducts: QuickOperationProduct[] = [
 
 const fallbackProduct: QuickOperationProduct = {
   code: "ITEM-001",
-  name: "Ornek urun/hizmet",
+  name: "Örnek ürün/hizmet",
   price: 0,
   taxRate: 20
 };
@@ -132,9 +102,9 @@ export const sourceOptions: SourceOption[] = [
   },
   {
     type: "factory",
-    title: "Fabrika Stogu",
+    title: "Fabrika stoğu",
     badge: "80 adet uygun",
-    description: "Fabrika: Ankara Fabrika · Tahmini gelis: 3 gun",
+    description: "Fabrika: Ankara Fabrika · Tahmini geliş: 3 gün",
     sourceLabel: "Fabrika",
     warehouseName: "Ankara Fabrika",
     rackCode: "-",
@@ -142,33 +112,33 @@ export const sourceOptions: SourceOption[] = [
   },
   {
     type: "supplier",
-    title: "Tedarikci Stogu",
+    title: "Tedarikçi stoğu",
     badge: "120 adet uygun",
-    description: "Tedarikci: Tedarikci A · Tahmini tedarik: 5 gun",
-    sourceLabel: "Tedarikci",
-    warehouseName: "Tedarikci A",
+    description: "Tedarikçi: Tedarikçi A · Tahmini tedarik: 5 gün",
+    sourceLabel: "Tedarikçi",
+    warehouseName: "Tedarikçi A",
     rackCode: "-",
-    locationCode: "Dis kaynak"
+    locationCode: "Dış kaynak"
   },
   {
     type: "split",
-    title: "Split Kaynak",
-    badge: "Coklu plan",
-    description: "Satir miktari depo/fabrika/tedarikci arasinda dagitilir.",
-    sourceLabel: "Split",
-    warehouseName: "Coklu kaynak",
+    title: "Çoklu kaynak",
+    badge: "Çoklu plan",
+    description: "Satır miktarı depo, fabrika ve tedarikçi arasında dağıtılır.",
+    sourceLabel: "Çoklu",
+    warehouseName: "Çoklu kaynak",
     rackCode: "-",
-    locationCode: "Dagitim plani"
+    locationCode: "Dağıtım planı"
   },
   {
     type: "auto",
     title: "Otomatik Kaynak",
     badge: "Sistem onerisi",
-    description: "Sistem stok, teslim suresi ve cari onceligine gore kaynak onerir.",
-    sourceLabel: "Auto",
-    warehouseName: "Sistem onerisi",
+    description: "Sistem stok, teslim süresi ve cari önceliğine göre kaynak önerir.",
+    sourceLabel: "Otomatik",
+    warehouseName: "Sistem önerisi",
     rackCode: "-",
-    locationCode: "Oneri"
+    locationCode: "Öneri"
   }
 ];
 
@@ -176,11 +146,11 @@ const fallbackSource: SourceOption = {
   type: "auto",
   title: "Otomatik Kaynak",
   badge: "Sistem onerisi",
-  description: "Kaynak secimi bekleniyor.",
-  sourceLabel: "Auto",
-  warehouseName: "Sistem onerisi",
+  description: "Kaynak seçimi bekleniyor.",
+  sourceLabel: "Otomatik",
+  warehouseName: "Sistem önerisi",
   rackCode: "-",
-  locationCode: "Oneri"
+  locationCode: "Öneri"
 };
 
 /** Tabloya eklenen boş satır — ürün seçilene kadar sıfır/boş değerler */
@@ -269,9 +239,24 @@ export function seedQuickOperationLines(): QuickOperationLine[] {
   ];
 }
 
-export function useQuickOperationState() {
+export function useQuickOperationState(options?: {
+  initialCustomerId?: string | null;
+  initialProductId?: string | null;
+}) {
+  const catalogCustomers = useMemo(() => buildQuickOperationCustomers(), []);
+  const resolvedInitialCustomer = useMemo(() => {
+    const requested = options?.initialCustomerId?.trim();
+    if (!requested) {
+      return catalogCustomers[0]?.id ?? fallbackCustomer.id;
+    }
+    if (findQuickOperationCustomer(requested)) {
+      return requested;
+    }
+    return catalogCustomers[0]?.id ?? fallbackCustomer.id;
+  }, [catalogCustomers, options?.initialCustomerId]);
+
   const [operationType, setOperationTypeState] = useState<QuickOperationType>("sale_order");
-  const [customerId, setCustomerId] = useState(demoCustomers[0]?.id ?? fallbackCustomer.id);
+  const [customerId, setCustomerId] = useState(resolvedInitialCustomer);
   const [lines, setLines] = useState<QuickOperationLine[]>(() => seedQuickOperationLines());
   const [expandedLineId, setExpandedLineId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -283,8 +268,13 @@ export function useQuickOperationState() {
   const [whatsappDraftVisible, setWhatsappDraftVisible] = useState(false);
 
   const selectedCustomer = useMemo(() => {
-    return demoCustomers.find((customer) => customer.id === customerId) ?? demoCustomers[0] ?? fallbackCustomer;
-  }, [customerId]);
+    return (
+      findQuickOperationCustomer(customerId) ??
+      catalogCustomers.find((customer) => customer.id === customerId) ??
+      catalogCustomers[0] ??
+      fallbackCustomer
+    );
+  }, [customerId, catalogCustomers]);
   const totals = useMemo(() => calculateQuickOperationTotals(lines), [lines]);
   const calculatedImpacts = useMemo(() => mapSourceSelectionToWorkflow(operationType, lines), [operationType, lines]);
   const impacts = submittedImpacts ?? calculatedImpacts;
@@ -347,8 +337,36 @@ export function useQuickOperationState() {
   };
 
   const showFoundationNotice = (action: string) => {
-    setNotice(`${action}: Bu turda taslak/onizleme olusturulur. Gercek gonderim/uretim sonraki asamada etkinlesecektir.`);
+    setNotice(`${action}: Bu ortamda yalnızca taslak ve önizleme hazırlanır. Canlı kayıt için onay ve işlem kuyruğu gerekir.`);
   };
+
+  const applyProductFromUrl = useCallback(
+    (productId: string): boolean => {
+      if (isQuickOpPreviewProductId(productId)) {
+        setNotice(MSG_PREVIEW_PRODUCT);
+        return false;
+      }
+      const product = findCatalogProduct(productId);
+      if (!product) {
+        setNotice("Ürün katalogda bulunamadı veya canlı veri bağlantısı kurulmadı.");
+        return false;
+      }
+      const line = productToQuickOperationLine(product);
+      setSubmittedImpacts(null);
+      setSideActions(null);
+      setLines((current) => {
+        const emptyOnly =
+          current.length === 0 || current.every((row) => !row.productCode.trim() && !row.productName.trim());
+        return emptyOnly ? [line] : [...current, line];
+      });
+      setExpandedLineId(line.id);
+      return true;
+    },
+    []
+  );
+
+  const isPreviewCustomer = isQuickOpPreviewCustomerId(selectedCustomer.id);
+  const isPreviewCustomerBlocked = isPreviewCustomer;
 
   const setOperationType = (next: QuickOperationType) => {
     setSubmittedImpacts(null);
@@ -380,6 +398,15 @@ export function useQuickOperationState() {
   };
 
   const submitOperation = async (): Promise<boolean> => {
+    if (isPreviewCustomerBlocked) {
+      setNotice(MSG_PREVIEW_CUSTOMER);
+      return false;
+    }
+    if (!selectedCustomer.id || selectedCustomer.id === fallbackCustomer.id) {
+      setNotice("Önce cari seçin.");
+      return false;
+    }
+
     setIsSubmitting(true);
     let success = false;
     try {
@@ -393,25 +420,18 @@ export function useQuickOperationState() {
         }))
       );
       setSideActions(result.sideActions ?? null);
-      if (result.mode === "executed") {
-        if (result.operationType === "delivery") {
-          setNotice(`Teslim kaydı oluşturuldu: ${result.createdEntityNo ?? "Numara üretilmedi"}`);
-        } else if (result.operationType === "return") {
-          setNotice(`İade talebi oluşturuldu: ${result.createdEntityNo ?? "Numara üretilmedi"}`);
-        } else {
-          setNotice(`İşlem oluşturuldu: ${result.createdEntityNo ?? "Numara üretilmedi"}`);
-        }
+      const ref = result.createdEntityNo ?? "—";
+      if (result.mode === "foundation" || dataSourceConfig.useDemoData) {
+        setNotice(`${MSG_DRAFT_SAVED} Referans: ${ref}`);
+      } else if (result.mode === "executed") {
+        setNotice(`İşlem kaydı alındı: ${ref}. Onay zinciri tamamlandığında uygulanır.`);
       } else {
-        if (result.operationType === "return") {
-          setNotice(`İade talebi oluşturuldu: ${result.createdEntityNo ?? "Numara üretilmedi"}`);
-        } else {
-          setNotice("Bu işlem inceleme modunda hazırlandı.");
-        }
+        setNotice(`Taslak inceleme için hazırlandı. Referans: ${ref}`);
       }
       success = true;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Bilinmeyen hata";
-      setNotice(`İşlem oluşturulamadı: ${message}`);
+      setNotice(`İşlem hazırlanamadı: ${message}`);
       success = false;
     } finally {
       setIsSubmitting(false);
@@ -421,7 +441,7 @@ export function useQuickOperationState() {
 
   const openDocumentPreview = () => {
     if (!documentPreview) {
-      showFoundationNotice("Belge Onizle");
+      showFoundationNotice("Belge önizle");
       return;
     }
     setDocumentPreviewVisible(true);
@@ -429,7 +449,7 @@ export function useQuickOperationState() {
 
   const openWhatsappDraft = () => {
     if (!whatsappDraft) {
-      showFoundationNotice("WhatsApp Taslagi");
+      showFoundationNotice("WhatsApp taslağı");
       return;
     }
     setWhatsappDraftVisible(true);
@@ -440,17 +460,25 @@ export function useQuickOperationState() {
     setSideActions(null);
     setNotice(null);
     setLines(seedQuickOperationLines());
-    setCustomerId(demoCustomers[0]?.id ?? fallbackCustomer.id);
+    setCustomerId(catalogCustomers[0]?.id ?? fallbackCustomer.id);
     setOperationTypeState("sale_order");
     setOperationNote("");
   };
 
   return {
+    catalogCustomers,
     operationType,
     setOperationType,
     customerId,
     setCustomerId,
     selectedCustomer,
+    isPreviewCustomer,
+    isPreviewCustomerBlocked,
+    applyProductFromUrl,
+    initialCustomerParam: options?.initialCustomerId ?? null,
+    initialCustomerResolved: Boolean(
+      options?.initialCustomerId && findQuickOperationCustomer(options.initialCustomerId)
+    ),
     lines,
     expandedLineId,
     setExpandedLineId,

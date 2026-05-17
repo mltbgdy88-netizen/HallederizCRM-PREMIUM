@@ -1,8 +1,8 @@
-"use client";
+﻿"use client";
 
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
-import { DetailPanel, SplitContentLayout } from "@hallederiz/ui";
+import { useRouter, useSearchParams } from "next/navigation";
+import { SplitContentLayout } from "@hallederiz/ui";
 import { dataSourceConfig } from "../../../lib/data-source";
 import { useToast } from "../../../providers/toast-provider";
 import type { QuickBubbleKind } from "../../dashboard/components/dashboard-inline-icons";
@@ -14,11 +14,20 @@ import {
   IconTrash2,
   QuickActionIcon
 } from "../../dashboard/components/dashboard-inline-icons";
-import { demoCustomers, seedQuickOperationLines, useQuickOperationState } from "../hooks/use-quick-operation-state";
-import type { QuickOperationLine, QuickOperationType } from "../types";
-import { QuickOperationImpactPanel } from "./QuickOperationImpactPanel";
+import {
+  MSG_DRAFT_SAVED,
+  MSG_NOT_LIVE,
+  MSG_PREVIEW_CUSTOMER,
+  MSG_PREVIEW_DOCUMENT,
+  MSG_PREVIEW_PRODUCT,
+  MSG_SELECT_CUSTOMER,
+  MSG_SELECT_LINE
+} from "../data/quick-operation-messages";
+import { isQuickOpPreviewProductId } from "../data/quick-operation-guards";
+import { seedQuickOperationLines, useQuickOperationState } from "../hooks/use-quick-operation-state";
+import type { QuickOperationLine, QuickOperationSourceType, QuickOperationType } from "../types";
 import { QuickOperationSourceAccordion } from "./QuickOperationSourceAccordion";
-import { QuickOperationTotalsPanel } from "./QuickOperationTotalsPanel";
+import { QuickOperationWorkbenchSide } from "./QuickOperationWorkbenchSide";
 
 const UNIT_OPTIONS = ["Adet", "Paket", "Takım", "Kutu", "Hizmet", "Metre"];
 
@@ -26,18 +35,94 @@ export type WorkflowTabId = "order" | "price" | "payment" | "delivery" | "docume
 
 const WORKFLOW: Array<{
   id: WorkflowTabId;
+  segment: string;
   title: string;
   hint: string;
   operation: QuickOperationType;
   icon: QuickBubbleKind;
 }> = [
-  { id: "order", title: "Sipariş al", hint: "Sipariş fişi ve satırlar.", operation: "sale_order", icon: "order" },
-  { id: "price", title: "Fiyat / Teklif", hint: "Teklif ve fiyatlandırma.", operation: "offer", icon: "price" },
-  { id: "payment", title: "Tahsilat gir", hint: "Tahsilat kaydı.", operation: "payment", icon: "pay" },
-  { id: "delivery", title: "Ürün teslim et", hint: "Depo hazırlıktan teslim.", operation: "delivery", icon: "stock" },
-  { id: "document", title: "Belge gönder", hint: "Belge çıkışı ve iletim.", operation: "delivery", icon: "doc" },
-  { id: "return", title: "İade / sorun", hint: "İade ve sorun kaydı.", operation: "return", icon: "return" }
+  { id: "price", segment: "Teklif", title: "Fiyat / Teklif", hint: "Teklif, fiyatlandırma ve belge taslağı.", operation: "offer", icon: "price" },
+  { id: "order", segment: "Sipariş", title: "Sipariş al", hint: "Stok, depo, kaynak ve onay etkisi.", operation: "sale_order", icon: "order" },
+  { id: "delivery", segment: "Teslim", title: "Ürün teslim et", hint: "Hazır depo fişi ve teslim tarihi.", operation: "delivery", icon: "stock" },
+  { id: "payment", segment: "Tahsilat", title: "Tahsilat gir", hint: "Cari, tutar, ödeme ve açık bakiye.", operation: "payment", icon: "pay" },
+  { id: "return", segment: "İade", title: "İade / sorun", hint: "İade nedeni, ilgili kayıt ve onay.", operation: "return", icon: "return" },
+  { id: "document", segment: "Belge", title: "Belge gönder", hint: "Belge çıkışı ve kanal iletimi.", operation: "delivery", icon: "doc" }
 ];
+
+const TABLE_COL_COUNT = 12;
+
+function sourceBadgeClass(sourceType: QuickOperationSourceType): string {
+  switch (sourceType) {
+    case "center_warehouse":
+      return "hz-qop-src-badge hz-qop-src-badge--center";
+    case "factory":
+      return "hz-qop-src-badge hz-qop-src-badge--factory";
+    case "supplier":
+      return "hz-qop-src-badge hz-qop-src-badge--supplier";
+    case "split":
+      return "hz-qop-src-badge hz-qop-src-badge--split";
+    default:
+      return "hz-qop-src-badge hz-qop-src-badge--auto";
+  }
+}
+
+function sourceBadgeLabel(line: QuickOperationLine): string {
+  if (line.sourceLabel && line.sourceLabel !== "—") return line.sourceLabel;
+  switch (line.sourceType) {
+    case "center_warehouse":
+      return "Merkez";
+    case "factory":
+      return "Fabrika";
+    case "supplier":
+      return "Tedarik";
+    case "split":
+      return "Çoklu";
+    default:
+      return "Otomatik";
+  }
+}
+
+function tabNeedsLines(tab: WorkflowTabId): boolean {
+  return tab === "order" || tab === "price" || tab === "return";
+}
+
+function tabFocusHint(tab: WorkflowTabId): string {
+  switch (tab) {
+    case "price":
+      return "Fiyatlandırma, belge ve WhatsApp taslağı odaklı işlem.";
+    case "order":
+      return "Stok, depo kaynağı ve sipariş onay etkisi odaklı işlem.";
+    case "delivery":
+      return "Hazır depo fişi ve teslim tarihi odaklı işlem.";
+    case "payment":
+      return "Cari bakiye, tahsilat tutarı ve ödeme eşleşmesi odaklı işlem.";
+    case "return":
+      return "İade nedeni ve onay değerlendirmesi odaklı işlem.";
+    case "document":
+      return "Belge önizleme ve kanal iletimi odaklı işlem.";
+    default:
+      return "";
+  }
+}
+
+function countMissingFields(
+  tab: WorkflowTabId,
+  lines: QuickOperationLine[],
+  customerReady: boolean
+): number {
+  let count = 0;
+  if (!customerReady) count += 1;
+  if (!tabNeedsLines(tab)) return count;
+  const productLines = lines.filter((line) => line.productCode.trim() || line.productName.trim());
+  if (productLines.length === 0) {
+    count += 1;
+    return count;
+  }
+  productLines.forEach((line) => {
+    if (!line.quantity || line.quantity <= 0) count += 1;
+  });
+  return count;
+}
 
 const PREP_SLIPS: Array<{ id: string; label: string }> = [
   { id: "prep-1", label: "DH-2026-0142 · Delta A.Ş. · Hazırlandı" },
@@ -89,7 +174,7 @@ function primaryActionLabel(tab: WorkflowTabId): string {
     case "document":
       return "Belgeyi gönder";
     case "return":
-      return "Kaydı oluştur";
+      return "İade talebini oluştur";
     default:
       return "Kaydet";
   }
@@ -153,10 +238,12 @@ function nextStepText(tab: WorkflowTabId, hasLines: boolean): string {
 
 export function QuickOperationPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const customerParam = searchParams.get("customer");
+  const productParam = searchParams.get("product");
   const { pushToast } = useToast();
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<WorkflowTabId>("order");
-  const [primaryDone, setPrimaryDone] = useState(false);
   const [representative, setRepresentative] = useState("Ayşe Kaya");
   const [warehouse, setWarehouse] = useState("Merkez Depo");
   const [dueDate, setDueDate] = useState("15.05.2026");
@@ -166,11 +253,17 @@ export function QuickOperationPage() {
   const [prepSearch, setPrepSearch] = useState("");
 
   const {
+    catalogCustomers,
     operationType,
     setOperationType,
     customerId,
     setCustomerId,
     selectedCustomer,
+    isPreviewCustomer,
+    isPreviewCustomerBlocked,
+    applyProductFromUrl,
+    initialCustomerParam,
+    initialCustomerResolved,
     lines,
     totals,
     impacts,
@@ -188,11 +281,33 @@ export function QuickOperationPage() {
     isSubmitting,
     resetDraft,
     setOperationNote
-  } = useQuickOperationState();
+  } = useQuickOperationState({
+    initialCustomerId: customerParam,
+    initialProductId: productParam
+  });
 
   useEffect(() => {
     setOperationNote(description);
   }, [description, setOperationNote]);
+
+  useEffect(() => {
+    if (!productParam) {
+      return;
+    }
+    if (isQuickOpPreviewProductId(productParam)) {
+      pushToast(MSG_PREVIEW_PRODUCT);
+      return;
+    }
+    applyProductFromUrl(productParam);
+  }, [applyProductFromUrl, productParam, pushToast]);
+
+  useEffect(() => {
+    if (initialCustomerParam && !initialCustomerResolved) {
+      setNotice(
+        `Cari (${initialCustomerParam}) listede bulunamadı. Mevcut cari seçildi veya canlı veri bağlantısı kurulmadı.`
+      );
+    }
+  }, [initialCustomerParam, initialCustomerResolved, setNotice]);
 
   useLayoutEffect(() => {
     const el = tableScrollRef.current;
@@ -210,7 +325,6 @@ export function QuickOperationPage() {
       setActiveTab(tab);
       const next = WORKFLOW.find((t) => t.id === tab);
       if (next) setOperationType(next.operation);
-      setPrimaryDone(false);
       replaceLines(defaultLinesForTab(tab));
       setPrepSlipId("");
       setPrepSearch("");
@@ -219,14 +333,28 @@ export function QuickOperationPage() {
   );
 
   const handlePrimary = async () => {
+    if (isPreviewCustomerBlocked) {
+      pushToast(MSG_PREVIEW_CUSTOMER);
+      return;
+    }
+    if (!customerId || catalogCustomers.length === 0) {
+      pushToast(MSG_SELECT_CUSTOMER);
+      return;
+    }
+    if (tabNeedsLines(activeTab)) {
+      const hasLine = lines.some((line) => line.productCode.trim() || line.productName.trim());
+      if (!hasLine) {
+        pushToast(MSG_SELECT_LINE);
+        return;
+      }
+    }
     const ok = await submitOperation();
     if (ok) {
       pushToast(
-        activeTab === "order"
-          ? "Sipariş taslağı oluşturuldu. Canlı execution için policy/onay zinciri gerekir."
-          : "İşlem taslağı kaydedildi. Bu adım canlı mutation başarısı değildir."
+        dataSourceConfig.useDemoData
+          ? MSG_DRAFT_SAVED
+          : "İşlem kaydı alındı. Onay zinciri tamamlandığında uygulanır."
       );
-      setPrimaryDone(true);
     }
   };
 
@@ -237,15 +365,13 @@ export function QuickOperationPage() {
     setWarehouse("Merkez Depo");
     setDueDate("15.05.2026");
     setDeliveryDate("08.05.2026");
-    setPrimaryDone(false);
     applyTab("order");
-    pushToast("Yeni işlem");
+    pushToast("Yeni işlem başlatıldı");
   };
 
   const handleClear = () => {
     resetDraft();
     setDescription("");
-    setPrimaryDone(false);
     applyTab(activeTab);
     pushToast("Taslak temizlendi");
   };
@@ -267,11 +393,24 @@ export function QuickOperationPage() {
     [setExpandedLineId]
   );
 
-  const riskHigh = selectedCustomer.risk === "Yuksek";
+  const riskHigh = selectedCustomer.risk === "Yüksek";
   const riskLabel = riskHigh ? "Yüksek" : selectedCustomer.risk === "Orta" ? "Orta" : "Düşük";
-
+  const activeWorkflow = WORKFLOW.find((w) => w.id === activeTab);
+  const customerReady = Boolean(customerId && catalogCustomers.length > 0);
+  const missingFieldCount = useMemo(
+    () => countMissingFields(activeTab, lines, customerReady),
+    [activeTab, lines, customerReady]
+  );
+  const approvalLikely =
+    riskHigh || Boolean(selectedCustomer.warningDisplay && selectedCustomer.warningDisplay !== "—");
+  const openBalanceLabel =
+    selectedCustomer.financeLinked === false
+      ? "—"
+      : selectedCustomer.receivableDisplay && selectedCustomer.receivableDisplay !== "—"
+        ? `₺${selectedCustomer.receivableDisplay}`
+        : "—";
   return (
-    <div className="hz-qop-page hz-qop-page--v2">
+    <div className="hz-qop-page hz-qop-page--v2 hz-qop-page--wb">
       {notice ? (
         <div className="hz-qop-notice hz-qop-notice--v2" role="status">
           <span>{notice}</span>
@@ -281,20 +420,62 @@ export function QuickOperationPage() {
         </div>
       ) : null}
 
-      {dataSourceConfig.useDemoData ? (
-        <div className="hz-qop-demo-band" role="status">
-          Demo veri — canlı cari / stok / onay akışı bağlandığında bu şerit kalkar ve gerçek kaynaklar kullanılır.
+      <header className="hz-qop-wb-head hz-qop-wb-head--compact">
+        <div className="hz-qop-wb-head-main">
+          <h1 className="hz-sr-only">Hızlı İşlem</h1>
+          <nav className="hz-qop-wb-segments" aria-label="İşlem türü">
+            {WORKFLOW.map((w) => (
+              <button
+                key={w.id}
+                type="button"
+                className={`hz-qop-wb-seg${activeTab === w.id ? " is-active" : ""}`}
+                onClick={() => applyTab(w.id)}
+              >
+                {w.segment}
+              </button>
+            ))}
+          </nav>
+          <p className="hz-qop-wb-focus" title={tabFocusHint(activeTab)}>
+            {tabFocusHint(activeTab)}
+          </p>
         </div>
-      ) : (
-        <div className="hz-qop-live-band" role="status">
-          Canlı mod: gönderim API (`/quick-operations/submit`) üzerinden; başarılı yanıt policy ve onay zincirine bağlıdır.
-        </div>
-      )}
-
-      <header className="hz-qop-hero">
-        <div className="hz-qop-hero-text">
-          <p className="hz-qop-hero-kicker">Ne yapmak istiyorsun?</p>
-          <p className="hz-qop-hero-sub">İşlem türünü seçin; taslak ve sipariş adımlarını alttaki aksiyonlarla tamamlayın.</p>
+        <div className="hz-qop-wb-head-actions">
+          <button type="button" className="hz-qop-btn hz-qop-btn--outline hz-qop-btn--sm" onClick={() => pushToast(MSG_NOT_LIVE)}>
+            <IconSave size={14} aria-hidden />
+            Taslak
+          </button>
+          <button
+            type="button"
+            className="hz-qop-btn hz-qop-btn--outline hz-qop-btn--sm"
+            onClick={() => pushToast(MSG_PREVIEW_DOCUMENT)}
+            title="Belge önizle"
+          >
+            <IconPrinter size={14} aria-hidden />
+            Önizle
+          </button>
+          <button
+            type="button"
+            className="hz-qop-btn hz-qop-btn--outline hz-qop-btn--sm"
+            onClick={() => pushToast("Onay talebi taslağı hazırlandı. Sonuç yalnızca onay sonrasında gösterilir.")}
+          >
+            <IconSend size={14} aria-hidden />
+            Onaya gönder
+          </button>
+          <button
+            type="button"
+            className="hz-qop-btn hz-qop-btn--primary hz-qop-btn--sm"
+            disabled={isSubmitting || isPreviewCustomerBlocked || catalogCustomers.length === 0}
+            onClick={handlePrimary}
+          >
+            {isSubmitting ? (
+              "İşleniyor…"
+            ) : (
+              <>
+                <QuickActionIcon kind={primaryIconKind(activeTab)} size={14} className="hz-qop-btn-ico-on-primary" />
+                {primaryActionLabel(activeTab)}
+              </>
+            )}
+          </button>
         </div>
       </header>
 
@@ -302,28 +483,7 @@ export function QuickOperationPage() {
         sideWidth="detail"
         main={
           <div className="hz-qop-main">
-            <div className="hz-qop-main-surface hz-qop-main-surface--v2">
-              <h1 className="hz-sr-only">Hızlı İşlem</h1>
-
-              <nav className="hz-qop-picker" aria-label="İşlem seçimi">
-                {WORKFLOW.map((w) => (
-                  <button
-                    key={w.id}
-                    type="button"
-                    className={`hz-qop-pick ${activeTab === w.id ? "is-active" : ""}`}
-                    onClick={() => applyTab(w.id)}
-                  >
-                    <span className="hz-qop-pick-ico" aria-hidden>
-                      <QuickActionIcon kind={w.icon} size={18} className="hz-qop-pick-svg" />
-                    </span>
-                    <span className="hz-qop-pick-body">
-                      <span className="hz-qop-pick-title">{w.title}</span>
-                      <span className="hz-qop-pick-hint">{w.hint}</span>
-                    </span>
-                  </button>
-                ))}
-              </nav>
-
+            <div className="hz-qop-main-surface hz-qop-main-surface--v2 hz-qop-wb-surface">
               {activeTab === "delivery" ? (
                 <section className="hz-qop-delivery-band" aria-label="Depo hazırlık bağlantısı">
                   <p className="hz-qop-delivery-lead">
@@ -362,50 +522,62 @@ export function QuickOperationPage() {
                 </section>
               ) : null}
 
-              <section className="hz-qop-form hz-qop-form--v2" aria-label="Cari ve tarih">
-                <div className="hz-qop-form-row hz-qop-form-row--v2">
-                  <label className="hz-qop-cari-search">
-                    <span className="hz-qop-label">Cari</span>
-                    <select className="hz-qop-input" value={customerId} onChange={(e) => setCustomerId(e.target.value)}>
-                      {demoCustomers.map((c) => (
+              <section className="hz-qop-wb-context" aria-label="Cari bağlamı">
+                <label className="hz-qop-wb-context-cari">
+                  <span className="hz-qop-label">Cari / Firma</span>
+                  <select
+                    className="hz-qop-input"
+                    value={customerId}
+                    onChange={(e) => setCustomerId(e.target.value)}
+                    disabled={catalogCustomers.length === 0}
+                  >
+                    {catalogCustomers.length === 0 ? (
+                      <option value="">Cari listesi bağlı değil</option>
+                    ) : (
+                      catalogCustomers.map((c) => (
                         <option key={c.id} value={c.id}>
                           {c.name}
                         </option>
-                      ))}
-                    </select>
-                  </label>
-                  <div className="hz-qop-date-inline hz-qop-date-in-form">
-                    <span className="hz-qop-label">Tarih</span>
-                    <div className="hz-qop-date-val">
-                      <strong>{docDate}</strong>
-                      <span className="hz-qop-date-auto">Otomatik</span>
-                    </div>
-                  </div>
-                </div>
+                      ))
+                    )}
+                  </select>
+                </label>
+                <span className={`hz-qop-wb-meta-pill${riskHigh ? " is-risk" : ""}`}>Risk: {riskLabel}</span>
+                <span className="hz-qop-wb-meta-pill">Fiyat grubu: {selectedCustomer.priceGroup}</span>
+                {selectedCustomer.whatsappMatched ? (
+                  <span className="hz-qop-wb-meta-pill is-ok">WhatsApp eşleşti</span>
+                ) : (
+                  <span className="hz-qop-wb-meta-pill">WhatsApp: eşleşme yok</span>
+                )}
+                <span className="hz-qop-wb-meta-pill">Açık bakiye: {openBalanceLabel}</span>
+                <span className="hz-qop-wb-meta-pill hz-qop-wb-meta-pill--date">{docDate} · Otomatik</span>
               </section>
 
-              <div className="hz-qop-table-toolbar">
-                <button type="button" className="hz-qop-btn hz-qop-btn--secondary" onClick={() => addEmptyLine()}>
+              <div className="hz-qop-wb-table-head">
+                <h2 className="hz-qop-wb-table-title">Ürün / hizmet tablosu</h2>
+                <button type="button" className="hz-qop-add-row-btn" onClick={() => addEmptyLine()}>
                   <span className="hz-qop-add-row-ico" aria-hidden>
-                    <IconPlusCircle size={17} />
+                    <IconPlusCircle size={14} />
                   </span>
                   Satır ekle
                 </button>
               </div>
 
-              <div ref={tableScrollRef} className="hz-qop-table-scroll hz-qop-table-scroll--v2">
-                <table className="hz-qop-table hz-qop-table--v2">
+              <div ref={tableScrollRef} className="hz-qop-table-scroll hz-qop-table-scroll--v2 hz-qop-table-scroll--wb">
+                <table className="hz-qop-table hz-qop-table--v2 hz-qop-table--wb">
                   <thead>
                     <tr>
                       <th>#</th>
-                      <th>Ürün Kodu</th>
-                      <th>Ürün Adı</th>
+                      <th>Kod</th>
+                      <th>Ürün / Hizmet</th>
                       <th>Birim</th>
                       <th>Miktar</th>
-                      <th>Fiyat (₺)</th>
+                      <th>Kaynak</th>
                       <th>Depo</th>
-                      <th>Raf No</th>
-                      <th>Tutar (₺)</th>
+                      <th>Raf</th>
+                      <th>Birim Fiyat</th>
+                      <th>KDV</th>
+                      <th>Tutar</th>
                       <th className="hz-qop-col-act">İşlem</th>
                     </tr>
                   </thead>
@@ -452,19 +624,21 @@ export function QuickOperationPage() {
                               onChange={(e) => updateLine(line.id, { quantity: Math.max(0, Number(e.target.value || 0)) })}
                             />
                           </td>
-                          <td>
-                            <input
-                              className="hz-qop-cell-input hz-qop-cell-num"
-                              type="number"
-                              min={0}
-                              step={0.01}
-                              value={line.unitPrice}
-                              onChange={(e) => updateLine(line.id, { unitPrice: Math.max(0, Number(e.target.value || 0)) })}
-                            />
+                          <td className="hz-qop-col-src">
+                            <button
+                              type="button"
+                              className={`hz-qop-src-hit${expandedLineId === line.id ? " is-active" : ""}`}
+                              title="Satır kaynağı"
+                              aria-expanded={expandedLineId === line.id}
+                              aria-controls={`qop-src-${line.id}`}
+                              onClick={() => toggleSourceRow(line.id)}
+                            >
+                              <span className={sourceBadgeClass(line.sourceType)}>{sourceBadgeLabel(line)}</span>
+                            </button>
                           </td>
                           <td>
                             <input
-                              className="hz-qop-cell-input"
+                              className="hz-qop-cell-input hz-qop-cell-ellipsis"
                               value={line.warehouseName}
                               onChange={(e) => updateLine(line.id, { warehouseName: e.target.value })}
                             />
@@ -476,18 +650,19 @@ export function QuickOperationPage() {
                               onChange={(e) => updateLine(line.id, { rackCode: e.target.value })}
                             />
                           </td>
-                          <td className="hz-qop-cell amt">{money(lineAmount(line))}</td>
+                          <td>
+                            <input
+                              className="hz-qop-cell-input hz-qop-cell-num"
+                              type="number"
+                              min={0}
+                              step={0.01}
+                              value={line.unitPrice}
+                              onChange={(e) => updateLine(line.id, { unitPrice: Math.max(0, Number(e.target.value || 0)) })}
+                            />
+                          </td>
+                          <td className="hz-qop-cell-num hz-qop-cell-kdv">%{line.taxRate}</td>
+                          <td className="hz-qop-cell amt">₺{money(lineAmount(line))}</td>
                           <td className="hz-qop-col-act hz-qop-col-act--row">
-                            <button
-                              type="button"
-                              className={`hz-qop-btn hz-qop-btn--secondary hz-qop-btn--row-act${expandedLineId === line.id ? " is-active" : ""}`}
-                              title="Satır kaynağı"
-                              aria-expanded={expandedLineId === line.id}
-                              aria-controls={`qop-src-${line.id}`}
-                              onClick={() => toggleSourceRow(line.id)}
-                            >
-                              Kaynak
-                            </button>
                             <button
                               type="button"
                               className="hz-qop-icon-btn hz-qop-icon-btn--v2"
@@ -495,13 +670,13 @@ export function QuickOperationPage() {
                               title="Satırı sil"
                               onClick={() => removeLine(line.id)}
                             >
-                              <IconTrash2 size={15} />
+                              <IconTrash2 size={13} />
                             </button>
                           </td>
                         </tr>
                         {expandedLineId === line.id ? (
                           <tr className="hz-qop-source-row">
-                            <td colSpan={10} id={`qop-src-${line.id}`}>
+                            <td colSpan={TABLE_COL_COUNT} id={`qop-src-${line.id}`}>
                               <QuickOperationSourceAccordion line={line} onSelectSource={selectSource} />
                             </td>
                           </tr>
@@ -512,26 +687,26 @@ export function QuickOperationPage() {
                 </table>
               </div>
 
-              <details className="hz-qop-more">
-                <summary className="hz-qop-more-sum">Açıklama ve ek alanlar</summary>
-                <div className="hz-qop-more-body">
-                  <label className="hz-qop-field">
+              <section className="hz-qop-wb-conditions hz-qop-wb-conditions--compact">
+                <h2 className="hz-qop-wb-conditions-title">Açıklama ve koşullar</h2>
+                <div className="hz-qop-wb-conditions-row">
+                  <label className="hz-qop-field hz-qop-field--compact hz-qop-field--grow">
                     <span className="hz-qop-label">İşlem notu</span>
-                    <textarea
-                      className="hz-qop-note-textarea hz-qop-note-textarea--inline"
+                    <input
+                      className="hz-qop-input"
+                      type="text"
                       value={description}
                       onChange={(e) => setDescription(e.target.value)}
-                      placeholder="Kısa not…"
-                      rows={3}
+                      placeholder="Kısa not"
                       maxLength={500}
                     />
                   </label>
-                  <div className="hz-qop-more-grid">
-                    <label className="hz-qop-field">
+                  <div className="hz-qop-wb-conditions-fields">
+                    <label className="hz-qop-field hz-qop-field--compact">
                       <span className="hz-qop-label">Temsilci</span>
                       <input className="hz-qop-input" value={representative} onChange={(e) => setRepresentative(e.target.value)} />
                     </label>
-                    <label className="hz-qop-field">
+                    <label className="hz-qop-field hz-qop-field--compact">
                       <span className="hz-qop-label">Depo</span>
                       <select className="hz-qop-input" value={warehouse} onChange={(e) => setWarehouse(e.target.value)}>
                         <option>Merkez Depo</option>
@@ -539,156 +714,84 @@ export function QuickOperationPage() {
                         <option>A Blok</option>
                       </select>
                     </label>
-                    <label className="hz-qop-field">
+                    <label className="hz-qop-field hz-qop-field--compact hz-qop-field--date">
                       <span className="hz-qop-label">Vade</span>
                       <input className="hz-qop-input" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
                     </label>
-                    <label className="hz-qop-field">
-                      <span className="hz-qop-label">Teslim tarihi</span>
+                    <label className="hz-qop-field hz-qop-field--compact hz-qop-field--date">
+                      <span className="hz-qop-label">Teslim</span>
                       <input className="hz-qop-input" value={deliveryDate} onChange={(e) => setDeliveryDate(e.target.value)} />
                     </label>
                   </div>
                 </div>
-              </details>
+              </section>
+            </div>
 
-              <footer className="hz-qop-actions hz-qop-actions--v2">
-                <button type="button" className="hz-qop-btn hz-qop-btn--ghost" onClick={handleNewOperation}>
-                  Yeni işlem
-                </button>
-                <button type="button" className="hz-qop-btn hz-qop-btn--outline" onClick={() => router.push("/archive")}>
-                  Geçmiş
+            <footer className="hz-qop-wb-dock hz-qop-wb-dock--compact" aria-label="Fiş özeti ve aksiyonlar">
+              <div className="hz-qop-wb-dock-left" role="status">
+                <span className="hz-qop-wb-dock-chip">Satır: {lines.length}</span>
+                <span className={`hz-qop-wb-dock-chip${missingFieldCount > 0 ? " is-warn" : ""}`}>
+                  Eksik: {missingFieldCount}
+                </span>
+                <span className={`hz-qop-wb-dock-chip${approvalLikely ? " is-warn" : ""}`}>
+                  Onay: {approvalLikely ? "Gerekebilir" : "Gerekmez"}
+                </span>
+              </div>
+              <div className="hz-qop-wb-dock-mid" aria-label="Toplamlar">
+                <span>
+                  Ara toplam <strong>₺{money(totals.subtotal)}</strong>
+                </span>
+                <span>
+                  KDV <strong>₺{money(totals.taxTotal)}</strong>
+                </span>
+                <span className="hz-qop-wb-dock-net">
+                  Net <strong>₺{money(totals.grandTotal)}</strong>
+                </span>
+              </div>
+              <div className="hz-qop-wb-dock-right">
+                <button type="button" className="hz-qop-btn hz-qop-btn--ghost hz-qop-btn--sm" onClick={() => pushToast(MSG_NOT_LIVE)}>
+                  Taslak
                 </button>
                 <button
                   type="button"
-                  className="hz-qop-btn hz-qop-btn--outline"
-                  onClick={() => pushToast("Taslak kaydedildi. Canlı uygulama onay/execution durumuna bağlıdır.")}
+                  className="hz-qop-btn hz-qop-btn--outline hz-qop-btn--sm"
+                  onClick={() => pushToast(MSG_PREVIEW_DOCUMENT)}
                 >
-                  <IconSave size={16} aria-hidden />
-                  Taslak kaydet
+                  Önizle
                 </button>
                 <button
                   type="button"
-                  className="hz-qop-btn hz-qop-btn--ghost"
-                  onClick={() => pushToast("Onay talebi hazırlandı. Tamamlandı bilgisi yalnız onay sonrası verilir.")}
+                  className="hz-qop-btn hz-qop-btn--outline hz-qop-btn--sm"
+                  onClick={() => pushToast("Onay talebi taslağı hazırlandı. Sonuç yalnızca onay sonrasında gösterilir.")}
                 >
-                  <IconSend size={16} aria-hidden />
-                  Onaya gönder
+                  Onaya Gönder
                 </button>
                 <button
                   type="button"
-                  className="hz-qop-btn hz-qop-btn--outline"
-                  onClick={() => pushToast("Önizleme hazırlanıyor. Gönderim/execute başarısı bu adımda üretilmez.")}
-                >
-                  <IconPrinter size={16} aria-hidden />
-                  Önizleme
-                </button>
-                <button type="button" className="hz-qop-btn hz-qop-btn--outline" onClick={handleClear}>
-                  Temizle
-                </button>
-                <button
-                  type="button"
-                  className="hz-qop-btn hz-qop-btn--primary hz-qop-btn--primary-solo"
-                  disabled={primaryDone || isSubmitting}
+                  className="hz-qop-btn hz-qop-btn--primary hz-qop-btn--sm"
+                  disabled={isSubmitting || isPreviewCustomerBlocked || catalogCustomers.length === 0}
                   onClick={handlePrimary}
                 >
-                  {isSubmitting ? (
-                    "İşleniyor…"
-                  ) : (
-                    <>
-                      <QuickActionIcon kind={primaryIconKind(activeTab)} size={17} className="hz-qop-btn-ico-on-primary" />
-                      {primaryActionLabel(activeTab)}
-                    </>
-                  )}
+                  {isSubmitting ? "İşleniyor…" : primaryActionLabel(activeTab)}
                 </button>
-              </footer>
-            </div>
+              </div>
+              <p className="hz-sr-only">Gerçek kayıt için onay ve işlem kuyruğu bağlantısı gerekir.</p>
+            </footer>
           </div>
         }
         side={
-          <div className="hz-qop-side-stack hz-qop-side--v2" aria-label="Cari, toplamlar ve operasyon özeti">
-            <article className="hz-qop-card hz-qop-card--v2">
-              <h2 className="hz-qop-side-h">Cari özeti</h2>
-              <p className="hz-qop-side-lead">{selectedCustomer.name}</p>
-              <dl className="hz-qop-dl hz-qop-dl--tight">
-                <div>
-                  <dt>Tip</dt>
-                  <dd>{selectedCustomer.customerType ?? "—"}</dd>
-                </div>
-                <div>
-                  <dt>Fiyat grubu</dt>
-                  <dd>{selectedCustomer.priceGroup}</dd>
-                </div>
-                <div>
-                  <dt>Alacak</dt>
-                  <dd>₺{selectedCustomer.receivableDisplay ?? "—"}</dd>
-                </div>
-                <div>
-                  <dt>Verecek</dt>
-                  <dd>₺{selectedCustomer.payableDisplay ?? "—"}</dd>
-                </div>
-                {selectedCustomer.warningDisplay && selectedCustomer.warningDisplay !== "—" ? (
-                  <div>
-                    <dt>Vade / ödeme</dt>
-                    <dd>{selectedCustomer.warningDisplay}</dd>
-                  </div>
-                ) : null}
-              </dl>
-              <div className="hz-qop-side-badge-row">
-                {selectedCustomer.whatsappMatched ? (
-                  <span className="hz-qop-pill hz-qop-pill--wa" title="WhatsApp kanalı ile eşleşmiş cari">
-                    WhatsApp eşleşti
-                  </span>
-                ) : (
-                  <span className="hz-qop-pill hz-qop-pill--muted">WhatsApp: eşleşme yok</span>
-                )}
-                <span className={`hz-qop-pill${riskHigh ? " hz-qop-pill--risk" : ""}`}>Risk: {riskLabel}</span>
-              </div>
-              <details className="hz-qop-side-details">
-                <summary>Adres ve ek not</summary>
-                <p className="hz-qop-side-muted">{selectedCustomer.address}</p>
-              </details>
-            </article>
-
-            <article className="hz-qop-card hz-qop-card--v2">
-              <h2 className="hz-qop-side-h">İşlem özeti</h2>
-              <dl className="hz-qop-dl hz-qop-dl--tight">
-                <div>
-                  <dt>Seçili işlem</dt>
-                  <dd>{WORKFLOW.find((w) => w.id === activeTab)?.title ?? "—"}</dd>
-                </div>
-                <div>
-                  <dt>Tür</dt>
-                  <dd>{operationTypeLabel(operationType)}</dd>
-                </div>
-                <div>
-                  <dt>Belge no</dt>
-                  <dd className="hz-qop-dd-mono">SO-2026-0148</dd>
-                </div>
-                <div>
-                  <dt>Sonraki adım</dt>
-                  <dd className="hz-qop-side-next-dd">{nextStepText(activeTab, lines.length > 0)}</dd>
-                </div>
-              </dl>
-            </article>
-
-            <DetailPanel title="Toplamlar" className="hz-qop-detail-panel">
-              <QuickOperationTotalsPanel totals={totals} layout="bare" />
-            </DetailPanel>
-
-            <DetailPanel title="Operasyon etkisi" className="hz-qop-detail-panel">
-              <QuickOperationImpactPanel impacts={impacts} aiInsight={aiInsight} layout="bare" />
-            </DetailPanel>
-
-            {riskHigh || (selectedCustomer.warningDisplay && selectedCustomer.warningDisplay !== "—") ? (
-              <article className="hz-qop-card hz-qop-card--v2 hz-qop-card--warn-soft">
-                <h2 className="hz-qop-side-h">Uyarı / onay</h2>
-                {riskHigh ? <p className="hz-qop-side-warn-line">Yüksek riskli cari: kayıt veya teslim öncesi onay önerilir.</p> : null}
-                {selectedCustomer.warningDisplay && selectedCustomer.warningDisplay !== "—" ? (
-                  <p className="hz-qop-side-warn-line">{selectedCustomer.warningDisplay}</p>
-                ) : null}
-              </article>
-            ) : null}
-          </div>
+          <QuickOperationWorkbenchSide
+            activeTab={activeTab}
+            workflowTitle={activeWorkflow?.title ?? "—"}
+            selectedCustomer={selectedCustomer}
+            riskLabel={riskLabel}
+            riskHigh={riskHigh}
+            totals={totals}
+            impacts={impacts}
+            aiInsight={aiInsight}
+            nextStepText={nextStepText(activeTab, lines.length > 0)}
+            approvalLikely={approvalLikely}
+          />
         }
       />
     </div>

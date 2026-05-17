@@ -11,10 +11,12 @@ export function QuickOperationSourceAccordion({ line, onSelectSource }: Props) {
     <div className="hz-content-card hz-qop-source-accordion">
       <div className="crm-identity-header">
         <div>
-          <h3>Satir Kaynak Secimi</h3>
-          <p className="hz-content-card-description">Kaynak secildiginde depo/raf/lokasyon alanlari satira otomatik yazilir.</p>
+          <h3>Satır kaynak seçimi</h3>
+          <p className="hz-content-card-description">
+            Kaynak seçildiğinde depo, raf ve lokasyon alanları satıra otomatik yazılır.
+          </p>
         </div>
-        <span className="hz-badge hz-badge-info">Satir {line.productCode}</span>
+        <span className="hz-badge hz-badge-info">Satır {line.productCode || "—"}</span>
       </div>
       <div className="hz-list-stack hz-margin-top-sm">
         {sourceOptions.map((option) => {
@@ -35,7 +37,7 @@ export function QuickOperationSourceAccordion({ line, onSelectSource }: Props) {
                   className={`hz-btn ${selected ? "hz-btn-primary" : "hz-btn-secondary"}`}
                   onClick={() => onSelectSource(line.id, option.type)}
                 >
-                  {selected ? "Secildi" : "Sec"}
+                  {selected ? "Seçildi" : "Seç"}
                 </button>
               </div>
             </div>
@@ -44,7 +46,8 @@ export function QuickOperationSourceAccordion({ line, onSelectSource }: Props) {
       </div>
       <div className="hz-state-card hz-margin-top-sm">
         <h4>
-          Sonuc: Kaynak = {line.sourceLabel} · Depo = {line.warehouseName} · Raf = {line.rackCode} · Lokasyon = {line.locationCode}
+          Sonuç: Kaynak = {line.sourceLabel} · Depo = {line.warehouseName} · Raf = {line.rackCode} · Lokasyon ={" "}
+          {line.locationCode}
         </h4>
       </div>
     </div>
