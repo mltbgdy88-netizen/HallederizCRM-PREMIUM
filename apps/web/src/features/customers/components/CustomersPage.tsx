@@ -205,7 +205,7 @@ export function CustomersPage() {
                 <IconMessageCircle size={16} />
               </span>
               <div>
-                <span className="hz-customers-kpi-label">WhatsApp Eşleşmesi</span>
+                <span className="hz-customers-kpi-label">WhatsApp eşleşmesi</span>
                 <span className="hz-customers-kpi-value">{kpiDisplay.waMatchCount}</span>
               </div>
             </div>
@@ -239,7 +239,7 @@ export function CustomersPage() {
             <>
               {usingDemoFallback ? (
                 <div className="hz-customers-demo-banner" role="note">
-                  Önizleme: örnek kayıtlar.
+                  Önizleme verisi — detay ve işlemler gerçek cari kaydı için geçerli değildir.
                 </div>
               ) : null}
               <CustomerTable

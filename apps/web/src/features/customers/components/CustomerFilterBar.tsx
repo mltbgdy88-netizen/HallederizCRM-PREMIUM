@@ -80,7 +80,7 @@ export function CustomerFilterBar({ filters, cities, priceSlots, onFilterChange,
             <option value="unmatched">Eşleşmedi</option>
           </select>
         </label>
-        <button type="button" className="hz-customers-filter-reset" onClick={onReset}>
+        <button type="button" className="hz-customers-filter-reset" onClick={onReset} title="Filtreleri sıfırla" aria-label="Filtreleri sıfırla">
           <IconRotateCcw size={14} />
           Sıfırla
         </button>
