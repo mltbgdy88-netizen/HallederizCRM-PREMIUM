@@ -170,7 +170,13 @@ export function StockFilterBar({
           <span className="hz-stock-filter-label hz-stock-filter-label--phantom" aria-hidden>
             .
           </span>
-          <button type="button" className="hz-stock-filter-reset" onClick={onReset}>
+          <button
+            type="button"
+            className="hz-stock-filter-reset"
+            onClick={onReset}
+            title="Filtreleri sıfırla"
+            aria-label="Filtreleri sıfırla"
+          >
             <IconFilter size={14} aria-hidden />
             Sıfırla
           </button>

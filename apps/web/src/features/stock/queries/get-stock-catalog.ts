@@ -13,6 +13,13 @@ export interface StockCatalogQueryResult {
   customerPricingProfiles: typeof stockCatalog.customerPricingProfiles;
 }
 
+const emptyProductionReference = {
+  brands: [] as typeof stockCatalog.brands,
+  factories: [] as typeof stockCatalog.factories,
+  warehouses: [] as typeof stockCatalog.warehouses,
+  customerPricingProfiles: [] as typeof stockCatalog.customerPricingProfiles
+};
+
 export async function getStockCatalog(): Promise<StockCatalogQueryResult> {
   if (!dataSourceConfig.useDemoData) {
     const [productsResponse, priceSlotsResponse, categorySlotsResponse, exchangeRatesResponse] = await Promise.all([
@@ -23,12 +30,12 @@ export async function getStockCatalog(): Promise<StockCatalogQueryResult> {
     ]);
 
     return {
-      ...stockCatalog,
       products: productsResponse.items as typeof stockCatalog.products,
       priceSlots: priceSlotsResponse.items as typeof stockCatalog.priceSlots,
       categorySlots: categorySlotsResponse.items as typeof stockCatalog.categorySlots,
       exchangeRates: exchangeRatesResponse.rates as typeof stockCatalog.exchangeRates,
-      exchangeRatePolicy: exchangeRatesResponse.policy as typeof stockCatalog.exchangeRatePolicy
+      exchangeRatePolicy: exchangeRatesResponse.policy as typeof stockCatalog.exchangeRatePolicy,
+      ...emptyProductionReference
     };
   }
 

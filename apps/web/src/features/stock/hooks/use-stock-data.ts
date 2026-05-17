@@ -2,6 +2,7 @@
 
 import { useMemo } from "react";
 import type { Product } from "@hallederiz/types";
+import { dataSourceConfig } from "../../../lib/data-source";
 import { mapProductToStockRow } from "../mappers/map-stock-row";
 import type { StockFilters } from "../schemas/stock-filter-schema";
 import { getStockCatalog } from "../queries/get-stock-catalog";
@@ -33,6 +34,11 @@ export function useStockData(filters: StockFilters): StockDataState {
     [data.products, data.warehouses, filters]
   );
 
+  const referenceCatalogLinked = useMemo(
+    () => dataSourceConfig.useDemoData || data.brands.length > 0 || data.warehouses.length > 0,
+    [data.brands.length, data.warehouses.length]
+  );
+
   const rows = useMemo(
     () =>
       filteredProducts.map((product) =>
@@ -41,10 +47,11 @@ export function useStockData(filters: StockFilters): StockDataState {
           brands: data.brands,
           factories: data.factories,
           warehouses: data.warehouses,
-          priceSlots: data.priceSlots
+          priceSlots: data.priceSlots,
+          referenceCatalogLinked
         })
       ),
-    [filteredProducts, data.brands, data.factories, data.warehouses, data.priceSlots]
+    [filteredProducts, data.brands, data.factories, data.warehouses, data.priceSlots, referenceCatalogLinked]
   );
 
   return {

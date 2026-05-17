@@ -121,12 +121,14 @@ export function mapProductToStockRow(params: {
   factories: Factory[];
   warehouses: Warehouse[];
   priceSlots: PriceSlotConfig[];
+  /** False when production API returns products without demo depo/marka/fabrika katalogu. */
+  referenceCatalogLinked?: boolean;
 }): StockRow {
-  const { product, brands, factories, warehouses, priceSlots } = params;
+  const { product, brands, factories, warehouses, priceSlots, referenceCatalogLinked = true } = params;
   const availability = resolveProductAvailability({ product, warehouses });
   const criticalStockStatus = detectCriticalStock(product, availability);
   const brandName = brands.find((b) => b.id === product.brandId)?.name ?? "—";
-  const factoryName = product.factoryId ? (factories.find((f) => f.id === product.factoryId)?.name ?? "Fabrika") : "—";
+  const factoryName = product.factoryId ? (factories.find((f) => f.id === product.factoryId)?.name ?? "—") : "—";
 
   const categoryBits = product.categoryValues
     .map((c) => c.value)
@@ -201,7 +203,7 @@ export function mapProductToStockRow(params: {
     displayStatus,
     reservedTotal: availability.reservedTotal,
     availableTotal: availability.availableTotal,
-    lastMovementLine: "Son hareket: günlük senkron",
+    lastMovementLine: referenceCatalogLinked ? "Son hareket: günlük senkron" : "Son hareket: —",
     lastCountLine: "Son sayım: —"
   };
 }
