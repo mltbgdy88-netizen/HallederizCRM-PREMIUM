@@ -62,6 +62,29 @@ function buildRiskNote(customer: Customer, account: CustomerAccount): string {
   return parts.join(" ");
 }
 
+function CustomerOperationLinks({ customer, account }: { customer: Customer; account: CustomerAccount | null }) {
+  return (
+    <ul className="hz-customers-op-list">
+      <li>
+        <IconBuilding size={14} /> Açık sipariş: <strong>{account ? account.openOrderCount : "—"}</strong>
+      </li>
+      <li>
+        <IconFileText size={14} /> Açık teklif: <strong>{account ? account.openOfferCount : "—"}</strong>
+      </li>
+      <li>
+        <IconWallet size={14} /> Bekleyen tahsilat: <strong>—</strong>
+      </li>
+      <li>
+        <IconFileText size={14} /> Son ödeme:{" "}
+        <strong>{account?.lastPaymentAt ? new Date(account.lastPaymentAt).toLocaleDateString("tr-TR") : "—"}</strong>
+      </li>
+      <li>
+        <IconMessageCircle size={14} /> WhatsApp: <strong>{customer.whatsappMatched ? "Eşleşti" : "Eşleşmedi"}</strong>
+      </li>
+    </ul>
+  );
+}
+
 function CustomerRadarChrome({ children }: { children: ReactNode }) {
   return (
     <>
@@ -166,7 +189,7 @@ export function CustomerQuickPreviewPanel({
               <dd className="hz-customers-dd-pos">{previewRow.balanceCreditLine === "—" ? "—" : previewRow.balanceCreditLine}</dd>
             </div>
             <div>
-              <dt>Verecek</dt>
+              <dt>Borç</dt>
               <dd className="hz-customers-dd-neg">{previewRow.balanceDebitLine === "—" ? "—" : previewRow.balanceDebitLine}</dd>
             </div>
             <div>
@@ -191,10 +214,13 @@ export function CustomerQuickPreviewPanel({
               <IconBuilding size={14} /> Açık sipariş: <strong>—</strong>
             </li>
             <li>
+              <IconFileText size={14} /> Açık teklif: <strong>—</strong>
+            </li>
+            <li>
               <IconWallet size={14} /> Bekleyen tahsilat: <strong>—</strong>
             </li>
             <li>
-              <IconFileText size={14} /> Son teklif / belge: <strong>—</strong>
+              <IconFileText size={14} /> Son ödeme: <strong>—</strong>
             </li>
             <li>
               <IconMessageCircle size={14} /> WhatsApp: <strong>{previewRow.whatsappMatched ? "Eşleşti" : "Eşleşmedi"}</strong>
@@ -209,28 +235,28 @@ export function CustomerQuickPreviewPanel({
               type="button"
               className="hz-customers-side-btn hz-customers-side-btn--primary"
               disabled={Boolean(demoDone.open)}
-              onClick={() => fireDemo("open", "Önizleme: cari detayı gerçek kayıt olmadan açılmaz (demo).")}
+              onClick={() => fireDemo("open", "Önizleme kaydı: cari detayı açılmaz.")}
             >
               <IconExternalLink size={15} />
               Cariyi aç
             </button>
-            <button type="button" className="hz-customers-side-btn" disabled={Boolean(demoDone.offer)} onClick={() => fireDemo("offer", "Teklif oluşturma demo; kayıt oluşturulmaz.")}>
+            <button type="button" className="hz-customers-side-btn" disabled={Boolean(demoDone.offer)} onClick={() => fireDemo("offer", "Önizleme kaydı: teklif oluşturulmaz.")}>
               <IconTag size={15} />
               Teklif oluştur
             </button>
-            <button type="button" className="hz-customers-side-btn" disabled={Boolean(demoDone.order)} onClick={() => fireDemo("order", "Sipariş oluşturma demo; kayıt oluşturulmaz.")}>
+            <button type="button" className="hz-customers-side-btn" disabled={Boolean(demoDone.order)} onClick={() => fireDemo("order", "Önizleme kaydı: sipariş oluşturulmaz.")}>
               <QuickActionIcon kind="order" size={16} className="hz-customers-side-svg" />
               Sipariş oluştur
             </button>
-            <button type="button" className="hz-customers-side-btn" disabled={Boolean(demoDone.pay)} onClick={() => fireDemo("pay", "Tahsilat girişi demo; kayıt oluşturulmaz.")}>
+            <button type="button" className="hz-customers-side-btn" disabled={Boolean(demoDone.pay)} onClick={() => fireDemo("pay", "Önizleme kaydı: tahsilat kaydı oluşturulmaz.")}>
               <QuickActionIcon kind="pay" size={16} className="hz-customers-side-svg" />
               Tahsilat gir
             </button>
-            <button type="button" className="hz-customers-side-btn" disabled={Boolean(demoDone.stmt)} onClick={() => fireDemo("stmt", "Ekstre taslağı demo; gönderim yapılmaz.")}>
+            <button type="button" className="hz-customers-side-btn" disabled={Boolean(demoDone.stmt)} onClick={() => fireDemo("stmt", "Önizleme kaydı: ekstre taslağı oluşturulmaz.")}>
               <IconSend size={15} />
               Ekstre taslağı
             </button>
-            <button type="button" className="hz-customers-side-btn" disabled={Boolean(demoDone.wa)} onClick={() => fireDemo("wa", "WhatsApp geçmişi demo; yönlendirme yok.")}>
+            <button type="button" className="hz-customers-side-btn" disabled={Boolean(demoDone.wa)} onClick={() => fireDemo("wa", "Önizleme kaydı: WhatsApp geçmişi açılmaz.")}>
               <IconMessageCircle size={15} />
               WhatsApp geçmişi
             </button>
@@ -304,20 +330,7 @@ export function CustomerQuickPreviewPanel({
 
         <section className="hz-customers-side-card">
           <h3 className="hz-customers-side-card-title">Operasyon bağlantıları</h3>
-          <ul className="hz-customers-op-list">
-            <li>
-              <IconBuilding size={14} /> Açık sipariş: <strong>—</strong>
-            </li>
-            <li>
-              <IconWallet size={14} /> Bekleyen tahsilat bağlamı: <strong>—</strong>
-            </li>
-            <li>
-              <IconFileText size={14} /> Son ödeme: <strong>—</strong>
-            </li>
-            <li>
-              <IconMessageCircle size={14} /> WhatsApp: <strong>{customer.whatsappMatched ? "Eşleşti" : "Eşleşmedi"}</strong>
-            </li>
-          </ul>
+          <CustomerOperationLinks customer={customer} account={null} />
         </section>
 
         <section className="hz-customers-side-card">
@@ -420,7 +433,7 @@ export function CustomerQuickPreviewPanel({
             <dd className="hz-customers-dd-pos">{rec}</dd>
           </div>
           <div>
-            <dt>Verecek</dt>
+            <dt>Borç</dt>
             <dd className="hz-customers-dd-neg">{pay}</dd>
           </div>
           <div>
@@ -444,21 +457,7 @@ export function CustomerQuickPreviewPanel({
 
       <section className="hz-customers-side-card">
         <h3 className="hz-customers-side-card-title">Operasyon bağlantıları</h3>
-        <ul className="hz-customers-op-list">
-          <li>
-            <IconBuilding size={14} /> Açık sipariş: <strong>{account.openOrderCount}</strong>
-          </li>
-          <li>
-            <IconWallet size={14} /> Bekleyen tahsilat bağlamı: <strong>{account.openOfferCount} teklif</strong>
-          </li>
-          <li>
-            <IconFileText size={14} /> Son ödeme:{" "}
-            <strong>{account.lastPaymentAt ? new Date(account.lastPaymentAt).toLocaleDateString("tr-TR") : "—"}</strong>
-          </li>
-          <li>
-            <IconMessageCircle size={14} /> WhatsApp: <strong>{customer.whatsappMatched ? "Eşleşti" : "Eşleşmedi"}</strong>
-          </li>
-        </ul>
+        <CustomerOperationLinks customer={customer} account={account} />
       </section>
 
       <section className="hz-customers-side-card">

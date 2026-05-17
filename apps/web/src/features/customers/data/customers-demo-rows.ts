@@ -64,7 +64,7 @@ export const CUSTOMERS_PORTFOLIO_DEMO_ROWS: CustomerRow[] = [
     city: "Bursa",
     balanceLabel: "₺6.450",
     balanceCreditLine: "—",
-    balanceDebitLine: "₺6.450 verecek",
+    balanceDebitLine: "₺6.450 borç",
     riskLabel: "Orta",
     riskTone: "warning",
     priceGroupLabel: "Perakende / Slot 1",

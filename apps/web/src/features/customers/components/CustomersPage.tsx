@@ -30,7 +30,6 @@ export function CustomersPage() {
   const { loading, data, filteredCustomers, rows } = useCustomersData(filters);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [topCtaDone, setTopCtaDone] = useState<Record<string, boolean>>({});
   const pageSize = 12;
 
   const usingDemoFallback = dataSourceConfig.useDemoData && !loading && data.customers.length === 0;
@@ -106,17 +105,29 @@ export function CustomersPage() {
   const formatKpiOpenBalanceTry = (value: number) =>
     new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(value);
 
-  const fireTopDemo = (key: string, msg: string) => {
-    if (topCtaDone[key]) {
+  const demoRowToast = useCallback(() => {
+    pushToast("Bu kayıt önizleme verisidir; gerçek cari kaydı değildir.");
+  }, [pushToast]);
+
+  const handleTopStatement = useCallback(() => {
+    if (!selectedCustomerId) {
+      pushToast("Ekstre taslağı için önce listeden bir cari seçin.");
       return;
     }
-    pushToast(msg);
-    setTopCtaDone((d) => ({ ...d, [key]: true }));
-  };
-
-  const demoRowToast = useCallback(() => {
-    pushToast("Bu kayıt örnek veri modunda. Production'da yalnız gerçek cari kayıtları açılır.");
-  }, [pushToast]);
+    if (isCustomersDemoRowId(selectedCustomerId)) {
+      pushToast("Önizleme kaydı: ekstre taslağı oluşturulmaz veya yönlendirilmez.");
+      return;
+    }
+    const customer =
+      data.customers.find((c) => c.id === selectedCustomerId) ??
+      filteredCustomers.find((c) => c.id === selectedCustomerId) ??
+      null;
+    if (!customer) {
+      pushToast("Ekstre taslağı için önce listeden bir cari seçin.");
+      return;
+    }
+    router.push(`/belgeler?customer=${customer.id}&type=statement_pdf`);
+  }, [data.customers, filteredCustomers, pushToast, router, selectedCustomerId]);
 
   const emptyFiltered = !usingDemoFallback && !loading && data.customers.length > 0 && rows.length === 0;
 
@@ -134,7 +145,7 @@ export function CustomersPage() {
               <button
                 type="button"
                 className="hz-customers-toolbar-btn hz-customers-toolbar-btn--primary"
-                disabled={Boolean(topCtaDone.new)}
+                title="Yeni cari kaydı ekranını açar"
                 onClick={() => router.push("/cariler/yeni")}
               >
                 <IconPlusCircle size={16} />
@@ -143,7 +154,7 @@ export function CustomersPage() {
               <button
                 type="button"
                 className="hz-customers-toolbar-btn hz-customers-toolbar-btn--outline"
-                disabled={Boolean(topCtaDone.import)}
+                title="Veri yükleme ve içe aktarma ayarları"
                 onClick={() => router.push("/ayarlar/veri-yukleme")}
               >
                 <IconUpload size={16} />
@@ -152,13 +163,8 @@ export function CustomersPage() {
               <button
                 type="button"
                 className="hz-customers-toolbar-btn hz-customers-toolbar-btn--outline"
-                disabled={Boolean(topCtaDone.statement)}
-                onClick={() =>
-                  fireTopDemo(
-                    "statement",
-                    "Ekstre gönderimi canlı kanala otomatik düşmez; policy/onay zinciri tamamlanmadan başarı raporlanmaz."
-                  )
-                }
+                title={selectedCustomer && !isCustomersDemoRowId(selectedCustomerId ?? "") ? "Seçili cari için ekstre taslağı" : "Önce listeden cari seçin"}
+                onClick={handleTopStatement}
               >
                 <IconSend size={16} />
                 Ekstre Taslağı
