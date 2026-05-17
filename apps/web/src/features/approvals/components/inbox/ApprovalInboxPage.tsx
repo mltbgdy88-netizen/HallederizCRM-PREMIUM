@@ -142,11 +142,14 @@ export function ApprovalInboxPage() {
 
   const listPhase: UiPhase = phase === "ready" && filteredRows.length === 0 ? "empty" : phase;
 
+  const pendingCount = useMemo(() => rows.filter((row) => row.status === "bekliyor").length, [rows]);
+
   return (
     <main className="hz-approvals-page hz-approvals-inbox-desk-page">
       <div className="hz-approvals-inbox-desk-workspace">
         <div className="hz-approvals-inbox-desk-top">
           <ApprovalInboxHeader
+            pendingCount={pendingCount}
             searchQuery={searchQuery}
             onSearchChange={setSearchQuery}
             onlyCritical={onlyCritical}

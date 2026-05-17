@@ -1,6 +1,7 @@
 import { IconRotateCcw } from "../../../dashboard/components/dashboard-inline-icons";
 
 type ApprovalInboxHeaderProps = {
+  pendingCount: number;
   searchQuery: string;
   onSearchChange: (value: string) => void;
   onlyCritical: boolean;
@@ -11,6 +12,7 @@ type ApprovalInboxHeaderProps = {
 };
 
 export function ApprovalInboxHeader({
+  pendingCount,
   searchQuery,
   onSearchChange,
   onlyCritical,
@@ -21,17 +23,21 @@ export function ApprovalInboxHeader({
 }: ApprovalInboxHeaderProps) {
   return (
     <header className="hz-approvals-inbox-desk-head">
-      <h1 className="hz-approvals-inbox-desk-title">Onay Kutusu</h1>
-      <p className="hz-approvals-inbox-desk-subtitle">
-        Finans, operasyon, satış ve belgeler ile ilgili bekleyen onayları inceleyin ve işlem yapın.
-      </p>
-      <div className="hz-approvals-inbox-desk-head-tools" aria-label="Üst araçlar">
+      <div className="hz-approvals-inbox-desk-head-left">
+        <div className="hz-approvals-inbox-desk-head-title-row">
+          <h1 className="hz-approvals-inbox-desk-title">Onay Kutusu</h1>
+          <span className="hz-approvals-inbox-desk-head-badge">{pendingCount} bekleyen</span>
+        </div>
+        <p className="hz-approvals-inbox-desk-subtitle">Finans, operasyon, satış ve belge onayları</p>
+      </div>
+
+      <div className="hz-approvals-inbox-desk-head-right" aria-label="Üst araçlar">
         <input
           type="search"
           className="hz-approvals-inbox-desk-input hz-approvals-inbox-desk-input--search"
           value={searchQuery}
           onChange={(event) => onSearchChange(event.target.value)}
-          placeholder="Arama yapın... (müşteri, teklif, sipariş, fatura, belge)"
+          placeholder="Ara: müşteri, onay no, belge…"
           aria-label="Onay ara"
         />
         <label className="hz-approvals-inbox-desk-toggle">
@@ -42,11 +48,11 @@ export function ApprovalInboxHeader({
           <IconRotateCcw size={13} className="hz-approvals-inbox-desk-btn-ico" aria-hidden />
           Yenile
         </button>
+        <p className="hz-approvals-inbox-desk-sync" role="status">
+          <span className="hz-approvals-inbox-desk-sync-dot" aria-hidden />
+          Son senkronizasyon: {lastSyncLabel}
+        </p>
       </div>
-      <p className="hz-approvals-inbox-desk-sync" role="status">
-        <span className="hz-approvals-inbox-desk-sync-dot" aria-hidden />
-        Son senkronizasyon: {lastSyncLabel}
-      </p>
     </header>
   );
 }
