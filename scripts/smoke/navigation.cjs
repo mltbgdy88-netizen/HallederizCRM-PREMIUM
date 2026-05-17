@@ -48,6 +48,16 @@ const checks = [
     description: "Yeni tahsilat Hızlı İşlem hub"
   },
   {
+    file: "apps/web/src/features/documents/components/DocumentsPage.tsx",
+    patterns: ["Belge önizlemesi hazırlanır; gönderim yapılmaz", "hz-doc-context-band", "PDF üretimi henüz canlı"],
+    description: "Belgeler canli olmayan aksiyon mesajlari"
+  },
+  {
+    file: "apps/web/src/features/archive/components/ArchivePage.tsx",
+    patterns: ["Bu işlem henüz canlı kullanıma bağlı değil", "Örnek veri modu: arşiv listesi"],
+    description: "Arsiv demo ve canli olmayan aksiyon mesajlari"
+  },
+  {
     file: "apps/web/src/features/orders/components/OrderDetailPage.tsx",
     patterns: ["/tahsilatlar/yeni?order=", "/depo/emirler/", "/teslimatlar/", "/faturalar/"],
     description: "Siparis detayindan operasyon modullerine gecis"

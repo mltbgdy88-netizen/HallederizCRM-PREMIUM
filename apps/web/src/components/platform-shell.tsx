@@ -57,7 +57,7 @@ const PAGE_META: Array<[string, PageMeta]> = [
   ["/ai/icgoruler", { title: "AI İçgörüler", subtitle: "AI risk ve fırsat analizlerini takip edin.", breadcrumb: "AI / İçgörüler" }],
   ["/hizli-islem", { title: "Hızlı İşlem", subtitle: "Sipariş, tahsilat, teslim ve belge işlemlerini tek akıştan başlatın.", breadcrumb: "Hızlı İşlem" }],
   ["/dashboard", { title: "Gösterge Paneli", subtitle: "", breadcrumb: "" }],
-  ["/archive", { title: "Arşiv", subtitle: "Geçmiş işlemler ve belge arşivi (yer tutucu).", breadcrumb: "Arşiv" }],
+  ["/archive", { title: "Arşiv", subtitle: "Geçmiş işlemler ve belge arşivi.", breadcrumb: "Arşiv" }],
   ["/kurulum/veri-yukleme", { title: "Veri Yükleme", subtitle: "CSV tabanlı içe aktarma ile cari, ürün, fiyat ve stok yükleyin.", breadcrumb: "Kurulum / Veri Yükleme" }],
   ["/ayarlar/veri-yukleme", { title: "Veri Yükleme", subtitle: "Şablon indir, dosya yükle, önizle ve içe aktar.", breadcrumb: "Ayarlar / Veri Yükleme" }],
   ["/ayarlar/operasyon-gozlem", { title: "Operasyon ve Gözlem", subtitle: "İz kaydı, kiracı korelasyonu ve sürüm deneme özeti.", breadcrumb: "Ayarlar / Operasyon" }],

@@ -1,4 +1,5 @@
 import type { Document, DocumentDelivery } from "@hallederiz/types";
+import { getDocumentDeliveryStatusLabel } from "../queries/document-mock-data";
 
 const TEMPLATE_VERSION_BY_TYPE: Partial<Record<Document["type"], string>> = {
   offer_pdf: "teklif-v1.4.0",
@@ -13,7 +14,7 @@ const TEMPLATE_VERSION_BY_TYPE: Partial<Record<Document["type"], string>> = {
 };
 
 export function formatDocumentTemplateVersion(document: Document): string {
-  return TEMPLATE_VERSION_BY_TYPE[document.type] ?? `genel-v1.0.0+${document.type}`;
+  return TEMPLATE_VERSION_BY_TYPE[document.type] ?? `genel-v1.0.0`;
 }
 
 export function formatDocumentDeliveryChannel(channel: DocumentDelivery["channel"]): string {
@@ -23,19 +24,37 @@ export function formatDocumentDeliveryChannel(channel: DocumentDelivery["channel
     case "email":
       return "E-posta";
     case "print":
-      return "Yazdirma";
+      return "Yazdırma";
     case "download":
-      return "Indirme";
+      return "İndirme";
   }
 }
 
+export function formatDocumentEntityType(entityType: Document["entityType"]): string {
+  const labels: Record<Document["entityType"], string> = {
+    offer: "Teklif",
+    order: "Sipariş",
+    payment: "Tahsilat",
+    warehouse_order: "Depo emri",
+    delivery: "Teslimat",
+    dispatch: "Sevk",
+    invoice: "Fatura",
+    return: "İade",
+    statement: "Cari ekstre"
+  };
+  return labels[entityType];
+}
+
 export function describeArchivePolicy(): string {
-  return "Arsiv: immutable PDF + metadata; tenant saklama suresi ve WORM politikasi API/ayarlarda; silme yalniz policy + onay ile.";
+  return "Arşiv kayıtları saklama süresi ve onay kurallarına tabidir; canlı arşiv bağlantısı tenant ayarlarından yönetilir.";
 }
 
 export function summarizeDocumentDeliveries(deliveries: DocumentDelivery[]): string {
   const d = deliveries[0];
-  if (!d) return "Teslim kaydi yok (kuyruk veya gonderim bekleniyor).";
+  if (!d) {
+    return "Teslim kaydı yok; önizleme veya kuyruk bekleniyor.";
+  }
   const ch = formatDocumentDeliveryChannel(d.channel);
-  return `${ch}: ${d.status}${d.sentAt ? `, gonderim ${new Date(d.sentAt).toLocaleString("tr-TR")}` : ""}${d.deliveredAt ? `, teslim ${new Date(d.deliveredAt).toLocaleString("tr-TR")}` : ""}.`;
+  const status = getDocumentDeliveryStatusLabel(d.status);
+  return `${ch}: ${status}${d.sentAt ? ` · ${new Date(d.sentAt).toLocaleString("tr-TR")}` : ""}`;
 }
