@@ -1,7 +1,7 @@
 "use client";
 
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { DetailPanel, SplitContentLayout } from "@hallederiz/ui";
 import { dataSourceConfig } from "../../../lib/data-source";
 import { useToast } from "../../../providers/toast-provider";
@@ -14,7 +14,15 @@ import {
   IconTrash2,
   QuickActionIcon
 } from "../../dashboard/components/dashboard-inline-icons";
-import { demoCustomers, seedQuickOperationLines, useQuickOperationState } from "../hooks/use-quick-operation-state";
+import {
+  MSG_DRAFT_SAVED,
+  MSG_NOT_LIVE,
+  MSG_PREVIEW_CUSTOMER,
+  MSG_SELECT_CUSTOMER,
+  MSG_SELECT_LINE
+} from "../data/quick-operation-messages";
+import { isQuickOpPreviewProductId } from "../data/quick-operation-guards";
+import { seedQuickOperationLines, useQuickOperationState } from "../hooks/use-quick-operation-state";
 import type { QuickOperationLine, QuickOperationType } from "../types";
 import { QuickOperationImpactPanel } from "./QuickOperationImpactPanel";
 import { QuickOperationSourceAccordion } from "./QuickOperationSourceAccordion";
@@ -151,12 +159,18 @@ function nextStepText(tab: WorkflowTabId, hasLines: boolean): string {
   return hasLines ? "Kayıt sonrası ilgili modülde takip edin." : "Satır ekleyin veya ürün seçin.";
 }
 
+function tabNeedsLines(tab: WorkflowTabId): boolean {
+  return tab === "order" || tab === "price" || tab === "return";
+}
+
 export function QuickOperationPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const customerParam = searchParams.get("customer");
+  const productParam = searchParams.get("product");
   const { pushToast } = useToast();
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<WorkflowTabId>("order");
-  const [primaryDone, setPrimaryDone] = useState(false);
   const [representative, setRepresentative] = useState("Ayşe Kaya");
   const [warehouse, setWarehouse] = useState("Merkez Depo");
   const [dueDate, setDueDate] = useState("15.05.2026");
@@ -166,11 +180,17 @@ export function QuickOperationPage() {
   const [prepSearch, setPrepSearch] = useState("");
 
   const {
+    catalogCustomers,
     operationType,
     setOperationType,
     customerId,
     setCustomerId,
     selectedCustomer,
+    isPreviewCustomer,
+    isPreviewCustomerBlocked,
+    applyProductFromUrl,
+    initialCustomerParam,
+    initialCustomerResolved,
     lines,
     totals,
     impacts,
@@ -188,11 +208,33 @@ export function QuickOperationPage() {
     isSubmitting,
     resetDraft,
     setOperationNote
-  } = useQuickOperationState();
+  } = useQuickOperationState({
+    initialCustomerId: customerParam,
+    initialProductId: productParam
+  });
 
   useEffect(() => {
     setOperationNote(description);
   }, [description, setOperationNote]);
+
+  useEffect(() => {
+    if (!productParam) {
+      return;
+    }
+    if (isQuickOpPreviewProductId(productParam)) {
+      pushToast("Bu urun onizleme verisidir; satira eklenmez.");
+      return;
+    }
+    applyProductFromUrl(productParam);
+  }, [applyProductFromUrl, productParam, pushToast]);
+
+  useEffect(() => {
+    if (initialCustomerParam && !initialCustomerResolved) {
+      setNotice(
+        `Cari (${initialCustomerParam}) listede bulunamadi. Mevcut cari secildi veya API baglantisi eksik.`
+      );
+    }
+  }, [initialCustomerParam, initialCustomerResolved, setNotice]);
 
   useLayoutEffect(() => {
     const el = tableScrollRef.current;
@@ -210,7 +252,6 @@ export function QuickOperationPage() {
       setActiveTab(tab);
       const next = WORKFLOW.find((t) => t.id === tab);
       if (next) setOperationType(next.operation);
-      setPrimaryDone(false);
       replaceLines(defaultLinesForTab(tab));
       setPrepSlipId("");
       setPrepSearch("");
@@ -219,14 +260,24 @@ export function QuickOperationPage() {
   );
 
   const handlePrimary = async () => {
+    if (isPreviewCustomerBlocked) {
+      pushToast(MSG_PREVIEW_CUSTOMER);
+      return;
+    }
+    if (!customerId || catalogCustomers.length === 0) {
+      pushToast(MSG_SELECT_CUSTOMER);
+      return;
+    }
+    if (tabNeedsLines(activeTab)) {
+      const hasLine = lines.some((line) => line.productCode.trim() || line.productName.trim());
+      if (!hasLine) {
+        pushToast(MSG_SELECT_LINE);
+        return;
+      }
+    }
     const ok = await submitOperation();
     if (ok) {
-      pushToast(
-        activeTab === "order"
-          ? "Sipariş taslağı oluşturuldu. Canlı execution için policy/onay zinciri gerekir."
-          : "İşlem taslağı kaydedildi. Bu adım canlı mutation başarısı değildir."
-      );
-      setPrimaryDone(true);
+      pushToast(dataSourceConfig.useDemoData ? MSG_DRAFT_SAVED : "Islem kaydi alindi. Onay zinciri tamamlandiginda uygulanir.");
     }
   };
 
@@ -237,15 +288,13 @@ export function QuickOperationPage() {
     setWarehouse("Merkez Depo");
     setDueDate("15.05.2026");
     setDeliveryDate("08.05.2026");
-    setPrimaryDone(false);
     applyTab("order");
-    pushToast("Yeni işlem");
+    pushToast("Yeni islem baslatildi");
   };
 
   const handleClear = () => {
     resetDraft();
     setDescription("");
-    setPrimaryDone(false);
     applyTab(activeTab);
     pushToast("Taslak temizlendi");
   };
@@ -283,13 +332,19 @@ export function QuickOperationPage() {
 
       {dataSourceConfig.useDemoData ? (
         <div className="hz-qop-demo-band" role="status">
-          Demo veri — canlı cari / stok / onay akışı bağlandığında bu şerit kalkar ve gerçek kaynaklar kullanılır.
+          Onizleme modu: ornek cari ve stok verileri gosteriliyor; canli kayit olusturulmaz.
         </div>
       ) : (
         <div className="hz-qop-live-band" role="status">
-          Canlı mod: gönderim API (`/quick-operations/submit`) üzerinden; başarılı yanıt policy ve onay zincirine bağlıdır.
+          Canli mod: islemler API uzerinden gonderilir; sonuc onay ve islem kuyruguna baglidir.
         </div>
       )}
+
+      {isPreviewCustomer ? (
+        <div className="hz-qop-preview-band" role="status">
+          Secili cari onizleme verisidir; kayit olusturma ve gonderim yapilmaz.
+        </div>
+      ) : null}
 
       <header className="hz-qop-hero">
         <div className="hz-qop-hero-text">
@@ -366,12 +421,21 @@ export function QuickOperationPage() {
                 <div className="hz-qop-form-row hz-qop-form-row--v2">
                   <label className="hz-qop-cari-search">
                     <span className="hz-qop-label">Cari</span>
-                    <select className="hz-qop-input" value={customerId} onChange={(e) => setCustomerId(e.target.value)}>
-                      {demoCustomers.map((c) => (
-                        <option key={c.id} value={c.id}>
-                          {c.name}
-                        </option>
-                      ))}
+                    <select
+                      className="hz-qop-input"
+                      value={customerId}
+                      onChange={(e) => setCustomerId(e.target.value)}
+                      disabled={catalogCustomers.length === 0}
+                    >
+                      {catalogCustomers.length === 0 ? (
+                        <option value="">Cari listesi bagli degil</option>
+                      ) : (
+                        catalogCustomers.map((c) => (
+                          <option key={c.id} value={c.id}>
+                            {c.name}
+                          </option>
+                        ))
+                      )}
                     </select>
                   </label>
                   <div className="hz-qop-date-inline hz-qop-date-in-form">
@@ -561,7 +625,7 @@ export function QuickOperationPage() {
                 <button
                   type="button"
                   className="hz-qop-btn hz-qop-btn--outline"
-                  onClick={() => pushToast("Taslak kaydedildi. Canlı uygulama onay/execution durumuna bağlıdır.")}
+                  onClick={() => pushToast(MSG_NOT_LIVE)}
                 >
                   <IconSave size={16} aria-hidden />
                   Taslak kaydet
@@ -569,7 +633,7 @@ export function QuickOperationPage() {
                 <button
                   type="button"
                   className="hz-qop-btn hz-qop-btn--ghost"
-                  onClick={() => pushToast("Onay talebi hazırlandı. Tamamlandı bilgisi yalnız onay sonrası verilir.")}
+                  onClick={() => pushToast("Onay talebi taslagi hazirlandi. Sonuc yalnizca onay sonrasinda gosterilir.")}
                 >
                   <IconSend size={16} aria-hidden />
                   Onaya gönder
@@ -577,7 +641,7 @@ export function QuickOperationPage() {
                 <button
                   type="button"
                   className="hz-qop-btn hz-qop-btn--outline"
-                  onClick={() => pushToast("Önizleme hazırlanıyor. Gönderim/execute başarısı bu adımda üretilmez.")}
+                  onClick={() => pushToast("Onizleme hazirlaniyor. Bu adimda canli gonderim yapilmaz.")}
                 >
                   <IconPrinter size={16} aria-hidden />
                   Önizleme
@@ -588,7 +652,7 @@ export function QuickOperationPage() {
                 <button
                   type="button"
                   className="hz-qop-btn hz-qop-btn--primary hz-qop-btn--primary-solo"
-                  disabled={primaryDone || isSubmitting}
+                  disabled={isSubmitting || isPreviewCustomerBlocked || catalogCustomers.length === 0}
                   onClick={handlePrimary}
                 >
                   {isSubmitting ? (
@@ -608,7 +672,9 @@ export function QuickOperationPage() {
           <div className="hz-qop-side-stack hz-qop-side--v2" aria-label="Cari, toplamlar ve operasyon özeti">
             <article className="hz-qop-card hz-qop-card--v2">
               <h2 className="hz-qop-side-h">Cari özeti</h2>
-              <p className="hz-qop-side-lead">{selectedCustomer.name}</p>
+              <p className="hz-qop-side-lead hz-qop-side-lead--ellipsis" title={selectedCustomer.name}>
+                {selectedCustomer.name}
+              </p>
               <dl className="hz-qop-dl hz-qop-dl--tight">
                 <div>
                   <dt>Tip</dt>
@@ -620,11 +686,23 @@ export function QuickOperationPage() {
                 </div>
                 <div>
                   <dt>Alacak</dt>
-                  <dd>₺{selectedCustomer.receivableDisplay ?? "—"}</dd>
+                  <dd>
+                    {selectedCustomer.financeLinked === false
+                      ? "—"
+                      : selectedCustomer.receivableDisplay && selectedCustomer.receivableDisplay !== "—"
+                        ? `₺${selectedCustomer.receivableDisplay}`
+                        : "—"}
+                  </dd>
                 </div>
                 <div>
                   <dt>Verecek</dt>
-                  <dd>₺{selectedCustomer.payableDisplay ?? "—"}</dd>
+                  <dd>
+                    {selectedCustomer.financeLinked === false
+                      ? "—"
+                      : selectedCustomer.payableDisplay && selectedCustomer.payableDisplay !== "—"
+                        ? `₺${selectedCustomer.payableDisplay}`
+                        : "—"}
+                  </dd>
                 </div>
                 {selectedCustomer.warningDisplay && selectedCustomer.warningDisplay !== "—" ? (
                   <div>

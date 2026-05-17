@@ -21,6 +21,8 @@ export interface QuickOperationCustomer {
   payableDisplay?: string;
   /** Gösterim: Uyarı metni */
   warningDisplay?: string;
+  /** Finans özeti demo/API ile bağlı mı */
+  financeLinked?: boolean;
 }
 
 export interface QuickOperationProduct {

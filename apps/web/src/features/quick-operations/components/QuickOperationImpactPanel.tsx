@@ -19,7 +19,7 @@ export function QuickOperationImpactPanel({ impacts, aiInsight, layout = "card" 
       {layout === "card" ? <p className="hz-content-card-description">Bu panel operasyon etkilerini ve AI operasyon notunu gosterir.</p> : null}
       {aiInsight ? (
         <div className={`hz-state-card tone-warning${layout === "bare" ? " hz-qop-ai-insight" : ""} hz-margin-top-sm`}>
-          <h4>AI Operasyon Notu ({aiInsight.source})</h4>
+          <h4>AI Operasyon Notu</h4>
           <p className="hz-content-card-description">{aiInsight.summary}</p>
           {aiInsight.warnings.length > 0 ? <p className="hz-content-card-description">Uyarilar: {aiInsight.warnings.join(" | ")}</p> : null}
           {aiInsight.recommendations.length > 0 ? (
@@ -32,7 +32,15 @@ export function QuickOperationImpactPanel({ impacts, aiInsight, layout = "card" 
           <li key={impact.id}>
             <div className="crm-identity-header">
               <strong style={{ color: "var(--hz-text-strong)" }}>{impact.title}</strong>
-              <span className={`hz-badge ${toneClass[impact.tone]}`}>{impact.tone}</span>
+              <span className={`hz-badge ${toneClass[impact.tone]}`}>
+                {impact.tone === "warning"
+                  ? "Uyari"
+                  : impact.tone === "success"
+                    ? "Olumlu"
+                    : impact.tone === "danger"
+                      ? "Risk"
+                      : "Bilgi"}
+              </span>
             </div>
             <p className="hz-content-card-description hz-margin-top-sm">{impact.description}</p>
           </li>
