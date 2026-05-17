@@ -3,6 +3,7 @@ export * from "./CustomerFilterBar";
 export * from "./CustomerTable";
 export * from "./CustomerQuickPreviewPanel";
 export * from "./CustomerDetailPage";
+export * from "./CustomerCreatePage";
 export * from "./CustomerIdentityHeader";
 export * from "./CustomerSummaryCards";
 export * from "./CustomerTabs";

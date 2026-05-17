@@ -1,5 +1,5 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+import { CustomerCreatePage } from "../../../../src/features/customers/components/CustomerCreatePage";
 
 export default function CarilerYeniPage() {
-  return renderProductCatchAll(["cariler", "yeni"]);
+  return <CustomerCreatePage />;
 }
