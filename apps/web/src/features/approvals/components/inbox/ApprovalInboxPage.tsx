@@ -2,7 +2,7 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { sdk } from "../../../../lib/data-source";
+import { dataSourceConfig, sdk } from "../../../../lib/data-source";
 import { useToast } from "../../../../providers/toast-provider";
 import { executeApprovalMutation } from "../../mutations";
 import { ApprovalInboxEmpty, ApprovalInboxError, ApprovalInboxLoading } from "../ApprovalInboxStates";
@@ -23,7 +23,7 @@ export function ApprovalInboxPage() {
 
   const [phase, setPhase] = useState<UiPhase>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<ApprovalInboxViewId>("bana_atanan");
+  const [activeView, setActiveView] = useState<ApprovalInboxViewId>("tum");
   const [filters, setFilters] = useState<ApprovalInboxFilterState>(DEFAULT_APPROVAL_INBOX_FILTERS);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
@@ -40,7 +40,7 @@ export function ApprovalInboxPage() {
     setErrorMessage(null);
     try {
       const result = await sdk.approvals.list();
-      const mapped = (result.items ?? []).map(mapApprovalToInboxRecord);
+      const mapped = (result.items ?? []).map((item) => mapApprovalToInboxRecord(item, dataSourceConfig.userId));
       setRows(mapped);
       setPhase("ready");
     } catch (error) {
@@ -81,7 +81,7 @@ export function ApprovalInboxPage() {
     setDetailError(null);
     try {
       const detail = await sdk.approvals.detail(selectedId);
-      const mapped = mapApprovalToInboxRecord(detail.item);
+      const mapped = mapApprovalToInboxRecord(detail.item, dataSourceConfig.userId);
       setRows((prev) => prev.map((item) => (item.id === mapped.id ? mapped : item)));
     } catch (error) {
       setDetailError(error instanceof Error ? error.message : "Detay yüklenemedi.");
@@ -168,7 +168,7 @@ export function ApprovalInboxPage() {
             rows={rows}
           />
           <section className="hz-approvals-inbox-desk-center" aria-label="Onay listesi alanı">
-            {listPhase === "loading" ? <ApprovalInboxLoading label="Onay kutusu yükleniyor…" /> : null}
+            {listPhase === "loading" ? <ApprovalInboxLoading label="Onay kutusu yükleniyor..." /> : null}
             {listPhase === "error" ? (
               <ApprovalInboxError
                 error={{ kind: "unknown", message: errorMessage ?? "Onay kutusu verisi şu an alınamıyor." }}

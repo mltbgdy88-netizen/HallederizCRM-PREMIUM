@@ -74,22 +74,14 @@ export function ApprovalInboxDetailPanel({
       </header>
 
       <div className="hz-approvals-inbox-desk-detail-scroll">
+        {detailLoading ? <p className="hz-approvals-inbox-desk-detail-empty-text">Detay yükleniyor...</p> : null}
+        {detailError ? <p className="hz-approvals-inbox-desk-detail-empty-text">{detailError}</p> : null}
+
         <DetailSection title="Onay Özeti">
           <dl className="hz-approvals-inbox-desk-kv hz-approvals-inbox-desk-kv--decision">
-            <div>
-              <dt>Tür</dt>
-              <dd>{record.summary.typeLabel}</dd>
-            </div>
-            <div>
-              <dt>Öncelik</dt>
-              <dd>
-                <PriorityBadge priority={record.priority} />
-              </dd>
-            </div>
-            <div>
-              <dt>Talep Tutarı</dt>
-              <dd>{record.summary.amountTry}</dd>
-            </div>
+            <div><dt>Tür</dt><dd>{record.summary.typeLabel}</dd></div>
+            <div><dt>Öncelik</dt><dd><PriorityBadge priority={record.priority} /></dd></div>
+            <div><dt>Talep Tutarı</dt><dd>{record.summary.amountTry}</dd></div>
             <div>
               <dt>İlgili Kayıt</dt>
               <dd>
@@ -98,18 +90,9 @@ export function ApprovalInboxDetailPanel({
                 </Link>
               </dd>
             </div>
-            <div>
-              <dt>Talep Eden</dt>
-              <dd>{record.summary.requesterName}</dd>
-            </div>
-            <div>
-              <dt>Talep Tarihi</dt>
-              <dd>{record.summary.requestedAt}</dd>
-            </div>
-            <div>
-              <dt>SLA Bitişi</dt>
-              <dd>{record.summary.slaDeadline}</dd>
-            </div>
+            <div><dt>Talep Eden</dt><dd>{record.summary.requesterName}</dd></div>
+            <div><dt>Talep Tarihi</dt><dd>{record.summary.requestedAt}</dd></div>
+            <div><dt>SLA Bitişi</dt><dd>{record.summary.slaDeadline}</dd></div>
           </dl>
         </DetailSection>
 
@@ -179,37 +162,10 @@ export function ApprovalInboxDetailPanel({
 
       <footer className="hz-approvals-inbox-desk-detail-foot">
         <div className="hz-approvals-inbox-desk-detail-actions hz-approvals-inbox-desk-detail-actions--row" aria-label="Karar aksiyonları">
-          <button
-            type="button"
-            className="hz-approvals-inbox-desk-act hz-approvals-inbox-desk-act--success"
-            disabled={disabled}
-            onClick={onApprove}
-          >
-            Onayla
-          </button>
-          <button
-            type="button"
-            className="hz-approvals-inbox-desk-act hz-approvals-inbox-desk-act--danger"
-            disabled={disabled}
-            onClick={onReject}
-          >
-            Reddet
-          </button>
-          <button
-            type="button"
-            className="hz-approvals-inbox-desk-act hz-approvals-inbox-desk-act--info"
-            disabled={disabled}
-            onClick={onSendToReview}
-          >
-            İncelemeye Gönder
-          </button>
-          <button
-            type="button"
-            className="hz-approvals-inbox-desk-act hz-approvals-inbox-desk-act--outline"
-            onClick={onOpenFull}
-          >
-            Tam Kaydı Aç
-          </button>
+          <button type="button" className="hz-approvals-inbox-desk-act hz-approvals-inbox-desk-act--success" disabled={disabled} onClick={onApprove}>Onayla</button>
+          <button type="button" className="hz-approvals-inbox-desk-act hz-approvals-inbox-desk-act--danger" disabled={disabled} onClick={onReject}>Reddet</button>
+          <button type="button" className="hz-approvals-inbox-desk-act hz-approvals-inbox-desk-act--info" disabled={disabled} onClick={onSendToReview}>İncelemeye Gönder</button>
+          <button type="button" className="hz-approvals-inbox-desk-act hz-approvals-inbox-desk-act--outline" onClick={onOpenFull}>Tam Kaydı Aç</button>
         </div>
       </footer>
     </aside>
