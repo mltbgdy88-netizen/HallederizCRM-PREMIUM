@@ -32,17 +32,21 @@ export interface CustomerDetailQueryResult {
   priceSlots: typeof customerPriceSlots;
 }
 
+const emptyProductionRelated = {
+  accounts: [] as CustomerAccount[],
+  contacts: [] as CustomerContact[],
+  addresses: [] as CustomerAddress[],
+  ledgerEntries: [] as CustomerLedgerEntry[],
+  priceSlots: [] as typeof customerPriceSlots
+};
+
 export async function getCustomers(): Promise<CustomersQueryResult> {
   if (!dataSourceConfig.useDemoData) {
     const [customersResponse] = await Promise.all([sdk.customers.list()]);
 
     return {
       customers: customersResponse.items,
-      accounts: customerAccounts,
-      contacts: customerContacts,
-      addresses: customerAddresses,
-      ledgerEntries: customerLedgerEntries,
-      priceSlots: customerPriceSlots
+      ...emptyProductionRelated
     };
   }
 
@@ -69,20 +73,17 @@ export async function getCustomerDetail(customerId: string): Promise<CustomerDet
       return {
         customer: null,
         account: null,
-        contacts: [],
-        addresses: [],
-        ledgerEntries: [],
-        priceSlots: customerPriceSlots
+        ...emptyProductionRelated
       };
     }
 
     return {
       customer,
       account: accountResponse.item ?? null,
-      contacts: getCustomerContacts(customer.id),
-      addresses: getCustomerAddresses(customer.id),
+      contacts: [],
+      addresses: [],
       ledgerEntries: ledgerResponse.items,
-      priceSlots: customerPriceSlots
+      priceSlots: []
     };
   }
 

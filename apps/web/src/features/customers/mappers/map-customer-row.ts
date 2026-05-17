@@ -16,6 +16,8 @@ export interface CustomerRow {
   priceGroupLabel: string;
   lastOrderLabel: string;
   whatsappMatched: boolean;
+  /** Gerçek hesap özeti bağlı; false iken bakiye alanları gösterilmez. */
+  financeLinked: boolean;
 }
 
 function formatMoney(amount: number, currency: string): string {
@@ -34,7 +36,46 @@ function riskTone(level: string): CustomerRow["riskTone"] {
   return "success";
 }
 
-export function mapCustomerToRow(customer: Customer, account: CustomerAccount): CustomerRow {
+function riskLabelFromCustomer(customer: Customer): string {
+  if (customer.riskLevel === "blocked") {
+    return "Blokeli";
+  }
+  if (customer.riskLevel === "high") {
+    return "Yüksek";
+  }
+  if (customer.riskLevel === "medium") {
+    return "Orta";
+  }
+  if (customer.riskLevel === "low") {
+    return "Düşük";
+  }
+  return "—";
+}
+
+export function mapCustomerToRow(customer: Customer, account: CustomerAccount | null): CustomerRow {
+  const priceGroupLabel = customer.pricingProfile.priceSlotLabelSnapshot ?? `Slot ${customer.pricingProfile.selectedPriceSlotNo}`;
+  const lastOrderLabel = customer.lastOrderAt ? new Date(customer.lastOrderAt).toLocaleDateString("tr-TR") : "—";
+
+  if (!account) {
+    return {
+      customerId: customer.id,
+      code: customer.code,
+      name: customer.name,
+      typeLabel: resolveCustomerDisplayType(customer.type),
+      phone: customer.phone,
+      city: customer.city,
+      balanceLabel: "—",
+      balanceCreditLine: "—",
+      balanceDebitLine: "—",
+      riskLabel: riskLabelFromCustomer(customer),
+      riskTone: riskTone(customer.riskLevel),
+      priceGroupLabel,
+      lastOrderLabel,
+      whatsappMatched: customer.whatsappMatched,
+      financeLinked: false
+    };
+  }
+
   const risk = calculateCustomerRiskState(customer, account);
   const b = account.balance;
   const cur = account.currency;
@@ -53,8 +94,9 @@ export function mapCustomerToRow(customer: Customer, account: CustomerAccount): 
     balanceDebitLine,
     riskLabel: risk.label,
     riskTone: riskTone(risk.level),
-    priceGroupLabel: customer.pricingProfile.priceSlotLabelSnapshot ?? `Slot ${customer.pricingProfile.selectedPriceSlotNo}`,
-    lastOrderLabel: customer.lastOrderAt ? new Date(customer.lastOrderAt).toLocaleDateString("tr-TR") : "—",
-    whatsappMatched: customer.whatsappMatched
+    priceGroupLabel,
+    lastOrderLabel,
+    whatsappMatched: customer.whatsappMatched,
+    financeLinked: true
   };
 }
