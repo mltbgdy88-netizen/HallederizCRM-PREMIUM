@@ -6,9 +6,9 @@ import { CUSTOMERS_PORTFOLIO_DEMO_ROWS } from "../../customers/data/customers-de
 import type { QuickOperationCustomer, QuickOperationLine } from "../types";
 
 function mapRisk(risk: Customer["riskLevel"]): QuickOperationCustomer["risk"] {
-  if (risk === "high" || risk === "blocked") return "Yuksek";
+  if (risk === "high" || risk === "blocked") return "Yüksek";
   if (risk === "medium") return "Orta";
-  return "Dusuk";
+  return "Düşük";
 }
 
 function formatBalance(amount: number): string {
@@ -33,7 +33,7 @@ function mapCatalogCustomer(customer: Customer, account: CustomerAccount | null,
     payableDisplay: financeLinked && overdue > 0 ? formatBalance(overdue) : "—",
     warningDisplay:
       financeLinked && overdue > 0
-        ? `${formatBalance(overdue)} TL gecikmis bakiye`
+        ? `${formatBalance(overdue)} TL gecikmiş bakiye`
         : customer.riskLevel === "blocked"
           ? "Cari blokeli"
           : "—",
@@ -45,7 +45,7 @@ function mapPortfolioRowToCustomer(
   row: (typeof CUSTOMERS_PORTFOLIO_DEMO_ROWS)[number]
 ): QuickOperationCustomer {
   const risk: QuickOperationCustomer["risk"] =
-    row.riskTone === "danger" ? "Yuksek" : row.riskTone === "warning" ? "Orta" : "Dusuk";
+    row.riskTone === "danger" ? "Yüksek" : row.riskTone === "warning" ? "Orta" : "Düşük";
   return {
     id: row.customerId,
     name: row.name,
@@ -59,7 +59,7 @@ function mapPortfolioRowToCustomer(
     address: row.city,
     receivableDisplay: row.financeLinked ? row.balanceCreditLine.replace(" alacak", "") : "—",
     payableDisplay: row.financeLinked ? row.balanceDebitLine : "—",
-    warningDisplay: row.riskLabel !== "Dusuk" ? `${row.riskLabel} risk` : "—",
+    warningDisplay: row.riskLabel !== "Düşük" ? `${row.riskLabel} risk` : "—",
     financeLinked: row.financeLinked
   };
 }

@@ -12,7 +12,7 @@ export interface QuickOperationCustomer {
   customerType?: string;
   /** WhatsApp ile eşleşmiş gösterimi */
   whatsappMatched?: boolean;
-  risk: "Dusuk" | "Orta" | "Yuksek";
+  risk: "Düşük" | "Orta" | "Yüksek";
   balance: number;
   address: string;
   /** Gösterim: Alacak tutarı (₺) */

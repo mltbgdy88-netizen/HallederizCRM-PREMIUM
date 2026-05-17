@@ -15,7 +15,7 @@ const toneClass: Record<QuickOperationImpact["tone"], string> = {
 
 function toneLabel(tone: QuickOperationImpact["tone"]) {
   if (tone === "warning") return "Uyarı";
-  if (tone === "success") return "Olumlu";
+  if (tone === "success") return "Uygun";
   if (tone === "danger") return "Risk";
   return "Bilgi";
 }

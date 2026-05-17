@@ -1,18 +1,21 @@
 export const MSG_NOT_LIVE =
-  "Bu islem henuz canli kullanima bagli degil. Onay ve islem kuyruzu baglantisi tamamlandiginda uygulanir.";
+  "Bu işlem henüz canlı kullanıma bağlı değil. Onay ve işlem kuyruğu bağlantısı tamamlandığında uygulanır.";
 
 export const MSG_PREVIEW_CUSTOMER =
-  "Bu cari onizleme verisidir; hizli islem kaydi olusturulmaz.";
+  "Bu cari önizleme verisidir; hızlı işlem kaydı oluşturulmaz.";
 
 export const MSG_PREVIEW_PRODUCT =
-  "Bu urun onizleme verisidir; satira eklenmez.";
+  "Bu ürün önizleme verisidir; satıra eklenmez.";
 
-export const MSG_SELECT_CUSTOMER = "Once cari secin.";
+export const MSG_SELECT_CUSTOMER = "Önce cari seçin.";
 
 export const MSG_SELECT_LINE =
-  "Bu islem turu icin en az bir satir veya urun bilgisi gerekir.";
+  "Bu işlem türü için en az bir satır veya ürün bilgisi gerekir.";
 
 export const MSG_DRAFT_SAVED =
-  "Taslak hazirlandi. Canli kayit icin onay ve islem kuyruzu baglantisi gerekir.";
+  "Taslak hazırlandı; gerçek kayıt oluşturulmadı. Onay ve işlem kuyruğu bağlantısı gerekir.";
 
-export const MSG_IMPORT_HINT = "Toplu urun aktarimi icin Veri yukleme ekranini kullanin.";
+export const MSG_IMPORT_HINT = "Toplu ürün aktarımı için Veri yükleme ekranını kullanın.";
+
+export const MSG_PREVIEW_DOCUMENT =
+  "Belge önizlemesi hazırlanır; gönderim yapılmaz.";

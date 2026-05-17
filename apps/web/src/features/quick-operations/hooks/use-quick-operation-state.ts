@@ -34,28 +34,28 @@ import { mapSourceSelectionToWorkflow } from "../utils/map-source-selection-to-w
 export const operationTypeLabels: Record<QuickOperationType, { label: string; title: string; description: string }> = {
   offer: {
     label: "Teklif",
-    title: "Teklif hizli girisi",
-    description: "Stok rezervasyonu yapmadan teklif, belge ve WhatsApp taslagi onizlenir."
+    title: "Teklif hızlı girişi",
+    description: "Stok rezervasyonu yapmadan teklif, belge ve WhatsApp taslağı önizlenir."
   },
   sale_order: {
-    label: "Satis / Siparis",
-    title: "Satis ve siparis hizli girisi",
-    description: "Satir kaynak secimine gore depo, fabrika ve tedarik workflow etkisi onizlenir."
+    label: "Satış / Sipariş",
+    title: "Satış ve sipariş hızlı girişi",
+    description: "Satır kaynak seçimine göre depo, fabrika ve tedarik iş akışı etkisi önizlenir."
   },
   delivery: {
     label: "Teslim",
-    title: "Teslim hizli girisi",
-    description: "Mevcut siparis veya serbest teslim icin depo hazirlik ve odeme kontrolleri onizlenir."
+    title: "Teslim hızlı girişi",
+    description: "Mevcut sipariş veya serbest teslim için depo hazırlık ve ödeme kontrolleri önizlenir."
   },
   payment: {
     label: "Tahsilat",
-    title: "Tahsilat hizli girisi",
-    description: "Cari bakiye ve acik siparis/fatura allocation foundation'i onizlenir."
+    title: "Tahsilat hızlı girişi",
+    description: "Cari bakiye ve açık sipariş/fatura dağılımı önizlenir."
   },
   return: {
-    label: "Iade",
-    title: "Iade hizli girisi",
-    description: "Iade talebi, stok/finans etkisi ve gerekirse approval ihtiyaci onizlenir."
+    label: "İade",
+    title: "İade hızlı girişi",
+    description: "İade talebi, stok/finans etkisi ve gerekirse onay ihtiyacı önizlenir."
   }
 };
 
@@ -63,11 +63,11 @@ export const demoCustomers: QuickOperationCustomer[] = buildQuickOperationCustom
 
 const fallbackCustomer: QuickOperationCustomer = {
   id: "customer_fallback",
-  name: "Cari secilmedi",
+  name: "Cari seçilmedi",
   contactName: "—",
   phone: "—",
   priceGroup: "—",
-  risk: "Dusuk",
+  risk: "Düşük",
   balance: 0,
   address: "—",
   receivableDisplay: "—",
@@ -84,7 +84,7 @@ export const demoProducts: QuickOperationProduct[] = [
 
 const fallbackProduct: QuickOperationProduct = {
   code: "ITEM-001",
-  name: "Ornek urun/hizmet",
+  name: "Örnek ürün/hizmet",
   price: 0,
   taxRate: 20
 };
@@ -102,9 +102,9 @@ export const sourceOptions: SourceOption[] = [
   },
   {
     type: "factory",
-    title: "Fabrika Stogu",
+    title: "Fabrika stoğu",
     badge: "80 adet uygun",
-    description: "Fabrika: Ankara Fabrika · Tahmini gelis: 3 gun",
+    description: "Fabrika: Ankara Fabrika · Tahmini geliş: 3 gün",
     sourceLabel: "Fabrika",
     warehouseName: "Ankara Fabrika",
     rackCode: "-",
@@ -112,33 +112,33 @@ export const sourceOptions: SourceOption[] = [
   },
   {
     type: "supplier",
-    title: "Tedarikci Stogu",
+    title: "Tedarikçi stoğu",
     badge: "120 adet uygun",
-    description: "Tedarikci: Tedarikci A · Tahmini tedarik: 5 gun",
-    sourceLabel: "Tedarikci",
-    warehouseName: "Tedarikci A",
+    description: "Tedarikçi: Tedarikçi A · Tahmini tedarik: 5 gün",
+    sourceLabel: "Tedarikçi",
+    warehouseName: "Tedarikçi A",
     rackCode: "-",
-    locationCode: "Dis kaynak"
+    locationCode: "Dış kaynak"
   },
   {
     type: "split",
-    title: "Split Kaynak",
-    badge: "Coklu plan",
-    description: "Satir miktari depo/fabrika/tedarikci arasinda dagitilir.",
-    sourceLabel: "Split",
-    warehouseName: "Coklu kaynak",
+    title: "Çoklu kaynak",
+    badge: "Çoklu plan",
+    description: "Satır miktarı depo, fabrika ve tedarikçi arasında dağıtılır.",
+    sourceLabel: "Çoklu",
+    warehouseName: "Çoklu kaynak",
     rackCode: "-",
-    locationCode: "Dagitim plani"
+    locationCode: "Dağıtım planı"
   },
   {
     type: "auto",
     title: "Otomatik Kaynak",
     badge: "Sistem onerisi",
-    description: "Sistem stok, teslim suresi ve cari onceligine gore kaynak onerir.",
-    sourceLabel: "Auto",
-    warehouseName: "Sistem onerisi",
+    description: "Sistem stok, teslim süresi ve cari önceliğine göre kaynak önerir.",
+    sourceLabel: "Otomatik",
+    warehouseName: "Sistem önerisi",
     rackCode: "-",
-    locationCode: "Oneri"
+    locationCode: "Öneri"
   }
 ];
 
@@ -146,11 +146,11 @@ const fallbackSource: SourceOption = {
   type: "auto",
   title: "Otomatik Kaynak",
   badge: "Sistem onerisi",
-  description: "Kaynak secimi bekleniyor.",
-  sourceLabel: "Auto",
-  warehouseName: "Sistem onerisi",
+  description: "Kaynak seçimi bekleniyor.",
+  sourceLabel: "Otomatik",
+  warehouseName: "Sistem önerisi",
   rackCode: "-",
-  locationCode: "Oneri"
+  locationCode: "Öneri"
 };
 
 /** Tabloya eklenen boş satır — ürün seçilene kadar sıfır/boş değerler */
@@ -337,7 +337,7 @@ export function useQuickOperationState(options?: {
   };
 
   const showFoundationNotice = (action: string) => {
-    setNotice(`${action}: Bu ortamda yalnizca taslak/onizleme hazirlanir. Canli kayit icin onay ve islem kuyruzu gerekir.`);
+    setNotice(`${action}: Bu ortamda yalnızca taslak ve önizleme hazırlanır. Canlı kayıt için onay ve işlem kuyruğu gerekir.`);
   };
 
   const applyProductFromUrl = useCallback(
@@ -348,7 +348,7 @@ export function useQuickOperationState(options?: {
       }
       const product = findCatalogProduct(productId);
       if (!product) {
-        setNotice("Urun katalogda bulunamadi veya API baglantisi eksik.");
+        setNotice("Ürün katalogda bulunamadı veya canlı veri bağlantısı kurulmadı.");
         return false;
       }
       const line = productToQuickOperationLine(product);
@@ -403,7 +403,7 @@ export function useQuickOperationState(options?: {
       return false;
     }
     if (!selectedCustomer.id || selectedCustomer.id === fallbackCustomer.id) {
-      setNotice("Once cari secin.");
+      setNotice("Önce cari seçin.");
       return false;
     }
 
@@ -424,14 +424,14 @@ export function useQuickOperationState(options?: {
       if (result.mode === "foundation" || dataSourceConfig.useDemoData) {
         setNotice(`${MSG_DRAFT_SAVED} Referans: ${ref}`);
       } else if (result.mode === "executed") {
-        setNotice(`Islem kaydi alindi: ${ref}. Onay zinciri tamamlandiginda uygulanir.`);
+        setNotice(`İşlem kaydı alındı: ${ref}. Onay zinciri tamamlandığında uygulanır.`);
       } else {
-        setNotice(`Taslak inceleme modunda hazirlandi. Referans: ${ref}`);
+        setNotice(`Taslak inceleme için hazırlandı. Referans: ${ref}`);
       }
       success = true;
     } catch (error) {
       const message = error instanceof Error ? error.message : "Bilinmeyen hata";
-      setNotice(`Islem hazirlanamadi: ${message}`);
+      setNotice(`İşlem hazırlanamadı: ${message}`);
       success = false;
     } finally {
       setIsSubmitting(false);
@@ -441,7 +441,7 @@ export function useQuickOperationState(options?: {
 
   const openDocumentPreview = () => {
     if (!documentPreview) {
-      showFoundationNotice("Belge Onizle");
+      showFoundationNotice("Belge önizle");
       return;
     }
     setDocumentPreviewVisible(true);
@@ -449,7 +449,7 @@ export function useQuickOperationState(options?: {
 
   const openWhatsappDraft = () => {
     if (!whatsappDraft) {
-      showFoundationNotice("WhatsApp Taslagi");
+      showFoundationNotice("WhatsApp taslağı");
       return;
     }
     setWhatsappDraftVisible(true);
