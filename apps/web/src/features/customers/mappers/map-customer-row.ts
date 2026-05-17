@@ -80,7 +80,7 @@ export function mapCustomerToRow(customer: Customer, account: CustomerAccount | 
   const b = account.balance;
   const cur = account.currency;
   const balanceCreditLine = b > 0 ? `${formatMoney(b, cur)} alacak` : "—";
-  const balanceDebitLine = b < 0 ? `${formatMoney(-b, cur)} verecek` : b === 0 ? "Bakiye sıfır" : "—";
+  const balanceDebitLine = b < 0 ? `${formatMoney(-b, cur)} borç` : b === 0 ? "Bakiye sıfır" : "—";
 
   return {
     customerId: customer.id,
