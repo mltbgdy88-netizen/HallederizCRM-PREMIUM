@@ -58,19 +58,7 @@ export function useCustomersData(filters: CustomerFilters) {
   const rows = useMemo(
     () =>
       filteredCustomers.map((customer) =>
-        mapCustomerToRow(
-          customer,
-          data.accounts.find((account) => account.customerId === customer.id) ?? {
-            id: `account_${customer.id}`,
-            tenantId: customer.tenantId,
-            customerId: customer.id,
-            balance: 0,
-            currency: "TRY",
-            overdueAmount: 0,
-            openOfferCount: 0,
-            openOrderCount: 0
-          }
-        )
+        mapCustomerToRow(customer, data.accounts.find((account) => account.customerId === customer.id) ?? null)
       ),
     [data.accounts, filteredCustomers]
   );

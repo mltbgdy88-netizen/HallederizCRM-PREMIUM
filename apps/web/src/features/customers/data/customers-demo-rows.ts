@@ -18,7 +18,8 @@ export const CUSTOMERS_PORTFOLIO_DEMO_ROWS: CustomerRow[] = [
     riskTone: "warning",
     priceGroupLabel: "Bayi A / Slot 2",
     lastOrderLabel: "12.04.2026",
-    whatsappMatched: true
+    whatsappMatched: true,
+    financeLinked: true
   },
   {
     customerId: `${HZ_CUSTOMERS_DEMO_PREFIX}nova`,
@@ -34,7 +35,8 @@ export const CUSTOMERS_PORTFOLIO_DEMO_ROWS: CustomerRow[] = [
     riskTone: "success",
     priceGroupLabel: "Kurumsal / Slot 1",
     lastOrderLabel: "28.03.2026",
-    whatsappMatched: true
+    whatsappMatched: true,
+    financeLinked: true
   },
   {
     customerId: `${HZ_CUSTOMERS_DEMO_PREFIX}ege`,
@@ -50,7 +52,8 @@ export const CUSTOMERS_PORTFOLIO_DEMO_ROWS: CustomerRow[] = [
     riskTone: "danger",
     priceGroupLabel: "Toptan B / Slot 3",
     lastOrderLabel: "30.04.2026",
-    whatsappMatched: true
+    whatsappMatched: true,
+    financeLinked: true
   },
   {
     customerId: `${HZ_CUSTOMERS_DEMO_PREFIX}ghi`,
@@ -66,7 +69,8 @@ export const CUSTOMERS_PORTFOLIO_DEMO_ROWS: CustomerRow[] = [
     riskTone: "warning",
     priceGroupLabel: "Perakende / Slot 1",
     lastOrderLabel: "01.04.2026",
-    whatsappMatched: false
+    whatsappMatched: false,
+    financeLinked: true
   },
   {
     customerId: `${HZ_CUSTOMERS_DEMO_PREFIX}kuzey`,
@@ -82,7 +86,8 @@ export const CUSTOMERS_PORTFOLIO_DEMO_ROWS: CustomerRow[] = [
     riskTone: "success",
     priceGroupLabel: "Kurumsal / Slot 2",
     lastOrderLabel: "25.04.2026",
-    whatsappMatched: true
+    whatsappMatched: true,
+    financeLinked: true
   },
   {
     customerId: `${HZ_CUSTOMERS_DEMO_PREFIX}abc`,
@@ -98,7 +103,8 @@ export const CUSTOMERS_PORTFOLIO_DEMO_ROWS: CustomerRow[] = [
     riskTone: "danger",
     priceGroupLabel: "Bayi B / Slot 2",
     lastOrderLabel: "18.03.2026",
-    whatsappMatched: false
+    whatsappMatched: false,
+    financeLinked: true
   }
 ];
 

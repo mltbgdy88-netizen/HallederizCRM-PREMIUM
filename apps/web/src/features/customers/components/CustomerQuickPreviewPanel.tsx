@@ -3,6 +3,7 @@
 import { calculateCustomerRiskState, resolveCustomerDisplayType } from "@hallederiz/domain";
 import type { Customer, CustomerAccount } from "@hallederiz/types";
 import { useRouter } from "next/navigation";
+import type { ReactNode } from "react";
 import { useState } from "react";
 import {
   IconBuilding,
@@ -27,6 +28,20 @@ function formatMoney(amount: number, currency: string): string {
   return new Intl.NumberFormat("tr-TR", { style: "currency", currency, maximumFractionDigits: 0 }).format(amount);
 }
 
+function buildRiskNoteWithoutAccount(customer: Customer): string {
+  const parts: string[] = ["Finans özeti henüz bağlı değil; bakiye ve vade bilgisi gösterilmez."];
+  if (customer.whatsappMatched) {
+    parts.push("WhatsApp eşleşmesi aktif; belge gönderiminde onay zinciri kullanılmalı.");
+  }
+  if (customer.riskLevel === "high" || customer.riskLevel === "blocked") {
+    parts.push("Cari risk profili yüksek veya blokeli; işlemlerde ek onay gerekebilir.");
+  }
+  if (parts.length === 1) {
+    return parts[0]!;
+  }
+  return parts.join(" ");
+}
+
 function buildRiskNote(customer: Customer, account: CustomerAccount): string {
   const risk = calculateCustomerRiskState(customer, account);
   const parts: string[] = [];
@@ -45,6 +60,18 @@ function buildRiskNote(customer: Customer, account: CustomerAccount): string {
     return "Profil stabil görünüyor. Rutin operasyon ve teklif akışına devam edebilirsiniz.";
   }
   return parts.join(" ");
+}
+
+function CustomerRadarChrome({ children }: { children: ReactNode }) {
+  return (
+    <>
+      <header className="hz-customers-side-head">
+        <h2 className="hz-customers-side-title">Cari Radarı</h2>
+        <p className="hz-customers-side-lead">Seçili carinin risk, bakiye ve operasyon özetleri.</p>
+      </header>
+      <div className="hz-customers-side-scroll">{children}</div>
+    </>
+  );
 }
 
 function buildDemoRiskNote(row: CustomerRow): string {
@@ -79,29 +106,20 @@ export function CustomerQuickPreviewPanel({
   };
 
   const emptyShell = (
-    <div className="hz-customers-side-inner">
-      <header className="hz-customers-side-head">
-        <h2 className="hz-customers-side-title">Cari Radarı</h2>
-        <p className="hz-customers-side-lead">Seçili carinin risk, bakiye ve operasyon özetleri.</p>
-      </header>
-      <div className="hz-customers-side-card">
+    <CustomerRadarChrome>
+      <section className="hz-customers-side-card">
         <div className="hz-customers-side-empty-visual" aria-hidden>
           <IconUser size={20} />
         </div>
         <p className="hz-customers-side-empty-title">Listeden bir cari seçin</p>
         <p className="hz-customers-side-empty-lead">Özet panosu, soldaki listeden bir satır seçildiğinde dolar.</p>
-      </div>
-    </div>
+      </section>
+    </CustomerRadarChrome>
   );
 
   if (previewRow && isCustomersDemoRowId(previewRow.customerId)) {
     return (
-      <div className="hz-customers-side-inner">
-        <header className="hz-customers-side-head">
-          <h2 className="hz-customers-side-title">Cari Radarı</h2>
-          <p className="hz-customers-side-lead">Seçili carinin risk, bakiye ve operasyon özetleri.</p>
-        </header>
-
+      <CustomerRadarChrome>
         <section className="hz-customers-side-card">
           <h3 className="hz-customers-side-card-title">Cari kimliği</h3>
           <p className="hz-customers-side-name">{previewRow.name}</p>
@@ -226,12 +244,121 @@ export function CustomerQuickPreviewPanel({
           <p className="hz-customers-risk-note-text">{buildDemoRiskNote(previewRow)}</p>
           <p className="hz-customers-ai-disclaimer">Özet bilgi; kayıt değiştirmez.</p>
         </section>
-      </div>
+    </CustomerRadarChrome>
     );
   }
 
-  if (!customer || !account) {
+  if (!customer) {
     return emptyShell;
+  }
+
+  if (!account) {
+    return (
+      <CustomerRadarChrome>
+        <section className="hz-customers-side-card">
+          <h3 className="hz-customers-side-card-title">Cari kimliği</h3>
+          <p className="hz-customers-side-name">{customer.name}</p>
+          <dl className="hz-customers-dl">
+            <div>
+              <dt>Kod</dt>
+              <dd>{customer.code}</dd>
+            </div>
+            <div>
+              <dt>Tip</dt>
+              <dd>{resolveCustomerDisplayType(customer.type)}</dd>
+            </div>
+            <div>
+              <dt>
+                <IconMapPin size={12} className="hz-customers-dl-ico" /> Şehir
+              </dt>
+              <dd>{customer.city}</dd>
+            </div>
+            <div>
+              <dt>
+                <IconPhone size={12} className="hz-customers-dl-ico" /> Telefon
+              </dt>
+              <dd>{customer.phone}</dd>
+            </div>
+            <div>
+              <dt>Vergi</dt>
+              <dd>
+                {customer.taxOffice ?? "—"} {customer.taxNumber ? `· ${customer.taxNumber}` : ""}
+              </dd>
+            </div>
+            <div>
+              <dt>
+                <IconTag size={12} className="hz-customers-dl-ico" /> Fiyat grubu
+              </dt>
+              <dd>{customer.pricingProfile.priceSlotLabelSnapshot ?? `Slot ${customer.pricingProfile.selectedPriceSlotNo}`}</dd>
+            </div>
+          </dl>
+          <span className={`hz-customers-status ${customer.active ? "hz-customers-status--ok" : "hz-customers-status--off"}`}>
+            {customer.active ? "Aktif cari" : "Pasif cari"}
+          </span>
+        </section>
+
+        <section className="hz-customers-side-card">
+          <h3 className="hz-customers-side-card-title">Finans özeti</h3>
+          <p className="hz-customers-muted-small">Finans özeti henüz bağlı değil. Hesap özeti API bağlantısı tamamlanınca burada görünür.</p>
+        </section>
+
+        <section className="hz-customers-side-card">
+          <h3 className="hz-customers-side-card-title">Operasyon bağlantıları</h3>
+          <ul className="hz-customers-op-list">
+            <li>
+              <IconBuilding size={14} /> Açık sipariş: <strong>—</strong>
+            </li>
+            <li>
+              <IconWallet size={14} /> Bekleyen tahsilat bağlamı: <strong>—</strong>
+            </li>
+            <li>
+              <IconFileText size={14} /> Son ödeme: <strong>—</strong>
+            </li>
+            <li>
+              <IconMessageCircle size={14} /> WhatsApp: <strong>{customer.whatsappMatched ? "Eşleşti" : "Eşleşmedi"}</strong>
+            </li>
+          </ul>
+        </section>
+
+        <section className="hz-customers-side-card">
+          <h3 className="hz-customers-side-card-title">Hızlı aksiyonlar</h3>
+          <div className="hz-customers-side-actions">
+            <button type="button" className="hz-customers-side-btn hz-customers-side-btn--primary" onClick={() => router.push(`/cariler/${customer.id}`)}>
+              <IconExternalLink size={15} />
+              Cariyi aç
+            </button>
+            <button type="button" className="hz-customers-side-btn" onClick={() => router.push(`/teklifler/yeni?customer=${customer.id}`)}>
+              <IconTag size={15} />
+              Teklif oluştur
+            </button>
+            <button type="button" className="hz-customers-side-btn" onClick={() => router.push(`/siparisler/yeni?customer=${customer.id}`)}>
+              <QuickActionIcon kind="order" size={16} className="hz-customers-side-svg" />
+              Sipariş oluştur
+            </button>
+            <button type="button" className="hz-customers-side-btn" onClick={() => router.push(`/tahsilatlar/yeni?customer=${customer.id}`)}>
+              <QuickActionIcon kind="pay" size={16} className="hz-customers-side-svg" />
+              Tahsilat gir
+            </button>
+            <button type="button" className="hz-customers-side-btn" onClick={() => router.push(`/belgeler?customer=${customer.id}&type=statement_pdf`)}>
+              <IconSend size={15} />
+              Ekstre taslağı
+            </button>
+            <button type="button" className="hz-customers-side-btn" onClick={() => router.push(`/whatsapp?customer=${customer.id}`)}>
+              <IconMessageCircle size={15} />
+              WhatsApp geçmişi
+            </button>
+          </div>
+        </section>
+
+        <section className="hz-customers-side-card hz-customers-risk-note">
+          <h3 className="hz-customers-side-card-title">
+            <IconSparkles size={14} /> Risk notu
+          </h3>
+          <p className="hz-customers-risk-note-text">{buildRiskNoteWithoutAccount(customer)}</p>
+          <p className="hz-customers-ai-disclaimer">Özet öneridir; kayıt değiştirmez.</p>
+        </section>
+      </CustomerRadarChrome>
+    );
   }
 
   const risk = calculateCustomerRiskState(customer, account);
@@ -241,11 +368,7 @@ export function CustomerQuickPreviewPanel({
   const net = formatMoney(bal, account.currency);
 
   return (
-    <div className="hz-customers-side-inner">
-      <header className="hz-customers-side-head">
-        <h2 className="hz-customers-side-title">Cari Radarı</h2>
-        <p className="hz-customers-side-lead">Seçili carinin risk, bakiye ve operasyon özetleri.</p>
-      </header>
+    <CustomerRadarChrome>
 
       <section className="hz-customers-side-card">
         <h3 className="hz-customers-side-card-title">Cari kimliği</h3>
@@ -375,6 +498,6 @@ export function CustomerQuickPreviewPanel({
         <p className="hz-customers-risk-note-text">{buildRiskNote(customer, account)}</p>
         <p className="hz-customers-ai-disclaimer">Özet öneridir; kayıt değiştirmez. İşlemler onay ve politika zincirinden geçer.</p>
       </section>
-    </div>
+    </CustomerRadarChrome>
   );
 }
