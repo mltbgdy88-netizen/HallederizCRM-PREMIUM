@@ -3,6 +3,8 @@
 import { EntityListPageTemplate, LoadingState, MetricCard, Pagination, PrimaryActionToolbar } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { dataSourceConfig } from "../../../lib/data-source";
+import { useToast } from "../../../providers/toast-provider";
 import { PaymentFilterBar } from "./PaymentFilterBar";
 import { PaymentPreviewPanel } from "./PaymentPreviewPanel";
 import { PaymentTable } from "./PaymentTable";
@@ -11,6 +13,7 @@ import { usePaymentsData } from "../hooks/use-payments-data";
 
 export function PaymentsPage() {
   const router = useRouter();
+  const { pushToast } = useToast();
   const { filters, updateFilter, resetFilters } = usePaymentFilters();
   const { loading, customers, filteredPayments, rows } = usePaymentsData(filters);
   const [selectedPaymentId, setSelectedPaymentId] = useState<string | null>(null);
@@ -52,12 +55,17 @@ export function PaymentsPage() {
         <div className="hz-tahsilatlar-head">
           <div className="hz-tahsilatlar-head-text">
             <h1 className="hz-tahsilatlar-head-title">Tahsilatlar</h1>
-            <p className="hz-tahsilatlar-head-sub">Tahsilat fişleri, allocation dağıtımları ve belge bağlantılarını yönetin.</p>
+            <p className="hz-tahsilatlar-head-sub">Tahsilat fişleri, tahsis dağıtımları ve belge bağlantılarını yönetin.</p>
           </div>
+          {dataSourceConfig.useDemoData ? (
+            <p className="hz-payments-preview-band" role="status">
+              Örnek veri modu: liste ve önizleme demo kayıtlarıdır; canlı tahsilat oluşturulmaz.
+            </p>
+          ) : null}
           <section className="hz-metric-grid">
             <MetricCard title="Tahsilat" value={String(filteredPayments.length)} detail="Filtre kapsamında" tone="info" />
             <MetricCard
-              title="Allocation bekleyen"
+              title="Tahsis bekleyen"
               value={String(filteredPayments.filter((payment) => payment.allocations.length === 0).length)}
               detail="Dağıtım gerekli"
               tone="warning"
@@ -79,10 +87,18 @@ export function PaymentsPage() {
             <button type="button" className="hz-btn hz-btn-primary hz-toolbar-btn" onClick={() => router.push("/tahsilatlar/yeni")}>
               Yeni tahsilat
             </button>
-            <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn">
+            <button
+              type="button"
+              className="hz-btn hz-btn-secondary hz-toolbar-btn"
+              onClick={() => pushToast("Toplu doğrulama onay zincirine bağlıdır; canlı işlem henüz bağlı değil.")}
+            >
               Toplu doğrula
             </button>
-            <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn">
+            <button
+              type="button"
+              className="hz-btn hz-btn-secondary hz-toolbar-btn"
+              onClick={() => pushToast("Belge önizlemesi hazırlanır; canlı PDF gönderimi henüz bağlı değil.")}
+            >
               PDF gönder
             </button>
           </PrimaryActionToolbar>
@@ -91,7 +107,7 @@ export function PaymentsPage() {
       filters={<PaymentFilterBar filters={filters} onFilterChange={updateFilter} onReset={resetFilters} />}
       list={
         loading ? (
-          <LoadingState title="Tahsilatlar yükleniyor" message="Fişler, allocation satırları ve belge durumları hazırlanıyor." />
+          <LoadingState title="Tahsilatlar yükleniyor" message="Fişler, tahsis satırları ve belge durumları hazırlanıyor." />
         ) : (
           <PaymentTable
             rows={pagedRows}

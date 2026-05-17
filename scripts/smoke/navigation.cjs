@@ -43,6 +43,11 @@ const checks = [
     description: "Yeni sipariş Hızlı İşlem hub"
   },
   {
+    file: "apps/web/src/features/payments/components/PaymentCreateHub.tsx",
+    patterns: ["Tahsilat kaydı henüz canlı kullanıma bağlı değil", "buildQuickOpHref", "Tahsilat"],
+    description: "Yeni tahsilat Hızlı İşlem hub"
+  },
+  {
     file: "apps/web/src/features/orders/components/OrderDetailPage.tsx",
     patterns: ["/tahsilatlar/yeni?order=", "/depo/emirler/", "/teslimatlar/", "/faturalar/"],
     description: "Siparis detayindan operasyon modullerine gecis"

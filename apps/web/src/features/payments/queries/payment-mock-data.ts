@@ -166,7 +166,7 @@ export function getPaymentMethodLabel(method: PaymentMethod): string {
     cash: "Nakit",
     card: "Kart",
     transfer: "Havale/EFT",
-    check: "Cek",
+    check: "Çek",
     mixed: "Karma"
   };
   return labels[method];
@@ -175,10 +175,10 @@ export function getPaymentMethodLabel(method: PaymentMethod): string {
 export function getPaymentStatusLabel(status: PaymentStatus): string {
   const labels: Record<PaymentStatus, string> = {
     draft: "Taslak",
-    confirmed: "Dogrulandi",
-    reversed: "Ters Kayit",
-    partially_allocated: "Kismi Dagitim",
-    allocated: "Dagitildi"
+    confirmed: "Doğrulandı",
+    reversed: "Ters kayıt",
+    partially_allocated: "Kısmi tahsis",
+    allocated: "Dağıtıldı"
   };
   return labels[status];
 }
