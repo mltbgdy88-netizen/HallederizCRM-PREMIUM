@@ -58,6 +58,15 @@ const checks = [
     description: "Arsiv demo ve canli olmayan aksiyon mesajlari"
   },
   {
+    file: "apps/web/src/features/whatsapp/components/WhatsAppPage.tsx",
+    patterns: [
+      "WhatsApp bağlantısı henüz canlı kullanıma bağlı değil",
+      "Mesaj taslağı hazırlandı; gönderim yapılmadı",
+      "initialCustomerId"
+    ],
+    description: "WhatsApp baglanti ve taslak guvenligi"
+  },
+  {
     file: "apps/web/src/features/orders/components/OrderDetailPage.tsx",
     patterns: ["/tahsilatlar/yeni?order=", "/depo/emirler/", "/teslimatlar/", "/faturalar/"],
     description: "Siparis detayindan operasyon modullerine gecis"

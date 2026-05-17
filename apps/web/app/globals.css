@@ -9988,6 +9988,78 @@ select.hz-qop-summary-input {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--hz-wa-wa) 22%, transparent);
 }
 
+.hz-wa-dot--warn {
+  background: var(--hz-wa-warn);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--hz-wa-warn) 22%, transparent);
+}
+
+.hz-wa-preview-band,
+.hz-wa-preview-band--page {
+  margin: 0 0 8px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #dbe4f2;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.hz-wa-context-band,
+.hz-wa-context-band--page {
+  margin: 0 0 8px;
+  padding: 6px 12px;
+  border-radius: 8px;
+  border: 1px solid #dbe4f2;
+  background: #f0f6ff;
+  color: #1e3a5f;
+  font-size: 12px;
+  line-height: 1.35;
+}
+
+.hz-wa-connection-card {
+  margin: 8px 0 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px dashed #cbd5e1;
+  background: #f8fafc;
+}
+
+.hz-wa-connection-status {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 600;
+  color: #92400e;
+}
+
+.hz-wa-connection-note {
+  margin: 8px 0 0;
+  font-size: 11px;
+  color: var(--hz-wa-muted);
+  line-height: 1.35;
+}
+
+.hz-wa-qr-placeholder {
+  padding: 16px 12px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  text-align: center;
+  color: var(--hz-wa-muted);
+  font-size: 11px;
+  line-height: 1.4;
+}
+
+.hz-wa-qr-placeholder-title {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hz-wa-text);
+}
+
 .hz-wa-queue-pill {
   margin-left: auto;
   padding: 2px 8px;
