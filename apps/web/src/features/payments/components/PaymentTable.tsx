@@ -17,13 +17,13 @@ export function PaymentTable({
         <table className="table hz-table hz-table-sticky">
           <thead>
             <tr>
-              <th>Fis No</th>
-              <th>Musteri</th>
+              <th>Fiş no</th>
+              <th>Müşteri</th>
               <th>Tutar</th>
-              <th>Yontem</th>
+              <th>Yöntem</th>
               <th>Durum</th>
               <th>Tarih</th>
-              <th>Bagli Belge</th>
+              <th>Bağlı belge</th>
             </tr>
           </thead>
           <tbody>
@@ -44,7 +44,7 @@ export function PaymentTable({
               </tr>
             ))}
             {rows.length === 0 ? (
-              <tr><td colSpan={7}><div className="table-empty">Filtrelere uygun tahsilat bulunamadi.</div></td></tr>
+              <tr><td colSpan={7}><div className="table-empty">Filtrelere uygun tahsilat bulunamadı.</div></td></tr>
             ) : null}
           </tbody>
         </table>

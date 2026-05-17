@@ -3,12 +3,12 @@ import type { PaymentReceipt } from "@hallederiz/types";
 export function PaymentDocumentPanel({ payment }: { payment: PaymentReceipt }) {
   return (
     <section className="hz-content-card">
-      <h3>Belge Paneli</h3>
+      <h3>Belge paneli</h3>
       <ul className="hz-side-list hz-margin-top-sm">
-        <li>Bagli belge sayisi: {payment.documentCount}</li>
-        <li>Makbuz PDF: {payment.status === "draft" ? "Taslak" : "Olusturulabilir"}</li>
-        <li>Musteri bildirimi: WhatsApp/PDF gonderim kaydi document deliveries ile tutulacak.</li>
-        <li>Ters kayit: yetkili onayi ve audit gerektirir.</li>
+        <li>Bağlı belge sayısı: {payment.documentCount}</li>
+        <li>Makbuz PDF: {payment.status === "draft" ? "Taslak önizleme" : "Önizleme hazırlanabilir"}</li>
+        <li>Müşteri bildirimi: WhatsApp/PDF gönderimi henüz canlı kullanıma bağlı değil.</li>
+        <li>Ters kayıt: yetkili onayı ve denetim kaydı gerekir.</li>
       </ul>
     </section>
   );

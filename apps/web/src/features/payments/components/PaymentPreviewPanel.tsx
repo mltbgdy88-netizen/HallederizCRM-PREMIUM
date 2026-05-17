@@ -6,8 +6,8 @@ export function PaymentPreviewPanel({ payment, customer }: { payment: PaymentRec
   if (!payment) {
     return (
       <section className="hz-content-card">
-        <h3>Tahsilat Preview</h3>
-        <p className="hz-content-card-description">Bir tahsilat secildiginde allocation ozeti burada gorunur.</p>
+        <h3>Tahsilat önizleme</h3>
+        <p className="hz-content-card-description">Bir tahsilat seçildiğinde tahsis özeti burada görünür.</p>
       </section>
     );
   }
@@ -16,13 +16,13 @@ export function PaymentPreviewPanel({ payment, customer }: { payment: PaymentRec
 
   return (
     <section className="hz-content-card">
-      <h3>Tahsilat Preview</h3>
+      <h3>Tahsilat önizleme</h3>
       <ul className="hz-side-list hz-margin-top-sm">
-        <li>Musteri: {customer?.name ?? payment.customerId}</li>
+        <li>Müşteri: {customer?.name ?? payment.customerId}</li>
         <li>Tutar: {money(payment.amount, payment.currency)}</li>
-        <li>Yontem: {getPaymentMethodLabel(payment.method)}</li>
+        <li>Yöntem: {getPaymentMethodLabel(payment.method)}</li>
         <li>Durum: {getPaymentStatusLabel(payment.status)}</li>
-        <li>Dagitilan: {money(summary.allocatedTotal, payment.currency)}</li>
+        <li>Dağıtılan: {money(summary.allocatedTotal, payment.currency)}</li>
         <li>Kalan: {money(summary.remainingAmount, payment.currency)}</li>
       </ul>
     </section>

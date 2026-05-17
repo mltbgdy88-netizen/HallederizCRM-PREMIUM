@@ -1,3 +1,4 @@
+export * from "./PaymentCreateHub";
 export * from "./PaymentsPage";
 export * from "./PaymentFilterBar";
 export * from "./PaymentTable";

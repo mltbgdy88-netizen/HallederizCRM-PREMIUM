@@ -1558,7 +1558,8 @@ p {
 }
 
 .hz-offers-preview-band,
-.hz-orders-preview-band {
+.hz-orders-preview-band,
+.hz-payments-preview-band {
   margin: 0;
   padding: 4px 10px;
   min-height: 22px;
