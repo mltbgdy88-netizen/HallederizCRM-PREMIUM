@@ -1,6 +1,4 @@
 import { IconRotateCcw } from "../../../dashboard/components/dashboard-inline-icons";
-import { APPROVAL_INBOX_LAST_SYNC } from "../../data/approval-inbox-demo";
-
 type ApprovalInboxHeaderProps = {
   searchQuery: string;
   onSearchChange: (value: string) => void;
@@ -18,7 +16,7 @@ export function ApprovalInboxHeader({
   onOnlyCriticalChange,
   onRefresh,
   refreshing,
-  lastSyncLabel = APPROVAL_INBOX_LAST_SYNC
+  lastSyncLabel = "-"
 }: ApprovalInboxHeaderProps) {
   return (
     <header className="hz-approvals-inbox-desk-head">

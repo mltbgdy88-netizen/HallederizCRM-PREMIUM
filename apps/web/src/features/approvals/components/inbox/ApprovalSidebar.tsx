@@ -1,8 +1,17 @@
 import type { ReactNode } from "react";
-import type { ApprovalInboxViewId } from "../../data/approval-inbox-demo";
-import { APPROVAL_INBOX_VIEWS } from "../../data/approval-inbox-demo";
 import { IconRotateCcw } from "../../../dashboard/components/dashboard-inline-icons";
 import { ApprovalInboxViewIcon } from "./approval-inbox-view-icons";
+import type { ApprovalInboxRecord, ApprovalInboxViewId } from "./types";
+
+const VIEW_DEFS: { id: ApprovalInboxViewId; label: string }[] = [
+  { id: "kritik", label: "Kritik" },
+  { id: "bana_atanan", label: "Bana Atananlar" },
+  { id: "finans", label: "Finans" },
+  { id: "operasyon", label: "Operasyon" },
+  { id: "ai_onerileri", label: "AI \u00d6nerileri" },
+  { id: "tum", label: "T\u00fcm Onaylar" },
+  { id: "yakin_sonuclanan", label: "Yak\u0131n Zamanda Sonu\u00e7lananlar" }
+];
 
 export type ApprovalInboxFilterState = {
   status: string;
@@ -29,6 +38,7 @@ type ApprovalSidebarProps = {
   onFilterChange: <K extends keyof ApprovalInboxFilterState>(key: K, value: ApprovalInboxFilterState[K]) => void;
   onClearFilters: () => void;
   onSaveView: () => void;
+  rows: ApprovalInboxRecord[];
 };
 
 export function ApprovalSidebar({
@@ -37,14 +47,15 @@ export function ApprovalSidebar({
   filters,
   onFilterChange,
   onClearFilters,
-  onSaveView
+  onSaveView,
+  rows
 }: ApprovalSidebarProps) {
   return (
     <aside className="hz-approvals-inbox-desk-side" aria-label="Görünümler ve filtreler">
       <section className="hz-approvals-inbox-desk-side-block">
         <h2 className="hz-approvals-inbox-desk-side-title">Görünümler</h2>
         <ul className="hz-approvals-inbox-desk-views" role="list">
-          {APPROVAL_INBOX_VIEWS.map((view) => (
+          {VIEW_DEFS.map((view) => (
             <li key={view.id}>
               <button
                 type="button"
@@ -55,7 +66,9 @@ export function ApprovalSidebar({
                   <ApprovalInboxViewIcon viewId={view.id} />
                   <span>{view.label}</span>
                 </span>
-                <span className="hz-approvals-inbox-desk-view-count">{view.count}</span>
+                <span className="hz-approvals-inbox-desk-view-count">
+                  {rows.filter((row) => row.viewTags.includes(view.id)).length}
+                </span>
               </button>
             </li>
           ))}

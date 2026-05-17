@@ -1,4 +1,4 @@
-import type { ApprovalInboxStatus } from "../../data/approval-inbox-demo";
+import type { ApprovalInboxStatus } from "./types";
 
 const LABELS: Record<ApprovalInboxStatus, string> = {
   bekliyor: "BEKLİYOR",

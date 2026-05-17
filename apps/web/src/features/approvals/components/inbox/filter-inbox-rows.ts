@@ -1,4 +1,4 @@
-import type { ApprovalInboxRecord, ApprovalInboxViewId } from "../../data/approval-inbox-demo";
+import type { ApprovalInboxRecord, ApprovalInboxViewId } from "./types";
 import type { ApprovalInboxFilterState } from "./ApprovalSidebar";
 
 const ASSIGNEE_LABELS: Record<string, string> = {

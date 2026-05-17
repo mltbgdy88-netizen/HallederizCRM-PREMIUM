@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import type { ApprovalInboxViewId } from "../../data/approval-inbox-demo";
+import type { ApprovalInboxViewId } from "./types";
 import {
   IconAlertTriangle,
   IconBanknote,
@@ -29,3 +29,4 @@ export function ApprovalInboxViewIcon({ viewId }: { viewId: ApprovalInboxViewId 
     </span>
   );
 }
+

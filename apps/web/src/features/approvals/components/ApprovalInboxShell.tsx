@@ -11,6 +11,7 @@ import {
 } from "@hallederiz/ui";
 import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { dataSourceConfig } from "../../../lib/data-source";
 import { useAuth } from "../../../providers/auth-provider";
 import { useToast } from "../../../providers/toast-provider";
 import { createApprovalClient } from "../api/approval-client";
@@ -52,16 +53,16 @@ import { WorkerQueueObservabilityPanel } from "./WorkerQueueObservabilityPanel";
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
 const FILTER_OPTIONS: { id: ApprovalInboxStatusFilter; label: string }[] = [
-  { id: "all", label: "Tumu" },
+  { id: "all", label: "Tümü" },
   { id: "pending", label: "Bekleyen" },
-  { id: "approved", label: "Onaylandi" },
+  { id: "approved", label: "Onaylandı" },
   { id: "rejected", label: "Reddedildi" }
 ];
 
 const SORT_OPTIONS: { id: ApprovalInboxSortMode; label: string }[] = [
   { id: "newest", label: "En yeni" },
   { id: "oldest", label: "En eski" },
-  { id: "actionKey", label: "Action key" }
+  { id: "actionKey", label: "İşlem anahtarı" }
 ];
 
 export function ApprovalInboxShell() {
@@ -156,7 +157,7 @@ export function ApprovalInboxShell() {
         `Tick: islenen ${summary.processed}, tamamlanan ${summary.completed}, hata ${summary.failed}, DLQ ${summary.deadLettered}, retry ${summary.retried}${dup}`
       );
     }
-    return parts.length ? parts.join(" · ") : "Ozete veri yok (worker health ozeti veya sayim gelmedi).";
+    return parts.length ? parts.join(" · ") : "Özete veri yok (worker health özeti veya sayım gelmedi).";
   }, [workerHealth]);
 
   const operatorSmokeSummary = useMemo(() => {
@@ -295,8 +296,17 @@ export function ApprovalInboxShell() {
   }, [refreshList, refreshWorkerHealth, refreshWorkerQueues, refreshWorkerSafety, refreshSandboxAvailability, state]);
 
   useEffect(() => {
-    if (!selectedId && visibleItems[0]) {
-      setSelectedId(visibleItems[0].approvalRequestId);
+    if (!visibleItems.length) {
+      setSelectedId(null);
+      return;
+    }
+    const stillHere =
+      selectedId !== null && visibleItems.some((row) => row.approvalRequestId === selectedId);
+    if (!stillHere) {
+      const next = visibleItems[0];
+      if (next) {
+        setSelectedId(next.approvalRequestId);
+      }
     }
   }, [selectedId, visibleItems]);
 
@@ -367,12 +377,12 @@ export function ApprovalInboxShell() {
   }
 
   return (
-    <main className="hz-approvals-inbox-page" aria-live="polite">
+    <main className="hz-approvals-page hz-approvals-inbox-page" aria-live="polite">
       <header className="hz-approvals-inbox-top">
         <div>
-          <p className="hz-approvals-inbox-eyebrow">Operator workspace</p>
+          <p className="hz-approvals-inbox-eyebrow">Operatör çalışma alanı</p>
           <h1 className="hz-approvals-inbox-title">Onaylar</h1>
-          <p className="hz-approvals-inbox-subtitle">Approval Inbox / operator onaylari, worker ve outbox sinyalleri.</p>
+          <p className="hz-approvals-inbox-subtitle">Onay gelen kutusu; operatör kararları, worker ve outbox sinyalleri.</p>
           <p className="hz-approvals-inbox-top-links">
             <Link href="/onaylar/kurallar" className="hz-approvals-inbox-policy-link">
               Politika matrisi
@@ -380,20 +390,32 @@ export function ApprovalInboxShell() {
             <span className="hz-approvals-inbox-top-links-sep" aria-hidden="true">
               ·
             </span>
-            <span className="hz-approvals-inbox-muted">Domain kayitlarindan onay gerektiren aksiyonlar</span>
+            <Link href="/ayarlar/operasyon-gozlem" className="hz-approvals-inbox-policy-link">
+              Operasyon ve gözlem
+            </Link>
+            <span className="hz-approvals-inbox-top-links-sep" aria-hidden="true">
+              ·
+            </span>
+            <span className="hz-approvals-inbox-muted">Alan kayıtlarından onay gerektiren aksiyonlar</span>
           </p>
         </div>
         <ApprovalSafetyBadge repositoryMode={repositoryMode} workerHealth={workerHealth} />
       </header>
 
-      <div className="hz-approvals-inbox-stats" aria-label="Onay ozetleri">
+      {dataSourceConfig.useDemoData ? (
+        <div className="hz-approvals-inbox-preview-band" role="status">
+          Demo veri modunda API boş dönerse liste boş kalır; sandbox araçlarıyla örnek onay oluşturabilirsiniz.
+        </div>
+      ) : null}
+
+      <div className="hz-approvals-inbox-stats" aria-label="Onay özetleri">
         <span>Toplam {stats.total}</span>
         <span>Bekleyen {stats.pending}</span>
         <span>Onaylanan {stats.approved}</span>
         <span>Reddedilen {stats.rejected}</span>
       </div>
 
-      <div className="hz-approvals-worker-strip" aria-label="Worker ve guvenlik ozeti">
+      <div className="hz-approvals-worker-strip" aria-label="Worker ve güvenlik özeti">
         <div className="hz-approvals-worker-card">
           <h4>Worker health</h4>
           <p>{summarizeWorkerHealth(workerHealth)}</p>

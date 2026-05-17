@@ -1,4 +1,4 @@
-import type { ApprovalInboxPriority } from "../../data/approval-inbox-demo";
+import type { ApprovalInboxPriority } from "./types";
 
 const LABELS: Record<ApprovalInboxPriority, string> = {
   kritik: "KRİTİK",

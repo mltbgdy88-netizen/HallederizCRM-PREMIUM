@@ -2,36 +2,52 @@
 
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { sdk } from "../../../../lib/data-source";
 import { useToast } from "../../../../providers/toast-provider";
-import { APPROVAL_INBOX_DEMO_ROWS, type ApprovalInboxRecord, type ApprovalInboxViewId } from "../../data/approval-inbox-demo";
+import { executeApprovalMutation } from "../../mutations";
 import { ApprovalInboxEmpty, ApprovalInboxError, ApprovalInboxLoading } from "../ApprovalInboxStates";
 import { ApprovalInboxDetailPanel } from "./ApprovalInboxDetailPanel";
+import { ApprovalInboxHeader } from "./ApprovalInboxHeader";
 import { ApprovalKpiCards } from "./ApprovalKpiCards";
 import { ApprovalSidebar, DEFAULT_APPROVAL_INBOX_FILTERS, type ApprovalInboxFilterState } from "./ApprovalSidebar";
 import { ApprovalTable } from "./ApprovalTable";
 import { filterApprovalInboxRows } from "./filter-inbox-rows";
+import { mapApprovalToInboxRecord } from "./map-approvals-to-inbox";
+import type { ApprovalInboxRecord, ApprovalInboxViewId } from "./types";
 
 type UiPhase = "loading" | "ready" | "empty" | "error";
-
-const DEMO_PREVIEW =
-  "Demo onay kutusu verisi — gerçek API bağlantısı sonraki aşamada bağlanacak.";
 
 export function ApprovalInboxPage() {
   const router = useRouter();
   const { pushToast } = useToast();
 
   const [phase, setPhase] = useState<UiPhase>("loading");
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [activeView, setActiveView] = useState<ApprovalInboxViewId>("bana_atanan");
   const [filters, setFilters] = useState<ApprovalInboxFilterState>(DEFAULT_APPROVAL_INBOX_FILTERS);
-  const [selectedId, setSelectedId] = useState<string | null>("on-003");
+  const [selectedId, setSelectedId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);
-  const [actionDone, setActionDone] = useState<Record<string, boolean>>({});
+  const [searchQuery, setSearchQuery] = useState("");
+  const [onlyCritical, setOnlyCritical] = useState(false);
+  const [rows, setRows] = useState<ApprovalInboxRecord[]>([]);
+  const [actionPending, setActionPending] = useState<"approve" | "reject" | "review" | null>(null);
+  const [detailLoading, setDetailLoading] = useState(false);
+  const [detailError, setDetailError] = useState<string | null>(null);
 
   const bootstrap = useCallback(async () => {
     setPhase("loading");
-    await new Promise((resolve) => setTimeout(resolve, 420));
-    setPhase("ready");
+    setErrorMessage(null);
+    try {
+      const result = await sdk.approvals.list();
+      const mapped = (result.items ?? []).map(mapApprovalToInboxRecord);
+      setRows(mapped);
+      setPhase("ready");
+    } catch (error) {
+      setRows([]);
+      setErrorMessage(error instanceof Error ? error.message : "Onay listesi alınamadı.");
+      setPhase("error");
+    }
   }, []);
 
   useEffect(() => {
@@ -40,13 +56,13 @@ export function ApprovalInboxPage() {
 
   const filteredRows = useMemo(
     () =>
-      filterApprovalInboxRows(APPROVAL_INBOX_DEMO_ROWS, {
+      filterApprovalInboxRows(rows, {
         activeView,
-        onlyCritical: false,
-        searchQuery: "",
+        onlyCritical,
+        searchQuery,
         filters
       }),
-    [activeView, filters]
+    [activeView, filters, onlyCritical, rows, searchQuery]
   );
 
   const pagedRows = useMemo(() => {
@@ -55,9 +71,28 @@ export function ApprovalInboxPage() {
   }, [filteredRows, page, pageSize]);
 
   const selectedRecord = useMemo(
-    () => filteredRows.find((row) => row.id === selectedId) ?? APPROVAL_INBOX_DEMO_ROWS.find((row) => row.id === selectedId) ?? null,
-    [filteredRows, selectedId]
+    () => filteredRows.find((row) => row.id === selectedId) ?? rows.find((row) => row.id === selectedId) ?? null,
+    [filteredRows, selectedId, rows]
   );
+
+  const refreshDetail = useCallback(async () => {
+    if (!selectedId) return;
+    setDetailLoading(true);
+    setDetailError(null);
+    try {
+      const detail = await sdk.approvals.detail(selectedId);
+      const mapped = mapApprovalToInboxRecord(detail.item);
+      setRows((prev) => prev.map((item) => (item.id === mapped.id ? mapped : item)));
+    } catch (error) {
+      setDetailError(error instanceof Error ? error.message : "Detay yüklenemedi.");
+    } finally {
+      setDetailLoading(false);
+    }
+  }, [selectedId]);
+
+  useEffect(() => {
+    void refreshDetail();
+  }, [refreshDetail]);
 
   useEffect(() => {
     if (phase !== "ready") return;
@@ -73,93 +108,110 @@ export function ApprovalInboxPage() {
 
   useEffect(() => {
     setPage(1);
-  }, [activeView, filters, pageSize]);
+  }, [activeView, filters, pageSize, onlyCritical, searchQuery]);
 
   const updateFilter = <K extends keyof ApprovalInboxFilterState>(key: K, value: ApprovalInboxFilterState[K]) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
   };
 
-  const markDemoAction = (record: ApprovalInboxRecord, message: string) => {
-    setActionDone((prev) => ({ ...prev, [record.id]: true }));
-    pushToast(message);
-  };
+  const runAction = useCallback(
+    async (kind: "approve" | "reject" | "review") => {
+      if (!selectedRecord || actionPending) return;
+      setActionPending(kind);
+      try {
+        if (kind === "approve") {
+          await sdk.approvals.approve(selectedRecord.id);
+          pushToast("Onay kaydı onaylandı.");
+        } else if (kind === "reject") {
+          await sdk.approvals.reject(selectedRecord.id);
+          pushToast("Onay kaydı reddedildi.");
+        } else {
+          await executeApprovalMutation(selectedRecord.id);
+          pushToast("Kayıt inceleme iş akışına gönderildi.");
+        }
+        await bootstrap();
+        await refreshDetail();
+      } catch (error) {
+        pushToast(error instanceof Error ? error.message : "İşlem tamamlanamadı.");
+      } finally {
+        setActionPending(null);
+      }
+    },
+    [actionPending, bootstrap, pushToast, refreshDetail, selectedRecord]
+  );
 
   const listPhase: UiPhase = phase === "ready" && filteredRows.length === 0 ? "empty" : phase;
 
   return (
     <main className="hz-approvals-page hz-approvals-inbox-desk-page">
       <div className="hz-approvals-inbox-desk-workspace">
-      <div className="hz-approvals-inbox-desk-top">
-        <ApprovalKpiCards />
-        <p className="hz-approvals-inbox-desk-preview" role="status">
-          {DEMO_PREVIEW}
-        </p>
+        <div className="hz-approvals-inbox-desk-top">
+          <ApprovalInboxHeader
+            searchQuery={searchQuery}
+            onSearchChange={setSearchQuery}
+            onlyCritical={onlyCritical}
+            onOnlyCriticalChange={setOnlyCritical}
+            onRefresh={() => void bootstrap()}
+            refreshing={phase === "loading"}
+            lastSyncLabel={new Intl.DateTimeFormat("tr-TR", { dateStyle: "short", timeStyle: "short" }).format(new Date())}
+          />
+          <ApprovalKpiCards rows={rows} />
+        </div>
+        <div className="hz-approvals-inbox-desk-body">
+          <ApprovalSidebar
+            activeView={activeView}
+            onViewChange={setActiveView}
+            filters={filters}
+            onFilterChange={updateFilter}
+            onClearFilters={() => setFilters(DEFAULT_APPROVAL_INBOX_FILTERS)}
+            onSaveView={() => pushToast("Görünüm kaydedildi.")}
+            rows={rows}
+          />
+          <section className="hz-approvals-inbox-desk-center" aria-label="Onay listesi alanı">
+            {listPhase === "loading" ? <ApprovalInboxLoading label="Onay kutusu yükleniyor…" /> : null}
+            {listPhase === "error" ? (
+              <ApprovalInboxError
+                error={{ kind: "unknown", message: errorMessage ?? "Onay kutusu verisi şu an alınamıyor." }}
+                onRetry={() => void bootstrap()}
+              />
+            ) : null}
+            {listPhase === "empty" ? (
+              <ApprovalInboxEmpty
+                title="Filtreye uygun onay yok"
+                description="Görünüm veya filtre kriterlerini değiştirin."
+              />
+            ) : null}
+            {listPhase === "ready" ? (
+              <ApprovalTable
+                rows={pagedRows}
+                selectedId={selectedId}
+                onSelect={setSelectedId}
+                page={page}
+                pageSize={pageSize}
+                totalCount={filteredRows.length}
+                onPageChange={setPage}
+                onPageSizeChange={(size) => {
+                  setPageSize(size);
+                  setPage(1);
+                }}
+              />
+            ) : null}
+          </section>
+          <ApprovalInboxDetailPanel
+            record={selectedRecord}
+            actionPending={actionPending}
+            detailLoading={detailLoading}
+            detailError={detailError}
+            onApprove={() => void runAction("approve")}
+            onReject={() => void runAction("reject")}
+            onSendToReview={() => void runAction("review")}
+            onOpenFull={() => {
+              if (!selectedRecord) return;
+              router.push(`/onaylar/${selectedRecord.id}`);
+            }}
+          />
+        </div>
       </div>
-
-      <div className="hz-approvals-inbox-desk-body">
-        <ApprovalSidebar
-          activeView={activeView}
-          onViewChange={setActiveView}
-          filters={filters}
-          onFilterChange={updateFilter}
-          onClearFilters={() => setFilters(DEFAULT_APPROVAL_INBOX_FILTERS)}
-          onSaveView={() => pushToast("Görünüm kaydedildi (demo).")}
-        />
-
-        <section className="hz-approvals-inbox-desk-center" aria-label="Onay listesi alanı">
-          {listPhase === "loading" ? <ApprovalInboxLoading label="Onay kutusu yükleniyor…" /> : null}
-          {listPhase === "error" ? (
-            <ApprovalInboxError
-              error={{ kind: "unknown", message: "Onay kutusu verisi şu an alınamıyor.", reasons: ["Demo hata durumu"] }}
-              onRetry={() => void bootstrap()}
-            />
-          ) : null}
-          {listPhase === "empty" ? (
-            <ApprovalInboxEmpty
-              title="Filtreye uygun onay yok"
-              description="Görünüm veya filtre kriterlerini değiştirin."
-            />
-          ) : null}
-          {listPhase === "ready" ? (
-            <ApprovalTable
-              rows={pagedRows}
-              selectedId={selectedId}
-              onSelect={setSelectedId}
-              page={page}
-              pageSize={pageSize}
-              totalCount={filteredRows.length}
-              onPageChange={setPage}
-              onPageSizeChange={(size) => {
-                setPageSize(size);
-                setPage(1);
-              }}
-            />
-          ) : null}
-        </section>
-
-        <ApprovalInboxDetailPanel
-          record={selectedRecord}
-          actionDone={actionDone}
-          onApprove={() => {
-            if (!selectedRecord) return;
-            markDemoAction(selectedRecord, `${selectedRecord.title} onaylandı (demo).`);
-          }}
-          onReject={() => {
-            if (!selectedRecord) return;
-            markDemoAction(selectedRecord, `${selectedRecord.title} reddedildi (demo).`);
-          }}
-          onSendToReview={() => {
-            if (!selectedRecord) return;
-            pushToast(`${selectedRecord.title} incelemeye gönderildi (demo).`);
-          }}
-          onOpenFull={() => {
-            if (!selectedRecord) return;
-            router.push(`/onaylar/${selectedRecord.id}`);
-          }}
-        />
-      </div>
-      </div>
-
     </main>
   );
 }

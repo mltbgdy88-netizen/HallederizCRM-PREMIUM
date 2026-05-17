@@ -2,7 +2,7 @@ import type { ApprovalInboxItem } from "../types";
 
 export function ApprovalRiskSummary({ item }: { item: ApprovalInboxItem }) {
   return (
-    <section className="hz-approvals-inbox-card" aria-label="Risk ozeti">
+    <section className="hz-approvals-inbox-card" aria-label="Risk özeti">
       <h3 className="hz-approvals-inbox-card-title">Risk ve politika</h3>
       <dl className="hz-approvals-inbox-meta">
         <div>
@@ -29,7 +29,7 @@ export function ApprovalRiskSummary({ item }: { item: ApprovalInboxItem }) {
           ))}
         </ul>
       ) : (
-        <p className="hz-approvals-inbox-muted">Gerekce kaydi yok.</p>
+        <p className="hz-approvals-inbox-muted">Gerekçe kaydı yok.</p>
       )}
     </section>
   );

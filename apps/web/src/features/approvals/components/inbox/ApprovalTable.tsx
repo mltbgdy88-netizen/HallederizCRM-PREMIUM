@@ -1,4 +1,4 @@
-import type { ApprovalInboxRecord } from "../../data/approval-inbox-demo";
+import type { ApprovalInboxRecord } from "./types";
 import { PriorityBadge } from "./PriorityBadge";
 import { StatusBadge } from "./StatusBadge";
 
@@ -191,3 +191,4 @@ function buildPageButtons(current: number, total: number): Array<number | "ellip
   pages.push(total);
   return pages;
 }
+

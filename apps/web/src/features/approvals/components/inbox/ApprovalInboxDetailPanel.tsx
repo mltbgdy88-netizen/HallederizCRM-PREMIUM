@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import type { ApprovalInboxRecord } from "../../data/approval-inbox-demo";
+import type { ApprovalInboxRecord } from "./types";
 import { PriorityBadge } from "./PriorityBadge";
 import { StatusBadge } from "./StatusBadge";
 
@@ -18,7 +18,9 @@ const RISK_LEVEL_LABELS: Record<NonNullable<ApprovalInboxRecord["riskLevel"]>, s
 
 type ApprovalInboxDetailPanelProps = {
   record: ApprovalInboxRecord | null;
-  actionDone: Record<string, boolean>;
+  actionPending: "approve" | "reject" | "review" | null;
+  detailLoading: boolean;
+  detailError: string | null;
   onApprove: () => void;
   onReject: () => void;
   onSendToReview: () => void;
@@ -35,7 +37,9 @@ function contextLinksForPanel(record: ApprovalInboxRecord) {
 
 export function ApprovalInboxDetailPanel({
   record,
-  actionDone,
+  actionPending,
+  detailLoading,
+  detailError,
   onApprove,
   onReject,
   onSendToReview,
@@ -50,7 +54,7 @@ export function ApprovalInboxDetailPanel({
     );
   }
 
-  const disabled = actionDone[record.id] === true;
+  const disabled = actionPending !== null;
   const contextLinks = contextLinksForPanel(record);
   const riskBullets = record.riskBullets.slice(0, MAX_RISK_BULLETS);
   const timelineSteps = record.timeline.slice(0, MAX_TIMELINE_STEPS);
