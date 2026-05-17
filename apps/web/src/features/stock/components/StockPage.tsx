@@ -61,15 +61,24 @@ function statusLabel(status: StockRow["displayStatus"]): string {
   }
 }
 
+const MSG_STOCK_MOVE =
+  "Stok hareketi henüz canlı kullanıma bağlı değil. Onay ve işlem kuyruğu bağlantısı tamamlandığında uygulanır.";
+const MSG_LABEL =
+  "Etiket ve barkod çıktısı bu ortamda kapalı. Canlı üretim için modül API bağlantısı gerekiyor.";
+const MSG_PRICE =
+  "Fiyat güncellemesi policy ve onay kontrolü olmadan canlıya alınmaz.";
+const MSG_NEW_PRODUCT =
+  "Yeni ürün oluşturma henüz canlı API ve onay zincirine bağlı değil.";
+const MSG_IMPORT_HINT = "Toplu ürün aktarımı için Veri yükleme ekranını kullanın.";
+
 function StockRadarPanel(props: {
   row: StockRow | null;
-  radarDone: Record<string, boolean>;
-  onFireRadar: (key: string, msg: string) => void;
+  onInfoToast: (msg: string) => void;
   onOpenDetail: (row: StockRow) => void;
-  onGoArchive: () => void;
-  onGoQuickOp: () => void;
+  onGoArchive: (row: StockRow) => void;
+  onGoQuickOp: (row: StockRow) => void;
 }) {
-  const { row, radarDone, onFireRadar, onOpenDetail, onGoArchive, onGoQuickOp } = props;
+  const { row, onInfoToast, onOpenDetail, onGoArchive, onGoQuickOp } = props;
 
   return (
     <aside className="hz-stock-side" aria-label="Stok radarı">
@@ -81,8 +90,8 @@ function StockRadarPanel(props: {
 
         {!row ? (
           <div className="hz-stock-empty hz-stock-empty--side" role="status">
-            <p className="hz-stock-empty-title">Henüz seçim yok</p>
-            <p className="hz-stock-empty-text">Listeden bir ürün seçin.</p>
+            <p className="hz-stock-empty-title">Listeden bir ürün seçin</p>
+            <p className="hz-stock-empty-text">Özet panosu, soldaki listeden bir satır seçildiğinde dolar.</p>
           </div>
         ) : (
           <div className="hz-stock-side-stack">
@@ -102,9 +111,9 @@ function StockRadarPanel(props: {
                   <dt>Kategori</dt>
                   <dd>{row.categorySummary}</dd>
                 </div>
-                <div>
+                <div className="hz-stock-dl-row hz-stock-dl-row--codes">
                   <dt>Barkod / QR</dt>
-                  <dd>
+                  <dd title={`${row.primaryBarcode} / ${row.qrCodeValue}`}>
                     {row.primaryBarcode} / {row.qrCodeValue}
                   </dd>
                 </div>
@@ -200,54 +209,23 @@ function StockRadarPanel(props: {
                   <IconFileText size={14} aria-hidden />
                   Detay aç
                 </button>
-                <button
-                  type="button"
-                  className="hz-stock-side-btn"
-                  disabled={Boolean(radarDone.move)}
-                  onClick={() => onFireRadar("move", "Stok hareketi yalnız policy/onay ve execution zinciri tamamlanınca uygulanır.")}
-                >
+                <button type="button" className="hz-stock-side-btn" onClick={() => onInfoToast(MSG_STOCK_MOVE)}>
                   <IconTruck size={14} aria-hidden />
                   Stok hareketi
                 </button>
-                <button
-                  type="button"
-                  className="hz-stock-side-btn"
-                  disabled={Boolean(radarDone.label)}
-                  onClick={() => onFireRadar("label", "Etiket/barkod çıktısı bu ortamda canlı üretim için hazır değil.")}
-                >
+                <button type="button" className="hz-stock-side-btn" onClick={() => onInfoToast(MSG_LABEL)}>
                   <IconBarcode size={14} aria-hidden />
                   Etiket / barkod
                 </button>
-                <button
-                  type="button"
-                  className="hz-stock-side-btn"
-                  disabled={Boolean(radarDone.price)}
-                  onClick={() => onFireRadar("price", "Fiyat güncellemesi policy/onay kontrolü olmadan canlıya alınmaz.")}
-                >
+                <button type="button" className="hz-stock-side-btn" onClick={() => onInfoToast(MSG_PRICE)}>
                   <IconTag size={14} aria-hidden />
                   Fiyat güncelle
                 </button>
-                <button
-                  type="button"
-                  className="hz-stock-side-btn"
-                  disabled={Boolean(radarDone.quick)}
-                  onClick={() => {
-                    onFireRadar("quick", "Hızlı İşlem ekranına yönlendirildi. Canlı mutation sonucu ayrı doğrulanır.");
-                    onGoQuickOp();
-                  }}
-                >
+                <button type="button" className="hz-stock-side-btn" onClick={() => onGoQuickOp(row)}>
                   <IconZap size={14} aria-hidden />
                   Hızlı işleme al
                 </button>
-                <button
-                  type="button"
-                  className="hz-stock-side-btn"
-                  disabled={Boolean(radarDone.arch)}
-                  onClick={() => {
-                    onFireRadar("arch", "Arşiv ekranına yönlendirildi. Kayıt durumu backend yanıtına göre gösterilir.");
-                    onGoArchive();
-                  }}
-                >
+                <button type="button" className="hz-stock-side-btn" onClick={() => onGoArchive(row)}>
                   <IconExternalLink size={14} aria-hidden />
                   Arşivde gör
                 </button>
@@ -276,9 +254,6 @@ export function StockPage() {
   const [selectedProductId, setSelectedProductId] = useState<string | null>(null);
   const [detailModalProductId, setDetailModalProductId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [topCtaDone, setTopCtaDone] = useState<Record<string, boolean>>({});
-  const [radarDone, setRadarDone] = useState<Record<string, boolean>>({});
-
   const pageSize = 20;
 
   const usingDemoFallback = dataSourceConfig.useDemoData && !loading && products.length === 0;
@@ -332,27 +307,8 @@ export function StockPage() {
     [displayRows, priceSlotActiveCount]
   );
 
-  const fireTopDemo = (key: string, msg: string) => {
-    if (topCtaDone[key]) {
-      return;
-    }
-    pushToast(msg);
-    setTopCtaDone((d) => ({ ...d, [key]: true }));
-  };
-
-  const fireRadarDemo = useCallback(
-    (key: string, msg: string) => {
-      if (radarDone[key]) {
-        return;
-      }
-      pushToast(msg);
-      setRadarDone((d) => ({ ...d, [key]: true }));
-    },
-    [pushToast, radarDone]
-  );
-
   const demoRowToast = useCallback(() => {
-    pushToast("Bu satır örnek veri modunda. Production'da yalnız gerçek stok kaydıyla işlem açılır.");
+    pushToast("Bu kayıt önizleme verisidir; gerçek stok kaydı ile işlem yapılmaz.");
   }, [pushToast]);
 
   const handleOpenDetail = useCallback(
@@ -374,10 +330,9 @@ export function StockPage() {
         return;
       }
       setSelectedProductId(row.productId);
-      pushToast("Hızlı İşlem ekranına yönlendirildi. Canlı execution sonucu policy/onay durumuna bağlıdır.");
-      router.push("/hizli-islem");
+      router.push(`/hizli-islem?product=${row.productId}`);
     },
-    [demoRowToast, pushToast, router]
+    [demoRowToast, router]
   );
 
   const handleStockMovement = useCallback(
@@ -386,9 +341,9 @@ export function StockPage() {
         demoRowToast();
         return;
       }
-      fireTopDemo("stockMove", "Stok hareketi yalnız onay + execution zinciri ile canlı uygulanır.");
+      pushToast(MSG_STOCK_MOVE);
     },
-    [demoRowToast, fireTopDemo]
+    [demoRowToast, pushToast]
   );
 
   const handleLabelAction = useCallback(
@@ -397,9 +352,31 @@ export function StockPage() {
         demoRowToast();
         return;
       }
-      fireTopDemo("label", "Etiket/barkod çıktısı bu ortamda canlı olarak üretilemez.");
+      pushToast(MSG_LABEL);
     },
-    [demoRowToast, fireTopDemo]
+    [demoRowToast, pushToast]
+  );
+
+  const handleRadarQuickOp = useCallback(
+    (row: StockRow) => {
+      if (isStockDemoRowId(row.productId)) {
+        demoRowToast();
+        return;
+      }
+      router.push(`/hizli-islem?product=${row.productId}`);
+    },
+    [demoRowToast, router]
+  );
+
+  const handleRadarArchive = useCallback(
+    (row: StockRow) => {
+      if (isStockDemoRowId(row.productId)) {
+        demoRowToast();
+        return;
+      }
+      router.push("/archive");
+    },
+    [demoRowToast, router]
   );
 
   const emptyFiltered = !usingDemoFallback && !loading && products.length > 0 && rows.length === 0;
@@ -425,8 +402,8 @@ export function StockPage() {
                 <button
                   type="button"
                   className="hz-stock-toolbar-btn hz-stock-toolbar-btn--primary"
-                  disabled={Boolean(topCtaDone.newProduct)}
-                  onClick={() => fireTopDemo("newProduct", "Yeni ürün açma akışı henüz canlı konfigüre değil (blocked_not_configured).")}
+                  title="Yeni ürün oluşturma henüz canlıya bağlı değil"
+                  onClick={() => pushToast(MSG_NEW_PRODUCT)}
                 >
                   <IconPlus size={16} aria-hidden />
                   Yeni ürün
@@ -434,8 +411,8 @@ export function StockPage() {
                 <button
                   type="button"
                   className="hz-stock-toolbar-btn hz-stock-toolbar-btn--outline"
-                  disabled={Boolean(topCtaDone.stockMoveTop)}
-                  onClick={() => fireTopDemo("stockMoveTop", "Stok hareketi yalnız onay + execution zinciri ile uygulanır.")}
+                  title="Stok hareketi onay zinciri bekliyor"
+                  onClick={() => pushToast(MSG_STOCK_MOVE)}
                 >
                   <IconTruck size={16} aria-hidden />
                   Stok hareketi
@@ -443,8 +420,8 @@ export function StockPage() {
                 <button
                   type="button"
                   className="hz-stock-toolbar-btn hz-stock-toolbar-btn--outline"
-                  disabled={Boolean(topCtaDone.labelTop)}
-                  onClick={() => fireTopDemo("labelTop", "Etiket/barkod çıktısı canlı modda henüz not_configured.")}
+                  title="Etiket ve barkod çıktısı bu ortamda kapalı"
+                  onClick={() => pushToast(MSG_LABEL)}
                 >
                   <IconBarcode size={16} aria-hidden />
                   Etiket / barkod
@@ -452,8 +429,11 @@ export function StockPage() {
                 <button
                   type="button"
                   className="hz-stock-toolbar-btn hz-stock-toolbar-btn--outline"
-                  disabled={Boolean(topCtaDone.import)}
-                  onClick={() => fireTopDemo("import", "İçe aktarma bu modda canlıya açık değil; ayarlar/veri-yükleme üzerinden ilerleyin.")}
+                  title="Toplu ürün aktarımı — Veri yükleme"
+                  onClick={() => {
+                    pushToast(MSG_IMPORT_HINT);
+                    router.push("/ayarlar/veri-yukleme");
+                  }}
                 >
                   <IconUpload size={16} aria-hidden />
                   İçe aktar
@@ -556,11 +536,10 @@ export function StockPage() {
         preview={
           <StockRadarPanel
             row={selectedRow}
-            radarDone={radarDone}
-            onFireRadar={fireRadarDemo}
+            onInfoToast={pushToast}
             onOpenDetail={handleOpenDetail}
-            onGoArchive={() => router.push("/archive")}
-            onGoQuickOp={() => router.push("/hizli-islem")}
+            onGoArchive={handleRadarArchive}
+            onGoQuickOp={handleRadarQuickOp}
           />
         }
       />

@@ -12125,6 +12125,12 @@ select.hz-qop-summary-input {
   word-break: break-word;
 }
 
+.hz-stock-dl-row--codes dd {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .hz-stock-side-badges {
   display: flex;
   flex-wrap: wrap;
