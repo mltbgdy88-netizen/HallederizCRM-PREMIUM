@@ -2,10 +2,6 @@ import type { ApprovalInboxRecord } from "./types";
 import { PriorityBadge } from "./PriorityBadge";
 import { StatusBadge } from "./StatusBadge";
 
-/** Sabit kolon genişlikleri — orta alan içinde yatay scroll ile korunur */
-const TABLE_COLS = "32px 74px 156px 128px 100px 116px 72px 88px";
-const TABLE_MIN_WIDTH_PX = 790;
-
 type ApprovalTableProps = {
   rows: ApprovalInboxRecord[];
   selectedId: string | null;
@@ -34,16 +30,30 @@ export function ApprovalTable({
   return (
     <section className="hz-approvals-inbox-desk-table-wrap" aria-label="Onay listesi">
       <div className="hz-approvals-inbox-desk-table-scroll">
-        <div className="hz-approvals-inbox-desk-table-inner" style={{ minWidth: TABLE_MIN_WIDTH_PX }}>
-          <div className="hz-approvals-inbox-desk-table-head" style={{ gridTemplateColumns: TABLE_COLS }}>
+        <div className="hz-approvals-inbox-desk-table-inner">
+          <div className="hz-approvals-inbox-desk-table-head hz-approvals-inbox-desk-grid">
             <span className="hz-approvals-inbox-desk-cell--check" aria-hidden />
-            <span title="Öncelik">Öncelik</span>
-            <span title="Onay">Onay</span>
-            <span title="Müşteri / Firma">Müşteri</span>
-            <span title="Tutar / Etki">Tutar</span>
-            <span title="Atanan kişi">Atanan</span>
-            <span title="Güncellendi">Güncel.</span>
-            <span title="Durum">Durum</span>
+            <span className="hz-approvals-inbox-desk-th" title="Öncelik">
+              Önc.
+            </span>
+            <span className="hz-approvals-inbox-desk-th hz-approvals-inbox-desk-th--onay" title="Onay kaydı">
+              Onay
+            </span>
+            <span className="hz-approvals-inbox-desk-th hz-approvals-inbox-desk-th--customer" title="Müşteri / Firma">
+              Müşteri
+            </span>
+            <span className="hz-approvals-inbox-desk-th" title="Tutar / Etki">
+              Tutar
+            </span>
+            <span className="hz-approvals-inbox-desk-th" title="Atanan kişi">
+              Atanan
+            </span>
+            <span className="hz-approvals-inbox-desk-th" title="Güncellendi">
+              Günc.
+            </span>
+            <span className="hz-approvals-inbox-desk-th" title="Durum">
+              Durum
+            </span>
           </div>
 
           <div className="hz-approvals-inbox-desk-table-body" role="listbox" aria-label="Onay kayıtları">
@@ -53,8 +63,7 @@ export function ApprovalTable({
                 type="button"
                 role="option"
                 aria-selected={selectedId === row.id}
-                className={`hz-approvals-inbox-desk-row${selectedId === row.id ? " is-selected" : ""}${row.priority === "kritik" || row.slaBreached ? " is-critical" : ""}${row.priority === "ai" ? " is-ai" : ""}`}
-                style={{ gridTemplateColumns: TABLE_COLS }}
+                className={`hz-approvals-inbox-desk-row hz-approvals-inbox-desk-grid${selectedId === row.id ? " is-selected" : ""}${row.priority === "kritik" || row.slaBreached ? " is-critical" : ""}${row.priority === "ai" ? " is-ai" : ""}`}
                 onClick={() => onSelect(row.id)}
               >
                 <span className="hz-approvals-inbox-desk-cell hz-approvals-inbox-desk-cell--check">
@@ -67,7 +76,7 @@ export function ApprovalTable({
                     onClick={(event) => event.stopPropagation()}
                   />
                 </span>
-                <span className="hz-approvals-inbox-desk-cell">
+                <span className="hz-approvals-inbox-desk-cell hz-approvals-inbox-desk-cell--priority">
                   <PriorityBadge priority={row.priority} />
                 </span>
                 <span className="hz-approvals-inbox-desk-cell hz-approvals-inbox-desk-cell--title">
@@ -90,7 +99,7 @@ export function ApprovalTable({
                 <span className="hz-approvals-inbox-desk-cell hz-approvals-inbox-desk-cell--updated">
                   {formatUpdated(row.updatedAt)}
                 </span>
-                <span className="hz-approvals-inbox-desk-cell">
+                <span className="hz-approvals-inbox-desk-cell hz-approvals-inbox-desk-cell--status">
                   <StatusBadge status={row.status} />
                 </span>
               </button>
@@ -158,14 +167,9 @@ export function ApprovalTable({
 function formatUpdated(value: string) {
   const [datePart, timePart] = value.split(" ");
   if (!timePart) {
-    return <>{value}</>;
+    return value;
   }
-  return (
-    <>
-      <strong>{timePart}</strong>
-      <small>{datePart}</small>
-    </>
-  );
+  return `${datePart} ${timePart}`;
 }
 
 function initials(name: string): string {

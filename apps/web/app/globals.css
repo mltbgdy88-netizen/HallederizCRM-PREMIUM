@@ -19005,6 +19005,8 @@ a.hz-dash-selected-card-more {
 }
 
 .hz-approvals-inbox-desk-center {
+  container-type: inline-size;
+  container-name: hz-ap-inbox-center;
   min-width: 0;
   min-height: 0;
   display: flex;
@@ -19027,23 +19029,35 @@ a.hz-dash-selected-card-more {
 .hz-approvals-inbox-desk-table-scroll {
   flex: 1 1 0;
   min-height: 0;
-  overflow: auto;
+  min-width: 0;
+  overflow-x: hidden;
+  overflow-y: auto;
   overscroll-behavior: contain;
 }
 
 .hz-approvals-inbox-desk-table-inner {
+  /* Onay↔Müşteri sıkı; kazanılan fr öncelik/tutar/atanan/günc/durum */
+  --hz-ap-table-cols: 22px minmax(0, 0.74fr) minmax(0, 0.9fr) minmax(0, 1.2fr) minmax(0, 0.7fr) minmax(0, 0.86fr) minmax(0, 0.6fr) minmax(0, 0.72fr);
   display: flex;
   flex-direction: column;
+  width: 100%;
+  min-width: 0;
   min-height: 100%;
+}
+
+.hz-approvals-inbox-desk-grid {
+  width: 100%;
+  box-sizing: border-box;
+  grid-template-columns: var(--hz-ap-table-cols);
+  column-gap: 3px;
 }
 
 .hz-approvals-inbox-desk-table-head {
   flex: 0 0 auto;
   display: grid;
   align-items: center;
-  column-gap: 3px;
-  min-height: 30px;
-  padding: 0 8px;
+  min-height: 28px;
+  padding: 0 6px;
   border-bottom: 1px solid #e8edf4;
   background: #f8fafc;
   font-size: 9px;
@@ -19065,9 +19079,8 @@ a.hz-dash-selected-card-more {
   width: 100%;
   display: grid;
   align-items: center;
-  column-gap: 3px;
-  min-height: 52px;
-  padding: 6px 8px;
+  min-height: 50px;
+  padding: 5px 6px;
   border: none;
   border-bottom: 1px solid #f1f5f9;
   background: #fff;
@@ -19100,14 +19113,46 @@ a.hz-dash-selected-card-more {
 
 .hz-approvals-inbox-desk-cell {
   min-width: 0;
+  max-width: 100%;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
   font-size: 11px;
   font-weight: 500;
   color: #334155;
-  padding-right: 3px;
+  padding-right: 2px;
   overflow: hidden;
+}
+
+.hz-approvals-inbox-desk-cell--title {
+  min-width: 0;
+  max-width: 100%;
+  padding-right: 1px;
+}
+
+.hz-approvals-inbox-desk-th--onay,
+.hz-approvals-inbox-desk-th--customer {
+  letter-spacing: 0;
+}
+
+.hz-approvals-inbox-desk-th--onay {
+  padding-right: 0;
+}
+
+.hz-approvals-inbox-desk-th--customer {
+  padding-left: 0;
+  margin-left: -1px;
+}
+
+.hz-approvals-inbox-desk-cell--title strong {
+  font-size: 10px;
+  font-weight: 600;
+  color: #0f172a;
+}
+
+.hz-approvals-inbox-desk-cell--title small {
+  font-size: 9px;
+  color: #94a3b8;
 }
 
 .hz-approvals-inbox-desk-cell strong {
@@ -19129,10 +19174,16 @@ a.hz-dash-selected-card-more {
 }
 
 .hz-approvals-inbox-desk-cell--customer {
+  display: block;
+  min-width: 0;
+  max-width: 100%;
+  padding-left: 0;
+  margin-left: -1px;
   font-size: 10px;
   font-weight: 600;
   color: #334155;
   white-space: nowrap;
+  overflow: hidden;
   text-overflow: ellipsis;
 }
 
@@ -19167,6 +19218,18 @@ a.hz-dash-selected-card-more {
   font-variant-numeric: tabular-nums;
   font-weight: 800;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.hz-approvals-inbox-desk-cell--updated {
+  display: block;
+  min-width: 0;
+  overflow: hidden;
+  font-size: 9px;
+  font-weight: 600;
+  color: #475569;
+  white-space: nowrap;
   text-overflow: ellipsis;
 }
 
@@ -19175,17 +19238,46 @@ a.hz-dash-selected-card-more {
   font-weight: 800;
 }
 
+.hz-approvals-inbox-desk-cell--priority,
+.hz-approvals-inbox-desk-cell--status {
+  align-items: center;
+  justify-content: flex-start;
+  overflow: hidden;
+}
+
+.hz-approvals-inbox-desk-cell--priority .hz-approvals-inbox-priority,
+.hz-approvals-inbox-desk-cell--status .hz-approvals-inbox-status {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  box-sizing: border-box;
+}
+
 .hz-approvals-inbox-desk-cell--assignee {
   flex-direction: row;
   align-items: center;
   gap: 4px;
 }
 
+.hz-approvals-inbox-desk-cell--assignee small {
+  display: none;
+}
+
 .hz-approvals-inbox-desk-cell--assignee > span:last-child {
   min-width: 0;
+  flex: 1 1 auto;
   display: flex;
   flex-direction: column;
-  gap: 2px;
+  gap: 1px;
+  overflow: hidden;
+}
+
+.hz-approvals-inbox-desk-cell--assignee strong,
+.hz-approvals-inbox-desk-cell--assignee small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .hz-approvals-inbox-desk-cell--check {
@@ -19241,11 +19333,37 @@ a.hz-dash-selected-card-more {
 
 .hz-approvals-inbox-desk-table-head > span {
   min-width: 0;
-  overflow: visible;
-  text-overflow: clip;
+  overflow: hidden;
+  text-overflow: ellipsis;
   white-space: nowrap;
-  padding-right: 3px;
+  padding-right: 0;
   line-height: 1.1;
+}
+
+.hz-approvals-inbox-desk-th {
+  text-align: left;
+}
+
+@container hz-ap-inbox-center (max-width: 520px) {
+  .hz-approvals-inbox-desk-table-inner {
+    --hz-ap-table-cols: 20px minmax(0, 0.7fr) minmax(0, 0.86fr) minmax(0, 1.16fr) minmax(0, 0.66fr) minmax(0, 0.9fr) minmax(0, 0.56fr) minmax(0, 0.68fr);
+  }
+
+  .hz-approvals-inbox-desk-cell--assignee .hz-approvals-inbox-desk-avatar {
+    display: none;
+  }
+
+  .hz-approvals-inbox-desk-cell--title small {
+    display: none;
+  }
+
+  .hz-approvals-inbox-desk-cell--priority .hz-approvals-inbox-priority,
+  .hz-approvals-inbox-desk-cell--status .hz-approvals-inbox-status {
+    font-size: 7px;
+    min-height: 16px;
+    padding: 0 3px;
+    letter-spacing: 0;
+  }
 }
 
 .hz-approvals-inbox-priority--kritik {
@@ -19838,6 +19956,12 @@ a.hz-dash-selected-card-more {
 @media (min-width: 1600px) {
   .hz-shell-content:has(.hz-approvals-inbox-desk-page) {
     padding: 12px 16px;
+  }
+}
+
+@media (max-width: 1100px) {
+  .hz-approvals-inbox-desk-table-scroll {
+    overflow-x: auto;
   }
 }
 
