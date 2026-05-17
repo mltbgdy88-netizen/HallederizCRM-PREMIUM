@@ -8,9 +8,9 @@ const VIEW_DEFS: { id: ApprovalInboxViewId; label: string }[] = [
   { id: "bana_atanan", label: "Bana Atananlar" },
   { id: "finans", label: "Finans" },
   { id: "operasyon", label: "Operasyon" },
-  { id: "ai_onerileri", label: "AI \u00d6nerileri" },
-  { id: "tum", label: "T\u00fcm Onaylar" },
-  { id: "yakin_sonuclanan", label: "Yak\u0131n Zamanda Sonu\u00e7lananlar" }
+  { id: "ai_onerileri", label: "AI Önerileri" },
+  { id: "tum", label: "Tüm Onaylar" },
+  { id: "yakin_sonuclanan", label: "Yakın Zamanda Sonuçlananlar" }
 ];
 
 export type ApprovalInboxFilterState = {

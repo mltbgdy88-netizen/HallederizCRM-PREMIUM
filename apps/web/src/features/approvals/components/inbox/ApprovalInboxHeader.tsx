@@ -1,4 +1,5 @@
 import { IconRotateCcw } from "../../../dashboard/components/dashboard-inline-icons";
+
 type ApprovalInboxHeaderProps = {
   searchQuery: string;
   onSearchChange: (value: string) => void;
@@ -34,19 +35,10 @@ export function ApprovalInboxHeader({
           aria-label="Onay ara"
         />
         <label className="hz-approvals-inbox-desk-toggle">
-          <input
-            type="checkbox"
-            checked={onlyCritical}
-            onChange={(event) => onOnlyCriticalChange(event.target.checked)}
-          />
+          <input type="checkbox" checked={onlyCritical} onChange={(event) => onOnlyCriticalChange(event.target.checked)} />
           <span>Sadece Kritikler</span>
         </label>
-        <button
-          type="button"
-          className="hz-approvals-inbox-desk-btn"
-          onClick={onRefresh}
-          disabled={refreshing}
-        >
+        <button type="button" className="hz-approvals-inbox-desk-btn" onClick={onRefresh} disabled={refreshing}>
           <IconRotateCcw size={13} className="hz-approvals-inbox-desk-btn-ico" aria-hidden />
           Yenile
         </button>

@@ -8,10 +8,10 @@ import type {
 } from "./types";
 
 const TYPE_LABELS: Record<ApprovalType, string> = {
-  order_high_value: "Y\u00fcksek Tutar",
+  order_high_value: "Yüksek Tutar",
   delivery_payment_missing: "Eksik Tahsilat",
-  return_approval: "\u0130ade",
-  price_override: "Fiyat \u0130ndirimi",
+  return_approval: "İade",
+  price_override: "Fiyat İndirimi",
   ai_action_proposal: "AI",
   manual_operation: "Operasyon"
 };
@@ -40,7 +40,7 @@ function mapPriority(type: ApprovalType): ApprovalInboxPriority {
 }
 
 function formatDate(value?: string): string {
-  if (!value) return "Ã¢ÂÂ";
+  if (!value) return "—";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return value;
   return new Intl.DateTimeFormat("tr-TR", {
@@ -77,7 +77,7 @@ function extractTenant(payload: Record<string, unknown>, tenantId: string): stri
 function extractCustomer(payloadSummary: string, entityNo: string): string {
   const source = payloadSummary.trim();
   if (source) return source;
-  return entityNo || "Ã¢ÂÂ";
+  return entityNo || "—";
 }
 
 function buildViews(record: { category: ApprovalInboxCategory; priority: ApprovalInboxPriority; status: ApprovalStatus }): ApprovalInboxViewId[] {
@@ -90,13 +90,13 @@ function buildViews(record: { category: ApprovalInboxCategory; priority: Approva
   return views;
 }
 
-export function mapApprovalToInboxRecord(approval: Approval): ApprovalInboxRecord {
+export function mapApprovalToInboxRecord(approval: Approval, currentUserId?: string): ApprovalInboxRecord {
   const payload = approval.payload ?? {};
   const category = mapCategory(approval.type);
   const priority = mapPriority(approval.type);
   const status = mapStatus(approval.status);
   const amount = amountFromPayload(payload);
-  const title = `${TYPE_LABELS[approval.type]} OnayÃÂ±`;
+  const title = `${TYPE_LABELS[approval.type]} Onayı`;
   const requestedAtLabel = formatDate(approval.createdAt);
   const deadlineLabel = formatDate(approval.expiresAt);
   const customerName = extractCustomer(approval.payloadSummary, approval.entityNo);
@@ -113,14 +113,17 @@ export function mapApprovalToInboxRecord(approval: Approval): ApprovalInboxRecor
     status,
     category,
     viewTags: buildViews({ category, priority, status: approval.status }),
-    assignedToMe: approval.status === "pending",
+    assignedToMe:
+      approval.requestedBy === currentUserId ||
+      approval.decidedBy === currentUserId ||
+      (approval.status === "pending" && !currentUserId),
     recentlyResolved: approval.status !== "pending",
     entityLabel: approval.entityNo || approval.entityType,
-    workflowLabel: `${approval.entityType} Ã¢ÂÂ ${approval.policySnapshot.serverActionKey ?? "Onay AkÃÂ±ÃÂÃÂ±"}`,
+    workflowLabel: `${approval.entityType} → ${approval.policySnapshot.serverActionKey ?? "Onay Akışı"}`,
     customerName,
     typeLabel: TYPE_LABELS[approval.type],
-    amountLabel: amount ?? (approval.payloadSummary || "â"),
-    slaLabel: approval.expiresAt ? `${deadlineLabel}` : "SLA tanÃÂ±mlÃÂ± deÃÂil",
+    amountLabel: amount ?? (approval.payloadSummary || "—"),
+    slaLabel: approval.expiresAt ? `${deadlineLabel}` : "SLA tanımlı değil",
     slaBreached: approval.status === "expired",
     assigneeName,
     assigneeRole,
@@ -128,8 +131,8 @@ export function mapApprovalToInboxRecord(approval: Approval): ApprovalInboxRecor
     summary: {
       typeLabel: TYPE_LABELS[approval.type],
       priorityLabel: priority.toUpperCase(),
-      amountTry: amount ?? (approval.payloadSummary || "â"),
-      relatedRecordLabel: approval.entityNo || `${approval.entityType} kaydÃÂ±`,
+      amountTry: amount ?? (approval.payloadSummary || "—"),
+      relatedRecordLabel: approval.entityNo || `${approval.entityType} kaydı`,
       relatedRecordHref: `/${approval.entityType === "ai_proposal" ? "ai/onaylar" : "onaylar"}/${approval.id}`,
       requesterName: approval.requestedByName,
       requestedAt: requestedAtLabel,
@@ -137,9 +140,9 @@ export function mapApprovalToInboxRecord(approval: Approval): ApprovalInboxRecor
     },
     riskLevel: approval.status === "expired" ? "kritik" : undefined,
     riskBullets: approval.riskNote ? [approval.riskNote] : [],
-    contextLinks: [{ label: `VarlÃÂ±k: ${approval.entityNo || approval.entityType}`, href: "/onaylar" }],
+    contextLinks: [{ label: `Varlık: ${approval.entityNo || approval.entityType}`, href: "/onaylar" }],
     timeline: [
-      { id: `${approval.id}-created`, label: "Talep oluÃÂturuldu", at: formatDate(approval.createdAt) },
+      { id: `${approval.id}-created`, label: "Talep oluşturuldu", at: formatDate(approval.createdAt) },
       ...(approval.decidedAt ? [{ id: `${approval.id}-decided`, label: "Karar verildi", at: formatDate(approval.decidedAt) }] : [])
     ],
     internalNote: {
@@ -156,6 +159,3 @@ export function mapApprovalToInboxRecord(approval: Approval): ApprovalInboxRecor
     raw: approval
   };
 }
-
-
-
