@@ -20,10 +20,10 @@ const TAB_ITEMS: { key: ProductTabKey; label: string }[] = [
   { key: "movements", label: "Hareketler" }
 ];
 
-const MSG_MODAL_SAVE = "Ürün kaydı henüz canlı API ve onay zincirine bağlı değil.";
+const MSG_MODAL_SAVE = "Urun kaydi henuz canli API ve onay zincirine bagli degil.";
 const MSG_MODAL_LABEL =
-  "Etiket ve barkod çıktısı bu ortamda kapalı. Canlı üretim için modül API bağlantısı gerekiyor.";
-const MSG_MODAL_PRINT = "Yazdırma çıktısı bu ortamda henüz kullanıma açık değil.";
+  "Etiket ve barkod ciktisi bu ortamda kapali. Canli uretim icin modul API baglantisi gerekiyor.";
+const MSG_MODAL_PRINT = "Yazdirma ciktisi bu ortamda henuz kullanima acik degil.";
 
 export interface ProductDetailModalProps {
   open: boolean;
@@ -40,11 +40,11 @@ function renderGeneralTab(product: Product, brandName: string, factoryName: stri
   return (
     <div className="hz-modal-panel-grid hz-tab-content">
       <article className="hz-kv-item">
-        <span>Ürün kodu</span>
+        <span>Urun kodu</span>
         <strong>{product.code}</strong>
       </article>
       <article className="hz-kv-item">
-        <span>Ürün adı</span>
+        <span>Urun adi</span>
         <strong>{product.name}</strong>
       </article>
       <article className="hz-kv-item">
@@ -56,11 +56,11 @@ function renderGeneralTab(product: Product, brandName: string, factoryName: stri
         <strong>{factoryName}</strong>
       </article>
       <article className="hz-kv-item">
-        <span>Üretici entegrasyon kodu</span>
-        <strong>{product.manufacturerIntegrationCode ?? "—"}</strong>
+        <span>Uretici entegrasyon kodu</span>
+        <strong>{product.manufacturerIntegrationCode ?? "-"}</strong>
       </article>
       <article className="hz-kv-item">
-        <span>Varsayılan kaynak</span>
+        <span>Varsayilan kaynak</span>
         <strong>{product.defaultSource}</strong>
       </article>
       <article className="hz-kv-item">
@@ -117,8 +117,8 @@ export function ProductDetailModal({
     const availability = resolveProductAvailability({ product, warehouses });
 
     return {
-      brandName: brand?.name ?? "—",
-      factoryName: factory?.name ?? "—",
+      brandName: brand?.name ?? "-",
+      factoryName: factory?.name ?? "-",
       centerStockTotal: availability.centerStockTotal
     };
   }, [product, brands, factories, warehouses]);
@@ -132,7 +132,7 @@ export function ProductDetailModal({
       <aside className="hz-modal stock-drawer" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
         <header className="hz-modal-header stock-drawer-header">
           <div>
-            <p className="drawer-eyebrow">Ürün kartı</p>
+            <p className="drawer-eyebrow">Urun karti</p>
             <h3>
               {product.code} - {product.name}
             </h3>
@@ -145,7 +145,7 @@ export function ProductDetailModal({
             <button
               type="button"
               className="hz-btn hz-btn-primary hz-toolbar-btn"
-              title="Kayıt henüz canlıya bağlı değil"
+              title="Kayit henuz canliya bagli degil"
               onClick={() => notifyNotLive(MSG_MODAL_SAVE)}
             >
               Kaydet
@@ -153,7 +153,7 @@ export function ProductDetailModal({
             <button
               type="button"
               className="hz-btn hz-btn-secondary hz-toolbar-btn"
-              title="Etiket çıktısı bu ortamda kapalı"
+              title="Etiket ciktisi bu ortamda kapali"
               onClick={() => notifyNotLive(MSG_MODAL_LABEL)}
             >
               Barkod etiketi
@@ -161,7 +161,7 @@ export function ProductDetailModal({
             <button
               type="button"
               className="hz-btn hz-btn-secondary hz-toolbar-btn"
-              title="QR etiket çıktısı bu ortamda kapalı"
+              title="QR etiket ciktisi bu ortamda kapali"
               onClick={() => notifyNotLive(MSG_MODAL_LABEL)}
             >
               QR etiketi
@@ -169,10 +169,10 @@ export function ProductDetailModal({
             <button
               type="button"
               className="hz-btn hz-btn-secondary hz-toolbar-btn"
-              title="Yazdırma henüz kullanıma açık değil"
+              title="Yazdirma henuz kullanima acik degil"
               onClick={() => notifyNotLive(MSG_MODAL_PRINT)}
             >
-              Yazdır
+              Yazdir
             </button>
             <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn" onClick={onClose}>
               Kapat
@@ -198,7 +198,7 @@ export function ProductDetailModal({
               <table className="table hz-table">
                 <thead>
                   <tr>
-                    <th>Slot adı</th>
+                    <th>Slot adi</th>
                     <th>Tutar</th>
                     <th>Para Birimi</th>
                     <th>Durum</th>
@@ -239,42 +239,42 @@ export function ProductDetailModal({
           {activeTab === "warehouses" ? (
             warehouses.length === 0 ? (
               <div className="hz-tab-content hz-content-card" role="status">
-                <p>Depo ve raf verisi bu ortamda bağlı değil. Merkez stok özeti ürün kaydından okunur.</p>
+                <p>Depo ve raf verisi bu ortamda bagli degil. Merkez stok ozeti urun kaydindan okunur.</p>
               </div>
             ) : (
-            <div className="hz-tab-content table-wrap hz-table-wrap">
-              <table className="table hz-table">
-                <thead>
-                  <tr>
-                    <th>Depo adı</th>
-                    <th>Stok</th>
-                    <th>Rezerve</th>
-                    <th>Kullanılabilir</th>
-                    <th>Raf no</th>
-                    <th>Lokasyon kodu</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {warehouses.map((warehouse) => {
-                    const stock = product.warehouseStocks.find((item) => item.warehouseId === warehouse.id);
-                    const location = product.locations.find((item) => item.warehouseId === warehouse.id);
-                    const onHand = stock?.onHand ?? 0;
-                    const reserved = stock?.reserved ?? 0;
+              <div className="hz-tab-content table-wrap hz-table-wrap">
+                <table className="table hz-table">
+                  <thead>
+                    <tr>
+                      <th>Depo adi</th>
+                      <th>Stok</th>
+                      <th>Rezerve</th>
+                      <th>Kullanilabilir</th>
+                      <th>Raf no</th>
+                      <th>Lokasyon kodu</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {warehouses.map((warehouse) => {
+                      const stock = product.warehouseStocks.find((item) => item.warehouseId === warehouse.id);
+                      const location = product.locations.find((item) => item.warehouseId === warehouse.id);
+                      const onHand = stock?.onHand ?? 0;
+                      const reserved = stock?.reserved ?? 0;
 
-                    return (
-                      <tr key={warehouse.id}>
-                        <td>{warehouse.name}</td>
-                        <td>{onHand}</td>
-                        <td>{reserved}</td>
-                        <td>{Math.max(onHand - reserved, 0)}</td>
-                        <td>{location?.rackNo ?? "-"}</td>
-                        <td>{location?.locationCode ?? "-"}</td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                      return (
+                        <tr key={warehouse.id}>
+                          <td>{warehouse.name}</td>
+                          <td>{onHand}</td>
+                          <td>{reserved}</td>
+                          <td>{Math.max(onHand - reserved, 0)}</td>
+                          <td>{location?.rackNo ?? "-"}</td>
+                          <td>{location?.locationCode ?? "-"}</td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             )
           ) : null}
 
@@ -286,7 +286,7 @@ export function ProductDetailModal({
                   <strong>{product.primaryBarcode}</strong>
                 </article>
                 <article className="hz-kv-item">
-                  <span>QR değeri</span>
+                  <span>QR degeri</span>
                   <strong>{product.qrCodeValue}</strong>
                 </article>
               </div>
@@ -303,8 +303,8 @@ export function ProductDetailModal({
               </div>
 
               <div className="hz-modal-panel-grid">
-                <div className="preview-placeholder">Barkod �nizlemesi bu ortamda kullan�lam�yor.</div>
-                <div className="preview-placeholder">QR �nizlemesi bu ortamda kullan�lam�yor.</div>
+                <div className="preview-placeholder">Barkod onizlemesi bu ortamda kullanilamiyor.</div>
+                <div className="preview-placeholder">QR onizlemesi bu ortamda kullanilamiyor.</div>
               </div>
             </div>
           ) : null}
@@ -312,20 +312,20 @@ export function ProductDetailModal({
           {activeTab === "factory" ? (
             <div className="hz-tab-content hz-modal-panel-grid">
               <article className="hz-kv-item">
-                <span>Fabrika adı</span>
+                <span>Fabrika adi</span>
                 <strong>{generalInfo.factoryName}</strong>
               </article>
               <article className="hz-kv-item">
-                <span>Fabrika stok özeti</span>
+                <span>Fabrika stok ozeti</span>
                 <strong>{product.factoryStockSummary.totalStock}</strong>
               </article>
               <article className="hz-kv-item">
                 <span>Son Senkron</span>
-                <strong>{product.factoryStockSummary.lastSyncedAt ?? "Henüz yok"}</strong>
+                <strong>{product.factoryStockSummary.lastSyncedAt ?? "Henuz yok"}</strong>
               </article>
               <article className="hz-kv-item">
                 <span>Entegrasyon kodu</span>
-                <strong>{product.manufacturerIntegrationCode ?? "—"}</strong>
+                <strong>{product.manufacturerIntegrationCode ?? "-"}</strong>
               </article>
             </div>
           ) : null}
@@ -334,9 +334,9 @@ export function ProductDetailModal({
             <div className="hz-tab-content hz-content-card">
               <h3>Stok Hareketleri</h3>
               <ul className="hz-side-list hz-margin-top-sm">
-                <li>Stok hareket geçmişi henüz canlı kullanıma bağlı değil.</li>
-                <li>Bu alanda giriş, çıkış, rezervasyon ve transfer olayları görünecek.</li>
-                <li>Onay ve denetim kaydı timeline ile birlikte sunulacak.</li>
+                <li>Stok hareket gecmisi henuz canli kullanima bagli degil.</li>
+                <li>Bu alanda giris, cikis, rezervasyon ve transfer olaylari gorunecek.</li>
+                <li>Onay ve denetim kaydi timeline ile birlikte sunulacak.</li>
               </ul>
             </div>
           ) : null}
