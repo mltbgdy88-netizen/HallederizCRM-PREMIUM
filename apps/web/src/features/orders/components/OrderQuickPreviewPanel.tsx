@@ -7,8 +7,8 @@ export function OrderQuickPreviewPanel({ order, customer }: { order: SaleOrder |
   if (!order) {
     return (
       <section className="hz-content-card">
-        <h3>Siparis Preview</h3>
-        <p className="hz-content-card-description">Bir siparis secildiginde operasyon ozeti burada gorunur.</p>
+        <h3>Sipariş özeti</h3>
+        <p className="hz-content-card-description">Bir sipariş seçildiğinde operasyon özeti burada görünür.</p>
       </section>
     );
   }
@@ -17,14 +17,14 @@ export function OrderQuickPreviewPanel({ order, customer }: { order: SaleOrder |
 
   return (
     <section className="hz-content-card">
-      <h3>Siparis Preview</h3>
+      <h3>{order.orderNo}</h3>
       <ul className="hz-side-list hz-margin-top-sm">
-        <li>Musteri: {customer?.name ?? order.customerId}</li>
+        <li>Müşteri: {customer?.name ?? order.customerId}</li>
         <li>Toplam: {money(order.grandTotal, order.currency)}</li>
-        <li>Odeme: {getPaymentStatusLabel(order.paymentStatus)}</li>
+        <li>Ödeme: {getPaymentStatusLabel(order.paymentStatus)}</li>
         <li>Teslim: {getDeliveryStatusLabel(order.deliveryStatus)}</li>
-        <li>Kaynak: {impact.needsFactoryOrder ? "Depo + Fabrika" : "Merkez Depo"}</li>
-        <li>Uyari: {impact.paymentMissing ? "Tahsilat kontrolu gerekli" : "Finans akisi uygun"}</li>
+        <li>Kaynak: {impact.needsFactoryOrder ? "Depo + Fabrika" : "Merkez depo"}</li>
+        <li>Uyarı: {impact.paymentMissing ? "Tahsilat kontrolü gerekli" : "Finans akışı uygun"}</li>
       </ul>
     </section>
   );

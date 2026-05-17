@@ -430,34 +430,34 @@ export async function getOrderById(orderId?: string, sourceOfferId?: string | nu
 export function getOrderStatusLabel(status: SaleOrderStatus): string {
   const labels: Record<SaleOrderStatus, string> = {
     draft: "Taslak",
-    confirmed: "Onaylandi",
+    confirmed: "Onaylandı",
     waiting_stock: "Stok Bekliyor",
-    in_preparation: "Hazirlaniyor",
-    ready: "Hazir",
-    partially_delivered: "Kismi Teslim",
+    in_preparation: "Hazırlanıyor",
+    ready: "Hazır",
+    partially_delivered: "Kısmi Teslim",
     delivered: "Teslim Edildi",
-    completed: "Tamamlandi",
-    cancelled: "Iptal"
+    completed: "Tamamlandı",
+    cancelled: "İptal"
   };
   return labels[status];
 }
 
 export function getPaymentStatusLabel(status: OrderPaymentStatus): string {
   const labels: Record<OrderPaymentStatus, string> = {
-    unpaid: "Odenmedi",
-    partial: "Kismi",
-    paid: "Odendi",
-    overpaid: "Fazla Odeme"
+    unpaid: "Ödenmedi",
+    partial: "Kısmi",
+    paid: "Ödendi",
+    overpaid: "Fazla Ödeme"
   };
   return labels[status];
 }
 
 export function getDeliveryStatusLabel(status: OrderDeliveryStatus): string {
   const labels: Record<OrderDeliveryStatus, string> = {
-    none: "Baslamadi",
-    preparing: "Hazirlaniyor",
-    ready: "Hazir",
-    partial: "Kismi",
+    none: "Başlamadı",
+    preparing: "Hazırlanıyor",
+    ready: "Hazır",
+    partial: "Kısmi",
     delivered: "Teslim"
   };
   return labels[status];
@@ -469,7 +469,7 @@ export function getOrderChannelLabel(channel: OrderChannel): string {
     phone: "Telefon",
     whatsapp: "WhatsApp",
     web: "Web",
-    offer_conversion: "Teklif Donusumu"
+    offer_conversion: "Teklif Dönüşümü"
   };
   return labels[channel];
 }

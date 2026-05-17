@@ -55,7 +55,7 @@ export function OfferFollowupPanel({ followUps }: { followUps: OfferFollowUp[] }
 
       <div className="table-wrap hz-table-wrap">
         <table className="table hz-table">
-          <thead><tr><th>Tarih</th><th>Kanal</th><th>Durum</th><th>Not</th><th>Olusturan</th></tr></thead>
+          <thead><tr><th>Tarih</th><th>Kanal</th><th>Durum</th><th>Not</th><th>Oluşturan</th></tr></thead>
           <tbody>
             {followUps.map((followUp) => (
               <tr key={followUp.id}>

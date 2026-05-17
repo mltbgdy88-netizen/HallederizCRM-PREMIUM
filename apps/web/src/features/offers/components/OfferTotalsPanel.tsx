@@ -7,15 +7,15 @@ function money(amount: number, currency: string): string {
 export function OfferTotalsPanel({ offer, customer }: { offer: Offer; customer: Customer | null }) {
   return (
     <section className="hz-content-card">
-      <h3>Teklif Toplami</h3>
+      <h3>Teklif toplamı</h3>
       <ul className="hz-side-list hz-margin-top-sm">
-        <li>Ara Toplam: {money(offer.subtotal, offer.currency)}</li>
-        <li>Indirim: {money(offer.discountTotal, offer.currency)}</li>
+        <li>Ara toplam: {money(offer.subtotal, offer.currency)}</li>
+        <li>İndirim: {money(offer.discountTotal, offer.currency)}</li>
         <li>KDV %{offer.taxRate}: {money(offer.taxTotal, offer.currency)}</li>
-        <li>Genel Toplam: {money(offer.grandTotal, offer.currency)}</li>
-        <li>Musteri: {customer?.name ?? "-"}</li>
-        <li>Atanmis Fiyat Grubu: {customer?.pricingProfile.priceSlotLabelSnapshot ?? offer.priceSlotLabelSnapshot}</li>
-        <li>AI Satis Notu: Musteri fiyat grubu ve stok uygunlugu standart teklif akisi icin uyumlu.</li>
+        <li>Genel toplam: {money(offer.grandTotal, offer.currency)}</li>
+        <li>Müşteri: {customer?.name ?? "—"}</li>
+        <li>Atanmış fiyat grubu: {customer?.pricingProfile.priceSlotLabelSnapshot ?? offer.priceSlotLabelSnapshot}</li>
+        <li>Operasyon notu: Müşteri fiyat grubu ve stok uygunluğu standart teklif akışı için uygun görünüyor.</li>
       </ul>
     </section>
   );

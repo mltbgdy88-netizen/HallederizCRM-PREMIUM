@@ -11,15 +11,15 @@ export function OfferLineEditor({
 }) {
   return (
     <section className="hz-content-card">
-      <h3>Satir Ekleme</h3>
+      <h3>Satır Ekleme</h3>
       <p className="hz-content-card-description">
-        Varsayilan fiyat grubu: {customer?.pricingProfile.priceSlotLabelSnapshot ?? offer.priceSlotLabelSnapshot}
+        Varsayılan fiyat grubu: {customer?.pricingProfile.priceSlotLabelSnapshot ?? offer.priceSlotLabelSnapshot}
       </p>
 
       <div className="hz-filter-grid hz-margin-top-sm">
         <label>
-          Urun Kodu / Barkod / QR
-          <input placeholder="Urun ara" />
+          Ürün Kodu / Barkod / QR
+          <input placeholder="Ürün ara" readOnly />
         </label>
         <label>
           Adet
@@ -42,14 +42,16 @@ export function OfferLineEditor({
           </select>
         </label>
         <label>
-          Indirim %
+          İndirim %
           <input type="number" defaultValue={0} min={0} max={100} />
         </label>
       </div>
 
       <div className="stock-filter-actions hz-margin-top-sm">
-        <button type="button" className="hz-btn hz-btn-primary hz-toolbar-btn">Satira Ekle</button>
-        <span className="hz-badge hz-badge-info">Override yapilirsa satirda isaretlenir</span>
+        <button type="button" className="hz-btn hz-btn-primary hz-toolbar-btn" disabled>
+          Satıra ekle
+        </button>
+        <span className="hz-badge hz-badge-info">Fiyat değişirse satırda işaretlenir</span>
       </div>
     </section>
   );

@@ -1,5 +1,5 @@
-import { OfferDetailPage } from "../../../../src/features/offers/components";
+import { OfferCreateHub } from "../../../../src/features/offers/components/OfferCreateHub";
 
 export default function NewOfferPage({ searchParams }: { searchParams?: { customer?: string } }) {
-  return <OfferDetailPage customerId={searchParams?.customer ?? null} />;
+  return <OfferCreateHub customerId={searchParams?.customer ?? null} />;
 }

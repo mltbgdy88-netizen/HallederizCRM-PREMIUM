@@ -29,8 +29,18 @@ const checks = [
   },
   {
     file: "apps/web/src/features/offers/components/OfferConvertDialog.tsx",
-    patterns: ["window.sessionStorage.setItem(\"hallederiz:order-draft\"", "router.push(draft.navigationPath)"],
-    description: "Tekliften siparise draft handoff"
+    patterns: ["router.push(`/hizli-islem", "Hızlı İşlem"],
+    description: "Tekliften siparişe Hızlı İşlem yönlendirmesi"
+  },
+  {
+    file: "apps/web/src/features/offers/components/OfferCreateHub.tsx",
+    patterns: ["Hızlı İşlem workbench", "buildQuickOpHref"],
+    description: "Yeni teklif Hızlı İşlem hub"
+  },
+  {
+    file: "apps/web/src/features/orders/components/OrderCreateHub.tsx",
+    patterns: ["Hızlı İşlem workbench", "buildQuickOpHref"],
+    description: "Yeni sipariş Hızlı İşlem hub"
   },
   {
     file: "apps/web/src/features/orders/components/OrderDetailPage.tsx",

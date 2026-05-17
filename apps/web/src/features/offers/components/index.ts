@@ -3,6 +3,7 @@ export * from "./OfferFilterBar";
 export * from "./OfferTable";
 export * from "./OfferQuickPreviewPanel";
 export * from "./OfferDetailPage";
+export * from "./OfferCreateHub";
 export * from "./OfferHeaderInfo";
 export * from "./OfferActionButtons";
 export * from "./OfferLineEditor";

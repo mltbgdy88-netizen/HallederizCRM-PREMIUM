@@ -14,6 +14,10 @@ export interface OrderDetailSideData {
 
 /** Tahsilat / depo / teslim / fatura özetleri: demo modda mock; canlı modda ilgili listelerden siparişe göre süzülür. */
 export async function getOrderDetailSideData(orderId: string | undefined): Promise<OrderDetailSideData> {
+  if (!orderId) {
+    return { payments: [], warehouseOrders: [], deliveries: [], invoices: [] };
+  }
+
   if (dataSourceConfig.useDemoData) {
     const [payments, warehouseOrders, deliveries, invoices] = await Promise.all([
       getPaymentMockData(),
@@ -22,10 +26,6 @@ export async function getOrderDetailSideData(orderId: string | undefined): Promi
       getInvoiceMockData()
     ]);
     return { payments, warehouseOrders, deliveries, invoices };
-  }
-
-  if (!orderId) {
-    return { payments: [], warehouseOrders: [], deliveries: [], invoices: [] };
   }
 
   try {

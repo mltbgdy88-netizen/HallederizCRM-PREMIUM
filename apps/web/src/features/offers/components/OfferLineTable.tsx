@@ -7,19 +7,19 @@ function money(amount: number, currency: string): string {
 export function OfferLineTable({ lines }: { lines: OfferLine[] }) {
   return (
     <div className="hz-tab-content">
-      <h3>Teklif Satirlari</h3>
+      <h3>Teklif satırları</h3>
       <div className="table-wrap hz-table-wrap">
         <table className="table hz-table hz-table-sticky">
           <thead>
             <tr>
-              <th>Urun Kodu</th>
-              <th>Urun Adi</th>
+              <th>Ürün Kodu</th>
+              <th>Ürün Adı</th>
               <th>Adet</th>
               <th>Fiyat Slotu</th>
               <th>Birim Fiyat</th>
               <th>Para Birimi</th>
               <th>Kur</th>
-              <th>Satir Toplami</th>
+              <th>Satır Toplamı</th>
               <th>Kaynak</th>
               <th>Merkez Stok</th>
               <th>Fabrika Stok</th>
@@ -49,7 +49,7 @@ export function OfferLineTable({ lines }: { lines: OfferLine[] }) {
       </div>
       {lines.some((line) => line.pricingWarning) ? (
         <div className="hz-state-card hz-margin-top-sm">
-          <h4>Fiyat Uyarisi</h4>
+          <h4>Fiyat uyarısı</h4>
           <p>{lines.find((line) => line.pricingWarning)?.pricingWarning}</p>
         </div>
       ) : null}

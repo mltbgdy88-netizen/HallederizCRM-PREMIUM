@@ -1557,6 +1557,81 @@ p {
   line-height: 1.45;
 }
 
+.hz-offers-preview-band,
+.hz-orders-preview-band {
+  margin: 0;
+  padding: 4px 10px;
+  min-height: 22px;
+  display: flex;
+  align-items: center;
+  border-radius: 8px;
+  border: 1px solid #dbe4f2;
+  background: #f8fafc;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 600;
+  line-height: 1.35;
+}
+
+.hz-commercial-create-hub {
+  width: 100%;
+  max-width: 1604px;
+  margin: 0 auto;
+  min-height: 0;
+  box-sizing: border-box;
+}
+
+.hz-commercial-create-hub-card {
+  max-width: 720px;
+  margin: 0 auto;
+  padding: 20px 22px;
+  border-radius: 14px;
+  border: 1px solid var(--hz-commerce-border, #dce6f5);
+  background: var(--hz-commerce-surface, #fff);
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+}
+
+.hz-commercial-create-hub-eyebrow {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.hz-commercial-create-hub-title {
+  margin: 0 0 8px;
+  font-size: 20px;
+  font-weight: 900;
+  color: var(--hz-commerce-text, #0f172a);
+}
+
+.hz-commercial-create-hub-lead {
+  margin: 0 0 12px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--hz-commerce-muted, #64748b);
+}
+
+.hz-commercial-create-hub-points {
+  margin: 0 0 16px;
+  padding-left: 18px;
+  color: #334155;
+  font-size: 13px;
+  line-height: 1.5;
+}
+
+.hz-commercial-create-hub-points li + li {
+  margin-top: 6px;
+}
+
+.hz-commercial-create-hub-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
 /* Task 15 — Entity detail */
 .hz-entity-detail-layout {
   display: grid;

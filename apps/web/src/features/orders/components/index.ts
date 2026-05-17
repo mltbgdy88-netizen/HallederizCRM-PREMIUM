@@ -1,5 +1,6 @@
 export * from "./OrdersPage";
 export * from "./OrderDetailPage";
+export * from "./OrderCreateHub";
 export * from "./OrderFilterBar";
 export * from "./OrderTable";
 export * from "./OrderQuickPreviewPanel";

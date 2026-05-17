@@ -4,35 +4,35 @@ import { getOrderChannelLabel } from "../queries/order-mock-data";
 export function OrderTopForm({ order, customer }: { order: SaleOrder; customer: Customer | null }) {
   return (
     <section className="hz-content-card">
-      <h3>Ust Bilgi</h3>
+      <h3>Üst bilgi</h3>
       <div className="hz-filter-grid hz-margin-top-sm">
         <label>
-          Musteri
+          Müşteri
           <input readOnly value={customer?.name ?? order.customerId} />
         </label>
         <label>
-          Teklif Baglantisi
-          <input readOnly value={order.offerId ?? "Yok"} />
+          Teklif bağlantısı
+          <input readOnly value={order.offerId ?? "—"} />
         </label>
         <label>
-          Teslimat Tipi
-          <select defaultValue={order.deliveryType}>
+          Teslimat tipi
+          <select defaultValue={order.deliveryType} disabled>
             <option value="warehouse">Depodan</option>
             <option value="factory">Fabrikadan</option>
             <option value="hybrid">Hibrit</option>
           </select>
         </label>
         <label>
-          Siparis Kanali
+          Sipariş kanalı
           <input readOnly value={getOrderChannelLabel(order.channel)} />
         </label>
         <label>
-          Fiyat Grubu Snapshot
+          Fiyat grubu özeti
           <input readOnly value={order.priceSlotLabelSnapshot} />
         </label>
         <label>
           Not
-          <input defaultValue={order.note ?? ""} />
+          <input defaultValue={order.note ?? ""} readOnly />
         </label>
       </div>
     </section>
