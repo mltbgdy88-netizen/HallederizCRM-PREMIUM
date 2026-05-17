@@ -1,5 +1,6 @@
 import type { Customer, CustomerAccount, CustomerAddress, CustomerContact, CustomerLedgerEntry } from "@hallederiz/types";
 import { dataSourceConfig, sdk } from "../../../lib/data-source";
+import { isCustomersDemoRowId } from "../data/customers-demo-rows";
 import {
   customerAccounts,
   customerAddresses,
@@ -61,6 +62,17 @@ export async function getCustomers(): Promise<CustomersQueryResult> {
 }
 
 export async function getCustomerDetail(customerId: string): Promise<CustomerDetailQueryResult> {
+  if (isCustomersDemoRowId(customerId)) {
+    return {
+      customer: null,
+      account: null,
+      contacts: [],
+      addresses: [],
+      ledgerEntries: [],
+      priceSlots: []
+    };
+  }
+
   if (!dataSourceConfig.useDemoData) {
     const [customerResponse, accountResponse, ledgerResponse] = await Promise.all([
       sdk.customers.detail(customerId),
