@@ -1616,6 +1616,67 @@ p {
   align-items: stretch;
 }
 
+.hz-customers-detail-topnav {
+  flex: 0 0 auto;
+  padding: 0 2px 4px;
+}
+
+.hz-customers-detail-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--hz-text-secondary, #5b6b82);
+  text-decoration: none;
+}
+
+.hz-customers-detail-back:hover {
+  color: var(--hz-primary, #6d5df6);
+}
+
+.hz-customers-detail-finance-banner,
+.hz-customers-detail-finance-hint {
+  grid-column: 1 / -1;
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 8px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--hz-text-secondary, #5b6b82);
+  background: rgba(109, 93, 246, 0.06);
+  border: 1px solid rgba(109, 93, 246, 0.14);
+}
+
+.hz-customers-detail-tab-empty {
+  padding: 16px 4px;
+}
+
+.hz-customers-detail-tab-empty h4 {
+  margin: 0 0 6px;
+  font-size: 14px;
+}
+
+.hz-customers-detail-tab-empty p {
+  margin: 0;
+  font-size: 13px;
+  color: var(--hz-text-secondary, #5b6b82);
+}
+
+.hz-customers-detail-tab-empty-actions {
+  margin-top: 12px;
+}
+
+.hz-customers-create-page {
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1604px;
+  margin: 0 auto;
+  height: 100%;
+  min-height: 0;
+  overflow: auto;
+}
+
 .hz-customers-detail-page .hz-entity-detail-main,
 .hz-customers-detail-page .hz-entity-detail-aside,
 .hz-orders-detail-page .hz-entity-detail-main,
