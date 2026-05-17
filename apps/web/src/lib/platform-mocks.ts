@@ -4,25 +4,25 @@ export const platformPermissions: Permission[] = [
   {
     id: "perm_dashboard_view",
     key: "platform.dashboard.view",
-    name: "Dashboard goruntuleme",
+    name: "Gösterge paneli görüntüleme",
     moduleCode: "core"
   },
   {
     id: "perm_users_read",
     key: "platform.users.read",
-    name: "Kullanicilari goruntuleme",
+    name: "Kullanıcıları görüntüleme",
     moduleCode: "users"
   },
   {
     id: "perm_roles_read",
     key: "platform.roles.read",
-    name: "Rolleri goruntuleme",
+    name: "Rolleri görüntüleme",
     moduleCode: "users"
   },
   {
     id: "perm_settings_read",
     key: "platform.settings.read",
-    name: "Ayarlari goruntuleme",
+    name: "Ayarları görüntüleme",
     moduleCode: "settings"
   }
 ];
@@ -36,7 +36,7 @@ export const defaultTenant: Tenant = {
   timeZone: "Europe/Istanbul",
   modules: [
     { code: "core", enabled: true, configured: true, label: "Platform Core" },
-    { code: "users", enabled: true, configured: true, label: "Kullanici ve Yetkilendirme" },
+    { code: "users", enabled: true, configured: true, label: "Kullanıcı ve Yetkilendirme" },
     { code: "settings", enabled: true, configured: true, label: "Ayarlar" },
     { code: "whatsapp", enabled: false, configured: false, label: "WhatsApp" },
     { code: "ai", enabled: false, configured: false, label: "AI" },
@@ -51,8 +51,8 @@ export const adminRole: Role = {
   id: "role_admin",
   tenantId: defaultTenant.id,
   code: "platform_admin",
-  name: "Platform Yoneticisi",
-  description: "Platform Core yonetim erisimleri",
+  name: "Platform Yöneticisi",
+  description: "Platform Core yönetim erişimleri",
   isSystem: true,
   permissions: platformPermissions
 };
@@ -63,7 +63,7 @@ export const defaultUser: User = {
   email: "admin@hallederiz.com",
   fullName: "Platform Admin",
   status: "active",
-  title: "Sistem Yoneticisi",
+  title: "Sistem Yöneticisi",
   directPermissions: [],
   lastLoginAt: new Date().toISOString()
 };

@@ -15,8 +15,8 @@ export default function UsersPage() {
   return (
     <div className="hz-page-stack">
       <PageHeader
-        title="Kullanicilar"
-        description="Pilot personel listesi, mobil erisim ve onay yetkilerini yonetin."
+        title="Kullanıcılar"
+        description="Pilot personel listesi, mobil erişim ve onay yetkilerini yönetin."
       />
 
       <section className="hz-content-card">
@@ -28,7 +28,7 @@ export default function UsersPage() {
                 <th>E-Posta</th>
                 <th>Durum</th>
                 <th>Unvan</th>
-                <th>Son Giris</th>
+                <th>Son Giriş</th>
               </tr>
             </thead>
             <tbody>

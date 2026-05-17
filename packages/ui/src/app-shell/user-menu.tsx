@@ -12,7 +12,7 @@ export function UserMenu({ fullName, roleLabel, onLogout }: UserMenuProps) {
         <p className="hz-user-menu-role">{roleLabel}</p>
       </div>
       <button type="button" onClick={onLogout} className="hz-user-menu-logout">
-        Cikis
+        Çıkış
       </button>
     </div>
   );

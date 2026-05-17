@@ -16,7 +16,7 @@ export default function RolesPage() {
     <div className="hz-page-stack">
       <PageHeader
         title="Roller"
-        description="Yonetici, satis, muhasebe, depo ve pazarlama icin önerilen permission presetleri."
+        description="Yönetici, satış, muhasebe, depo ve pazarlama için önerilen izin şablonları."
       />
 
       <section className="hz-content-card">
@@ -26,15 +26,15 @@ export default function RolesPage() {
               <tr>
                 <th>Rol</th>
                 <th>Kod</th>
-                <th>Aciklama</th>
-                <th>Modul Erisimi</th>
-                <th>Approval</th>
+                <th>Açıklama</th>
+                <th>Modül Erişimi</th>
+                <th>Onay</th>
               </tr>
             </thead>
             <tbody>
               {presets.length === 0 ? (
                 <tr>
-                  <td className="table-empty" colSpan={5}>Preset bulunamadi.</td>
+                  <td className="table-empty" colSpan={5}>Şablon bulunamadı.</td>
                 </tr>
               ) : (
                 presets.map((preset) => (
@@ -43,7 +43,7 @@ export default function RolesPage() {
                     <td>{preset.code}</td>
                     <td>{preset.description}</td>
                     <td>{preset.moduleAccess.join(", ")}</td>
-                    <td>{preset.approvalEnabled ? "Evet" : "Hayir"}</td>
+                    <td>{preset.approvalEnabled ? "Evet" : "Hayır"}</td>
                   </tr>
                 ))
               )}

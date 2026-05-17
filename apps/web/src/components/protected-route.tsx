@@ -21,7 +21,7 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
       <div className="auth-loading">
         <div className="card">
           <h2>Oturum kontrol ediliyor</h2>
-          <p>Platform Core kimlik dogrulamasi yukleniyor.</p>
+          <p>Platform Core kimlik doğrulaması yükleniyor.</p>
         </div>
       </div>
     );

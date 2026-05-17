@@ -63,7 +63,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!input.email || !input.password || !input.tenantSlug) {
       return {
         success: false,
-        message: "Lutfen tenant, e-posta ve parola alanlarini doldurun."
+        message: "Lütfen kiracı, e-posta ve parola alanlarını doldurun."
       };
     }
 
@@ -83,8 +83,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     if (!loginResponse?.ok && !ENABLE_DEMO_AUTH) {
       let message = networkError
-        ? `API'ye ulasilamadi (${API_BASE_URL}). API sunucusunun calistigini ve CORS ayarlarini kontrol edin.`
-        : "Giris yapilamadi. Lutfen auth saglayici ayarlarini kontrol edin.";
+        ? `API'ye ulaşılamadı (${API_BASE_URL}). API sunucusunun çalıştığını ve CORS ayarlarını kontrol edin.`
+        : "Giriş yapılamadı. Lütfen kimlik doğrulama ayarlarını kontrol edin.";
       try {
         const errorPayload = loginResponse ? ((await loginResponse.json()) as { message?: string }) : null;
         message = errorPayload?.message ?? message;
