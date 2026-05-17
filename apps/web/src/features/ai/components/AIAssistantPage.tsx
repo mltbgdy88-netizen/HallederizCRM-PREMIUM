@@ -23,6 +23,7 @@ import {
   transcribeSalesVoice,
   updateSalesKnowledge
 } from "../queries";
+import { buildAiProposalSnapshotJson } from "../utils/ai-proposal-snapshot";
 
 const statusLabel: Record<AiProposal["status"], string> = {
   draft: "Taslak",
@@ -186,13 +187,24 @@ export function AiProposalCardList({ proposals, onConfirm, onReject }: { proposa
     <section className="hz-content-card">
       <h3>Proposal Kartları</h3>
       {proposals.map((proposal) => (
-        <div key={proposal.id} className="hz-list-item">
-          <strong>
-            {proposal.proposalNo} / {proposal.actionType}
-          </strong>
-          <span>{proposal.summary}</span>
+        <div key={proposal.id} className="hz-list-item hz-ai-proposal-card">
+          <div className="hz-ai-proposal-card-head">
+            <strong>
+              {proposal.proposalNo} / {proposal.actionType}
+            </strong>
+            <span className="hz-ai-proposal-badge-row">
+              <span className="hz-badge hz-badge-info">{statusLabel[proposal.status]}</span>
+              <span className={proposal.requiresApproval ? "hz-badge hz-badge-warning" : "hz-badge hz-badge-success"}>
+                Onay gerekli: {proposal.requiresApproval ? "Evet" : "Hayır"}
+              </span>
+            </span>
+          </div>
+          <span className="hz-ai-proposal-summary">{proposal.summary}</span>
+          <details className="hz-ai-proposal-snapshot">
+            <summary>Proposal snapshot (salt okunur)</summary>
+            <pre className="hz-ai-proposal-snapshot-pre">{buildAiProposalSnapshotJson(proposal)}</pre>
+          </details>
           <div className="hz-inline-actions">
-            <span className="hz-badge hz-badge-info">{statusLabel[proposal.status]}</span>
             {proposal.requiresApproval ? (
               <>
                 <button className="hz-btn hz-btn-secondary" type="button" onClick={() => onConfirm?.(proposal.id)}>
@@ -203,7 +215,7 @@ export function AiProposalCardList({ proposals, onConfirm, onReject }: { proposa
                 </button>
               </>
             ) : (
-              <span className="hz-badge hz-badge-success">Read-only</span>
+              <span className="hz-badge hz-badge-success">Salt okunur</span>
             )}
           </div>
         </div>

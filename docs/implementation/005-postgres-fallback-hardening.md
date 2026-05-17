@@ -2,6 +2,8 @@
 
 Bu tur, `PERSISTENCE_MODE=postgres` veya production ortamında veritabanı hatalarının sessizce demo/mock store'a düşmesi riskini kapatır. Amaç, canlı/pilot veri yolunda başarısız DB operasyonlarının başarılı mock cevap gibi görünmesini engellemektir.
 
+**Durum (repo):** Davranış `persistence-policy` + repository `handleDbFailure` ile uygulanır; yürütme kuyruğu `docs/development/PRODUCTION_EXECUTION_QUEUE.md` Faz B ilgili madde tamamlandı olarak işaretlendi.
+
 ## Kapatılan Risk
 
 Önceki foundation davranışında bazı repository catch blokları DB sorgusu hata verdiğinde demo store sonucuna dönebiliyordu. Bu davranış development demo için kullanışlı olsa da production/postgres modunda yanlış başarı algısı ve veri tutarsızlığı riski oluşturur.
@@ -79,12 +81,10 @@ Business success response shape değiştirilmedi.
 
 ## Test Kapsamı
 
-Eklenen testler:
+Eklenen testler (`apps/api/src/tests/`):
 
-- production + postgres modda fallback kapalıdır
-- development + demo modda açık flag ile fallback policy izin verebilir
-- postgres modda DB URL yokken mock başarı dönmez, `503 persistence_unavailable` döner
-- demo modda DB URL olmadan mevcut demo store davranışı korunur
+- `persistence-policy.test.ts`: production + postgres modda fallback kapalıdır; development + demo modda açık flag ile fallback policy izin verebilir; postgres modda DB URL yokken mock başarı dönmez, `503 persistence_unavailable` döner; demo modda DB URL olmadan mevcut demo store davranışı korunur
+- `whatsapp-workflow-persistence.test.ts`: WhatsApp workflow store için aynı fail-closed / açık fallback ayrımı
 
 ## Sonraki İş
 

@@ -23,6 +23,46 @@ export function filterInboxItems(items: ApprovalInboxItem[], filter: ApprovalInb
   return items.filter((item) => item.status === filter);
 }
 
+export function summarizeGateDecision(gate?: Record<string, unknown> | null): string {
+  if (!gate || typeof gate !== "object") {
+    return "Gate karari API yaniti ile gelmedi.";
+  }
+  const allowed = gate.allowed;
+  const mode = gate.mode;
+  const blockers = Array.isArray(gate.blockers) ? gate.blockers.filter((b): b is string => typeof b === "string") : [];
+  const reasons = Array.isArray(gate.reasons) ? gate.reasons.filter((b): b is string => typeof b === "string") : [];
+  const parts: string[] = [];
+  if (typeof allowed === "boolean") parts.push(`allowed=${allowed}`);
+  if (typeof mode === "string") parts.push(`mode=${mode}`);
+  if (blockers.length) parts.push(`blockers: ${blockers.join(", ")}`);
+  if (reasons.length) parts.push(`reasons: ${reasons.join(", ")}`);
+  return parts.length ? parts.join(" · ") : "Gate detayi bos.";
+}
+
+/** Liste ve arama için tek satır özet (pending öncelikli). */
+export function getApprovalWaitingReasonSummary(item: ApprovalInboxItem): string {
+  if (item.status === "rejected") {
+    const r = item.rejectReason?.trim();
+    if (r) return r;
+    const first = item.reasons.find((x) => x.trim());
+    return first?.trim() ?? "Red gerekcesi belirtilmedi.";
+  }
+
+  if (item.status === "pending") {
+    const fromReasons = item.reasons.map((x) => x.trim()).filter(Boolean).join(" · ");
+    if (fromReasons) return fromReasons;
+    const bridge = (item.bridgeReasons ?? []).map((x) => x.trim()).filter(Boolean).join(" · ");
+    if (bridge) return bridge;
+    const gate = summarizeGateDecision(item.gateDecision);
+    if (gate !== "Gate karari API yaniti ile gelmedi." && gate !== "Gate detayi bos.") {
+      return gate;
+    }
+    return "Bekleme nedeni API yanitinda belirtilmedi.";
+  }
+
+  return "—";
+}
+
 export function searchInboxItems(items: ApprovalInboxItem[], query: string): ApprovalInboxItem[] {
   const normalized = query.trim().toLowerCase();
   if (!normalized) {
@@ -35,6 +75,9 @@ export function searchInboxItems(items: ApprovalInboxItem[], query: string): App
       item.actorId,
       item.idempotencyKey,
       ...item.reasons,
+      ...(item.bridgeReasons ?? []),
+      getApprovalWaitingReasonSummary(item),
+      summarizeGateDecision(item.gateDecision),
       item.rejectReason ?? ""
     ]
       .join(" ")
@@ -204,30 +247,25 @@ export function canRejectApproval(
   return { ok: true };
 }
 
-export function summarizeGateDecision(gate?: Record<string, unknown> | null): string {
-  if (!gate || typeof gate !== "object") {
-    return "Gate karari API yaniti ile gelmedi.";
-  }
-  const allowed = gate.allowed;
-  const mode = gate.mode;
-  const blockers = Array.isArray(gate.blockers) ? gate.blockers.filter((b): b is string => typeof b === "string") : [];
-  const reasons = Array.isArray(gate.reasons) ? gate.reasons.filter((b): b is string => typeof b === "string") : [];
-  const parts: string[] = [];
-  if (typeof allowed === "boolean") parts.push(`allowed=${allowed}`);
-  if (typeof mode === "string") parts.push(`mode=${mode}`);
-  if (blockers.length) parts.push(`blockers: ${blockers.join(", ")}`);
-  if (reasons.length) parts.push(`reasons: ${reasons.join(", ")}`);
-  return parts.length ? parts.join(" · ") : "Gate detayi bos.";
-}
-
 export function summarizeWorkerHealth(worker: WorkerHealthResponse | null | undefined): string {
   if (!worker) return "Worker health verisi yok.";
   if (!worker.ok) return worker.message || worker.error || "Worker health kullanilamiyor.";
   const h = worker.health;
   if (!h) return "Worker health govdesi bos.";
   const summary = h.summary;
+  const countBits: string[] = [];
+  const c = worker.counts;
+  if (c) {
+    countBits.push(`kuyruk bekleyen=${c.pending} claim=${c.claimed} hata=${c.failed} dlq=${c.deadLetter}`);
+  }
   if (summary) {
-    return `mode=${h.mode} processed=${summary.processed} completed=${summary.completed} failed=${summary.failed} dlq=${summary.deadLettered}`;
+    const dup = typeof summary.duplicates === "number" ? ` dup=${summary.duplicates}` : "";
+    countBits.push(
+      `tick processed=${summary.processed} ok=${summary.completed} fail=${summary.failed} dlq=${summary.deadLettered} retry=${summary.retried}${dup}`
+    );
+  }
+  if (countBits.length) {
+    return `mode=${h.mode} workerId=${h.workerId} · ${countBits.join(" · ")}`;
   }
   return `mode=${h.mode} workerId=${h.workerId}`;
 }

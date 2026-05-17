@@ -1,40 +1,46 @@
 import type { ApprovalClientError } from "../types";
 import { mapApprovalUiErrorMessage } from "../utils/inbox-helpers";
+import { EmptyState as UiEmptyState, ErrorState as UiErrorState, LoadingState as UiLoadingState, UiButton } from "@hallederiz/ui";
 
-export function LoadingState({ label = "Onay kayitlari yukleniyor..." }: { label?: string }) {
+/** Onay gelen kutusu liste/detay yükleme göstergesi. */
+export function ApprovalInboxLoading({ label = "Onay kayıtları yükleniyor…" }: { label?: string }) {
   return (
-    <div className="hz-approvals-inbox-state hz-approvals-inbox-state--loading" role="status" aria-live="polite">
-      <p>{label}</p>
-    </div>
+    <UiLoadingState title="Yükleniyor" message={label} className="hz-approvals-inbox-state hz-approvals-inbox-state--loading" />
   );
 }
 
-export function ErrorState({ error, onRetry }: { error: ApprovalClientError; onRetry?: () => void }) {
+export function ApprovalInboxError({ error, onRetry }: { error: ApprovalClientError; onRetry?: () => void }) {
   return (
-    <div className="hz-approvals-inbox-state hz-approvals-inbox-state--error" role="alert">
-      <p className="hz-approvals-inbox-state-title">Onay verisi alinamadi</p>
-      <p className="hz-approvals-inbox-state-message">{mapApprovalUiErrorMessage(error)}</p>
-      {error.reasons?.length ? (
-        <ul className="hz-approvals-inbox-state-reasons">
-          {error.reasons.map((reason) => (
-            <li key={reason}>{reason}</li>
-          ))}
-        </ul>
-      ) : null}
-      {onRetry ? (
-        <button type="button" className="hz-approvals-inbox-btn hz-approvals-inbox-btn--secondary" onClick={onRetry}>
-          Yeniden Dene
-        </button>
-      ) : null}
-    </div>
+    <UiErrorState
+      title="Onay verisi alınamadı"
+      message={mapApprovalUiErrorMessage(error)}
+      className="hz-approvals-inbox-state hz-approvals-inbox-state--error"
+      details={
+        error.reasons?.length ? (
+          <ul className="hz-approvals-inbox-state-reasons">
+            {error.reasons.map((reason) => (
+              <li key={reason}>{reason}</li>
+            ))}
+          </ul>
+        ) : null
+      }
+      actions={
+        onRetry ? (
+          <UiButton type="button" variant="secondary" size="sm" onClick={onRetry}>
+            Yeniden dene
+          </UiButton>
+        ) : null
+      }
+    />
   );
 }
 
-export function EmptyState({ title = "Bekleyen onay bulunamadi", description }: { title?: string; description?: string }) {
+export function ApprovalInboxEmpty({ title = "Bekleyen onay bulunamadı", description }: { title?: string; description?: string }) {
   return (
-    <div className="hz-approvals-inbox-state hz-approvals-inbox-state--empty">
-      <p className="hz-approvals-inbox-state-title">{title}</p>
-      {description ? <p className="hz-approvals-inbox-state-message">{description}</p> : null}
-    </div>
+    <UiEmptyState
+      title={title}
+      message={description ?? "Filtre veya arama kriterlerini değiştirin."}
+      className="hz-approvals-inbox-state hz-approvals-inbox-state--empty"
+    />
   );
 }

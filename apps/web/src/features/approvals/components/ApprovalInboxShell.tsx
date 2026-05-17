@@ -1,10 +1,28 @@
 "use client";
 
+import {
+  FilterChip,
+  FilterToolbar,
+  FilterToolbarChips,
+  FilterToolbarRow,
+  FilterToolbarSearch,
+  FilterToolbarViews,
+  SplitContentLayout
+} from "@hallederiz/ui";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useState } from "react";
+import { dataSourceConfig } from "../../../lib/data-source";
 import { useAuth } from "../../../providers/auth-provider";
 import { useToast } from "../../../providers/toast-provider";
 import { createApprovalClient } from "../api/approval-client";
-import type { ApprovalClientError, ApprovalInboxItem, ApprovalInboxStatusFilter, ApprovalSandboxAvailabilityResponse, WorkerHealthResponse } from "../types";
+import type {
+  ApprovalClientError,
+  ApprovalInboxItem,
+  ApprovalInboxStatusFilter,
+  ApprovalSandboxAvailabilityResponse,
+  WorkerHealthResponse,
+  WorkerJobListResponse
+} from "../types";
 import {
   buildActiveFilterSummary,
   computeInboxStats,
@@ -25,25 +43,26 @@ import {
   type LastApprovalActionSummary
 } from "../utils/operator-smoke";
 import { ApprovalDetailPanel } from "./ApprovalDetailPanel";
-import { EmptyState, ErrorState, LoadingState } from "./ApprovalInboxStates";
+import { ApprovalInboxEmpty, ApprovalInboxError, ApprovalInboxLoading } from "./ApprovalInboxStates";
 import { ApprovalList } from "./ApprovalList";
 import { ApprovalOperatorSmokePanel } from "./ApprovalOperatorSmokePanel";
 import { ApprovalSafetyBadge } from "./ApprovalSafetyBadge";
 import { ApprovalSandboxToolbar } from "./ApprovalSandboxToolbar";
+import { WorkerQueueObservabilityPanel } from "./WorkerQueueObservabilityPanel";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
 const FILTER_OPTIONS: { id: ApprovalInboxStatusFilter; label: string }[] = [
-  { id: "all", label: "Tumu" },
+  { id: "all", label: "Tümü" },
   { id: "pending", label: "Bekleyen" },
-  { id: "approved", label: "Onaylandi" },
+  { id: "approved", label: "Onaylandı" },
   { id: "rejected", label: "Reddedildi" }
 ];
 
 const SORT_OPTIONS: { id: ApprovalInboxSortMode; label: string }[] = [
   { id: "newest", label: "En yeni" },
   { id: "oldest", label: "En eski" },
-  { id: "actionKey", label: "Action key" }
+  { id: "actionKey", label: "İşlem anahtarı" }
 ];
 
 export function ApprovalInboxShell() {
@@ -70,6 +89,11 @@ export function ApprovalInboxShell() {
   const [detailError, setDetailError] = useState<ApprovalClientError | null>(null);
   const [workerHealth, setWorkerHealth] = useState<WorkerHealthResponse | null>(null);
   const [workerSafety, setWorkerSafety] = useState<WorkerHealthResponse | null>(null);
+  const [workerOutbox, setWorkerOutbox] = useState<WorkerJobListResponse | null>(null);
+  const [workerDeadLetter, setWorkerDeadLetter] = useState<WorkerJobListResponse | null>(null);
+  const [workerQueuesLoading, setWorkerQueuesLoading] = useState(false);
+  const [workerOutboxError, setWorkerOutboxError] = useState<ApprovalClientError | null>(null);
+  const [workerDeadLetterError, setWorkerDeadLetterError] = useState<ApprovalClientError | null>(null);
   const [sandboxAvailability, setSandboxAvailability] = useState<ApprovalSandboxAvailabilityResponse | null>(null);
   const [loadingList, setLoadingList] = useState(true);
   const [loadingDetail, setLoadingDetail] = useState(false);
@@ -121,10 +145,20 @@ export function ApprovalInboxShell() {
   }, [sandboxAvailability]);
 
   const dlqSummary = useMemo(() => {
-    const summary = workerSafety?.health?.summary;
-    if (!summary) return "Ozete veri yok.";
-    return `DLQ: ${summary.deadLettered} · Failed: ${summary.failed} · Retried: ${summary.retried}`;
-  }, [workerSafety]);
+    const summary = workerHealth?.health?.summary;
+    const counts = workerHealth?.counts;
+    const parts: string[] = [];
+    if (counts) {
+      parts.push(`Repo: bekleyen ${counts.pending}, claim ${counts.claimed}, hata ${counts.failed}, DLQ ${counts.deadLetter}`);
+    }
+    if (summary) {
+      const dup = typeof summary.duplicates === "number" ? `, dup ${summary.duplicates}` : "";
+      parts.push(
+        `Tick: islenen ${summary.processed}, tamamlanan ${summary.completed}, hata ${summary.failed}, DLQ ${summary.deadLettered}, retry ${summary.retried}${dup}`
+      );
+    }
+    return parts.length ? parts.join(" · ") : "Özete veri yok (worker health özeti veya sayım gelmedi).";
+  }, [workerHealth]);
 
   const operatorSmokeSummary = useMemo(() => {
     const steps = buildOperatorSmokeChecklist({
@@ -229,6 +263,26 @@ export function ApprovalInboxShell() {
     setWorkerSafety(result.data);
   }, [client]);
 
+  const refreshWorkerQueues = useCallback(async () => {
+    setWorkerQueuesLoading(true);
+    setWorkerOutboxError(null);
+    setWorkerDeadLetterError(null);
+    const [o, d] = await Promise.all([client.getWorkerOutbox(), client.getWorkerDeadLetter()]);
+    if (o.ok) {
+      setWorkerOutbox(o.data);
+    } else {
+      setWorkerOutbox(null);
+      setWorkerOutboxError(o.error);
+    }
+    if (d.ok) {
+      setWorkerDeadLetter(d.data);
+    } else {
+      setWorkerDeadLetter(null);
+      setWorkerDeadLetterError(d.error);
+    }
+    setWorkerQueuesLoading(false);
+  }, [client]);
+
   useEffect(() => {
     if (state !== "authenticated") {
       setLoadingList(false);
@@ -237,12 +291,22 @@ export function ApprovalInboxShell() {
     void refreshList();
     void refreshWorkerHealth();
     void refreshWorkerSafety();
+    void refreshWorkerQueues();
     void refreshSandboxAvailability();
-  }, [refreshList, refreshWorkerHealth, refreshWorkerSafety, refreshSandboxAvailability, state]);
+  }, [refreshList, refreshWorkerHealth, refreshWorkerQueues, refreshWorkerSafety, refreshSandboxAvailability, state]);
 
   useEffect(() => {
-    if (!selectedId && visibleItems[0]) {
-      setSelectedId(visibleItems[0].approvalRequestId);
+    if (!visibleItems.length) {
+      setSelectedId(null);
+      return;
+    }
+    const stillHere =
+      selectedId !== null && visibleItems.some((row) => row.approvalRequestId === selectedId);
+    if (!stillHere) {
+      const next = visibleItems[0];
+      if (next) {
+        setSelectedId(next.approvalRequestId);
+      }
     }
   }, [selectedId, visibleItems]);
 
@@ -279,6 +343,8 @@ export function ApprovalInboxShell() {
     }
     await refreshList();
     await refreshDetail(selectedId);
+    void refreshWorkerHealth();
+    void refreshWorkerQueues();
   };
 
   const handleReject = async (reason: string) => {
@@ -293,15 +359,17 @@ export function ApprovalInboxShell() {
     pushToast("Onay istegi reddedildi.");
     await refreshList();
     await refreshDetail(selectedId);
+    void refreshWorkerHealth();
+    void refreshWorkerQueues();
   };
 
   if (state === "loading") {
-    return <LoadingState />;
+    return <ApprovalInboxLoading />;
   }
 
   if (state === "anonymous") {
     return (
-      <EmptyState
+      <ApprovalInboxEmpty
         title="Oturum gerekli"
         description="Onay inbox verilerini gormek icin giris yapin. UI sahte onay verisi gostermez."
       />
@@ -309,24 +377,45 @@ export function ApprovalInboxShell() {
   }
 
   return (
-    <main className="hz-approvals-inbox-page" aria-live="polite">
+    <main className="hz-approvals-page hz-approvals-inbox-page" aria-live="polite">
       <header className="hz-approvals-inbox-top">
         <div>
-          <p className="hz-approvals-inbox-eyebrow">Operator workspace</p>
+          <p className="hz-approvals-inbox-eyebrow">Operatör çalışma alanı</p>
           <h1 className="hz-approvals-inbox-title">Onaylar</h1>
-          <p className="hz-approvals-inbox-subtitle">Approval Inbox / operator onaylari, worker ve outbox sinyalleri.</p>
+          <p className="hz-approvals-inbox-subtitle">Onay gelen kutusu; operatör kararları, worker ve outbox sinyalleri.</p>
+          <p className="hz-approvals-inbox-top-links">
+            <Link href="/onaylar/kurallar" className="hz-approvals-inbox-policy-link">
+              Politika matrisi
+            </Link>
+            <span className="hz-approvals-inbox-top-links-sep" aria-hidden="true">
+              ·
+            </span>
+            <Link href="/ayarlar/operasyon-gozlem" className="hz-approvals-inbox-policy-link">
+              Operasyon ve gözlem
+            </Link>
+            <span className="hz-approvals-inbox-top-links-sep" aria-hidden="true">
+              ·
+            </span>
+            <span className="hz-approvals-inbox-muted">Alan kayıtlarından onay gerektiren aksiyonlar</span>
+          </p>
         </div>
         <ApprovalSafetyBadge repositoryMode={repositoryMode} workerHealth={workerHealth} />
       </header>
 
-      <div className="hz-approvals-inbox-stats" aria-label="Onay ozetleri">
+      {dataSourceConfig.useDemoData ? (
+        <div className="hz-approvals-inbox-preview-band" role="status">
+          Demo veri modunda API boş dönerse liste boş kalır; sandbox araçlarıyla örnek onay oluşturabilirsiniz.
+        </div>
+      ) : null}
+
+      <div className="hz-approvals-inbox-stats" aria-label="Onay özetleri">
         <span>Toplam {stats.total}</span>
         <span>Bekleyen {stats.pending}</span>
         <span>Onaylanan {stats.approved}</span>
         <span>Reddedilen {stats.rejected}</span>
       </div>
 
-      <div className="hz-approvals-worker-strip" aria-label="Worker ve guvenlik ozeti">
+      <div className="hz-approvals-worker-strip" aria-label="Worker ve güvenlik özeti">
         <div className="hz-approvals-worker-card">
           <h4>Worker health</h4>
           <p>{summarizeWorkerHealth(workerHealth)}</p>
@@ -337,6 +426,15 @@ export function ApprovalInboxShell() {
           <p className="hz-approvals-inbox-muted">{dlqSummary}</p>
         </div>
       </div>
+
+      <WorkerQueueObservabilityPanel
+        workerHealth={workerHealth}
+        outbox={workerOutbox}
+        deadLetter={workerDeadLetter}
+        outboxError={workerOutboxError}
+        deadLetterError={workerDeadLetterError}
+        loading={workerQueuesLoading}
+      />
 
       <ApprovalOperatorSmokePanel
         production={process.env.NODE_ENV === "production"}
@@ -349,13 +447,15 @@ export function ApprovalInboxShell() {
         client={client}
         visible={sandboxToolbarVisible}
         availabilityHelp={sandboxAvailabilityHelp}
-        onSeedCounts={(counts) => {
+        onSeedCounts={(counts: { created: number; skipped: number }) => {
           setLastSeedCounts(counts);
           setLastSeedLine(formatSandboxSeedOutcome(counts.created, counts.skipped).message);
         }}
         onAfterSeed={async () => {
           await refreshList();
           await refreshSandboxAvailability();
+          void refreshWorkerHealth();
+          void refreshWorkerQueues();
         }}
       />
 
@@ -365,80 +465,92 @@ export function ApprovalInboxShell() {
         </p>
       ) : null}
 
-      <div className="hz-approvals-inbox-filters" role="toolbar" aria-label="Durum filtresi">
-        {FILTER_OPTIONS.map((option) => (
-          <button
-            key={option.id}
-            type="button"
-            className={`hz-approvals-inbox-filter${filter === option.id ? " is-active" : ""}`}
-            onClick={() => setFilter(option.id)}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
-
-      <div className="hz-approvals-inbox-toolbar">
-        <label className="hz-approvals-inbox-search">
-          <span className="hz-approvals-inbox-search-label">Ara</span>
-          <input
-            type="search"
-            className="hz-approvals-inbox-input"
-            value={searchQuery}
-            onChange={(event) => setSearchQuery(event.target.value)}
-            placeholder="approvalRequestId, actionKey, actor veya reason"
-          />
-        </label>
-        <label className="hz-approvals-inbox-sort">
-          <span className="hz-approvals-inbox-sort-label">Siralama</span>
-          <select className="hz-approvals-inbox-input" value={sortMode} onChange={(event) => setSortMode(event.target.value as ApprovalInboxSortMode)}>
-            {SORT_OPTIONS.map((option) => (
-              <option key={option.id} value={option.id}>
-                {option.label}
-              </option>
-            ))}
-          </select>
-        </label>
+      <div role="toolbar" aria-label="Onay inbox filtreleri">
+        <FilterToolbar>
+          <FilterToolbarRow>
+            <FilterToolbarChips>
+              {FILTER_OPTIONS.map((option) => (
+                <FilterChip key={option.id} active={filter === option.id} onClick={() => setFilter(option.id)}>
+                  {option.label}
+                </FilterChip>
+              ))}
+            </FilterToolbarChips>
+          </FilterToolbarRow>
+          <FilterToolbarRow>
+            <FilterToolbarSearch>
+              <label className="hz-approvals-inbox-search">
+                <span className="hz-approvals-inbox-search-label">Ara</span>
+                <input
+                  type="search"
+                  className="hz-approvals-inbox-input"
+                  value={searchQuery}
+                  onChange={(event) => setSearchQuery(event.target.value)}
+                  placeholder="approvalRequestId, actionKey, actor veya reason"
+                />
+              </label>
+            </FilterToolbarSearch>
+            <FilterToolbarViews>
+              <label className="hz-approvals-inbox-sort">
+                <span className="hz-approvals-inbox-sort-label">Siralama</span>
+                <select
+                  className="hz-approvals-inbox-input"
+                  value={sortMode}
+                  onChange={(event) => setSortMode(event.target.value as ApprovalInboxSortMode)}
+                >
+                  {SORT_OPTIONS.map((option) => (
+                    <option key={option.id} value={option.id}>
+                      {option.label}
+                    </option>
+                  ))}
+                </select>
+              </label>
+            </FilterToolbarViews>
+          </FilterToolbarRow>
+        </FilterToolbar>
       </div>
 
       <p className="hz-approvals-inbox-summary">{filterSummary}</p>
 
-      <div className="hz-approvals-inbox-layout">
-        <section className="hz-approvals-inbox-main">
-          {loadingList ? <LoadingState /> : null}
-          {!loadingList && listError ? <ErrorState error={listError} onRetry={() => void refreshList()} /> : null}
-          {!loadingList && !listError && items.length === 0 ? (
-            <EmptyState
-              title="Liste bos"
-              description={
-                sandboxToolbarVisible
-                  ? "API gercek zamanli bos dondu. Sahte kayit gosterilmez; asagidaki sandbox araci ile demo onaylari olusturabilirsiniz."
-                  : "API gercek zamanli bos dondu. Sahte kayit gosterilmez."
-              }
-            />
-          ) : null}
-          {!loadingList && !listError && items.length > 0 && visibleItems.length === 0 ? (
-            <EmptyState title="Filtreye uygun onay yok" description="Durum, arama veya siralama kriterlerini degistirin." />
-          ) : null}
-          {!loadingList && !listError && visibleItems.length > 0 ? (
-            <ApprovalList items={visibleItems} selectedId={selectedId} onSelect={setSelectedId} />
-          ) : null}
-        </section>
-
-        <section className="hz-approvals-inbox-side">
-          {loadingDetail ? <LoadingState label="Detay yukleniyor..." /> : null}
-          {!loadingDetail && detailError ? <ErrorState error={detailError} onRetry={() => selectedId && void refreshDetail(selectedId)} /> : null}
-          {!loadingDetail && !detailError ? (
-            <ApprovalDetailPanel
-              item={detail}
-              busy={busyAction}
-              lastApprovalSummary={lastApprovalSummary}
-              onApprove={() => void handleApprove()}
-              onReject={(reason) => void handleReject(reason)}
-            />
-          ) : null}
-        </section>
-      </div>
+      <SplitContentLayout
+        sideWidth="detail"
+        main={
+          <>
+            {loadingList ? <ApprovalInboxLoading /> : null}
+            {!loadingList && listError ? <ApprovalInboxError error={listError} onRetry={() => void refreshList()} /> : null}
+            {!loadingList && !listError && items.length === 0 ? (
+              <ApprovalInboxEmpty
+                title="Liste bos"
+                description={
+                  sandboxToolbarVisible
+                    ? "API gercek zamanli bos dondu. Sahte kayit gosterilmez; asagidaki sandbox araci ile demo onaylari olusturabilirsiniz."
+                    : "API gercek zamanli bos dondu. Sahte kayit gosterilmez."
+                }
+              />
+            ) : null}
+            {!loadingList && !listError && items.length > 0 && visibleItems.length === 0 ? (
+              <ApprovalInboxEmpty title="Filtreye uygun onay yok" description="Durum, arama veya siralama kriterlerini degistirin." />
+            ) : null}
+            {!loadingList && !listError && visibleItems.length > 0 ? (
+              <ApprovalList items={visibleItems} selectedId={selectedId} onSelect={setSelectedId} />
+            ) : null}
+          </>
+        }
+        side={
+          <>
+            {loadingDetail ? <ApprovalInboxLoading label="Detay yükleniyor…" /> : null}
+            {!loadingDetail && detailError ? <ApprovalInboxError error={detailError} onRetry={() => selectedId && void refreshDetail(selectedId)} /> : null}
+            {!loadingDetail && !detailError ? (
+              <ApprovalDetailPanel
+                item={detail}
+                busy={busyAction}
+                lastApprovalSummary={lastApprovalSummary}
+                onApprove={() => void handleApprove()}
+                onReject={(reason) => void handleReject(reason)}
+              />
+            ) : null}
+          </>
+        }
+      />
     </main>
   );
 }

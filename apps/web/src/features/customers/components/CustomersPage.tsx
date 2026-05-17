@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingState, Pagination } from "@hallederiz/ui";
+import { EntityListPageTemplate, LoadingState, Pagination } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -15,6 +15,7 @@ import {
   IconWallet
 } from "../../dashboard/components/dashboard-inline-icons";
 import { useToast } from "../../../providers/toast-provider";
+import { dataSourceConfig } from "../../../lib/data-source";
 import { computeKpiMetricsFromCustomerRows, CUSTOMERS_PORTFOLIO_DEMO_ROWS, isCustomersDemoRowId } from "../data/customers-demo-rows";
 import { CustomerFilterBar } from "./CustomerFilterBar";
 import { CustomerQuickPreviewPanel } from "./CustomerQuickPreviewPanel";
@@ -32,7 +33,7 @@ export function CustomersPage() {
   const [topCtaDone, setTopCtaDone] = useState<Record<string, boolean>>({});
   const pageSize = 12;
 
-  const usingDemoFallback = !loading && data.customers.length === 0;
+  const usingDemoFallback = dataSourceConfig.useDemoData && !loading && data.customers.length === 0;
   const displayRows = useMemo(() => (usingDemoFallback ? CUSTOMERS_PORTFOLIO_DEMO_ROWS : rows), [usingDemoFallback, rows]);
   const pagedRows = useMemo(() => displayRows.slice((page - 1) * pageSize, page * pageSize), [page, displayRows]);
 
@@ -120,9 +121,10 @@ export function CustomersPage() {
   const emptyFiltered = !usingDemoFallback && !loading && data.customers.length > 0 && rows.length === 0;
 
   return (
-    <div className="hz-customers-page">
-      <div className="hz-customers-layout">
-        <div className="hz-customers-main">
+    <EntityListPageTemplate
+      className="hz-customers-page"
+      header={
+        <>
           <header className="hz-customers-topbar">
             <div className="hz-customers-topbar-text">
               <h1 className="hz-customers-topbar-title">Cari Portföyü</h1>
@@ -220,60 +222,61 @@ export function CustomersPage() {
               </div>
             </div>
           </div>
-
-          <CustomerFilterBar filters={filters} cities={cities} priceSlots={data.priceSlots} onFilterChange={updateFilter} onReset={resetFilters} />
-
-          <div className="hz-customers-list-wrap">
-            {loading ? (
-              <LoadingState title="Cariler yükleniyor" message="Hesap, fiyat ve risk özetleri hazırlanıyor." />
-            ) : (
-              <>
-                {usingDemoFallback ? (
-                  <div className="hz-customers-demo-banner" role="note">
-                    Önizleme: örnek kayıtlar.
-                  </div>
-                ) : null}
-                <CustomerTable
-                  rows={pagedRows}
-                  selectedCustomerId={selectedCustomerId}
-                  onSelectCustomer={setSelectedCustomerId}
-                  onOpenCustomer={(customerId) => {
-                    if (isCustomersDemoRowId(customerId)) {
-                      demoRowToast();
-                      return;
-                    }
-                    router.push(`/cariler/${customerId}`);
-                  }}
-                  onQuickOperation={(customerId) => {
-                    if (isCustomersDemoRowId(customerId)) {
-                      demoRowToast();
-                      return;
-                    }
-                    router.push(`/hizli-islem?customer=${customerId}`);
-                  }}
-                  onWhatsApp={(customerId) => {
-                    if (isCustomersDemoRowId(customerId)) {
-                      demoRowToast();
-                      return;
-                    }
-                    router.push(`/whatsapp?customer=${customerId}`);
-                  }}
-                  emptyFiltered={emptyFiltered}
-                  onEmptyNew={emptyFiltered ? undefined : () => router.push("/cariler/yeni")}
-                  onEmptyImport={emptyFiltered ? undefined : () => router.push("/ayarlar/veri-yukleme")}
-                />
-                <div className="hz-customers-pagination">
-                  <Pagination totalItems={displayRows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
+        </>
+      }
+      filters={<CustomerFilterBar filters={filters} cities={cities} priceSlots={data.priceSlots} onFilterChange={updateFilter} onReset={resetFilters} />}
+      list={
+        <div className="hz-customers-list-wrap">
+          {loading ? (
+            <LoadingState title="Cariler yükleniyor" message="Hesap, fiyat ve risk özetleri hazırlanıyor." />
+          ) : (
+            <>
+              {usingDemoFallback ? (
+                <div className="hz-customers-demo-banner" role="note">
+                  Önizleme: örnek kayıtlar.
                 </div>
-              </>
-            )}
-          </div>
+              ) : null}
+              <CustomerTable
+                rows={pagedRows}
+                selectedCustomerId={selectedCustomerId}
+                onSelectCustomer={setSelectedCustomerId}
+                onOpenCustomer={(customerId) => {
+                  if (isCustomersDemoRowId(customerId)) {
+                    demoRowToast();
+                    return;
+                  }
+                  router.push(`/cariler/${customerId}`);
+                }}
+                onQuickOperation={(customerId) => {
+                  if (isCustomersDemoRowId(customerId)) {
+                    demoRowToast();
+                    return;
+                  }
+                  router.push(`/hizli-islem?customer=${customerId}`);
+                }}
+                onWhatsApp={(customerId) => {
+                  if (isCustomersDemoRowId(customerId)) {
+                    demoRowToast();
+                    return;
+                  }
+                  router.push(`/whatsapp?customer=${customerId}`);
+                }}
+                emptyFiltered={emptyFiltered}
+                onEmptyNew={emptyFiltered ? undefined : () => router.push("/cariler/yeni")}
+                onEmptyImport={emptyFiltered ? undefined : () => router.push("/ayarlar/veri-yukleme")}
+              />
+              <div className="hz-customers-pagination">
+                <Pagination totalItems={displayRows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
+              </div>
+            </>
+          )}
         </div>
-
+      }
+      preview={
         <aside className="hz-customers-side">
           <CustomerQuickPreviewPanel customer={selectedCustomer} account={selectedAccount} previewRow={selectedPreviewRow} />
         </aside>
-      </div>
-    </div>
+      }
+    />
   );
 }

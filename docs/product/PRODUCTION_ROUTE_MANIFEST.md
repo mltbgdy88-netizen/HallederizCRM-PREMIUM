@@ -21,6 +21,10 @@ Bu doküman, HallederizCRM Premium web uygulamasındaki **üretim bilgi mimarisi
 
 Her biri için **landing** görünümü: alt rota kartları, durum rozeti, mevcut uygulanan ekranlara CTA.
 
+## Ayarlar — derin bağlantılı rotalar
+
+- `/ayarlar/operasyon-gozlem` — trace/tenant özeti, release/pilot checklist, haftalık pilot şablonu (`apps/web/app/(platform)/ayarlar/operasyon-gozlem/page.tsx`; manifestte `link:` çocuk düğümü).
+
 ## Dinamik rotalar
 
 Kayıt kimliği içeren sekmeler (`/[customerId]/ozet` vb.) manifestte tek tek `href` olarak listelenmez; ilgili modül altında **catch-all** veya mevcut `[id]` sayfaları ile çözülür. Üçüncü segment ve sonrası için `render-product-catch-all` üretim shell üretir.

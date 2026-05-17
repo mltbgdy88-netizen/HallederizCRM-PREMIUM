@@ -1,5 +1,7 @@
 # Kalite kapıları (Quality gates)
 
+Üretim yürütme kuyruğu: [PRODUCTION_EXECUTION_QUEUE.md](./PRODUCTION_EXECUTION_QUEUE.md). Ortam tablosu: [ENV_MATRIX.md](./ENV_MATRIX.md).
+
 PR merge öncesi aşağıdaki kontroller **ilgili değişiklikte** zorunludur.
 
 ## Her PR (varsayılan)

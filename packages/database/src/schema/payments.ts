@@ -17,3 +17,21 @@ CREATE TABLE IF NOT EXISTS payment_receipts (
   created_at TIMESTAMP NOT NULL DEFAULT NOW()
 );
 `;
+
+export const paymentAllocationsSchemaSql = `
+CREATE TABLE IF NOT EXISTS payment_allocations (
+  id TEXT PRIMARY KEY,
+  tenant_id TEXT NOT NULL,
+  payment_id TEXT NOT NULL,
+  customer_id TEXT NOT NULL,
+  target_type TEXT NOT NULL,
+  target_id TEXT,
+  target_no TEXT NOT NULL,
+  target_total NUMERIC NOT NULL,
+  open_balance NUMERIC NOT NULL,
+  allocated_amount NUMERIC NOT NULL,
+  currency TEXT NOT NULL DEFAULT 'TRY',
+  created_at TIMESTAMP NOT NULL DEFAULT NOW(),
+  CONSTRAINT payment_allocations_payment_fk FOREIGN KEY (payment_id) REFERENCES payment_receipts (id) ON DELETE CASCADE
+);
+`;

@@ -93,9 +93,36 @@ export interface ApprovalSandboxSeedResponse {
   message?: string;
 }
 
+/** /worker/outbox ve /worker/dead-letter satirlari (API WorkerJob JSON). */
+export interface WorkerOutboxJobSnapshot {
+  jobId: string;
+  tenantId?: string;
+  jobType: string;
+  actionKey?: string;
+  status: string;
+  attempts?: number;
+  maxAttempts?: number;
+  idempotencyKey?: string;
+  deadLetterReason?: string;
+  lastError?: string;
+}
+
+export interface WorkerJobListResponse {
+  items: WorkerOutboxJobSnapshot[];
+  total: number;
+  workerPersistenceMode?: string;
+}
+
 export interface WorkerHealthResponse {
   ok: boolean;
   tenantId?: string;
+  /** /worker/health — tenant outbox + DLQ sayimlari */
+  counts?: {
+    pending: number;
+    claimed: number;
+    failed: number;
+    deadLetter: number;
+  };
   /** Present on /worker/safety — operator smoke uses for security signals */
   providerWritesEnabled?: boolean;
   realExecutionEnabled?: boolean;
@@ -111,6 +138,7 @@ export interface WorkerHealthResponse {
       failed: number;
       deadLettered: number;
       retried: number;
+      duplicates?: number;
       noJob: boolean;
     };
     reasons?: string[];

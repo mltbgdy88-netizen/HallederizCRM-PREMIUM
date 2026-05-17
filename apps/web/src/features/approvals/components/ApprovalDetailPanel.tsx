@@ -1,5 +1,6 @@
 "use client";
 
+import { DetailPanel } from "@hallederiz/ui";
 import { useState } from "react";
 import type { ApprovalInboxItem } from "../types";
 import type { LastApprovalActionSummary } from "../utils/operator-smoke";
@@ -8,7 +9,8 @@ import { ApprovalOutboxStatusCard } from "./ApprovalOutboxStatusCard";
 import { ApprovalRiskSummary } from "./ApprovalRiskSummary";
 import { ApprovalStatusBadge } from "./ApprovalStatusBadge";
 import { ApprovalTimelinePreview } from "./ApprovalTimelinePreview";
-import { EmptyState } from "./ApprovalInboxStates";
+import { ApprovalInboxEmpty } from "./ApprovalInboxStates";
+import { getApprovalWaitingReasonSummary } from "../utils/inbox-helpers";
 import { summarizeGateDecision } from "../utils/inbox-helpers";
 
 function formatDate(value?: string): string {
@@ -34,9 +36,9 @@ export function ApprovalDetailPanel({
 
   if (!item) {
     return (
-      <aside className="hz-approvals-inbox-detail">
-        <EmptyState title="Onay secin" description="Listeden bir kayit secerek detay, risk ve aksiyonlari goruntuleyin." />
-      </aside>
+      <DetailPanel className="hz-approvals-inbox-detail">
+        <ApprovalInboxEmpty title="Onay seçin" description="Listeden bir kayıt seçerek detay, risk ve aksiyonları görüntüleyin." />
+      </DetailPanel>
     );
   }
 
@@ -54,21 +56,25 @@ export function ApprovalDetailPanel({
   };
 
   return (
-    <aside className="hz-approvals-inbox-detail" aria-labelledby="approval-detail-title">
+    <DetailPanel className="hz-approvals-inbox-detail" aria-labelledby="approval-detail-title">
       <header className="hz-approvals-inbox-detail-head">
-        <p className="hz-approvals-inbox-eyebrow">Approval request</p>
+        <p className="hz-approvals-inbox-eyebrow">Onay isteği</p>
         <div className="hz-approvals-inbox-detail-id-row">
           <h2 id="approval-detail-title">{item.approvalRequestId}</h2>
           <button type="button" className="hz-approvals-inbox-copy" onClick={() => void copyId()}>
-            {copied ? "Kopyalandi" : "Kopyala"}
+            {copied ? "Kopyalandı" : "Kopyala"}
           </button>
         </div>
         <ApprovalStatusBadge status={item.status} />
       </header>
 
       <section className="hz-approvals-inbox-card">
-        <h3 className="hz-approvals-inbox-card-title">Ozet</h3>
+        <h3 className="hz-approvals-inbox-card-title">Özet</h3>
         <dl className="hz-approvals-inbox-meta hz-approvals-inbox-meta--grid">
+          <div>
+            <dt>{item.status === "pending" ? "Bekleme nedeni" : item.status === "rejected" ? "Red özeti" : "Karar özeti"}</dt>
+            <dd className="hz-approvals-inbox-wait-reason">{getApprovalWaitingReasonSummary(item)}</dd>
+          </div>
           <div>
             <dt>Action key</dt>
             <dd>{item.actionKey}</dd>
@@ -78,11 +84,11 @@ export function ApprovalDetailPanel({
             <dd>{item.actorId}</dd>
           </div>
           <div>
-            <dt>Talep zamani</dt>
+            <dt>Talep zamanı</dt>
             <dd>{formatDate(item.requestedAt)}</dd>
           </div>
           <div>
-            <dt>Olusturma</dt>
+            <dt>Oluşturma</dt>
             <dd>{formatDate(item.createdAt)}</dd>
           </div>
           <div>
@@ -107,7 +113,7 @@ export function ApprovalDetailPanel({
           </div>
         </dl>
         <details className="hz-approvals-inbox-payload-details">
-          <summary>Payload ozeti</summary>
+          <summary>Payload özeti</summary>
           <pre className="hz-approvals-inbox-payload">{payloadPreview}</pre>
         </details>
       </section>
@@ -135,29 +141,29 @@ export function ApprovalDetailPanel({
             <dt>Audit / timeline writeback</dt>
             <dd>
               {item.auditTimelineWritebackQueued === true
-                ? "Kuyruklandi veya yanitta true"
+                ? "Kuyruğlandı veya yanıtta true"
                 : item.auditTimelineWritebackQueued === false
-                  ? "Yanitta false"
+                  ? "Yanıtta false"
                   : item.auditRequired
-                    ? "Gerekli (detay alani bos)"
-                    : "Hayir"}
+                    ? "Gerekli (detay alanı boş)"
+                    : "Hayır"}
             </dd>
           </div>
           <div>
-            <dt>Worker onerisi</dt>
-            <dd>{item.workerProcessingRecommended ? "Islenmesi onerilir" : "Beklemede / yok"}</dd>
+            <dt>Worker önerisi</dt>
+            <dd>{item.workerProcessingRecommended ? "İşlenmesi önerilir" : "Beklemede / yok"}</dd>
           </div>
         </dl>
-        <p className="hz-approvals-inbox-muted">Gate ozeti: {summarizeGateDecision(item.gateDecision)}</p>
+        <p className="hz-approvals-inbox-muted">Kapı özeti: {summarizeGateDecision(item.gateDecision)}</p>
       </section>
 
       {lastApprovalSummary ? (
-        <section className="hz-approvals-inbox-card hz-approvals-inbox-card--last-action" aria-label="Son islem sonucu">
-          <h3 className="hz-approvals-inbox-card-title">Son islem sonucu (onay API)</h3>
+        <section className="hz-approvals-inbox-card hz-approvals-inbox-card--last-action" aria-label="Son işlem sonucu">
+          <h3 className="hz-approvals-inbox-card-title">Son işlem sonucu (onay API)</h3>
           <p className="hz-approvals-inbox-muted">
             {lastApprovalSummary.duplicate
-              ? "Idempotent yanit: kayit zaten islenmis; yeni execution gonderilmedi."
-              : "Onay API basarili dondu; asagidaki alanlar son yanittan."}
+              ? "İdempotent yanıt: kayıt zaten işlenmiş; yeni execution gönderilmedi."
+              : "Onay API başarılı döndü; aşağıdaki alanlar son yanıttan."}
           </p>
           <dl className="hz-approvals-inbox-meta hz-approvals-inbox-meta--grid">
             <div>
@@ -187,7 +193,7 @@ export function ApprovalDetailPanel({
               <dd className="hz-approvals-inbox-mono-wrap">{lastApprovalSummary.gateLine}</dd>
             </div>
             <div>
-              <dt>Yanit zamani</dt>
+              <dt>Yanıt zamanı</dt>
               <dd>{new Date(lastApprovalSummary.at).toLocaleString("tr-TR")}</dd>
             </div>
           </dl>
@@ -195,8 +201,8 @@ export function ApprovalDetailPanel({
       ) : null}
 
       {gateReasons.length ? (
-        <section className="hz-approvals-inbox-card hz-approvals-inbox-card--warn" aria-label="Gate uyarilari">
-          <h3 className="hz-approvals-inbox-card-title">Gate / safety uyarilari</h3>
+        <section className="hz-approvals-inbox-card hz-approvals-inbox-card--warn" aria-label="Kapı uyarıları">
+          <h3 className="hz-approvals-inbox-card-title">Kapı / güvenlik uyarıları</h3>
           <ul className="hz-approvals-inbox-reasons">
             {gateReasons.map((reason) => (
               <li key={reason}>{reason}</li>
@@ -209,6 +215,6 @@ export function ApprovalDetailPanel({
       <ApprovalTimelinePreview item={item} />
       <ApprovalOutboxStatusCard item={item} />
       <ApprovalActionBar item={item} busy={busy} onApprove={onApprove} onReject={onReject} />
-    </aside>
+    </DetailPanel>
   );
 }

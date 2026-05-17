@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { MetricCard, PageHeader } from "@hallederiz/ui";
+import { SettingsAreaShell } from "./SettingsAreaShell";
 import type { ProductionReadinessSummary } from "../../../services/api";
 import { getProductionReadinessData } from "../queries";
 
@@ -40,6 +41,7 @@ export function ProductionReadinessPage() {
   }, []);
 
   return (
+    <SettingsAreaShell>
     <div className="hz-page-stack">
       <PageHeader
         title="Canli Kullanim Hazirligi"
@@ -159,6 +161,7 @@ export function ProductionReadinessPage() {
         </>
       ) : null}
     </div>
+    </SettingsAreaShell>
   );
 }
 

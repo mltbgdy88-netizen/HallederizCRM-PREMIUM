@@ -1,6 +1,7 @@
 "use client";
 
 import { MetricCard, PageHeader, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
+import { SettingsAreaShell } from "./SettingsAreaShell";
 import { useEffect, useMemo, useState } from "react";
 import {
   getIntegrationHealthSummaryApi,
@@ -118,7 +119,8 @@ export function StagingValidationPage() {
   };
 
   return (
-    <div className="hz-page-stack">
+    <SettingsAreaShell>
+      <div className="hz-page-stack">
       <PageHeader
         title="Hazırlık kontrolü"
         description="Canlı bağlantıya geçiş öncesi AI, WhatsApp, ERP, fabrika ve yerel aracı servis sağlığını doğrulayın."
@@ -221,6 +223,7 @@ export function StagingValidationPage() {
           </div>
         }
       />
-    </div>
+      </div>
+    </SettingsAreaShell>
   );
 }

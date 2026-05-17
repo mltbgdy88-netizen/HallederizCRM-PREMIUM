@@ -1,5 +1,6 @@
 ﻿"use client";
 
+import { ErrorState, LoadingState, SettingsLayout, UiButton } from "@hallederiz/ui";
 import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type {
@@ -14,6 +15,7 @@ import type {
 import { savePlatformSettings, quickCreateUser } from "../mutations";
 import { getPilotSetupData } from "../queries";
 import { IntentRuleAssistantPanel, WhatsAppIntentRulesSection } from "./WhatsAppIntentRulesSection";
+import { SettingsSubNav } from "./SettingsSubNav";
 import { useToast } from "../../../providers/toast-provider";
 import {
   IconArchive,
@@ -259,14 +261,8 @@ export function SettingsPage() {
   if (loading && !settings) {
     return (
       <div className="hz-settings-page">
-        <div className="hz-settings-loading">
-          <div className="hz-settings-loading-inner">
-            <p className="hz-settings-loading-title">Ayarlar yükleniyor</p>
-            <p className="hz-settings-loading-sub">Firma ve kullanıcı bilgileri hazırlanıyor.</p>
-            <div className="hz-settings-skel-line" style={{ width: "88%" }} />
-            <div className="hz-settings-skel-line" style={{ width: "72%" }} />
-            <div className="hz-settings-skel-line" style={{ width: "64%" }} />
-          </div>
+        <div className="hz-ui-state-center">
+          <LoadingState title="Ayarlar yükleniyor" message="Firma ve kullanıcı bilgileri hazırlanıyor." />
         </div>
       </div>
     );
@@ -275,14 +271,16 @@ export function SettingsPage() {
   if (!settings && loadError) {
     return (
       <div className="hz-settings-page">
-        <div className="hz-settings-error">
-          <div className="hz-settings-error-card">
-            <h2>Ayarlar yüklenemedi</h2>
-            <p>{loadError}</p>
-            <button type="button" className="hz-settings-retry-btn" onClick={loadData}>
-              Tekrar dene
-            </button>
-          </div>
+        <div className="hz-ui-state-center">
+          <ErrorState
+            title="Ayarlar yüklenemedi"
+            message={loadError}
+            actions={
+              <UiButton type="button" variant="secondary" size="md" onClick={loadData}>
+                Tekrar dene
+              </UiButton>
+            }
+          />
         </div>
       </div>
     );
@@ -298,8 +296,11 @@ export function SettingsPage() {
 
   return (
     <div className="hz-settings-page">
-      <div className="hz-settings-layout">
-        <div className="hz-settings-main">
+      <div className="hz-settings-workspace">
+        <SettingsLayout
+          nav={<SettingsSubNav />}
+          children={
+            <div className="hz-settings-main">
           <header className="hz-settings-topbar">
             <div className="hz-settings-topbar-text">
               <h1 className="hz-settings-topbar-title">
@@ -1252,6 +1253,8 @@ export function SettingsPage() {
             ) : null}
           </div>
         </div>
+          }
+        />
 
         <aside className="hz-settings-side" aria-label="Ayar Asistanı">
           <div className="hz-settings-side-inner">
@@ -1318,6 +1321,10 @@ export function SettingsPage() {
                       <IconShieldCheck size={14} />
                       Hazırlık kontrolü
                     </button>
+                    <button type="button" className="hz-settings-side-link" onClick={() => router.push("/ayarlar/operasyon-gozlem")}>
+                      <IconDatabase size={14} />
+                      Operasyon ve gözlem
+                    </button>
                     <button type="button" className="hz-settings-side-link" onClick={() => router.push("/raporlar")}>
                       <IconBarChart3 size={14} />
                       Raporlar
@@ -1336,6 +1343,10 @@ export function SettingsPage() {
                     <button type="button" className="hz-settings-side-link" onClick={() => router.push("/ayarlar/staging-kontrol")}>
                       <IconShieldCheck size={14} />
                       Hazırlık kontrolü
+                    </button>
+                    <button type="button" className="hz-settings-side-link" onClick={() => router.push("/ayarlar/operasyon-gozlem")}>
+                      <IconDatabase size={14} />
+                      Operasyon ve gözlem
                     </button>
                     <button type="button" className="hz-settings-side-link" onClick={() => router.push("/raporlar")}>
                       <IconBarChart3 size={14} />

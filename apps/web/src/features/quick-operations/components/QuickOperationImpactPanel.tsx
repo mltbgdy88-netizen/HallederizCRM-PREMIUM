@@ -3,6 +3,7 @@ import type { QuickOperationAiInsight, QuickOperationImpact } from "../types";
 interface Props {
   impacts: QuickOperationImpact[];
   aiInsight?: QuickOperationAiInsight;
+  layout?: "card" | "bare";
 }
 
 const toneClass: Record<QuickOperationImpact["tone"], string> = {
@@ -12,13 +13,12 @@ const toneClass: Record<QuickOperationImpact["tone"], string> = {
   danger: "hz-badge-danger"
 };
 
-export function QuickOperationImpactPanel({ impacts, aiInsight }: Props) {
-  return (
-    <section className="hz-side-panel">
-      <h3>Operasyon Etkisi</h3>
-      <p className="hz-content-card-description">Bu panel operasyon etkilerini ve AI operasyon notunu gosterir.</p>
+export function QuickOperationImpactPanel({ impacts, aiInsight, layout = "card" }: Props) {
+  const body = (
+    <>
+      {layout === "card" ? <p className="hz-content-card-description">Bu panel operasyon etkilerini ve AI operasyon notunu gosterir.</p> : null}
       {aiInsight ? (
-        <div className="hz-state-card tone-warning hz-margin-top-sm">
+        <div className={`hz-state-card tone-warning${layout === "bare" ? " hz-qop-ai-insight" : ""} hz-margin-top-sm`}>
           <h4>AI Operasyon Notu ({aiInsight.source})</h4>
           <p className="hz-content-card-description">{aiInsight.summary}</p>
           {aiInsight.warnings.length > 0 ? <p className="hz-content-card-description">Uyarilar: {aiInsight.warnings.join(" | ")}</p> : null}
@@ -27,7 +27,7 @@ export function QuickOperationImpactPanel({ impacts, aiInsight }: Props) {
           ) : null}
         </div>
       ) : null}
-      <ul className="hz-side-list">
+      <ul className={layout === "bare" ? "hz-qop-impact-list" : "hz-side-list"}>
         {impacts.map((impact) => (
           <li key={impact.id}>
             <div className="crm-identity-header">
@@ -38,6 +38,17 @@ export function QuickOperationImpactPanel({ impacts, aiInsight }: Props) {
           </li>
         ))}
       </ul>
+    </>
+  );
+
+  if (layout === "bare") {
+    return <div className="hz-qop-impact-bare">{body}</div>;
+  }
+
+  return (
+    <section className="hz-side-panel">
+      <h3>Operasyon Etkisi</h3>
+      {body}
     </section>
   );
 }

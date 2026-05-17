@@ -1,6 +1,7 @@
 "use client";
 
 import type { WhatsAppConversation, WhatsAppMessage } from "@hallederiz/types";
+import { LoadingState } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useCallback, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
@@ -17,12 +18,10 @@ import {
   IconWallet
 } from "../../dashboard/components/dashboard-inline-icons";
 import { useToast } from "../../../providers/toast-provider";
-import {
-  getWhatsAppConversationById,
-  getWhatsAppConversations,
-  type WaRichBlock,
-  WA_QUEUE_META
-} from "../queries/whatsapp-mock-data";
+import { useWhatsAppInbox } from "../hooks/use-whatsapp-inbox";
+import { type WaRichBlock, WA_QUEUE_META } from "../queries/whatsapp-mock-data";
+import { waConversationQueueLine, type WaQueueLineMeta } from "../utils/wa-conversation-helpers";
+import { WhatsAppProductionSecurityChecklist } from "./WhatsAppProductionSecurityChecklist";
 
 type QueueChip = "all" | "unread" | "approval" | "risk";
 
@@ -34,7 +33,7 @@ const DELTA_HEADER = {
   lastOrder: "SO-2026-0148"
 };
 
-function filterConversations(list: WhatsAppConversation[], chip: QueueChip): WhatsAppConversation[] {
+function filterConversations(list: WhatsAppConversation[], chip: QueueChip, useDemo: boolean): WhatsAppConversation[] {
   if (chip === "all") {
     return list;
   }
@@ -44,34 +43,34 @@ function filterConversations(list: WhatsAppConversation[], chip: QueueChip): Wha
   if (chip === "approval") {
     return list.filter((c) => c.pendingActionCount > 0);
   }
-  return list.filter((c) => WA_QUEUE_META[c.id]?.risk !== "none");
+  return list.filter((c) => (useDemo ? WA_QUEUE_META[c.id]?.risk : waConversationQueueLine(c).risk) !== "none");
 }
 
 function ThreadHeader({
-  conversationId,
   contactName,
   phone,
-  hasCustomer
+  hasCustomer,
+  lineMeta,
+  financeExtras
 }: {
-  conversationId: string;
   contactName: string;
   phone: string;
   hasCustomer: boolean;
+  lineMeta?: WaQueueLineMeta | null;
+  financeExtras?: { openBalance: string; lastOrder: string } | null;
 }) {
-  const meta = WA_QUEUE_META[conversationId];
-  const isDelta = conversationId === "wa_op_delta";
   return (
     <header className="hz-wa-thread-header">
       <h2 className="hz-wa-thread-title">{contactName}</h2>
       <p className="hz-wa-thread-phone">{phone}</p>
       <div className="hz-wa-thread-tags">
         <span className={`hz-wa-mini-tag${hasCustomer ? " hz-wa-mini-tag--ok" : ""}`}>{hasCustomer ? "Cari eşleşti" : "Cari eşlenmedi"}</span>
-        {meta?.risk === "orta" ? <span className="hz-wa-mini-tag hz-wa-mini-tag--warn">Risk: Orta</span> : null}
-        {meta?.risk === "kritik" ? <span className="hz-wa-mini-tag hz-wa-mini-tag--bad">Kritik</span> : null}
-        {isDelta ? (
+        {lineMeta?.risk === "orta" ? <span className="hz-wa-mini-tag hz-wa-mini-tag--warn">Risk: Orta</span> : null}
+        {lineMeta?.risk === "kritik" ? <span className="hz-wa-mini-tag hz-wa-mini-tag--bad">Kritik</span> : null}
+        {financeExtras ? (
           <>
-            <span className="hz-wa-mini-tag hz-wa-mini-tag--neutral">Açık bakiye {DELTA_HEADER.openBalance}</span>
-            <span className="hz-wa-mini-tag hz-wa-mini-tag--neutral">Son sipariş {DELTA_HEADER.lastOrder}</span>
+            <span className="hz-wa-mini-tag hz-wa-mini-tag--neutral">Açık bakiye {financeExtras.openBalance}</span>
+            <span className="hz-wa-mini-tag hz-wa-mini-tag--neutral">Son sipariş {financeExtras.lastOrder}</span>
           </>
         ) : null}
       </div>
@@ -138,12 +137,23 @@ function MessageBubble({ message }: { message: WhatsAppMessage }) {
 export function WhatsAppPage() {
   const router = useRouter();
   const { pushToast } = useToast();
-  const conversations = useMemo(() => getWhatsAppConversations(), []);
-  const [selectedId, setSelectedId] = useState(conversations[0]?.id ?? "");
+  const {
+    useDemo,
+    conversations,
+    selectedId,
+    setSelectedId,
+    detail,
+    listLoading,
+    listError,
+    detailLoading,
+    detailError,
+    reloadList
+  } = useWhatsAppInbox();
+
   const [chip, setChip] = useState<QueueChip>("all");
   const [demoDone, setDemoDone] = useState<Record<string, boolean>>({});
 
-  const filtered = useMemo(() => filterConversations(conversations, chip), [conversations, chip]);
+  const filtered = useMemo(() => filterConversations(conversations, chip, useDemo), [conversations, chip, useDemo]);
   const filteredKey = useMemo(() => filtered.map((c) => c.id).join("|"), [filtered]);
 
   const queueListRef = useRef<HTMLDivElement>(null);
@@ -163,8 +173,6 @@ export function WhatsAppPage() {
     }
   }, [selectedId]);
 
-  const data = useMemo(() => getWhatsAppConversationById(selectedId), [selectedId]);
-
   const fireDemo = useCallback(
     (key: string, message: string) => {
       if (demoDone[key]) {
@@ -176,19 +184,51 @@ export function WhatsAppPage() {
     [demoDone, pushToast]
   );
 
-  if (!data.conversation || !data.contact) {
+  if (!useDemo && listLoading && conversations.length === 0) {
     return (
       <div className="hz-wa-page">
-        <div className="hz-wa-shell">
-          <p className="hz-wa-empty">Konuşma bulunamadı.</p>
+        <div className="hz-wa-shell hz-wa-shell--load">
+          <LoadingState title="WhatsApp kutusu yükleniyor" message="Konuşma listesi API üzerinden alınıyor." />
         </div>
       </div>
     );
   }
 
-  const { conversation, contact, messages, richBlocks, customer, suggestedReply, actionRequests } = data;
-  const qMeta = WA_QUEUE_META[conversation.id];
-  const aiDraft = conversation.id === "wa_op_delta" ? DELTA_AI_DRAFT : suggestedReply;
+  if (!useDemo && listError && conversations.length === 0) {
+    return (
+      <div className="hz-wa-page">
+        <div className="hz-wa-shell hz-wa-shell--load">
+          <p className="hz-wa-empty" role="alert">
+            {listError}
+          </p>
+          <button type="button" className="hz-wa-action-button hz-wa-action-button--primary hz-wa-retry-btn" onClick={() => reloadList()}>
+            Tekrar dene
+          </button>
+        </div>
+      </div>
+    );
+  }
+
+  if (!detail.conversation || !detail.contact) {
+    return (
+      <div className="hz-wa-page">
+        <div className="hz-wa-shell hz-wa-shell--load">
+          <p className="hz-wa-empty">Konuşma bulunamadı.</p>
+          {!useDemo ? (
+            <button type="button" className="hz-wa-action-button hz-wa-action-button--primary hz-wa-retry-btn" onClick={() => reloadList()}>
+              Listeyi yenile
+            </button>
+          ) : null}
+        </div>
+      </div>
+    );
+  }
+
+  const { conversation, contact, messages, richBlocks, customer, suggestedReply, actionRequests } = detail;
+  const lineMeta: WaQueueLineMeta = useDemo
+    ? (WA_QUEUE_META[conversation.id] ?? waConversationQueueLine(conversation))
+    : waConversationQueueLine(conversation);
+  const aiDraft = useDemo && conversation.id === "wa_op_delta" ? DELTA_AI_DRAFT : suggestedReply;
 
   const unreadTotal = conversations.reduce((a, c) => a + c.unreadCount, 0);
   const approvalTotal = conversations.reduce((a, c) => a + c.pendingActionCount, 0);
@@ -205,7 +245,7 @@ export function WhatsAppPage() {
               <div className="hz-wa-queue-status" aria-live="polite">
                 <span className="hz-wa-dot hz-wa-dot--ok" aria-hidden />
                 <span>Gateway çevrimiçi</span>
-                <span className="hz-wa-queue-pill">12 aktif</span>
+                <span className="hz-wa-queue-pill">{Math.max(conversations.length, 1)} aktif</span>
               </div>
             </div>
             <div className="hz-wa-chips" role="tablist" aria-label="Hızlı süzme">
@@ -231,7 +271,7 @@ export function WhatsAppPage() {
             </div>
             <div ref={queueListRef} className="hz-wa-conversation-list">
               {filtered.map((c) => {
-                const meta = WA_QUEUE_META[c.id];
+                const meta = useDemo ? (WA_QUEUE_META[c.id] ?? waConversationQueueLine(c)) : waConversationQueueLine(c);
                 const active = c.id === selectedId;
                 return (
                   <button
@@ -247,13 +287,13 @@ export function WhatsAppPage() {
                     <span className="hz-wa-conversation-card-body">
                       <span className="hz-wa-conversation-card-top">
                         <span className="hz-wa-conversation-name">{c.title}</span>
-                        <span className="hz-wa-conversation-time">{meta?.timeLabel ?? ""}</span>
+                        <span className="hz-wa-conversation-time">{meta.timeLabel}</span>
                       </span>
-                      <p className="hz-wa-conversation-snippet">{meta?.subtitle ?? c.lastMessagePreview}</p>
+                      <p className="hz-wa-conversation-snippet">{meta.subtitle}</p>
                       <p className="hz-wa-conversation-meta">
-                        <span className="hz-wa-conversation-meta-strong">{meta?.intentLabel ?? "Genel"}</span>
+                        <span className="hz-wa-conversation-meta-strong">{meta.intentLabel}</span>
                         {" · "}
-                        {meta?.statusLine ?? "—"}
+                        {meta.statusLine}
                         {c.pendingActionCount > 0 ? (
                           <>
                             {" · "}
@@ -272,15 +312,15 @@ export function WhatsAppPage() {
                 <div className="hz-wa-today-grid">
                   <div>
                     <span className="hz-wa-today-k">Okunmamış</span>
-                    <span className="hz-wa-today-v">{unreadTotal || 4}</span>
+                    <span className="hz-wa-today-v">{unreadTotal || (useDemo ? 4 : 0)}</span>
                   </div>
                   <div>
                     <span className="hz-wa-today-k">Onay bekleyen</span>
-                    <span className="hz-wa-today-v">{approvalTotal || 7}</span>
+                    <span className="hz-wa-today-v">{approvalTotal || (useDemo ? 7 : 0)}</span>
                   </div>
                   <div>
                     <span className="hz-wa-today-k">Hata</span>
-                    <span className="hz-wa-today-v hz-wa-today-v--bad">1</span>
+                    <span className="hz-wa-today-v hz-wa-today-v--bad">{useDemo ? 1 : 0}</span>
                   </div>
                 </div>
               </div>
@@ -290,12 +330,23 @@ export function WhatsAppPage() {
           {/* Orta: Mesaj + composer */}
           <section className="hz-wa-thread-panel" aria-label="Mesaj akışı">
             <ThreadHeader
-              conversationId={conversation.id}
               contactName={contact.displayName}
               phone={contact.phone}
               hasCustomer={Boolean(customer)}
+              lineMeta={lineMeta}
+              financeExtras={useDemo && conversation.id === "wa_op_delta" ? DELTA_HEADER : null}
             />
             <div ref={chatFeedRef} className="hz-wa-chat-feed">
+              {!useDemo && detailError ? (
+                <p className="hz-wa-inline-error" role="alert">
+                  {detailError}
+                </p>
+              ) : null}
+              {!useDemo && detailLoading ? (
+                <div className="hz-wa-chat-feed-loading" role="status">
+                  <LoadingState title="Mesajlar yükleniyor" message="Konuşma içeriği API üzerinden alınıyor." />
+                </div>
+              ) : null}
               {richBlocks?.length
                 ? richBlocks.map((b) => (
                     <ChatBlock
@@ -432,7 +483,7 @@ export function WhatsAppPage() {
                   <li>
                     <span>Intent</span>
                     <strong>
-                      {qMeta?.intentLabel === "Sipariş" ? "Sipariş + Fiyat" : qMeta?.intentLabel ?? "—"}
+                      {lineMeta.intentLabel === "Sipariş" ? "Sipariş + Fiyat" : lineMeta.intentLabel}
                     </strong>
                   </li>
                   <li>
@@ -449,6 +500,8 @@ export function WhatsAppPage() {
                   </li>
                 </ul>
               </article>
+
+              <WhatsAppProductionSecurityChecklist />
 
               <article className="hz-wa-side-card hz-wa-side-card--ai">
                 <div className="hz-wa-side-card-head">
@@ -499,9 +552,11 @@ export function WhatsAppPage() {
                 <ul className="hz-wa-pending-list">
                   {(actionRequests.length
                     ? actionRequests.map((a) => a.title)
-                    : ["Sipariş taslağı oluşturuldu", "Teklif gönderimi onay bekliyor", "Tahsilat riski işaretlendi"]
-                  ).map((t) => (
-                    <li key={t}>{t}</li>
+                    : useDemo
+                      ? ["Sipariş taslağı oluşturuldu", "Teklif gönderimi onay bekliyor", "Tahsilat riski işaretlendi"]
+                      : ["API modunda bekleyen aksiyon kaydı yok."]
+                  ).map((t, i) => (
+                    <li key={`${t}-${i}`}>{t}</li>
                   ))}
                 </ul>
                 {conversation.relatedCustomerId ? (

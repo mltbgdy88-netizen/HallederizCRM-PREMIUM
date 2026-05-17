@@ -1,6 +1,6 @@
 "use client";
 
-import { EmptyState, LoadingState, PageHeader, SplitContentLayout } from "@hallederiz/ui";
+import { EmptyState, EntityDetailLayout, LoadingState, PageHeader } from "@hallederiz/ui";
 import { useEffect, useState } from "react";
 import { CustomerIdentityHeader } from "./CustomerIdentityHeader";
 import { CustomerInsightSidePanel } from "./CustomerInsightSidePanel";
@@ -47,12 +47,16 @@ export function CustomerDetailPage({ customerId }: { customerId: string }) {
   }
 
   return (
-    <div className="hz-page-stack">
-      <PageHeader title="Cari Karti" description="Musteri/bayi finans, teklif ve operasyon baglamini tek kartta yonetin." />
-      <CustomerIdentityHeader customer={data.customer} />
-      <CustomerSummaryCards customer={data.customer} account={data.account} />
-      <SplitContentLayout
-        main={
+    <div className="hz-customers-detail-page">
+      <EntityDetailLayout
+        summary={
+          <>
+            <PageHeader title="Cari kartı" description="Müşteri/bayi finans, teklif ve operasyon bağlamını tek kartta yönetin." />
+            <CustomerIdentityHeader customer={data.customer} />
+            <CustomerSummaryCards customer={data.customer} account={data.account} />
+          </>
+        }
+        sections={
           <CustomerTabs
             customer={data.customer}
             account={data.account}
@@ -62,7 +66,7 @@ export function CustomerDetailPage({ customerId }: { customerId: string }) {
             offers={offers}
           />
         }
-        side={<CustomerInsightSidePanel customer={data.customer} account={data.account} />}
+        sidebar={<CustomerInsightSidePanel customer={data.customer} account={data.account} />}
       />
     </div>
   );

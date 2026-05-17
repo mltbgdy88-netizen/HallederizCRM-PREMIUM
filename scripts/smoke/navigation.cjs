@@ -12,7 +12,8 @@ const requiredRouteFiles = [
   "apps/web/app/(platform)/gelen-kutu/konusma/[conversationId]/page.tsx",
   "apps/web/app/(platform)/cariler/liste/page.tsx",
   "apps/web/app/(platform)/onaylar/bekleyenler/page.tsx",
-  "docs/product/PRODUCTION_ROUTE_MANIFEST.md"
+  "docs/product/PRODUCTION_ROUTE_MANIFEST.md",
+  "apps/web/app/(platform)/ayarlar/operasyon-gozlem/page.tsx"
 ];
 
 const checks = [
@@ -45,6 +46,26 @@ const checks = [
     file: "apps/web/src/features/documents/components/DocumentsPage.tsx",
     patterns: ["/teklifler/", "/siparisler/", "/tahsilatlar/", "/depo/emirler/", "/teslimatlar/", "/faturalar/", "/iadeler/"],
     description: "Belge merkezinden ilgili kayda git"
+  },
+  {
+    file: "apps/web/src/features/settings/components/SettingsSubNav.tsx",
+    patterns: ["/ayarlar/operasyon-gozlem"],
+    description: "Ayarlar ic navigasyon operasyon gozlem rotasi"
+  },
+  {
+    file: "apps/web/src/features/tasks/components/OperatorWorkspaceContextPanel.tsx",
+    patterns: ["/ayarlar/operasyon-gozlem"],
+    description: "Gorevler sag panel operasyon gozlem kisayolu"
+  },
+  {
+    file: "apps/web/src/components/platform-shell.tsx",
+    patterns: ["normalizedPath.startsWith(\"/gorevler/\")"],
+    description: "Gorev alt rotalari icin tasks workspace bayragi"
+  },
+  {
+    file: "apps/web/src/features/tasks/components/TasksPage.tsx",
+    patterns: ["/ayarlar/operasyon-gozlem"],
+    description: "Gorev detay TaskActionsBar operasyon kisayolu"
   },
   {
     file: "apps/web/src/features/ai/components/AIAssistantPage.tsx",

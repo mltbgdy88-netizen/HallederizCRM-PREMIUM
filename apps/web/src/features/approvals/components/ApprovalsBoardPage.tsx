@@ -19,36 +19,25 @@ import {
   IconWallet,
   QuickActionIcon
 } from "../../dashboard/components/dashboard-inline-icons";
+import { LoadingState } from "@hallederiz/ui";
+import { dataSourceConfig, sdk } from "../../../lib/data-source";
 import { useToast } from "../../../providers/toast-provider";
-import type { CSSProperties, ReactNode } from "react";
-import { useMemo, useState } from "react";
+import type { ApprovalsBoardCard, ApprovalsBoardRiskKey } from "../types/approvals-board-card";
+import { useApprovalsFromApi } from "../hooks/use-approvals-from-api";
+import { mapApprovalToBoardCard } from "../utils/map-approval-to-board-card";
+import type { CSSProperties } from "react";
+import { useEffect, useMemo, useState } from "react";
 
 const nfTry = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", minimumFractionDigits: 2 });
 
-type RiskKey = "high" | "medium" | "critical" | "normal";
-
-type DemoCard = {
-  id: string;
-  categoryLabel: string;
-  risk: RiskKey;
-  customer: string;
-  docLine: string;
-  summaryLine: string;
-  description: string;
-  date: string;
-  rep: string;
-  accent: string;
-  icon: ReactNode;
-};
-
-const RISK_LABEL: Record<RiskKey, string> = {
+const RISK_LABEL: Record<ApprovalsBoardRiskKey, string> = {
   high: "Yüksek Risk",
   medium: "Orta Risk",
   critical: "Kritik",
   normal: "Normal"
 };
 
-const DEMO_CARDS: DemoCard[] = [
+const DEMO_CARDS: ApprovalsBoardCard[] = [
   {
     id: "1",
     categoryLabel: "SATIŞ",
@@ -209,13 +198,13 @@ const DEMO_CARDS: DemoCard[] = [
 
 type FilterKey = "all" | "sales" | "collection" | "delivery" | "return" | "invoice" | "whatsapp" | "ai" | "highRisk";
 
-function riskClass(r: RiskKey): string {
+function riskClass(r: ApprovalsBoardRiskKey): string {
   if (r === "high" || r === "critical") return "hz-approvals-risk hz-approvals-risk--danger";
   if (r === "medium") return "hz-approvals-risk hz-approvals-risk--warn";
   return "hz-approvals-risk hz-approvals-risk--info";
 }
 
-function matchesFilter(card: DemoCard, f: FilterKey): boolean {
+function matchesFilter(card: ApprovalsBoardCard, f: FilterKey): boolean {
   if (f === "all") return true;
   if (f === "sales") return card.categoryLabel === "SATIŞ";
   if (f === "collection") return card.categoryLabel === "TAHSİLAT" || card.categoryLabel === "TAHSİLAT PLANI";
@@ -240,24 +229,100 @@ const FILTER_CHIPS: { id: FilterKey; label: string }[] = [
   { id: "highRisk", label: "Yüksek Risk" }
 ];
 
+function rangePages(totalPages: number, current: number): (number | "gap")[] {
+  if (totalPages <= 9) {
+    return Array.from({ length: totalPages }, (_, i) => i + 1);
+  }
+  const want = new Set([1, totalPages, current, current - 1, current + 1]);
+  for (let n = 2; n <= 4; n += 1) want.add(n);
+  for (let n = totalPages - 3; n < totalPages; n += 1) want.add(n);
+  const sorted = Array.from(want).filter((n) => n >= 1 && n <= totalPages).sort((a, b) => a - b);
+  const out: (number | "gap")[] = [];
+  let prev = 0;
+  for (const n of sorted) {
+    if (prev && n - prev > 1) {
+      out.push("gap");
+    }
+    out.push(n);
+    prev = n;
+  }
+  return out;
+}
+
 export function ApprovalsBoardPage() {
   const { pushToast } = useToast();
+  const useDemoBoard = dataSourceConfig.useDemoData;
+  const { items: approvalItems, loading: apiLoading, error: apiError, reload } = useApprovalsFromApi(!useDemoBoard);
+
+  const apiCards = useMemo(() => approvalItems.map(mapApprovalToBoardCard), [approvalItems]);
+  const sourceCards = useDemoBoard ? DEMO_CARDS : apiCards;
+
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(12);
   const [approvedIds, setApprovedIds] = useState<Set<string>>(() => new Set());
   const [filter, setFilter] = useState<FilterKey>("all");
 
-  const filteredCards = useMemo(() => DEMO_CARDS.filter((c) => matchesFilter(c, filter)), [filter]);
-  const totalDemoRecords = filteredCards.length;
+  const filteredCards = useMemo(() => sourceCards.filter((c) => matchesFilter(c, filter)), [sourceCards, filter]);
+  const totalRecords = filteredCards.length;
+  const totalPages = Math.max(1, Math.ceil(totalRecords / pageSize));
+  const currentPage = Math.min(Math.max(1, page), totalPages);
+  const pagedCards = useMemo(
+    () => filteredCards.slice((currentPage - 1) * pageSize, currentPage * pageSize),
+    [filteredCards, currentPage, pageSize]
+  );
+
+  useEffect(() => {
+    setPage(1);
+  }, [filter, useDemoBoard]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [pageSize]);
+
+  const kpi = useMemo(() => {
+    if (useDemoBoard) {
+      return { pending: 12, critical: 3, approvedToday: 8, rejected: 2 };
+    }
+    const start = new Date();
+    start.setHours(0, 0, 0, 0);
+    const pendingItems = approvalItems.filter((a) => a.status === "pending");
+    return {
+      pending: pendingItems.length,
+      critical: pendingItems.filter((a) => a.type === "delivery_payment_missing" || a.type === "order_high_value").length,
+      approvedToday: approvalItems.filter(
+        (a) =>
+          a.status === "approved" &&
+          Boolean(a.decidedAt) &&
+          !Number.isNaN(new Date(a.decidedAt as string).getTime()) &&
+          new Date(a.decidedAt as string) >= start
+      ).length,
+      rejected: approvalItems.filter((a) => a.status === "rejected").length
+    };
+  }, [useDemoBoard, approvalItems]);
+
+  const pageButtons = useMemo(() => rangePages(totalPages, currentPage), [totalPages, currentPage]);
+
+  const approvalPending = (id: string) => approvalItems.find((a) => a.id === id)?.status === "pending";
 
   const onCardActivate = () => {
     pushToast("Detay modalı bir sonraki aşamada açılacak.");
   };
 
-  const onApprove = (id: string) => {
-    if (approvedIds.has(id)) return;
-    setApprovedIds((prev) => new Set(prev).add(id));
-    pushToast("Onay kaydı işaretlendi (demo).");
+  const onApprove = async (id: string) => {
+    if (useDemoBoard) {
+      if (approvedIds.has(id)) return;
+      setApprovedIds((prev) => new Set(prev).add(id));
+      pushToast("Onay kaydı işaretlendi (demo).");
+      return;
+    }
+    if (!approvalPending(id)) return;
+    try {
+      await sdk.approvals.approve(id);
+      pushToast("Onay kaydı API üzerinden güncellendi.");
+      reload();
+    } catch (e) {
+      pushToast(e instanceof Error ? e.message : "Onay isteği başarısız");
+    }
   };
 
   return (
@@ -276,27 +341,29 @@ export function ApprovalsBoardPage() {
                     <p className="hz-approvals-hero-sub">Riskli işlemler, AI proposal talepleri ve kritik mutation onayları.</p>
                   </div>
                 </div>
-                <span className="hz-approvals-hero-hint">Kart tıklanınca detay modalı açılacak</span>
+                <span className="hz-approvals-hero-hint">
+                  {useDemoBoard ? "Kart tıklanınca detay modalı açılacak" : "Liste operations API (/approvals) üzerinden yüklenir."}
+                </span>
               </header>
 
               <div className="hz-approvals-kpi-row" aria-label="Onay özeti">
                 <article className="hz-approvals-kpi hz-approvals-kpi--primary">
                   <span className="hz-approvals-kpi-label">Bekleyen Onay</span>
-                  <span className="hz-approvals-kpi-value">12</span>
+                  <span className="hz-approvals-kpi-value">{kpi.pending}</span>
                 </article>
                 <article className="hz-approvals-kpi hz-approvals-kpi--danger">
                   <span className="hz-approvals-kpi-label">Kritik Risk</span>
-                  <span className="hz-approvals-kpi-value">3</span>
+                  <span className="hz-approvals-kpi-value">{kpi.critical}</span>
                   <span className="hz-approvals-kpi-meta">Yüksek riskli</span>
                 </article>
                 <article className="hz-approvals-kpi hz-approvals-kpi--success">
                   <span className="hz-approvals-kpi-label">Bugün Onaylanan</span>
-                  <span className="hz-approvals-kpi-value">8</span>
+                  <span className="hz-approvals-kpi-value">{kpi.approvedToday}</span>
                   <span className="hz-approvals-kpi-meta">Başarıyla tamamlandı</span>
                 </article>
                 <article className="hz-approvals-kpi hz-approvals-kpi--muted">
                   <span className="hz-approvals-kpi-label">Reddedilen</span>
-                  <span className="hz-approvals-kpi-value">2</span>
+                  <span className="hz-approvals-kpi-value">{kpi.rejected}</span>
                   <span className="hz-approvals-kpi-meta">Kontrol geçmişi</span>
                 </article>
               </div>
@@ -314,90 +381,144 @@ export function ApprovalsBoardPage() {
                     </button>
                   ))}
                 </div>
-                <button type="button" className="hz-approvals-filter-btn" onClick={() => pushToast("Filtre paneli (demo).")} aria-label="Filtrele">
+                <button
+                  type="button"
+                  className="hz-approvals-filter-btn"
+                  onClick={() => pushToast(useDemoBoard ? "Filtre paneli (demo)." : "Gelişmiş filtre paneli yakında.")}
+                  aria-label="Filtrele"
+                >
                   Filtrele
                 </button>
               </div>
+
+              {!useDemoBoard && apiError ? (
+                <div className="hz-approvals-error-band" role="alert">
+                  <span>{apiError}</span>
+                  <button type="button" className="hz-approvals-filter-btn" onClick={() => reload()}>
+                    Tekrar dene
+                  </button>
+                </div>
+              ) : null}
+              {!useDemoBoard && !apiLoading && !apiError ? (
+                <div className="hz-approvals-api-band" role="status">
+                  Canlı veri: onay kartları API yanıtına göre oluşturulur; onay mutation backend policy zincirine bağlıdır.
+                </div>
+              ) : null}
             </div>
 
             <div className="hz-approvals-grid-wrap">
-              <div className="hz-approvals-grid">
-                {filteredCards.map((card) => (
-                  <article
-                    key={card.id}
-                    className="hz-approvals-card"
-                    style={{ "--hz-ap-accent": card.accent } as CSSProperties}
-                    onClick={onCardActivate}
-                    onKeyDown={(e) => {
-                      if (e.key === "Enter" || e.key === " ") {
-                        e.preventDefault();
-                        onCardActivate();
-                      }
-                    }}
-                    role="button"
-                    tabIndex={0}
-                  >
-                    <div className="hz-approvals-card-body">
-                      <div className="hz-approvals-card-top">
-                        <div className="hz-approvals-card-ico">{card.icon}</div>
-                        <span className="hz-approvals-cat">{card.categoryLabel}</span>
-                        <span className={riskClass(card.risk)}>{RISK_LABEL[card.risk]}</span>
-                      </div>
-                      <div className="hz-approvals-card-mid">
-                        <p className="hz-approvals-cust">{card.customer}</p>
-                        <p className="hz-approvals-doc">{card.docLine}</p>
-                        <p className="hz-approvals-sum">{card.summaryLine}</p>
-                      </div>
-                      <div className="hz-approvals-meta">
-                        <span>{card.date}</span>
-                        <span>{card.rep}</span>
-                      </div>
+              {!useDemoBoard && apiLoading ? (
+                <LoadingState title="Onaylar yükleniyor" message="API üzerinden bekleyen kayıtlar alınıyor." />
+              ) : (
+                <div className="hz-approvals-grid">
+                  {pagedCards.length === 0 ? (
+                    <div className="hz-approvals-empty-state" role="status">
+                      <p className="hz-approvals-empty-title">{apiError ? "Liste yüklenemedi" : "Gösterilecek onay yok"}</p>
+                      <p className="hz-approvals-empty-text">
+                        {apiError
+                          ? "Bağlantıyı ve oturum bilgilerini kontrol edip tekrar deneyin."
+                          : useDemoBoard
+                            ? "Filtreleri değiştirerek tekrar deneyin."
+                            : "Filtreleri sıfırlayın veya API tarafında bekleyen onay oluşturulduğunda kayıtlar burada listelenir."}
+                      </p>
                     </div>
-                    <div className="hz-approvals-card-actions">
-                      <button
-                        type="button"
-                        className="hz-approvals-btn hz-approvals-btn--ghost"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          pushToast("Detay modalı hazırlanıyor.");
+                  ) : (
+                    pagedCards.map((card) => (
+                      <article
+                        key={card.id}
+                        className="hz-approvals-card"
+                        style={{ "--hz-ap-accent": card.accent } as CSSProperties}
+                        onClick={onCardActivate}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            onCardActivate();
+                          }
                         }}
+                        role="button"
+                        tabIndex={0}
                       >
-                        Detaylar
-                      </button>
-                      <button
-                        type="button"
-                        className="hz-approvals-btn hz-approvals-btn--primary"
-                        disabled={approvedIds.has(card.id)}
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onApprove(card.id);
-                        }}
-                      >
-                        Onayla
-                      </button>
-                    </div>
-                  </article>
-                ))}
-              </div>
+                        <div className="hz-approvals-card-body">
+                          <div className="hz-approvals-card-top">
+                            <div className="hz-approvals-card-ico">{card.icon}</div>
+                            <span className="hz-approvals-cat">{card.categoryLabel}</span>
+                            <span className={riskClass(card.risk)}>{RISK_LABEL[card.risk]}</span>
+                          </div>
+                          <div className="hz-approvals-card-mid">
+                            <p className="hz-approvals-cust">{card.customer}</p>
+                            <p className="hz-approvals-doc">{card.docLine}</p>
+                            <p className="hz-approvals-sum">{card.summaryLine}</p>
+                          </div>
+                          <div className="hz-approvals-meta">
+                            <span>{card.date}</span>
+                            <span>{card.rep}</span>
+                          </div>
+                        </div>
+                        <div className="hz-approvals-card-actions">
+                          <button
+                            type="button"
+                            className="hz-approvals-btn hz-approvals-btn--ghost"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              pushToast("Detay modalı hazırlanıyor.");
+                            }}
+                          >
+                            Detaylar
+                          </button>
+                          <button
+                            type="button"
+                            className="hz-approvals-btn hz-approvals-btn--primary"
+                            disabled={useDemoBoard ? approvedIds.has(card.id) : !approvalPending(card.id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              void onApprove(card.id);
+                            }}
+                          >
+                            Onayla
+                          </button>
+                        </div>
+                      </article>
+                    ))
+                  )}
+                </div>
+              )}
             </div>
 
             <footer className="hz-approvals-pagination">
-              <span className="hz-approvals-page-total">Toplam {totalDemoRecords} kayıt</span>
+              <span className="hz-approvals-page-total">Toplam {totalRecords} kayıt</span>
               <div className="hz-approvals-page-nav">
-                <button type="button" className="hz-approvals-page-arrow" disabled={page <= 1} onClick={() => setPage((p) => Math.max(1, p - 1))} aria-label="Önceki sayfa">
+                <button
+                  type="button"
+                  className="hz-approvals-page-arrow"
+                  disabled={currentPage <= 1}
+                  onClick={() => setPage((p) => Math.max(1, p - 1))}
+                  aria-label="Önceki sayfa"
+                >
                   ‹
                 </button>
-                {[1, 2, 3].map((n) => (
-                  <button
-                    key={n}
-                    type="button"
-                    className={`hz-approvals-page-num ${page === n ? "hz-approvals-page-num--active" : ""}`}
-                    onClick={() => setPage(n)}
-                  >
-                    {n}
-                  </button>
-                ))}
-                <button type="button" className="hz-approvals-page-arrow" disabled={page >= 3} onClick={() => setPage((p) => Math.min(3, p + 1))} aria-label="Sonraki sayfa">
+                {pageButtons.map((n, idx) =>
+                  n === "gap" ? (
+                    <span key={`gap-${idx}`} className="hz-approvals-page-ellipsis" aria-hidden>
+                      …
+                    </span>
+                  ) : (
+                    <button
+                      key={n}
+                      type="button"
+                      className={`hz-approvals-page-num ${currentPage === n ? "hz-approvals-page-num--active" : ""}`}
+                      onClick={() => setPage(n)}
+                    >
+                      {n}
+                    </button>
+                  )
+                )}
+                <button
+                  type="button"
+                  className="hz-approvals-page-arrow"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+                  aria-label="Sonraki sayfa"
+                >
                   ›
                 </button>
               </div>
@@ -453,9 +574,23 @@ export function ApprovalsBoardPage() {
               <h3 className="hz-approvals-assistant-card-title">Öncelikli Uyarılar</h3>
             </div>
             <ul className="hz-approvals-assistant-list">
-              <li>3 yüksek riskli satış onayı bekliyor.</li>
-              <li>1 teslimatta eksik tahsilat riski.</li>
-              <li>WhatsApp belgelerinde cari eşleşmesini kontrol edin.</li>
+              {useDemoBoard ? (
+                <>
+                  <li>3 yüksek riskli satış onayı bekliyor.</li>
+                  <li>1 teslimatta eksik tahsilat riski.</li>
+                  <li>WhatsApp belgelerinde cari eşleşmesini kontrol edin.</li>
+                </>
+              ) : (
+                <>
+                  <li>
+                    {kpi.critical > 0
+                      ? `${kpi.critical} kritik veya yüksek tutarlı bekleyen onay.`
+                      : "Kritik öncelikli bekleyen onay bulunmuyor."}
+                  </li>
+                  <li>{kpi.pending > 0 ? `${kpi.pending} bekleyen onay kuyrukta.` : "Bekleyen onay kuyruğu boş."}</li>
+                  <li>Liste gerçek zamanlı API verisine göre güncellenir; detay ve red akışı bir sonraki iterasyonda tamamlanacak.</li>
+                </>
+              )}
             </ul>
           </section>
 
@@ -486,19 +621,19 @@ export function ApprovalsBoardPage() {
             <ul className="hz-approvals-metrics">
               <li>
                 <span className="hz-approvals-metrics-label">Bekleyen</span>
-                <span className="hz-approvals-metrics-badge hz-approvals-metrics-badge--primary">12</span>
+                <span className="hz-approvals-metrics-badge hz-approvals-metrics-badge--primary">{kpi.pending}</span>
               </li>
               <li>
                 <span className="hz-approvals-metrics-label">Kritik</span>
-                <span className="hz-approvals-metrics-badge hz-approvals-metrics-badge--danger">3</span>
+                <span className="hz-approvals-metrics-badge hz-approvals-metrics-badge--danger">{kpi.critical}</span>
               </li>
               <li>
                 <span className="hz-approvals-metrics-label">Tahsilat bağlantılı</span>
-                <span className="hz-approvals-metrics-badge hz-approvals-metrics-badge--success">2</span>
+                <span className="hz-approvals-metrics-badge hz-approvals-metrics-badge--success">{useDemoBoard ? 2 : "—"}</span>
               </li>
               <li>
                 <span className="hz-approvals-metrics-label">Belge gönderimi</span>
-                <span className="hz-approvals-metrics-badge hz-approvals-metrics-badge--info">1</span>
+                <span className="hz-approvals-metrics-badge hz-approvals-metrics-badge--info">{useDemoBoard ? 1 : "—"}</span>
               </li>
             </ul>
           </section>
@@ -514,7 +649,7 @@ export function ApprovalsBoardPage() {
               </span>
             </div>
             <ul className="hz-approvals-assistant-list hz-approvals-assistant-list--compact">
-              <li>Kart tıklanınca detay modalı açılacak.</li>
+              <li>{useDemoBoard ? "Kart tıklanınca detay modalı açılacak." : "Kartlar API'deki onay kayıtlarından üretilir; detay modalı bir sonraki iterasyonda açılacak."}</li>
               <li>Modalda risk, belge ve audit; Onayla/Reddet bağlanacak.</li>
             </ul>
           </section>

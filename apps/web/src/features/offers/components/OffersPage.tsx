@@ -1,8 +1,8 @@
 "use client";
 
-import { LoadingState, MetricCard, PageHeader, Pagination, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
+import { EntityListPageTemplate, LoadingState, MetricCard, Pagination, PrimaryActionToolbar } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { OfferFilterBar } from "./OfferFilterBar";
 import { OfferQuickPreviewPanel } from "./OfferQuickPreviewPanel";
 import { OfferTable } from "./OfferTable";
@@ -26,52 +26,89 @@ export function OffersPage() {
     [customers, selectedOffer?.customerId]
   );
 
+  useEffect(() => {
+    setPage(1);
+  }, [filters]);
+
+  useEffect(() => {
+    if (!filteredOffers.length) {
+      setSelectedOfferId(null);
+      return;
+    }
+    const first = filteredOffers[0];
+    if (!first) {
+      setSelectedOfferId(null);
+      return;
+    }
+    if (!selectedOfferId || !filteredOffers.some((o) => o.id === selectedOfferId)) {
+      setSelectedOfferId(first.id);
+    }
+  }, [filteredOffers, selectedOfferId]);
+
   return (
-    <div className="hz-page-stack">
-      <PageHeader
-        title="Teklifler"
-        description="Satis oncesi teklifleri, fiyat grubu snapshotlarini ve follow-up akislarini yonetin."
-      />
-
-      <section className="hz-metric-grid">
-        <MetricCard title="Acik Teklif" value={String(filteredOffers.length)} detail="Filtre kapsaminda" tone="info" />
-        <MetricCard title="Onaylanan" value={String(filteredOffers.filter((offer) => offer.status === "approved").length)} detail="Siparise hazir" tone="success" />
-        <MetricCard title="Cevap Bekleyen" value={String(filteredOffers.filter((offer) => offer.status === "waiting_response").length)} detail="Follow-up gerekli" tone="warning" />
-        <MetricCard title="Toplam Hacim" value={`${Math.round(filteredOffers.reduce((sum, offer) => sum + offer.grandTotal, 0) / 1000)}K`} detail="TRY" tone="info" />
-      </section>
-
-      <PrimaryActionToolbar>
-        <button type="button" className="hz-btn hz-btn-primary hz-toolbar-btn" onClick={() => router.push("/teklifler/yeni")}>
-          Yeni Teklif
-        </button>
-        <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn">
-          PDF Uret
-        </button>
-        <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn">
-          Follow-up Planla
-        </button>
-      </PrimaryActionToolbar>
-
-      <OfferFilterBar filters={filters} customers={customers} onFilterChange={updateFilter} onReset={resetFilters} />
-
-      <SplitContentLayout
-        main={
-          loading ? (
-            <LoadingState title="Teklifler yukleniyor" message="Teklif, follow-up ve fiyat grubu ozetleri hazirlaniyor." />
-          ) : (
-            <>
-              <OfferTable
-                rows={pagedRows}
-                selectedOfferId={selectedOffer?.id ?? null}
-                onSelectOffer={setSelectedOfferId}
-                onOpenOffer={(offerId) => router.push(`/teklifler/${offerId}`)}
-              />
-              <Pagination totalItems={rows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
-            </>
-          )
-        }
-        side={<OfferQuickPreviewPanel offer={selectedOffer} customer={selectedCustomer} />}
-      />
-    </div>
+    <EntityListPageTemplate
+      className="hz-offers-page"
+      header={
+        <div className="hz-offers-head">
+          <div className="hz-offers-head-text">
+            <h1 className="hz-offers-head-title">Teklifler</h1>
+            <p className="hz-offers-head-sub">Satış öncesi teklifleri, fiyat grubu snapshotlarını ve follow-up akışlarını yönetin.</p>
+          </div>
+          <section className="hz-metric-grid">
+            <MetricCard title="Açık teklif" value={String(filteredOffers.length)} detail="Filtre kapsamında" tone="info" />
+            <MetricCard
+              title="Onaylanan"
+              value={String(filteredOffers.filter((offer) => offer.status === "approved").length)}
+              detail="Siparişe hazır"
+              tone="success"
+            />
+            <MetricCard
+              title="Cevap bekleyen"
+              value={String(filteredOffers.filter((offer) => offer.status === "waiting_response").length)}
+              detail="Follow-up gerekli"
+              tone="warning"
+            />
+            <MetricCard
+              title="Toplam hacim"
+              value={`${Math.round(filteredOffers.reduce((sum, offer) => sum + offer.grandTotal, 0) / 1000)}K`}
+              detail="TRY"
+              tone="info"
+            />
+          </section>
+          <PrimaryActionToolbar>
+            <button type="button" className="hz-btn hz-btn-primary hz-toolbar-btn" onClick={() => router.push("/teklifler/yeni")}>
+              Yeni teklif
+            </button>
+            <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn">
+              PDF üret
+            </button>
+            <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn">
+              Follow-up planla
+            </button>
+          </PrimaryActionToolbar>
+        </div>
+      }
+      filters={<OfferFilterBar filters={filters} customers={customers} onFilterChange={updateFilter} onReset={resetFilters} />}
+      list={
+        loading ? (
+          <LoadingState title="Teklifler yükleniyor" message="Teklif, follow-up ve fiyat grubu özetleri hazırlanıyor." />
+        ) : (
+          <OfferTable
+            rows={pagedRows}
+            selectedOfferId={selectedOffer?.id ?? null}
+            onSelectOffer={setSelectedOfferId}
+            onOpenOffer={(offerId) => router.push(`/teklifler/${offerId}`)}
+          />
+        )
+      }
+      pagination={
+        loading ? null : <Pagination totalItems={rows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
+      }
+      preview={
+        <div className="hz-offers-side">
+          <OfferQuickPreviewPanel offer={selectedOffer} customer={selectedCustomer} />
+        </div>
+      }
+    />
   );
 }

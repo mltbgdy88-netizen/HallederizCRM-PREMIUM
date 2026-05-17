@@ -10,10 +10,11 @@ Bu batch, cekirdek operasyon omurgasinda kalan kritik bosluklari kapatmak icin u
 - `assertAuthenticated` guard'i tenant mismatch durumunu `403 forbidden` olarak netlestirdi.
 
 2. Remaining write parity (DB-first guclendirme)
-- Commercial core repository icinde `payments` ve `warehouse_orders` icin DB-first read/write path eklendi.
+- Commercial core repository icinde `payments` ve depo emirleri icin DB-first read/write path eklendi.
 - `payment_receipts` tablosu uzerinden list/get/create/confirm/reverse zinciri guclendirildi.
-- `warehouse_orders` tablosu uzerinden list/get/create/assign/start/prepared/cancel zinciri guclendirildi.
-- `payment allocations` icin DB modunda deterministic foundation hesaplamasi eklendi.
+- `warehouse_orders` + `warehouse_order_lines` + `warehouse_tasks` DB-first path; siparisten emir `buildWarehouseOrderFromSale` + transaction insert; liste/get cocuk satirlari DB'den.
+- `payment allocations` icin satir bazli kalici tablo (`payment_allocations`) ve migration `0011_payment_allocations.sql`; commercial-core repository onayda foundation onerisini bu tabloya yazar, liste/get odemeleri DB allocation ile dondurur.
+- Fatura/iade olusturma (DB): siparis satirina gore miktar ust siniri + fatura satir tutar/vergi aritmetigi domain validasyonlari.
 
 3. Approval execution completion
 - Execution failure mesajina retryability etiketi eklendi: `[RETRYABLE]` / `[NON_RETRYABLE]`.
@@ -33,8 +34,9 @@ Bu batch, cekirdek operasyon omurgasinda kalan kritik bosluklari kapatmak icin u
 olaylari icin audit write-back eklendi.
 
 ## Hala Foundation Olan Alanlar
-- Payment allocations icin tam line-level kalici tablo yapisi yok; foundation hesaplamasi kullaniliyor.
-- Warehouse line/task alt tablolari DB tarafinda temel seviyede.
+- Tahsilat allocation icin coklu hedef (fatura + siparis karma) ve operator duzenleme UI/API henuz tam degil; temel tablo + tek aday siparis foundation persist mevcut.
+- Depo satir `prepared_quantity` / gorev durumu icin operasyonel write-back (toplu toplama UI) ve cok-depo senaryolari foundation seviyesinde.
+- Fatura / iade hatlarinda ERP stok ledger + hesap mutabakatı onayli execution dispatcher ile baglanacak (Faz D); satir bazli siparis/fatura aritmetik dogrulamalari Faz C foundation olarak eklendi.
 - Local agent OS-level printer varyasyonlari ve ileri retry politikasi foundation seviyesinde.
 
 ## Dogrulama

@@ -1,7 +1,8 @@
 import type { ReportCategoryChip, ReportMetricRow } from "../types";
+import { dataSourceConfig } from "../../../lib/data-source";
 
-/** API bağlandığında false yapın; önizleme ve örnek satırlar gizlenir. */
-export const REPORTS_USE_DEMO_DATA = true;
+/** `NEXT_PUBLIC_USE_DEMO_DATA` ile uyumlu; API modunda `false` iken örnek satırlar kullanılmaz. */
+export const REPORTS_USE_DEMO_DATA = dataSourceConfig.useDemoData;
 
 export const REPORTS_DEMO_METRICS: ReportMetricRow[] = [
   {

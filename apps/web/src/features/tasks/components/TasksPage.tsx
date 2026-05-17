@@ -1,16 +1,44 @@
 "use client";
 
 import type { Task } from "@hallederiz/types";
-import { FilterActions, FilterBar, LoadingState, MetricCard, PageHeader, Pagination, SplitContentLayout } from "@hallederiz/ui";
+import {
+  FilterChip,
+  FilterResetButton,
+  FilterToolbar,
+  FilterToolbarChips,
+  FilterToolbarRow,
+  FilterToolbarSearch,
+  FilterToolbarViews,
+  LoadingState,
+  PageHeader,
+  Pagination,
+  SplitContentLayout
+} from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { getOperationsEngineData } from "../../dashboard/queries";
+import { OperatorWorkspaceContextPanel } from "./OperatorWorkspaceContextPanel";
 
-const priorityLabels: Record<Task["priority"], string> = { low: "Dusuk", normal: "Normal", high: "Yuksek", critical: "Kritik" };
-const statusLabels: Record<Task["status"], string> = { open: "Acik", in_progress: "Devam", done: "Tamam", cancelled: "Iptal", overdue: "Gecikti" };
+const priorityLabels: Record<Task["priority"], string> = {
+  low: "Dusuk",
+  normal: "Normal",
+  high: "Yuksek",
+  critical: "Kritik"
+};
+const statusLabels: Record<Task["status"], string> = {
+  open: "Acik",
+  in_progress: "Devam",
+  done: "Tamam",
+  cancelled: "Iptal",
+  overdue: "Gecikti"
+};
 
 function priorityBadge(priority: Task["priority"]) {
-  return priority === "critical" ? "hz-badge hz-badge-danger" : priority === "high" ? "hz-badge hz-badge-warning" : "hz-badge hz-badge-info";
+  return priority === "critical"
+    ? "hz-badge hz-badge-danger"
+    : priority === "high"
+      ? "hz-badge hz-badge-warning"
+      : "hz-badge hz-badge-info";
 }
 
 type TaskFilters = {
@@ -22,76 +50,200 @@ type TaskFilters = {
   overdueOnly: boolean;
 };
 
-function TaskFilterBar({ filters, onChange, onReset }: { filters: TaskFilters; onChange: (next: Partial<TaskFilters>) => void; onReset: () => void }) {
+const defaultFilters: TaskFilters = {
+  assignee: "",
+  status: "",
+  priority: "",
+  source: "",
+  entityType: "",
+  overdueOnly: false
+};
+
+const STATUS_CHIPS: { id: "" | Task["status"]; label: string }[] = [
+  { id: "", label: "Tumu" },
+  { id: "open", label: "Acik" },
+  { id: "in_progress", label: "Devam" },
+  { id: "overdue", label: "Gecikti" },
+  { id: "done", label: "Tamam" },
+  { id: "cancelled", label: "Iptal" }
+];
+
+function TaskFilterWorkbench({
+  filters,
+  onChange,
+  onReset
+}: {
+  filters: TaskFilters;
+  onChange: (next: Partial<TaskFilters>) => void;
+  onReset: () => void;
+}) {
   return (
-    <FilterBar>
-      <div className="task-center-filter-grid">
-        <label>
-          Atanan Kisi
-          <input value={filters.assignee} onChange={(event) => onChange({ assignee: event.target.value })} placeholder="Atanan kisi ara" />
-        </label>
-        <label>
-          Durum
-          <select value={filters.status} onChange={(event) => onChange({ status: event.target.value as TaskFilters["status"] })}>
-            <option value="">Tum durumlar</option>
-            <option value="open">Acik</option>
-            <option value="in_progress">Devam</option>
-            <option value="done">Tamam</option>
-            <option value="overdue">Gecikti</option>
-            <option value="cancelled">Iptal</option>
-          </select>
-        </label>
-        <label>
-          Oncelik
-          <select value={filters.priority} onChange={(event) => onChange({ priority: event.target.value as TaskFilters["priority"] })}>
-            <option value="">Tum oncelikler</option>
-            <option value="critical">Kritik</option>
-            <option value="high">Yuksek</option>
-            <option value="normal">Normal</option>
-            <option value="low">Dusuk</option>
-          </select>
-        </label>
-        <label>
-          Gorev Tipi
-          <select value={filters.source} onChange={(event) => onChange({ source: event.target.value as TaskFilters["source"] })}>
-            <option value="">Tum tipler</option>
-            <option value="workflow">Workflow</option>
-            <option value="dashboard">Dashboard</option>
-            <option value="ai">AI</option>
-          </select>
-        </label>
-        <label>
-          Entity Tipi
-          <select value={filters.entityType} onChange={(event) => onChange({ entityType: event.target.value as TaskFilters["entityType"] })}>
-            <option value="">Tum kayitlar</option>
-            <option value="order">Siparis</option>
-            <option value="delivery">Teslimat</option>
-            <option value="customer">Cari</option>
-            <option value="approval">Onay</option>
-          </select>
-        </label>
-        <label className="hz-toggle">
-          <input checked={filters.overdueOnly} onChange={(event) => onChange({ overdueOnly: event.target.checked })} type="checkbox" />
-          Sadece gecikenler
-        </label>
-      </div>
-      <FilterActions>
-        <button type="button" className="hz-btn hz-btn-secondary" onClick={onReset}>
-          Filtreleri sifirla
-        </button>
-      </FilterActions>
-      <p className="muted">Filtreler bu ekranda anlik olarak listeye uygulanir. Canli mutation veya fake basari uretmez.</p>
-    </FilterBar>
+    <FilterToolbar>
+      <FilterToolbarRow>
+        <FilterToolbarChips>
+          {STATUS_CHIPS.map((chip) => (
+            <FilterChip
+              key={chip.id || "all"}
+              active={filters.status === chip.id}
+              onClick={() => onChange({ status: chip.id, overdueOnly: chip.id === "overdue" ? false : filters.overdueOnly })}
+            >
+              {chip.label}
+            </FilterChip>
+          ))}
+        </FilterToolbarChips>
+        <FilterToolbarViews>
+          <label className="hz-tasks-ws-toggle">
+            <input
+              checked={filters.overdueOnly}
+              onChange={(event) => onChange({ overdueOnly: event.target.checked })}
+              type="checkbox"
+            />
+            Sadece gecikenler
+          </label>
+        </FilterToolbarViews>
+      </FilterToolbarRow>
+      <FilterToolbarRow>
+        <FilterToolbarSearch>
+          <label className="hz-tasks-ws-search">
+            <span className="hz-tasks-ws-search-label">Atanan</span>
+            <input
+              value={filters.assignee}
+              onChange={(event) => onChange({ assignee: event.target.value })}
+              placeholder="Atanan kisi ara"
+              type="search"
+              className="hz-tasks-ws-input"
+            />
+          </label>
+        </FilterToolbarSearch>
+        <div className="hz-tasks-ws-filter-fields">
+          <label className="hz-tasks-ws-field">
+            <span>Oncelik</span>
+            <select
+              value={filters.priority}
+              onChange={(event) => onChange({ priority: event.target.value as TaskFilters["priority"] })}
+              className="hz-tasks-ws-input"
+            >
+              <option value="">Tum oncelikler</option>
+              <option value="critical">Kritik</option>
+              <option value="high">Yuksek</option>
+              <option value="normal">Normal</option>
+              <option value="low">Dusuk</option>
+            </select>
+          </label>
+          <label className="hz-tasks-ws-field">
+            <span>Kaynak</span>
+            <select
+              value={filters.source}
+              onChange={(event) => onChange({ source: event.target.value as TaskFilters["source"] })}
+              className="hz-tasks-ws-input"
+            >
+              <option value="">Tum kaynaklar</option>
+              <option value="system">Sistem</option>
+              <option value="ai">AI</option>
+            </select>
+          </label>
+          <label className="hz-tasks-ws-field">
+            <span>Entity</span>
+            <select
+              value={filters.entityType}
+              onChange={(event) => onChange({ entityType: event.target.value as TaskFilters["entityType"] })}
+              className="hz-tasks-ws-input"
+            >
+              <option value="">Tum entityler</option>
+              <option value="order">Siparis</option>
+              <option value="delivery">Teslimat</option>
+              <option value="customer">Cari</option>
+              <option value="product">Urun</option>
+              <option value="payment">Tahsilat</option>
+              <option value="offer">Teklif</option>
+              <option value="ai_proposal">AI proposal</option>
+              <option value="factory_order">Fabrika siparisi</option>
+              <option value="warehouse_order">Depo siparisi</option>
+              <option value="invoice">Fatura</option>
+              <option value="return">Iade</option>
+              <option value="document">Belge</option>
+            </select>
+          </label>
+        </div>
+      </FilterToolbarRow>
+      <FilterToolbarRow>
+        <FilterResetButton onClick={onReset} label="Filtreleri sifirla" />
+        <p className="hz-tasks-ws-filter-hint">Filtreler anlik uygulanir; canli mutation veya sahte basari uretmez.</p>
+      </FilterToolbarRow>
+    </FilterToolbar>
   );
 }
 
-export function TaskTable({ tasks, selectedTaskId, onSelect, onOpen }: { tasks: Task[]; selectedTaskId: string | null; onSelect: (taskId: string) => void; onOpen: (taskId: string) => void }) {
-  return <section className="hz-content-card"><div className="table-wrap hz-table-wrap"><table className="table hz-table hz-table-sticky"><thead><tr><th>Gorev No</th><th>Baslik</th><th>Musteri / Kayit</th><th>Atanan</th><th>Durum</th><th>Oncelik</th><th>Son Tarih</th><th>Aksiyon</th></tr></thead><tbody>{tasks.map((task) => <tr key={task.id} className={`stock-table-row ${selectedTaskId === task.id ? "is-selected-row" : ""}`} onClick={() => onSelect(task.id)} onDoubleClick={() => onOpen(task.id)}><td>{task.taskNo}</td><td>{task.title}</td><td>{task.customerName ?? task.entityNo}</td><td>{task.assigneeName ?? "-"}</td><td>{statusLabels[task.status]}</td><td><span className={priorityBadge(task.priority)}>{priorityLabels[task.priority]}</span></td><td>{new Date(task.dueAt).toLocaleString("tr-TR")}</td><td><button className="hz-btn hz-btn-secondary" type="button" onClick={() => onOpen(task.id)}>Detay</button></td></tr>)}{tasks.length === 0 ? <tr><td colSpan={8}><div className="table-empty">Filtrelere uygun gorev bulunamadi.</div></td></tr> : null}</tbody></table></div></section>;
-}
-
-function TaskPreviewPanel({ task }: { task: Task | null }) {
-  if (!task) return <aside className="hz-side-panel"><p className="muted">Gorev secimi bekleniyor.</p></aside>;
-  return <aside className="hz-side-panel"><p className="drawer-eyebrow">Gorev Onizleme</p><h3>{task.title}</h3><p className="muted">{task.description}</p><div className="detail-list"><span>Kaynak</span><strong>{task.source === "ai" ? "Yapay Zeka" : "Sistem"}</strong><span>Ilgili kayit</span><strong>{task.entityNo}</strong><span>Oncelik</span><strong>{priorityLabels[task.priority]}</strong><span>Durum</span><strong>{statusLabels[task.status]}</strong></div></aside>;
+export function TaskTable({
+  tasks,
+  selectedTaskId,
+  onSelect,
+  onOpen
+}: {
+  tasks: Task[];
+  selectedTaskId: string | null;
+  onSelect: (taskId: string) => void;
+  onOpen: (taskId: string) => void;
+}) {
+  return (
+    <section className="hz-content-card hz-tasks-ws-table-card">
+      <div className="table-wrap hz-table-wrap hz-tasks-ws-table-wrap">
+        <table className="table hz-table hz-table-sticky">
+          <thead>
+            <tr>
+              <th>Gorev No</th>
+              <th>Baslik</th>
+              <th>Musteri / Kayit</th>
+              <th>Atanan</th>
+              <th>Durum</th>
+              <th>Oncelik</th>
+              <th>Son Tarih</th>
+              <th>Aksiyon</th>
+            </tr>
+          </thead>
+          <tbody>
+            {tasks.map((task) => (
+              <tr
+                key={task.id}
+                className={`stock-table-row ${selectedTaskId === task.id ? "is-selected-row" : ""}`}
+                onClick={() => onSelect(task.id)}
+                onDoubleClick={() => onOpen(task.id)}
+              >
+                <td>{task.taskNo}</td>
+                <td>{task.title}</td>
+                <td>{task.customerName ?? task.entityNo}</td>
+                <td>{task.assigneeName ?? "-"}</td>
+                <td>{statusLabels[task.status]}</td>
+                <td>
+                  <span className={priorityBadge(task.priority)}>{priorityLabels[task.priority]}</span>
+                </td>
+                <td>{new Date(task.dueAt).toLocaleString("tr-TR")}</td>
+                <td>
+                  <button
+                    className="hz-btn hz-btn-secondary"
+                    type="button"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      onOpen(task.id);
+                    }}
+                  >
+                    Detay
+                  </button>
+                </td>
+              </tr>
+            ))}
+            {tasks.length === 0 ? (
+              <tr>
+                <td colSpan={8}>
+                  <div className="table-empty">Filtrelere uygun gorev bulunamadi.</div>
+                </td>
+              </tr>
+            ) : null}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
 }
 
 export function TasksPage() {
@@ -99,7 +251,7 @@ export function TasksPage() {
   const [tasks, setTasks] = useState<Task[] | null>(null);
   const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const [filters, setFilters] = useState<TaskFilters>({ assignee: "", status: "", priority: "", source: "", entityType: "", overdueOnly: false });
+  const [filters, setFilters] = useState<TaskFilters>({ ...defaultFilters });
   const pageSize = 10;
 
   useEffect(() => {
@@ -126,6 +278,16 @@ export function TasksPage() {
 
   const pagedTasks = useMemo(() => filteredTasks.slice((page - 1) * pageSize, page * pageSize), [filteredTasks, page]);
 
+  const totals = useMemo(() => {
+    const list = tasks ?? [];
+    return {
+      total: list.length,
+      overdue: list.filter((t) => t.status === "overdue").length,
+      ai: list.filter((t) => t.source === "ai").length,
+      approval: list.filter((t) => t.approvalId).length
+    };
+  }, [tasks]);
+
   useEffect(() => {
     setPage(1);
   }, [filters]);
@@ -140,22 +302,134 @@ export function TasksPage() {
     }
   }, [filteredTasks, selectedTaskId]);
 
-  return <div className="hz-page-stack"><PageHeader title="Gorevler" description="Workflow, dashboard ve AI kaynakli tum operasyon gorevlerini tek listede takip edin." /><section className="hz-metric-grid"><MetricCard title="Toplam" value={String(tasks?.length ?? 0)} detail="Aktif kapsam" tone="info" /><MetricCard title="Geciken" value={String(tasks?.filter((task) => task.status === "overdue").length ?? 0)} detail="SLA riski" tone="danger" /><MetricCard title="AI Kaynakli" value={String(tasks?.filter((task) => task.source === "ai").length ?? 0)} detail="Insight/proposal" tone="success" /><MetricCard title="Onay Bagli" value={String(tasks?.filter((task) => task.approvalId).length ?? 0)} detail="Approval link" tone="warning" /></section><TaskFilterBar filters={filters} onChange={(next) => setFilters((prev) => ({ ...prev, ...next }))} onReset={() => setFilters({ assignee: "", status: "", priority: "", source: "", entityType: "", overdueOnly: false })} />{!tasks ? <LoadingState title="Gorevler yukleniyor" message="Operasyon motoru kayitlari hazirlaniyor." /> : <SplitContentLayout main={<><TaskTable tasks={pagedTasks} selectedTaskId={selectedTaskId} onSelect={setSelectedTaskId} onOpen={(taskId) => router.push(`/gorevler/${taskId}`)} /><Pagination totalItems={filteredTasks.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} /></>} side={<TaskPreviewPanel task={selectedTask} />} />}</div>;
+  return (
+    <main className="hz-tasks-ws-page">
+      <header className="hz-tasks-ws-top">
+        <div>
+          <p className="hz-tasks-ws-eyebrow">Operator workspace</p>
+          <h1 className="hz-tasks-ws-title">Gorevler</h1>
+          <p className="hz-tasks-ws-subtitle">Orta is listesi, sag baglam paneli, AI ozet ve zaman cizelgesi.</p>
+        </div>
+      </header>
+
+      <div className="hz-tasks-ws-kpis" aria-label="Gorev ozetleri">
+        <div className="hz-tasks-ws-kpi">
+          <span className="hz-tasks-ws-kpi-label">Toplam</span>
+          <span className="hz-tasks-ws-kpi-value">{tasks?.length ?? "—"}</span>
+        </div>
+        <div className="hz-tasks-ws-kpi hz-tasks-ws-kpi--danger">
+          <span className="hz-tasks-ws-kpi-label">Geciken</span>
+          <span className="hz-tasks-ws-kpi-value">{tasks ? totals.overdue : "—"}</span>
+        </div>
+        <div className="hz-tasks-ws-kpi hz-tasks-ws-kpi--accent">
+          <span className="hz-tasks-ws-kpi-label">AI</span>
+          <span className="hz-tasks-ws-kpi-value">{tasks ? totals.ai : "—"}</span>
+        </div>
+        <div className="hz-tasks-ws-kpi hz-tasks-ws-kpi--warn">
+          <span className="hz-tasks-ws-kpi-label">Onay bagli</span>
+          <span className="hz-tasks-ws-kpi-value">{tasks ? totals.approval : "—"}</span>
+        </div>
+      </div>
+
+      <TaskFilterWorkbench
+        filters={filters}
+        onChange={(next) => setFilters((prev) => ({ ...prev, ...next }))}
+        onReset={() => setFilters({ ...defaultFilters })}
+      />
+
+      <p className="hz-tasks-ws-summary">
+        {filteredTasks.length} gorev · Sayfa {page} / {Math.max(1, Math.ceil(filteredTasks.length / pageSize) || 1)}
+      </p>
+
+      {!tasks ? (
+        <LoadingState title="Gorevler yukleniyor" message="Operasyon motoru kayitlari hazirlaniyor." />
+      ) : (
+        <SplitContentLayout
+          sideWidth="detail"
+          main={
+            <div className="hz-tasks-ws-main">
+              <TaskTable
+                tasks={pagedTasks}
+                selectedTaskId={selectedTaskId}
+                onSelect={setSelectedTaskId}
+                onOpen={(taskId) => router.push(`/gorevler/${taskId}`)}
+              />
+              <Pagination totalItems={filteredTasks.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
+            </div>
+          }
+          side={
+            <OperatorWorkspaceContextPanel task={selectedTask} onOpenDetail={(taskId) => router.push(`/gorevler/${taskId}`)} />
+          }
+        />
+      )}
+    </main>
+  );
 }
 
 export function TaskHeaderInfo({ task }: { task: Task }) {
-  return <section className="hz-content-card"><p className="drawer-eyebrow">{task.taskNo}</p><h2>{task.title}</h2><p className="muted">{task.description}</p><div className="hz-inline-actions"><span className={priorityBadge(task.priority)}>{priorityLabels[task.priority]}</span><span className="hz-badge hz-badge-info">{statusLabels[task.status]}</span></div></section>;
+  return (
+    <section className="hz-content-card">
+      <p className="drawer-eyebrow">{task.taskNo}</p>
+      <h2>{task.title}</h2>
+      <p className="muted">{task.description}</p>
+      <div className="hz-inline-actions">
+        <span className={priorityBadge(task.priority)}>{priorityLabels[task.priority]}</span>
+        <span className="hz-badge hz-badge-info">{statusLabels[task.status]}</span>
+      </div>
+    </section>
+  );
 }
 
 export function TaskCommentsPanel() {
-  return <section className="hz-content-card"><h3>Yorumlar</h3><p className="muted">Gorev yorumlari ve ic ekip notlari burada tutulur. Placeholder basari mesaji uretmez.</p><div className="timeline-item"><strong>Satis Operasyon</strong><span>Kaynak plani kontrol edildi, aksiyon bekliyor.</span></div></section>;
+  return (
+    <section className="hz-content-card">
+      <h3>Yorumlar</h3>
+      <p className="muted">Gorev yorumlari ve ic ekip notlari burada tutulur. Placeholder basari mesaji uretmez.</p>
+      <div className="timeline-item">
+        <strong>Satis Operasyon</strong>
+        <span>Kaynak plani kontrol edildi, aksiyon bekliyor.</span>
+      </div>
+    </section>
+  );
 }
 
 export function TaskActionsBar({ task }: { task: Task }) {
   const router = useRouter();
-  return <section className="hz-content-card"><h3>Aksiyonlar</h3><div className="hz-inline-actions"><button className="hz-btn hz-btn-primary" type="button">Baslat</button><button className="hz-btn hz-btn-secondary" type="button">Tamamla</button><button className="hz-btn hz-btn-secondary" type="button">Iptal Et</button><button className="hz-btn hz-btn-secondary" type="button">Not Ekle</button>{task.approvalId ? <button className="hz-btn hz-btn-secondary" type="button" onClick={() => router.push(`/onaylar/${task.approvalId}`)}>Approval'a Git</button> : null}</div></section>;
+  return (
+    <section className="hz-content-card">
+      <h3>Aksiyonlar</h3>
+      <div className="hz-inline-actions">
+        <button className="hz-btn hz-btn-primary" type="button">
+          Baslat
+        </button>
+        <button className="hz-btn hz-btn-secondary" type="button">
+          Tamamla
+        </button>
+        <button className="hz-btn hz-btn-secondary" type="button">
+          Iptal Et
+        </button>
+        <button className="hz-btn hz-btn-secondary" type="button">
+          Not Ekle
+        </button>
+        {task.approvalId ? (
+          <button className="hz-btn hz-btn-secondary" type="button" onClick={() => router.push(`/onaylar`)}>
+            Onay inbox
+          </button>
+        ) : null}
+        <button className="hz-btn hz-btn-secondary" type="button" onClick={() => router.push("/ayarlar/operasyon-gozlem")}>
+          Operasyon ve gozlem
+        </button>
+      </div>
+    </section>
+  );
 }
 
 export function TaskDetailPage({ task }: { task: Task }) {
-  return <div className="hz-page-stack"><PageHeader title="Gorev Detayi" description="Gorev, ilgili kayit, yorum ve aksiyonlari tek ekranda yonetin." /><TaskHeaderInfo task={task} /><SplitContentLayout main={<TaskCommentsPanel />} side={<TaskActionsBar task={task} />} /></div>;
+  return (
+    <div className="hz-page-stack">
+      <PageHeader title="Gorev Detayi" description="Gorev, ilgili kayit, yorum ve aksiyonlari tek ekranda yonetin." />
+      <TaskHeaderInfo task={task} />
+      <SplitContentLayout main={<TaskCommentsPanel />} side={<TaskActionsBar task={task} />} />
+    </div>
+  );
 }

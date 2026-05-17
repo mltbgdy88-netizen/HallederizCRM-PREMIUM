@@ -31,15 +31,15 @@ export function ApprovalActionBar({
   };
 
   return (
-    <section className="hz-approvals-inbox-card hz-approvals-inbox-actionbar" aria-label="Onay aksiyonlari">
-      <h3 className="hz-approvals-inbox-card-title">Operator aksiyonlari</h3>
+    <section className="hz-approvals-inbox-card hz-approvals-inbox-actionbar" aria-label="Onay aksiyonları">
+      <h3 className="hz-approvals-inbox-card-title">Operatör aksiyonları</h3>
       <label className="hz-approvals-inbox-field" htmlFor="approval-reject-reason">
         <span>Reddetme nedeni</span>
         <input
           type="text"
           name="rejectReason"
           className="hz-approvals-inbox-input"
-          placeholder="Reddetme nedeni yazin"
+          placeholder="Reddetme nedenini yazın"
           disabled={!pending || busy}
           value={rejectReason}
           onChange={(event) => {
@@ -64,7 +64,7 @@ export function ApprovalActionBar({
           disabled={!pending || busy}
           onClick={onApprove}
         >
-          {busy ? "Onaylaniyor..." : "Onayla"}
+          {busy ? "Onaylanıyor..." : "Onayla"}
         </button>
         <button
           type="button"

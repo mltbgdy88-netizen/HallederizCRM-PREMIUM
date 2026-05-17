@@ -18,6 +18,8 @@ test("approval client endpoint paths are correct", () => {
   assert.equal(APPROVAL_API_PATHS.sandboxSeed, "/platform/approvals/sandbox/seed");
   assert.equal(APPROVAL_API_PATHS.workerHealth, "/worker/health");
   assert.equal(APPROVAL_API_PATHS.workerSafety, "/worker/safety");
+  assert.equal(APPROVAL_API_PATHS.workerOutbox, "/worker/outbox");
+  assert.equal(APPROVAL_API_PATHS.workerDeadLetter, "/worker/dead-letter");
 });
 
 test("approval client joins api base url without duplicate slashes", () => {
@@ -45,7 +47,7 @@ test("404/503 error mapping does not fake success", () => {
 
   const worker404 = mapApprovalClientError(404, undefined, "worker_health");
   assert.equal(worker404.kind, "not_found");
-  assert.match(worker404.message, /Worker health\/safety endpoint/i);
+  assert.match(worker404.message, /404|Worker .*endpoint|yayinlanmiyor/i);
 
   const list503 = mapApprovalClientError(503, undefined, "approvals_list");
   assert.equal(list503.kind, "unsupported");

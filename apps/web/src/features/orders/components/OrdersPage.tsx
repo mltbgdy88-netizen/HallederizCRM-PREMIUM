@@ -1,8 +1,8 @@
 "use client";
 
-import { LoadingState, MetricCard, PageHeader, Pagination, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
+import { EntityListPageTemplate, LoadingState, MetricCard, Pagination, PrimaryActionToolbar } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { OrderFilterBar } from "./OrderFilterBar";
 import { OrderQuickPreviewPanel } from "./OrderQuickPreviewPanel";
 import { OrderTable } from "./OrderTable";
@@ -26,52 +26,89 @@ export function OrdersPage() {
     [customers, selectedOrder?.customerId]
   );
 
+  useEffect(() => {
+    setPage(1);
+  }, [filters]);
+
+  useEffect(() => {
+    if (!filteredOrders.length) {
+      setSelectedOrderId(null);
+      return;
+    }
+    const first = filteredOrders[0];
+    if (!first) {
+      setSelectedOrderId(null);
+      return;
+    }
+    if (!selectedOrderId || !filteredOrders.some((o) => o.id === selectedOrderId)) {
+      setSelectedOrderId(first.id);
+    }
+  }, [filteredOrders, selectedOrderId]);
+
   return (
-    <div className="hz-page-stack">
-      <PageHeader
-        title="Siparisler"
-        description="Siparis, kaynak plani, tahsilat ve depo etkisini tek operasyon listesinde yonetin."
-      />
-
-      <section className="hz-metric-grid">
-        <MetricCard title="Acik Siparis" value={String(filteredOrders.length)} detail="Filtre kapsaminda" tone="info" />
-        <MetricCard title="Tahsilat Eksik" value={String(filteredOrders.filter((order) => order.paymentStatus !== "paid").length)} detail="Finans kontrolu" tone="warning" />
-        <MetricCard title="Depo Hazirlik" value={String(filteredOrders.filter((order) => order.deliveryStatus === "preparing").length)} detail="Aktif operasyon" tone="info" />
-        <MetricCard title="Fabrika Gerekli" value={String(filteredOrders.filter((order) => order.sourcePlans.some((plan) => plan.factoryQuantity > 0)).length)} detail="Kaynak plani" tone="danger" />
-      </section>
-
-      <PrimaryActionToolbar>
-        <button type="button" className="hz-btn hz-btn-primary hz-toolbar-btn" onClick={() => router.push("/siparisler/yeni")}>
-          Yeni Siparis
-        </button>
-        <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn" onClick={() => router.push("/teklifler")}>
-          Tekliften Donustur
-        </button>
-        <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn">
-          Toplu Durum Guncelle
-        </button>
-      </PrimaryActionToolbar>
-
-      <OrderFilterBar filters={filters} onFilterChange={updateFilter} onReset={resetFilters} />
-
-      <SplitContentLayout
-        main={
-          loading ? (
-            <LoadingState title="Siparisler yukleniyor" message="Kaynak plani, tahsilat ve depo etkisi hazirlaniyor." />
-          ) : (
-            <>
-              <OrderTable
-                rows={pagedRows}
-                selectedOrderId={selectedOrder?.id ?? null}
-                onSelectOrder={setSelectedOrderId}
-                onOpenOrder={(orderId) => router.push(`/siparisler/${orderId}`)}
-              />
-              <Pagination totalItems={rows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
-            </>
-          )
-        }
-        side={<OrderQuickPreviewPanel order={selectedOrder} customer={selectedCustomer} />}
-      />
-    </div>
+    <EntityListPageTemplate
+      className="hz-orders-page"
+      header={
+        <div className="hz-orders-head">
+          <div className="hz-orders-head-text">
+            <h1 className="hz-orders-head-title">Siparişler</h1>
+            <p className="hz-orders-head-sub">Sipariş, kaynak planı, tahsilat ve depo etkisini tek operasyon listesinde yönetin.</p>
+          </div>
+          <section className="hz-metric-grid">
+            <MetricCard title="Açık sipariş" value={String(filteredOrders.length)} detail="Filtre kapsamında" tone="info" />
+            <MetricCard
+              title="Tahsilat eksik"
+              value={String(filteredOrders.filter((order) => order.paymentStatus !== "paid").length)}
+              detail="Finans kontrolü"
+              tone="warning"
+            />
+            <MetricCard
+              title="Depo hazırlık"
+              value={String(filteredOrders.filter((order) => order.deliveryStatus === "preparing").length)}
+              detail="Aktif operasyon"
+              tone="info"
+            />
+            <MetricCard
+              title="Fabrika gerekli"
+              value={String(filteredOrders.filter((order) => order.sourcePlans.some((plan) => plan.factoryQuantity > 0)).length)}
+              detail="Kaynak planı"
+              tone="danger"
+            />
+          </section>
+          <PrimaryActionToolbar>
+            <button type="button" className="hz-btn hz-btn-primary hz-toolbar-btn" onClick={() => router.push("/siparisler/yeni")}>
+              Yeni sipariş
+            </button>
+            <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn" onClick={() => router.push("/teklifler")}>
+              Tekliften dönüştür
+            </button>
+            <button type="button" className="hz-btn hz-btn-secondary hz-toolbar-btn">
+              Toplu durum güncelle
+            </button>
+          </PrimaryActionToolbar>
+        </div>
+      }
+      filters={<OrderFilterBar filters={filters} onFilterChange={updateFilter} onReset={resetFilters} />}
+      list={
+        loading ? (
+          <LoadingState title="Siparişler yükleniyor" message="Kaynak planı, tahsilat ve depo etkisi hazırlanıyor." />
+        ) : (
+          <OrderTable
+            rows={pagedRows}
+            selectedOrderId={selectedOrder?.id ?? null}
+            onSelectOrder={setSelectedOrderId}
+            onOpenOrder={(orderId) => router.push(`/siparisler/${orderId}`)}
+          />
+        )
+      }
+      pagination={
+        loading ? null : <Pagination totalItems={rows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
+      }
+      preview={
+        <div className="hz-orders-side">
+          <OrderQuickPreviewPanel order={selectedOrder} customer={selectedCustomer} />
+        </div>
+      }
+    />
   );
 }

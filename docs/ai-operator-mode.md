@@ -15,3 +15,9 @@
 ## Guvenlik
 - Approval olmadan mutation execution yok.
 - Yetkisiz kullanicilar confirm/reject aksiyonlarina erisemez.
+
+## Web yuzeyi (referans)
+
+- Tam sayfa asistan: `/ai` (proposal snapshot ve `requiresApproval` gorunumu `AiProposalCardList` vb.).
+- AI onay kayitlari: `/ai/onaylar`.
+- Operasyon / release / pilot sablonu: `/ayarlar/operasyon-gozlem`.

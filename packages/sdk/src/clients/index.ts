@@ -14,3 +14,4 @@ export * from "./ai.client";
 export * from "./platform.client";
 export * from "./imports.client";
 export * from "./quick-operations.client";
+export * from "./whatsapp.client";
