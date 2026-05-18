@@ -5,52 +5,32 @@ import type { Customer, Document } from "@hallederiz/types";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { dataSourceConfig, sdk } from "../../../lib/data-source";
+import { dataSourceConfig } from "../../../lib/data-source";
 import type { DocumentOutputJobRow, LocalAgentHealthSnapshot } from "../../../services/api/documents.service";
 import { useToast } from "../../../providers/toast-provider";
 import { getDocumentTypeLabel, getDocumentDeliveryStatusLabel } from "../queries/document-mock-data";
 import { getDocumentDetail } from "../queries/get-documents";
 import { formatDocumentDeliveryChannel, formatDocumentEntityType } from "../utils/document-faz-f";
+import { runDocumentLiveAction, sanitizeDocumentUserText } from "../utils/document-action-feedback";
 import { dateLabel } from "../utils";
-
-const PREVIEW_ONLY_TOAST = "Belge önizlemesi hazırlanır; gönderim yapılmaz.";
 
 function DocumentActions({ document, onReload }: { document: Document | null; onReload: () => Promise<void> }) {
   const router = useRouter();
   const { pushToast } = useToast();
 
-  const previewOnly = (detail: string) => {
-    pushToast(detail);
-    pushToast(PREVIEW_ONLY_TOAST);
-  };
-
   const run = async (action: "queueSave" | "queuePrint" | "regenerate" | "sendWhatsApp" | "sendEmail") => {
     if (!document) {
       return;
     }
-    if (dataSourceConfig.useDemoData) {
-      if (action === "sendWhatsApp") {
-        previewOnly("WhatsApp gönderimi için bağlantı tamamlanmalıdır.");
-        return;
-      }
-      if (action === "sendEmail") {
-        previewOnly("E-posta gönderimi henüz canlı kullanıma bağlı değil.");
-        return;
-      }
-      if (action === "regenerate") {
-        pushToast("PDF üretimi henüz canlı kullanıma bağlı değil.");
-        pushToast(PREVIEW_ONLY_TOAST);
-        return;
-      }
-      previewOnly("Belge kuyruğu işlemi henüz canlı kullanıma bağlı değil.");
-      return;
+    const outcome = await runDocumentLiveAction(action, document.id, {
+      useDemoData: dataSourceConfig.useDemoData
+    });
+    for (const toast of outcome.toasts) {
+      pushToast(toast);
     }
-    if (action === "queueSave") await sdk.documents.queueSave(document.id);
-    if (action === "queuePrint") await sdk.documents.queuePrint(document.id);
-    if (action === "regenerate") await sdk.documents.regenerate(document.id);
-    if (action === "sendWhatsApp") await sdk.documents.sendWhatsApp(document.id);
-    if (action === "sendEmail") await sdk.documents.sendEmail(document.id);
-    await onReload();
+    if (outcome.ok) {
+      await onReload();
+    }
   };
 
   return (
@@ -99,7 +79,7 @@ function DocumentPreview({ document }: { document: Document }) {
       <p className="hz-content-card-description">
         {dataSourceConfig.useDemoData
           ? "Şablon önizlemesi gösterilir; canlı PDF üretimi ve gönderim henüz bağlı değildir."
-          : document.previewText}
+          : sanitizeDocumentUserText(document.previewText)}
       </p>
       <div className="hz-inline-note">
         <span className="hz-inline-note-label">Kayıt</span>

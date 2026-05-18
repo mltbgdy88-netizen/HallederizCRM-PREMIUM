@@ -127,7 +127,7 @@ export const ARCHIVE_DEMO_RECORDS: ArchiveRecord[] = [
     retentionYears: 5,
     hashPreview: "sha256:441c…09f",
     auditCreatedBy: "Depo otomasyonu",
-    auditLastAction: "Arşivlendi",
+    auditLastAction: "Arşive aktarım bekliyor",
     auditApprovalInfo: "Saklama politikası",
     auditIpDevice: "depo-scanner-12",
     relatedLinks: [{ label: "Stok", href: "/stok" }]
@@ -222,7 +222,7 @@ export const ARCHIVE_DEMO_RECORDS: ArchiveRecord[] = [
     retentionYears: 5,
     hashPreview: "sha256:1010…fab",
     auditCreatedBy: "Sistem",
-    auditLastAction: "Arşivlendi",
+    auditLastAction: "Belge önizlemesi hazırlandı",
     auditApprovalInfo: "Saklama süresi içinde",
     auditIpDevice: "document-worker",
     relatedLinks: [{ label: "Belge", href: "/belgeler/document_7" }]

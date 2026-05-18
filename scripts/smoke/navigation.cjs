@@ -48,9 +48,18 @@ const checks = [
     description: "Yeni tahsilat Hızlı İşlem hub"
   },
   {
-    file: "apps/web/src/features/documents/components/DocumentsPage.tsx",
-    patterns: ["Belge önizlemesi hazırlanır; gönderim yapılmaz", "hz-doc-context-band", "PDF üretimi henüz canlı"],
+    file: "apps/web/src/features/documents/data/document-action-messages.ts",
+    patterns: [
+      "Belge önizlemesi hazırlanır; gönderim yapılmaz",
+      "PDF üretimi henüz canlı kullanıma bağlı değil",
+      "Belge indirme henüz canlı kullanıma bağlı değil"
+    ],
     description: "Belgeler canli olmayan aksiyon mesajlari"
+  },
+  {
+    file: "apps/web/src/features/documents/components/DocumentsPage.tsx",
+    patterns: ["hz-doc-context-band", "runDocumentLiveAction", "resolveDocumentsEmptyMessage"],
+    description: "Belgeler baglam bandi ve aksiyon feedback"
   },
   {
     file: "apps/web/src/features/archive/components/ArchivePage.tsx",
