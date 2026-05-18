@@ -213,7 +213,7 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
                       <p>{message.text}</p>
                     </div>
                     {proposalFootnote && !loading && index === lastAsstIdx ? (
-                      <p className="hz-dash-ai-footnote hz-dash-ai-footnote--attached">öneri modu · canlı işlem yapılmadı</p>
+                      <p className="hz-dash-ai-footnote hz-dash-ai-footnote--attached">Öneri; canlı işlem yapılmadı.</p>
                     ) : null}
                     <time className="hz-dash-ai-msg-time hz-dash-ai-msg-time--assistant" dateTime={new Date(message.ts).toISOString()}>
                       {formatMsgTime(message.ts)}
