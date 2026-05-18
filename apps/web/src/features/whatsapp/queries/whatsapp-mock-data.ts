@@ -70,7 +70,7 @@ const DELTA_THREAD: WaRichBlock[] = [
     id: "b1",
     dir: "in",
     body: "Merhaba, URN-001 ve URN-056 stokta var mı?\nMümkünse bugün teklif de rica ederiz.",
-    badges: ["Intent: Sipariş", "Fiyat"]
+    badges: ["Sipariş", "Fiyat"]
   },
   {
     kind: "msg",
@@ -81,8 +81,8 @@ const DELTA_THREAD: WaRichBlock[] = [
   {
     kind: "ai",
     id: "b3",
-    title: "AI İşlem Önerisi",
-    body: "Stok kontrolü ve fiyat teklifi için işlem taslağı hazırlanabilir. Gönderim onay gerektirir.",
+    title: "AI önerisi",
+    body: "Stok kontrolü ve fiyat teklifi için işlem taslağı hazırlanabilir. Canlı gönderim onay gerektirir.",
     badge: "Onay gerekli"
   },
   {
@@ -90,7 +90,7 @@ const DELTA_THREAD: WaRichBlock[] = [
     id: "b4",
     dir: "in",
     body: "Stok uygunsa 12 adet URN-001, 30 adet URN-056 için sipariş taslağı oluşturabilirsiniz.",
-    badges: ["Action request: Sipariş taslağı"]
+    badges: ["Sipariş taslağı"]
   },
   {
     kind: "quote",
@@ -321,7 +321,7 @@ function conv(
     id,
     tenantId,
     contactId,
-    title: contact.displayName,
+    title: customer?.name ?? contact.displayName,
     lastMessagePreview: WA_QUEUE_META[id]?.subtitle ?? "",
     intent,
     unreadCount: 0,

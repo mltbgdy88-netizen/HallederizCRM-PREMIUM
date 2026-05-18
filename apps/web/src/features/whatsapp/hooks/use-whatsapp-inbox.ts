@@ -3,10 +3,24 @@
 import type { WhatsAppConversation, WhatsAppMessage } from "@hallederiz/types";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { dataSourceConfig, sdk } from "../../../lib/data-source";
+import { getCustomerById } from "../../customers/queries/customer-mock-data";
 import { getWhatsAppConversationById, getWhatsAppConversations } from "../queries/whatsapp-mock-data";
 import { buildWhatsAppApiPageDetail, type WhatsAppPageDetail } from "../utils/build-whatsapp-api-page-detail";
 
-export function useWhatsAppInbox() {
+function pickConversationId(list: WhatsAppConversation[], customerId: string | null | undefined, useDemo: boolean): string {
+  if (customerId) {
+    const match = list.find((item) => item.relatedCustomerId === customerId);
+    if (match) {
+      return match.id;
+    }
+  }
+  if (useDemo) {
+    return list[0]?.id ?? "";
+  }
+  return "";
+}
+
+export function useWhatsAppInbox(initialCustomerId?: string | null) {
   const useDemo = dataSourceConfig.useDemoData;
   const demoList = useMemo(() => getWhatsAppConversations(), []);
 
@@ -14,7 +28,7 @@ export function useWhatsAppInbox() {
   const [listLoading, setListLoading] = useState(!useDemo);
   const [listError, setListError] = useState<string | null>(null);
 
-  const [selectedId, setSelectedId] = useState<string>(() => (useDemo ? demoList[0]?.id ?? "" : ""));
+  const [selectedId, setSelectedId] = useState<string>(() => pickConversationId(demoList, initialCustomerId, useDemo));
 
   const [apiMessages, setApiMessages] = useState<WhatsAppMessage[]>([]);
   const [detailLoading, setDetailLoading] = useState(false);
@@ -52,6 +66,16 @@ export function useWhatsAppInbox() {
     }
     setSelectedId((cur) => (cur && apiList.some((c) => c.id === cur) ? cur : apiList[0]!.id));
   }, [useDemo, apiList]);
+
+  useEffect(() => {
+    if (!initialCustomerId) {
+      return;
+    }
+    const match = conversations.find((item) => item.relatedCustomerId === initialCustomerId);
+    if (match) {
+      setSelectedId(match.id);
+    }
+  }, [initialCustomerId, conversations]);
 
   useEffect(() => {
     if (useDemo || !selectedId) {
@@ -107,9 +131,27 @@ export function useWhatsAppInbox() {
     return buildWhatsAppApiPageDetail(conv, apiMessages);
   }, [useDemo, selectedId, apiList, apiMessages]);
 
+  const contextCustomer = useMemo(() => {
+    if (!initialCustomerId) {
+      return null;
+    }
+    return getCustomerById(initialCustomerId) ?? null;
+  }, [initialCustomerId]);
+
+  const customerScopedConversations = useMemo(() => {
+    if (!initialCustomerId) {
+      return conversations;
+    }
+    const scoped = conversations.filter((item) => item.relatedCustomerId === initialCustomerId);
+    return scoped.length ? scoped : conversations;
+  }, [conversations, initialCustomerId]);
+
   return {
     useDemo,
-    conversations,
+    conversations: customerScopedConversations,
+    allConversations: conversations,
+    initialCustomerId: initialCustomerId ?? null,
+    contextCustomer,
     selectedId,
     setSelectedId,
     detail,

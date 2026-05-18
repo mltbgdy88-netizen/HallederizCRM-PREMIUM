@@ -17,6 +17,7 @@ import {
   IconUser,
   IconWallet
 } from "../../dashboard/components/dashboard-inline-icons";
+import { dataSourceConfig } from "../../../lib/data-source";
 import { useToast } from "../../../providers/toast-provider";
 import { useWhatsAppInbox } from "../hooks/use-whatsapp-inbox";
 import { type WaRichBlock, WA_QUEUE_META } from "../queries/whatsapp-mock-data";
@@ -25,8 +26,11 @@ import { WhatsAppProductionSecurityChecklist } from "./WhatsAppProductionSecurit
 
 type QueueChip = "all" | "unread" | "approval" | "risk";
 
+const PREVIEW_SEND_NOTE = "Mesaj taslağı hazırlandı; gönderim yapılmadı.";
+const WA_CONNECTION_REQUIRED = "WhatsApp gönderimi için bağlantı tamamlanmalıdır.";
+
 const DELTA_AI_DRAFT =
-  "Merhaba Delta A.Ş.,\nURN-001 ve URN-056 için stok durumunu kontrol ettim.\nTeklif taslağını onayınıza sunuyorum.";
+  "Merhaba,\nURN-001 ve URN-056 için stok durumunu kontrol ettim.\nTeklif taslağını onayınıza sunuyorum.";
 
 const DELTA_HEADER = {
   openBalance: "₺84.500",
@@ -134,12 +138,30 @@ function MessageBubble({ message }: { message: WhatsAppMessage }) {
   );
 }
 
-export function WhatsAppPage() {
+function WhatsAppConnectionPanel() {
+  return (
+    <article className="hz-wa-connection-card" aria-label="WhatsApp bağlantısı">
+      <p className="hz-wa-connection-status">
+        <span className="hz-wa-dot hz-wa-dot--warn" aria-hidden />
+        WhatsApp bağlantısı henüz canlı kullanıma bağlı değil.
+      </p>
+      <div className="hz-wa-qr-placeholder" role="status">
+        <p className="hz-wa-qr-placeholder-title">QR bağlantısı</p>
+        <p>QR bağlantısı hazır olduğunda bu alanda görünecektir.</p>
+      </div>
+      <p className="hz-wa-connection-note">WhatsApp bağlantısı tamamlanmadan otomatik yanıt çalışmaz.</p>
+    </article>
+  );
+}
+
+export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?: string | null }) {
   const router = useRouter();
   const { pushToast } = useToast();
   const {
     useDemo,
     conversations,
+    allConversations,
+    contextCustomer,
     selectedId,
     setSelectedId,
     detail,
@@ -148,7 +170,7 @@ export function WhatsAppPage() {
     detailLoading,
     detailError,
     reloadList
-  } = useWhatsAppInbox();
+  } = useWhatsAppInbox(initialCustomerId);
 
   const [chip, setChip] = useState<QueueChip>("all");
   const [demoDone, setDemoDone] = useState<Record<string, boolean>>({});
@@ -188,7 +210,7 @@ export function WhatsAppPage() {
     return (
       <div className="hz-wa-page">
         <div className="hz-wa-shell hz-wa-shell--load">
-          <LoadingState title="WhatsApp kutusu yükleniyor" message="Konuşma listesi API üzerinden alınıyor." />
+          <LoadingState title="WhatsApp kutusu yükleniyor" message="Konuşma listesi hazırlanıyor." />
         </div>
       </div>
     );
@@ -213,7 +235,25 @@ export function WhatsAppPage() {
     return (
       <div className="hz-wa-page">
         <div className="hz-wa-shell hz-wa-shell--load">
-          <p className="hz-wa-empty">Konuşma bulunamadı.</p>
+          {useDemo ? (
+            <p className="hz-wa-preview-band" role="status">
+              Örnek veri modu: sohbet ve mesajlar demo amaçlıdır; canlı WhatsApp iletimi yapılmaz.
+            </p>
+          ) : null}
+          {initialCustomerId ? (
+            <p className="hz-wa-context-band" role="status">
+              Cari bağlamı: {contextCustomer?.name ?? initialCustomerId}
+              {allConversations.every((item) => item.relatedCustomerId !== initialCustomerId)
+                ? " — bu cari için örnek sohbet bulunamadı"
+                : ""}
+            </p>
+          ) : null}
+          <WhatsAppConnectionPanel />
+          <p className="hz-wa-empty">
+            {initialCustomerId && allConversations.every((item) => item.relatedCustomerId !== initialCustomerId)
+              ? "Bu cari için WhatsApp sohbeti henüz bağlı değil."
+              : "Konuşma bulunamadı."}
+          </p>
           {!useDemo ? (
             <button type="button" className="hz-wa-action-button hz-wa-action-button--primary hz-wa-retry-btn" onClick={() => reloadList()}>
               Listeyi yenile
@@ -225,6 +265,7 @@ export function WhatsAppPage() {
   }
 
   const { conversation, contact, messages, richBlocks, customer, suggestedReply, actionRequests } = detail;
+  const displayContactName = customer?.name ?? contact.displayName;
   const lineMeta: WaQueueLineMeta = useDemo
     ? (WA_QUEUE_META[conversation.id] ?? waConversationQueueLine(conversation))
     : waConversationQueueLine(conversation);
@@ -233,8 +274,21 @@ export function WhatsAppPage() {
   const unreadTotal = conversations.reduce((a, c) => a + c.unreadCount, 0);
   const approvalTotal = conversations.reduce((a, c) => a + c.pendingActionCount, 0);
 
+  const customerBannerName = contextCustomer?.name ?? customer?.name ?? null;
+
   return (
     <div className="hz-wa-page">
+      {useDemo ? (
+        <p className="hz-wa-preview-band hz-wa-preview-band--page" role="status">
+          Örnek veri modu: sohbet ve mesajlar demo amaçlıdır; canlı WhatsApp iletimi yapılmaz.
+        </p>
+      ) : null}
+      {initialCustomerId ? (
+        <p className="hz-wa-context-band hz-wa-context-band--page" role="status">
+          Cari bağlamı: {customerBannerName ?? initialCustomerId}
+          {conversations.length < allConversations.length ? " · cariye göre süzüldü" : ""}
+        </p>
+      ) : null}
       <div className="hz-wa-shell">
         <div className="hz-wa-layout">
           {/* Sol: Konuşma Kuyruğu */}
@@ -242,10 +296,11 @@ export function WhatsAppPage() {
             <div className="hz-wa-panel-head">
               <h1 className="hz-wa-panel-title">Konuşma Kuyruğu</h1>
               <p className="hz-wa-panel-sub">Mesajdan CRM işlemine dönüşen talepler.</p>
+              <WhatsAppConnectionPanel />
               <div className="hz-wa-queue-status" aria-live="polite">
-                <span className="hz-wa-dot hz-wa-dot--ok" aria-hidden />
-                <span>Gateway çevrimiçi</span>
-                <span className="hz-wa-queue-pill">{Math.max(conversations.length, 1)} aktif</span>
+                <span className="hz-wa-dot hz-wa-dot--warn" aria-hidden />
+                <span>Canlı bağlantı bekleniyor</span>
+                <span className="hz-wa-queue-pill">{conversations.length} önizleme</span>
               </div>
             </div>
             <div className="hz-wa-chips" role="tablist" aria-label="Hızlı süzme">
@@ -330,7 +385,7 @@ export function WhatsAppPage() {
           {/* Orta: Mesaj + composer */}
           <section className="hz-wa-thread-panel" aria-label="Mesaj akışı">
             <ThreadHeader
-              contactName={contact.displayName}
+              contactName={displayContactName}
               phone={contact.phone}
               hasCustomer={Boolean(customer)}
               lineMeta={lineMeta}
@@ -344,7 +399,7 @@ export function WhatsAppPage() {
               ) : null}
               {!useDemo && detailLoading ? (
                 <div className="hz-wa-chat-feed-loading" role="status">
-                  <LoadingState title="Mesajlar yükleniyor" message="Konuşma içeriği API üzerinden alınıyor." />
+                  <LoadingState title="Mesajlar yükleniyor" message="Konuşma içeriği hazırlanıyor." />
                 </div>
               ) : null}
               {richBlocks?.length
@@ -352,7 +407,14 @@ export function WhatsAppPage() {
                     <ChatBlock
                       key={b.id}
                       block={b}
-                      onQuoteAction={b.kind === "quote" ? () => fireDemo("quoteApprove", "Onaya gönderim canlı iletim değildir; onay zinciri tamamlanınca uygulanır.") : undefined}
+                      onQuoteAction={
+                        b.kind === "quote"
+                          ? () => {
+                              pushToast("Belge önizlemesi hazırlanır; gönderim yapılmaz.");
+                              fireDemo("quoteApprove", "Onay önizlemesi oluşturuldu; canlı iletim yapılmadı.");
+                            }
+                          : undefined
+                      }
                     />
                   ))
                 : messages.map((m) => <MessageBubble key={m.id} message={m} />)}
@@ -361,18 +423,34 @@ export function WhatsAppPage() {
               <textarea className="hz-wa-composer-input" placeholder="Cevap yaz veya şablon seç..." rows={2} readOnly />
               <div className="hz-wa-composer-bar">
                 <div className="hz-wa-composer-actions">
-                  <button type="button" className="hz-wa-action-button hz-wa-action-button--ghost" onClick={() => fireDemo("tpl", "Şablon seçimi bu ortamda not_configured.")}>
+                  <button
+                    type="button"
+                    className="hz-wa-action-button hz-wa-action-button--ghost"
+                    onClick={() => fireDemo("tpl", "Şablon seçimi canlı bağlantı gerektirir.")}
+                  >
                     Şablon
                   </button>
-                  <button type="button" className="hz-wa-action-button hz-wa-action-button--ghost" onClick={() => fireDemo("ai", "AI yalnız taslak üretir; otomatik canlı gönderim kapalıdır.")}>
+                  <button
+                    type="button"
+                    className="hz-wa-action-button hz-wa-action-button--ghost"
+                    onClick={() => fireDemo("ai", "AI yalnızca taslak üretir; otomatik gönderim yapılmaz.")}
+                  >
                     <IconSparkles size={14} aria-hidden />
                     AI Taslak
                   </button>
-                  <button type="button" className="hz-wa-action-button hz-wa-action-button--ghost" onClick={() => fireDemo("doc", "Belge ekleme bu ortamda canlıya açık değil (blocked_not_configured).")}>
+                  <button
+                    type="button"
+                    className="hz-wa-action-button hz-wa-action-button--ghost"
+                    onClick={() => fireDemo("doc", "Belge ekleme henüz canlı kullanıma bağlı değil.")}
+                  >
                     <IconPaperclip size={14} aria-hidden />
                     Belge Ekle
                   </button>
-                  <button type="button" className="hz-wa-action-button hz-wa-action-button--ghost" onClick={() => fireDemo("mic", "Ses notu özelliği henüz canlıya açık değil.")}>
+                  <button
+                    type="button"
+                    className="hz-wa-action-button hz-wa-action-button--ghost"
+                    onClick={() => fireDemo("mic", "Ses notu henüz canlı kullanıma bağlı değil.")}
+                  >
                     <IconMic size={14} aria-hidden />
                     Ses Notu
                   </button>
@@ -381,7 +459,10 @@ export function WhatsAppPage() {
                   type="button"
                   className="hz-wa-action-button hz-wa-action-button--send"
                   disabled={Boolean(demoDone.send)}
-                  onClick={() => fireDemo("send", "Canlı gönderim için provider + policy + approval zinciri gerekir. Bu adım başarı iletimi üretmez.")}
+                  onClick={() => {
+                    pushToast(PREVIEW_SEND_NOTE);
+                    fireDemo("send", WA_CONNECTION_REQUIRED);
+                  }}
                 >
                   <IconSend size={15} aria-hidden />
                   Gönder
@@ -400,7 +481,7 @@ export function WhatsAppPage() {
               <article className="hz-wa-side-card">
                 <h3 className="hz-wa-side-card-title">Cari özeti</h3>
                 <p className="hz-wa-side-lead">
-                  {contact.displayName}
+                  {displayContactName}
                   {customer ? ` • ${customer.type === "bayi" ? "Bayi" : "Müşteri"}` : " • —"}
                 </p>
                 <div className="hz-wa-fin-rows">
@@ -437,11 +518,13 @@ export function WhatsAppPage() {
                   <button
                     type="button"
                     className="hz-wa-linked-action"
-                    onClick={() =>
-                      router.push(
-                        conversation.relatedOrderId ? `/siparisler/${conversation.relatedOrderId}` : "/siparisler/SO-2026-0148"
-                      )
-                    }
+                    disabled={!conversation.relatedOrderId}
+                    onClick={() => {
+                      if (!conversation.relatedOrderId) {
+                        return;
+                      }
+                      router.push(`/siparisler/${conversation.relatedOrderId}`);
+                    }}
                   >
                     <IconShoppingCart size={14} aria-hidden />
                     Siparişe Git
@@ -463,13 +546,14 @@ export function WhatsAppPage() {
                   <button
                     type="button"
                     className="hz-wa-linked-action"
-                    onClick={() =>
+                    onClick={() => {
+                      pushToast("Belge önizlemesi hazırlanır; gönderim yapılmaz.");
                       router.push(
                         conversation.relatedDocumentId
                           ? `/belgeler?document=${conversation.relatedDocumentId}`
-                          : "/belgeler?document=TF-2026-0189"
-                      )
-                    }
+                          : "/belgeler?document=document_1"
+                      );
+                    }}
                   >
                     <IconFileText size={14} aria-hidden />
                     Belge
@@ -481,7 +565,7 @@ export function WhatsAppPage() {
                 <h3 className="hz-wa-side-card-title">Kural / güvenlik</h3>
                 <ul className="hz-wa-rule-list">
                   <li>
-                    <span>Intent</span>
+                    <span>Talep türü</span>
                     <strong>
                       {lineMeta.intentLabel === "Sipariş" ? "Sipariş + Fiyat" : lineMeta.intentLabel}
                     </strong>
@@ -510,16 +594,31 @@ export function WhatsAppPage() {
                   </span>
                   <h3 className="hz-wa-side-card-title">AI cevap taslağı</h3>
                 </div>
-                <p className="hz-wa-ai-note">Otomatik göndermez</p>
+                <p className="hz-wa-ai-note">Öneri — otomatik gönderilmez</p>
                 <p className="hz-wa-ai-draft">{aiDraft}</p>
                 <div className="hz-wa-side-btn-grid hz-wa-side-btn-grid--3">
-                  <button type="button" className="hz-wa-action-button hz-wa-action-button--secondary" onClick={() => fireDemo("take", "Taslak metin çalışma alanına alındı.")}>
+                  <button
+                    type="button"
+                    className="hz-wa-action-button hz-wa-action-button--secondary"
+                    onClick={() => fireDemo("take", PREVIEW_SEND_NOTE)}
+                  >
                     Cevaba Al
                   </button>
-                  <button type="button" className="hz-wa-action-button hz-wa-action-button--secondary" onClick={() => fireDemo("edit", "Düzenleme özelliği henüz canlıya açık değil.")}>
+                  <button
+                    type="button"
+                    className="hz-wa-action-button hz-wa-action-button--secondary"
+                    onClick={() => fireDemo("edit", "Düzenleme henüz canlı kullanıma bağlı değil.")}
+                  >
                     Düzenle
                   </button>
-                  <button type="button" className="hz-wa-action-button hz-wa-action-button--primary" onClick={() => fireDemo("approveSend", "Onay talebi oluşturuldu; canlı iletim sonucu ayrı olarak izlenir.")}>
+                  <button
+                    type="button"
+                    className="hz-wa-action-button hz-wa-action-button--primary"
+                    onClick={() => {
+                      pushToast(PREVIEW_SEND_NOTE);
+                      fireDemo("approveSend", "Onay önizlemesi oluşturuldu; canlı iletim yapılmadı.");
+                    }}
+                  >
                     Onaya Gönder
                   </button>
                 </div>
@@ -528,19 +627,35 @@ export function WhatsAppPage() {
               <article className="hz-wa-side-card">
                 <h3 className="hz-wa-side-card-title">İşleme dönüştür</h3>
                 <div className="hz-wa-convert-grid">
-                  <button type="button" className="hz-wa-convert-btn" onClick={() => fireDemo("ord", "Sipariş oluşturma yalnız onay + execution zinciriyle çalışır.")}>
+                  <button
+                    type="button"
+                    className="hz-wa-convert-btn"
+                    onClick={() => fireDemo("ord", "Sipariş oluşturma henüz canlı kullanıma bağlı değil.")}
+                  >
                     <IconShoppingCart size={18} className="hz-wa-convert-svg" aria-hidden />
                     Sipariş Oluştur
                   </button>
-                  <button type="button" className="hz-wa-convert-btn" onClick={() => fireDemo("offer", "Teklif hazırlama onay gerektirir; bu adım canlı başarı üretmez.")}>
+                  <button
+                    type="button"
+                    className="hz-wa-convert-btn"
+                    onClick={() => fireDemo("offer", "Teklif hazırlama henüz canlı kullanıma bağlı değil.")}
+                  >
                     <IconFileText size={18} className="hz-wa-convert-svg" aria-hidden />
                     Teklif Hazırla
                   </button>
-                  <button type="button" className="hz-wa-convert-btn" onClick={() => fireDemo("pay", "Tahsilat aksiyonu policy gate altında değerlendirilir.")}>
+                  <button
+                    type="button"
+                    className="hz-wa-convert-btn"
+                    onClick={() => fireDemo("pay", "Tahsilat hatırlatma henüz canlı kullanıma bağlı değil.")}
+                  >
                     <IconWallet size={18} className="hz-wa-convert-svg" aria-hidden />
                     Tahsilat Hatırlat
                   </button>
-                  <button type="button" className="hz-wa-convert-btn" onClick={() => fireDemo("stmt", "Ekstre/belge çıktısı yalnız onay sonrası canlıya alınır.")}>
+                  <button
+                    type="button"
+                    className="hz-wa-convert-btn"
+                    onClick={() => fireDemo("stmt", "Ekstre ve belge çıktısı henüz canlı kullanıma bağlı değil.")}
+                  >
                     <IconRotateCcw size={18} className="hz-wa-convert-svg" aria-hidden />
                     Ekstre / Belge
                   </button>
@@ -554,7 +669,7 @@ export function WhatsAppPage() {
                     ? actionRequests.map((a) => a.title)
                     : useDemo
                       ? ["Sipariş taslağı oluşturuldu", "Teklif gönderimi onay bekliyor", "Tahsilat riski işaretlendi"]
-                      : ["API modunda bekleyen aksiyon kaydı yok."]
+                      : ["Canlı modda bekleyen aksiyon kaydı yok."]
                   ).map((t, i) => (
                     <li key={`${t}-${i}`}>{t}</li>
                   ))}
