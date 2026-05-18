@@ -22,12 +22,25 @@ import { useToast } from "../../../providers/toast-provider";
 import { useWhatsAppInbox } from "../hooks/use-whatsapp-inbox";
 import { type WaRichBlock, WA_QUEUE_META } from "../queries/whatsapp-mock-data";
 import { waConversationQueueLine, type WaQueueLineMeta } from "../utils/wa-conversation-helpers";
+import {
+  MSG_WA_AI_DRAFT_ONLY,
+  MSG_WA_APPROVAL_PREVIEW,
+  MSG_WA_AUTO_REPLY_OFF,
+  MSG_WA_CONNECTION_NOT_LIVE,
+  MSG_WA_CONNECTION_REQUIRED,
+  MSG_WA_DOCUMENT_PREVIEW,
+  MSG_WA_DOC_ATTACH_NOT_LIVE,
+  MSG_WA_EDIT_NOT_LIVE,
+  MSG_WA_LIVE_WAITING,
+  MSG_WA_PREVIEW_SEND,
+  MSG_WA_QR_PLACEHOLDER,
+  MSG_WA_TEMPLATE_REQUIRES_LINK,
+  MSG_WA_VOICE_NOT_LIVE
+} from "../data/whatsapp-action-messages";
+import { resolveCustomerEmptyMessage, sanitizeWhatsAppUserText } from "../utils/whatsapp-action-feedback";
 import { WhatsAppProductionSecurityChecklist } from "./WhatsAppProductionSecurityChecklist";
 
 type QueueChip = "all" | "unread" | "approval" | "risk";
-
-const PREVIEW_SEND_NOTE = "Mesaj taslağı hazırlandı; gönderim yapılmadı.";
-const WA_CONNECTION_REQUIRED = "WhatsApp gönderimi için bağlantı tamamlanmalıdır.";
 
 const DELTA_AI_DRAFT =
   "Merhaba,\nURN-001 ve URN-056 için stok durumunu kontrol ettim.\nTeklif taslağını onayınıza sunuyorum.";
@@ -143,13 +156,13 @@ function WhatsAppConnectionPanel() {
     <article className="hz-wa-connection-card" aria-label="WhatsApp bağlantısı">
       <p className="hz-wa-connection-status">
         <span className="hz-wa-dot hz-wa-dot--warn" aria-hidden />
-        WhatsApp bağlantısı henüz canlı kullanıma bağlı değil.
+        {MSG_WA_CONNECTION_NOT_LIVE}
       </p>
       <div className="hz-wa-qr-placeholder" role="status">
         <p className="hz-wa-qr-placeholder-title">QR bağlantısı</p>
-        <p>QR bağlantısı hazır olduğunda bu alanda görünecektir.</p>
+        <p>{MSG_WA_QR_PLACEHOLDER}</p>
       </div>
-      <p className="hz-wa-connection-note">WhatsApp bağlantısı tamamlanmadan otomatik yanıt çalışmaz.</p>
+      <p className="hz-wa-connection-note">{MSG_WA_AUTO_REPLY_OFF}</p>
     </article>
   );
 }
@@ -250,9 +263,12 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
           ) : null}
           <WhatsAppConnectionPanel />
           <p className="hz-wa-empty">
-            {initialCustomerId && allConversations.every((item) => item.relatedCustomerId !== initialCustomerId)
-              ? "Bu cari için WhatsApp sohbeti henüz bağlı değil."
-              : "Konuşma bulunamadı."}
+            {resolveCustomerEmptyMessage(
+              Boolean(
+                initialCustomerId &&
+                  allConversations.every((item) => item.relatedCustomerId !== initialCustomerId)
+              )
+            )}
           </p>
           {!useDemo ? (
             <button type="button" className="hz-wa-action-button hz-wa-action-button--primary hz-wa-retry-btn" onClick={() => reloadList()}>
@@ -299,7 +315,7 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
               <WhatsAppConnectionPanel />
               <div className="hz-wa-queue-status" aria-live="polite">
                 <span className="hz-wa-dot hz-wa-dot--warn" aria-hidden />
-                <span>Canlı bağlantı bekleniyor</span>
+                <span>{MSG_WA_LIVE_WAITING}</span>
                 <span className="hz-wa-queue-pill">{conversations.length} önizleme</span>
               </div>
             </div>
@@ -410,8 +426,8 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
                       onQuoteAction={
                         b.kind === "quote"
                           ? () => {
-                              pushToast("Belge önizlemesi hazırlanır; gönderim yapılmaz.");
-                              fireDemo("quoteApprove", "Onay önizlemesi oluşturuldu; canlı iletim yapılmadı.");
+                              pushToast(MSG_WA_DOCUMENT_PREVIEW);
+                              fireDemo("quoteApprove", MSG_WA_APPROVAL_PREVIEW);
                             }
                           : undefined
                       }
@@ -426,14 +442,14 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
                   <button
                     type="button"
                     className="hz-wa-action-button hz-wa-action-button--ghost"
-                    onClick={() => fireDemo("tpl", "Şablon seçimi canlı bağlantı gerektirir.")}
+                    onClick={() => fireDemo("tpl", MSG_WA_TEMPLATE_REQUIRES_LINK)}
                   >
                     Şablon
                   </button>
                   <button
                     type="button"
                     className="hz-wa-action-button hz-wa-action-button--ghost"
-                    onClick={() => fireDemo("ai", "AI yalnızca taslak üretir; otomatik gönderim yapılmaz.")}
+                    onClick={() => fireDemo("ai", MSG_WA_AI_DRAFT_ONLY)}
                   >
                     <IconSparkles size={14} aria-hidden />
                     AI Taslak
@@ -441,7 +457,7 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
                   <button
                     type="button"
                     className="hz-wa-action-button hz-wa-action-button--ghost"
-                    onClick={() => fireDemo("doc", "Belge ekleme henüz canlı kullanıma bağlı değil.")}
+                    onClick={() => fireDemo("doc", MSG_WA_DOC_ATTACH_NOT_LIVE)}
                   >
                     <IconPaperclip size={14} aria-hidden />
                     Belge Ekle
@@ -449,7 +465,7 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
                   <button
                     type="button"
                     className="hz-wa-action-button hz-wa-action-button--ghost"
-                    onClick={() => fireDemo("mic", "Ses notu henüz canlı kullanıma bağlı değil.")}
+                    onClick={() => fireDemo("mic", MSG_WA_VOICE_NOT_LIVE)}
                   >
                     <IconMic size={14} aria-hidden />
                     Ses Notu
@@ -460,8 +476,8 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
                   className="hz-wa-action-button hz-wa-action-button--send"
                   disabled={Boolean(demoDone.send)}
                   onClick={() => {
-                    pushToast(PREVIEW_SEND_NOTE);
-                    fireDemo("send", WA_CONNECTION_REQUIRED);
+                    pushToast(MSG_WA_PREVIEW_SEND);
+                    fireDemo("send", MSG_WA_CONNECTION_REQUIRED);
                   }}
                 >
                   <IconSend size={15} aria-hidden />
@@ -547,7 +563,7 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
                     type="button"
                     className="hz-wa-linked-action"
                     onClick={() => {
-                      pushToast("Belge önizlemesi hazırlanır; gönderim yapılmaz.");
+                      pushToast(MSG_WA_DOCUMENT_PREVIEW);
                       router.push(
                         conversation.relatedDocumentId
                           ? `/belgeler?document=${conversation.relatedDocumentId}`
@@ -600,14 +616,14 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
                   <button
                     type="button"
                     className="hz-wa-action-button hz-wa-action-button--secondary"
-                    onClick={() => fireDemo("take", PREVIEW_SEND_NOTE)}
+                    onClick={() => fireDemo("take", MSG_WA_PREVIEW_SEND)}
                   >
                     Cevaba Al
                   </button>
                   <button
                     type="button"
                     className="hz-wa-action-button hz-wa-action-button--secondary"
-                    onClick={() => fireDemo("edit", "Düzenleme henüz canlı kullanıma bağlı değil.")}
+                    onClick={() => fireDemo("edit", MSG_WA_EDIT_NOT_LIVE)}
                   >
                     Düzenle
                   </button>
@@ -615,8 +631,8 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
                     type="button"
                     className="hz-wa-action-button hz-wa-action-button--primary"
                     onClick={() => {
-                      pushToast(PREVIEW_SEND_NOTE);
-                      fireDemo("approveSend", "Onay önizlemesi oluşturuldu; canlı iletim yapılmadı.");
+                      pushToast(MSG_WA_PREVIEW_SEND);
+                      fireDemo("approveSend", MSG_WA_APPROVAL_PREVIEW);
                     }}
                   >
                     Onaya Gönder
@@ -666,12 +682,16 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
                 <h3 className="hz-wa-side-card-title">Bekleyen aksiyonlar</h3>
                 <ul className="hz-wa-pending-list">
                   {(actionRequests.length
-                    ? actionRequests.map((a) => a.title)
+                    ? actionRequests.map((a) => sanitizeWhatsAppUserText(a.title))
                     : useDemo
-                      ? ["Sipariş taslağı oluşturuldu", "Teklif gönderimi onay bekliyor", "Tahsilat riski işaretlendi"]
+                      ? [
+                          "Sipariş taslağı hazırlandı",
+                          "Teklif önizlemesi onay bekliyor",
+                          "Tahsilat riski işaretlendi"
+                        ]
                       : ["Canlı modda bekleyen aksiyon kaydı yok."]
                   ).map((t, i) => (
-                    <li key={`${t}-${i}`}>{t}</li>
+                    <li key={`${t}-${i}`}>{sanitizeWhatsAppUserText(t)}</li>
                   ))}
                 </ul>
                 {conversation.relatedCustomerId ? (

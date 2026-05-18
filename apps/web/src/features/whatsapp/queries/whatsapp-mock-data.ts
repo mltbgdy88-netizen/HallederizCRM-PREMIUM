@@ -274,7 +274,7 @@ export const whatsappActionRequests: WhatsAppActionRequest[] = [
     contactId: "wa_c_delta",
     intent: "siparis",
     status: "pending",
-    title: "Sipariş taslağı oluşturuldu",
+    title: "Sipariş taslağı hazırlandı",
     payloadSummary: "URN-001 / URN-056 satırları",
     targetEntityType: "order",
     targetEntityId: "order_draft_1",
