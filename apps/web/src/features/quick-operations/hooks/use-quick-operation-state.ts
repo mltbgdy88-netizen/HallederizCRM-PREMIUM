@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useCallback, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import type { QuickOperationSubmitRequest } from "@hallederiz/types";
 import type {
   QuickOperationAiInsight,
@@ -21,6 +21,7 @@ import {
   buildQuickOperationCustomers,
   findCatalogProduct,
   findQuickOperationCustomer,
+  loadQuickOperationCustomers,
   productToQuickOperationLine
 } from "../data/quick-operation-catalog";
 import {
@@ -243,20 +244,65 @@ export function useQuickOperationState(options?: {
   initialCustomerId?: string | null;
   initialProductId?: string | null;
 }) {
-  const catalogCustomers = useMemo(() => buildQuickOperationCustomers(), []);
-  const resolvedInitialCustomer = useMemo(() => {
-    const requested = options?.initialCustomerId?.trim();
-    if (!requested) {
-      return catalogCustomers[0]?.id ?? fallbackCustomer.id;
+  const [catalogCustomers, setCatalogCustomers] = useState<QuickOperationCustomer[]>(() =>
+    dataSourceConfig.useDemoData ? buildQuickOperationCustomers() : []
+  );
+  const [customersLoading, setCustomersLoading] = useState(!dataSourceConfig.useDemoData);
+  const [customersLoadError, setCustomersLoadError] = useState<string | null>(null);
+
+  useEffect(() => {
+    let active = true;
+
+    if (dataSourceConfig.useDemoData) {
+      setCatalogCustomers(buildQuickOperationCustomers());
+      setCustomersLoading(false);
+      setCustomersLoadError(null);
+      return () => {
+        active = false;
+      };
     }
-    if (findQuickOperationCustomer(requested)) {
-      return requested;
-    }
-    return catalogCustomers[0]?.id ?? fallbackCustomer.id;
-  }, [catalogCustomers, options?.initialCustomerId]);
+
+    setCustomersLoading(true);
+    setCustomersLoadError(null);
+    void loadQuickOperationCustomers()
+      .then((list) => {
+        if (!active) return;
+        setCatalogCustomers(list);
+      })
+      .catch((error) => {
+        if (!active) return;
+        setCatalogCustomers([]);
+        setCustomersLoadError("Cari kayıtları şu an yüklenemedi. Lütfen daha sonra tekrar deneyin.");
+      })
+      .finally(() => {
+        if (active) {
+          setCustomersLoading(false);
+        }
+      });
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const [operationType, setOperationTypeState] = useState<QuickOperationType>("sale_order");
-  const [customerId, setCustomerId] = useState(resolvedInitialCustomer);
+  const [customerId, setCustomerId] = useState(fallbackCustomer.id);
+
+  useEffect(() => {
+    if (customersLoading) {
+      return;
+    }
+    const requested = options?.initialCustomerId?.trim();
+    if (requested && catalogCustomers.some((c) => c.id === requested)) {
+      setCustomerId(requested);
+      return;
+    }
+    if (catalogCustomers[0]) {
+      setCustomerId(catalogCustomers[0].id);
+      return;
+    }
+    setCustomerId(fallbackCustomer.id);
+  }, [catalogCustomers, customersLoading, options?.initialCustomerId]);
   const [lines, setLines] = useState<QuickOperationLine[]>(() => seedQuickOperationLines());
   const [expandedLineId, setExpandedLineId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -269,7 +315,7 @@ export function useQuickOperationState(options?: {
 
   const selectedCustomer = useMemo(() => {
     return (
-      findQuickOperationCustomer(customerId) ??
+      findQuickOperationCustomer(customerId, catalogCustomers) ??
       catalogCustomers.find((customer) => customer.id === customerId) ??
       catalogCustomers[0] ??
       fallbackCustomer
@@ -477,8 +523,12 @@ export function useQuickOperationState(options?: {
     applyProductFromUrl,
     initialCustomerParam: options?.initialCustomerId ?? null,
     initialCustomerResolved: Boolean(
-      options?.initialCustomerId && findQuickOperationCustomer(options.initialCustomerId)
+      options?.initialCustomerId &&
+        catalogCustomers.some((customer) => customer.id === options.initialCustomerId)
     ),
+    customersLoading,
+    customersLoadError,
+    hasCatalogCustomers: catalogCustomers.length > 0,
     lines,
     expandedLineId,
     setExpandedLineId,
