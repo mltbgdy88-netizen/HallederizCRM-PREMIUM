@@ -4,6 +4,7 @@ import { createMockLoginResponse, isSessionActive } from "@hallederiz/domain";
 import type { AuthState, LoginInput, SessionModel } from "@hallederiz/types";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { adminRole, defaultTenant, defaultUser } from "../lib/platform-mocks";
+import { mapUserFacingLoginError } from "../lib/user-facing-data-error";
 
 interface LoginResult {
   success: boolean;
@@ -82,18 +83,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
 
     if (!loginResponse?.ok && !ENABLE_DEMO_AUTH) {
-      let message = networkError
-        ? `API'ye ulaşılamadı (${API_BASE_URL}). API sunucusunun çalıştığını ve CORS ayarlarını kontrol edin.`
-        : "Giriş yapılamadı. Lütfen kimlik doğrulama ayarlarını kontrol edin.";
+      let serverMessage: string | null = null;
       try {
         const errorPayload = loginResponse ? ((await loginResponse.json()) as { message?: string }) : null;
-        message = errorPayload?.message ?? message;
+        serverMessage = errorPayload?.message ?? null;
       } catch {
-        // Keep the user-facing fallback message.
+        serverMessage = null;
       }
       return {
         success: false,
-        message
+        message: mapUserFacingLoginError({ networkError, serverMessage })
       };
     }
 

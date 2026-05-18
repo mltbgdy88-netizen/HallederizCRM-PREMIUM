@@ -2,7 +2,7 @@
  * Shared helpers for HTTP-level web smoke scripts (production-data, api-offline).
  * No extra dependencies — Node 20+ fetch + child_process.
  */
-const { spawn } = require("node:child_process");
+const { execSync, spawn } = require("node:child_process");
 const path = require("node:path");
 
 const repoRoot = path.resolve(__dirname, "..", "..");
@@ -132,6 +132,138 @@ function isAcceptableHttpStatus(status, location) {
   return false;
 }
 
+function waitForChildExit(child, timeoutMs) {
+  return new Promise((resolve) => {
+    if (child.exitCode != null || child.signalCode != null) {
+      resolve(true);
+      return;
+    }
+    let settled = false;
+    const finish = (ok) => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      clearTimeout(timer);
+      resolve(ok);
+    };
+    const timer = setTimeout(() => finish(false), timeoutMs);
+    child.once("exit", () => finish(true));
+    child.once("error", () => finish(true));
+  });
+}
+
+function releaseChildIo(child, onData) {
+  if (child.stdout) {
+    child.stdout.removeListener("data", onData);
+    child.stdout.removeAllListeners();
+    child.stdout.destroy();
+  }
+  if (child.stderr) {
+    child.stderr.removeListener("data", onData);
+    child.stderr.removeAllListeners();
+    child.stderr.destroy();
+  }
+  child.removeAllListeners();
+}
+
+function runTaskkillTree(pid) {
+  return new Promise((resolve) => {
+    if (!pid) {
+      resolve();
+      return;
+    }
+    const killer = spawn("taskkill", ["/pid", String(pid), "/T", "/F"], {
+      shell: true,
+      stdio: "ignore",
+      windowsHide: true
+    });
+    const timer = setTimeout(resolve, 8000);
+    killer.once("close", () => {
+      clearTimeout(timer);
+      resolve();
+    });
+    killer.once("error", () => {
+      clearTimeout(timer);
+      resolve();
+    });
+  });
+}
+
+/** POSIX: process group; Windows: taskkill /T on root pid (shell or pnpm). */
+async function killChildTree(child) {
+  if (!child || child.pid == null) {
+    return;
+  }
+
+  const isWindows = process.platform === "win32";
+
+  if (isWindows) {
+    await runTaskkillTree(child.pid);
+    await waitForChildExit(child, 5000);
+    return;
+  }
+
+  const pgid = child.pid;
+  try {
+    process.kill(-pgid, "SIGTERM");
+  } catch {
+    try {
+      child.kill("SIGTERM");
+    } catch {
+      // ignore
+    }
+  }
+
+  let exited = await waitForChildExit(child, 6000);
+  if (!exited) {
+    try {
+      process.kill(-pgid, "SIGKILL");
+    } catch {
+      try {
+        child.kill("SIGKILL");
+      } catch {
+        // ignore
+      }
+    }
+    await waitForChildExit(child, 3000);
+  }
+}
+
+/** Best-effort: free listen port if child tree survived (common on CI when pnpm spawns next). */
+function killPortListeners(port) {
+  const portNum = Number(port);
+  if (!Number.isFinite(portNum) || portNum <= 0) {
+    return;
+  }
+  try {
+    if (process.platform === "win32") {
+      const ps = `Get-NetTCPConnection -LocalPort ${portNum} -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force -ErrorAction SilentlyContinue }`;
+      execSync(`powershell -NoProfile -Command "${ps}"`, { stdio: "ignore", timeout: 8000 });
+    } else {
+      execSync(`fuser -k ${portNum}/tcp 2>/dev/null || true`, { stdio: "ignore", timeout: 8000 });
+    }
+  } catch {
+    // ignore
+  }
+}
+
+async function stopWebDevServer(server) {
+  if (!server) {
+    return;
+  }
+  if (server._stopPromise) {
+    return server._stopPromise;
+  }
+  server._stopPromise = (async () => {
+    const { child, port, onData } = server;
+    releaseChildIo(child, onData);
+    await killChildTree(child);
+    killPortListeners(port);
+  })();
+  return server._stopPromise;
+}
+
 async function waitForWebReady(baseUrl, timeoutMs = 180000) {
   const deadline = Date.now() + timeoutMs;
   while (Date.now() < deadline) {
@@ -163,6 +295,9 @@ function startWebDevServer({ port, envExtra }) {
     cwd: repoRoot,
     env,
     shell: isWindows,
+    windowsHide: true,
+    /** Unix CI: new process group so SIGTERM/-pid kills pnpm + next-server tree */
+    detached: !isWindows,
     stdio: ["ignore", "pipe", "pipe"]
   });
 
@@ -182,36 +317,17 @@ function startWebDevServer({ port, envExtra }) {
   child.stdout?.on("data", onData);
   child.stderr?.on("data", onData);
 
-  const stop = () =>
-    new Promise((resolve) => {
-      if (child.killed || child.exitCode !== null) {
-        resolve();
-        return;
-      }
-      const killTimer = setTimeout(() => {
-        try {
-          child.kill("SIGKILL");
-        } catch {
-          // noop
-        }
-        resolve();
-      }, 8000);
-      child.on("exit", () => {
-        clearTimeout(killTimer);
-        resolve();
-      });
-      try {
-        if (isWindows) {
-          spawn("taskkill", ["/pid", String(child.pid), "/T", "/F"], { shell: true });
-        } else {
-          child.kill("SIGTERM");
-        }
-      } catch {
-        child.kill("SIGKILL");
-      }
-    });
+  const server = {
+    child,
+    baseUrl,
+    port: portValue,
+    onData,
+    getReadyFlag: () => ready,
+    _stopPromise: null,
+    stop: () => stopWebDevServer(server)
+  };
 
-  return { child, baseUrl, port: portValue, getReadyFlag: () => ready, stop };
+  return server;
 }
 
 async function runHttpRouteSmoke({
@@ -287,7 +403,7 @@ async function runWithWebServer({ label, port, envExtra, checkTechnicalHtml, rea
     });
   } finally {
     console.log(`[${label}] Web dev sunucusu kapatiliyor...`);
-    await server.stop();
+    await stopWebDevServer(server);
   }
 }
 
@@ -297,5 +413,7 @@ module.exports = {
   probeApiHealth,
   runHttpRouteSmoke,
   runWithWebServer,
+  stopWebDevServer,
+  killChildTree,
   parsePort
 };

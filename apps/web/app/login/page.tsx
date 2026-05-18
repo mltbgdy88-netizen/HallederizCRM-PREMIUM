@@ -44,8 +44,8 @@ export default function LoginPage() {
     <main className="login-page">
       <section className="login-card">
         <p className="eyebrow">HallederizCRM PREMIUM</p>
-        <h1>Platform Core Giriş</h1>
-        <p className="muted">Çok kiracılı CRM omurgası için giriş ekranı iskeleti.</p>
+        <h1>Platform Giriş</h1>
+        <p className="muted">Kurumsal CRM platformuna giriş yapın.</p>
 
         <form className="login-form" onSubmit={handleSubmit}>
           <label>

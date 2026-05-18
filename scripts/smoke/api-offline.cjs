@@ -34,6 +34,7 @@ async function main() {
   }
 
   console.log("API offline smoke basarili.");
+  process.exit(0);
 }
 
 main().catch((error) => {

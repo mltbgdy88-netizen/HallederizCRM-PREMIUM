@@ -27,7 +27,14 @@ import {
   MSG_SELECT_LINE
 } from "../data/quick-operation-messages";
 import { isQuickOpPreviewProductId } from "../data/quick-operation-guards";
-import { seedQuickOperationLines, useQuickOperationState } from "../hooks/use-quick-operation-state";
+import {
+  dataSourceConfig as quickOpDataSource
+} from "../../../lib/data-source";
+import {
+  defaultQuickOperationLinesForTab,
+  seedQuickOperationLines,
+  useQuickOperationState
+} from "../hooks/use-quick-operation-state";
 import type { QuickOperationLine, QuickOperationSourceType, QuickOperationType } from "../types";
 import { QuickOperationSourceAccordion } from "./QuickOperationSourceAccordion";
 import { QuickOperationWorkbenchSide } from "./QuickOperationWorkbenchSide";
@@ -133,6 +140,9 @@ const PREP_SLIPS: Array<{ id: string; label: string }> = [
 ];
 
 function prepLines(id: string): QuickOperationLine[] {
+  if (!quickOpDataSource.useDemoData) {
+    return [];
+  }
   const seed = seedQuickOperationLines();
   if (id === "prep-1") return seed.slice(0, 4).map((l, i) => ({ ...l, id: `prep1_${i}_${l.id}` }));
   if (id === "prep-2") return seed.slice(2, 6).map((l, i) => ({ ...l, id: `prep2_${i}_${l.id}` }));
@@ -199,25 +209,6 @@ function primaryIconKind(tab: WorkflowTabId): QuickBubbleKind {
       return "return";
     default:
       return "order";
-  }
-}
-
-function defaultLinesForTab(tab: WorkflowTabId): QuickOperationLine[] {
-  const full = seedQuickOperationLines();
-  switch (tab) {
-    case "order":
-      return full;
-    case "price":
-      return full.slice(0, 3);
-    case "payment":
-    case "document":
-      return [];
-    case "delivery":
-      return [];
-    case "return":
-      return [];
-    default:
-      return full;
   }
 }
 
@@ -331,7 +322,7 @@ export function QuickOperationPage() {
       setActiveTab(tab);
       const next = WORKFLOW.find((t) => t.id === tab);
       if (next) setOperationType(next.operation);
-      replaceLines(defaultLinesForTab(tab));
+      replaceLines(defaultQuickOperationLinesForTab(tab));
       setPrepSlipId("");
       setPrepSearch("");
     },

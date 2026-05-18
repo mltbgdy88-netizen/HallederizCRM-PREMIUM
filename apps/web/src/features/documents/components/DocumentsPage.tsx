@@ -5,6 +5,7 @@ import type { Customer, Document, DocumentType } from "@hallederiz/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { dataSourceConfig } from "../../../lib/data-source";
+import { MSG_DATA_WHEN_RECONNECTED, MSG_REFRESH_RETRY } from "../../../lib/user-facing-data-error";
 import { useToast } from "../../../providers/toast-provider";
 import { dateLabel } from "../utils";
 import {
@@ -14,7 +15,11 @@ import {
   formatDocumentTemplateVersion,
   summarizeDocumentDeliveries
 } from "../utils/document-faz-f";
-import { MSG_DOC_DOWNLOAD_NOT_LIVE, MSG_DOC_PREVIEW_ONLY } from "../data/document-action-messages";
+import {
+  MSG_DOC_DOWNLOAD_NOT_LIVE,
+  MSG_DOC_LIST_UNAVAILABLE,
+  MSG_DOC_PREVIEW_ONLY
+} from "../data/document-action-messages";
 import {
   hasDownloadablePdf,
   resolveDocumentsEmptyMessage,
@@ -345,16 +350,19 @@ export function DocumentsPage() {
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const pageSize = 10;
 
   useEffect(() => {
     let mounted = true;
+    setLoadError(null);
     getDocuments()
       .then((result) => {
         if (!mounted) {
           return;
         }
+        setLoadError(null);
         setDocuments(result.documents);
         setCustomers(result.customers);
 
@@ -423,11 +431,13 @@ export function DocumentsPage() {
     [customers, customerParam]
   );
   const contextBanner = resolveContextBanner(customerParam, typeParam, contextCustomerName);
-  const emptyMessage = resolveDocumentsEmptyMessage({
-    useDemoData: dataSourceConfig.useDemoData,
-    customerId: customerParam,
-    typeFilter: typeParam
-  });
+  const emptyMessage = loadError
+    ? "Kayıt bulunamadı veya veri kaynağına ulaşılamıyor."
+    : resolveDocumentsEmptyMessage({
+        useDemoData: dataSourceConfig.useDemoData,
+        customerId: customerParam,
+        typeFilter: typeParam
+      });
 
   return (
     <div className="hz-page-stack hz-doc-page">
@@ -439,6 +449,11 @@ export function DocumentsPage() {
       {contextBanner ? (
         <p className="hz-doc-context-band" role="status">
           {contextBanner}
+        </p>
+      ) : null}
+      {loadError ? (
+        <p className="hz-doc-context-band" role="alert">
+          {loadError} {MSG_DATA_WHEN_RECONNECTED} {MSG_REFRESH_RETRY}
         </p>
       ) : null}
       <PageHeader
