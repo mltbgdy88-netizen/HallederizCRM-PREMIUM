@@ -287,7 +287,7 @@ export const whatsappActionRequests: WhatsAppActionRequest[] = [
     contactId: "wa_c_delta",
     intent: "fiyat",
     status: "pending",
-    title: "Teklif gönderimi onay bekliyor",
+    title: "Teklif önizlemesi onay bekliyor",
     payloadSummary: "TF-2026-0189",
     targetEntityType: "document",
     targetEntityId: "doc_tf_0189",
