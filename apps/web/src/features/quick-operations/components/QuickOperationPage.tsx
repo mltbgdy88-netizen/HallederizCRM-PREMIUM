@@ -4,7 +4,6 @@ import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, use
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SplitContentLayout } from "@hallederiz/ui";
-import { dataSourceConfig } from "../../../lib/data-source";
 import { useToast } from "../../../providers/toast-provider";
 import type { QuickBubbleKind } from "../../dashboard/components/dashboard-inline-icons";
 import {
@@ -19,8 +18,8 @@ import {
   MSG_CUSTOMER_PARAM_NOT_FOUND,
   MSG_CUSTOMERS_EMPTY,
   MSG_CUSTOMERS_REQUIRED,
-  MSG_DRAFT_SAVED,
   MSG_NOT_LIVE,
+  MSG_SUBMIT_APPROVALS_HINT,
   MSG_PREVIEW_CUSTOMER,
   MSG_PREVIEW_DOCUMENT,
   MSG_PREVIEW_PRODUCT,
@@ -168,19 +167,19 @@ function operationTypeLabel(type: QuickOperationType): string {
 function primaryActionLabel(tab: WorkflowTabId): string {
   switch (tab) {
     case "order":
-      return "Siparişi oluştur";
+      return "Siparişi hazırla";
     case "payment":
-      return "Tahsilatı kaydet";
+      return "Tahsilatı hazırla";
     case "price":
-      return "Teklifi oluştur";
+      return "Teklifi hazırla";
     case "delivery":
-      return "Teslimi başlat";
+      return "Teslimi hazırla";
     case "document":
-      return "Belgeyi gönder";
+      return "Belge taslağını hazırla";
     case "return":
-      return "İade talebini oluştur";
+      return "İade talebini hazırla";
     default:
-      return "Kaydet";
+      return "Taslağı hazırla";
   }
 }
 
@@ -277,6 +276,7 @@ export function QuickOperationPage() {
     aiInsight,
     notice,
     setNotice,
+    submitLinks,
     expandedLineId,
     setExpandedLineId,
     removeLine,
@@ -361,13 +361,9 @@ export function QuickOperationPage() {
         return;
       }
     }
-    const ok = await submitOperation();
-    if (ok) {
-      pushToast(
-        dataSourceConfig.useDemoData
-          ? MSG_DRAFT_SAVED
-          : "İşlem kaydı alındı. Onay zinciri tamamlandığında uygulanır."
-      );
+    const outcome = await submitOperation();
+    if (outcome.ok && outcome.toast) {
+      pushToast(outcome.toast);
     }
   };
 
@@ -428,6 +424,16 @@ export function QuickOperationPage() {
       {notice ? (
         <div className="hz-qop-notice hz-qop-notice--v2" role="status">
           <span>{notice}</span>
+          {submitLinks.showApprovalsLink ? (
+            <Link href="/onaylar" className="hz-qop-inline-link">
+              {MSG_SUBMIT_APPROVALS_HINT}
+            </Link>
+          ) : null}
+          {submitLinks.detailHref ? (
+            <Link href={submitLinks.detailHref} className="hz-qop-inline-link">
+              {submitLinks.detailLabel ?? "Detaya git"}
+            </Link>
+          ) : null}
           <button type="button" className="hz-qop-notice-dismiss" onClick={() => setNotice(null)}>
             Kapat
           </button>

@@ -28,9 +28,25 @@ import {
   isQuickOpPreviewCustomerId,
   isQuickOpPreviewProductId
 } from "../data/quick-operation-guards";
-import { MSG_DRAFT_SAVED, MSG_PREVIEW_CUSTOMER, MSG_PREVIEW_PRODUCT } from "../data/quick-operation-messages";
+import { MSG_PREVIEW_CUSTOMER, MSG_PREVIEW_PRODUCT } from "../data/quick-operation-messages";
 import { calculateQuickOperationTotals } from "../utils/calculate-quick-operation-totals";
 import { mapSourceSelectionToWorkflow } from "../utils/map-source-selection-to-workflow";
+import {
+  mapSubmitActionError,
+  resolveSubmitFeedback,
+  sanitizeSubmitImpacts
+} from "../utils/quick-operation-submit-feedback";
+
+export type QuickOperationSubmitOutcome = {
+  ok: boolean;
+  toast?: string;
+};
+
+export type QuickOperationSubmitLinks = {
+  showApprovalsLink: boolean;
+  detailHref?: string;
+  detailLabel?: string;
+};
 
 export const operationTypeLabels: Record<QuickOperationType, { label: string; title: string; description: string }> = {
   offer: {
@@ -309,6 +325,7 @@ export function useQuickOperationState(options?: {
   const [operationNote, setOperationNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submittedImpacts, setSubmittedImpacts] = useState<QuickOperationImpact[] | null>(null);
+  const [submitLinks, setSubmitLinks] = useState<QuickOperationSubmitLinks>({ showApprovalsLink: false });
   const [sideActions, setSideActions] = useState<QuickOperationSideActions | null>(null);
   const [documentPreviewVisible, setDocumentPreviewVisible] = useState(false);
   const [whatsappDraftVisible, setWhatsappDraftVisible] = useState(false);
@@ -378,6 +395,7 @@ export function useQuickOperationState(options?: {
   const replaceLines = (next: QuickOperationLine[]) => {
     setSubmittedImpacts(null);
     setSideActions(null);
+    setSubmitLinks({ showApprovalsLink: false });
     setLines(next);
     setExpandedLineId(null);
   };
@@ -443,22 +461,22 @@ export function useQuickOperationState(options?: {
     };
   };
 
-  const submitOperation = async (): Promise<boolean> => {
+  const submitOperation = async (): Promise<QuickOperationSubmitOutcome> => {
     if (isPreviewCustomerBlocked) {
       setNotice(MSG_PREVIEW_CUSTOMER);
-      return false;
+      return { ok: false };
     }
     if (!selectedCustomer.id || selectedCustomer.id === fallbackCustomer.id) {
       setNotice("Önce cari seçin.");
-      return false;
+      return { ok: false };
     }
 
     setIsSubmitting(true);
-    let success = false;
     try {
       const result = await submitQuickOperationRecord(buildSubmitPayload());
+      const sanitizedImpacts = sanitizeSubmitImpacts(result.workflowImpacts);
       setSubmittedImpacts(
-        result.workflowImpacts.map((impact) => ({
+        sanitizedImpacts.map((impact) => ({
           id: impact.id,
           title: impact.title,
           description: impact.description,
@@ -466,23 +484,24 @@ export function useQuickOperationState(options?: {
         }))
       );
       setSideActions(result.sideActions ?? null);
-      const ref = result.createdEntityNo ?? "—";
-      if (result.mode === "foundation" || dataSourceConfig.useDemoData) {
-        setNotice(`${MSG_DRAFT_SAVED} Referans: ${ref}`);
-      } else if (result.mode === "executed") {
-        setNotice(`İşlem kaydı alındı: ${ref}. Onay zinciri tamamlandığında uygulanır.`);
-      } else {
-        setNotice(`Taslak inceleme için hazırlandı. Referans: ${ref}`);
-      }
-      success = true;
+      const feedback = resolveSubmitFeedback(result, {
+        useDemoData: dataSourceConfig.useDemoData,
+        operationType
+      });
+      setNotice(feedback.notice);
+      setSubmitLinks({
+        showApprovalsLink: feedback.showApprovalsLink,
+        detailHref: feedback.detailHref,
+        detailLabel: feedback.detailLabel
+      });
+      return { ok: true, toast: feedback.toast };
     } catch (error) {
-      const message = error instanceof Error ? error.message : "Bilinmeyen hata";
-      setNotice(`İşlem hazırlanamadı: ${message}`);
-      success = false;
+      setSubmitLinks({ showApprovalsLink: false });
+      setNotice(mapSubmitActionError(error));
+      return { ok: false };
     } finally {
       setIsSubmitting(false);
     }
-    return success;
   };
 
   const openDocumentPreview = () => {
@@ -504,6 +523,7 @@ export function useQuickOperationState(options?: {
   const resetDraft = () => {
     setSubmittedImpacts(null);
     setSideActions(null);
+    setSubmitLinks({ showApprovalsLink: false });
     setNotice(null);
     setLines(seedQuickOperationLines());
     setCustomerId(catalogCustomers[0]?.id ?? fallbackCustomer.id);
@@ -536,6 +556,7 @@ export function useQuickOperationState(options?: {
     impacts,
     notice,
     setNotice,
+    submitLinks,
     operationNote,
     setOperationNote,
     addEmptyLine,

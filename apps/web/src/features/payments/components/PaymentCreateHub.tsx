@@ -81,8 +81,8 @@ export function PaymentCreateHub({
         <p className="hz-commercial-create-hub-eyebrow">Tahsilatlar</p>
         <h1 className="hz-commercial-create-hub-title">Yeni tahsilat</h1>
         <p className="hz-commercial-create-hub-lead">
-          Tahsilat kaydı henüz canlı kullanıma bağlı değil. Bu işlem Hızlı İşlem workbench üzerinden hazırlanır; onay ve
-          işlem kuyruğu bağlantısı gerekir. Önizleme verisiyle gerçek tahsilat oluşturulmaz.
+          Bu işlem Hızlı İşlem workbench üzerinden hazırlanır. Gerçek kayıt için onay ve işlem kuyruğu bağlantısı gerekir.
+          Önizleme verisiyle gerçek kayıt oluşturulmaz.
         </p>
 
         {dataSourceConfig.useDemoData ? (

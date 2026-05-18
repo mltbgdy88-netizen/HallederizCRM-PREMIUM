@@ -30,3 +30,29 @@ export const MSG_IMPORT_HINT = "Toplu ürün aktarımı için Veri yükleme ekra
 
 export const MSG_PREVIEW_DOCUMENT =
   "Belge önizlemesi hazırlanır; gönderim yapılmaz.";
+
+export const MSG_SUBMIT_PREVIEW =
+  "Önizleme verisiyle gerçek kayıt oluşturulmaz.";
+
+export const MSG_SUBMIT_DRAFT_READY =
+  "İşlem taslağı hazırlandı; gerçek kayıt oluşturulmadı.";
+
+export const MSG_SUBMIT_QUEUE_PENDING =
+  "Onay kaydı alındı; işlem kuyruğu bağlantısı bekleniyor.";
+
+export const MSG_SUBMIT_QUEUE_WHEN_READY =
+  "Onay ve işlem kuyruğu bağlantısı tamamlandığında kayıt işlenecek.";
+
+export const MSG_SUBMIT_NOT_LIVE =
+  "Bu işlem henüz canlı yürütmeye bağlı değil.";
+
+export const MSG_SUBMIT_VALIDATION_FAILED =
+  "İşlem taslağı doğrulanamadı. Eksik alanları kontrol edin.";
+
+export const MSG_SUBMIT_FAILED =
+  "İşlem taslağı hazırlanamadı.";
+
+export const MSG_SUBMIT_APPROVALS_HINT =
+  "Onaylar ekranından takip edebilirsiniz.";
+
+export const MSG_SUBMIT_TASLAK_REF_PREFIX = "Referans:";
