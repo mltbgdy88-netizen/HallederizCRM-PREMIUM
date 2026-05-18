@@ -1,8 +1,9 @@
 import type { Customer, CustomerAccount, Product } from "@hallederiz/types";
 import { customers as demoCatalogCustomers, getCustomerAccount } from "../../../demo/customers";
 import { stockCatalog } from "../../../demo";
-import { dataSourceConfig } from "../../../lib/data-source";
+import { dataSourceConfig, sdk } from "../../../lib/data-source";
 import { CUSTOMERS_PORTFOLIO_DEMO_ROWS } from "../../customers/data/customers-demo-rows";
+import { getCustomers } from "../../customers/queries/get-customers";
 import type { QuickOperationCustomer, QuickOperationLine } from "../types";
 
 function mapRisk(risk: Customer["riskLevel"]): QuickOperationCustomer["risk"] {
@@ -22,13 +23,13 @@ function mapCatalogCustomer(customer: Customer, account: CustomerAccount | null,
     id: customer.id,
     name: customer.name,
     contactName: customer.name,
-    phone: customer.phone ?? "-",
+    phone: customer.phone ?? "—",
     priceGroup: customer.pricingProfile?.priceSlotLabelSnapshot ?? "Genel",
     customerType: customer.type,
     whatsappMatched: customer.whatsappMatched,
     risk: mapRisk(customer.riskLevel),
-    balance,
-    address: customer.addressLine ?? customer.city ?? "-",
+    balance: financeLinked ? balance : 0,
+    address: customer.addressLine ?? customer.city ?? "—",
     receivableDisplay: financeLinked && balance > 0 ? formatBalance(balance) : "—",
     payableDisplay: financeLinked && overdue > 0 ? formatBalance(overdue) : "—",
     warningDisplay:
@@ -36,7 +37,9 @@ function mapCatalogCustomer(customer: Customer, account: CustomerAccount | null,
         ? `${formatBalance(overdue)} TL gecikmiş bakiye`
         : customer.riskLevel === "blocked"
           ? "Cari blokeli"
-          : "—",
+          : financeLinked
+            ? "—"
+            : "Finans özeti henüz bağlı değil",
     financeLinked
   };
 }
@@ -64,12 +67,7 @@ function mapPortfolioRowToCustomer(
   };
 }
 
-/** Demo modda cari listesi — kanonik demo/customers + cariler onizleme satirlari. */
-export function buildQuickOperationCustomers(): QuickOperationCustomer[] {
-  if (!dataSourceConfig.useDemoData) {
-    return [];
-  }
-
+function buildDemoQuickOperationCustomers(): QuickOperationCustomer[] {
   const fromCatalog = demoCatalogCustomers.map((customer) =>
     mapCatalogCustomer(customer, getCustomerAccount(customer.id), true)
   );
@@ -81,8 +79,55 @@ export function buildQuickOperationCustomers(): QuickOperationCustomer[] {
   return [...fromCatalog, ...portfolioOnly];
 }
 
-export function findQuickOperationCustomer(customerId: string): QuickOperationCustomer | undefined {
-  return buildQuickOperationCustomers().find((c) => c.id === customerId);
+/** Demo modda senkron cari listesi. */
+export function buildQuickOperationCustomers(): QuickOperationCustomer[] {
+  if (!dataSourceConfig.useDemoData) {
+    return [];
+  }
+  return buildDemoQuickOperationCustomers();
+}
+
+async function loadProductionQuickOperationCustomers(): Promise<QuickOperationCustomer[]> {
+  const { customers } = await getCustomers();
+  if (!customers.length) {
+    return [];
+  }
+
+  const mapped = await Promise.all(
+    customers.map(async (customer) => {
+      try {
+        const accountResponse = await sdk.customers.accountSummary(customer.id);
+        const account = accountResponse.item ?? null;
+        const financeLinked = Boolean(
+          account &&
+            (typeof account.balance === "number" ||
+              typeof account.overdueAmount === "number" ||
+              typeof account.creditLimit === "number")
+        );
+        return mapCatalogCustomer(customer, account, financeLinked);
+      } catch {
+        return mapCatalogCustomer(customer, null, false);
+      }
+    })
+  );
+
+  return mapped;
+}
+
+/** Demo veya production cari listesi (async). */
+export async function loadQuickOperationCustomers(): Promise<QuickOperationCustomer[]> {
+  if (dataSourceConfig.useDemoData) {
+    return buildDemoQuickOperationCustomers();
+  }
+  return loadProductionQuickOperationCustomers();
+}
+
+export function findQuickOperationCustomer(
+  customerId: string,
+  catalog?: QuickOperationCustomer[]
+): QuickOperationCustomer | undefined {
+  const list = catalog ?? buildQuickOperationCustomers();
+  return list.find((c) => c.id === customerId);
 }
 
 export function findCatalogProduct(productId: string): Product | undefined {

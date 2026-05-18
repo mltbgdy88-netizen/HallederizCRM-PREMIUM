@@ -1,6 +1,7 @@
 "use client";
 
 import { dataSourceConfig } from "../../../lib/data-source";
+import { MSG_FINANCE_NOT_LINKED } from "../data/quick-operation-messages";
 import type { QuickOperationAiInsight, QuickOperationCustomer, QuickOperationImpact, QuickOperationTotals } from "../types";
 import type { WorkflowTabId } from "./QuickOperationPage";
 import { QuickOperationImpactPanel } from "./QuickOperationImpactPanel";
@@ -83,6 +84,9 @@ export function QuickOperationWorkbenchSide({
 
         <section className="hz-qop-wb-block">
           <h3 className="hz-qop-wb-block-h">Finans Özeti</h3>
+          {selectedCustomer.financeLinked === false && !dataSourceConfig.useDemoData ? (
+            <p className="hz-qop-wb-muted">{MSG_FINANCE_NOT_LINKED}</p>
+          ) : null}
           <QuickOperationTotalsPanel totals={totals} layout="finance" />
         </section>
 

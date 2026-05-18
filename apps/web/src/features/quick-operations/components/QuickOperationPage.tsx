@@ -1,6 +1,7 @@
 ﻿"use client";
 
 import { Fragment, useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SplitContentLayout } from "@hallederiz/ui";
 import { dataSourceConfig } from "../../../lib/data-source";
@@ -15,6 +16,9 @@ import {
   QuickActionIcon
 } from "../../dashboard/components/dashboard-inline-icons";
 import {
+  MSG_CUSTOMER_PARAM_NOT_FOUND,
+  MSG_CUSTOMERS_EMPTY,
+  MSG_CUSTOMERS_REQUIRED,
   MSG_DRAFT_SAVED,
   MSG_NOT_LIVE,
   MSG_PREVIEW_CUSTOMER,
@@ -264,6 +268,9 @@ export function QuickOperationPage() {
     applyProductFromUrl,
     initialCustomerParam,
     initialCustomerResolved,
+    customersLoading,
+    customersLoadError,
+    hasCatalogCustomers,
     lines,
     totals,
     impacts,
@@ -302,12 +309,11 @@ export function QuickOperationPage() {
   }, [applyProductFromUrl, productParam, pushToast]);
 
   useEffect(() => {
-    if (initialCustomerParam && !initialCustomerResolved) {
-      setNotice(
-        `Cari (${initialCustomerParam}) listede bulunamadı. Mevcut cari seçildi veya canlı veri bağlantısı kurulmadı.`
-      );
+    if (customersLoading || !initialCustomerParam || initialCustomerResolved) {
+      return;
     }
-  }, [initialCustomerParam, initialCustomerResolved, setNotice]);
+    setNotice(MSG_CUSTOMER_PARAM_NOT_FOUND);
+  }, [customersLoading, initialCustomerParam, initialCustomerResolved, setNotice]);
 
   useLayoutEffect(() => {
     const el = tableScrollRef.current;
@@ -335,6 +341,13 @@ export function QuickOperationPage() {
   const handlePrimary = async () => {
     if (isPreviewCustomerBlocked) {
       pushToast(MSG_PREVIEW_CUSTOMER);
+      return;
+    }
+    if (customersLoading) {
+      return;
+    }
+    if (!hasCatalogCustomers) {
+      pushToast(MSG_CUSTOMERS_REQUIRED);
       return;
     }
     if (!customerId || catalogCustomers.length === 0) {
@@ -396,7 +409,8 @@ export function QuickOperationPage() {
   const riskHigh = selectedCustomer.risk === "Yüksek";
   const riskLabel = riskHigh ? "Yüksek" : selectedCustomer.risk === "Orta" ? "Orta" : "Düşük";
   const activeWorkflow = WORKFLOW.find((w) => w.id === activeTab);
-  const customerReady = Boolean(customerId && catalogCustomers.length > 0);
+  const customerReady = Boolean(!customersLoading && customerId && hasCatalogCustomers);
+  const workbenchLocked = customersLoading || !hasCatalogCustomers;
   const missingFieldCount = useMemo(
     () => countMissingFields(activeTab, lines, customerReady),
     [activeTab, lines, customerReady]
@@ -418,6 +432,30 @@ export function QuickOperationPage() {
             Kapat
           </button>
         </div>
+      ) : null}
+
+      {customersLoadError ? (
+        <p className="hz-qop-notice hz-qop-notice--v2" role="alert">
+          {customersLoadError}
+        </p>
+      ) : null}
+
+      {!customersLoading && !hasCatalogCustomers && !customersLoadError ? (
+        <>
+          <p className="hz-qop-notice hz-qop-notice--v2" role="status">
+            {MSG_CUSTOMERS_REQUIRED}
+          </p>
+          <p className="hz-qop-notice hz-qop-notice--v2" role="status">
+            {MSG_CUSTOMERS_EMPTY}{" "}
+            <Link href="/cariler" className="hz-qop-inline-link">
+              Cariler
+            </Link>
+            {" · "}
+            <Link href="/cariler/yeni" className="hz-qop-inline-link">
+              Yeni cari
+            </Link>
+          </p>
+        </>
       ) : null}
 
       <header className="hz-qop-wb-head hz-qop-wb-head--compact">
@@ -464,7 +502,7 @@ export function QuickOperationPage() {
           <button
             type="button"
             className="hz-qop-btn hz-qop-btn--primary hz-qop-btn--sm"
-            disabled={isSubmitting || isPreviewCustomerBlocked || catalogCustomers.length === 0}
+            disabled={isSubmitting || isPreviewCustomerBlocked || workbenchLocked}
             onClick={handlePrimary}
           >
             {isSubmitting ? (
@@ -529,10 +567,12 @@ export function QuickOperationPage() {
                     className="hz-qop-input"
                     value={customerId}
                     onChange={(e) => setCustomerId(e.target.value)}
-                    disabled={catalogCustomers.length === 0}
+                    disabled={workbenchLocked}
                   >
-                    {catalogCustomers.length === 0 ? (
-                      <option value="">Cari listesi bağlı değil</option>
+                    {customersLoading ? (
+                      <option value="">Cariler yükleniyor…</option>
+                    ) : !hasCatalogCustomers ? (
+                      <option value="">Cari kaydı yok</option>
                     ) : (
                       catalogCustomers.map((c) => (
                         <option key={c.id} value={c.id}>
@@ -769,7 +809,7 @@ export function QuickOperationPage() {
                 <button
                   type="button"
                   className="hz-qop-btn hz-qop-btn--primary hz-qop-btn--sm"
-                  disabled={isSubmitting || isPreviewCustomerBlocked || catalogCustomers.length === 0}
+                  disabled={isSubmitting || isPreviewCustomerBlocked || workbenchLocked}
                   onClick={handlePrimary}
                 >
                   {isSubmitting ? "İşleniyor…" : primaryActionLabel(activeTab)}

@@ -9,6 +9,17 @@ export const MSG_PREVIEW_PRODUCT =
 
 export const MSG_SELECT_CUSTOMER = "Önce cari seçin.";
 
+export const MSG_CUSTOMERS_REQUIRED =
+  "Hızlı İşlem için önce bir cari kaydı gerekir.";
+
+export const MSG_CUSTOMERS_EMPTY =
+  "Cari kaydı bulunamadı. Cariler modülünden yeni kayıt hazırlayabilirsiniz.";
+
+export const MSG_CUSTOMER_PARAM_NOT_FOUND =
+  "Seçilen cari listede bulunamadı. İlk uygun cari seçildi veya cari listesini kontrol edin.";
+
+export const MSG_FINANCE_NOT_LINKED = "Finans özeti henüz bağlı değil.";
+
 export const MSG_SELECT_LINE =
   "Bu işlem türü için en az bir satır veya ürün bilgisi gerekir.";
 
