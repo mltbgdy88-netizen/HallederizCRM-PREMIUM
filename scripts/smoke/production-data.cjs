@@ -57,6 +57,7 @@ async function main() {
   }
 
   console.log("Production data smoke basarili.");
+  process.exit(0);
 }
 
 main().catch((error) => {
