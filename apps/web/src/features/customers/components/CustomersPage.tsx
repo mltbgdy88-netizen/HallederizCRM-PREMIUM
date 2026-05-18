@@ -27,7 +27,8 @@ export function CustomersPage() {
   const router = useRouter();
   const { pushToast } = useToast();
   const { filters, updateFilter, resetFilters } = useCustomerFilters();
-  const { loading, data, filteredCustomers, rows } = useCustomersData(filters);
+  const { loading, loadFailed, loadUnavailableTitle, loadUnavailableDetail, data, filteredCustomers, rows } =
+    useCustomersData(filters);
   const [selectedCustomerId, setSelectedCustomerId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const pageSize = 12;
@@ -279,7 +280,10 @@ export function CustomersPage() {
                   router.push(`/whatsapp?customer=${customerId}`);
                 }}
                 emptyFiltered={emptyFiltered}
-                onEmptyNew={emptyFiltered ? undefined : () => router.push("/cariler/yeni")}
+                dataUnavailable={loadFailed && !usingDemoFallback}
+                dataUnavailableTitle={loadUnavailableTitle}
+                dataUnavailableDetail={loadUnavailableDetail}
+                onEmptyNew={emptyFiltered || loadFailed ? undefined : () => router.push("/cariler/yeni")}
                 onEmptyImport={emptyFiltered ? undefined : () => router.push("/ayarlar/veri-yukleme")}
               />
               <div className="hz-customers-pagination">

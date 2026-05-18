@@ -171,6 +171,25 @@ pnpm smoke:navigation                     → geçti (21)
 
 ---
 
+## Follow-up fixes (`fix/api-offline-empty-states`)
+
+| Bulgu | Durum |
+|-------|--------|
+| **P1** Login teknik URL/CORS metni | Düzeltildi — `mapUserFacingLoginError` |
+| **P1** Hızlı İşlem ön-doldurulmuş satırlar | Düzeltildi — `initialQuickOperationLines` yalnız demo modda seed |
+| **P1** Belgeler liste `.catch` yok | Düzeltildi — yükleme hatası bandı + boş liste |
+| **P1** Oturum tam sayfa yenileme | Dokümante — auth hydrate API’ye bağlı; ayrı PR |
+| **P2** Onaylar worker/outbox jargonu | Düzeltildi — kullanıcı metinleri sadeleştirildi |
+| **P2** Worker panel `error.kind` sızıntısı | Düzeltildi — `mapApprovalUiErrorMessage` |
+| **P2** Login “iskelet” ifadesi | Düzeltildi |
+| **P2** Hızlı İşlem `?product=` | Beklenen davranış; production’da boş satır |
+
+Ortak yardımcı: `apps/web/src/lib/user-facing-data-error.ts`
+
+Cariler: API hatasında “Henüz cari kaydı yok” yerine “Canlı veri şu anda alınamıyor.”
+
+---
+
 ## Referanslar
 
 - `docs/development/PRODUCTION_DATA_MODE_SMOKE_REPORT.md`

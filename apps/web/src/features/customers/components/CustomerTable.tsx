@@ -17,6 +17,10 @@ export interface CustomerTableProps {
   onWhatsApp: (customerId: string) => void;
   /** No rows after filters (real portfolio only). */
   emptyFiltered?: boolean;
+  /** Live data could not be loaded (production mode). */
+  dataUnavailable?: boolean;
+  dataUnavailableTitle?: string;
+  dataUnavailableDetail?: string;
   onEmptyNew?: () => void;
   onEmptyImport?: () => void;
 }
@@ -29,6 +33,9 @@ export function CustomerTable({
   onQuickOperation,
   onWhatsApp,
   emptyFiltered,
+  dataUnavailable,
+  dataUnavailableTitle,
+  dataUnavailableDetail,
   onEmptyNew,
   onEmptyImport
 }: CustomerTableProps) {
@@ -45,7 +52,14 @@ export function CustomerTable({
       </div>
       <div className="hz-customers-list-body">
         {rows.length === 0 ? (
-          emptyFiltered ? (
+          dataUnavailable ? (
+            <div className="hz-customers-empty" role="alert">
+              <p className="hz-customers-empty-title">{dataUnavailableTitle ?? "Canlı veri şu anda alınamıyor."}</p>
+              <p className="hz-customers-empty-text">
+                {dataUnavailableDetail ?? "Bağlantı tekrar kurulduğunda bilgiler yenilenecek."}
+              </p>
+            </div>
+          ) : emptyFiltered ? (
             <div className="hz-customers-empty" role="status">
               <p className="hz-customers-empty-title">Filtrelere uygun cari yok</p>
               <p className="hz-customers-empty-text">Filtreleri sıfırlayarak veya arama metnini daraltarak tekrar deneyin.</p>

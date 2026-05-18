@@ -5,6 +5,8 @@ import { mapCustomerToRow } from "../mappers/map-customer-row";
 import { getCustomers, type CustomersQueryResult } from "../queries/get-customers";
 import { filterCustomers } from "../utils/filter-customers";
 import type { CustomerFilters } from "../schemas/customer-filter-schema";
+import { dataSourceConfig } from "../../../lib/data-source";
+import { MSG_DATA_UNAVAILABLE, MSG_DATA_WHEN_RECONNECTED } from "../../../lib/user-facing-data-error";
 
 const emptyData: CustomersQueryResult = {
   customers: [],
@@ -18,19 +20,23 @@ const emptyData: CustomersQueryResult = {
 export function useCustomersData(filters: CustomerFilters) {
   const [data, setData] = useState<CustomersQueryResult>(emptyData);
   const [loading, setLoading] = useState(true);
+  const [loadFailed, setLoadFailed] = useState(false);
 
   useEffect(() => {
     let mounted = true;
 
+    setLoadFailed(false);
     getCustomers()
       .then((result) => {
         if (mounted) {
           setData(result);
+          setLoadFailed(false);
         }
       })
       .catch(() => {
         if (mounted) {
           setData(emptyData);
+          setLoadFailed(!dataSourceConfig.useDemoData);
         }
       })
       .finally(() => {
@@ -65,6 +71,9 @@ export function useCustomersData(filters: CustomerFilters) {
 
   return {
     loading,
+    loadFailed,
+    loadUnavailableTitle: MSG_DATA_UNAVAILABLE,
+    loadUnavailableDetail: MSG_DATA_WHEN_RECONNECTED,
     data,
     customers: data.customers,
     filteredCustomers,

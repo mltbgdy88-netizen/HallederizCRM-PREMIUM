@@ -382,7 +382,7 @@ export function ApprovalInboxShell() {
         <div>
           <p className="hz-approvals-inbox-eyebrow">Operatör çalışma alanı</p>
           <h1 className="hz-approvals-inbox-title">Onaylar</h1>
-          <p className="hz-approvals-inbox-subtitle">Onay gelen kutusu; operatör kararları, worker ve outbox sinyalleri.</p>
+          <p className="hz-approvals-inbox-subtitle">Onay gelen kutusu; bekleyen kararlar ve işlem durumu özeti.</p>
           <p className="hz-approvals-inbox-top-links">
             <Link href="/onaylar/kurallar" className="hz-approvals-inbox-policy-link">
               Politika matrisi
@@ -415,13 +415,13 @@ export function ApprovalInboxShell() {
         <span>Reddedilen {stats.rejected}</span>
       </div>
 
-      <div className="hz-approvals-worker-strip" aria-label="Worker ve güvenlik özeti">
+      <div className="hz-approvals-worker-strip" aria-label="İşlem servisi ve güvenlik özeti">
         <div className="hz-approvals-worker-card">
-          <h4>Worker health</h4>
+          <h4>İşlem servisi</h4>
           <p>{summarizeWorkerHealth(workerHealth)}</p>
         </div>
         <div className="hz-approvals-worker-card">
-          <h4>Production safety / DLQ</h4>
+          <h4>Güvenlik özeti</h4>
           <p>{workerSafety?.productionSafety?.labels?.join(" · ") || summarizeWorkerHealth(workerSafety)}</p>
           <p className="hz-approvals-inbox-muted">{dlqSummary}</p>
         </div>

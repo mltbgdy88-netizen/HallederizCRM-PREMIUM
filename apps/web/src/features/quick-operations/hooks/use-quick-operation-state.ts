@@ -171,7 +171,7 @@ const fallbackSource: SourceOption = {
 };
 
 /** Tabloya eklenen boş satır — ürün seçilene kadar sıfır/boş değerler */
-function createEmptyLine(): QuickOperationLine {
+export function createEmptyQuickOperationLine(): QuickOperationLine {
   return {
     id: `line_empty_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`,
     productCode: "",
@@ -254,6 +254,38 @@ export function seedQuickOperationLines(): QuickOperationLine[] {
       rackCode: "E-05"
     })
   ];
+}
+
+export function initialQuickOperationLines(): QuickOperationLine[] {
+  if (dataSourceConfig.useDemoData) {
+    return seedQuickOperationLines();
+  }
+  return [createEmptyQuickOperationLine()];
+}
+
+export type QuickOperationWorkflowTabId = "order" | "payment" | "price" | "delivery" | "document" | "return";
+
+export function defaultQuickOperationLinesForTab(tab: QuickOperationWorkflowTabId): QuickOperationLine[] {
+  if (!dataSourceConfig.useDemoData) {
+    if (tab === "payment" || tab === "document" || tab === "delivery" || tab === "return") {
+      return [];
+    }
+    return [createEmptyQuickOperationLine()];
+  }
+  const full = seedQuickOperationLines();
+  switch (tab) {
+    case "order":
+      return full;
+    case "price":
+      return full.slice(0, 3);
+    case "payment":
+    case "document":
+    case "delivery":
+    case "return":
+      return [];
+    default:
+      return full;
+  }
 }
 
 export function useQuickOperationState(options?: {
@@ -376,7 +408,7 @@ export function useQuickOperationState(options?: {
   };
 
   const addEmptyLine = () => {
-    const nextLine = createEmptyLine();
+    const nextLine = createEmptyQuickOperationLine();
     setSubmittedImpacts(null);
     setSideActions(null);
     setLines((current) => [...current, nextLine]);
@@ -525,7 +557,7 @@ export function useQuickOperationState(options?: {
     setSideActions(null);
     setSubmitLinks({ showApprovalsLink: false });
     setNotice(null);
-    setLines(seedQuickOperationLines());
+    setLines(initialQuickOperationLines());
     setCustomerId(catalogCustomers[0]?.id ?? fallbackCustomer.id);
     setOperationTypeState("sale_order");
     setOperationNote("");

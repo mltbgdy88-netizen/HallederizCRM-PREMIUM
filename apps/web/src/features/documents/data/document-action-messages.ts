@@ -25,4 +25,6 @@ export const MSG_DOC_PRINT_QUEUE = "Yazdırma işi kuyruğa alındı.";
 
 export const MSG_DOC_NOT_FOUND = "Belge kaydı bulunamadı.";
 
+export const MSG_DOC_LIST_UNAVAILABLE = "Canlı veri şu anda alınamıyor.";
+
 export const MSG_DOC_CUSTOMER_PREVIEW_MISSING = "Bu cari için belge önizlemesi henüz hazırlanmadı.";
