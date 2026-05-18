@@ -6,6 +6,7 @@ import { dataSourceConfig, sdk } from "../../../lib/data-source";
 import { getCustomerById } from "../../customers/queries/customer-mock-data";
 import { getWhatsAppConversationById, getWhatsAppConversations } from "../queries/whatsapp-mock-data";
 import { buildWhatsAppApiPageDetail, type WhatsAppPageDetail } from "../utils/build-whatsapp-api-page-detail";
+import { mapWhatsAppActionError, mapWhatsAppDetailError } from "../utils/whatsapp-action-feedback";
 
 function pickConversationId(list: WhatsAppConversation[], customerId: string | null | undefined, useDemo: boolean): string {
   if (customerId) {
@@ -47,9 +48,9 @@ export function useWhatsAppInbox(initialCustomerId?: string | null) {
       .then((res) => {
         setApiList(res.items ?? []);
       })
-      .catch((e: Error) => {
+      .catch((error: unknown) => {
         setApiList([]);
-        setListError(e.message ?? "Konuşma listesi alınamadı");
+        setListError(mapWhatsAppActionError(error));
       })
       .finally(() => {
         setListLoading(false);
@@ -64,8 +65,15 @@ export function useWhatsAppInbox(initialCustomerId?: string | null) {
     if (useDemo || !apiList.length) {
       return;
     }
-    setSelectedId((cur) => (cur && apiList.some((c) => c.id === cur) ? cur : apiList[0]!.id));
-  }, [useDemo, apiList]);
+    const pool = initialCustomerId
+      ? apiList.filter((item) => item.relatedCustomerId === initialCustomerId)
+      : apiList;
+    if (!pool.length) {
+      setSelectedId("");
+      return;
+    }
+    setSelectedId((cur) => (cur && pool.some((c) => c.id === cur) ? cur : pool[0]!.id));
+  }, [useDemo, apiList, initialCustomerId]);
 
   useEffect(() => {
     if (!initialCustomerId) {
@@ -74,8 +82,10 @@ export function useWhatsAppInbox(initialCustomerId?: string | null) {
     const match = conversations.find((item) => item.relatedCustomerId === initialCustomerId);
     if (match) {
       setSelectedId(match.id);
+    } else if (!useDemo) {
+      setSelectedId("");
     }
-  }, [initialCustomerId, conversations]);
+  }, [initialCustomerId, conversations, useDemo]);
 
   useEffect(() => {
     if (useDemo || !selectedId) {
@@ -94,15 +104,15 @@ export function useWhatsAppInbox(initialCustomerId?: string | null) {
         const bundle = res.item;
         if (!bundle?.conversation) {
           setApiMessages([]);
-          setDetailError("Konuşma bulunamadı");
+          setDetailError(mapWhatsAppDetailError(new Error("not_found")));
           return;
         }
         setApiMessages(bundle.messages ?? []);
       })
-      .catch((e: Error) => {
+      .catch((error: unknown) => {
         if (!cancelled) {
           setApiMessages([]);
-          setDetailError(e.message ?? "Konuşma detayı alınamadı");
+          setDetailError(mapWhatsAppDetailError(error));
         }
       })
       .finally(() => {
@@ -142,8 +152,7 @@ export function useWhatsAppInbox(initialCustomerId?: string | null) {
     if (!initialCustomerId) {
       return conversations;
     }
-    const scoped = conversations.filter((item) => item.relatedCustomerId === initialCustomerId);
-    return scoped.length ? scoped : conversations;
+    return conversations.filter((item) => item.relatedCustomerId === initialCustomerId);
   }, [conversations, initialCustomerId]);
 
   return {

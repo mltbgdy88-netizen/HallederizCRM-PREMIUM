@@ -67,13 +67,14 @@ const checks = [
     description: "Arsiv demo ve canli olmayan aksiyon mesajlari"
   },
   {
-    file: "apps/web/src/features/whatsapp/components/WhatsAppPage.tsx",
-    patterns: [
-      "WhatsApp bağlantısı henüz canlı kullanıma bağlı değil",
-      "Mesaj taslağı hazırlandı; gönderim yapılmadı",
-      "initialCustomerId"
-    ],
+    file: "apps/web/src/features/whatsapp/data/whatsapp-action-messages.ts",
+    patterns: ["MSG_WA_CONNECTION_NOT_LIVE", "MSG_WA_PREVIEW_SEND", "MSG_WA_CUSTOMER_HISTORY_MISSING"],
     description: "WhatsApp baglanti ve taslak guvenligi"
+  },
+  {
+    file: "apps/web/src/features/whatsapp/components/WhatsAppPage.tsx",
+    patterns: ["initialCustomerId", "resolveCustomerEmptyMessage"],
+    description: "WhatsApp cari baglami ve bos durum"
   },
   {
     file: "apps/web/src/features/orders/components/OrderDetailPage.tsx",
