@@ -44,7 +44,7 @@ const checks = [
   },
   {
     file: "apps/web/src/features/payments/components/PaymentCreateHub.tsx",
-    patterns: ["Tahsilat kaydı henüz canlı kullanıma bağlı değil", "buildQuickOpHref", "Tahsilat"],
+    patterns: ["Gerçek kayıt için onay ve işlem kuyruğu bağlantısı gerekir", "buildQuickOpHref", "Tahsilat"],
     description: "Yeni tahsilat Hızlı İşlem hub"
   },
   {
