@@ -1,8 +1,10 @@
 import type { Customer, CustomerAccount, Product } from "@hallederiz/types";
 import { customers as demoCatalogCustomers, getCustomerAccount } from "../../../demo/customers";
 import { stockCatalog } from "../../../demo";
-import { dataSourceConfig, sdk } from "../../../lib/data-source";
+import { dataSourceConfig } from "../../../lib/data-source";
 import { CUSTOMERS_PORTFOLIO_DEMO_ROWS } from "../../customers/data/customers-demo-rows";
+import { isCustomerFinanceLinked } from "../../customers/utils/customer-finance";
+import { fetchCustomerAccountSummary } from "../../customers/utils/customer-finance-loader";
 import { getCustomers } from "../../customers/queries/get-customers";
 import type { QuickOperationCustomer, QuickOperationLine } from "../types";
 
@@ -95,19 +97,8 @@ async function loadProductionQuickOperationCustomers(): Promise<QuickOperationCu
 
   const mapped = await Promise.all(
     customers.map(async (customer) => {
-      try {
-        const accountResponse = await sdk.customers.accountSummary(customer.id);
-        const account = accountResponse.item ?? null;
-        const financeLinked = Boolean(
-          account &&
-            (typeof account.balance === "number" ||
-              typeof account.overdueAmount === "number" ||
-              typeof account.creditLimit === "number")
-        );
-        return mapCatalogCustomer(customer, account, financeLinked);
-      } catch {
-        return mapCatalogCustomer(customer, null, false);
-      }
+      const account = await fetchCustomerAccountSummary(customer.id);
+      return mapCatalogCustomer(customer, account, isCustomerFinanceLinked(account));
     })
   );
 

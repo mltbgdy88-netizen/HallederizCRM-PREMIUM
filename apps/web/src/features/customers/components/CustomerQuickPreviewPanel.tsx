@@ -325,7 +325,7 @@ export function CustomerQuickPreviewPanel({
 
         <section className="hz-customers-side-card">
           <h3 className="hz-customers-side-card-title">Finans özeti</h3>
-          <p className="hz-customers-muted-small">Finans özeti henüz bağlı değil. Hesap özeti API bağlantısı tamamlanınca burada görünür.</p>
+          <p className="hz-customers-muted-small">Finans özeti henüz bağlı değil.</p>
         </section>
 
         <section className="hz-customers-side-card">

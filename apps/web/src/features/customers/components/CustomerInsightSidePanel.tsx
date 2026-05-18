@@ -10,7 +10,7 @@ export function CustomerInsightSidePanel({ customer, account }: { customer: Cust
         <h3>AI ve risk paneli</h3>
         <ul className="hz-side-list hz-margin-top-sm">
           <li>AI önerisi: Finans özeti bağlandığında detaylı öneri üretilecek.</li>
-          <li>Tahsilat uyarısı: Vade ve gecikme bilgisi hesap özeti API ile gelecek.</li>
+          <li>Tahsilat uyarısı: Vade ve gecikme bilgisi hesap özeti bağlandığında gösterilir.</li>
           <li>Müşteri risk notu: {risk.description}</li>
           <li>Fiyat grubu: {customer.pricingProfile.priceSlotLabelSnapshot ?? `Slot ${customer.pricingProfile.selectedPriceSlotNo}`}</li>
         </ul>
