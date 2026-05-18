@@ -105,6 +105,22 @@ const checks = [
     file: "apps/web/src/features/ai/components/AIAssistantPage.tsx",
     patterns: ["/ai/onaylar", "/ai/icgoruler"],
     description: "AI merkezi onay ve icgoru gecisleri"
+  },
+  {
+    file: "apps/web/app/(platform)/panel/page.tsx",
+    patterns: ['redirect("/dashboard")'],
+    description: "Panel rotasi dashboard yonlendirmesi"
+  },
+  {
+    file: "apps/web/src/features/dashboard/components/DashboardHomePage.tsx",
+    patterns: [
+      "hz-dash-preview-band",
+      "Örnek veri modu: KPI",
+      "/teklifler/yeni",
+      "/tahsilatlar/yeni",
+      "Bağlantı bekleniyor"
+    ],
+    description: "Dashboard onizleme ve hizli aksiyonlar"
   }
 ];
 
