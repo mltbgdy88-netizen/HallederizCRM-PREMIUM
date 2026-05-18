@@ -1,5 +1,6 @@
 import { calculateCustomerRiskState, resolveCustomerDisplayType } from "@hallederiz/domain";
 import type { Customer, CustomerAccount } from "@hallederiz/types";
+import { isCustomerFinanceLinked } from "../utils/customer-finance";
 
 export interface CustomerRow {
   customerId: string;
@@ -56,7 +57,7 @@ export function mapCustomerToRow(customer: Customer, account: CustomerAccount | 
   const priceGroupLabel = customer.pricingProfile.priceSlotLabelSnapshot ?? `Slot ${customer.pricingProfile.selectedPriceSlotNo}`;
   const lastOrderLabel = customer.lastOrderAt ? new Date(customer.lastOrderAt).toLocaleDateString("tr-TR") : "—";
 
-  if (!account) {
+  if (!isCustomerFinanceLinked(account)) {
     return {
       customerId: customer.id,
       code: customer.code,

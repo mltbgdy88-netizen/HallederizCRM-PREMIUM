@@ -91,13 +91,22 @@ export function CustomersPage() {
         priceGroupCount: m.uniquePriceGroupCount
       };
     }
+    const hasFinanceSummary = data.accounts.length > 0;
+    const uniquePriceGroups = new Set(
+      data.customers
+        .map((c) => c.pricingProfile?.priceSlotLabelSnapshot?.trim())
+        .filter((label): label is string => Boolean(label))
+    );
+
     return {
       totalCustomers: data.customers.length,
-      openBalanceTry: data.accounts.reduce((total, account) => total + Math.max(account.balance, 0), 0),
+      openBalanceTry: hasFinanceSummary
+        ? data.accounts.reduce((total, account) => total + Math.max(account.balance, 0), 0)
+        : null,
       highRiskCount: data.customers.filter((c) => c.riskLevel === "high" || c.riskLevel === "blocked").length,
       waMatchCount: data.customers.filter((c) => c.whatsappMatched).length,
-      overdueCount: data.accounts.filter((a) => a.overdueAmount > 0).length,
-      priceGroupCount: data.priceSlots.filter((s) => s.active).length
+      overdueCount: hasFinanceSummary ? data.accounts.filter((a) => a.overdueAmount > 0).length : null,
+      priceGroupCount: uniquePriceGroups.size
     };
   }, [usingDemoFallback, displayRows, data.customers, data.accounts, data.priceSlots]);
 
@@ -188,7 +197,9 @@ export function CustomersPage() {
               </span>
               <div>
                 <span className="hz-customers-kpi-label">Açık bakiye</span>
-                <span className="hz-customers-kpi-value hz-customers-kpi-value--money">{formatKpiOpenBalanceTry(kpiDisplay.openBalanceTry)}</span>
+                <span className="hz-customers-kpi-value hz-customers-kpi-value--money">
+                  {kpiDisplay.openBalanceTry === null ? "—" : formatKpiOpenBalanceTry(kpiDisplay.openBalanceTry)}
+                </span>
               </div>
             </div>
             <div className="hz-customers-kpi hz-customers-kpi--danger">
@@ -215,7 +226,7 @@ export function CustomersPage() {
               </span>
               <div>
                 <span className="hz-customers-kpi-label">Vadesi geçen</span>
-                <span className="hz-customers-kpi-value">{kpiDisplay.overdueCount}</span>
+                <span className="hz-customers-kpi-value">{kpiDisplay.overdueCount === null ? "—" : kpiDisplay.overdueCount}</span>
               </div>
             </div>
             <div className="hz-customers-kpi hz-customers-kpi--violet">

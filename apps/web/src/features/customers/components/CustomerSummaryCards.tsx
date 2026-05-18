@@ -9,7 +9,7 @@ export function CustomerSummaryCards({ customer, account }: { customer: Customer
     return (
       <section className="hz-metric-grid">
         <p className="hz-customers-detail-finance-banner" role="note">
-          Finans özeti henüz bağlı değil; bakiye, açık teklif ve sipariş sayıları API bağlandığında gösterilir.
+          Finans özeti henüz bağlı değil; bakiye, açık teklif ve sipariş sayıları hesap özeti bağlandığında gösterilir.
         </p>
         <MetricCard title="Açık bakiye" value="—" detail="Hesap özeti bekleniyor" tone="info" />
         <MetricCard title="Açık teklif" value="—" detail="Hesap özeti bekleniyor" tone="info" />

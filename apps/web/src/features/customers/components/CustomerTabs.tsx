@@ -87,7 +87,7 @@ export function CustomerTabs({
             {ledgerEntries.length > 0 ? <MiniLedgerTable entries={ledgerEntries.slice(0, 3)} /> : <TabEmptyState title="Hareket özeti" message="Bu cari için henüz hesap hareketi kaydı yok." />}
           </div>
         ) : (
-          <TabEmptyState title="Hesap özeti bağlı değil" message="Finans özeti API uçları tamamlandığında bakiye, limit ve hareket özeti burada görünecek." />
+          <TabEmptyState title="Hesap özeti bağlı değil" message="Finans özeti henüz bağlı değil. Bakiye, limit ve hareket özeti bağlandığında burada görünecek." />
         )
       ) : null}
 
@@ -118,14 +118,14 @@ export function CustomerTabs({
       ) : null}
 
       {activeTab === "Siparişler" ? (
-        <TabEmptyState title="Siparişler" message="Bu cariye bağlı sipariş listesi modül API bağlantısı ile doldurulacak." actionsHint={<Link href={`/siparisler/yeni?customer=${customer.id}`} className="hz-btn hz-btn-secondary hz-toolbar-btn">Sipariş oluştur</Link>} />
+        <TabEmptyState title="Siparişler" message="Bu cariye bağlı sipariş kaydı henüz listelenmiyor." actionsHint={<Link href={`/siparisler/yeni?customer=${customer.id}`} className="hz-btn hz-btn-secondary hz-toolbar-btn">Sipariş oluştur</Link>} />
       ) : null}
 
       {activeTab === "Tahsilatlar" ? (
-        <TabEmptyState title="Tahsilatlar" message="Bu cariye bağlı tahsilat kayıtları modül API bağlantısı ile doldurulacak." actionsHint={<Link href={`/tahsilatlar/yeni?customer=${customer.id}`} className="hz-btn hz-btn-secondary hz-toolbar-btn">Tahsilat gir</Link>} />
+        <TabEmptyState title="Tahsilatlar" message="Bu cariye bağlı tahsilat kaydı henüz listelenmiyor." actionsHint={<Link href={`/tahsilatlar/yeni?customer=${customer.id}`} className="hz-btn hz-btn-secondary hz-toolbar-btn">Tahsilat gir</Link>} />
       ) : null}
 
-      {activeTab === "Teslimatlar" ? <TabEmptyState title="Teslimatlar" message="Bu cariye bağlı teslimat kayıtları modül API bağlantısı ile doldurulacak." /> : null}
+      {activeTab === "Teslimatlar" ? <TabEmptyState title="Teslimatlar" message="Bu cariye bağlı teslimat kaydı henüz listelenmiyor." /> : null}
 
       {activeTab === "Belgeler" ? (
         <TabEmptyState title="Belgeler" message="Ekstre ve belge geçmişi belgeler modülünden görüntülenir." actionsHint={<Link href={`/belgeler?customer=${customer.id}&type=statement_pdf`} className="hz-btn hz-btn-secondary hz-toolbar-btn">Ekstre taslağı</Link>} />
@@ -149,7 +149,7 @@ export function CustomerTabs({
             </table>
           </div>
         ) : (
-          <TabEmptyState title="Yetkili kişi yok" message="Bu cari için kayıtlı yetkili kişi bulunmuyor; iletişim API bağlandığında listelenecek." />
+          <TabEmptyState title="Yetkili kişi yok" message="Bu cari için kayıtlı yetkili kişi bulunmuyor." />
         )
       ) : null}
 
@@ -164,7 +164,7 @@ export function CustomerTabs({
             ))}
           </div>
         ) : (
-          <TabEmptyState title="Adres kaydı yok" message="Kart üzerindeki ana adres gösterilir; ek adresler API bağlandığında listelenecek." />
+          <TabEmptyState title="Adres kaydı yok" message="Kart üzerindeki ana adres gösterilir; ek adres kaydı bulunmuyor." />
         )
       ) : null}
     </section>

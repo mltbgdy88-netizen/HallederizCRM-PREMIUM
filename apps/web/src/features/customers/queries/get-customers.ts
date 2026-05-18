@@ -1,6 +1,7 @@
 import type { Customer, CustomerAccount, CustomerAddress, CustomerContact, CustomerLedgerEntry } from "@hallederiz/types";
 import { dataSourceConfig, sdk } from "../../../lib/data-source";
 import { isCustomersDemoRowId } from "../data/customers-demo-rows";
+import { loadProductionCustomerAccounts } from "../utils/customer-finance-loader";
 import {
   customerAccounts,
   customerAddresses,
@@ -43,11 +44,14 @@ const emptyProductionRelated = {
 
 export async function getCustomers(): Promise<CustomersQueryResult> {
   if (!dataSourceConfig.useDemoData) {
-    const [customersResponse] = await Promise.all([sdk.customers.list()]);
+    const customersResponse = await sdk.customers.list();
+    const customers = customersResponse.items ?? [];
+    const accounts = await loadProductionCustomerAccounts(customers);
 
     return {
-      customers: customersResponse.items,
-      ...emptyProductionRelated
+      customers,
+      ...emptyProductionRelated,
+      accounts
     };
   }
 
