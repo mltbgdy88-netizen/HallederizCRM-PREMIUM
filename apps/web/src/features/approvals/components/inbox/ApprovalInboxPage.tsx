@@ -4,7 +4,25 @@ import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { dataSourceConfig, sdk } from "../../../../lib/data-source";
 import { useToast } from "../../../../providers/toast-provider";
-import { executeApprovalMutation } from "../../mutations";
+import {
+  MSG_APPROVAL_DEMO_BAND,
+  MSG_APPROVAL_DETAIL_FAILED,
+  MSG_APPROVAL_EMPTY_FILTERED,
+  MSG_APPROVAL_EMPTY_FILTERED_HINT,
+  MSG_APPROVAL_EMPTY_LIST,
+  MSG_APPROVAL_LIVE_QUEUE_BAND,
+  MSG_APPROVAL_LIST_FAILED
+} from "../../data/approval-action-messages";
+import { approveApprovalMutation, executeApprovalMutation, rejectApprovalMutation } from "../../mutations";
+import {
+  canInboxApprove,
+  canInboxProcess,
+  canInboxReject,
+  inboxProcessDisabledReason,
+  mapApprovalActionError,
+  resolveApproveRejectToast,
+  resolveExecuteFeedback
+} from "../../utils/approval-action-feedback";
 import { ApprovalInboxEmpty, ApprovalInboxError, ApprovalInboxLoading } from "../ApprovalInboxStates";
 import { ApprovalInboxDetailPanel } from "./ApprovalInboxDetailPanel";
 import { ApprovalInboxHeader } from "./ApprovalInboxHeader";
@@ -31,7 +49,7 @@ export function ApprovalInboxPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [onlyCritical, setOnlyCritical] = useState(false);
   const [rows, setRows] = useState<ApprovalInboxRecord[]>([]);
-  const [actionPending, setActionPending] = useState<"approve" | "reject" | "review" | null>(null);
+  const [actionPending, setActionPending] = useState<"approve" | "reject" | "process" | null>(null);
   const [detailLoading, setDetailLoading] = useState(false);
   const [detailError, setDetailError] = useState<string | null>(null);
 
@@ -45,7 +63,7 @@ export function ApprovalInboxPage() {
       setPhase("ready");
     } catch (error) {
       setRows([]);
-      setErrorMessage(error instanceof Error ? error.message : "Onay listesi alınamadı.");
+      setErrorMessage(mapApprovalActionError(error) || MSG_APPROVAL_LIST_FAILED);
       setPhase("error");
     }
   }, []);
@@ -84,7 +102,7 @@ export function ApprovalInboxPage() {
       const mapped = mapApprovalToInboxRecord(detail.item, dataSourceConfig.userId);
       setRows((prev) => prev.map((item) => (item.id === mapped.id ? mapped : item)));
     } catch (error) {
-      setDetailError(error instanceof Error ? error.message : "Detay yüklenemedi.");
+      setDetailError(mapApprovalActionError(error) || MSG_APPROVAL_DETAIL_FAILED);
     } finally {
       setDetailLoading(false);
     }
@@ -115,24 +133,41 @@ export function ApprovalInboxPage() {
   };
 
   const runAction = useCallback(
-    async (kind: "approve" | "reject" | "review") => {
+    async (kind: "approve" | "reject" | "process") => {
       if (!selectedRecord || actionPending) return;
+      const approval = selectedRecord.raw;
+
+      if (kind === "approve" && !canInboxApprove(approval)) {
+        pushToast("Bu kayıt onaylanamaz.");
+        return;
+      }
+      if (kind === "reject" && !canInboxReject(approval)) {
+        pushToast("Bu kayıt reddedilemez.");
+        return;
+      }
+      if (kind === "process" && !canInboxProcess(approval)) {
+        pushToast(inboxProcessDisabledReason(approval) ?? "Bu kayıt işleme alınamaz.");
+        return;
+      }
+
       setActionPending(kind);
       try {
         if (kind === "approve") {
-          await sdk.approvals.approve(selectedRecord.id);
-          pushToast("Onay kaydı onaylandı.");
+          await approveApprovalMutation(selectedRecord.id);
+          pushToast(resolveApproveRejectToast("approve", dataSourceConfig.useDemoData));
         } else if (kind === "reject") {
-          await sdk.approvals.reject(selectedRecord.id);
-          pushToast("Onay kaydı reddedildi.");
+          await rejectApprovalMutation(selectedRecord.id);
+          pushToast(resolveApproveRejectToast("reject", dataSourceConfig.useDemoData));
+        } else if (dataSourceConfig.useDemoData) {
+          pushToast(resolveExecuteFeedback({ approval, execution: undefined }, { useDemoData: true }));
         } else {
-          await executeApprovalMutation(selectedRecord.id);
-          pushToast("Kayıt inceleme iş akışına gönderildi.");
+          const result = await executeApprovalMutation(selectedRecord.id);
+          pushToast(resolveExecuteFeedback(result, { useDemoData: false }));
         }
         await bootstrap();
         await refreshDetail();
       } catch (error) {
-        pushToast(error instanceof Error ? error.message : "İşlem tamamlanamadı.");
+        pushToast(mapApprovalActionError(error));
       } finally {
         setActionPending(null);
       }
@@ -140,7 +175,10 @@ export function ApprovalInboxPage() {
     [actionPending, bootstrap, pushToast, refreshDetail, selectedRecord]
   );
 
-  const listPhase: UiPhase = phase === "ready" && filteredRows.length === 0 ? "empty" : phase;
+  const listIsFilteredEmpty = phase === "ready" && rows.length > 0 && filteredRows.length === 0;
+  const listIsTrulyEmpty = phase === "ready" && rows.length === 0;
+  const listPhase: UiPhase =
+    phase === "ready" && (listIsFilteredEmpty || listIsTrulyEmpty) ? "empty" : phase;
 
   const pendingCount = useMemo(() => rows.filter((row) => row.status === "bekliyor").length, [rows]);
 
@@ -159,6 +197,15 @@ export function ApprovalInboxPage() {
             lastSyncLabel={new Intl.DateTimeFormat("tr-TR", { dateStyle: "short", timeStyle: "short" }).format(new Date())}
           />
           <ApprovalKpiCards rows={rows} />
+          {dataSourceConfig.useDemoData ? (
+            <p className="hz-approvals-inbox-preview-band" role="status">
+              {MSG_APPROVAL_DEMO_BAND}
+            </p>
+          ) : (
+            <p className="hz-approvals-inbox-preview-band" role="status">
+              {MSG_APPROVAL_LIVE_QUEUE_BAND}
+            </p>
+          )}
         </div>
         <div className="hz-approvals-inbox-desk-body">
           <ApprovalSidebar
@@ -180,8 +227,8 @@ export function ApprovalInboxPage() {
             ) : null}
             {listPhase === "empty" ? (
               <ApprovalInboxEmpty
-                title="Filtreye uygun onay yok"
-                description="Görünüm veya filtre kriterlerini değiştirin."
+                title={listIsTrulyEmpty ? MSG_APPROVAL_EMPTY_LIST : MSG_APPROVAL_EMPTY_FILTERED}
+                description={listIsTrulyEmpty ? undefined : MSG_APPROVAL_EMPTY_FILTERED_HINT}
               />
             ) : null}
             {listPhase === "ready" ? (
@@ -207,7 +254,7 @@ export function ApprovalInboxPage() {
             detailError={detailError}
             onApprove={() => void runAction("approve")}
             onReject={() => void runAction("reject")}
-            onSendToReview={() => void runAction("review")}
+            onProcess={() => void runAction("process")}
             onOpenFull={() => {
               if (!selectedRecord) return;
               router.push(`/onaylar/${selectedRecord.id}`);

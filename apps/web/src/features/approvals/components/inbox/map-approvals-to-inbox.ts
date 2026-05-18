@@ -1,4 +1,5 @@
 import type { Approval, ApprovalStatus, ApprovalType } from "@hallederiz/types";
+import { sanitizeUserFacingText } from "../../utils/approval-action-feedback";
 import type {
   ApprovalInboxCategory,
   ApprovalInboxPriority,
@@ -139,7 +140,7 @@ export function mapApprovalToInboxRecord(approval: Approval, currentUserId?: str
       slaDeadline: deadlineLabel
     },
     riskLevel: approval.status === "expired" ? "kritik" : undefined,
-    riskBullets: approval.riskNote ? [approval.riskNote] : [],
+    riskBullets: approval.riskNote ? [sanitizeUserFacingText(approval.riskNote)] : [],
     contextLinks: [{ label: `Varlık: ${approval.entityNo || approval.entityType}`, href: "/onaylar" }],
     timeline: [
       { id: `${approval.id}-created`, label: "Talep oluşturuldu", at: formatDate(approval.createdAt) },
@@ -147,7 +148,7 @@ export function mapApprovalToInboxRecord(approval: Approval, currentUserId?: str
     ],
     internalNote: {
       author: approval.decidedByName ?? "Sistem",
-      body: approval.riskNote || approval.policySnapshot.reason || "Ek not bulunmuyor.",
+      body: sanitizeUserFacingText(approval.riskNote || approval.policySnapshot.reason || "Ek not bulunmuyor."),
       at: formatDate(approval.decidedAt ?? approval.createdAt)
     },
     meta: {

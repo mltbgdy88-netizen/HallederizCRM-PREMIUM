@@ -289,36 +289,31 @@ export function validateRejectReason(reason: string): string | null {
 
 export function mapApprovalUiErrorMessage(error: ApprovalClientError): string {
   if (error.kind === "unauthorized") {
-    return error.message?.trim()
-      ? `Oturum sorunu (401): ${error.message}`
-      : "Oturum gecersiz veya suresi doldu (401). Lutfen tekrar giris yapin.";
+    return "Oturum süresi doldu. Tekrar giriş yapın.";
   }
   if (error.kind === "forbidden") {
-    return error.message?.trim()
-      ? `Yetki yok (403): ${error.message}`
-      : "Yetki reddedildi (403). Bu tenant veya rol icin onay API'si kapali olabilir.";
+    return "Bu işlem için yetkiniz yok.";
   }
   if (error.kind === "unsupported") {
-    return error.message || "Servis kullanilamiyor (503). Foundation/runtime veya persistence hazir degil.";
+    return "Onay servisi şu an kullanılamıyor. Lütfen daha sonra tekrar deneyin.";
   }
   if (error.kind === "not_found") {
-    return error.message || "Kaynak bulunamadi (404). Approval route yayinlanmiyor veya yanlis path.";
+    return "Onay kaydı bulunamadı.";
   }
   if (error.kind === "conflict") {
-    return (
-      error.message ||
-      "Cakisma (409). Kayit zaten islendi, durum uyusmuyor veya tekrarlanamaz islem; detay icin API mesajina bakin."
-    );
+    return "Kayıt zaten işlendi veya bu adım tekrarlanamaz.";
   }
   if (error.kind === "invalid_request") {
-    return error.message || "Gecersiz istek (400). Validasyon veya zorunlu alanlari kontrol edin.";
+    return "İstek geçersiz. Zorunlu alanları kontrol edin.";
   }
   if (error.kind === "network") {
-    return error.message?.trim()
-      ? `Ag / baglanti: ${error.message}`
-      : "Ag hatasi: Approval API'ye ulasilamadi (CORS, DNS, sunucu kapali veya zaman asimi).";
+    return "Bağlantı kurulamadı. Sunucuya erişilemiyor.";
   }
-  return error.message || "Bilinmeyen hata.";
+  const raw = error.message?.trim();
+  if (raw && !/api|mock|fallback|dispatcher|worker|outbox|mutation|execution|not_configured/i.test(raw)) {
+    return raw;
+  }
+  return "Onay verisi alınamadı.";
 }
 
 /** Aciklayici metin: aksiyonlar neden kapali (pending disi veya secim yok). */

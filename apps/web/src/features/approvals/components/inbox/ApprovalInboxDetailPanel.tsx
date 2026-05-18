@@ -2,6 +2,12 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
+import {
+  canInboxApprove,
+  canInboxProcess,
+  canInboxReject,
+  inboxProcessDisabledReason
+} from "../../utils/approval-action-feedback";
 import type { ApprovalInboxRecord } from "./types";
 import { PriorityBadge } from "./PriorityBadge";
 import { StatusBadge } from "./StatusBadge";
@@ -18,12 +24,12 @@ const RISK_LEVEL_LABELS: Record<NonNullable<ApprovalInboxRecord["riskLevel"]>, s
 
 type ApprovalInboxDetailPanelProps = {
   record: ApprovalInboxRecord | null;
-  actionPending: "approve" | "reject" | "review" | null;
+  actionPending: "approve" | "reject" | "process" | null;
   detailLoading: boolean;
   detailError: string | null;
   onApprove: () => void;
   onReject: () => void;
-  onSendToReview: () => void;
+  onProcess: () => void;
   onOpenFull: () => void;
 };
 
@@ -42,7 +48,7 @@ export function ApprovalInboxDetailPanel({
   detailError,
   onApprove,
   onReject,
-  onSendToReview,
+  onProcess,
   onOpenFull
 }: ApprovalInboxDetailPanelProps) {
   if (!record) {
@@ -55,6 +61,11 @@ export function ApprovalInboxDetailPanel({
   }
 
   const disabled = actionPending !== null;
+  const approval = record.raw;
+  const approveDisabled = disabled || !canInboxApprove(approval);
+  const rejectDisabled = disabled || !canInboxReject(approval);
+  const processDisabled = disabled || !canInboxProcess(approval);
+  const processHint = inboxProcessDisabledReason(approval);
   const contextLinks = contextLinksForPanel(record);
   const riskBullets = record.riskBullets.slice(0, MAX_RISK_BULLETS);
   const timelineSteps = record.timeline.slice(0, MAX_TIMELINE_STEPS);
@@ -162,9 +173,31 @@ export function ApprovalInboxDetailPanel({
 
       <footer className="hz-approvals-inbox-desk-detail-foot">
         <div className="hz-approvals-inbox-desk-detail-actions hz-approvals-inbox-desk-detail-actions--row" aria-label="Karar aksiyonları">
-          <button type="button" className="hz-approvals-inbox-desk-act hz-approvals-inbox-desk-act--success" disabled={disabled} onClick={onApprove}>Onayla</button>
-          <button type="button" className="hz-approvals-inbox-desk-act hz-approvals-inbox-desk-act--danger" disabled={disabled} onClick={onReject}>Reddet</button>
-          <button type="button" className="hz-approvals-inbox-desk-act hz-approvals-inbox-desk-act--info" disabled={disabled} onClick={onSendToReview}>İncelemeye Gönder</button>
+          <button
+            type="button"
+            className="hz-approvals-inbox-desk-act hz-approvals-inbox-desk-act--success"
+            disabled={approveDisabled}
+            onClick={onApprove}
+          >
+            Onayla
+          </button>
+          <button
+            type="button"
+            className="hz-approvals-inbox-desk-act hz-approvals-inbox-desk-act--danger"
+            disabled={rejectDisabled}
+            onClick={onReject}
+          >
+            Reddet
+          </button>
+          <button
+            type="button"
+            className="hz-approvals-inbox-desk-act hz-approvals-inbox-desk-act--info"
+            disabled={processDisabled}
+            title={processHint ?? undefined}
+            onClick={onProcess}
+          >
+            İşleme Al
+          </button>
           <button type="button" className="hz-approvals-inbox-desk-act hz-approvals-inbox-desk-act--outline" onClick={onOpenFull}>Tam Kaydı Aç</button>
         </div>
       </footer>
