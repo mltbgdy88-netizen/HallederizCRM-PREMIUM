@@ -1,0 +1,97 @@
+name: Smoke
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  smoke-static:
+    name: Navigation smoke (static)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Web typecheck
+        run: pnpm --filter @hallederiz/web typecheck
+
+      - name: Navigation smoke
+        run: pnpm smoke:navigation
+
+  smoke-api-offline:
+    name: API offline HTTP smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: API offline smoke
+        run: pnpm smoke:api-offline
+        env:
+          SMOKE_API_OFFLINE_PORT: "3197"
+
+  # Production data mode needs a live API (/health). Not available on default CI runners.
+  smoke-production-data:
+    name: Production data HTTP smoke (optional)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    if: github.event_name == 'workflow_dispatch'
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Production data smoke
+        run: pnpm smoke:production-data
+        env:
+          SMOKE_PRODUCTION_DATA_PORT: "3198"
+          NEXT_PUBLIC_API_BASE_URL: ${{ vars.SMOKE_API_BASE_URL || 'http://localhost:4000' }}
