@@ -4,7 +4,7 @@ import { LoadingState, MetricCard, PageHeader, Pagination, SplitContentLayout } 
 import type { Customer, Document, DocumentType } from "@hallederiz/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { dataSourceConfig, sdk } from "../../../lib/data-source";
+import { dataSourceConfig } from "../../../lib/data-source";
 import { useToast } from "../../../providers/toast-provider";
 import { dateLabel } from "../utils";
 import {
@@ -14,10 +14,16 @@ import {
   formatDocumentTemplateVersion,
   summarizeDocumentDeliveries
 } from "../utils/document-faz-f";
+import { MSG_DOC_DOWNLOAD_NOT_LIVE, MSG_DOC_PREVIEW_ONLY } from "../data/document-action-messages";
+import {
+  hasDownloadablePdf,
+  resolveDocumentsEmptyMessage,
+  resolveDemoActionToasts,
+  runDocumentLiveAction,
+  sanitizeDocumentUserText
+} from "../utils/document-action-feedback";
 import { getDocuments } from "../queries/get-documents";
 import { getDocumentDeliveryStatusLabel, getDocumentTypeLabel } from "../queries/document-mock-data";
-
-const PREVIEW_ONLY_TOAST = "Belge önizlemesi hazırlanır; gönderim yapılmaz.";
 
 export function DocumentFilterBar() {
   return (
@@ -73,12 +79,14 @@ export function DocumentTable({
   documents,
   customers,
   selectedId,
-  onSelect
+  onSelect,
+  emptyMessage
 }: {
   documents: Document[];
   customers: Customer[];
   selectedId: string | null;
   onSelect: (id: string) => void;
+  emptyMessage: string;
 }) {
   const router = useRouter();
   return (
@@ -136,7 +144,7 @@ export function DocumentTable({
             {documents.length === 0 ? (
               <tr>
                 <td colSpan={7}>
-                  <div className="table-empty">Filtrelere uygun belge bulunamadı.</div>
+                  <div className="table-empty">{emptyMessage}</div>
                 </td>
               </tr>
             ) : null}
@@ -173,7 +181,7 @@ export function DocumentPreviewPanel({ document }: { document: Document | null }
           Önizleme:{" "}
           {dataSourceConfig.useDemoData
             ? "Şablon önizlemesi gösterilir; canlı PDF üretimi henüz bağlı değildir."
-            : document.previewText}
+            : sanitizeDocumentUserText(document.previewText)}
         </li>
       </ul>
       {deliveries.length > 0 ? (
@@ -229,37 +237,33 @@ export function DocumentActionsBar({ document }: { document: Document | null }) 
   const router = useRouter();
   const { pushToast } = useToast();
 
-  const previewOnly = (detail: string) => {
-    pushToast(detail);
-    pushToast(PREVIEW_ONLY_TOAST);
-  };
-
-  const runLiveAction = async (action: "sendWhatsApp" | "sendEmail" | "queueSave" | "queuePrint" | "regenerate") => {
+  const runAction = async (action: "sendWhatsApp" | "sendEmail" | "queueSave" | "queuePrint" | "regenerate") => {
     if (!document) {
       return;
     }
-    if (dataSourceConfig.useDemoData) {
-      if (action === "sendWhatsApp") {
-        previewOnly("WhatsApp gönderimi için bağlantı tamamlanmalıdır.");
-        return;
-      }
-      if (action === "sendEmail") {
-        previewOnly("E-posta gönderimi henüz canlı kullanıma bağlı değil.");
-        return;
-      }
-      if (action === "regenerate") {
-        pushToast("PDF üretimi henüz canlı kullanıma bağlı değil.");
-        pushToast(PREVIEW_ONLY_TOAST);
-        return;
-      }
-      previewOnly("Belge kuyruğu işlemi henüz canlı kullanıma bağlı değil.");
+    const outcome = await runDocumentLiveAction(action, document.id, {
+      useDemoData: dataSourceConfig.useDemoData
+    });
+    for (const toast of outcome.toasts) {
+      pushToast(toast);
+    }
+  };
+
+  const runDownload = () => {
+    if (!document) {
       return;
     }
-    if (action === "sendWhatsApp") await sdk.documents.sendWhatsApp(document.id);
-    if (action === "sendEmail") await sdk.documents.sendEmail(document.id);
-    if (action === "queueSave") await sdk.documents.queueSave(document.id);
-    if (action === "queuePrint") await sdk.documents.queuePrint(document.id);
-    if (action === "regenerate") await sdk.documents.regenerate(document.id);
+    if (hasDownloadablePdf(document)) {
+      return;
+    }
+    if (dataSourceConfig.useDemoData) {
+      for (const toast of resolveDemoActionToasts("download")) {
+        pushToast(toast);
+      }
+      return;
+    }
+    pushToast(MSG_DOC_DOWNLOAD_NOT_LIVE);
+    pushToast(MSG_DOC_PREVIEW_ONLY);
   };
 
   return (
@@ -274,30 +278,27 @@ export function DocumentActionsBar({ document }: { document: Document | null }) 
       <button
         className="hz-btn hz-btn-secondary hz-toolbar-btn"
         type="button"
-        onClick={() => void runLiveAction("sendWhatsApp")}
+        onClick={() => void runAction("sendWhatsApp")}
       >
         WhatsApp&apos;tan gönder
       </button>
-      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void runLiveAction("sendEmail")}>
+      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void runAction("sendEmail")}>
         E-posta
       </button>
       <button
         className="hz-btn hz-btn-secondary hz-toolbar-btn"
         type="button"
-        onClick={() => {
-          pushToast("PDF üretimi henüz canlı kullanıma bağlı değil.");
-          pushToast(PREVIEW_ONLY_TOAST);
-        }}
+        onClick={() => runDownload()}
       >
         İndir
       </button>
-      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void runLiveAction("queueSave")}>
+      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void runAction("queueSave")}>
         Arşive al
       </button>
-      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void runLiveAction("queuePrint")}>
+      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void runAction("queuePrint")}>
         Yazdırma kuyruğu
       </button>
-      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void runLiveAction("regenerate")}>
+      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void runAction("regenerate")}>
         PDF yenile
       </button>
       <button
@@ -422,6 +423,11 @@ export function DocumentsPage() {
     [customers, customerParam]
   );
   const contextBanner = resolveContextBanner(customerParam, typeParam, contextCustomerName);
+  const emptyMessage = resolveDocumentsEmptyMessage({
+    useDemoData: dataSourceConfig.useDemoData,
+    customerId: customerParam,
+    typeFilter: typeParam
+  });
 
   return (
     <div className="hz-page-stack hz-doc-page">
@@ -468,6 +474,7 @@ export function DocumentsPage() {
                 customers={customers}
                 selectedId={selected?.id ?? null}
                 onSelect={setSelectedId}
+                emptyMessage={emptyMessage}
               />
               <Pagination totalItems={filteredDocuments.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
             </>
