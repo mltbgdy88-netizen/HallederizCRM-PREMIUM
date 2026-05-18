@@ -58,6 +58,17 @@ $env:SMOKE_PRODUCTION_DATA_REQUIRED="1"
 pnpm smoke:production-data
 ```
 
+### Production-data smoke doğrulama notları
+
+| Koşul | Davranış |
+|--------|----------|
+| Yerel API açık (`SMOKE_API_BASE_URL` / `localhost:4000`, `/health` 200) | `pnpm smoke:production-data` → **24/24** route HTTP kontrolü geçer |
+| API kapalı | Varsayılan: uyarı + **exit 0** (skip); CI’ı kırmaz |
+| Zorunlu fail | `SMOKE_PRODUCTION_DATA_REQUIRED=1` → API yokken **exit 1** |
+| `pnpm smoke:all` | Production-data adımı aynı kurallarla çalışır; API açıkken tam suite geçer |
+
+Health check `SMOKE_API_BASE_URL` kullanır; shell’de kalmış `NEXT_PUBLIC_API_BASE_URL=http://localhost:4999` (offline) ile karışmaz.
+
 ### 3. API offline (gerçek API gerekmez)
 
 ```powershell
