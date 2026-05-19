@@ -190,6 +190,17 @@ Cariler: API hatasında “Henüz cari kaydı yok” yerine “Canlı veri şu a
 
 ---
 
+## Follow-up fixes (`fix/whatsapp-api-offline-error-copy`)
+
+| Bulgu | Durum |
+|-------|--------|
+| `/whatsapp?customer=…` API offline iken **Failed to fetch** uyarısı | Düzeltildi — `mapWhatsAppInboxError` + `isOfflineLikeError` |
+| Oturum tam sayfa yenileme (direct URL) | PR **#111** (`fix/auth-hydrate-refresh-session`) — bu PR kapsamı dışı |
+
+WhatsApp liste hatası: “WhatsApp konuşmaları şu anda alınamıyor.” + “Bağlantı tekrar kurulduğunda iletişim geçmişi yenilenecek.”
+
+---
+
 ## Referanslar
 
 - `docs/development/PRODUCTION_DATA_MODE_SMOKE_REPORT.md`

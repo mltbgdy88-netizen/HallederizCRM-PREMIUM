@@ -1,7 +1,7 @@
 "use client";
 
 import { useRouter, useSearchParams } from "next/navigation";
-import { FormEvent, useEffect, useState } from "react";
+import { FormEvent, Suspense, useEffect, useState } from "react";
 import { useAuth } from "../../src/providers/auth-provider";
 
 function resolvePostLoginPath(nextParam: string | null): string {
@@ -14,7 +14,7 @@ function resolvePostLoginPath(nextParam: string | null): string {
   return nextParam;
 }
 
-export default function LoginPage() {
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { state, login } = useAuth();
@@ -82,5 +82,21 @@ export default function LoginPage() {
         </form>
       </section>
     </main>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense
+      fallback={
+        <main className="login-page">
+          <section className="login-card">
+            <p className="muted">Oturum bilgileri kontrol ediliyor.</p>
+          </section>
+        </main>
+      }
+    >
+      <LoginPageContent />
+    </Suspense>
   );
 }

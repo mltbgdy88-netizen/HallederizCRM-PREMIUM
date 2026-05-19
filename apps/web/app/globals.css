@@ -9875,6 +9875,14 @@ select.hz-qop-summary-input {
   color: var(--hz-wa-muted);
 }
 
+.hz-wa-empty-sub {
+  margin: -12px 24px 0;
+  padding: 0 0 16px;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--hz-wa-muted);
+}
+
 .hz-wa-shell {
   flex: 1;
   min-height: 0;
