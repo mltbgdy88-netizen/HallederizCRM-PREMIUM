@@ -1,13 +1,15 @@
+import { containsTechnicalUserText, isOfflineLikeError } from "../../../lib/user-facing-data-error";
 import {
   MSG_WA_CONNECTION_NOT_LIVE,
   MSG_WA_CONVERSATION_NOT_FOUND,
   MSG_WA_CUSTOMER_HISTORY_MISSING,
   MSG_WA_DETAIL_FAILED,
+  MSG_WA_INBOX_UNAVAILABLE,
   MSG_WA_LIST_FAILED
 } from "../data/whatsapp-action-messages";
 
 const TECHNICAL_PATTERN =
-  /api|mock|fallback|dispatcher|worker|outbox|mutation|execution|not_configured|webhook|adapter|queue|gateway/i;
+  /api|mock|fallback|dispatcher|worker|outbox|mutation|execution|not_configured|webhook|adapter|queue|gateway|fetch failed|failed to fetch|networkerror|econnrefused|network error/i;
 
 const FALSE_SUCCESS_PATTERN =
   /\bgönderildi\b|\bgonderildi\b|\biletildi\b|\bbağlandı\b|\bbaglandi\b|\baktif edildi\b|\bolu[sş]turuldu\b/i;
@@ -52,7 +54,18 @@ function readHttpError(error: unknown): { status: number; message: string } | nu
   return null;
 }
 
-export function mapWhatsAppActionError(error: unknown): string {
+export function mapWhatsAppInboxError(error: unknown): string {
+  return mapWhatsAppActionError(error, MSG_WA_INBOX_UNAVAILABLE);
+}
+
+export function mapWhatsAppActionError(
+  error: unknown,
+  offlineFallback: string = MSG_WA_INBOX_UNAVAILABLE
+): string {
+  if (isOfflineLikeError(error)) {
+    return offlineFallback;
+  }
+
   const httpError = readHttpError(error);
   if (httpError) {
     const raw = httpError.message.trim();
@@ -69,31 +82,27 @@ export function mapWhatsAppActionError(error: unknown): string {
     if (httpError.status === 409) {
       return "Kayıt zaten işlendi veya bu adım tekrarlanamaz.";
     }
-    if (httpError.status === 503 || containsTechnicalWhatsAppTerms(raw)) {
+    if (httpError.status === 503 || containsTechnicalWhatsAppTerms(raw) || containsTechnicalUserText(raw)) {
       return MSG_WA_CONNECTION_NOT_LIVE;
     }
     if (raw && !containsTechnicalWhatsAppTerms(raw) && !containsFalseWhatsAppSuccessTerms(raw)) {
       return raw;
     }
-    return MSG_WA_LIST_FAILED;
+    return offlineFallback;
   }
 
   if (error instanceof Error) {
     const raw = error.message.trim();
-    if (raw && !containsTechnicalWhatsAppTerms(raw) && !containsFalseWhatsAppSuccessTerms(raw)) {
+    if (raw && !containsTechnicalWhatsAppTerms(raw) && !containsFalseWhatsAppSuccessTerms(raw) && !containsTechnicalUserText(raw)) {
       return raw;
     }
   }
 
-  return MSG_WA_LIST_FAILED;
+  return offlineFallback;
 }
 
 export function mapWhatsAppDetailError(error: unknown): string {
-  const mapped = mapWhatsAppActionError(error);
-  if (mapped === MSG_WA_LIST_FAILED) {
-    return MSG_WA_DETAIL_FAILED;
-  }
-  return mapped;
+  return mapWhatsAppActionError(error, MSG_WA_DETAIL_FAILED);
 }
 
 export function resolveCustomerEmptyMessage(hasCustomerFilter: boolean): string {

@@ -31,6 +31,7 @@ import {
   MSG_WA_DOCUMENT_PREVIEW,
   MSG_WA_DOC_ATTACH_NOT_LIVE,
   MSG_WA_EDIT_NOT_LIVE,
+  MSG_WA_INBOX_RECONNECT,
   MSG_WA_LIVE_WAITING,
   MSG_WA_PREVIEW_SEND,
   MSG_WA_QR_PLACEHOLDER,
@@ -236,6 +237,9 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
           <p className="hz-wa-empty" role="alert">
             {listError}
           </p>
+          <p className="hz-wa-empty-sub" role="status">
+            {MSG_WA_INBOX_RECONNECT}
+          </p>
           <button type="button" className="hz-wa-action-button hz-wa-action-button--primary hz-wa-retry-btn" onClick={() => reloadList()}>
             Tekrar dene
           </button>
@@ -257,7 +261,7 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
             <p className="hz-wa-context-band" role="status">
               Cari bağlamı: {contextCustomer?.name ?? initialCustomerId}
               {allConversations.every((item) => item.relatedCustomerId !== initialCustomerId)
-                ? " — bu cari için örnek sohbet bulunamadı"
+                ? " — bu cari için kayıtlı sohbet bulunamadı"
                 : ""}
             </p>
           ) : null}

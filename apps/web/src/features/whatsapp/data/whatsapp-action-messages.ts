@@ -22,6 +22,10 @@ export const MSG_WA_CUSTOMER_HISTORY_MISSING =
 
 export const MSG_WA_LIST_FAILED = "Konuşma listesi alınamadı.";
 
+export const MSG_WA_INBOX_UNAVAILABLE = "WhatsApp konuşmaları şu anda alınamıyor.";
+
+export const MSG_WA_INBOX_RECONNECT = "Bağlantı tekrar kurulduğunda iletişim geçmişi yenilenecek.";
+
 export const MSG_WA_DETAIL_FAILED = "Konuşma detayı alınamadı.";
 
 export const MSG_WA_APPROVAL_PREVIEW =

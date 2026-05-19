@@ -4,10 +4,11 @@ import {
   MSG_WA_CONNECTION_NOT_LIVE,
   MSG_WA_CONVERSATION_NOT_FOUND,
   MSG_WA_CUSTOMER_HISTORY_MISSING,
-  MSG_WA_LIST_FAILED
+  MSG_WA_INBOX_UNAVAILABLE
 } from "../data/whatsapp-action-messages";
 import {
   mapWhatsAppActionError,
+  mapWhatsAppInboxError,
   resolveCustomerEmptyMessage,
   sanitizeWhatsAppUserText
 } from "../utils/whatsapp-action-feedback";
@@ -23,7 +24,13 @@ test("sanitizeWhatsAppUserText fixes olusturuldu in demo labels", () => {
 
 test("mapWhatsAppActionError hides technical terms in generic errors", () => {
   const message = mapWhatsAppActionError(new Error("webhook dispatcher failed in outbox"));
-  assert.equal(message, MSG_WA_LIST_FAILED);
+  assert.equal(message, MSG_WA_INBOX_UNAVAILABLE);
+});
+
+test("mapWhatsAppInboxError maps offline fetch failures to safe inbox copy", () => {
+  assert.equal(mapWhatsAppInboxError(new TypeError("Failed to fetch")), MSG_WA_INBOX_UNAVAILABLE);
+  assert.equal(mapWhatsAppInboxError(new Error("fetch failed")), MSG_WA_INBOX_UNAVAILABLE);
+  assert.equal(mapWhatsAppInboxError(new Error("NetworkError when attempting to fetch resource.")), MSG_WA_INBOX_UNAVAILABLE);
 });
 
 test("mapWhatsAppActionError maps service unavailable to connection copy", () => {

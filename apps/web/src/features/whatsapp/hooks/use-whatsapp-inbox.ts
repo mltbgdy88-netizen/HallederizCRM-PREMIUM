@@ -6,7 +6,7 @@ import { dataSourceConfig, sdk } from "../../../lib/data-source";
 import { getCustomerById } from "../../customers/queries/customer-mock-data";
 import { getWhatsAppConversationById, getWhatsAppConversations } from "../queries/whatsapp-mock-data";
 import { buildWhatsAppApiPageDetail, type WhatsAppPageDetail } from "../utils/build-whatsapp-api-page-detail";
-import { mapWhatsAppActionError, mapWhatsAppDetailError } from "../utils/whatsapp-action-feedback";
+import { mapWhatsAppDetailError, mapWhatsAppInboxError } from "../utils/whatsapp-action-feedback";
 
 function pickConversationId(list: WhatsAppConversation[], customerId: string | null | undefined, useDemo: boolean): string {
   if (customerId) {
@@ -50,7 +50,7 @@ export function useWhatsAppInbox(initialCustomerId?: string | null) {
       })
       .catch((error: unknown) => {
         setApiList([]);
-        setListError(mapWhatsAppActionError(error));
+        setListError(mapWhatsAppInboxError(error));
       })
       .finally(() => {
         setListLoading(false);
