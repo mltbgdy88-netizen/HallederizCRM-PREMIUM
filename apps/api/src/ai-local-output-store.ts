@@ -363,6 +363,12 @@ export function listFileSaveJobs() {
   return fileSaveJobs;
 }
 
+export function getLatestFileSaveJobForDocument(documentId: string) {
+  return [...fileSaveJobs]
+    .filter((job) => job.documentId === documentId)
+    .sort((left, right) => right.queuedAt.localeCompare(left.queuedAt))[0];
+}
+
 export function queueDocumentSave(documentId: string) {
   const job = {
     ...fileSaveJobs[0],

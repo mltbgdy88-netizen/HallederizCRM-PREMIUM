@@ -31,6 +31,32 @@ export class ApiClient {
     return this.request<T>(path, { method: "GET" });
   }
 
+  /** Returns HTTP status and parsed JSON without throwing on 202/404. */
+  async getWithStatus<T>(path: string): Promise<{ status: number; data: T }> {
+    const sessionToken = this.resolveSessionToken();
+    const response = await fetch(`${this.options.baseUrl}${path}`, {
+      method: "GET",
+      headers: {
+        "content-type": "application/json",
+        ...(this.options.tenantId ? { "x-tenant-id": this.options.tenantId } : {}),
+        ...(this.options.userId ? { "x-user-id": this.options.userId } : {}),
+        ...(sessionToken ? { "x-session-token": sessionToken } : {}),
+        ...(sessionToken ? { authorization: `Bearer ${sessionToken}` } : {})
+      },
+      cache: "no-store",
+      credentials: "include"
+    });
+
+    let data = {} as T;
+    try {
+      data = (await response.json()) as T;
+    } catch {
+      // no-op
+    }
+
+    return { status: response.status, data };
+  }
+
   async post<T>(path: string, body?: unknown): Promise<T> {
     return this.request<T>(path, { method: "POST", body });
   }

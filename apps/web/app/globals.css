@@ -10068,6 +10068,14 @@ select.hz-qop-summary-input {
   color: var(--hz-wa-text);
 }
 
+.hz-wa-qr-image {
+  display: block;
+  max-width: 100%;
+  max-height: 140px;
+  margin: 0 auto;
+  border-radius: 6px;
+}
+
 .hz-wa-queue-pill {
   margin-left: auto;
   padding: 2px 8px;

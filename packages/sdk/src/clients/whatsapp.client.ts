@@ -1,4 +1,9 @@
-import type { WhatsAppConversation, WhatsAppMessage } from "@hallederiz/types";
+import type {
+  WhatsAppConversation,
+  WhatsAppMessage,
+  WhatsAppOutboundPayload,
+  WhatsAppSessionSnapshot
+} from "@hallederiz/types";
 import type { ItemResponse, ListResponse } from "../base";
 import { ApiClient } from "../base";
 
@@ -24,8 +29,18 @@ export class WhatsAppClient {
         status: string;
         message: string;
         mode?: string;
+        reason?: string;
         details?: Record<string, unknown>;
+        lastCheckedAt?: string;
       }>
     >("/health/whatsapp");
+  }
+
+  getSession() {
+    return this.api.get<ItemResponse<WhatsAppSessionSnapshot>>("/whatsapp/session");
+  }
+
+  sendOutbound(payload: WhatsAppOutboundPayload) {
+    return this.api.post<ItemResponse<WhatsAppMessage>>("/whatsapp/outbound", payload);
   }
 }

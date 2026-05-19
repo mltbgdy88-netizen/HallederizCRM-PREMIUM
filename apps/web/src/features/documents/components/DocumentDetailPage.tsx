@@ -15,6 +15,7 @@ import { MSG_DOC_DOWNLOAD_PENDING } from "../data/document-action-messages";
 import {
   extractDownloadUrlFromDocument,
   hasDownloadablePdf,
+  fetchDocumentDownloadLink,
   runDocumentLiveAction,
   sanitizeDocumentUserText
 } from "../utils/document-action-feedback";
@@ -73,7 +74,7 @@ function DocumentActions({ document, onReload }: { document: Document | null; on
       <button
         className="hz-btn hz-btn-secondary hz-toolbar-btn"
         type="button"
-        onClick={() => runDownload()}
+        onClick={() => void runDownload()}
         title={canDownload ? "Belge dosyasını indir" : MSG_DOC_DOWNLOAD_PENDING}
       >
         {canDownload ? "İndir" : "İndirme bekleniyor"}

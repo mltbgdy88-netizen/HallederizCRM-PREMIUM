@@ -465,6 +465,13 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
     })
   );
 
+  server.get("/whatsapp/session", async (request, reply) =>
+    withGuards(request, reply, requireReadAccess(readPermissions.integrations), async (context) => {
+      const service = new IntegrationsService(context);
+      return { item: service.getWhatsAppSession() };
+    })
+  );
+
   server.post("/health/whatsapp/test-send", async (request, reply) =>
     withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "whatsapp.write"]), async (context) => {
       const service = new IntegrationsService(context);
