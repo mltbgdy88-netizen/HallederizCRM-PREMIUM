@@ -11,7 +11,13 @@ import { useToast } from "../../../providers/toast-provider";
 import { getDocumentTypeLabel, getDocumentDeliveryStatusLabel } from "../queries/document-mock-data";
 import { getDocumentDetail } from "../queries/get-documents";
 import { formatDocumentDeliveryChannel, formatDocumentEntityType } from "../utils/document-faz-f";
-import { runDocumentLiveAction, sanitizeDocumentUserText } from "../utils/document-action-feedback";
+import { MSG_DOC_DOWNLOAD_PENDING } from "../data/document-action-messages";
+import {
+  extractDownloadUrlFromDocument,
+  hasDownloadablePdf,
+  runDocumentLiveAction,
+  sanitizeDocumentUserText
+} from "../utils/document-action-feedback";
 import { dateLabel } from "../utils";
 
 function DocumentActions({ document, onReload }: { document: Document | null; onReload: () => Promise<void> }) {
@@ -33,6 +39,20 @@ function DocumentActions({ document, onReload }: { document: Document | null; on
     }
   };
 
+  const downloadUrl = document ? extractDownloadUrlFromDocument(document) : null;
+  const canDownload = hasDownloadablePdf(document, { extraUrl: downloadUrl });
+
+  const runDownload = () => {
+    if (!document) {
+      return;
+    }
+    if (canDownload && downloadUrl) {
+      window.open(downloadUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
+    pushToast(MSG_DOC_DOWNLOAD_PENDING);
+  };
+
   return (
     <section className="hz-action-toolbar">
       <button className="hz-btn hz-btn-primary hz-toolbar-btn" type="button" onClick={() => void run("regenerate")}>
@@ -49,6 +69,14 @@ function DocumentActions({ document, onReload }: { document: Document | null; on
       </button>
       <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void run("sendEmail")}>
         E-posta
+      </button>
+      <button
+        className="hz-btn hz-btn-secondary hz-toolbar-btn"
+        type="button"
+        onClick={() => runDownload()}
+        title={canDownload ? "Belge dosyasını indir" : MSG_DOC_DOWNLOAD_PENDING}
+      >
+        {canDownload ? "İndir" : "İndirme bekleniyor"}
       </button>
       <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => router.push("/belgeler")}>
         Listeye dön

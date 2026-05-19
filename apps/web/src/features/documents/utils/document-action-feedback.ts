@@ -1,6 +1,5 @@
 import type { Document } from "@hallederiz/types";
-import { ApiError } from "@hallederiz/sdk";
-import { sdk } from "../../../lib/data-source";
+import { containsTechnicalUserText, isOfflineLikeError } from "../../../lib/user-facing-data-error";
 import {
   MSG_DOC_ACTION_FAILED,
   MSG_DOC_ARCHIVE_NEED_LINK,
@@ -11,31 +10,53 @@ import {
   MSG_DOC_NOT_FOUND,
   MSG_DOC_PDF_NOT_LIVE,
   MSG_DOC_PDF_QUEUE,
+  MSG_DOC_PDF_READY_HINT,
   MSG_DOC_PREVIEW_ONLY,
   MSG_DOC_PRINT_QUEUE,
   MSG_DOC_QUEUE_NOT_LIVE,
   MSG_DOC_SEND_QUEUE,
   MSG_DOC_WHATSAPP_NEED_LINK
 } from "../data/document-action-messages";
+import {
+  extractDownloadUrlFromDocument,
+  extractDownloadUrlFromRecord,
+  findLatestDelivery,
+  hasDownloadablePdf
+} from "./document-delivery-utils";
 
 const TECHNICAL_PATTERN =
-  /api|mock|fallback|dispatcher|worker|outbox|mutation|execution|not_configured|adapter|queue/i;
+  /api|mock|fallback|dispatcher|worker|outbox|mutation|execution|not_configured|adapter|queue|fetch failed|failed to fetch|networkerror|econnrefused/i;
 
 const FALSE_SUCCESS_PATTERN =
   /\bolu[sş]turuldu\b|\bkaydedildi\b|\btamamland[ıi]\b|\bgönderildi\b|\bgonderildi\b|\bindirildi\b|\bar[sş]ivlendi\b/i;
 
 export type DocumentLiveAction = "regenerate" | "sendWhatsApp" | "sendEmail" | "queueSave" | "queuePrint";
 
-export function hasDownloadablePdf(_document: Document | null): boolean {
-  return false;
-}
+export type DocumentActionOutcome = {
+  ok: boolean;
+  toasts: string[];
+  document?: Document;
+  downloadUrl?: string | null;
+};
+
+export { hasDownloadablePdf, extractDownloadUrlFromDocument };
 
 function containsTechnicalTerms(value: string): boolean {
-  return TECHNICAL_PATTERN.test(value);
+  return TECHNICAL_PATTERN.test(value) || containsTechnicalUserText(value);
 }
 
 function containsFalseSuccessTerms(value: string): boolean {
   return FALSE_SUCCESS_PATTERN.test(value);
+}
+
+function readApiError(error: unknown): { status: number; message: string } | null {
+  if (typeof error === "object" && error !== null) {
+    const candidate = error as { status?: unknown; message?: unknown };
+    if (typeof candidate.status === "number" && typeof candidate.message === "string") {
+      return { status: candidate.status, message: candidate.message };
+    }
+  }
+  return null;
 }
 
 export function sanitizeDocumentUserText(value: string): string {
@@ -61,26 +82,31 @@ export function sanitizeDocumentUserText(value: string): string {
 }
 
 export function mapDocumentActionError(error: unknown): string {
-  if (error instanceof ApiError) {
-    const raw = error.message.trim();
+  if (isOfflineLikeError(error)) {
+    return MSG_DOC_QUEUE_NOT_LIVE;
+  }
 
-    if (error.status === 401) {
+  const httpError = readApiError(error);
+  if (httpError) {
+    const raw = httpError.message.trim();
+
+    if (httpError.status === 401) {
       return "Oturum süresi doldu. Tekrar giriş yapın.";
     }
-    if (error.status === 403) {
+    if (httpError.status === 403) {
       return "Bu işlem için yetkiniz yok.";
     }
-    if (error.status === 404) {
+    if (httpError.status === 404) {
       return MSG_DOC_NOT_FOUND;
     }
-    if (error.status === 409) {
+    if (httpError.status === 409) {
       return "Kayıt zaten işlendi veya bu adım tekrarlanamaz.";
     }
-    if (error.status === 503 || containsTechnicalTerms(raw)) {
+    if (httpError.status === 503 || containsTechnicalTerms(raw)) {
       return MSG_DOC_QUEUE_NOT_LIVE;
     }
     if (raw && !containsTechnicalTerms(raw) && !containsFalseSuccessTerms(raw)) {
-      return raw;
+      return sanitizeDocumentUserText(raw);
     }
     return MSG_DOC_ACTION_FAILED;
   }
@@ -88,11 +114,42 @@ export function mapDocumentActionError(error: unknown): string {
   if (error instanceof Error) {
     const raw = error.message.trim();
     if (raw && !containsTechnicalTerms(raw) && !containsFalseSuccessTerms(raw)) {
-      return raw;
+      return sanitizeDocumentUserText(raw);
     }
   }
 
   return MSG_DOC_ACTION_FAILED;
+}
+
+function resolveSendChannelToast(document: Document, channel: "whatsapp" | "email"): string {
+  const delivery = findLatestDelivery(document, channel);
+  if (!delivery) {
+    return MSG_DOC_SEND_QUEUE;
+  }
+  if (delivery.status === "delivered") {
+    return "İletim tamamlandı.";
+  }
+  if (delivery.status === "failed") {
+    return "İletim tamamlanamadı. Belge ekranından tekrar deneyin.";
+  }
+  return MSG_DOC_SEND_QUEUE;
+}
+
+function resolveLiveSuccessToasts(action: DocumentLiveAction, document?: Document): string[] {
+  switch (action) {
+    case "regenerate":
+      return [MSG_DOC_PDF_QUEUE, MSG_DOC_PDF_READY_HINT];
+    case "sendWhatsApp":
+      return document ? [resolveSendChannelToast(document, "whatsapp")] : [MSG_DOC_SEND_QUEUE];
+    case "sendEmail":
+      return document ? [resolveSendChannelToast(document, "email")] : [MSG_DOC_SEND_QUEUE];
+    case "queueSave":
+      return [MSG_DOC_ARCHIVE_QUEUE];
+    case "queuePrint":
+      return [MSG_DOC_PRINT_QUEUE];
+    default:
+      return [MSG_DOC_QUEUE_NOT_LIVE];
+  }
 }
 
 export function resolveDemoActionToasts(action: DocumentLiveAction | "download"): string[] {
@@ -114,44 +171,43 @@ export function resolveDemoActionToasts(action: DocumentLiveAction | "download")
   }
 }
 
-export function resolveLiveSuccessToast(action: DocumentLiveAction): string {
-  switch (action) {
-    case "regenerate":
-      return MSG_DOC_PDF_QUEUE;
-    case "sendWhatsApp":
-    case "sendEmail":
-      return MSG_DOC_SEND_QUEUE;
-    case "queueSave":
-      return MSG_DOC_ARCHIVE_QUEUE;
-    case "queuePrint":
-      return MSG_DOC_PRINT_QUEUE;
-    default:
-      return MSG_DOC_QUEUE_NOT_LIVE;
-  }
-}
-
 export async function runDocumentLiveAction(
   action: DocumentLiveAction,
   documentId: string,
   options: { useDemoData: boolean }
-): Promise<{ ok: boolean; toasts: string[] }> {
+): Promise<DocumentActionOutcome> {
   if (options.useDemoData) {
     return { ok: false, toasts: resolveDemoActionToasts(action) };
   }
 
   try {
+    const { sdk } = await import("../../../lib/data-source");
+    let document: Document | undefined;
+    let downloadUrl: string | null = null;
+
     if (action === "regenerate") {
-      await sdk.documents.regenerate(documentId);
+      const response = await sdk.documents.regenerate(documentId);
+      document = response.item;
+      downloadUrl = extractDownloadUrlFromDocument(document) ?? extractDownloadUrlFromRecord(response.item as unknown as Record<string, unknown>);
     } else if (action === "sendWhatsApp") {
-      await sdk.documents.sendWhatsApp(documentId);
+      const response = await sdk.documents.sendWhatsApp(documentId);
+      document = response.item;
     } else if (action === "sendEmail") {
-      await sdk.documents.sendEmail(documentId);
+      const response = await sdk.documents.sendEmail(documentId);
+      document = response.item;
     } else if (action === "queueSave") {
-      await sdk.documents.queueSave(documentId);
+      const response = await sdk.documents.queueSave(documentId);
+      downloadUrl = extractDownloadUrlFromRecord(response.item as Record<string, unknown>);
     } else if (action === "queuePrint") {
       await sdk.documents.queuePrint(documentId);
     }
-    return { ok: true, toasts: [resolveLiveSuccessToast(action)] };
+
+    return {
+      ok: true,
+      toasts: resolveLiveSuccessToasts(action, document),
+      document,
+      downloadUrl: downloadUrl ?? (document ? extractDownloadUrlFromDocument(document) : null)
+    };
   } catch (error) {
     return { ok: false, toasts: [mapDocumentActionError(error)] };
   }
