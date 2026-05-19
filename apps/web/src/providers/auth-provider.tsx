@@ -4,6 +4,11 @@ import { createMockLoginResponse, isSessionActive } from "@hallederiz/domain";
 import type { AuthState, LoginInput, SessionModel } from "@hallederiz/types";
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
 import { adminRole, defaultTenant, defaultUser } from "../lib/platform-mocks";
+import {
+  clearPersistedDemoAuth,
+  readPersistedDemoAuth,
+  writePersistedDemoAuth
+} from "../lib/auth-demo-session-storage";
 import { mapUserFacingLoginError } from "../lib/user-facing-data-error";
 
 interface LoginResult {
@@ -44,6 +49,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         const payload = (await response.json()) as { item: SessionModel };
         if (isSessionActive(payload.item)) {
+          clearPersistedDemoAuth();
           setSession(payload.item);
           setAccessToken(null);
           setState("authenticated");
@@ -51,6 +57,17 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         }
         throw new Error("session_expired");
       } catch {
+        if (ENABLE_DEMO_AUTH) {
+          const persisted = readPersistedDemoAuth();
+          if (persisted) {
+            setSession(persisted.session);
+            setAccessToken(persisted.accessToken);
+            setState("authenticated");
+            return;
+          }
+        }
+
+        clearPersistedDemoAuth();
         setSession(null);
         setAccessToken(null);
         setState("anonymous");
@@ -101,14 +118,21 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         ? ((await loginResponse.json()) as { session: SessionModel; accessToken: string })
         : createMockLoginResponse(input, defaultTenant, defaultUser, [adminRole]);
 
+    const isDemoLogin = ENABLE_DEMO_AUTH && !loginResponse?.ok;
     setSession(payload.session);
-    setAccessToken(ENABLE_DEMO_AUTH && !loginResponse?.ok ? payload.accessToken : null);
+    setAccessToken(isDemoLogin ? payload.accessToken : null);
+    if (isDemoLogin) {
+      writePersistedDemoAuth(payload.session, payload.accessToken);
+    } else {
+      clearPersistedDemoAuth();
+    }
     setState("authenticated");
 
     return { success: true };
   };
 
   const logout = (): void => {
+    clearPersistedDemoAuth();
     void fetch(`${API_BASE_URL}/auth/logout`, {
       method: "POST",
       credentials: "include",

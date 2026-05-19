@@ -118,6 +118,7 @@ Otomasyon, aşağıdaki manuel smoke raporlarının **HTTP / statik** alt kümes
 - İlk `next dev` derlemesi 2–4 dakika sürebilir; timeout 240s.
 - Windows’ta dev sunucu kapatma `taskkill` ile yapılır; port çakışması olursa `SMOKE_*_PORT` değiştirin.
 - Api-offline: Hızlı İşlem ön-doldurulmuş satır şablonları HTTP ile ayrı kontrol edilmez (manuel rapor P1).
+- Oturum yenileme / `next` parametresi: HTTP smoke oturum çerezi veya tarayıcı depolamasını doğrulamaz; demo auth açıkken manuel tarayıcı testi gerekir (`login` → protected route → F5).
 
 ## Dosya yapısı
 

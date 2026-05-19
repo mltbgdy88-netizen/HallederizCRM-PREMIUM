@@ -10,18 +10,23 @@ export function ProtectedRoute({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (state === "anonymous") {
-      const nextPath = pathname ? `?next=${encodeURIComponent(pathname)}` : "";
-      router.replace(`/login${nextPath}`);
+    if (state !== "anonymous") {
+      return;
     }
+
+    const fullPath =
+      typeof window !== "undefined"
+        ? `${window.location.pathname}${window.location.search}`
+        : pathname || "/dashboard";
+    router.replace(`/login?next=${encodeURIComponent(fullPath)}`);
   }, [pathname, router, state]);
 
   if (state === "loading") {
     return (
       <div className="auth-loading">
         <div className="card">
-          <h2>Oturum kontrol ediliyor</h2>
-          <p>Platform Core kimlik doğrulaması yükleniyor.</p>
+          <h2>Oturum bilgileri kontrol ediliyor</h2>
+          <p>Kimlik doğrulaması tamamlanınca sayfa açılacak.</p>
         </div>
       </div>
     );

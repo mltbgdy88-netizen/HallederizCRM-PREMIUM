@@ -178,7 +178,7 @@ pnpm smoke:navigation                     → geçti (21)
 | **P1** Login teknik URL/CORS metni | Düzeltildi — `mapUserFacingLoginError` |
 | **P1** Hızlı İşlem ön-doldurulmuş satırlar | Düzeltildi — `initialQuickOperationLines` yalnız demo modda seed |
 | **P1** Belgeler liste `.catch` yok | Düzeltildi — yükleme hatası bandı + boş liste |
-| **P1** Oturum tam sayfa yenileme | Dokümante — auth hydrate API’ye bağlı; ayrı PR |
+| **P1** Oturum tam sayfa yenileme | Düzeltildi — `fix/auth-hydrate-refresh-session`: demo oturum `sessionStorage` + `next` param |
 | **P2** Onaylar worker/outbox jargonu | Düzeltildi — kullanıcı metinleri sadeleştirildi |
 | **P2** Worker panel `error.kind` sızıntısı | Düzeltildi — `mapApprovalUiErrorMessage` |
 | **P2** Login “iskelet” ifadesi | Düzeltildi |

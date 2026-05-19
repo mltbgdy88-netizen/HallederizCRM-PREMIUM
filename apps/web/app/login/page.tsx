@@ -1,11 +1,22 @@
 "use client";
 
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { FormEvent, useEffect, useState } from "react";
 import { useAuth } from "../../src/providers/auth-provider";
 
+function resolvePostLoginPath(nextParam: string | null): string {
+  if (!nextParam) {
+    return "/";
+  }
+  if (!nextParam.startsWith("/") || nextParam.startsWith("//")) {
+    return "/";
+  }
+  return nextParam;
+}
+
 export default function LoginPage() {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const { state, login } = useAuth();
   const [tenantSlug, setTenantSlug] = useState("hallederiz");
   const [email, setEmail] = useState("admin@hallederiz.com");
@@ -15,9 +26,9 @@ export default function LoginPage() {
 
   useEffect(() => {
     if (state === "authenticated") {
-      router.replace("/");
+      router.replace(resolvePostLoginPath(searchParams.get("next")));
     }
-  }, [router, state]);
+  }, [router, searchParams, state]);
 
   async function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -33,11 +44,11 @@ export default function LoginPage() {
     setIsSubmitting(false);
 
     if (!result.success) {
-      setErrorMessage(result.message ?? "Giriş yapılamadı.");
+      setErrorMessage(result.message ?? "Oturum bulunamadı. Lütfen tekrar giriş yapın.");
       return;
     }
 
-    router.replace("/");
+    router.replace(resolvePostLoginPath(searchParams.get("next")));
   }
 
   return (
