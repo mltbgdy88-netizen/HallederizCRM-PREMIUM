@@ -1,33 +1,36 @@
 import type { QuickOperationSubmitResponse, QuickOperationType, QuickOperationWorkflowImpact } from "@hallederiz/types";
-import { ApiError } from "@hallederiz/sdk";
+import { containsTechnicalUserText, isOfflineLikeError } from "../../../lib/user-facing-data-error";
+import { resolveOperationEntityHref } from "../../../lib/operation-entity-links";
 import {
+  MSG_SUBMIT_AFTER_APPROVAL,
   MSG_SUBMIT_APPROVALS_HINT,
   MSG_SUBMIT_DRAFT_READY,
   MSG_SUBMIT_FAILED,
   MSG_SUBMIT_NOT_LIVE,
   MSG_SUBMIT_PREVIEW,
-  MSG_SUBMIT_QUEUE_PENDING,
-  MSG_SUBMIT_QUEUE_WHEN_READY,
+  MSG_SUBMIT_QUEUED,
+  MSG_SUBMIT_SENT_FOR_APPROVAL,
   MSG_SUBMIT_TASLAK_REF_PREFIX,
   MSG_SUBMIT_VALIDATION_FAILED
 } from "../data/quick-operation-messages";
 
 const TECHNICAL_PATTERN =
-  /api|mock|fallback|dispatcher|worker|outbox|mutation|execution|not_configured|operation|submit/i;
+  /api|mock|fallback|dispatcher|worker|outbox|mutation|execution|not_configured|operation|submit|fetch failed|failed to fetch|networkerror|econnrefused/i;
 
 const FALSE_SUCCESS_PATTERN =
-  /\bolu[sş]turuldu\b|\bkaydedildi\b|\btamamland[ıi]\b|\bgönderildi\b|\bgonderildi\b/i;
+  /\bolu[sş]turuldu\b|\bkaydedildi\b|\btamamland[ıi]\b|\bgönderildi\b|\bgonderildi\b|\bi[sş]lendi\b/i;
 
 export type QuickOperationSubmitFeedback = {
   notice: string;
   toast: string;
   showApprovalsLink: boolean;
+  approvalsHref?: string;
   detailHref?: string;
   detailLabel?: string;
 };
 
 function containsTechnicalTerms(value: string): boolean {
-  return TECHNICAL_PATTERN.test(value);
+  return TECHNICAL_PATTERN.test(value) || containsTechnicalUserText(value);
 }
 
 function containsFalseSuccessTerms(value: string): boolean {
@@ -45,10 +48,11 @@ export function sanitizeSubmitUserText(value: string): string {
       .replace(/\bkaydedildi\b/gi, "hazırlandı")
       .replace(/\btamamland[ıi]\b/gi, "işlenecek")
       .replace(/\bgönderildi\b/gi, "iletilecek")
-      .replace(/\bgonderildi\b/gi, "iletilecek");
+      .replace(/\bgonderildi\b/gi, "iletilecek")
+      .replace(/\bi[sş]lendi\b/gi, "işlenecek");
   }
   if (containsTechnicalTerms(trimmed)) {
-    return MSG_SUBMIT_QUEUE_PENDING;
+    return MSG_SUBMIT_QUEUED;
   }
   return trimmed;
 }
@@ -69,28 +73,35 @@ function formatReference(referenceNo?: string): string {
   return `${MSG_SUBMIT_TASLAK_REF_PREFIX} ${ref}`;
 }
 
+function resolveApprovalsHref(result: QuickOperationSubmitResponse): string {
+  const approvalId = result.approvalId?.trim();
+  if (approvalId) {
+    return `/onaylar/${approvalId}`;
+  }
+  return "/onaylar";
+}
+
 function resolveDetailLink(
   result: QuickOperationSubmitResponse,
   useDemoData: boolean
 ): { href: string; label: string } | null {
-  if (useDemoData || result.mode !== "executed" || !result.createdEntityId || !result.createdEntityType) {
+  if (useDemoData) {
     return null;
   }
 
-  switch (result.createdEntityType) {
-    case "offer":
-      return { href: `/teklifler/${result.createdEntityId}`, label: "Teklif detayına git" };
-    case "order":
-      return { href: `/siparisler/${result.createdEntityId}`, label: "Sipariş detayına git" };
-    case "payment":
-      return { href: `/tahsilatlar/${result.createdEntityId}`, label: "Tahsilat detayına git" };
-    case "delivery":
-      return { href: `/teslimatlar/${result.createdEntityId}`, label: "Teslimat detayına git" };
-    case "return":
-      return { href: `/iadeler/${result.createdEntityId}`, label: "İade detayına git" };
-    default:
-      return null;
+  if (result.createdEntityId && result.createdEntityType) {
+    const fromEntity = resolveOperationEntityHref(result.createdEntityType, result.createdEntityId);
+    if (fromEntity) {
+      return fromEntity;
+    }
   }
+
+  const documentId = result.documentIds?.[0]?.trim();
+  if (documentId) {
+    return resolveOperationEntityHref("document", documentId);
+  }
+
+  return null;
 }
 
 function segmentLabel(operationType: QuickOperationType): string {
@@ -116,6 +127,7 @@ export function resolveSubmitFeedback(
 ): QuickOperationSubmitFeedback {
   const refSuffix = formatReference(result.createdEntityNo);
   const detail = resolveDetailLink(result, options.useDemoData);
+  const approvalsHref = resolveApprovalsHref(result);
 
   if (options.useDemoData) {
     const notice = [MSG_SUBMIT_DRAFT_READY, refSuffix, MSG_SUBMIT_PREVIEW].filter(Boolean).join(" ");
@@ -135,52 +147,72 @@ export function resolveSubmitFeedback(
     };
   }
 
-  if (result.mode === "foundation" || !result.createdEntityId) {
-    const notice = [MSG_SUBMIT_QUEUE_PENDING, refSuffix, MSG_SUBMIT_QUEUE_WHEN_READY].filter(Boolean).join(" ");
+  const approvalsLink = {
+    showApprovalsLink: true,
+    approvalsHref,
+    detailHref: detail?.href,
+    detailLabel: detail?.label
+  };
+
+  if (result.mode === "executed" && result.createdEntityId) {
+    const notice = [
+      `${segmentLabel(options.operationType)} kaydı hazırlandı.`,
+      refSuffix,
+      MSG_SUBMIT_AFTER_APPROVAL
+    ]
+      .filter(Boolean)
+      .join(" ");
+
     return {
       notice,
-      toast: `${MSG_SUBMIT_QUEUE_PENDING} ${MSG_SUBMIT_APPROVALS_HINT}`,
-      showApprovalsLink: true,
-      detailHref: detail?.href,
-      detailLabel: detail?.label
+      toast: [MSG_SUBMIT_SENT_FOR_APPROVAL, MSG_SUBMIT_APPROVALS_HINT].join(" "),
+      ...approvalsLink
     };
   }
 
-  const notice = [
-    `${segmentLabel(options.operationType)} taslağı hazırlandı.`,
-    refSuffix,
-    MSG_SUBMIT_QUEUE_WHEN_READY
-  ]
+  const notice = [MSG_SUBMIT_SENT_FOR_APPROVAL, refSuffix, MSG_SUBMIT_QUEUED, MSG_SUBMIT_AFTER_APPROVAL]
     .filter(Boolean)
     .join(" ");
 
   return {
     notice,
-    toast: `${MSG_SUBMIT_QUEUE_PENDING} ${MSG_SUBMIT_APPROVALS_HINT}`,
-    showApprovalsLink: true,
-    detailHref: detail?.href,
-    detailLabel: detail?.label
+    toast: [MSG_SUBMIT_SENT_FOR_APPROVAL, MSG_SUBMIT_APPROVALS_HINT].join(" "),
+    ...approvalsLink
   };
 }
 
-export function mapSubmitActionError(error: unknown): string {
-  if (error instanceof ApiError) {
-    const raw = error.message.trim();
-    const lower = raw.toLowerCase();
+function readApiError(error: unknown): { status: number; message: string } | null {
+  if (typeof error === "object" && error !== null) {
+    const candidate = error as { status?: unknown; message?: unknown };
+    if (typeof candidate.status === "number" && typeof candidate.message === "string") {
+      return { status: candidate.status, message: candidate.message };
+    }
+  }
+  return null;
+}
 
-    if (error.status === 401) {
+export function mapSubmitActionError(error: unknown): string {
+  if (isOfflineLikeError(error)) {
+    return MSG_SUBMIT_NOT_LIVE;
+  }
+
+  const httpError = readApiError(error);
+  if (httpError) {
+    const raw = httpError.message.trim();
+
+    if (httpError.status === 401) {
       return "Oturum süresi doldu. Tekrar giriş yapın.";
     }
-    if (error.status === 403) {
+    if (httpError.status === 403) {
       return "Bu işlem için yetkiniz yok.";
     }
-    if (error.status === 404) {
+    if (httpError.status === 404) {
       return "İşlem kaynağı bulunamadı. Cari veya satırları kontrol edin.";
     }
-    if (error.status === 409) {
+    if (httpError.status === 409) {
       return "Kayıt zaten işlendi veya bu adım tekrarlanamaz.";
     }
-    if (error.status === 503 || containsTechnicalTerms(raw)) {
+    if (httpError.status === 503 || containsTechnicalTerms(raw)) {
       return MSG_SUBMIT_NOT_LIVE;
     }
     if (raw && !containsTechnicalTerms(raw) && !containsFalseSuccessTerms(raw)) {

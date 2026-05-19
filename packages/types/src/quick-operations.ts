@@ -142,6 +142,8 @@ export interface QuickOperationSubmitResponse {
   ok: boolean;
   operationType: QuickOperationType;
   draftId?: string;
+  /** Onay kaydı oluşturulduysa Onaylar detayına yönlendirme için */
+  approvalId?: string;
   createdEntityType?: "offer" | "order" | "delivery" | "payment" | "return";
   createdEntityId?: string;
   createdEntityNo?: string;

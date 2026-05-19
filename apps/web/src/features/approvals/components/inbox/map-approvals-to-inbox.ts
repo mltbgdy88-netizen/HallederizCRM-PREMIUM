@@ -1,5 +1,5 @@
 import type { Approval, ApprovalStatus, ApprovalType } from "@hallederiz/types";
-import { sanitizeUserFacingText } from "../../utils/approval-action-feedback";
+import { resolveApprovalEntityLink, sanitizeUserFacingText } from "../../utils/approval-action-feedback";
 import type {
   ApprovalInboxCategory,
   ApprovalInboxPriority,
@@ -105,6 +105,7 @@ export function mapApprovalToInboxRecord(approval: Approval, currentUserId?: str
   const tenant = extractTenant(payload, approval.tenantId);
   const assigneeName = approval.decidedByName ?? approval.requestedByName;
   const assigneeRole = approval.requestedRole || "Onay Sorumlusu";
+  const entityLink = resolveApprovalEntityLink(approval);
 
   return {
     id: approval.id,
@@ -120,7 +121,7 @@ export function mapApprovalToInboxRecord(approval: Approval, currentUserId?: str
       (approval.status === "pending" && !currentUserId),
     recentlyResolved: approval.status !== "pending",
     entityLabel: approval.entityNo || approval.entityType,
-    workflowLabel: `${approval.entityType} → ${approval.policySnapshot.serverActionKey ?? "Onay Akışı"}`,
+    workflowLabel: `${TYPE_LABELS[approval.type]} onayı`,
     customerName,
     typeLabel: TYPE_LABELS[approval.type],
     amountLabel: amount ?? (approval.payloadSummary || "—"),
@@ -133,15 +134,15 @@ export function mapApprovalToInboxRecord(approval: Approval, currentUserId?: str
       typeLabel: TYPE_LABELS[approval.type],
       priorityLabel: priority.toUpperCase(),
       amountTry: amount ?? (approval.payloadSummary || "—"),
-      relatedRecordLabel: approval.entityNo || `${approval.entityType} kaydı`,
-      relatedRecordHref: `/${approval.entityType === "ai_proposal" ? "ai/onaylar" : "onaylar"}/${approval.id}`,
+      relatedRecordLabel: approval.entityNo || `${TYPE_LABELS[approval.type]} kaydı`,
+      relatedRecordHref: entityLink.href,
       requesterName: approval.requestedByName,
       requestedAt: requestedAtLabel,
       slaDeadline: deadlineLabel
     },
     riskLevel: approval.status === "expired" ? "kritik" : undefined,
     riskBullets: approval.riskNote ? [sanitizeUserFacingText(approval.riskNote)] : [],
-    contextLinks: [{ label: `Varlık: ${approval.entityNo || approval.entityType}`, href: "/onaylar" }],
+    contextLinks: [{ label: `İlgili kayıt: ${approval.entityNo || approval.entityType}`, href: entityLink.href }],
     timeline: [
       { id: `${approval.id}-created`, label: "Talep oluşturuldu", at: formatDate(approval.createdAt) },
       ...(approval.decidedAt ? [{ id: `${approval.id}-decided`, label: "Karar verildi", at: formatDate(approval.decidedAt) }] : [])

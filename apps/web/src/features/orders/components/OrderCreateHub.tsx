@@ -65,7 +65,7 @@ export function OrderCreateHub({
         <p className="hz-commercial-create-hub-eyebrow">Siparişler</p>
         <h1 className="hz-commercial-create-hub-title">Yeni sipariş</h1>
         <p className="hz-commercial-create-hub-lead">
-          Bu işlem Hızlı İşlem workbench üzerinden hazırlanır. Gerçek kayıt için onay ve işlem kuyruğu bağlantısı gerekir.
+          Hızlı İşlem&apos;de hazırlayın, onaya gönderin; onay sonrası kayıt işlenecek.
         </p>
 
         {dataSourceConfig.useDemoData ? (
@@ -76,7 +76,7 @@ export function OrderCreateHub({
 
         <ul className="hz-commercial-create-hub-points">
           <li>Hızlı İşlem&apos;de <strong>Sipariş</strong> segmentini seçerek satır, kaynak ve operasyon etkisini hazırlayın.</li>
-          <li>Bu ekranda taslak kaydet veya kesinleştir simülasyonu yapılmaz.</li>
+          <li>Bu ekranda doğrudan kayıt oluşturulmaz; işlem onay zincirinden geçer.</li>
           {sourceOfferId ? (
             <li>
               Kaynak teklif: <strong>{resolving ? "yükleniyor…" : sourceOfferNo ?? sourceOfferId}</strong>

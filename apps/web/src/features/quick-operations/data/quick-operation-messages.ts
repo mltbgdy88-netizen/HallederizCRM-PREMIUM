@@ -37,11 +37,21 @@ export const MSG_SUBMIT_PREVIEW =
 export const MSG_SUBMIT_DRAFT_READY =
   "İşlem taslağı hazırlandı; gerçek kayıt oluşturulmadı.";
 
-export const MSG_SUBMIT_QUEUE_PENDING =
-  "Onay kaydı alındı; işlem kuyruğu bağlantısı bekleniyor.";
+export const MSG_SUBMIT_SENT_FOR_APPROVAL = "İşlem onaya gönderildi.";
 
-export const MSG_SUBMIT_QUEUE_WHEN_READY =
-  "Onay ve işlem kuyruğu bağlantısı tamamlandığında kayıt işlenecek.";
+export const MSG_SUBMIT_AFTER_APPROVAL = "Onay sonrası kayıt işlenecek.";
+
+export const MSG_SUBMIT_QUEUED =
+  "İşlem kuyruğa alındı; tamamlandığında kayıt güncellenecek.";
+
+/** @deprecated Use MSG_SUBMIT_QUEUED */
+export const MSG_SUBMIT_QUEUE_PENDING = MSG_SUBMIT_QUEUED;
+
+/** @deprecated Use MSG_SUBMIT_AFTER_APPROVAL */
+export const MSG_SUBMIT_QUEUE_WHEN_READY = MSG_SUBMIT_AFTER_APPROVAL;
+
+export const MSG_SUBMIT_PREVIEW_HELD =
+  "Canlı bağlantı şu anda tamamlanmadığı için işlem önizlemede tutuldu.";
 
 export const MSG_SUBMIT_NOT_LIVE =
   "Bu işlem henüz canlı yürütmeye bağlı değil.";
@@ -56,3 +66,5 @@ export const MSG_SUBMIT_APPROVALS_HINT =
   "Onaylar ekranından takip edebilirsiniz.";
 
 export const MSG_SUBMIT_TASLAK_REF_PREFIX = "Referans:";
+
+export const MSG_REFRESH_STATUS = "Sayfayı yenileyerek durumu kontrol edebilirsiniz.";

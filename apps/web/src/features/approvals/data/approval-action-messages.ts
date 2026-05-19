@@ -1,13 +1,20 @@
 export const MSG_APPROVAL_APPROVED = "Onay kaydı onaylandı.";
 export const MSG_APPROVAL_REJECTED = "Onay kaydı reddedildi.";
 
-export const MSG_APPROVAL_QUEUE_PENDING =
-  "Onay kaydı alındı; işlem kuyruğu bağlantısı bekleniyor.";
+export const MSG_APPROVAL_SENT_FOR_APPROVAL = "İşlem onaya gönderildi.";
+
+export const MSG_APPROVAL_QUEUED =
+  "İşlem kuyruğa alındı; tamamlandığında kayıt güncellenecek.";
+
+/** @deprecated Use MSG_APPROVAL_QUEUED */
+export const MSG_APPROVAL_QUEUE_PENDING = MSG_APPROVAL_QUEUED;
 
 export const MSG_APPROVAL_NOT_LIVE_EXECUTE = "Bu işlem henüz canlı yürütmeye bağlı değil.";
 
-export const MSG_APPROVAL_QUEUE_WHEN_READY =
-  "Onay ve işlem kuyruğu bağlantısı tamamlandığında kayıt otomatik işlenecek.";
+export const MSG_APPROVAL_AFTER_APPROVAL = "Onay sonrası kayıt işlenecek.";
+
+/** @deprecated Use MSG_APPROVAL_AFTER_APPROVAL */
+export const MSG_APPROVAL_QUEUE_WHEN_READY = MSG_APPROVAL_AFTER_APPROVAL;
 
 export const MSG_APPROVAL_PREVIEW_NO_EXECUTE = "Önizleme verisiyle gerçek işlem yürütülmez.";
 
@@ -30,4 +37,6 @@ export const MSG_APPROVAL_EMPTY_FILTERED_HINT = "Görünüm veya filtre kriterle
 export const MSG_APPROVAL_DEMO_BAND =
   "Önizleme modu: liste canlı kaynaktan okunur; işleme al adımı gerçek yürütme yapmaz.";
 
-export const MSG_APPROVAL_LIVE_QUEUE_BAND = MSG_APPROVAL_QUEUE_WHEN_READY;
+export const MSG_APPROVAL_LIVE_QUEUE_BAND = MSG_APPROVAL_AFTER_APPROVAL;
+
+export const MSG_REFRESH_STATUS = "Sayfayı yenileyerek durumu kontrol edebilirsiniz.";

@@ -34,18 +34,33 @@ const checks = [
   },
   {
     file: "apps/web/src/features/offers/components/OfferCreateHub.tsx",
-    patterns: ["Hızlı İşlem workbench", "buildQuickOpHref"],
+    patterns: ["onaya gönderin", "buildQuickOpHref"],
     description: "Yeni teklif Hızlı İşlem hub"
   },
   {
     file: "apps/web/src/features/orders/components/OrderCreateHub.tsx",
-    patterns: ["Hızlı İşlem workbench", "buildQuickOpHref"],
+    patterns: ["onaya gönderin", "buildQuickOpHref"],
     description: "Yeni sipariş Hızlı İşlem hub"
   },
   {
     file: "apps/web/src/features/payments/components/PaymentCreateHub.tsx",
-    patterns: ["Gerçek kayıt için onay ve işlem kuyruğu bağlantısı gerekir", "buildQuickOpHref", "Tahsilat"],
+    patterns: ["onaya gönderin", "buildQuickOpHref", "Tahsilat"],
     description: "Yeni tahsilat Hızlı İşlem hub"
+  },
+  {
+    file: "apps/web/src/features/quick-operations/data/quick-operation-messages.ts",
+    patterns: ["MSG_SUBMIT_SENT_FOR_APPROVAL", "MSG_SUBMIT_QUEUED", "MSG_SUBMIT_AFTER_APPROVAL"],
+    description: "Hızlı İşlem canlı zincir mesajları"
+  },
+  {
+    file: "apps/web/src/features/approvals/data/approval-action-messages.ts",
+    patterns: ["MSG_APPROVAL_QUEUED", "MSG_APPROVAL_PROCESS_DONE"],
+    description: "Onaylar execute geri bildirim mesajları"
+  },
+  {
+    file: "apps/web/src/lib/operation-entity-links.ts",
+    patterns: ["resolveOperationEntityHref", "/teklifler/", "/belgeler/"],
+    description: "Operasyon varlık detay rotaları"
   },
   {
     file: "apps/web/src/features/documents/data/document-action-messages.ts",
