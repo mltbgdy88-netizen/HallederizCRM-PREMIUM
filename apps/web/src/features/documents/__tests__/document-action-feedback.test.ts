@@ -1,6 +1,5 @@
 import assert from "node:assert/strict";
 import test from "node:test";
-import { ApiError } from "@hallederiz/sdk";
 import {
   MSG_DOC_DOWNLOAD_NOT_LIVE,
   MSG_DOC_PDF_NOT_LIVE,
@@ -20,7 +19,9 @@ test("sanitizeDocumentUserText replaces false success wording", () => {
 });
 
 test("mapDocumentActionError hides technical terms", () => {
-  const message = mapDocumentActionError(new ApiError("dispatcher failed in outbox worker", 503));
+  const message = mapDocumentActionError(
+    Object.assign(new Error("dispatcher failed in outbox worker"), { status: 503 })
+  );
   assert.equal(message, MSG_DOC_QUEUE_NOT_LIVE);
 });
 

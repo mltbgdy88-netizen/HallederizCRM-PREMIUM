@@ -17,4 +17,15 @@ export class WhatsAppClient {
   getConversation(id: string) {
     return this.api.get<ItemResponse<WhatsAppConversationDetail>>(`/whatsapp/conversations/${id}`);
   }
+
+  getChannelHealth() {
+    return this.api.get<
+      ItemResponse<{
+        status: string;
+        message: string;
+        mode?: string;
+        details?: Record<string, unknown>;
+      }>
+    >("/health/whatsapp");
+  }
 }

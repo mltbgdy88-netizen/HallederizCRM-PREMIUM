@@ -17,10 +17,12 @@ import {
 } from "../utils/document-faz-f";
 import {
   MSG_DOC_DOWNLOAD_NOT_LIVE,
+  MSG_DOC_DOWNLOAD_PENDING,
   MSG_DOC_LIST_UNAVAILABLE,
   MSG_DOC_PREVIEW_ONLY
 } from "../data/document-action-messages";
 import {
+  extractDownloadUrlFromDocument,
   hasDownloadablePdf,
   resolveDocumentsEmptyMessage,
   resolveDemoActionToasts,
@@ -254,11 +256,15 @@ export function DocumentActionsBar({ document }: { document: Document | null }) 
     }
   };
 
+  const downloadUrl = document ? extractDownloadUrlFromDocument(document) : null;
+  const canDownload = hasDownloadablePdf(document, { extraUrl: downloadUrl });
+
   const runDownload = () => {
     if (!document) {
       return;
     }
-    if (hasDownloadablePdf(document)) {
+    if (canDownload && downloadUrl) {
+      window.open(downloadUrl, "_blank", "noopener,noreferrer");
       return;
     }
     if (dataSourceConfig.useDemoData) {
@@ -267,8 +273,7 @@ export function DocumentActionsBar({ document }: { document: Document | null }) 
       }
       return;
     }
-    pushToast(MSG_DOC_DOWNLOAD_NOT_LIVE);
-    pushToast(MSG_DOC_PREVIEW_ONLY);
+    pushToast(MSG_DOC_DOWNLOAD_PENDING);
   };
 
   return (
@@ -294,8 +299,9 @@ export function DocumentActionsBar({ document }: { document: Document | null }) 
         className="hz-btn hz-btn-secondary hz-toolbar-btn"
         type="button"
         onClick={() => runDownload()}
+        title={canDownload ? "Belge dosyasını indir" : MSG_DOC_DOWNLOAD_PENDING}
       >
-        İndir
+        {canDownload ? "İndir" : "İndirme bekleniyor"}
       </button>
       <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void runAction("queueSave")}>
         Arşive al
