@@ -52,7 +52,7 @@ export function OfferCreateHub({ customerId }: { customerId: string | null }) {
         <p className="hz-commercial-create-hub-eyebrow">Teklifler</p>
         <h1 className="hz-commercial-create-hub-title">Yeni teklif</h1>
         <p className="hz-commercial-create-hub-lead">
-          Bu işlem Hızlı İşlem workbench üzerinden hazırlanır. Gerçek kayıt için onay ve işlem kuyruğu bağlantısı gerekir.
+          Hızlı İşlem&apos;de hazırlayın, onaya gönderin; onay sonrası kayıt işlenecek.
         </p>
 
         {dataSourceConfig.useDemoData ? (
@@ -63,7 +63,7 @@ export function OfferCreateHub({ customerId }: { customerId: string | null }) {
 
         <ul className="hz-commercial-create-hub-points">
           <li>Hızlı İşlem&apos;de <strong>Teklif</strong> segmentini seçerek satır, fiyat ve belge taslağını hazırlayın.</li>
-          <li>Bu ekranda taslak kaydet veya gönder simülasyonu yapılmaz.</li>
+          <li>Bu ekranda doğrudan kayıt oluşturulmaz; işlem onay zincirinden geçer.</li>
           {customerId ? (
             <li>
               Cari bağlamı:{" "}

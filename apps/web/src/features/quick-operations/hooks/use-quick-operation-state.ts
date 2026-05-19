@@ -44,6 +44,7 @@ export type QuickOperationSubmitOutcome = {
 
 export type QuickOperationSubmitLinks = {
   showApprovalsLink: boolean;
+  approvalsHref?: string;
   detailHref?: string;
   detailLabel?: string;
 };
@@ -523,6 +524,7 @@ export function useQuickOperationState(options?: {
       setNotice(feedback.notice);
       setSubmitLinks({
         showApprovalsLink: feedback.showApprovalsLink,
+        approvalsHref: feedback.approvalsHref,
         detailHref: feedback.detailHref,
         detailLabel: feedback.detailLabel
       });

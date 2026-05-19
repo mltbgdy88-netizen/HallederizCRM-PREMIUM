@@ -81,8 +81,7 @@ export function PaymentCreateHub({
         <p className="hz-commercial-create-hub-eyebrow">Tahsilatlar</p>
         <h1 className="hz-commercial-create-hub-title">Yeni tahsilat</h1>
         <p className="hz-commercial-create-hub-lead">
-          Bu işlem Hızlı İşlem workbench üzerinden hazırlanır. Gerçek kayıt için onay ve işlem kuyruğu bağlantısı gerekir.
-          Önizleme verisiyle gerçek kayıt oluşturulmaz.
+          Hızlı İşlem&apos;de hazırlayın, onaya gönderin; onay sonrası kayıt işlenecek.
         </p>
 
         {dataSourceConfig.useDemoData ? (
@@ -96,7 +95,7 @@ export function PaymentCreateHub({
             Hızlı İşlem&apos;de <strong>Tahsilat</strong> segmentini seçerek tutar, ödeme yöntemi ve cari eşleşmesini
             hazırlayın.
           </li>
-          <li>Bu ekranda taslak kaydet veya doğrula simülasyonu yapılmaz.</li>
+          <li>Bu ekranda doğrudan kayıt oluşturulmaz; işlem onay zincirinden geçer.</li>
           {sourceOrderId ? (
             <li>
               Sipariş bağlamı: <strong>{resolving ? "yükleniyor…" : sourceOrderNo ?? sourceOrderId}</strong>

@@ -159,10 +159,10 @@ export function ApprovalInboxPage() {
           await rejectApprovalMutation(selectedRecord.id);
           pushToast(resolveApproveRejectToast("reject", dataSourceConfig.useDemoData));
         } else if (dataSourceConfig.useDemoData) {
-          pushToast(resolveExecuteFeedback({ approval, execution: undefined }, { useDemoData: true }));
+          pushToast(resolveExecuteFeedback({ approval, execution: undefined }, { useDemoData: true }).message);
         } else {
           const result = await executeApprovalMutation(selectedRecord.id);
-          pushToast(resolveExecuteFeedback(result, { useDemoData: false }));
+          pushToast(resolveExecuteFeedback(result, { useDemoData: false }).message);
         }
         await bootstrap();
         await refreshDetail();

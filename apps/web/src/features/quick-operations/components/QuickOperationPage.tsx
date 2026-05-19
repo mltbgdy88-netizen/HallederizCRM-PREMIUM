@@ -416,7 +416,7 @@ export function QuickOperationPage() {
         <div className="hz-qop-notice hz-qop-notice--v2" role="status">
           <span>{notice}</span>
           {submitLinks.showApprovalsLink ? (
-            <Link href="/onaylar" className="hz-qop-inline-link">
+            <Link href={submitLinks.approvalsHref ?? "/onaylar"} className="hz-qop-inline-link">
               {MSG_SUBMIT_APPROVALS_HINT}
             </Link>
           ) : null}
