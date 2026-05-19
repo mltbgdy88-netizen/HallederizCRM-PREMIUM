@@ -1,4 +1,11 @@
-import type { ErpConnection, ErpMapping, FactoryOrder, WhatsAppActionRequest, WhatsAppMessage } from "@hallederiz/types";
+import type {
+  ErpConnection,
+  ErpMapping,
+  FactoryOrder,
+  WhatsAppActionRequest,
+  WhatsAppMessage,
+  WhatsAppSessionSnapshot
+} from "@hallederiz/types";
 import type { RequestContext } from "../../shared/request-context";
 import { buildIntegrationsHealthSummary } from "../../shared/service-config";
 import { ErpAdapter } from "./adapters/erp-adapter";
@@ -142,6 +149,28 @@ export class IntegrationsService {
 
   getWhatsAppHealth() {
     return this.whatsappAdapter.getHealth();
+  }
+
+  getWhatsAppSession(): WhatsAppSessionSnapshot {
+    const health = this.getWhatsAppHealth();
+    let connectionStatus: WhatsAppSessionSnapshot["connectionStatus"] = "pending";
+    if (health.status === "misconfigured") {
+      connectionStatus = "disconnected";
+    }
+
+    const details = health.details as Record<string, unknown> | undefined;
+    const qrCandidate = details?.qrDataUrl;
+    const qrDataUrl =
+      typeof qrCandidate === "string" &&
+      (qrCandidate.startsWith("data:image/") || /^https?:\/\//i.test(qrCandidate))
+        ? qrCandidate
+        : undefined;
+
+    return {
+      connectionStatus,
+      qrDataUrl,
+      checkedAt: health.lastCheckedAt
+    };
   }
 
   getErpHealth() {

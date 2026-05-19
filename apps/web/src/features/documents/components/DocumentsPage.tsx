@@ -25,6 +25,7 @@ import {
   extractDownloadUrlFromDocument,
   hasDownloadablePdf,
   resolveDocumentsEmptyMessage,
+  fetchDocumentDownloadLink,
   resolveDemoActionToasts,
   runDocumentLiveAction,
   sanitizeDocumentUserText
@@ -259,7 +260,7 @@ export function DocumentActionsBar({ document }: { document: Document | null }) 
   const downloadUrl = document ? extractDownloadUrlFromDocument(document) : null;
   const canDownload = hasDownloadablePdf(document, { extraUrl: downloadUrl });
 
-  const runDownload = () => {
+  const runDownload = async () => {
     if (!document) {
       return;
     }
@@ -273,7 +274,12 @@ export function DocumentActionsBar({ document }: { document: Document | null }) 
       }
       return;
     }
-    pushToast(MSG_DOC_DOWNLOAD_PENDING);
+    const outcome = await fetchDocumentDownloadLink(document.id, { useDemoData: false });
+    if (outcome.ok && outcome.downloadUrl) {
+      window.open(outcome.downloadUrl, "_blank", "noopener,noreferrer");
+      return;
+    }
+    pushToast(outcome.message || MSG_DOC_DOWNLOAD_PENDING);
   };
 
   return (
@@ -298,7 +304,7 @@ export function DocumentActionsBar({ document }: { document: Document | null }) 
       <button
         className="hz-btn hz-btn-secondary hz-toolbar-btn"
         type="button"
-        onClick={() => runDownload()}
+        onClick={() => void runDownload()}
         title={canDownload ? "Belge dosyasını indir" : MSG_DOC_DOWNLOAD_PENDING}
       >
         {canDownload ? "İndir" : "İndirme bekleniyor"}

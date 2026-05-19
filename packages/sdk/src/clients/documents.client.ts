@@ -1,6 +1,11 @@
-import type { Document, DocumentEntityType, DocumentType } from "@hallederiz/types";
+import type { Document, DocumentDownloadLink, DocumentEntityType, DocumentType, FileSaveJob } from "@hallederiz/types";
 import type { ItemResponse, ListResponse } from "../base";
 import { ApiClient } from "../base";
+
+export type DocumentDownloadUrlResult = {
+  status: number;
+  item?: DocumentDownloadLink;
+};
 
 export interface RenderDocumentInput {
   type: DocumentType;
@@ -37,8 +42,17 @@ export class DocumentsClient {
     return this.api.post<ItemResponse<Document>>(`/documents/${id}/send-email`);
   }
 
+  getDownloadUrl(id: string) {
+    return this.api
+      .getWithStatus<ItemResponse<DocumentDownloadLink>>(`/documents/${id}/download-url`)
+      .then((response) => ({
+        status: response.status,
+        item: response.data.item
+      }) satisfies DocumentDownloadUrlResult);
+  }
+
   queueSave(id: string) {
-    return this.api.post<ItemResponse<unknown>>(`/documents/${id}/queue-save`);
+    return this.api.post<ItemResponse<FileSaveJob>>(`/documents/${id}/queue-save`);
   }
 
   queuePrint(id: string) {

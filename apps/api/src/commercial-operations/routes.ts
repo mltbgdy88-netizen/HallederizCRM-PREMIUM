@@ -690,4 +690,20 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
       return { item: document };
     })
   );
+
+  server.get<{ Params: { id: string } }>("/documents/:id/download-url", async (request, reply) =>
+    withGuards(request, reply, requireReadAccess(readPermissions.documents), async (context) => {
+      const { resolveDocumentDownloadLink } = await import("../modules/documents/download-contract");
+      const service = new CommercialCoreService(context);
+      const document = await service.getDocument(request.params.id);
+      const resolved = resolveDocumentDownloadLink(document, request.params.id);
+      if (resolved.status === 404) {
+        return reply.status(404).send({ message: "Document not found" });
+      }
+      if (resolved.status === 202) {
+        return reply.status(202).send({ item: resolved.item });
+      }
+      return { item: resolved.item };
+    })
+  );
 }

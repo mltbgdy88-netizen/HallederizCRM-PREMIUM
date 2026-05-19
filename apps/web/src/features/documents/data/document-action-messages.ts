@@ -7,6 +7,13 @@ export const MSG_DOC_DOWNLOAD_NOT_LIVE = "Belge indirme henüz canlı kullanıma
 export const MSG_DOC_DOWNLOAD_PENDING =
   "Belge dosyası hazır olduğunda indirme bağlantısı burada görünecek.";
 
+export const MSG_DOC_DOWNLOAD_PREPARING =
+  "Belge dosyası hazırlanıyor; hazır olduğunda indirme bağlantısı görünecek.";
+
+export const MSG_DOC_DOWNLOAD_NOT_READY = "Belge dosyası henüz hazır değil.";
+
+export const MSG_DOC_DOWNLOAD_UNAVAILABLE = "Belge dosyası şu anda alınamıyor.";
+
 export const MSG_DOC_EMAIL_NOT_LIVE = "E-posta gönderimi henüz canlı kullanıma bağlı değil.";
 
 export const MSG_DOC_WHATSAPP_NEED_LINK = "WhatsApp gönderimi için bağlantı tamamlanmalıdır.";

@@ -6,6 +6,8 @@ import {
   MSG_DOC_ARCHIVE_QUEUE,
   MSG_DOC_CUSTOMER_PREVIEW_MISSING,
   MSG_DOC_DOWNLOAD_NOT_LIVE,
+  MSG_DOC_DOWNLOAD_NOT_READY,
+  MSG_DOC_DOWNLOAD_UNAVAILABLE,
   MSG_DOC_EMAIL_NOT_LIVE,
   MSG_DOC_NOT_FOUND,
   MSG_DOC_PDF_NOT_LIVE,
@@ -19,9 +21,11 @@ import {
 } from "../data/document-action-messages";
 import {
   extractDownloadUrlFromDocument,
+  extractDownloadUrlFromLink,
   extractDownloadUrlFromRecord,
   findLatestDelivery,
-  hasDownloadablePdf
+  hasDownloadablePdf,
+  resolveDocumentDownloadUserMessage
 } from "./document-delivery-utils";
 
 const TECHNICAL_PATTERN =
@@ -99,6 +103,9 @@ export function mapDocumentActionError(error: unknown): string {
     if (httpError.status === 404) {
       return MSG_DOC_NOT_FOUND;
     }
+    if (httpError.status === 202) {
+      return resolveDocumentDownloadUserMessage({ httpStatus: 202 });
+    }
     if (httpError.status === 409) {
       return "Kayıt zaten işlendi veya bu adım tekrarlanamaz.";
     }
@@ -171,6 +178,37 @@ export function resolveDemoActionToasts(action: DocumentLiveAction | "download")
   }
 }
 
+export async function fetchDocumentDownloadLink(
+  documentId: string,
+  options: { useDemoData: boolean }
+): Promise<{ ok: boolean; downloadUrl: string | null; message: string }> {
+  if (options.useDemoData) {
+    return { ok: false, downloadUrl: null, message: MSG_DOC_DOWNLOAD_NOT_LIVE };
+  }
+
+  try {
+    const { sdk } = await import("../../../lib/data-source");
+    const response = await sdk.documents.getDownloadUrl(documentId);
+    const url = extractDownloadUrlFromLink(response.item);
+    if (response.status === 200 && url) {
+      return { ok: true, downloadUrl: url, message: "" };
+    }
+    return {
+      ok: false,
+      downloadUrl: null,
+      message: resolveDocumentDownloadUserMessage({ httpStatus: response.status, link: response.item })
+    };
+  } catch (error) {
+    if (readApiError(error)?.status === 404) {
+      return { ok: false, downloadUrl: null, message: MSG_DOC_DOWNLOAD_NOT_READY };
+    }
+    if (isOfflineLikeError(error)) {
+      return { ok: false, downloadUrl: null, message: MSG_DOC_DOWNLOAD_UNAVAILABLE };
+    }
+    return { ok: false, downloadUrl: null, message: mapDocumentActionError(error) };
+  }
+}
+
 export async function runDocumentLiveAction(
   action: DocumentLiveAction,
   documentId: string,
@@ -197,7 +235,7 @@ export async function runDocumentLiveAction(
       document = response.item;
     } else if (action === "queueSave") {
       const response = await sdk.documents.queueSave(documentId);
-      downloadUrl = extractDownloadUrlFromRecord(response.item as Record<string, unknown>);
+      downloadUrl = extractDownloadUrlFromRecord(response.item as unknown as Record<string, unknown>);
     } else if (action === "queuePrint") {
       await sdk.documents.queuePrint(documentId);
     }

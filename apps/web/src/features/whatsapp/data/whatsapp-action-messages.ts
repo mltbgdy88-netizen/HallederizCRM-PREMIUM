@@ -15,7 +15,11 @@ export const MSG_WA_AUTO_REPLY_OFF =
 
 export const MSG_WA_LIVE_WAITING = "Canlı bağlantı bekleniyor";
 
+export const MSG_WA_CHANNEL_READY = "Canlı bağlantı hazır";
+
 export const MSG_WA_CHANNEL_WAITING = "WhatsApp bağlantısı tamamlandığında gönderim yapılabilir.";
+
+export const MSG_WA_CONNECTION_NEEDED = "Bu işlem için canlı bağlantı gerekir.";
 
 export const MSG_WA_OUTBOUND_QUEUE = "Mesaj iletim kuyruğuna alındı.";
 

@@ -27,6 +27,7 @@ import {
   MSG_WA_APPROVAL_PREVIEW,
   MSG_WA_AUTO_REPLY_OFF,
   MSG_WA_CHANNEL_WAITING,
+  MSG_WA_CONNECTION_NEEDED,
   MSG_WA_CONNECTION_REQUIRED,
   MSG_WA_DOCUMENT_PREVIEW,
   MSG_WA_DOC_ATTACH_NOT_LIVE,
@@ -39,7 +40,9 @@ import {
   MSG_WA_VOICE_NOT_LIVE
 } from "../data/whatsapp-action-messages";
 import { resolveCustomerEmptyMessage, sanitizeWhatsAppUserText } from "../utils/whatsapp-action-feedback";
+import type { WhatsAppSessionSnapshot } from "@hallederiz/types";
 import { mapWhatsAppChannelHealthView, type WhatsAppChannelHealthSnapshot } from "../utils/whatsapp-channel-health";
+import { canSendWhatsAppOutbound, runWhatsAppOutboundSend } from "../utils/whatsapp-outbound-feedback";
 import { WhatsAppProductionSecurityChecklist } from "./WhatsAppProductionSecurityChecklist";
 
 type QueueChip = "all" | "unread" | "approval" | "risk";
@@ -154,15 +157,25 @@ function MessageBubble({ message }: { message: WhatsAppMessage }) {
 }
 
 function WhatsAppConnectionPanel({ healthView }: { healthView: ReturnType<typeof mapWhatsAppChannelHealthView> }) {
+  const dotClass =
+    healthView.dotTone === "error" ? "danger" : healthView.dotTone === "ok" ? "ok" : "warn";
+
   return (
     <article className="hz-wa-connection-card" aria-label="WhatsApp bağlantısı">
       <p className="hz-wa-connection-status">
-        <span className={`hz-wa-dot hz-wa-dot--${healthView.dotTone === "error" ? "danger" : "warn"}`} aria-hidden />
+        <span className={`hz-wa-dot hz-wa-dot--${dotClass}`} aria-hidden />
         {healthView.statusLine}
       </p>
       <div className="hz-wa-qr-placeholder" role="status">
-        <p className="hz-wa-qr-placeholder-title">QR bağlantısı</p>
-        <p>{MSG_WA_QR_PLACEHOLDER}</p>
+        {healthView.qrDataUrl ? (
+          // eslint-disable-next-line @next/next/no-img-element -- QR provider returns data URL or HTTPS image.
+          <img src={healthView.qrDataUrl} alt="WhatsApp QR bağlantı kodu" className="hz-wa-qr-image" />
+        ) : (
+          <>
+            <p className="hz-wa-qr-placeholder-title">QR bağlantısı</p>
+            <p>{MSG_WA_QR_PLACEHOLDER}</p>
+          </>
+        )}
       </div>
       <p className="hz-wa-connection-note">{healthView.note || MSG_WA_CHANNEL_WAITING}</p>
       <p className="hz-wa-connection-note">{MSG_WA_AUTO_REPLY_OFF}</p>
@@ -191,35 +204,38 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
   const [chip, setChip] = useState<QueueChip>("all");
   const [demoDone, setDemoDone] = useState<Record<string, boolean>>({});
   const [channelHealth, setChannelHealth] = useState<WhatsAppChannelHealthSnapshot | null>(null);
+  const [channelSession, setChannelSession] = useState<WhatsAppSessionSnapshot | null>(null);
 
   useEffect(() => {
     if (useDemo || dataSourceConfig.useDemoData) {
       setChannelHealth(null);
+      setChannelSession(null);
       return;
     }
 
     let cancelled = false;
 
-    void sdk.whatsapp
-      .getChannelHealth()
-      .then((response) => {
+    void Promise.all([sdk.whatsapp.getChannelHealth(), sdk.whatsapp.getSession()])
+      .then(([healthResponse, sessionResponse]) => {
         if (cancelled) {
           return;
         }
-        const item = response.item;
-        if (!item) {
-          setChannelHealth(null);
-          return;
-        }
-        setChannelHealth({
-          status: item.status,
-          message: item.message,
-          mode: item.mode
-        });
+        const healthItem = healthResponse.item;
+        setChannelHealth(
+          healthItem
+            ? {
+                status: healthItem.status,
+                message: healthItem.message ?? healthItem.reason ?? "",
+                mode: healthItem.mode
+              }
+            : null
+        );
+        setChannelSession(sessionResponse.item ?? null);
       })
       .catch(() => {
         if (!cancelled) {
           setChannelHealth(null);
+          setChannelSession(null);
         }
       });
 
@@ -229,9 +245,11 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
   }, [useDemo]);
 
   const healthView = useMemo(
-    () => mapWhatsAppChannelHealthView(channelHealth, { useDemoData: useDemo }),
-    [channelHealth, useDemo]
+    () => mapWhatsAppChannelHealthView(channelHealth, channelSession, { useDemoData: useDemo }),
+    [channelHealth, channelSession, useDemo]
   );
+
+  const outboundReady = canSendWhatsAppOutbound(channelSession, useDemo);
 
   const filtered = useMemo(() => filterConversations(conversations, chip, useDemo), [conversations, chip, useDemo]);
   const filteredKey = useMemo(() => filtered.map((c) => c.id).join("|"), [filtered]);
@@ -522,10 +540,25 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
                 <button
                   type="button"
                   className="hz-wa-action-button hz-wa-action-button--send"
-                  disabled={Boolean(demoDone.send)}
+                  disabled={useDemo ? Boolean(demoDone.send) : !outboundReady}
                   onClick={() => {
-                    pushToast(MSG_WA_PREVIEW_SEND);
-                    fireDemo("send", MSG_WA_CONNECTION_REQUIRED);
+                    if (useDemo) {
+                      pushToast(MSG_WA_PREVIEW_SEND);
+                      fireDemo("send", MSG_WA_CONNECTION_REQUIRED);
+                      return;
+                    }
+                    if (!outboundReady || !selectedId) {
+                      pushToast(MSG_WA_CONNECTION_NEEDED);
+                      return;
+                    }
+                    void runWhatsAppOutboundSend({
+                      useDemoData: false,
+                      session: channelSession,
+                      conversationId: selectedId,
+                      body: aiDraft
+                    }).then((outcome) => {
+                      pushToast(outcome.toast);
+                    });
                   }}
                 >
                   <IconSend size={15} aria-hidden />

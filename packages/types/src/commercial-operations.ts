@@ -366,6 +366,17 @@ export type DocumentType =
 export type DocumentDeliveryStatus = "queued" | "sent" | "delivered" | "failed";
 export type DocumentEntityType = "offer" | "order" | "payment" | "warehouse_order" | "delivery" | "dispatch" | "invoice" | "statement" | "return";
 
+export type DocumentFileStatus = "pending" | "ready" | "unavailable";
+
+export interface DocumentDownloadLink {
+  documentId: DocumentId;
+  status: DocumentFileStatus;
+  downloadUrl?: string;
+  expiresAt?: string;
+  jobId?: string;
+  archiveId?: string;
+}
+
 export interface Document {
   id: DocumentId;
   tenantId: TenantId;
@@ -380,6 +391,9 @@ export interface Document {
   createdAt: string;
   createdBy: UserId;
   deliveries: DocumentDelivery[];
+  /** Set only when a verified HTTPS download URL exists. */
+  downloadUrl?: string;
+  fileStatus?: DocumentFileStatus;
 }
 
 export interface DocumentDelivery {
@@ -692,6 +706,19 @@ export interface WhatsAppMessage {
   sentAt: string;
   status: "received" | "queued" | "sent" | "delivered" | "failed";
 }
+
+export type WhatsAppConnectionStatus = "connected" | "pending" | "disconnected";
+
+export interface WhatsAppSessionSnapshot {
+  connectionStatus: WhatsAppConnectionStatus;
+  qrDataUrl?: string;
+  checkedAt?: string;
+}
+
+/** Matches POST /whatsapp/outbound body (partial message fields). */
+export type WhatsAppOutboundPayload = Partial<
+  Pick<WhatsAppMessage, "conversationId" | "type" | "body" | "attachmentTitle" | "quotedMessageId">
+>;
 
 export interface WhatsAppTemplate {
   id: string;
