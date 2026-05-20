@@ -10,6 +10,7 @@ import { registerWorkerRoutes, type WorkerRouteDeps } from "./worker-routes";
 import { registerUsageRoutes } from "./usage-routes";
 import { registerProductionReadinessRoutes } from "./production-readiness-routes";
 import { registerAiSalesRoutes } from "./ai-sales-routes";
+import { registerTimelineRoutes } from "./timeline-routes";
 
 export interface PlatformCoreRouteDeps {
   approvalRoutes?: ApprovalRouteDeps;
@@ -28,4 +29,5 @@ export async function registerPlatformCoreRoutes(server: FastifyInstance, deps: 
   await registerOmnichannelRoutes(server);
   await registerOmnichannelWebhookRoutes(server);
   await registerProductionReadinessRoutes(server);
+  await registerTimelineRoutes(server);
 }

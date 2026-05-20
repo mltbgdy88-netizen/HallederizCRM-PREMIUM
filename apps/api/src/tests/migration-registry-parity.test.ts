@@ -10,6 +10,7 @@ import {
 test("migration registry includes ai foundation and ordered sql files", () => {
   const names = listMigrationRegistryNames();
   assert.ok(names.includes("20260502_ai_foundation"));
+  assert.ok(names.includes("0014_commercial_line_tables"));
   for (const file of ORDERED_SQL_MIGRATION_FILES) {
     const id = file.replace(/\.sql$/i, "");
     assert.ok(names.includes(id), `missing migration ${id}`);

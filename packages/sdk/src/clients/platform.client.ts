@@ -1,4 +1,4 @@
-import type { PlatformSettings, RolePresetItem, User } from "@hallederiz/types";
+import type { EntityTimelineItem, PlatformSettings, RolePresetItem, User } from "@hallederiz/types";
 import type { ItemResponse, ListResponse } from "../base";
 import { ApiClient } from "../base";
 
@@ -163,5 +163,10 @@ export class PlatformClient {
 
   listRolePresets() {
     return this.api.get<ListResponse<RolePresetItem>>("/roles/presets");
+  }
+
+  listEntityTimeline(entityType: string, entityId: string) {
+    const query = new URLSearchParams({ entityType, entityId });
+    return this.api.get<ListResponse<EntityTimelineItem>>(`/timeline?${query.toString()}`);
   }
 }

@@ -134,12 +134,23 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
 
   server.post<{ Params: { id: string } }>("/orders/:id/confirm", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["orders.write", "orders.confirm"])], async (context) => {
-      const service = new CommercialCoreService(context);
-      const order = await service.confirmOrder(request.params.id);
-      if (!order) {
+      const wrapped = await withMutationPolicy({
+        request,
+        reply,
+        context,
+        actionKey: "platform.orders.confirm",
+        entityType: "order",
+        entityId: request.params.id,
+        payload: { orderId: request.params.id },
+        handler: async () => new CommercialCoreService(context).confirmOrder(request.params.id)
+      });
+      if (wrapped.handled) {
+        return reply.status(wrapped.statusCode).send(wrapped.body);
+      }
+      if (!wrapped.value) {
         return reply.status(404).send({ message: "Order not found" });
       }
-      return { item: order };
+      return { item: wrapped.value };
     });
   });
 
@@ -178,12 +189,23 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
 
   server.post<{ Params: { id: string } }>("/orders/:id/cancel", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["orders.write", "orders.cancel"])], async (context) => {
-      const service = new CommercialCoreService(context);
-      const order = service.cancelOrder(request.params.id);
-      if (!order) {
+      const wrapped = await withMutationPolicy({
+        request,
+        reply,
+        context,
+        actionKey: "platform.orders.cancel",
+        entityType: "order",
+        entityId: request.params.id,
+        payload: { orderId: request.params.id },
+        handler: async () => new CommercialCoreService(context).cancelOrder(request.params.id)
+      });
+      if (wrapped.handled) {
+        return reply.status(wrapped.statusCode).send(wrapped.body);
+      }
+      if (!wrapped.value) {
         return reply.status(404).send({ message: "Order not found" });
       }
-      return { item: order };
+      return { item: wrapped.value };
     });
   });
 
@@ -424,17 +446,23 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   );
   server.post<{ Params: { id: string } }>("/deliveries/:id/complete", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["deliveries.write", "deliveries.complete"])], async (context) => {
-      const service = new CommercialCoreService(context);
-      const delivery = await service.completeDelivery(request.params.id);
-      if (!delivery) return reply.status(404).send({ message: "Delivery not found" });
-      recordAuditEvent(context, {
+      const wrapped = await withMutationPolicy({
+        request,
+        reply,
+        context,
+        actionKey: "platform.deliveries.complete",
         entityType: "delivery",
-        entityId: delivery.id,
-        eventType: "delivery.completed",
-        title: "Teslimat tamamlandi",
-        description: `${delivery.deliveryNo} teslimati tamamlandi.`
+        entityId: request.params.id,
+        payload: { deliveryId: request.params.id },
+        handler: async () => new CommercialCoreService(context).completeDelivery(request.params.id)
       });
-      return { item: delivery };
+      if (wrapped.handled) {
+        return reply.status(wrapped.statusCode).send(wrapped.body);
+      }
+      if (!wrapped.value) {
+        return reply.status(404).send({ message: "Delivery not found" });
+      }
+      return { item: wrapped.value };
     })
   );
   server.post<{ Params: { id: string } }>("/deliveries/:id/rollback", async (request, reply) =>
@@ -490,17 +518,23 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   );
   server.post<{ Params: { id: string } }>("/invoices/:id/issue", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["invoices.write", "invoices.issue"])], async (context) => {
-      const service = new CommercialCoreService(context);
-      const invoice = await service.issueInvoice(request.params.id);
-      if (!invoice) return reply.status(404).send({ message: "Invoice not found" });
-      recordAuditEvent(context, {
+      const wrapped = await withMutationPolicy({
+        request,
+        reply,
+        context,
+        actionKey: "platform.invoices.issue",
         entityType: "invoice",
-        entityId: invoice.id,
-        eventType: "invoice.issued",
-        title: "Fatura kesildi",
-        description: `${invoice.invoiceNo} faturasi kesildi.`
+        entityId: request.params.id,
+        payload: { invoiceId: request.params.id },
+        handler: async () => new CommercialCoreService(context).issueInvoice(request.params.id)
       });
-      return { item: invoice };
+      if (wrapped.handled) {
+        return reply.status(wrapped.statusCode).send(wrapped.body);
+      }
+      if (!wrapped.value) {
+        return reply.status(404).send({ message: "Invoice not found" });
+      }
+      return { item: wrapped.value };
     })
   );
   server.post<{ Params: { id: string } }>("/invoices/:id/cancel", async (request, reply) =>
@@ -556,17 +590,23 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   );
   server.post<{ Params: { id: string } }>("/returns/:id/approve", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["returns.write", "returns.approve"])], async (context) => {
-      const service = new CommercialCoreService(context);
-      const returnRecord = await service.approveReturn(request.params.id);
-      if (!returnRecord) return reply.status(404).send({ message: "Return not found" });
-      recordAuditEvent(context, {
+      const wrapped = await withMutationPolicy({
+        request,
+        reply,
+        context,
+        actionKey: "platform.returns.approve",
         entityType: "return",
-        entityId: returnRecord.id,
-        eventType: "return.approved",
-        title: "Iade onaylandi",
-        description: `${returnRecord.returnNo} iadesi onaylandi.`
+        entityId: request.params.id,
+        payload: { returnId: request.params.id },
+        handler: async () => new CommercialCoreService(context).approveReturn(request.params.id)
       });
-      return { item: returnRecord };
+      if (wrapped.handled) {
+        return reply.status(wrapped.statusCode).send(wrapped.body);
+      }
+      if (!wrapped.value) {
+        return reply.status(404).send({ message: "Return not found" });
+      }
+      return { item: wrapped.value };
     })
   );
   server.post<{ Params: { id: string } }>("/returns/:id/receive", async (request, reply) =>
@@ -654,55 +694,65 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   );
   server.post<{ Params: { id: string } }>("/documents/:id/regenerate", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["documents.write", "documents.render"])], async (context) => {
-      const service = new CommercialCoreService(context);
-      const regenerated = await service.regenerateDocument(request.params.id);
-      if (!regenerated) return reply.status(404).send({ message: "Document not found" });
-      recordAuditEvent(context, {
+      const wrapped = await withMutationPolicy({
+        request,
+        reply,
+        context,
+        actionKey: "platform.documents.regenerate",
         entityType: "document",
-        entityId: regenerated.id,
-        eventType: "document.regenerated",
-        title: "Belge yeniden olusturuldu",
-        description: `${regenerated.documentNo} belgesi yeniden uretildi.`
+        entityId: request.params.id,
+        payload: { documentId: request.params.id },
+        handler: async () => new CommercialCoreService(context).regenerateDocument(request.params.id)
       });
-      return reply.status(201).send({ item: regenerated });
+      if (wrapped.handled) {
+        return reply.status(wrapped.statusCode).send(wrapped.body);
+      }
+      if (!wrapped.value) {
+        return reply.status(404).send({ message: "Document not found" });
+      }
+      return reply.status(201).send({ item: wrapped.value });
     })
   );
   server.post<{ Params: { id: string } }>("/documents/:id/send-whatsapp", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["documents.write", "integrations.write"])], async (context) => {
-      const policyResult = await enforcePolicyForRoute(context, {
-        actionKey: "platform.documents.send",
-        requiredPermissions: ["documents.write", "integrations.write"],
-        productionActionType: "document_send",
+      const wrapped = await withMutationPolicy({
+        request,
+        reply,
+        context,
+        actionKey: "platform.documents.send_whatsapp",
+        entityType: "document",
+        entityId: request.params.id,
         payload: { documentId: request.params.id, channel: "whatsapp" },
-        channel: "whatsapp",
-        source: "api"
+        handler: async () => new CommercialCoreService(context).sendDocumentWhatsApp(request.params.id)
       });
-      if (policyResult.handled) {
-        return reply.status(policyResult.statusCode).send(policyResult.body);
+      if (wrapped.handled) {
+        return reply.status(wrapped.statusCode).send(wrapped.body);
       }
-
-      const service = new CommercialCoreService(context);
-      const document = await service.sendDocumentWhatsApp(request.params.id);
-      if (!document) return reply.status(404).send({ message: "Document not found" });
-      return { item: document };
+      if (!wrapped.value) {
+        return reply.status(404).send({ message: "Document not found" });
+      }
+      return { item: wrapped.value };
     })
   );
   server.post<{ Params: { id: string } }>("/documents/:id/send-email", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["documents.write", "integrations.write"])], async (context) => {
-      const policyResult = await enforcePolicyForRoute(context, {
-        actionKey: "platform.documents.send",
-        requiredPermissions: ["documents.write", "integrations.write"],
-        productionActionType: "document_send",
-        payload: { documentId: request.params.id, channel: "email" }
+      const wrapped = await withMutationPolicy({
+        request,
+        reply,
+        context,
+        actionKey: "platform.documents.send_email",
+        entityType: "document",
+        entityId: request.params.id,
+        payload: { documentId: request.params.id, channel: "email" },
+        handler: async () => new CommercialCoreService(context).sendDocumentEmail(request.params.id)
       });
-      if (policyResult.handled) {
-        return reply.status(policyResult.statusCode).send(policyResult.body);
+      if (wrapped.handled) {
+        return reply.status(wrapped.statusCode).send(wrapped.body);
       }
-
-      const service = new CommercialCoreService(context);
-      const document = await service.sendDocumentEmail(request.params.id);
-      if (!document) return reply.status(404).send({ message: "Document not found" });
-      return { item: document };
+      if (!wrapped.value) {
+        return reply.status(404).send({ message: "Document not found" });
+      }
+      return { item: wrapped.value };
     })
   );
 
