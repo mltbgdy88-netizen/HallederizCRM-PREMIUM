@@ -1,0 +1,744 @@
+{
+  "png_count": 319,
+  "notes_count": 54,
+  "route_count": 53,
+  "routes": [
+    {
+      "folder": "01-auth/login",
+      "path": "/login",
+      "title": "Giriş",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-validation-error.png",
+        "desktop-success-or-submitted.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "02-platform/dashboard",
+      "path": "/dashboard",
+      "title": "Gösterge Paneli",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "02-platform/panel-redirect",
+      "path": "/panel",
+      "title": "Panel Yönlendirme",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "03-operations/hizli-islem",
+      "path": "/hizli-islem",
+      "title": "Hızlı İşlem",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "03-operations/onaylar",
+      "path": "/onaylar",
+      "title": "Onaylar",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "03-operations/onaylar-id",
+      "path": "/onaylar/[id]",
+      "title": "Onay Detayı",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-detail.png",
+        "desktop-audit-timeline.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "03-operations/onaylar-kurallar",
+      "path": "/onaylar/kurallar",
+      "title": "Onay Kuralları",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "04-communication/whatsapp",
+      "path": "/whatsapp",
+      "title": "WhatsApp Operasyon",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "04-communication/gelen-kutu",
+      "path": "/gelen-kutu",
+      "title": "Gelen Kutu",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "04-communication/gelen-kutu-konusma-id",
+      "path": "/gelen-kutu/konusma/[id]",
+      "title": "Konuşma Detayı",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-detail.png",
+        "desktop-audit-timeline.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "05-crm/cariler",
+      "path": "/cariler",
+      "title": "Cariler",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "05-crm/cariler-id",
+      "path": "/cariler/[id]",
+      "title": "Cari Detayı",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-detail.png",
+        "desktop-audit-timeline.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "05-crm/cariler-yeni",
+      "path": "/cariler/yeni",
+      "title": "Yeni Cari",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-validation-error.png",
+        "desktop-success-or-submitted.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "06-commercial/teklifler",
+      "path": "/teklifler",
+      "title": "Teklifler",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "06-commercial/teklifler-id",
+      "path": "/teklifler/[id]",
+      "title": "Teklif Detayı",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-detail.png",
+        "desktop-audit-timeline.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "06-commercial/teklifler-yeni",
+      "path": "/teklifler/yeni",
+      "title": "Yeni Teklif",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "06-commercial/siparisler",
+      "path": "/siparisler",
+      "title": "Siparişler",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "06-commercial/siparisler-id",
+      "path": "/siparisler/[id]",
+      "title": "Sipariş Detayı",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-detail.png",
+        "desktop-audit-timeline.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "06-commercial/siparisler-yeni",
+      "path": "/siparisler/yeni",
+      "title": "Yeni Sipariş",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "06-commercial/tahsilatlar",
+      "path": "/tahsilatlar",
+      "title": "Tahsilatlar",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "06-commercial/tahsilatlar-id",
+      "path": "/tahsilatlar/[id]",
+      "title": "Tahsilat Detayı",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-detail.png",
+        "desktop-audit-timeline.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "06-commercial/tahsilatlar-yeni",
+      "path": "/tahsilatlar/yeni",
+      "title": "Yeni Tahsilat",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "06-commercial/teslimatlar",
+      "path": "/teslimatlar",
+      "title": "Teslimatlar",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "06-commercial/teslimatlar-id",
+      "path": "/teslimatlar/[id]",
+      "title": "Teslimat Detayı",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-detail.png",
+        "desktop-audit-timeline.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "06-commercial/iadeler",
+      "path": "/iadeler",
+      "title": "İadeler",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "06-commercial/iadeler-id",
+      "path": "/iadeler/[id]",
+      "title": "İade Detayı",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-detail.png",
+        "desktop-audit-timeline.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "06-commercial/faturalar",
+      "path": "/faturalar",
+      "title": "Faturalar",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "06-commercial/faturalar-id",
+      "path": "/faturalar/[id]",
+      "title": "Fatura Detayı",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-detail.png",
+        "desktop-audit-timeline.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "07-stock-warehouse/stok",
+      "path": "/stok",
+      "title": "Stok",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "07-stock-warehouse/depo",
+      "path": "/depo",
+      "title": "Depo Operasyon",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "07-stock-warehouse/fabrikalar-shell",
+      "path": "/fabrikalar/*",
+      "title": "Fabrikalar Shell",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-placeholder.png",
+        "mobile-placeholder.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "08-documents-tasks/belgeler",
+      "path": "/belgeler",
+      "title": "Belgeler",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "08-documents-tasks/belgeler-id",
+      "path": "/belgeler/[id]",
+      "title": "Belge Detayı",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-detail.png",
+        "desktop-audit-timeline.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "08-documents-tasks/gorevler",
+      "path": "/gorevler",
+      "title": "Görevler",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "08-documents-tasks/gorevler-id",
+      "path": "/gorevler/[id]",
+      "title": "Görev Detayı",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-detail.png",
+        "desktop-audit-timeline.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "09-archive-reports/archive",
+      "path": "/archive",
+      "title": "Arşiv",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "09-archive-reports/raporlar",
+      "path": "/raporlar",
+      "title": "Raporlar",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "09-archive-reports/raporlar-catchall",
+      "path": "/raporlar/[...]",
+      "title": "Alt Rapor Shell",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-placeholder.png",
+        "mobile-placeholder.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "10-ai/ai",
+      "path": "/ai",
+      "title": "AI Merkezi",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "10-ai/ai-onaylar",
+      "path": "/ai/onaylar",
+      "title": "AI Onay İnceleme",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "10-ai/ai-icgoruler",
+      "path": "/ai/icgoruler",
+      "title": "AI İçgörüler",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "11-settings-users-erp/ayarlar",
+      "path": "/ayarlar",
+      "title": "Ayarlar",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "11-settings-users-erp/ayarlar-subpage-template",
+      "path": "/ayarlar/*",
+      "title": "Alt Ayar Şablonu",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-validation-error.png",
+        "desktop-success-or-submitted.png",
+        "desktop-placeholder.png",
+        "mobile-placeholder.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "11-settings-users-erp/kullanicilar",
+      "path": "/kullanicilar",
+      "title": "Kullanıcılar",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "11-settings-users-erp/kullanicilar-roller",
+      "path": "/kullanicilar/roller",
+      "title": "Roller ve Yetkiler",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "11-settings-users-erp/erp",
+      "path": "/erp",
+      "title": "ERP Entegrasyonu",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "11-settings-users-erp/workflow-type-id",
+      "path": "/workflow/[type]/[id]",
+      "title": "Workflow Timeline",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-detail.png",
+        "desktop-audit-timeline.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "12-common-layers/unauthorized",
+      "path": "/unauthorized",
+      "title": "Yetkisiz Erişim",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-placeholder.png",
+        "mobile-placeholder.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "12-common-layers/offline-api",
+      "path": "/offline-api",
+      "title": "API Çevrimdışı",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-placeholder.png",
+        "mobile-placeholder.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "12-common-layers/demo-mode",
+      "path": "/demo-mode",
+      "title": "Demo Modu",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-placeholder.png",
+        "mobile-placeholder.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "12-common-layers/live-empty",
+      "path": "/live-empty",
+      "title": "Canlı Veri Boş",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-placeholder.png",
+        "mobile-placeholder.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "12-common-layers/mobile-drawer",
+      "path": "/mobile-drawer",
+      "title": "Mobil Drawer",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-placeholder.png",
+        "mobile-placeholder.png",
+        "notes.md"
+      ]
+    },
+    {
+      "folder": "12-common-layers/print-export",
+      "path": "/print-export",
+      "title": "Yazdır / Dışa Aktar",
+      "files": [
+        "desktop-default.png",
+        "desktop-loading.png",
+        "desktop-empty.png",
+        "desktop-error.png",
+        "mobile-default.png",
+        "desktop-placeholder.png",
+        "mobile-placeholder.png",
+        "notes.md"
+      ]
+    }
+  ]
+}
