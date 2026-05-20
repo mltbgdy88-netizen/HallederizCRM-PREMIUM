@@ -31,6 +31,7 @@ import { buildRequestContext } from "../shared/request-context";
 import { asApiErrorPayload } from "../shared/errors";
 import { assertAnyPermission, assertAuthenticated, withGuards } from "../shared/auth-guards";
 import { recordAuditEvent } from "../shared/audit-timeline";
+import { withMutationPolicy } from "../shared/mutation-policy";
 import { readPermissions, requireReadAccess } from "../shared/read-guards";
 import { enforcePolicyForRoute } from "../shared/policy-route-enforcement";
 
@@ -231,37 +232,51 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
 
   server.post<{ Params: { id: string } }>("/payments/:id/confirm", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["payments.write", "payments.confirm"])], async (context) => {
-      const service = new CommercialCoreService(context);
-      const payment = await service.confirmPayment(request.params.id);
-      if (!payment) {
+      const wrapped = await withMutationPolicy({
+        request,
+        reply,
+        context,
+        actionKey: "platform.payments.confirm",
+        entityType: "payment",
+        entityId: request.params.id,
+        payload: { paymentId: request.params.id },
+        handler: async () => {
+          const service = new CommercialCoreService(context);
+          return service.confirmPayment(request.params.id);
+        }
+      });
+      if (wrapped.handled) {
+        return reply.status(wrapped.statusCode).send(wrapped.body);
+      }
+      if (!wrapped.value) {
         return reply.status(404).send({ message: "Payment not found" });
       }
-      recordAuditEvent(context, {
-        entityType: "payment",
-        entityId: payment.id,
-        eventType: "payment.confirmed",
-        title: "Tahsilat onaylandi",
-        description: `${payment.receiptNo} tahsilati onaylandi.`
-      });
-      return { item: payment };
+      return { item: wrapped.value };
     });
   });
 
   server.post<{ Params: { id: string }; Body: { reason?: string } }>("/payments/:id/reverse", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["payments.write", "payments.reverse"])], async (context) => {
-      const service = new CommercialCoreService(context);
-      const reversal = await service.reversePayment(request.params.id, request.body?.reason);
-      if (!reversal) {
+      const wrapped = await withMutationPolicy({
+        request,
+        reply,
+        context,
+        actionKey: "platform.payments.reverse",
+        entityType: "payment",
+        entityId: request.params.id,
+        payload: { paymentId: request.params.id, reason: request.body?.reason },
+        handler: async () => {
+          const service = new CommercialCoreService(context);
+          return service.reversePayment(request.params.id, request.body?.reason);
+        }
+      });
+      if (wrapped.handled) {
+        return reply.status(wrapped.statusCode).send(wrapped.body);
+      }
+      if (!wrapped.value) {
         return reply.status(404).send({ message: "Payment not found" });
       }
-      recordAuditEvent(context, {
-        entityType: "payment",
-        entityId: reversal.paymentId,
-        eventType: "payment.reversed",
-        title: "Tahsilat ters kayda alindi",
-        description: reversal.reason
-      });
-      return { item: reversal };
+      return { item: wrapped.value };
     });
   });
 

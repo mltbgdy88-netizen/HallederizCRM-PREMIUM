@@ -1,3 +1,5 @@
+export * from "./audit-event-repository";
+export * from "./timeline-event-repository";
 export * from "./approval-execution-log-repository";
 export * from "./outbox-job-repository";
 export * from "./pending-approval-repository";
