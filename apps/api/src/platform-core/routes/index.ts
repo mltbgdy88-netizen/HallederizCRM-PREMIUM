@@ -2,6 +2,7 @@ import type { FastifyInstance } from "fastify";
 import { registerApprovalRoutes, type ApprovalRouteDeps } from "./approval-routes";
 import { registerAuthRoutes } from "./auth-routes";
 import { registerOmnichannelRoutes } from "./omnichannel-routes";
+import { registerOmnichannelWebhookRoutes } from "./omnichannel-webhook-routes";
 import { registerRoleRoutes } from "./role-routes";
 import { registerSettingsRoutes } from "./settings-routes";
 import { registerUserRoutes } from "./user-routes";
@@ -25,5 +26,6 @@ export async function registerPlatformCoreRoutes(server: FastifyInstance, deps: 
   await registerUsageRoutes(server);
   await registerAiSalesRoutes(server);
   await registerOmnichannelRoutes(server);
+  await registerOmnichannelWebhookRoutes(server);
   await registerProductionReadinessRoutes(server);
 }

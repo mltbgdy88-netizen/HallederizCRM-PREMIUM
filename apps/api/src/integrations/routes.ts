@@ -9,6 +9,8 @@ import { AiRuntimeService } from "../modules/ai-runtime/service";
 import { getLocalAgentStatus } from "../ai-local-output-store";
 import { readPermissions, requireReadAccess } from "../shared/read-guards";
 import { enforcePolicyForRoute } from "../shared/policy-route-enforcement";
+import { resolveOmnichannelRuntime } from "../shared/omnichannel-runtime";
+import { OmnichannelInboundService } from "../modules/omnichannel-inbound/service";
 
 type RequestWithRawBody = {
   rawBody?: string;
@@ -191,6 +193,19 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
 
         if (messageBody) {
           await service.receiveWhatsAppInbound({ body: messageBody, type: "text" });
+          const omnichannelRuntime = resolveOmnichannelRuntime({
+            tenantId,
+            userId: "system",
+            persistenceMode: process.env.NODE_ENV === "production" ? "postgres" : "demo"
+          });
+          if (omnichannelRuntime.conversationRepository && omnichannelRuntime.messageRepository) {
+            await new OmnichannelInboundService(omnichannelRuntime).bridgeWhatsAppInbound({
+              tenantId,
+              from,
+              messageId,
+              text: messageBody
+            });
+          }
         }
         await whatsAppWorkflowStoreService.markProcessed(tenantId, workflowPayload);
       } catch (error) {

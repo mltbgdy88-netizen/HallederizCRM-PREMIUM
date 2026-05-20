@@ -250,6 +250,18 @@ export async function registerOmnichannelRoutes(server: FastifyInstance) {
     })
   );
 
+  server.get<{ Params: { id: string } }>("/platform/omnichannel/conversations/:id/ai-suggestions", async (request, reply) =>
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, readPermissions)], async (context) => {
+      const resolved = ensureRuntime(context);
+      if (resolved.error || !resolved.runtime.aiReplySuggestionRepository) {
+        return reply.status(503).send({ ok: false, error: "ai_suggestions_unavailable" });
+      }
+
+      const items = await resolved.runtime.aiReplySuggestionRepository.listByConversation(context.tenantId, request.params.id);
+      return { items, total: items.length };
+    })
+  );
+
   server.get("/platform/omnichannel/health", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, readPermissions)], async (context) => {
       const runtime = resolveOmnichannelRuntime(context);

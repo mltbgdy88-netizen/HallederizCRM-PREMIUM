@@ -1,9 +1,9 @@
-import { renderProductCatchAll } from "../../../../../src/navigation/render-product-catch-all";
+import { OmnichannelConversationDetailPage } from "../../../../../src/features/inbox/components/OmnichannelConversationDetailPage";
 
 type PageProps = {
   params: { conversationId: string };
 };
 
 export default function GelenKutuKonusmaPage({ params }: PageProps) {
-  return renderProductCatchAll(["gelen-kutu", "konusma", params.conversationId]);
+  return <OmnichannelConversationDetailPage conversationId={params.conversationId} />;
 }
