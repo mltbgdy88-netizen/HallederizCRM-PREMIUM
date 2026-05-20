@@ -147,6 +147,16 @@ export function resolveSubmitFeedback(
     };
   }
 
+  if (result.approvalId?.trim()) {
+    const notice = [MSG_SUBMIT_SENT_FOR_APPROVAL, refSuffix, MSG_SUBMIT_AFTER_APPROVAL].filter(Boolean).join(" ");
+    return {
+      notice,
+      toast: [MSG_SUBMIT_SENT_FOR_APPROVAL, MSG_SUBMIT_APPROVALS_HINT].join(" "),
+      showApprovalsLink: true,
+      approvalsHref
+    };
+  }
+
   const approvalsLink = {
     showApprovalsLink: true,
     approvalsHref,

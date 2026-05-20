@@ -16,4 +16,8 @@ export class PaymentsClient {
   allocations(id: string) {
     return this.api.get<{ items: PaymentAllocation[] }>(`/payments/${id}/allocations`);
   }
+
+  create(payload: Partial<PaymentReceipt>) {
+    return this.api.post<ItemResponse<PaymentReceipt>>("/payments", payload);
+  }
 }

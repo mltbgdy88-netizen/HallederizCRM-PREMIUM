@@ -46,4 +46,12 @@ export class StockClient {
   patchExchangeRatePolicy(payload: Partial<ExchangeRatePolicy>) {
     return this.api.patch<{ policy: ExchangeRatePolicy }>("/exchange-rate-policy", payload);
   }
+
+  createProduct(payload: Partial<Product>) {
+    return this.api.post<ItemResponse<Product>>("/products", payload);
+  }
+
+  updateProduct(id: string, payload: Partial<Product>) {
+    return this.api.patch<ItemResponse<Product>>(`/products/${id}`, payload);
+  }
 }

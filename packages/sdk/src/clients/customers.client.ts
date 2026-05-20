@@ -20,4 +20,12 @@ export class CustomersClient {
   ledger(id: string) {
     return this.api.get<{ items: CustomerLedgerEntry[] }>(`/customers/${id}/ledger`);
   }
+
+  create(payload: Partial<Customer>) {
+    return this.api.post<ItemResponse<Customer>>("/customers", payload);
+  }
+
+  update(id: string, payload: Partial<Customer>) {
+    return this.api.patch<ItemResponse<Customer>>(`/customers/${id}`, payload);
+  }
 }

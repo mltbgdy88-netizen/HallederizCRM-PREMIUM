@@ -16,4 +16,8 @@ export class OffersClient {
   convertToOrder(id: string) {
     return this.api.post<ItemResponse<unknown>>(`/offers/${id}/convert-to-order`);
   }
+
+  create(payload: Partial<Offer>) {
+    return this.api.post<ItemResponse<Offer>>("/offers", payload);
+  }
 }

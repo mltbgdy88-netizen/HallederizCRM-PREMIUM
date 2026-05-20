@@ -275,6 +275,8 @@ export function QuickOperationPage() {
     updateLine,
     addEmptyLine,
     selectSource,
+    previewOperation,
+    previewPending,
     submitOperation,
     isSubmitting,
     resetDraft,
@@ -482,11 +484,12 @@ export function QuickOperationPage() {
           <button
             type="button"
             className="hz-qop-btn hz-qop-btn--outline hz-qop-btn--sm"
-            onClick={() => pushToast(MSG_PREVIEW_DOCUMENT)}
-            title="Belge önizle"
+            disabled={previewPending || isPreviewCustomerBlocked}
+            onClick={() => void previewOperation()}
+            title="İşlem önizlemesi"
           >
             <IconPrinter size={14} aria-hidden />
-            Önizle
+            {previewPending ? "Önizleniyor…" : "Önizle"}
           </button>
           <button
             type="button"

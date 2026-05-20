@@ -31,12 +31,12 @@ Merkezi istemci: `createHallederizSdk()` → `apps/web/src/lib/data-source.ts`.
 
 ### Hub / önizleme modunda bekleyen modüller
 
-- `/teklifler/yeni`, `/siparisler/yeni`, `/tahsilatlar/yeni` → hub metni + Hızlı İşlem yönlendirmesi; **doğrudan create API yok**.
-- `/cariler/yeni` → `ProductPageShell` (needs-api); **SDK’da `CustomersClient.create` yok**.
+- `/teklifler/yeni`, `/siparisler/yeni`, `/tahsilatlar/yeni` → hub metni + Hızlı İşlem yönlendirmesi; doğrudan create formları hâlâ hub (SDK `create` hazır).
+- `/cariler/yeni` → **canlı modda form + `customers.create`** (demo modda güvenli blok); bkz. `RUNTIME_WORKER_CORE_WRITE_READINESS_REPORT.md`.
 
 ### Gerçek canlı işlem bekleyen alanlar
 
-- Hızlı İşlem: demo’da `submitQuickOperationRecord` → `mode: "foundation"`; canlıda `POST /quick-operations/submit` var ancak **cari kataloğu canlıda boş** (`buildQuickOperationCustomers()` demo dışında `[]` döner).
+- Hızlı İşlem: **önizleme UI → `POST /quick-operations/preview`**; submit policy onayında **`approvalId`** döner; canlı **cari kataloğu** hâlâ boş olabilir (`buildQuickOperationCustomers()` demo dışında `[]`).
 - Stok: satır aksiyonları toast ile bloklanır; **ürün create / stok hareketi SDK’da yok**.
 - WhatsApp: **gönderim / QR / outbound** SDK’da yok; yalnızca `listConversations`, `getConversation`.
 - Arşiv: yalnızca `archive-demo-records.ts`; **SDK archive client yok**.
@@ -48,9 +48,9 @@ Merkezi istemci: `createHallederizSdk()` → `apps/web/src/lib/data-source.ts`.
 
 | Modül | Route | Mevcut UI durumu | Mevcut data source / query / hook | SDK / client | Eksik canlı mutation / endpoint | İşlem kuyruğu / onay | Demo/production riski | Önerilen ilk entegrasyon adımı | Öncelik |
 |-------|--------|------------------|-----------------------------------|--------------|--------------------------------|----------------------|------------------------|--------------------------------|-----------|
-| **Cariler** | `/cariler`, `/cariler/[id]`, `/cariler/yeni` | Liste/detay UI hazır; yeni shell | `get-customers.ts` → demo: `customer-mock-data`; canlı: `sdk.customers.list/detail/accountSummary/ledger` | `CustomersClient`: GET only | `POST /customers` (create/update); UI `CustomerCreatePage` SDK çağırmıyor | Create muhtemelen onaylı | Demo listede zengin veri; canlıda boş liste olabilir | SDK + API `customers.create`; `yeni` formu bağla | **P1** |
+| **Cariler** | `/cariler`, `/cariler/[id]`, `/cariler/yeni` | Liste/detay + **yeni form (canlı)** | `get-customers.ts` + `CustomerCreatePage` → `sdk.customers.create` | `CustomersClient`: GET + **create/update** | Canlı liste hâlâ tenant verisine bağlı | Create onaylı (`platform.customers.create`) | Demo’da create blok | Canlı cari feed + duplicate 409 UX | **P1** |
 | **Stok** | `/stok` | Liste/modal hazır; aksiyonlar toast | `get-stock-catalog.ts` → canlı: `sdk.stock.list`, `priceSlots`, `categorySlots`, `exchangeRates` | `StockClient`: GET + PATCH slot/policy; **ürün POST yok** | Ürün create, stok hareketi, rezervasyon write | Stok düşümü onaylı mutation | `MSG_STOCK_MOVE` / `MSG_NEW_PRODUCT` demo’da blok | API stok hareketi + UI `StockPage` handler → API (onay sonrası) | **P1** |
-| **Hızlı İşlem** | `/hizli-islem` (+ query) | Workbench tam; submit demo foundation | `use-quick-operation-state` + `submitQuickOperationRecord` (`quick-operations.service.ts`); katalog: `quick-operation-catalog.ts` | `QuickOperationsClient`: `POST /quick-operations/preview`, `POST /quick-operations/submit` | Canlı **cari/ürün kataloğu** (`buildQuickOperationCustomers` canlıda `[]`); workbench cari seçimi kilitlenir | Submit → onay + execution dispatcher (backend) | Demo: `MSG_DRAFT_SAVED`; canlı submit var ama katalog eksik | 1) Canlı cari+ürün feed 2) Submit sonrası approval id UI 3) `preview` endpoint bağlantısı | **P0** |
+| **Hızlı İşlem** | `/hizli-islem` (+ query) | Workbench; **Önizle + approvalId submit** | `previewQuickOperationRecord` + `submitQuickOperationRecord`; `use-quick-operation-state` | `QuickOperationsClient`: preview, submit | Canlı **cari/ürün kataloğu** boş kalabilir | Submit → pending approval + execute (worker) | Demo taslak; canlı onay id | 1) Canlı katalog 2) Execute sonrası entity link | **P0** |
 | **Teklifler** | `/teklifler`, `/teklifler/yeni` | Liste + hub | `get-offers.ts` → canlı: `sdk.offers.list/detail` | `OffersClient`: list, detail, `convertToOrder` | `POST /offers` (create); hub create yapmıyor | Create / convert onaylı | Demo bandı liste; hub güvenli | Hızlı İşlem submit → offer entity veya doğrudan offers create API | **P0** (Hızlı İşlem zinciri ile) |
 | **Siparişler** | `/siparisler`, `/siparisler/yeni` | Liste + hub | `get-orders.ts` → canlı: `sdk.orders.list/detail` | `OrdersClient`: list, detail only | `POST /orders`; hub yok | Onaylı sipariş kesinleştirme | Aynı | Quick-op `sale_order` + offers `convertToOrder` | **P0** |
 | **Tahsilatlar** | `/tahsilatlar`, `/tahsilatlar/yeni` | Liste + `PaymentCreateHub` | `get-payments.ts` → canlı: `sdk.payments.list/detail/allocations` | `PaymentsClient`: read only | `POST /payments` | Tahsilat onay politikası | PR #95 önizleme | Quick-op `payment` veya payments create | **P0** |
@@ -66,12 +66,12 @@ Merkezi istemci: `createHallederizSdk()` → `apps/web/src/lib/data-source.ts`.
 
 | Client | Read (mevcut) | Write (mevcut) | Web’de write kullanımı |
 |--------|---------------|----------------|-------------------------|
-| `customers` | list, detail, accountSummary, ledger | — | Yok |
-| `stock` | list, detail, availability, slots, rates | patch slots/policy | Yok (stok toast) |
-| `quickOperations` | — | preview, submit | Submit yalnız `!useDemoData` |
-| `offers` | list, detail | convertToOrder | convert UI’da sınırlı |
-| `orders` | list, detail | — | Yok |
-| `payments` | list, detail, allocations | — | Yok |
+| `customers` | list, detail, accountSummary, ledger | **create, update** | `/cariler/yeni` canlı |
+| `stock` | list, detail, availability, slots, rates | patch slots/policy, **createProduct, updateProduct** | Stok toast (UI sonraki) |
+| `quickOperations` | — | preview, submit | Preview + submit + **approvalId** |
+| `offers` | list, detail | convertToOrder, **create** | Quick-op onay kuyruğu |
+| `orders` | list, detail | **create** | Quick-op onay kuyruğu |
+| `payments` | list, detail, allocations | **create** | Quick-op onay kuyruğu |
 | `documents` | list, detail | render, regenerate, send*, queue* | Canlı modda `DocumentsPage` / detay |
 | `whatsapp` | listConversations, getConversation | — | Yok (taslak toast) |
 | `approvals` | list, detail | approve, reject, execute | `ApprovalInboxPage` |

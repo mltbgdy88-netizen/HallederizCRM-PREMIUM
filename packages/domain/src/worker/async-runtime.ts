@@ -1,32 +1,19 @@
 import { getWorkerJobHandler } from "./handler-registry";
 import type { ProcessNextJobResult, WorkerJob } from "./model";
 import { calculateNextRetryAt, classifyWorkerError, shouldRetryJob } from "./outbox";
-import type { OutboxJobRepository, WorkerJobClaimOptions } from "./repository";
+import type { WorkerJobClaimOptions } from "./repository";
+import type { WorkerLeaseOptions, WorkerRuntimeOptions, WorkerRuntimeResult } from "./runtime";
 
-export interface WorkerLeaseOptions extends WorkerJobClaimOptions {
-  workerId: string;
-  claimLeaseMs: number;
-}
-
-export interface WorkerRuntimeOptions {
-  lease?: Partial<WorkerLeaseOptions>;
-  now?: string;
-  nowProvider?: () => Date;
-  maxJobsPerTick?: number;
-  baseRetryDelayMs?: number;
-  maxRetryDelayMs?: number;
-  dryRun?: boolean;
-}
-
-export interface WorkerRuntimeResult {
-  processed: number;
-  completed: number;
-  failed: number;
-  deadLettered: number;
-  duplicates: number;
-  noJob: boolean;
-  results: ProcessNextJobResult[];
-  reasons: string[];
+export interface AsyncOutboxJobRepository {
+  claimNext: (now?: string, options?: WorkerJobClaimOptions) => Promise<WorkerJob | undefined>;
+  complete: (jobId: string, completedAt?: string) => Promise<WorkerJob | undefined>;
+  fail: (
+    jobId: string,
+    errorMessage: string,
+    nextAvailableAt: string,
+    failedAt?: string
+  ) => Promise<WorkerJob | undefined>;
+  moveToDeadLetter: (jobId: string, reason: string, movedAt?: string) => Promise<WorkerJob | undefined>;
 }
 
 function resolveNow(options?: WorkerRuntimeOptions) {
@@ -42,16 +29,16 @@ function resolveLeaseOptions(options?: WorkerRuntimeOptions): WorkerLeaseOptions
   };
 }
 
-export function processClaimedJob(
+export async function processClaimedJobAsync(
   job: WorkerJob,
-  repository: OutboxJobRepository,
+  repository: AsyncOutboxJobRepository,
   options?: WorkerRuntimeOptions & { seenIdempotencyKeys?: Set<string> }
-): ProcessNextJobResult {
+): Promise<ProcessNextJobResult> {
   const now = resolveNow(options);
   const seenIdempotencyKeys = options?.seenIdempotencyKeys;
 
   if (!job.tenantId) {
-    const dead = repository.moveToDeadLetter(job.jobId, "missing_tenant_context", now);
+    const dead = await repository.moveToDeadLetter(job.jobId, "missing_tenant_context", now);
     return {
       status: "dead_letter",
       claimedJob: job,
@@ -61,7 +48,7 @@ export function processClaimedJob(
   }
 
   if (!job.idempotencyKey) {
-    const dead = repository.moveToDeadLetter(job.jobId, "missing_idempotency_key", now);
+    const dead = await repository.moveToDeadLetter(job.jobId, "missing_idempotency_key", now);
     return {
       status: "dead_letter",
       claimedJob: job,
@@ -80,7 +67,7 @@ export function processClaimedJob(
   }
 
   if (seenIdempotencyKeys?.has(job.idempotencyKey)) {
-    const completed = repository.complete(job.jobId, now);
+    const completed = await repository.complete(job.jobId, now);
     return {
       status: "duplicate",
       claimedJob: job,
@@ -91,7 +78,7 @@ export function processClaimedJob(
 
   const handler = getWorkerJobHandler(job.jobType);
   if (!handler) {
-    const dead = repository.moveToDeadLetter(job.jobId, "missing_worker_handler", now);
+    const dead = await repository.moveToDeadLetter(job.jobId, "missing_worker_handler", now);
     return {
       status: "dead_letter",
       claimedJob: job,
@@ -102,7 +89,7 @@ export function processClaimedJob(
 
   const isProduction = process.env.NODE_ENV === "production";
   if (isProduction && (handler.productionAllowed !== true || handler.liveReady !== true)) {
-    const dead = repository.moveToDeadLetter(job.jobId, "foundation_blocked_in_production", now);
+    const dead = await repository.moveToDeadLetter(job.jobId, "foundation_blocked_in_production", now);
     return {
       status: "dead_letter",
       claimedJob: job,
@@ -123,7 +110,7 @@ export function processClaimedJob(
     const reasons = result.reasons ?? [result.ok ? "handler_completed" : "handler_failed"];
 
     if (result.ok) {
-      const completed = repository.complete(job.jobId, now);
+      const completed = await repository.complete(job.jobId, now);
       seenIdempotencyKeys?.add(job.idempotencyKey);
       return {
         status: "completed",
@@ -142,7 +129,7 @@ export function processClaimedJob(
         options?.maxRetryDelayMs,
         new Date(now)
       );
-      const failed = repository.fail(job.jobId, reasons.join(";"), nextRetryAt, now);
+      const failed = await repository.fail(job.jobId, reasons.join(";"), nextRetryAt, now);
       return {
         status: "failed",
         claimedJob: job,
@@ -152,7 +139,7 @@ export function processClaimedJob(
       };
     }
 
-    const dead = repository.moveToDeadLetter(
+    const dead = await repository.moveToDeadLetter(
       job.jobId,
       retryable ? "max_attempts_reached" : "non_retryable_failure",
       now
@@ -173,7 +160,7 @@ export function processClaimedJob(
         options?.maxRetryDelayMs,
         new Date(now)
       );
-      const failed = repository.fail(job.jobId, classified.message, nextRetryAt, now);
+      const failed = await repository.fail(job.jobId, classified.message, nextRetryAt, now);
       return {
         status: "failed",
         claimedJob: job,
@@ -182,7 +169,7 @@ export function processClaimedJob(
       };
     }
 
-    const dead = repository.moveToDeadLetter(
+    const dead = await repository.moveToDeadLetter(
       job.jobId,
       classified.retryable ? "max_attempts_reached" : "non_retryable_failure",
       now
@@ -196,7 +183,10 @@ export function processClaimedJob(
   }
 }
 
-export function processWorkerTick(repository: OutboxJobRepository, options?: WorkerRuntimeOptions): WorkerRuntimeResult {
+export async function processWorkerTickAsync(
+  repository: AsyncOutboxJobRepository,
+  options?: WorkerRuntimeOptions
+): Promise<WorkerRuntimeResult> {
   const now = resolveNow(options);
   const lease = resolveLeaseOptions(options);
   const maxJobsPerTick = Math.max(1, options?.maxJobsPerTick ?? 1);
@@ -210,7 +200,7 @@ export function processWorkerTick(repository: OutboxJobRepository, options?: Wor
   let duplicates = 0;
 
   for (let i = 0; i < maxJobsPerTick; i += 1) {
-    const job = repository.claimNext(now, { workerId: lease.workerId, claimLeaseMs: lease.claimLeaseMs });
+    const job = await repository.claimNext(now, { workerId: lease.workerId, claimLeaseMs: lease.claimLeaseMs });
     if (!job) {
       if (results.length === 0) {
         reasons.push("no_job_available");
@@ -218,7 +208,7 @@ export function processWorkerTick(repository: OutboxJobRepository, options?: Wor
       break;
     }
 
-    const processed = processClaimedJob(job, repository, {
+    const processed = await processClaimedJobAsync(job, repository, {
       ...options,
       now,
       lease,

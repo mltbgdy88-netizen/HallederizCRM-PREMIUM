@@ -1,5 +1,10 @@
-import type { QuickOperationSubmitRequest, QuickOperationSubmitResponse } from "@hallederiz/types";
+import type {
+  QuickOperationPreviewResponse,
+  QuickOperationSubmitRequest,
+  QuickOperationSubmitResponse
+} from "@hallederiz/types";
 import { dataSourceConfig, sdk } from "../../lib/data-source";
+import { calculateQuickOperationTotals } from "@hallederiz/domain";
 
 function resolveCreatedEntityType(operationType: QuickOperationSubmitRequest["operationType"]): QuickOperationSubmitResponse["createdEntityType"] {
   switch (operationType) {
@@ -33,6 +38,32 @@ function resolveDocumentTitle(operationType: QuickOperationSubmitRequest["operat
     default:
       return "Belge Onizleme";
   }
+}
+
+export async function previewQuickOperationRecord(
+  payload: QuickOperationSubmitRequest
+): Promise<QuickOperationPreviewResponse> {
+  if (dataSourceConfig.useDemoData) {
+    const totals = calculateQuickOperationTotals(payload.lines);
+    return {
+      ok: payload.customerId.trim().length > 0 && payload.lines.length > 0,
+      operationType: payload.operationType,
+      totals,
+      workflowImpacts: [
+        {
+          id: "demo_preview",
+          key: "offer_no_reservation",
+          title: "Önizleme modu",
+          description: "Canlı önizleme bağlantısı olmadan taslak etkileri gösterilir.",
+          severity: "info"
+        }
+      ],
+      validationIssues: []
+    };
+  }
+
+  const response = await sdk.quickOperations.previewQuickOperation(payload);
+  return response.item;
 }
 
 export async function submitQuickOperationRecord(payload: QuickOperationSubmitRequest): Promise<QuickOperationSubmitResponse> {
