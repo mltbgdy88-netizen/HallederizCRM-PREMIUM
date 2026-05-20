@@ -122,11 +122,15 @@ PNG (referans, import YOK)
 |--|--|
 | **Routes** | `/login`, `/dashboard`, `/panel`, `/hizli-islem`, `/onaylar`, `/onaylar/[id]`, `/onaylar/kurallar`, `/workflow/[type]/[id]` |
 | **Status** | **Tamamlandı** — `UI_AGENT_04_REPORT.md`. Emerald/gold split login, ops KPI, QOP stepper, onay detay `EntityDetailLayout`, workflow timeline. PNG runtime import yasağı korunur. |
-| **Sonraki** | Agent 05 CRM/commercial |
+| **Sonraki** | — |
 
 ### Agent 05 — `ui/05-crm-commercial`
 
-Routes: cariler, teklifler, siparişler, tahsilatlar, teslimatlar, iadeler, faturalar (+ hub `/yeni` korunur)
+| | |
+|--|--|
+| **Routes** | cariler, teklifler, siparişler, tahsilatlar, teslimatlar, iadeler, faturalar (+ hub `/teklifler|siparisler|tahsilatlar/yeni`) |
+| **Status** | **Tamamlandı** — `UI_AGENT_05_REPORT.md`. `EntityListPageTemplate` teslimat/iade/fatura; detay `EntityDetailLayout`; hub «Hızlı İşlem'e git»; `agent05-crm-commercial.css`. PNG runtime import yasağı korunur. |
+| **Sonraki** | Agent 06 stock/documents/tasks |
 
 ### Agent 06 — `ui/06-stock-documents-tasks`
 

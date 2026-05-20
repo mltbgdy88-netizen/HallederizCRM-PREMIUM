@@ -3,6 +3,7 @@
 @import "../../../packages/ui/src/styles/shell-foundation.css";
 @import "../../../packages/ui/src/styles/layout-templates.css";
 @import "./styles/agent04-platform.css";
+@import "./styles/agent05-crm-commercial.css";
 
 :root,
 :root[data-theme="light"] {

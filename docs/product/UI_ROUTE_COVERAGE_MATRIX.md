@@ -1,6 +1,6 @@
 # UI Route Coverage Matrix — 53 route/layer
 
-**Base commit:** `3fa7c74` (PR #127) — Agent 04 platform routes güncellendi  
+**Base commit:** `f9943c7` (PR #128) — Agent 05 CRM/commercial routes güncellendi  
 **Mockup paketi:** `docs/design/ui-design-output/**` — **repoda yok** (tüm “Mockup” kolonları **MISSING**)
 
 **Implementation type kısaltmaları:**
@@ -28,25 +28,25 @@
 | 8 | `/whatsapp` | Omnichannel / WA ops | MISSING | **Var** | REAL | default, empty, mobile | Kanal policy UI; mutation CTA yok | 07 | `WhatsAppPage`; `/gelen-kutu/whatsapp` manifest paraleli |
 | 9 | `/gelen-kutu` | Omnichannel three-panel inbox | MISSING | **Var** | REAL | default, empty, mobile | Üç panel inbox | 07 | `OmnichannelInboxPage` |
 | 10 | `/gelen-kutu/konusma/[id]` | Conversation detail | MISSING | **Var** `[conversationId]` | REAL (kısmi) | detail, mobile | Backend bağlantısı kısmi | 07 | `ConversationPage`; yerelde veri bağlantısı doğrulanmalı |
-| 11 | `/cariler` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, mobile | İlk satır seçili / sağ panel dolu | 05 | `CustomersPage` + `EntityListPageTemplate` kısmi |
-| 12 | `/cariler/[id]` | Entity detail + timeline | MISSING | **Var** `[customerId]` | REAL | detail, audit timeline | `CustomerInsightSidePanel` timeline | 05 | — |
-| 13 | `/cariler/yeni` | FormPageShell | MISSING | **Var** | FORM | validation, submitted | **Gerçek form** (hub değil) | 05 | `CustomerCreatePage` |
+| 11 | `/cariler` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, mobile | İlk satır seçili / sağ panel dolu | 05 | **Agent 05 tamam** — `CustomersPage` + `EntityListPageTemplate` |
+| 12 | `/cariler/[id]` | Entity detail + timeline | MISSING | **Var** `[customerId]` | REAL | detail, audit timeline | `EntityDetailLayout` | 05 | **Agent 05 tamam** |
+| 13 | `/cariler/yeni` | FormPageShell | MISSING | **Var** | FORM | validation, submitted | **Gerçek form** (hub değil) | 05 | **Agent 05 tamam** — `CustomerCreatePage` |
 | 14 | `/stok` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, mobile | Stok yoğunluk kuralları | 06 | `StockPage` |
-| 15 | `/teklifler` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, mobile | — | 05 | `OffersPage` |
-| 16 | `/teklifler/[id]` | Entity detail + timeline | MISSING | **Var** `[offerId]` | REAL | detail, audit timeline | Timeline **eksik** (özet panel var) | 05 | `OfferDetailPage`; timeline Agent 05 |
-| 17 | `/teklifler/yeni` | Hub → Hızlı İşlem | MISSING | **Var** | HUB | default, mobile | **Form değil**; CTA Hızlı İşlem | 05 | `OfferCreateHub` ✓ |
-| 18 | `/siparisler` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, mobile | — | 05 | `OrdersPage` |
-| 19 | `/siparisler/[id]` | Entity detail + timeline | MISSING | **Var** `[orderId]` | REAL | detail, audit timeline | Timeline **eksik** | 05 | `OrderDetailPage` |
-| 20 | `/siparisler/yeni` | Hub → Hızlı İşlem | MISSING | **Var** | HUB | default | Form değil | 05 | `OrderCreateHub` ✓ |
-| 21 | `/tahsilatlar` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, mobile | — | 05 | `PaymentsPage` |
-| 22 | `/tahsilatlar/[id]` | Entity detail + timeline | MISSING | **Var** `[paymentId]` | REAL | detail, audit timeline | `EntityTimelinePanel` ✓ | 05 | PR #122 timeline |
-| 23 | `/tahsilatlar/yeni` | Hub → Hızlı İşlem | MISSING | **Var** | HUB | default | Form değil | 05 | `PaymentCreateHub` ✓ |
-| 24 | `/teslimatlar` | Entity list + right preview | MISSING | **Var** | REAL | default, empty | — | 05 | `Deliveries` feature list |
-| 25 | `/teslimatlar/[id]` | Entity detail + timeline | MISSING | **Var** `[deliveryId]` | REAL | detail | Timeline **eksik** | 05 | `DeliveryDetailPage` |
-| 26 | `/iadeler` | Entity list + right preview | MISSING | **Var** | REAL | default, empty | — | 05 | `ReturnsPage` |
-| 27 | `/iadeler/[id]` | Entity detail + timeline | MISSING | **Var** `[returnId]` | REAL | detail | Timeline **eksik** | 05 | Return detail feature |
-| 28 | `/faturalar` | Entity list + right preview | MISSING | **Var** | REAL | default, empty | — | 05 | `InvoicesPage` |
-| 29 | `/faturalar/[id]` | Entity detail + timeline | MISSING | **Var** `[invoiceId]` | REAL | detail | Timeline **eksik** | 05 | `InvoiceDetailPage` |
+| 15 | `/teklifler` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, mobile | — | 05 | **Agent 05 tamam** — `OffersPage` |
+| 16 | `/teklifler/[id]` | Entity detail + timeline | MISSING | **Var** `[offerId]` | REAL | detail, audit timeline | `EntityDetailLayout` | 05 | **Agent 05 tamam**; canlı timeline feed sonraki |
+| 17 | `/teklifler/yeni` | Hub → Hızlı İşlem | MISSING | **Var** | HUB | default, mobile | **Form değil**; CTA Hızlı İşlem | 05 | **Agent 05 tamam** — `OfferCreateHub` |
+| 18 | `/siparisler` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, mobile | — | 05 | **Agent 05 tamam** — `OrdersPage` |
+| 19 | `/siparisler/[id]` | Entity detail + timeline | MISSING | **Var** `[orderId]` | REAL | detail, audit timeline | `EntityDetailLayout` | 05 | **Agent 05 tamam** |
+| 20 | `/siparisler/yeni` | Hub → Hızlı İşlem | MISSING | **Var** | HUB | default | Form değil | 05 | **Agent 05 tamam** — `OrderCreateHub` |
+| 21 | `/tahsilatlar` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, mobile | — | 05 | **Agent 05 tamam** — `PaymentsPage` |
+| 22 | `/tahsilatlar/[id]` | Entity detail + timeline | MISSING | **Var** `[paymentId]` | REAL | detail, audit timeline | `EntityTimelinePanel` | 05 | **Agent 05 tamam** |
+| 23 | `/tahsilatlar/yeni` | Hub → Hızlı İşlem | MISSING | **Var** | HUB | default | Form değil | 05 | **Agent 05 tamam** — `PaymentCreateHub` |
+| 24 | `/teslimatlar` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, loading | `EntityListPageTemplate` | 05 | **Agent 05 tamam** — `DeliveriesPage` |
+| 25 | `/teslimatlar/[id]` | Entity detail + timeline | MISSING | **Var** `[deliveryId]` | REAL | detail | `EntityDetailLayout`; harita yok | 05 | **Agent 05 tamam** |
+| 26 | `/iadeler` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, loading | — | 05 | **Agent 05 tamam** — `ReturnsPage` |
+| 27 | `/iadeler/[id]` | Entity detail + timeline | MISSING | **Var** `[returnId]` | REAL | detail | `EntityDetailLayout` | 05 | **Agent 05 tamam** |
+| 28 | `/faturalar` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, loading | Sahte fatura no yok | 05 | **Agent 05 tamam** — `InvoicesPage` |
+| 29 | `/faturalar/[id]` | Entity detail + timeline | MISSING | **Var** `[invoiceId]` | REAL | detail | PDF disabled; sahte önizleme yok | 05 | **Agent 05 tamam** |
 | 30 | `/depo` | Entity list + detail | MISSING | **Var** | REAL | default, detail | Depo hazırlık fişi | 06 | `WarehouseTasksPage` |
 | 31 | `/fabrikalar/*` | Factory list + detail | MISSING | **Var** siparisler + stoklar + `[factoryOrderId]` | REAL | default, detail | `fabrikalar/siparisler`, `stoklar` | 06 | Async server pages |
 | 32 | `/belgeler` | Entity list + preview | MISSING | **Var** | REAL | default, empty | — | 06 | `DocumentsPage` |

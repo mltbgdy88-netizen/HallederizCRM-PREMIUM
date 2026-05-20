@@ -52,7 +52,7 @@ export function OfferCreateHub({ customerId }: { customerId: string | null }) {
         <p className="hz-commercial-create-hub-eyebrow">Teklifler</p>
         <h1 className="hz-commercial-create-hub-title">Yeni teklif</h1>
         <p className="hz-commercial-create-hub-lead">
-          Hızlı İşlem&apos;de hazırlayın, onaya gönderin; onay sonrası kayıt işlenecek.
+          <strong>Teklif oluşturma Hızlı İşlem üzerinden yapılır.</strong> Onay sonrası kayıt işlenir; bu ekranda form veya kayıt oluşturma yoktur.
         </p>
 
         {dataSourceConfig.useDemoData ? (
@@ -63,7 +63,7 @@ export function OfferCreateHub({ customerId }: { customerId: string | null }) {
 
         <ul className="hz-commercial-create-hub-points">
           <li>Hızlı İşlem&apos;de <strong>Teklif</strong> segmentini seçerek satır, fiyat ve belge taslağını hazırlayın.</li>
-          <li>Bu ekranda doğrudan kayıt oluşturulmaz; işlem onay zincirinden geçer.</li>
+          <li>Bu ekranda doğrudan kayıt oluşturulmaz; taslak hazırlandıktan sonra işlemi onaya gönderin.</li>
           {customerId ? (
             <li>
               Cari bağlamı:{" "}
@@ -77,7 +77,7 @@ export function OfferCreateHub({ customerId }: { customerId: string | null }) {
 
         <div className="hz-commercial-create-hub-actions">
           <button type="button" className="hz-btn hz-btn-primary hz-toolbar-btn" onClick={() => router.push(quickHref)}>
-            Hızlı İşlem&apos;de hazırla
+            Hızlı İşlem&apos;e git
           </button>
           <Link className="hz-btn hz-btn-secondary hz-toolbar-btn" href="/teklifler">
             Teklif listesine dön

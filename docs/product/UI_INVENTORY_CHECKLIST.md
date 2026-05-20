@@ -109,7 +109,9 @@ Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 
 **Agent 03:** layout template foundation tamam (`UI_LAYOUT_PATTERNS.md`).
 
-**Agent 04 (2026-05-21):** Platform/operations route adoption tamam — `ui/04-platform-operations` @ `3fa7c74`. `/login` split, `/dashboard` 5 KPI + AI «İncele», `/panel` loading redirect, `/hizli-islem` stepper, `/onaylar` + detay + kurallar, `/workflow` timeline. `loading.tsx`: login, panel, dashboard, hizli-islem, onaylar. Detay: `UI_AGENT_04_REPORT.md`. **Sonraki:** Agent 05 CRM/commercial.
+**Agent 05 (2026-05-21):** CRM/commercial route adoption tamam — `ui/05-crm-commercial` @ `f9943c7`. Cariler/teklif/sipariş/tahsilat (liste+detay+hub), teslimat/iade/fatura liste+detay `EntityListPageTemplate` / `EntityDetailLayout`, hub CTA «Hızlı İşlem'e git», `agent05-crm-commercial.css`. `loading.tsx`: teslimatlar, iadeler, faturalar. Detay: `UI_AGENT_05_REPORT.md`. **Sonraki:** Agent 06 stock/documents/tasks.
+
+**Agent 04 (2026-05-21):** Platform/operations route adoption tamam — `ui/04-platform-operations` @ `3fa7c74`. `/login` split, `/dashboard` 5 KPI + AI «İncele», `/panel` loading redirect, `/hizli-islem` stepper, `/onaylar` + detay + kurallar, `/workflow` timeline. `loading.tsx`: login, panel, dashboard, hizli-islem, onaylar. Detay: `UI_AGENT_04_REPORT.md`.
 
 ---
 
@@ -138,7 +140,7 @@ Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 | Lorem ipsum | **Bulunamadı** (`rg` apps/web) |
 | Sahte müşteri/firma (demo) | `*-mock-data.ts`, `demo/` — demo modunda; canlıda fail-closed copy |
 | Sahte telefon/adres | Demo veri dosyalarında |
-| Sahte fatura no örnekleri | Filtre placeholder `INV-1201` (InvoicesPage) — Agent 05 |
+| Sahte fatura no örnekleri | ~~`INV-1201` placeholder~~ — Agent 05 temizlendi |
 | Sahte ürün fotoğrafı | **Bulunamadı** (açık img mock) |
 | Sahte PDF | Toast: “canlı PDF gönderimi henüz bağlı değil” — güvenli; sahte binary preview yok |
 | Sahte harita | **Bulunamadı** |

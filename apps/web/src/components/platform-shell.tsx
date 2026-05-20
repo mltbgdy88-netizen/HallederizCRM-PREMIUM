@@ -167,6 +167,9 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
   const isOrdersList = normalizedPath === "/siparisler";
   const isOffersList = normalizedPath === "/teklifler";
   const isPaymentsList = normalizedPath === "/tahsilatlar";
+  const isDeliveriesList = normalizedPath === "/teslimatlar";
+  const isReturnsList = normalizedPath === "/iadeler";
+  const isInvoicesList = normalizedPath === "/faturalar";
   const isArchiveList = normalizedPath === "/archive";
   const isReportsList = normalizedPath === "/raporlar";
   const isSettingsArea = normalizedPath === "/ayarlar" || normalizedPath.startsWith("/ayarlar/");
@@ -184,6 +187,17 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
     normalizedPath.startsWith("/tahsilatlar/") &&
     normalizedPath !== "/tahsilatlar/yeni" &&
     normalizedPath !== "/tahsilatlar/liste";
+  const isDeliveriesEntityDetail =
+    normalizedPath.startsWith("/teslimatlar/") &&
+    normalizedPath !== "/teslimatlar/yeni" &&
+    normalizedPath !== "/teslimatlar/liste" &&
+    normalizedPath !== "/teslimatlar/rota";
+  const isReturnsEntityDetail =
+    normalizedPath.startsWith("/iadeler/") && normalizedPath !== "/iadeler/yeni" && normalizedPath !== "/iadeler/liste";
+  const isInvoicesEntityDetail =
+    normalizedPath.startsWith("/faturalar/") &&
+    normalizedPath !== "/faturalar/yeni" &&
+    normalizedPath !== "/faturalar/liste";
   const isEntityFormNew =
     normalizedPath === "/cariler/yeni" ||
     normalizedPath === "/siparisler/yeni" ||
@@ -227,6 +241,9 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
             isOrdersList ||
             isOffersList ||
             isPaymentsList ||
+            isDeliveriesList ||
+            isReturnsList ||
+            isInvoicesList ||
             isArchiveList ||
             isReportsList ||
             isSettingsArea ||
@@ -238,6 +255,9 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
             isOrdersEntityDetail ||
             isOffersEntityDetail ||
             isPaymentsEntityDetail ||
+            isDeliveriesEntityDetail ||
+            isReturnsEntityDetail ||
+            isInvoicesEntityDetail ||
             isEntityFormNew ||
             shouldSuppressShellPageMeta(normalizedPath)
           }
@@ -270,7 +290,13 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
                           ? "Teklif no, müşteri, durum, fiyat grubu veya geçerlilik ara..."
                           : isPaymentsList
                             ? "Fiş no, müşteri, tutar, yöntem veya belge bağlantısı ara..."
-                            : isWarehousePrep
+                            : isDeliveriesList
+                              ? "Teslimat no, müşteri, sipariş, durum veya belge ara..."
+                              : isReturnsList
+                                ? "İade no, müşteri, sipariş, teslimat veya durum ara..."
+                                : isInvoicesList
+                                  ? "Fatura no, müşteri, sipariş, tutar veya durum ara..."
+                                  : isWarehousePrep
                               ? "Belge no, cari, ürün, raf veya depo görevlisi ara..."
                               : isArchiveList
                                 ? "Belge no, cari, işlem, tarih, kullanıcı veya etiket ara..."
@@ -286,7 +312,13 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
                                           ? "Teklif detayı: satır, follow-up veya belge ara..."
                                           : isPaymentsEntityDetail
                                             ? "Tahsilat detayı: fiş, allocation veya belge ara..."
-                                            : isEntityFormNew
+                                            : isDeliveriesEntityDetail
+                                              ? "Teslimat detayı: satır, doğrulama veya belge ara..."
+                                              : isReturnsEntityDetail
+                                                ? "İade detayı: satır, sebep veya etki ara..."
+                                                : isInvoicesEntityDetail
+                                                  ? "Fatura detayı: satır, kesim veya belge ara..."
+                                                  : isEntityFormNew
                                               ? "Yeni kayıt: müşteri, belge no, tutar veya referans ara..."
                                               : "Cari, sipariş, ürün kodu veya barkod ara"
           }
