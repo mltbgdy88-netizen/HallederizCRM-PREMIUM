@@ -1,29 +1,29 @@
 # UI Inventory Checklist — Agent 00
 
-**Base:** `10f2f40` — feat(platform): add live worker and commercial execution foundation (#122)  
-**İnceleme tarihi:** 2026-05-20 (repo dosya sistemi taraması)
+**Base:** `fd933b0` — docs(ui): mockup inventory + scope guard (#123)  
+**İnceleme tarihi:** 2026-05-20 (Agent 00 + Agent 00B)
 
 ---
 
 ## 1. Mockup package checklist
 
-| Madde | Beklenen | Repo durumu (10f2f40) |
-|-------|----------|------------------------|
-| Kök klasör `docs/design/ui-design-output/` | Var | **YOK** — `docs/design/` klasörü bile yok |
-| `MANIFEST.md` | Var | **YOK** |
-| `CHECKLIST.md` | Var | **YOK** |
-| `CURSOR_REFERENCE_README.md` | Var | **YOK** |
-| `manifest.json` | Var | **YOK** |
-| `00-design-system/` | Var | **YOK** |
-| Route/layer klasör sayısı | ~53 | **0** (paket eksik) |
-| PNG mockup sayısı | ~319 | **0** |
-| Markdown doküman sayısı | ~56 | **0** |
-| Desktop boyut | 1920×1080 | Doğrulanamadı (paket yok) |
-| Mobile boyut | 390×844 | Doğrulanamadı (paket yok) |
-| Route başına `notes.md` | Her route | **N/A** |
-| Zorunlu state PNG seti | default/loading/empty/error/mobile | **N/A** |
+| Madde | Beklenen | Repo durumu (00B — ZIP entegrasyonu) |
+|-------|----------|--------------------------------------|
+| Kök klasör `docs/design/ui-design-output/` | Var | **Var** |
+| `MANIFEST.md` | Var | **Var** |
+| `CHECKLIST.md` | Var | **Var** |
+| `CURSOR_REFERENCE_README.md` | Var | **Yok** (minor gap) |
+| `manifest.json` | Var | **Var** |
+| `00-design-system/` | Var | **Var** |
+| Route/layer klasör sayısı | ~53 | **53** |
+| PNG mockup sayısı | ~319 | **319** |
+| Markdown doküman sayısı | ~56 | **56** |
+| `notes.md` sayısı | ~54 | **54** |
+| Desktop boyut | 1920×1080 | manifest ile uyumlu |
+| Mobile boyut | 390×844 | manifest ile uyumlu |
+| Zorunlu state PNG seti | default/loading/empty/error/mobile | **Eşleşti** (53/53/53/53/53) |
 
-**Sonuç:** Mockup referans paketi repoda **henüz commit edilmemiş** veya farklı konumda tutuluyor. UI dönüşümü başlamadan önce paketin repoya veya erişilebilir read-only mount’a eklenmesi gerekir. Agent 00 paketi **düzeltmez**; yalnızca gap kaydeder.
+**Sonuç:** Paket repoda. **Agent 01 unblock.** Eksik: yalnız `CURSOR_REFERENCE_README.md`. Kaynak ZIP: `ui-design-output-project-reviewed-full-package.zip`. Detay: `UI_DESIGN_REFERENCE_PACKAGE_REPORT.md`.
 
 **Geçici kaynaklar (mevcut):**
 
@@ -38,13 +38,13 @@
 
 | Dosya | Durum |
 |-------|--------|
-| `colors.png` | Paket yok |
-| `typography.png` | Paket yok |
-| `components.png` | Paket yok |
-| `table-system.png` | Paket yok |
-| `status-badges.png` | Paket yok |
-| `empty-loading-error-states.png` | Paket yok |
-| `notes.md` | Paket yok |
+| `colors.png` | Var |
+| `typography.png` | Var |
+| `components.png` | Var |
+| `table-system.png` | Var |
+| `status-badges.png` | Var |
+| `empty-loading-error-states.png` | Var |
+| `notes.md` | Var |
 
 Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 

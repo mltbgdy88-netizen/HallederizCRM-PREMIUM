@@ -12,7 +12,9 @@ HallederizCRM web arayüzü, operasyon cockpit’i olarak **emerald/gold** lüks
 - **Agent 00** (bu branch): envanter, coverage matrix, scope guard — **kod yok**.
 - **Agent 01–09**: sıralı UI implementation + QA.
 
-Mockup PNG paketi (`docs/design/ui-design-output/**`) **runtime’da import edilmez**; tasarım referansıdır. **Not (2026-05-20):** Paket repoda henüz yok — UI 01 öncesi repoya eklenmeli veya harici read-only mount tanımlanmalı.
+Mockup PNG paketi (`docs/design/ui-design-output/**`) **runtime’da import edilmez**; tasarım referansıdır.
+
+**Agent 00B (2026-05-20):** Mockup paketi repoya eklendi (`docs/design/ui-design-output/**`, 319 PNG, 53 route). **Agent 01 başlatılabilir.** `CURSOR_REFERENCE_README.md` pakette yok — minor documentation gap.
 
 ---
 
@@ -20,7 +22,9 @@ Mockup PNG paketi (`docs/design/ui-design-output/**`) **runtime’da import edil
 
 | Kaynak | Rol |
 |--------|-----|
-| `docs/design/ui-design-output/**` | PNG + notes.md (read-only) — **hedef** |
+| `docs/design/ui-design-output/**` | PNG + notes.md (read-only) — **repoda mevcut** |
+| `docs/design/ui-design-output/manifest.json` | Route listesi (53 route/layer) |
+| `docs/product/UI_DESIGN_REFERENCE_PACKAGE_REPORT.md` | Sayım, state coverage, gap notları |
 | `docs/product/UI_SCOPE_GUARD.md` | Kapsam ve yasaklar |
 | `docs/product/UI_INVENTORY_CHECKLIST.md` | Checklist |
 | `docs/product/UI_ROUTE_COVERAGE_MATRIX.md` | 53 route/layer matrisi |
@@ -192,9 +196,9 @@ pnpm smoke:navigation
 
 ---
 
-## 9. Known gaps (Agent 00 tespiti)
+## 9. Known gaps (Agent 00 / 00B)
 
-1. **Mockup paketi repoda yok** — `docs/design/ui-design-output/**` eksik; PNG/manifest/notes import edilemiyor.
+1. **CURSOR_REFERENCE_README.md eksik** — minor documentation gap; MANIFEST + CHECKLIST + manifest.json mevcut.
 2. **Legacy renkler** — `globals.css` lacivert/mor-ağırlıklı; emerald planı Agent 01.
 3. **App Router `loading.tsx` / `error.tsx`** — 0 dosya; segment state Agent 04+.
 4. **Detay timeline** — order, offer, delivery, return, invoice detayında `EntityTimelinePanel` eksik (payment/document/customer/approval var).
