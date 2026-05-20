@@ -1,7 +1,7 @@
-# UI Inventory Checklist — Agent 00
+# UI Inventory Checklist — Agent 00 / 01
 
-**Base:** `fd933b0` — docs(ui): mockup inventory + scope guard (#123)  
-**İnceleme tarihi:** 2026-05-20 (Agent 00 + Agent 00B)
+**Base:** `c228bc7` — design reference package (#124)  
+**İnceleme tarihi:** 2026-05-20 (Agent 00 + 00B + **01**)
 
 ---
 
@@ -52,23 +52,25 @@ Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 
 ## 3. `packages/ui` primitive / template checklist
 
+**Agent 01 (2026-05-20):** Emerald/gold foundation tokens (`packages/ui/src/tokens/`, `src/styles/tokens.css`); `hz-ui-*` primitive CSS (`foundation-primitives.css`); shared state TR defaults. **AppShell / route adoption yapılmadı.**
+
 | Component (hedef ad) | Durum | Konum | Gap | Target agent |
 |----------------------|-------|-------|-----|--------------|
-| UiButton | **Mevcut** | `primitives/button.tsx` (`Button`) | İsimlendirme/export birleşimi | 01 |
-| UiBadge | **Mevcut** | `primitives/badge.tsx` | Emerald tema | 01 |
-| UiCard | **Mevcut** | `primitives/card.tsx` | Radius 16px hizası | 01 |
-| UiInput | **Mevcut** | `primitives/input.tsx` | — | 01 |
-| UiSelect | **Mevcut** | `primitives/select.tsx` | — | 01 |
-| UiTabs | **Mevcut** | `primitives/tabs.tsx` | — | 01 |
-| UiModal | **Mevcut** | `primitives/modal.tsx` | — | 01 |
-| UiDrawer | **Mevcut** | `primitives/drawer.tsx` | Mobile drawer shell ile hizalama | 01–02 |
-| UiSkeleton | **Mevcut** | `primitives/skeleton.tsx` | — | 01 |
-| LoadingState | **Mevcut** | `primitives/loading-state.tsx` | Route-level `loading.tsx` yok | 01, 04+ |
-| EmptyState | **Mevcut** | `primitives/empty-state.tsx` | — | 01 |
-| ErrorState | **Mevcut** | `primitives/error-state.tsx` | App Router `error.tsx` yok | 01, 04+ |
-| SuccessState | **Mevcut** | `primitives/success-state.tsx` | — | 01 |
-| DisabledNotice | **Mevcut** | `primitives/disabled-notice.tsx` | — | 01 |
-| DestructiveConfirmModal | **Mevcut** | `primitives/destructive-confirm-modal.tsx` | — | 01 |
+| UiButton | **Hazır (foundation)** | `primitives/button.tsx` | Route `hz-btn` migration | 04+ |
+| UiBadge | **Hazır (foundation)** | `primitives/badge.tsx` | — | — |
+| UiCard | **Hazır (foundation)** | `primitives/card.tsx` | — | — |
+| UiInput | **Hazır (foundation)** | `primitives/input.tsx` | — | — |
+| UiSelect | **Hazır (foundation)** | `primitives/select.tsx` | — | — |
+| UiTabs | **Hazır** | `primitives/tabs.tsx` | — | — |
+| UiModal | **Hazır** | `primitives/modal.tsx` | — | — |
+| UiDrawer | **Hazır** | `primitives/drawer.tsx` | Mobile drawer shell ile hizalama | **02** |
+| UiSkeleton | **Hazır** | `primitives/skeleton.tsx` | — | — |
+| LoadingState | **Hazır** | `primitives/loading-state.tsx` | Route-level `loading.tsx` yok | 04+ |
+| EmptyState | **Hazır** | `primitives/empty-state.tsx` | `TabEmptyState` local duplicate (web) | 05 |
+| ErrorState | **Hazır** | `primitives/error-state.tsx` | App Router `error.tsx` yok | 04+ |
+| SuccessState | **Hazır** | `primitives/success-state.tsx` | — | — |
+| DisabledNotice | **Hazır** | `primitives/disabled-notice.tsx` | apps/web kullanımı az | 07 |
+| DestructiveConfirmModal | **Hazır** | `primitives/destructive-confirm-modal.tsx` | apps/web adoption | 04+ |
 | FilterToolbar | **Kısmi** | `primitives/filter-bar.tsx` | İsim + API `FilterToolbar` | 03 |
 | DataTableShell | **Kısmi** | `primitives/data-table.tsx` | Yoğunluk token hizası | 03 |
 | DetailPanel | **Mevcut** | `primitives/detail-panel.tsx` | 360px hedef genişlik | 03 |

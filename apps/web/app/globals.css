@@ -1,3 +1,6 @@
+@import "../../../packages/ui/src/styles/tokens.css";
+@import "../../../packages/ui/src/styles/foundation-primitives.css";
+
 :root,
 :root[data-theme="light"] {
   --hz-sidebar-width: 200px;
@@ -18,12 +21,12 @@
   --hz-table-cell-x: 8px;
   --hz-modal-padding: 18px;
   --hz-radius-modal: 18px;
-  --hz-radius-card: 14px;
+  --hz-radius-card: 16px;
   --hz-radius-control: 10px;
   --hz-radius-pill: 999px;
   --hz-side-panel-width: 272px;
   --hz-content-max-width: 1604px;
-  --hz-detail-panel-width: 336px;
+  --hz-detail-panel-width: 360px;
 
   --hz-bg: #f3f5f9;
   --hz-surface: #ffffff;
