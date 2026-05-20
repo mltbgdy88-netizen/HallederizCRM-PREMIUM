@@ -235,7 +235,23 @@ export async function runDocumentLiveAction(
       document = response.item;
     } else if (action === "queueSave") {
       const response = await sdk.documents.queueSave(documentId);
-      downloadUrl = extractDownloadUrlFromRecord(response.item as unknown as Record<string, unknown>);
+      const queued = response.item as unknown as Record<string, unknown>;
+      downloadUrl = extractDownloadUrlFromRecord(queued);
+      const jobQueued = typeof queued.id === "string" && queued.id.length > 0;
+      const archiveId =
+        typeof queued.archiveId === "string" && queued.archiveId.trim().length > 0
+          ? queued.archiveId.trim()
+          : undefined;
+      return {
+        ok: true,
+        toasts: archiveId
+          ? ["Arşiv kaydı hazır.", "Arşiv ekranından görüntüleyebilirsiniz."]
+          : jobQueued
+            ? ["Arşiv işlemi kuyruğa alındı.", MSG_DOC_PDF_READY_HINT]
+            : resolveLiveSuccessToasts(action, document),
+        document,
+        downloadUrl: downloadUrl ?? (document ? extractDownloadUrlFromDocument(document) : null)
+      };
     } else if (action === "queuePrint") {
       await sdk.documents.queuePrint(documentId);
     }

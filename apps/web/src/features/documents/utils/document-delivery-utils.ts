@@ -9,7 +9,7 @@ import {
 const DOWNLOAD_URL_KEYS = ["pdfUrl", "downloadUrl", "fileUrl", "binaryUrl", "publicUrl", "url", "href"] as const;
 
 function isHttpUrl(value: string): boolean {
-  return /^https?:\/\//i.test(value.trim());
+  return /^https:\/\//i.test(value.trim());
 }
 
 export function extractDownloadUrlFromRecord(record: Record<string, unknown> | null | undefined): string | null {

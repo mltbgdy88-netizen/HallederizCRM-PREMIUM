@@ -7,5 +7,6 @@ export * from "./runtime";
 export * from "./lifecycle";
 export * from "./admin";
 export * from "./contract-handlers";
+export * from "./document-job-handlers";
 export * from "./production-config";
 export * from "./async-runtime";

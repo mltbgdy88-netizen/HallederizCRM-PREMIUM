@@ -1,17 +1,28 @@
 import type { Document, DocumentDownloadLink } from "@hallederiz/types";
 import { getLatestFileSaveJobForDocument } from "../../ai-local-output-store";
 
-const HTTP_URL = /^https?:\/\//i;
+/** Production-ready download URLs must be HTTPS. */
+const HTTPS_URL = /^https:\/\//i;
 
-function pickHttpUrl(document: Document): string | null {
-  if (document.downloadUrl && HTTP_URL.test(document.downloadUrl)) {
+function pickHttpsUrl(document: Document): string | null {
+  if (document.downloadUrl && HTTPS_URL.test(document.downloadUrl)) {
     return document.downloadUrl.trim();
   }
   const preview = document.previewText?.trim();
-  if (preview && HTTP_URL.test(preview)) {
+  if (preview && HTTPS_URL.test(preview)) {
     return preview;
   }
   return null;
+}
+
+function buildFileMetadata(document: Document, downloadUrl: string | null): Partial<DocumentDownloadLink> {
+  return {
+    fileName: document.documentNo ? `${document.documentNo}.pdf` : undefined,
+    mimeType: "application/pdf",
+    generatedAt: document.createdAt,
+    storageKey: downloadUrl ? `documents/${document.id}` : undefined,
+    fileId: downloadUrl ? document.id : undefined
+  };
 }
 
 export function resolveDocumentDownloadLink(
@@ -22,14 +33,16 @@ export function resolveDocumentDownloadLink(
     return { status: 404 };
   }
 
-  const downloadUrl = pickHttpUrl(document);
+  const downloadUrl = pickHttpsUrl(document);
   if (downloadUrl) {
     return {
       status: 200,
       item: {
         documentId,
         status: "ready",
-        downloadUrl
+        downloadUrl,
+        fileUrl: downloadUrl,
+        ...buildFileMetadata(document, downloadUrl)
       }
     };
   }
@@ -38,13 +51,26 @@ export function resolveDocumentDownloadLink(
   const base: DocumentDownloadLink = {
     documentId,
     status: "pending",
-    ...(job ? { jobId: job.id } : {})
+    ...(job ? { jobId: job.id, fileName: job.fileName } : {}),
+    ...buildFileMetadata(document, null)
   };
 
   if (job?.status === "failed") {
     return {
       status: 202,
-      item: { ...base, status: "unavailable", jobId: job.id }
+      item: {
+        ...base,
+        status: "unavailable",
+        jobId: job.id,
+        reason: "file_generation_failed"
+      }
+    };
+  }
+
+  if (document.fileStatus === "unavailable") {
+    return {
+      status: 202,
+      item: { ...base, status: "unavailable", reason: "file_not_available" }
     };
   }
 

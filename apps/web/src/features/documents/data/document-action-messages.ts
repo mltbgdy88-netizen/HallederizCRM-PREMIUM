@@ -31,7 +31,7 @@ export const MSG_DOC_PDF_READY_HINT = "PDF hazır olduğunda indirme bağlantıs
 export const MSG_DOC_SEND_QUEUE =
   "İletim kuyruğa alındı; durum belge ekranından takip edilebilir.";
 
-export const MSG_DOC_ARCHIVE_QUEUE = "Arşiv kaydı kuyruğa alındı.";
+export const MSG_DOC_ARCHIVE_QUEUE = "Arşiv işlemi kuyruğa alındı.";
 
 export const MSG_DOC_PRINT_QUEUE = "Yazdırma işi kuyruğa alındı.";
 

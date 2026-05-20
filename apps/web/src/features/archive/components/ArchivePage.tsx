@@ -20,6 +20,7 @@ import {
 } from "../../dashboard/components/dashboard-inline-icons";
 import { useToast } from "../../../providers/toast-provider";
 import { ARCHIVE_DEMO_RECORDS, ARCHIVE_USE_DEMO_DATA } from "../data/archive-demo-records";
+import { getArchiveLiveRecords } from "../queries/get-archive-live-records";
 import type {
   ArchiveCategoryFilter,
   ArchiveRecord,
@@ -145,7 +146,42 @@ function filterRecords(
 export function ArchivePage() {
   const router = useRouter();
   const { pushToast } = useToast();
-  const baseRows = useMemo(() => (ARCHIVE_USE_DEMO_DATA ? ARCHIVE_DEMO_RECORDS : []), []);
+  const [liveRows, setLiveRows] = useState<ArchiveRecord[]>([]);
+  const [liveMessage, setLiveMessage] = useState<string | null>(null);
+  const [liveReady, setLiveReady] = useState(false);
+  const [liveLoading, setLiveLoading] = useState(!ARCHIVE_USE_DEMO_DATA);
+
+  const baseRows = useMemo(
+    () => (ARCHIVE_USE_DEMO_DATA ? ARCHIVE_DEMO_RECORDS : liveRows),
+    [liveRows]
+  );
+
+  useEffect(() => {
+    if (ARCHIVE_USE_DEMO_DATA) {
+      setLiveLoading(false);
+      return;
+    }
+    let active = true;
+    setLiveLoading(true);
+    void getArchiveLiveRecords()
+      .then((result) => {
+        if (!active) return;
+        setLiveRows(result.records);
+        setLiveMessage(result.message ?? null);
+        setLiveReady(result.liveReady);
+        setLiveLoading(false);
+      })
+      .catch(() => {
+        if (!active) return;
+        setLiveRows([]);
+        setLiveMessage("Arşiv kayıtları şu anda alınamıyor.");
+        setLiveReady(false);
+        setLiveLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [search, setSearch] = useState("");
@@ -454,9 +490,17 @@ export function ArchivePage() {
             <div className="hz-archive-preview-band" role="status">
               Örnek veri modu: arşiv listesi demo kayıtlarıdır; canlı arşiv ve indirme henüz bağlı değildir.
             </div>
-          ) : !baseRows.length ? (
+          ) : liveLoading ? (
             <div className="hz-archive-preview-band" role="status">
-              Canlı arşiv verisi henüz bağlı değil; kayıt listesi boş görünür.
+              Arşiv kayıtları yükleniyor.
+            </div>
+          ) : !liveReady ? (
+            <div className="hz-archive-preview-band" role="status">
+              Arşiv kayıtları şu anda alınamıyor.
+            </div>
+          ) : liveMessage ? (
+            <div className="hz-archive-preview-band" role="status">
+              {liveMessage}
             </div>
           ) : null}
 

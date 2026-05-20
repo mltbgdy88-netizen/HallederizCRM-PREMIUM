@@ -9,6 +9,7 @@ export * from "./quick-operations";
 export * from "./product-stock-pricing";
 export * from "./customer-offer";
 export * from "./commercial-operations";
+export * from "./archive";
 export * from "./whatsapp-workflow";
 export * from "./whatsapp-intent-rules";
 export * from "./omnichannel-social";

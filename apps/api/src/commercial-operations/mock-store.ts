@@ -142,7 +142,21 @@ let documents: Document[] = [
     customerId: deliveries[0]?.customerId,
     createdBy,
     title: "Teslim Fisi"
-  })
+  }),
+  {
+    ...buildDocumentRecord({
+      tenantId,
+      type: "invoice_pdf",
+      entityType: "invoice",
+      entityId: invoices[0]?.id ?? "invoice_1",
+      entityNo: invoices[0]?.invoiceNo ?? "INV-2026-001",
+      customerId: invoices[0]?.customerId,
+      createdBy,
+      title: "Fatura PDF"
+    }),
+    downloadUrl: "https://storage.example.com/tenant_1/invoices/INV-2026-001.pdf",
+    fileStatus: "ready"
+  }
 ];
 
 function recalculateOrder(order: SaleOrder): SaleOrder {
