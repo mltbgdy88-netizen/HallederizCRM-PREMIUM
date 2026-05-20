@@ -10,6 +10,7 @@ export * from "./returns.client";
 export * from "./approvals.client";
 export * from "./dashboard.client";
 export * from "./documents.client";
+export * from "./archive.client";
 export * from "./ai.client";
 export * from "./platform.client";
 export * from "./imports.client";

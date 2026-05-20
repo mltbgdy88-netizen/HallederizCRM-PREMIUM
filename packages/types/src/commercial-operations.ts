@@ -366,15 +366,25 @@ export type DocumentType =
 export type DocumentDeliveryStatus = "queued" | "sent" | "delivered" | "failed";
 export type DocumentEntityType = "offer" | "order" | "payment" | "warehouse_order" | "delivery" | "dispatch" | "invoice" | "statement" | "return";
 
-export type DocumentFileStatus = "pending" | "ready" | "unavailable";
+export type DocumentFileStatus = "pending" | "ready" | "unavailable" | "missing";
 
 export interface DocumentDownloadLink {
   documentId: DocumentId;
   status: DocumentFileStatus;
   downloadUrl?: string;
-  expiresAt?: string;
-  jobId?: string;
+  fileUrl?: string;
+  signedUrl?: string;
+  storageKey?: string;
+  fileId?: string;
   archiveId?: string;
+  jobId?: string;
+  expiresAt?: string;
+  generatedAt?: string;
+  fileName?: string;
+  mimeType?: string;
+  fileSize?: number;
+  checksum?: string;
+  reason?: string;
 }
 
 export interface Document {

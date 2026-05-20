@@ -5,6 +5,7 @@ import { registerCommercialOperationsRoutes } from "./commercial-operations/rout
 import { registerImportRoutes } from "./imports/routes";
 import { registerIntegrationRoutes } from "./integrations/routes";
 import { registerAiAssistantPlanRoutes } from "./modules/ai-assistant/plan-routes";
+import { registerArchiveRoutes } from "./modules/archive/routes";
 import { registerOperationsEngineRoutes } from "./operations-engine/routes";
 import { registerPlatformCoreRoutes } from "./platform-core/routes";
 import { registerProductStockPricingRoutes } from "./product-stock-pricing/routes";
@@ -42,6 +43,7 @@ async function bootstrap() {
   await registerProductStockPricingRoutes(server);
   await registerSalesCrmRoutes(server);
   await registerCommercialOperationsRoutes(server);
+  await registerArchiveRoutes(server);
   await registerOperationsEngineRoutes(server);
   await registerIntegrationRoutes(server);
   await registerImportRoutes(server);

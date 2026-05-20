@@ -30,7 +30,9 @@ const HTTP_SMOKE_ROUTES = [
   "/tahsilatlar/yeni?customer=customer_1",
   "/belgeler",
   "/belgeler?customer=customer_1&type=statement_pdf",
+  "/gelen-kutu",
   "/archive",
+  "/archive?customer=customer_1",
   "/whatsapp",
   "/whatsapp?customer=customer_1"
 ];

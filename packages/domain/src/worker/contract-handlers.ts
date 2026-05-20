@@ -1,10 +1,10 @@
 import type { WorkerJobHandler } from "./handler-registry";
 
+import { listDocumentJobHandlers } from "./document-job-handlers";
+
 const CONTRACT_JOB_TYPES = [
   "approval_execution",
   "ai_reply_send",
-  "document_render",
-  "document_archive",
   "integration_sync"
 ] as const;
 
@@ -23,5 +23,8 @@ export function createUnsupportedContractHandler(jobType: string): WorkerJobHand
 }
 
 export function listContractJobHandlers(): WorkerJobHandler[] {
-  return CONTRACT_JOB_TYPES.map((jobType) => createUnsupportedContractHandler(jobType));
+  return [
+    ...CONTRACT_JOB_TYPES.map((jobType) => createUnsupportedContractHandler(jobType)),
+    ...listDocumentJobHandlers()
+  ];
 }

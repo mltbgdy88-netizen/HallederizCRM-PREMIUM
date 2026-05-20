@@ -10,6 +10,7 @@ import {
   RowListIconSvg
 } from "./dashboard-inline-icons";
 import { getDashboardHomeSnapshot } from "../queries/get-dashboard-home-snapshot";
+import { getDashboardLiveSnapshot } from "../queries/get-dashboard-live-snapshot";
 import {
   DASHBOARD_CARD_HREF,
   EMPTY_DASHBOARD_HOME_SNAPSHOT,
@@ -136,14 +137,8 @@ export function DashboardHomePage() {
 
   useEffect(() => {
     let active = true;
-    if (!isDemo) {
-      setSnapshot(EMPTY_DASHBOARD_HOME_SNAPSHOT);
-      setSnapshotReady(true);
-      return () => {
-        active = false;
-      };
-    }
-    void getDashboardHomeSnapshot()
+    const loader = isDemo ? getDashboardHomeSnapshot() : getDashboardLiveSnapshot();
+    void loader
       .then((data) => {
         if (!active) return;
         setSnapshot(data);

@@ -23,7 +23,7 @@ function authHeaders(token: string) {
   };
 }
 
-test("GET /documents/:id/download-url returns 202 when file not ready", async () => {
+test("GET /archive returns live records in foundation mode", async () => {
   await withDemoAuth(async () => {
     const server = await buildServer();
     const login = createSession({
@@ -32,33 +32,22 @@ test("GET /documents/:id/download-url returns 202 when file not ready", async ()
       password: "demo"
     });
 
-    const listResponse = await server.inject({
-      method: "GET",
-      url: "/documents",
-      headers: authHeaders(login.accessToken)
-    });
-    assert.equal(listResponse.statusCode, 200);
-    const listPayload = listResponse.json() as { items: Array<{ id: string }> };
-    const documentId = listPayload.items[0]?.id;
-    assert.ok(documentId);
-
     const response = await server.inject({
       method: "GET",
-      url: `/documents/${documentId}/download-url`,
+      url: "/archive",
       headers: authHeaders(login.accessToken)
     });
 
-    assert.equal(response.statusCode, 202);
-    const payload = response.json() as { item: { status: string; documentId: string } };
-    assert.equal(payload.item.documentId, documentId);
-    assert.equal(payload.item.status, "pending");
-    assert.equal((payload.item as { downloadUrl?: string }).downloadUrl, undefined);
+    assert.equal(response.statusCode, 200);
+    const payload = response.json() as { items: unknown[]; liveReady: boolean; total: number };
+    assert.equal(payload.liveReady, true);
+    assert.ok(payload.total >= 1);
 
     await server.close();
   });
 });
 
-test("GET /documents/:id/download-url returns 200 when HTTPS file is ready", async () => {
+test("GET /archive/:id/download-url returns 200 when document file is ready", async () => {
   await withDemoAuth(async () => {
     const server = await buildServer();
     const login = createSession({
@@ -69,16 +58,16 @@ test("GET /documents/:id/download-url returns 200 when HTTPS file is ready", asy
 
     const listResponse = await server.inject({
       method: "GET",
-      url: "/documents",
+      url: "/archive",
       headers: authHeaders(login.accessToken)
     });
-    const listPayload = listResponse.json() as { items: Array<{ id: string; downloadUrl?: string }> };
-    const readyDoc = listPayload.items.find((item) => item.downloadUrl?.startsWith("https://"));
-    assert.ok(readyDoc?.id);
+    const listPayload = listResponse.json() as { items: Array<{ id: string; documentId?: string; downloadUrl?: string }> };
+    const ready = listPayload.items.find((row) => row.downloadUrl?.startsWith("https://"));
+    assert.ok(ready?.id);
 
     const response = await server.inject({
       method: "GET",
-      url: `/documents/${readyDoc.id}/download-url`,
+      url: `/archive/${ready.id}/download-url`,
       headers: authHeaders(login.accessToken)
     });
 
@@ -91,7 +80,7 @@ test("GET /documents/:id/download-url returns 200 when HTTPS file is ready", asy
   });
 });
 
-test("GET /documents/:id/download-url returns 404 for unknown document", async () => {
+test("GET /archive/:id returns 404 for unknown archive", async () => {
   await withDemoAuth(async () => {
     const server = await buildServer();
     const login = createSession({
@@ -102,7 +91,7 @@ test("GET /documents/:id/download-url returns 404 for unknown document", async (
 
     const response = await server.inject({
       method: "GET",
-      url: "/documents/missing_document/download-url",
+      url: "/archive/missing_archive",
       headers: authHeaders(login.accessToken)
     });
 
