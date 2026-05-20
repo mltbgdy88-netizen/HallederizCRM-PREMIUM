@@ -16,6 +16,7 @@
   "dependencies": {
     "@fastify/cors": "9.0.1",
     "@hallederiz/ai-contracts": "workspace:*",
+    "@hallederiz/config": "workspace:*",
     "@hallederiz/database": "workspace:*",
     "@hallederiz/domain": "workspace:*",
     "@hallederiz/types": "workspace:*",

@@ -11,6 +11,9 @@ import { registerProductStockPricingRoutes } from "./product-stock-pricing/route
 import { registerQuickOperationsRoutes } from "./quick-operations/routes";
 import { registerSalesCrmRoutes } from "./sales-crm/routes";
 import { buildApiCorsOptions } from "./shared/cors-config";
+import { bootstrapRuntimeEnvValidation } from "./shared/runtime-env-bootstrap";
+
+bootstrapRuntimeEnvValidation();
 
 const server = Fastify({
   logger: true

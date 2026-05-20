@@ -45,6 +45,9 @@ importers:
       '@hallederiz/ai-contracts':
         specifier: workspace:*
         version: link:../../packages/ai-contracts
+      '@hallederiz/config':
+        specifier: workspace:*
+        version: link:../../packages/config
       '@hallederiz/database':
         specifier: workspace:*
         version: link:../../packages/database
@@ -132,6 +135,9 @@ importers:
 
   apps/worker:
     dependencies:
+      '@hallederiz/database':
+        specifier: workspace:*
+        version: link:../../packages/database
       '@hallederiz/domain':
         specifier: workspace:*
         version: link:../../packages/domain

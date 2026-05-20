@@ -12,4 +12,8 @@ export class OrdersClient {
   detail(id: string) {
     return this.api.get<ItemResponse<SaleOrder>>(`/orders/${id}`);
   }
+
+  create(payload: Partial<SaleOrder>) {
+    return this.api.post<ItemResponse<SaleOrder>>("/orders", payload);
+  }
 }

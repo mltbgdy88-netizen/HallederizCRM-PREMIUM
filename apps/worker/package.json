@@ -12,6 +12,7 @@
     "clean": "node -e \"console.log('clean: no-op for @hallederiz/worker')\""
   },
   "dependencies": {
+    "@hallederiz/database": "workspace:*",
     "@hallederiz/domain": "workspace:*",
     "@hallederiz/sdk": "workspace:*"
   },

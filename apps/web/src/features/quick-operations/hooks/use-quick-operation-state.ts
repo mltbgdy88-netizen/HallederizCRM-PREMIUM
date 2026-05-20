@@ -16,7 +16,16 @@ import type {
   SourceOption
 } from "../types";
 import { dataSourceConfig } from "../../../lib/data-source";
-import { submitQuickOperationRecord } from "../../../services/api/quick-operations.service";
+import {
+  previewQuickOperationRecord,
+  submitQuickOperationRecord
+} from "../../../services/api/quick-operations.service";
+import {
+  mapPreviewActionError,
+  mapPreviewNotice,
+  sanitizePreviewImpacts,
+  validateQuickOperationLinesForPreview
+} from "../utils/quick-operation-preview-feedback";
 import {
   buildQuickOperationCustomers,
   findCatalogProduct,
@@ -357,6 +366,10 @@ export function useQuickOperationState(options?: {
   const [notice, setNotice] = useState<string | null>(null);
   const [operationNote, setOperationNote] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [previewPending, setPreviewPending] = useState(false);
+  const [previewError, setPreviewError] = useState<string | null>(null);
+  const [previewLastUpdatedAt, setPreviewLastUpdatedAt] = useState<string | null>(null);
+  const [previewBlockingSubmit, setPreviewBlockingSubmit] = useState(false);
   const [submittedImpacts, setSubmittedImpacts] = useState<QuickOperationImpact[] | null>(null);
   const [submitLinks, setSubmitLinks] = useState<QuickOperationSubmitLinks>({ showApprovalsLink: false });
   const [sideActions, setSideActions] = useState<QuickOperationSideActions | null>(null);
@@ -494,7 +507,59 @@ export function useQuickOperationState(options?: {
     };
   };
 
+  const previewOperation = async (): Promise<boolean> => {
+    if (isPreviewCustomerBlocked) {
+      setNotice(MSG_PREVIEW_CUSTOMER);
+      return false;
+    }
+
+    const payload = buildSubmitPayload();
+    const localIssues = validateQuickOperationLinesForPreview(payload);
+    if (localIssues.some((issue) => issue.level === "error")) {
+      setPreviewBlockingSubmit(true);
+      setPreviewError("Önizleme doğrulaması tamamlanamadı. Eksik alanları kontrol edin.");
+      setNotice("Önizleme doğrulaması tamamlanamadı. Eksik alanları kontrol edin.");
+      return false;
+    }
+
+    setPreviewPending(true);
+    setPreviewError(null);
+    try {
+      const result = await previewQuickOperationRecord(payload);
+      const sanitizedImpacts = sanitizePreviewImpacts(result.workflowImpacts);
+      setSubmittedImpacts(
+        sanitizedImpacts.map((impact) => ({
+          id: impact.id,
+          title: impact.title,
+          description: impact.description,
+          tone: impact.severity === "warning" ? "warning" : impact.severity === "success" ? "success" : "info"
+        }))
+      );
+      const hasErrors =
+        localIssues.some((issue) => issue.level === "error") ||
+        (result.validationIssues ?? []).some((issue) => issue.level === "error") ||
+        !result.ok;
+      setPreviewBlockingSubmit(hasErrors);
+      const notice = mapPreviewNotice({ ...result, validationIssues: [...localIssues, ...(result.validationIssues ?? [])] });
+      setNotice(notice);
+      setPreviewLastUpdatedAt(new Date().toISOString());
+      return !hasErrors;
+    } catch (error) {
+      const message = mapPreviewActionError(error);
+      setPreviewError(message);
+      setPreviewBlockingSubmit(false);
+      setNotice(message);
+      return false;
+    } finally {
+      setPreviewPending(false);
+    }
+  };
+
   const submitOperation = async (): Promise<QuickOperationSubmitOutcome> => {
+    if (previewBlockingSubmit) {
+      setNotice("Önizleme doğrulaması tamamlanamadı. Eksik alanları kontrol edin.");
+      return { ok: false };
+    }
     if (isPreviewCustomerBlocked) {
       setNotice(MSG_PREVIEW_CUSTOMER);
       return { ok: false };
@@ -600,6 +665,11 @@ export function useQuickOperationState(options?: {
     selectProduct,
     selectSource,
     showFoundationNotice,
+    previewOperation,
+    previewPending,
+    previewError,
+    previewLastUpdatedAt,
+    previewBlockingSubmit,
     submitOperation,
     isSubmitting,
     sideActions,

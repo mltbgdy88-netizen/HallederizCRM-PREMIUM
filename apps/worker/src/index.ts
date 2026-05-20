@@ -35,3 +35,33 @@ export function runWorkerFoundationTick(options?: WorkerRuntimeOptions): WorkerB
     tickResult
   };
 }
+
+export {
+  createWorkerRuntimeFromEnv,
+  runWorkerProductionTick,
+  type WorkerProductionTickResult
+} from "./production-runtime.js";
+
+const workerMode = (process.env.WORKER_MODE ?? "foundation_dry_run").trim().toLowerCase();
+
+if (workerMode === "production") {
+  const result = await runWorkerProductionTick();
+  if (!result.ok) {
+    console.error("[worker] production tick fail-closed", result.reasons.join(","));
+    process.exitCode = 1;
+  } else {
+    console.log("[worker] production tick", JSON.stringify({
+      processed: result.tickResult?.processed ?? 0,
+      completed: result.tickResult?.completed ?? 0,
+      failed: result.tickResult?.failed ?? 0,
+      deadLettered: result.tickResult?.deadLettered ?? 0,
+      noJob: result.tickResult?.noJob ?? true
+    }));
+  }
+} else if (workerMode !== "disabled") {
+  const bootstrap = runWorkerFoundationTick();
+  console.log("[worker] foundation dry-run", JSON.stringify({
+    processed: bootstrap.tickResult.processed,
+    noJob: bootstrap.tickResult.noJob
+  }));
+}

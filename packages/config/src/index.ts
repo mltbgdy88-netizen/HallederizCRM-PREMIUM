@@ -4,4 +4,4 @@ export const appConfig = {
   defaultTimeZone: "Europe/Istanbul"
 } as const;
 
-// TODO: Add typed runtime env parsing and validation.
+export * from "./runtime-env.js";

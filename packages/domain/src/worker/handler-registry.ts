@@ -1,3 +1,4 @@
+import { listContractJobHandlers } from "./contract-handlers";
 import type { WorkerHandlerMode, WorkerJob, WorkerJobHandleResult } from "./model";
 import {
   buildAuditTimelineWritebackPayload,
@@ -251,12 +252,9 @@ function createFoundationHandler(jobType: string): WorkerJobHandler {
     productionAllowed: false,
     liveReady: false,
     handle: () => ({
-      ok: true,
+      ok: false,
       retryable: false,
-      reasons: [
-        "foundation_handler_dry_run",
-        "no_real_provider_or_mutation_execution"
-      ]
+      reasons: ["unsupported_job_type", `job_type:${jobType}`, "mutation_executed:false", "provider_call_executed:false"]
     })
   };
 }
@@ -265,6 +263,9 @@ function registerDefaults() {
   registerWorkerJobHandler(createFoundationHandler("approval.execution.dispatch"));
   registerWorkerJobHandler(createFoundationHandler("audit.timeline.writeback"));
   registerWorkerJobHandler(createFoundationHandler("notification.dispatch"));
+  for (const handler of listContractJobHandlers()) {
+    registerWorkerJobHandler(handler);
+  }
 }
 
 registerDefaults();

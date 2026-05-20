@@ -24,6 +24,8 @@ import type {
   SaleOrderLine
 } from "@hallederiz/types";
 import type { RequestContext } from "../../shared/request-context";
+import { resolvePendingApprovalRepository } from "../../shared/approval-repository-runtime";
+import { evaluatePolicyEngineForContext } from "../../shared/policy-engine-runtime";
 import { CommercialCoreService } from "../commercial-core/service";
 import { SalesCrmService } from "../sales-crm/service";
 
@@ -104,9 +106,6 @@ export class QuickOperationsService {
       ok: preview.ok,
       operationType: request.operationType,
       draftId: `qod_${now}`,
-      createdEntityType: this.resolveCreatedEntityType(request.operationType),
-      createdEntityId: `foundation_${request.operationType}_${now}`,
-      createdEntityNo: `QO-${new Date().getFullYear()}-${String(now).slice(-6)}`,
       workflowImpacts: preview.workflowImpacts,
       documentIds: [],
       auditEventIds: [],
@@ -116,6 +115,11 @@ export class QuickOperationsService {
 
     if (!preview.ok) {
       return this.withSideActions(request, base);
+    }
+
+    const approvalQueued = await this.queueForApprovalIfRequired(request, preview);
+    if (approvalQueued) {
+      return this.withSideActions(request, approvalQueued);
     }
 
     switch (request.operationType) {
@@ -431,6 +435,112 @@ export class QuickOperationsService {
     }
 
     return [...defaultImpacts, ...extraImpacts];
+  }
+
+  private resolveQuickOperationActionKey(operationType: QuickOperationSubmitRequest["operationType"]): string {
+    switch (operationType) {
+      case "offer":
+        return "platform.offers.create";
+      case "sale_order":
+        return "platform.orders.create";
+      case "payment":
+        return "platform.payments.create";
+      case "delivery":
+        return "platform.ai.propose";
+      case "return":
+        return "platform.ai.propose";
+      default:
+        return "platform.ai.propose";
+    }
+  }
+
+  private async queueForApprovalIfRequired(
+    request: QuickOperationSubmitRequest,
+    preview: QuickOperationPreviewResponse
+  ): Promise<QuickOperationSubmitResponse | null> {
+    const actionKey = this.resolveQuickOperationActionKey(request.operationType);
+    const policyDecision = evaluatePolicyEngineForContext(this.context, {
+      actionKey,
+      channel: "web",
+      source: "web",
+      idempotencyKey: `quick_operation.${request.operationType}.${request.customerId}.${Date.now()}`,
+      metadata: {
+        route: "quick-operations.submit",
+        operationType: request.operationType,
+        customerId: request.customerId
+      }
+    });
+
+    if (policyDecision.effect !== "require_approval") {
+      return null;
+    }
+
+    const approvalRuntime = resolvePendingApprovalRepository(this.context);
+    if (!approvalRuntime.repository) {
+      return {
+        ok: true,
+        operationType: request.operationType,
+        draftId: `qod_${Date.now()}`,
+        workflowImpacts: [
+          ...preview.workflowImpacts,
+          impact(
+            "impact_qo_approval_pending",
+            "return_review_required",
+            "Onay kaydı bekleniyor",
+            "Onay deposu bu ortamda hazır değil; işlem canlı bağlantı kurulduğunda onaya gönderilecek.",
+            "warning"
+          )
+        ],
+        documentIds: [],
+        auditEventIds: [],
+        validationIssues: preview.validationIssues,
+        mode: "foundation"
+      };
+    }
+
+    const totals = calculateQuickOperationTotals(request.lines);
+    const pending = await approvalRuntime.repository.createPendingApprovalRequest({
+      tenantId: this.context.tenantId,
+      actorId: this.context.userId,
+      actionKey,
+      reasons: policyDecision.reasons,
+      payload: {
+        source: "quick-operations.submit",
+        operationType: request.operationType,
+        customerId: request.customerId,
+        customerName: request.customerName,
+        note: request.note,
+        lines: request.lines,
+        totals,
+        orderId: request.orderId,
+        deliveryId: request.deliveryId
+      },
+      idempotencyKey: `quick_operation.${request.operationType}.${request.customerId}.${Date.now()}`,
+      requestedAt: nowIso(),
+      auditRequired: policyDecision.auditPolicy?.auditRequired ?? true,
+      timelineRequired: policyDecision.auditPolicy?.timelineRequired ?? true
+    });
+
+    return {
+      ok: true,
+      operationType: request.operationType,
+      draftId: `qod_${Date.now()}`,
+      approvalId: pending.approvalRequestId,
+      workflowImpacts: [
+        ...preview.workflowImpacts,
+        impact(
+          "impact_qo_approval_created",
+          "return_review_required",
+          "Onay kaydı oluşturuldu",
+          "İşlem onay kuyruğuna alındı; onay sonrası kayıt işlenecek.",
+          "warning"
+        )
+      ],
+      documentIds: [],
+      auditEventIds: [],
+      validationIssues: preview.validationIssues,
+      mode: "foundation"
+    };
   }
 
   private resolveCreatedEntityType(operationType: QuickOperationSubmitRequest["operationType"]): QuickOperationSubmitResponse["createdEntityType"] {

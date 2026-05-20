@@ -1,0 +1,2032 @@
+﻿TAP version 13
+# (node:16132) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:16132) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: ai config validator marks missing key as misconfigured in live mode
+ok 1 - ai config validator marks missing key as misconfigured in live mode
+  ---
+  duration_ms: 4.9221
+  type: 'test'
+  ...
+# Subtest: ai runtime chat falls back safely when provider is not live
+ok 2 - ai runtime chat falls back safely when provider is not live
+  ---
+  duration_ms: 4.7148
+  type: 'test'
+  ...
+# Subtest: proposal generation keeps fallback operations when live parse fails
+ok 3 - proposal generation keeps fallback operations when live parse fails
+  ---
+  duration_ms: 28.6527
+  type: 'test'
+  ...
+# (node:41732) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:41732) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: GET /platform/approvals fails without auth
+ok 4 - GET /platform/approvals fails without auth
+  ---
+  duration_ms: 317.643
+  type: 'test'
+  ...
+# Subtest: tenant mismatch is fail-closed for approval list
+ok 5 - tenant mismatch is fail-closed for approval list
+  ---
+  duration_ms: 66.8141
+  type: 'test'
+  ...
+# Subtest: GET list/detail returns pending approvals
+ok 6 - GET list/detail returns pending approvals
+  ---
+  duration_ms: 46.2719
+  type: 'test'
+  ...
+# Subtest: POST approve fails without approval permission
+ok 7 - POST approve fails without approval permission
+  ---
+  duration_ms: 201.6417
+  type: 'test'
+  ...
+# Subtest: POST approve triggers transactional bridge and returns metadata
+ok 8 - POST approve triggers transactional bridge and returns metadata
+  ---
+  duration_ms: 40.1843
+  type: 'test'
+  ...
+# Subtest: duplicate approve is safe and does not produce new execution
+ok 9 - duplicate approve is safe and does not produce new execution
+  ---
+  duration_ms: 39.7824
+  type: 'test'
+  ...
+# Subtest: POST reject marks request rejected and blocks approve
+ok 10 - POST reject marks request rejected and blocks approve
+  ---
+  duration_ms: 103.511
+  type: 'test'
+  ...
+# Subtest: approved request cannot be rejected
+ok 11 - approved request cannot be rejected
+  ---
+  duration_ms: 56.6315
+  type: 'test'
+  ...
+# Subtest: bridge failure does not mark approval as approved
+ok 12 - bridge failure does not mark approval as approved
+  ---
+  duration_ms: 71.2004
+  type: 'test'
+  ...
+# Subtest: missing repository does not fail-open
+ok 13 - missing repository does not fail-open
+  ---
+  duration_ms: 97.8583
+  type: 'test'
+  ...
+# (node:15352) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:15352) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: dispatcher returns unsupported_action for unknown action
+ok 14 - dispatcher returns unsupported_action for unknown action
+  ---
+  duration_ms: 2.7283
+  type: 'test'
+  ...
+# Subtest: dispatcher blocks critical action without approvalRequestId
+ok 15 - dispatcher blocks critical action without approvalRequestId
+  ---
+  duration_ms: 0.4027
+  type: 'test'
+  ...
+# Subtest: dispatcher returns duplicate for same idempotency key
+ok 16 - dispatcher returns duplicate for same idempotency key
+  ---
+  duration_ms: 0.8938
+  type: 'test'
+  ...
+# Subtest: supported action returns executionId without real mutation
+ok 17 - supported action returns executionId without real mutation
+  ---
+  duration_ms: 1.4331
+  type: 'test'
+  ...
+# Subtest: dispatcher keeps audit/timeline flags and tenant/action metadata
+ok 18 - dispatcher keeps audit/timeline flags and tenant/action metadata
+  ---
+  duration_ms: 0.7269
+  type: 'test'
+  ...
+# Subtest: handler registry lists foundation handlers
+ok 19 - handler registry lists foundation handlers
+  ---
+  duration_ms: 3.9644
+  type: 'test'
+  ...
+# Subtest: settings handler is supported in dry_run mode
+ok 20 - settings handler is supported in dry_run mode
+  ---
+  duration_ms: 0.5208
+  type: 'test'
+  ...
+# (node:41612) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:41612) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: executeApprovedPendingApproval export is callable
+ok 21 - executeApprovedPendingApproval export is callable
+  ---
+  duration_ms: 8.3768
+  type: 'test'
+  ...
+# Subtest: approve runtime resolves pending approval and returns execution/outbox metadata
+ok 22 - approve runtime resolves pending approval and returns execution/outbox metadata
+  ---
+  duration_ms: 1.6628
+  type: 'test'
+  ...
+# Subtest: duplicate approve is idempotent and does not call bridge again
+ok 23 - duplicate approve is idempotent and does not call bridge again
+  ---
+  duration_ms: 1.8158
+  type: 'test'
+  ...
+# Subtest: rejected approval cannot be approved
+ok 24 - rejected approval cannot be approved
+  ---
+  duration_ms: 1.4137
+  type: 'test'
+  ...
+# Subtest: bridge failure keeps approval pending
+ok 25 - bridge failure keeps approval pending
+  ---
+  duration_ms: 1.3637
+  type: 'test'
+  ...
+# Subtest: tenant mismatch fails closed and returns not_found
+ok 26 - tenant mismatch fails closed and returns not_found
+  ---
+  duration_ms: 0.942
+  type: 'test'
+  ...
+# Subtest: unsupported repository never fail-opens
+ok 27 - unsupported repository never fail-opens
+  ---
+  duration_ms: 1.1912
+  type: 'test'
+  ...
+# (node:39364) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:39364) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: runtime resolver returns in-memory repository in development demo mode
+ok 28 - runtime resolver returns in-memory repository in development demo mode
+  ---
+  duration_ms: 4.1795
+  type: 'test'
+  ...
+# Subtest: runtime resolver is explicit unsupported in production demo mode
+ok 29 - runtime resolver is explicit unsupported in production demo mode
+  ---
+  duration_ms: 0.7973
+  type: 'test'
+  ...
+# Subtest: runtime resolver requires postgres URL in postgres mode
+ok 30 - runtime resolver requires postgres URL in postgres mode
+  ---
+  duration_ms: 1.1147
+  type: 'test'
+  ...
+# Subtest: runtime resolver selects postgres adapter when postgres URL exists
+ok 31 - runtime resolver selects postgres adapter when postgres URL exists
+  ---
+  duration_ms: 0.9803
+  type: 'test'
+  ...
+# Subtest: policy bridge uses runtime resolver and returns persistence metadata
+ok 32 - policy bridge uses runtime resolver and returns persistence metadata
+  ---
+  duration_ms: 1.7002
+  type: 'test'
+  ...
+# Subtest: policy bridge does not fail-open when runtime repository is unsupported
+ok 33 - policy bridge does not fail-open when runtime repository is unsupported
+  ---
+  duration_ms: 1.072
+  type: 'test'
+  ...
+# (node:13112) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:13112) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: sandbox seed route flag is false in production
+ok 34 - sandbox seed route flag is false in production
+  ---
+  duration_ms: 2.5395
+  type: 'test'
+  ...
+# Subtest: sandbox seed creates pending approvals idempotently in development demo
+ok 35 - sandbox seed creates pending approvals idempotently in development demo
+  ---
+  duration_ms: 322.7868
+  type: 'test'
+  ...
+# Subtest: sandbox seed rejects without auth
+ok 36 - sandbox seed rejects without auth
+  ---
+  duration_ms: 34.8241
+  type: 'test'
+  ...
+# (node:13328) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:13328) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: audit/timeline writeback exports are callable
+ok 37 - audit/timeline writeback exports are callable
+  ---
+  duration_ms: 2.0717
+  type: 'test'
+  ...
+# Subtest: valid payload writes back audit/timeline drafts
+ok 38 - valid payload writes back audit/timeline drafts
+  ---
+  duration_ms: 1.1041
+  type: 'test'
+  ...
+# Subtest: missing tenant/execution/action fails validation
+ok 39 - missing tenant/execution/action fails validation
+  ---
+  duration_ms: 0.3972
+  type: 'test'
+  ...
+# Subtest: missing repository never fail-opens
+ok 40 - missing repository never fail-opens
+  ---
+  duration_ms: 0.3381
+  type: 'test'
+  ...
+# Subtest: partial writeback failure is not reported as success
+ok 41 - partial writeback failure is not reported as success
+  ---
+  duration_ms: 0.582
+  type: 'test'
+  ...
+# (node:46892) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:46892) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: demo auth disabled: /auth/login does not create demo session
+ok 42 - demo auth disabled: /auth/login does not create demo session
+  ---
+  duration_ms: 196.4643
+  type: 'test'
+  ...
+# Subtest: demo auth enabled in development: /auth/login creates session
+ok 43 - demo auth enabled in development: /auth/login creates session
+  ---
+  duration_ms: 16.8347
+  type: 'test'
+  ...
+# Subtest: session can be restored from HttpOnly session cookie
+ok 44 - session can be restored from HttpOnly session cookie
+  ---
+  duration_ms: 21.853
+  type: 'test'
+  ...
+# Subtest: logout clears session cookie and invalidates token
+ok 45 - logout clears session cookie and invalidates token
+  ---
+  duration_ms: 73.0377
+  type: 'test'
+  ...
+# Subtest: development demo persistence enables demo auth when DEMO_AUTH_ENABLED is unset
+ok 46 - development demo persistence enables demo auth when DEMO_AUTH_ENABLED is unset
+  ---
+  duration_ms: 11.9783
+  type: 'test'
+  ...
+# Subtest: login session restore returns active session for matching tenant header
+ok 47 - login session restore returns active session for matching tenant header
+  ---
+  duration_ms: 11.6894
+  type: 'test'
+  ...
+# Subtest: createSession throws when demo auth is disabled
+ok 48 - createSession throws when demo auth is disabled
+  ---
+  duration_ms: 1.1695
+  type: 'test'
+  ...
+# Subtest: mock access token is ignored when demo auth is disabled
+ok 49 - mock access token is ignored when demo auth is disabled
+  ---
+  duration_ms: 1.8951
+  type: 'test'
+  ...
+# Subtest: mock access token is accepted only in explicit demo auth mode
+ok 50 - mock access token is accepted only in explicit demo auth mode
+  ---
+  duration_ms: 1.2565
+  type: 'test'
+  ...
+# Subtest: header permission fallback is disabled in postgres mode
+ok 51 - header permission fallback is disabled in postgres mode
+  ---
+  duration_ms: 1.3231
+  type: 'test'
+  ...
+# Subtest: tenant mismatch guard behavior is preserved
+ok 52 - tenant mismatch guard behavior is preserved
+  ---
+  duration_ms: 1.3709
+  type: 'test'
+  ...
+# Subtest: production ignores local pilot auth even if enabled
+ok 53 - production ignores local pilot auth even if enabled
+  ---
+  duration_ms: 16.2404
+  type: 'test'
+  ...
+# Subtest: postgres mode keeps 503 when local pilot auth is disabled
+ok 54 - postgres mode keeps 503 when local pilot auth is disabled
+  ---
+  duration_ms: 9.2454
+  type: 'test'
+  ...
+# Subtest: local pilot auth allows login in development postgres mode with explicit flag
+ok 55 - local pilot auth allows login in development postgres mode with explicit flag
+  ---
+  duration_ms: 12.4751
+  type: 'test'
+  ...
+# Subtest: local pilot auth rejects wrong password
+ok 56 - local pilot auth rejects wrong password
+  ---
+  duration_ms: 11.5883
+  type: 'test'
+  ...
+# Subtest: local pilot auth does not enable mock access token or header fallback in postgres mode
+ok 57 - local pilot auth does not enable mock access token or header fallback in postgres mode
+  ---
+  duration_ms: 1.2264
+  type: 'test'
+  ...
+# Subtest: postgres database auth: valid user credentials return login session
+ok 58 - postgres database auth: valid user credentials return login session
+  ---
+  duration_ms: 8.6381
+  type: 'test'
+  ...
+# Subtest: postgres database auth: wrong password returns 401
+ok 59 - postgres database auth: wrong password returns 401
+  ---
+  duration_ms: 6.4274
+  type: 'test'
+  ...
+# Subtest: postgres database auth: inactive user returns 403
+ok 60 - postgres database auth: inactive user returns 403
+  ---
+  duration_ms: 9.3797
+  type: 'test'
+  ...
+# (node:1756) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:1756) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: execution gate export allows dry_run and keeps mutation closed
+ok 61 - execution gate export allows dry_run and keeps mutation closed
+  ---
+  duration_ms: 2.3187
+  type: 'test'
+  ...
+# Subtest: execute gate blocks missing allowlist, approval, idempotency, and audit timeline metadata
+ok 62 - execute gate blocks missing allowlist, approval, idempotency, and audit timeline metadata
+  ---
+  duration_ms: 0.7479
+  type: 'test'
+  ...
+# Subtest: platform.settings.update dry_run and controlled execute never perform real mutation
+ok 63 - platform.settings.update dry_run and controlled execute never perform real mutation
+  ---
+  duration_ms: 2.1714
+  type: 'test'
+  ...
+# Subtest: platform.users.create execute remains blocked and dry_run-only
+ok 64 - platform.users.create execute remains blocked and dry_run-only
+  ---
+  duration_ms: 0.6358
+  type: 'test'
+  ...
+# Subtest: worker validates execution gate metadata on approval dispatch jobs
+ok 65 - worker validates execution gate metadata on approval dispatch jobs
+  ---
+  duration_ms: 3.648
+  type: 'test'
+  ...
+# (node:17160) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:17160) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: request context flags tenant mismatch when session tenant differs from header
+ok 66 - request context flags tenant mismatch when session tenant differs from header
+  ---
+  duration_ms: 11.7122
+  type: 'test'
+  ...
+# Subtest: approval execution marks failed results with retryability suffix
+ok 67 - approval execution marks failed results with retryability suffix
+  ---
+  duration_ms: 2.1802
+  type: 'test'
+  ...
+# Subtest: approval execution cancel path sets cancelled status
+ok 68 - approval execution cancel path sets cancelled status
+  ---
+  duration_ms: 3.5033
+  type: 'test'
+  ...
+# (node:45024) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:45024) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: customers write foundation: create + update + pricing profile
+ok 69 - customers write foundation: create + update + pricing profile
+  ---
+  duration_ms: 3.9566
+  type: 'test'
+  ...
+# Subtest: products write foundation: create + update aggregate
+ok 70 - products write foundation: create + update aggregate
+  ---
+  duration_ms: 2.0308
+  type: 'test'
+  ...
+# Subtest: offers write foundation: create with lines + follow-up
+ok 71 - offers write foundation: create with lines + follow-up
+  ---
+  duration_ms: 2.1001
+  type: 'test'
+  ...
+# Subtest: orders write foundation: create + line update + sourcing
+ok 72 - orders write foundation: create + line update + sourcing
+  ---
+  duration_ms: 6.5465
+  type: 'test'
+  ...
+# Subtest: concurrency foundation: stale update throws conflict
+ok 73 - concurrency foundation: stale update throws conflict
+  ---
+  duration_ms: 1.2224
+  type: 'test'
+  ...
+# (node:46912) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:46912) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: API CORS allows configured local web origin
+ok 74 - API CORS allows configured local web origin
+  ---
+  duration_ms: 94.8413
+  type: 'test'
+  ...
+# Subtest: API CORS allows default development origin on 127.0.0.1
+ok 75 - API CORS allows default development origin on 127.0.0.1
+  ---
+  duration_ms: 21.524
+  type: 'test'
+  ...
+# Subtest: API CORS preflight OPTIONS /auth/login allows localhost:3003 (Next dynamic port)
+ok 76 - API CORS preflight OPTIONS /auth/login allows localhost:3003 (Next dynamic port)
+  ---
+  duration_ms: 29.0913
+  type: 'test'
+  ...
+# Subtest: API CORS preflight allows localhost:3005 and 127.0.0.1:3003
+ok 77 - API CORS preflight allows localhost:3005 and 127.0.0.1:3003
+  ---
+  duration_ms: 11.1999
+  type: 'test'
+  ...
+# Subtest: API CORS production default has no implicit localhost dev ports
+ok 78 - API CORS production default has no implicit localhost dev ports
+  ---
+  duration_ms: 12.8647
+  type: 'test'
+  ...
+# Subtest: API CORS does not allow an unconfigured browser origin
+ok 79 - API CORS does not allow an unconfigured browser origin
+  ---
+  duration_ms: 12.7413
+  type: 'test'
+  ...
+# Subtest: API CORS ignores wildcard origins in production
+ok 80 - API CORS ignores wildcard origins in production
+  ---
+  duration_ms: 2.3211
+  type: 'test'
+  ...
+# (node:44200) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:44200) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: authenticateWithDatabase returns success when password hash matches
+ok 81 - authenticateWithDatabase returns success when password hash matches
+  ---
+  duration_ms: 384.6079
+  type: 'test'
+  ...
+# Subtest: authenticateWithDatabase returns invalid credentials when password mismatch
+ok 82 - authenticateWithDatabase returns invalid credentials when password mismatch
+  ---
+  duration_ms: 351.3062
+  type: 'test'
+  ...
+# Subtest: authenticateWithDatabase returns inactive user when user is not active
+ok 83 - authenticateWithDatabase returns inactive user when user is not active
+  ---
+  duration_ms: 377.2349
+  type: 'test'
+  ...
+# (node:32236) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:32236) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: pending approval DB repository adapter export is available
+ok 84 - pending approval DB repository adapter export is available
+  ---
+  duration_ms: 2.0965
+  type: 'test'
+  ...
+# Subtest: pending approval DB repository fails closed when persistence mode is not postgres
+ok 85 - pending approval DB repository fails closed when persistence mode is not postgres
+  ---
+  duration_ms: 3.813
+  type: 'test'
+  ...
+# Subtest: pending approval DB repository validates tenant/idempotency fields
+ok 86 - pending approval DB repository validates tenant/idempotency fields
+  ---
+  duration_ms: 0.792
+  type: 'test'
+  ...
+# Subtest: pending approval mapper helpers preserve key metadata
+ok 87 - pending approval mapper helpers preserve key metadata
+  ---
+  duration_ms: 0.8854
+  type: 'test'
+  ...
+# Subtest: pending approval create uses tenant-scoped idempotency lookup before insert
+ok 88 - pending approval create uses tenant-scoped idempotency lookup before insert
+  ---
+  duration_ms: 0.9734
+  type: 'test'
+  ...
+# (node:2992) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:2992) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: pending approval migration exists with required table and columns
+ok 89 - pending approval migration exists with required table and columns
+  ---
+  duration_ms: 4.5003
+  type: 'test'
+  ...
+# Subtest: pending approval migration includes required index and unique constraints
+ok 90 - pending approval migration includes required index and unique constraints
+  ---
+  duration_ms: 1.1953
+  type: 'test'
+  ...
+# Subtest: pending approval schema export is available
+ok 91 - pending approval schema export is available
+  ---
+  duration_ms: 0.307
+  type: 'test'
+  ...
+# (node:36808) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:36808) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: transaction contract exports and executes wrapped operation
+ok 92 - transaction contract exports and executes wrapped operation
+  ---
+  duration_ms: 3.2631
+  type: 'test'
+  ...
+# Subtest: approval execution repository exposes expected contract methods
+ok 93 - approval execution repository exposes expected contract methods
+  ---
+  duration_ms: 0.4544
+  type: 'test'
+  ...
+# Subtest: outbox repository exposes expected contract methods
+ok 94 - outbox repository exposes expected contract methods
+  ---
+  duration_ms: 0.6885
+  type: 'test'
+  ...
+# Subtest: tenantId and idempotency validation fails for missing values
+ok 95 - tenantId and idempotency validation fails for missing values
+  ---
+  duration_ms: 1.7237
+  type: 'test'
+  ...
+# Subtest: repositories fail-closed when persistence mode is not postgres
+ok 96 - repositories fail-closed when persistence mode is not postgres
+  ---
+  duration_ms: 0.9539
+  type: 'test'
+  ...
+# Subtest: execution log mapping helpers preserve key metadata
+ok 97 - execution log mapping helpers preserve key metadata
+  ---
+  duration_ms: 0.8421
+  type: 'test'
+  ...
+# Subtest: outbox mapping helpers preserve tenant and idempotency
+ok 98 - outbox mapping helpers preserve tenant and idempotency
+  ---
+  duration_ms: 0.861
+  type: 'test'
+  ...
+# Subtest: outbox enqueue SQL contract keeps duplicate idempotency guard
+ok 99 - outbox enqueue SQL contract keeps duplicate idempotency guard
+  ---
+  duration_ms: 1.1815
+  type: 'test'
+  ...
+# Subtest: transaction write helper keeps execution + audit + timeline in one boundary
+ok 100 - transaction write helper keeps execution + audit + timeline in one boundary
+  ---
+  duration_ms: 1.957
+  type: 'test'
+  ...
+# (node:39052) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:39052) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: execution worker migration exists with required tables
+ok 101 - execution worker migration exists with required tables
+  ---
+  duration_ms: 3.6197
+  type: 'test'
+  ...
+# Subtest: migration enforces tenant scoped idempotency and outbox scheduling index
+ok 102 - migration enforces tenant scoped idempotency and outbox scheduling index
+  ---
+  duration_ms: 1.082
+  type: 'test'
+  ...
+# Subtest: schema export includes execution worker foundation tables
+ok 103 - schema export includes execution worker foundation tables
+  ---
+  duration_ms: 0.3173
+  type: 'test'
+  ...
+# (node:17936) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:17936) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: tenant usage migration defines tenant scoped usage event table and indexes
+ok 104 - tenant usage migration defines tenant scoped usage event table and indexes
+  ---
+  duration_ms: 2.556
+  type: 'test'
+  ...
+# Subtest: tenant usage database mapper preserves tenant and aggregation fields
+ok 105 - tenant usage database mapper preserves tenant and aggregation fields
+  ---
+  duration_ms: 0.9145
+  type: 'test'
+  ...
+# Subtest: tenant usage database ledger fails closed outside postgres persistence mode
+ok 106 - tenant usage database ledger fails closed outside postgres persistence mode
+  ---
+  duration_ms: 2.0621
+  type: 'test'
+  ...
+# (node:42444) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:42444) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: DB outbox atomic claim helpers are exported
+ok 107 - DB outbox atomic claim helpers are exported
+  ---
+  duration_ms: 22.0617
+  type: 'test'
+  ...
+# Subtest: claim SQL contract targets only available pending or failed jobs
+ok 108 - claim SQL contract targets only available pending or failed jobs
+  ---
+  duration_ms: 0.4922
+  type: 'test'
+  ...
+# Subtest: claim SQL contract includes unlocked or expired lease predicate
+ok 109 - claim SQL contract includes unlocked or expired lease predicate
+  ---
+  duration_ms: 0.2536
+  type: 'test'
+  ...
+# Subtest: active lease blocks claim eligibility contract
+ok 110 - active lease blocks claim eligibility contract
+  ---
+  duration_ms: 2.3902
+  type: 'test'
+  ...
+# Subtest: expired lease becomes claimable again
+ok 111 - expired lease becomes claimable again
+  ---
+  duration_ms: 0.4149
+  type: 'test'
+  ...
+# Subtest: claimed row mapping preserves worker lease metadata
+ok 112 - claimed row mapping preserves worker lease metadata
+  ---
+  duration_ms: 0.5524
+  type: 'test'
+  ...
+# Subtest: claimLeaseMs drives leaseExpiresAt calculation
+ok 113 - claimLeaseMs drives leaseExpiresAt calculation
+  ---
+  duration_ms: 0.5324
+  type: 'test'
+  ...
+# Subtest: DB outbox repository does not fail-open when persistence mode is not postgres
+ok 114 - DB outbox repository does not fail-open when persistence mode is not postgres
+  ---
+  duration_ms: 1.9766
+  type: 'test'
+  ...
+# Subtest: foundation concurrent claim simulation does not assign same job twice
+ok 115 - foundation concurrent claim simulation does not assign same job twice
+  ---
+  duration_ms: 1.7017
+  type: 'test'
+  ...
+# Subtest: database claimNext uses atomic claim SQL and maps lease metadata
+ok 116 - database claimNext uses atomic claim SQL and maps lease metadata
+  ---
+  duration_ms: 1.5628
+  type: 'test'
+  ...
+# (node:17724) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:17724) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: deriveOrderCompletionState: all delivered -> delivered
+ok 117 - deriveOrderCompletionState: all delivered -> delivered
+  ---
+  duration_ms: 8.4043
+  type: 'test'
+  ...
+# Subtest: deriveOrderCompletionState: rolled_back dominates -> ready
+ok 118 - deriveOrderCompletionState: rolled_back dominates -> ready
+  ---
+  duration_ms: 0.4179
+  type: 'test'
+  ...
+# Subtest: deriveOrderCompletionState: partially_delivered
+ok 119 - deriveOrderCompletionState: partially_delivered
+  ---
+  duration_ms: 0.362
+  type: 'test'
+  ...
+# Subtest: deriveOrderCompletionState: ready without full delivery -> ready
+ok 120 - deriveOrderCompletionState: ready without full delivery -> ready
+  ---
+  duration_ms: 0.3506
+  type: 'test'
+  ...
+# Subtest: deriveOrderCompletionState: empty -> in_preparation
+ok 121 - deriveOrderCompletionState: empty -> in_preparation
+  ---
+  duration_ms: 0.2868
+  type: 'test'
+  ...
+# Subtest: resolveOrderStatusAfterDeliveryRollback: completed -> partially_delivered
+ok 122 - resolveOrderStatusAfterDeliveryRollback: completed -> partially_delivered
+  ---
+  duration_ms: 2.6475
+  type: 'test'
+  ...
+# Subtest: resolveOrderStatusAfterDeliveryRollback: other statuses unchanged
+ok 123 - resolveOrderStatusAfterDeliveryRollback: other statuses unchanged
+  ---
+  duration_ms: 0.5874
+  type: 'test'
+  ...
+# Subtest: calculateReturnImpact: quantity drives stockImpact and approval threshold
+ok 124 - calculateReturnImpact: quantity drives stockImpact and approval threshold
+  ---
+  duration_ms: 2.0038
+  type: 'test'
+  ...
+# Subtest: calculateReturnImpact: quality reason forces approval
+ok 125 - calculateReturnImpact: quality reason forces approval
+  ---
+  duration_ms: 0.7009
+  type: 'test'
+  ...
+# (node:41956) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:41956) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: GET /documents/:id/download-url returns 202 when file not ready
+ok 126 - GET /documents/:id/download-url returns 202 when file not ready
+  ---
+  duration_ms: 602.7847
+  type: 'test'
+  ...
+# Subtest: GET /documents/:id/download-url returns 404 for unknown document
+ok 127 - GET /documents/:id/download-url returns 404 for unknown document
+  ---
+  duration_ms: 260.761
+  type: 'test'
+  ...
+# (node:2868) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:2868) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: durable outbox migration adds lease/idempotency/approval columns and indexes
+ok 128 - durable outbox migration adds lease/idempotency/approval columns and indexes
+  ---
+  duration_ms: 3.2531
+  type: 'test'
+  ...
+# (node:21708) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:21708) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: active lease blocks claim and expired lease becomes claimable
+ok 129 - active lease blocks claim and expired lease becomes claimable
+  ---
+  duration_ms: 8.22
+  type: 'test'
+  ...
+# Subtest: duplicate idempotency key does not create second outbox job
+ok 130 - duplicate idempotency key does not create second outbox job
+  ---
+  duration_ms: 2.6132
+  type: 'test'
+  ...
+# Subtest: cancelled job is not executed and remains fail-closed
+ok 131 - cancelled job is not executed and remains fail-closed
+  ---
+  duration_ms: 1.4573
+  type: 'test'
+  ...
+# Subtest: approval approve endpoint returns durable outbox metadata
+ok 132 - approval approve endpoint returns durable outbox metadata
+  ---
+  duration_ms: 167.4143
+  type: 'test'
+  ...
+# (node:38280) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:38280) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: repository persists execution log and audit/timeline drafts
+ok 133 - repository persists execution log and audit/timeline drafts
+  ---
+  duration_ms: 26.5884
+  type: 'test'
+  ...
+# Subtest: duplicate idempotency key does not execute second time with repository
+ok 134 - duplicate idempotency key does not execute second time with repository
+  ---
+  duration_ms: 0.6702
+  type: 'test'
+  ...
+# Subtest: repository persistence failure returns failed status with reasons
+ok 135 - repository persistence failure returns failed status with reasons
+  ---
+  duration_ms: 1.4956
+  type: 'test'
+  ...
+# (node:46908) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:46908) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: requireTenantPermissionGuards enforces tenant isolation before permission checks
+ok 136 - requireTenantPermissionGuards enforces tenant isolation before permission checks
+  ---
+  duration_ms: 5.0389
+  type: 'test'
+  ...
+# Subtest: production webhook rejects missing tenant context
+ok 137 - production webhook rejects missing tenant context
+  ---
+  duration_ms: 123.8783
+  type: 'test'
+  ...
+# Subtest: development webhook keeps safe default tenant fallback for legacy payloads
+ok 138 - development webhook keeps safe default tenant fallback for legacy payloads
+  ---
+  duration_ms: 98.1067
+  type: 'test'
+  ...
+# (node:15656) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:15656) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: xlsx best sheet suggestion picks closest matching headers
+ok 139 - xlsx best sheet suggestion picks closest matching headers
+  ---
+  duration_ms: 356.5992
+  type: 'test'
+  ...
+# Subtest: import preview rejects unsupported file extension
+ok 140 - import preview rejects unsupported file extension
+  ---
+  duration_ms: 7.3219
+  type: 'test'
+  ...
+# Subtest: header alias mapping resolves common product aliases
+ok 141 - header alias mapping resolves common product aliases
+  ---
+  duration_ms: 6.4989
+  type: 'test'
+  ...
+# Subtest: preview validation reports duplicate customer code
+ok 142 - preview validation reports duplicate customer code
+  ---
+  duration_ms: 7.9637
+  type: 'test'
+  ...
+# Subtest: import apply happy path writes history
+ok 143 - import apply happy path writes history
+  ---
+  duration_ms: 21.8953
+  type: 'test'
+  ...
+# Subtest: history error report available for failed import
+ok 144 - history error report available for failed import
+  ---
+  duration_ms: 1.5437
+  type: 'test'
+  ...
+# (node:45424) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:45424) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: validateInvoiceLinesAgainstOrder rejects quantity above order line
+ok 145 - validateInvoiceLinesAgainstOrder rejects quantity above order line
+  ---
+  duration_ms: 6.4098
+  type: 'test'
+  ...
+# Subtest: validateInvoiceLinesAgainstOrder allows matching quantity
+ok 146 - validateInvoiceLinesAgainstOrder allows matching quantity
+  ---
+  duration_ms: 0.4047
+  type: 'test'
+  ...
+# Subtest: validateInvoiceLinesAgainstOrder requires order when orderLineId set
+ok 147 - validateInvoiceLinesAgainstOrder requires order when orderLineId set
+  ---
+  duration_ms: 0.2957
+  type: 'test'
+  ...
+# Subtest: validateInvoiceLineArithmetic detects tax mismatch
+ok 148 - validateInvoiceLineArithmetic detects tax mismatch
+  ---
+  duration_ms: 0.4354
+  type: 'test'
+  ...
+# Subtest: validateReturnLinesAgainstOrder rejects quantity above order line
+ok 149 - validateReturnLinesAgainstOrder rejects quantity above order line
+  ---
+  duration_ms: 0.5933
+  type: 'test'
+  ...
+# Subtest: validateReturnLinesAgainstOrder allows within bound
+ok 150 - validateReturnLinesAgainstOrder allows within bound
+  ---
+  duration_ms: 0.2686
+  type: 'test'
+  ...
+# (node:29408) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:29408) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: AI health returns degraded live mode when openai provider requested without key
+ok 151 - AI health returns degraded live mode when openai provider requested without key
+  ---
+  duration_ms: 6.3729
+  type: 'test'
+  ...
+# Subtest: Integration health reports misconfigured when live env missing
+ok 152 - Integration health reports misconfigured when live env missing
+  ---
+  duration_ms: 3.3259
+  type: 'test'
+  ...
+# (node:34076) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:34076) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: local AI config reads provider URL and timeout
+ok 153 - local AI config reads provider URL and timeout
+  ---
+  duration_ms: 14.039
+  type: 'test'
+  ...
+# Subtest: local AI config reports invalid service URL as misconfigured
+ok 154 - local AI config reports invalid service URL as misconfigured
+  ---
+  duration_ms: 8.2588
+  type: 'test'
+  ...
+# Subtest: local AI health fetch failure returns degraded result
+ok 155 - local AI health fetch failure returns degraded result
+  ---
+  duration_ms: 5.1708
+  type: 'test'
+  ...
+# Subtest: local AI chat forwards text prompt to service
+ok 156 - local AI chat forwards text prompt to service
+  ---
+  duration_ms: 145.8576
+  type: 'test'
+  ...
+# Subtest: mock AI provider keeps existing safe fallback behavior
+ok 157 - mock AI provider keeps existing safe fallback behavior
+  ---
+  duration_ms: 1.0615
+  type: 'test'
+  ...
+# (node:31412) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:31412) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: sales assistant health returns degraded when ollama is unavailable
+ok 158 - sales assistant health returns degraded when ollama is unavailable
+  ---
+  duration_ms: 315.6334
+  type: 'test'
+  ...
+# Subtest: sales assistant health returns not_configured when configured models are missing
+ok 159 - sales assistant health returns not_configured when configured models are missing
+  ---
+  duration_ms: 180.0155
+  type: 'test'
+  ...
+# Subtest: sales assistant health returns healthy when primary model exists
+ok 160 - sales assistant health returns healthy when primary model exists
+  ---
+  duration_ms: 3.1218
+  type: 'test'
+  ...
+# Subtest: sales assistant chat denies unauthenticated access
+ok 161 - sales assistant chat denies unauthenticated access
+  ---
+  duration_ms: 35.8891
+  type: 'test'
+  ...
+# Subtest: sales assistant chat is tenant fail-closed on mismatch
+ok 162 - sales assistant chat is tenant fail-closed on mismatch
+  ---
+  duration_ms: 107.8695
+  type: 'test'
+  ...
+# Subtest: sales knowledge CRUD does not fallback when postgres repository is unavailable
+ok 163 - sales knowledge CRUD does not fallback when postgres repository is unavailable
+  ---
+  duration_ms: 1.0784
+  type: 'test'
+  ...
+# Subtest: sales knowledge CRUD requires authentication
+ok 164 - sales knowledge CRUD requires authentication
+  ---
+  duration_ms: 39.5335
+  type: 'test'
+  ...
+# Subtest: chat uses tenant scoped knowledge and does not hallucinate hidden price
+ok 165 - chat uses tenant scoped knowledge and does not hallucinate hidden price
+  ---
+  duration_ms: 120.4197
+  type: 'test'
+  ...
+# Subtest: order intent only returns suggested actions and never executes mutation
+ok 166 - order intent only returns suggested actions and never executes mutation
+  ---
+  duration_ms: 251.6269
+  type: 'test'
+  ...
+# Subtest: fallback model is used when primary model is missing
+ok 167 - fallback model is used when primary model is missing
+  ---
+  duration_ms: 6.4451
+  type: 'test'
+  ...
+# Subtest: empty generate response returns safe non-hallucinated message
+ok 168 - empty generate response returns safe non-hallucinated message
+  ---
+  duration_ms: 4.2086
+  type: 'test'
+  ...
+# Subtest: voice runtime returns degraded when local providers are unavailable
+ok 169 - voice runtime returns degraded when local providers are unavailable
+  ---
+  duration_ms: 33.8488
+  type: 'test'
+  ...
+# Subtest: sales assistant health blocks public ollama URL by default
+ok 170 - sales assistant health blocks public ollama URL by default
+  ---
+  duration_ms: 23.6195
+  type: 'test'
+  ...
+# Subtest: sales assistant health allows public ollama URL only with explicit override
+ok 171 - sales assistant health allows public ollama URL only with explicit override
+  ---
+  duration_ms: 1.5128
+  type: 'test'
+  ...
+# Subtest: localhost and loopback local AI URLs are allowed
+ok 172 - localhost and loopback local AI URLs are allowed
+  ---
+  duration_ms: 2.0213
+  type: 'test'
+  ...
+# Subtest: private LAN local AI URL is allowed by default
+ok 173 - private LAN local AI URL is allowed by default
+  ---
+  duration_ms: 3.9126
+  type: 'test'
+  ...
+# Subtest: invalid local AI URL returns blocked/not_configured and does not fake chat or voice success
+ok 174 - invalid local AI URL returns blocked/not_configured and does not fake chat or voice success
+  ---
+  duration_ms: 1.0927
+  type: 'test'
+  ...
+# (node:43872) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:43872) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: delivery flow hardening: create + validate + complete + rollback
+ok 175 - delivery flow hardening: create + validate + complete + rollback
+  ---
+  duration_ms: 11.4853
+  type: 'test'
+  ...
+# Subtest: invoice flow hardening: create + issue + cancel
+ok 176 - invoice flow hardening: create + issue + cancel
+  ---
+  duration_ms: 5.3451
+  type: 'test'
+  ...
+# Subtest: return flow hardening: create + approve + complete
+ok 177 - return flow hardening: create + approve + complete
+  ---
+  duration_ms: 3.4847
+  type: 'test'
+  ...
+# Subtest: document flow hardening: render + regenerate + send
+ok 178 - document flow hardening: render + regenerate + send
+  ---
+  duration_ms: 3.1392
+  type: 'test'
+  ...
+# (node:24096) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:24096) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: omnichannel conversation list requires auth
+ok 179 - omnichannel conversation list requires auth
+  ---
+  duration_ms: 185.0658
+  type: 'test'
+  ...
+# Subtest: omnichannel conversation list is tenant scoped
+ok 180 - omnichannel conversation list is tenant scoped
+  ---
+  duration_ms: 81.2794
+  type: 'test'
+  ...
+# Subtest: omnichannel reply missing permission denies
+ok 181 - omnichannel reply missing permission denies
+  ---
+  duration_ms: 71.8934
+  type: 'test'
+  ...
+# Subtest: AI source omnichannel reply stays approval/dry-run and does not live send
+ok 182 - AI source omnichannel reply stays approval/dry-run and does not live send
+  ---
+  duration_ms: 121.1158
+  type: 'test'
+  ...
+# Subtest: production postgres mode does not silently fallback to memory
+ok 183 - production postgres mode does not silently fallback to memory
+  ---
+  duration_ms: 1.4816
+  type: 'test'
+  ...
+# Subtest: mock providers are degraded and do not perform live send
+ok 184 - mock providers are degraded and do not perform live send
+  ---
+  duration_ms: 32.7461
+  type: 'test'
+  ...
+# (node:36348) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:36348) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: meta webhook GET rejects invalid verify token in production
+ok 185 - meta webhook GET rejects invalid verify token in production
+  ---
+  duration_ms: 341.4789
+  type: 'test'
+  ...
+# Subtest: meta webhook GET accepts dev env verify token
+ok 186 - meta webhook GET accepts dev env verify token
+  ---
+  duration_ms: 32.9209
+  type: 'test'
+  ...
+# Subtest: meta webhook POST rejects invalid signature in production
+ok 187 - meta webhook POST rejects invalid signature in production
+  ---
+  duration_ms: 47.2096
+  type: 'test'
+  ...
+# Subtest: meta webhook POST valid signature creates conversation in memory mode
+ok 188 - meta webhook POST valid signature creates conversation in memory mode
+  ---
+  duration_ms: 258.71
+  type: 'test'
+  ...
+# Subtest: duplicate meta webhook returns duplicate true
+ok 189 - duplicate meta webhook returns duplicate true
+  ---
+  duration_ms: 74.6681
+  type: 'test'
+  ...
+# (node:18888) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:18888) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: omnichannel provider ai migration includes required tables
+ok 190 - omnichannel provider ai migration includes required tables
+  ---
+  duration_ms: 3.9436
+  type: 'test'
+  ...
+# Subtest: omnichannel provider ai schema export is available
+ok 191 - omnichannel provider ai schema export is available
+  ---
+  duration_ms: 0.3126
+  type: 'test'
+  ...
+# (node:18980) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:18980) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: production provider factory does not silently fallback to live send
+ok 192 - production provider factory does not silently fallback to live send
+  ---
+  duration_ms: 12.1459
+  type: 'test'
+  ...
+# Subtest: disconnected provider send denied without live credentials
+ok 193 - disconnected provider send denied without live credentials
+  ---
+  duration_ms: 7.3568
+  type: 'test'
+  ...
+# (node:11720) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:11720) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: pending approval repository export and create/get/list are tenant scoped
+ok 194 - pending approval repository export and create/get/list are tenant scoped
+  ---
+  duration_ms: 13.9595
+  type: 'test'
+  ...
+# Subtest: pending approval duplicate idempotency returns existing request
+ok 195 - pending approval duplicate idempotency returns existing request
+  ---
+  duration_ms: 2.9914
+  type: 'test'
+  ...
+# Subtest: pending approval state transitions enforce approve/reject guards
+ok 196 - pending approval state transitions enforce approve/reject guards
+  ---
+  duration_ms: 10.0001
+  type: 'test'
+  ...
+# Subtest: policy bridge require_approval persists when repository exists
+ok 197 - policy bridge require_approval persists when repository exists
+  ---
+  duration_ms: 0.8698
+  type: 'test'
+  ...
+# Subtest: policy bridge require_approval with no repository marks persistence skipped
+ok 198 - policy bridge require_approval with no repository marks persistence skipped
+  ---
+  duration_ms: 0.333
+  type: 'test'
+  ...
+# Subtest: policy bridge repository failure does not fail-open
+ok 199 - policy bridge repository failure does not fail-open
+  ---
+  duration_ms: 5.4064
+  type: 'test'
+  ...
+# (node:13064) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:13064) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: production postgres mode disables demo fallback and throws on DB failure
+ok 200 - production postgres mode disables demo fallback and throws on DB failure
+  ---
+  duration_ms: 2.6742
+  type: 'test'
+  ...
+# Subtest: development demo mode can explicitly allow fallback
+ok 201 - development demo mode can explicitly allow fallback
+  ---
+  duration_ms: 0.7239
+  type: 'test'
+  ...
+# Subtest: postgres mode with fallback disabled does not return mock data on DB failure
+ok 202 - postgres mode with fallback disabled does not return mock data on DB failure
+  ---
+  duration_ms: 3.3364
+  type: 'test'
+  ...
+# Subtest: demo persistence mode without database URL keeps demo store behavior
+ok 203 - demo persistence mode without database URL keeps demo store behavior
+  ---
+  duration_ms: 334.8184
+  type: 'test'
+  ...
+# (node:17256) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:17256) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: pilot readiness derives completion and blockers from settings
+ok 204 - pilot readiness derives completion and blockers from settings
+  ---
+  duration_ms: 5.7019
+  type: 'test'
+  ...
+# (node:25984) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:25984) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: require_approval returns approvalRequestId and keeps mutation blocked
+ok 205 - require_approval returns approvalRequestId and keeps mutation blocked
+  ---
+  duration_ms: 228.6819
+  type: 'test'
+  ...
+# Subtest: deny decisions stay fail-closed
+ok 206 - deny decisions stay fail-closed
+  ---
+  duration_ms: 147.6836
+  type: 'test'
+  ...
+# (node:38660) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:38660) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: policy engine denies unknown actions
+ok 207 - policy engine denies unknown actions
+  ---
+  duration_ms: 7.2158
+  type: 'test'
+  ...
+# Subtest: policy engine denies tenant mismatch and missing tenant
+ok 208 - policy engine denies tenant mismatch and missing tenant
+  ---
+  duration_ms: 0.5093
+  type: 'test'
+  ...
+# Subtest: policy engine denies missing permission and allows low-risk read with permission
+ok 209 - policy engine denies missing permission and allows low-risk read with permission
+  ---
+  duration_ms: 0.6968
+  type: 'test'
+  ...
+# Subtest: critical write actions require approval even with permission
+ok 210 - critical write actions require approval even with permission
+  ---
+  duration_ms: 0.3516
+  type: 'test'
+  ...
+# Subtest: AI critical execute remains dry-run or approval gated
+ok 211 - AI critical execute remains dry-run or approval gated
+  ---
+  duration_ms: 0.6506
+  type: 'test'
+  ...
+# Subtest: worker execution requires approved context idempotency and audit metadata
+ok 212 - worker execution requires approved context idempotency and audit metadata
+  ---
+  duration_ms: 0.6139
+  type: 'test'
+  ...
+# Subtest: WhatsApp approval command requires channel constraints
+ok 213 - WhatsApp approval command requires channel constraints
+  ---
+  duration_ms: 0.4497
+  type: 'test'
+  ...
+# Subtest: production uncertain fallback denies
+ok 214 - production uncertain fallback denies
+  ---
+  duration_ms: 0.3568
+  type: 'test'
+  ...
+# Subtest: action registry entries include required safety fields
+ok 215 - action registry entries include required safety fields
+  ---
+  duration_ms: 0.7177
+  type: 'test'
+  ...
+# Subtest: policy bridge maps request context without weakening existing guard assumptions
+ok 216 - policy bridge maps request context without weakening existing guard assumptions
+  ---
+  duration_ms: 1.8331
+  type: 'test'
+  ...
+# Subtest: policy usage obligations can create tenant usage event metadata
+ok 217 - policy usage obligations can create tenant usage event metadata
+  ---
+  duration_ms: 0.5971
+  type: 'test'
+  ...
+# (node:4232) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:4232) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: evaluatePolicy returns deny for unknown actionKey
+ok 218 - evaluatePolicy returns deny for unknown actionKey
+  ---
+  duration_ms: 2.8533
+  type: 'test'
+  ...
+# Subtest: critical mutation returns require_approval even with permission
+ok 219 - critical mutation returns require_approval even with permission
+  ---
+  duration_ms: 0.763
+  type: 'test'
+  ...
+# Subtest: AI critical execution attempt is blocked behind approval
+ok 220 - AI critical execution attempt is blocked behind approval
+  ---
+  duration_ms: 0.3777
+  type: 'test'
+  ...
+# Subtest: feature disabled returns deny
+ok 221 - feature disabled returns deny
+  ---
+  duration_ms: 0.3117
+  type: 'test'
+  ...
+# Subtest: policy bridge maps RequestContext to policy request
+ok 222 - policy bridge maps RequestContext to policy request
+  ---
+  duration_ms: 0.6554
+  type: 'test'
+  ...
+# (node:21664) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:21664) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: route helper denies unauthenticated context on critical route
+ok 223 - route helper denies unauthenticated context on critical route
+  ---
+  duration_ms: 185.6751
+  type: 'test'
+  ...
+# Subtest: tenant mismatch remains fail-closed before policy allow
+ok 224 - tenant mismatch remains fail-closed before policy allow
+  ---
+  duration_ms: 123.0858
+  type: 'test'
+  ...
+# Subtest: missing permission still denies before policy execution
+ok 225 - missing permission still denies before policy execution
+  ---
+  duration_ms: 164.477
+  type: 'test'
+  ...
+# Subtest: unknown action denies in policy engine
+ok 226 - unknown action denies in policy engine
+  ---
+  duration_ms: 2.1666
+  type: 'test'
+  ...
+# Subtest: user create and settings update require approval and keep mutation blocked
+ok 227 - user create and settings update require approval and keep mutation blocked
+  ---
+  duration_ms: 122.0233
+  type: 'test'
+  ...
+# Subtest: document send and commercial critical actions are approval-first
+ok 228 - document send and commercial critical actions are approval-first
+  ---
+  duration_ms: 75.6443
+  type: 'test'
+  ...
+# Subtest: AI execute attempt remains dry_run_only or approval-gated
+ok 229 - AI execute attempt remains dry_run_only or approval-gated
+  ---
+  duration_ms: 146.8167
+  type: 'test'
+  ...
+# Subtest: WhatsApp webhook command cannot bypass signature checks
+ok 230 - WhatsApp webhook command cannot bypass signature checks
+  ---
+  duration_ms: 122.1064
+  type: 'test'
+  ...
+# Subtest: API confirm route uses API action and does not impersonate inbound WhatsApp command
+ok 231 - API confirm route uses API action and does not impersonate inbound WhatsApp command
+  ---
+  duration_ms: 53.1264
+  type: 'test'
+  ...
+# Subtest: platform.whatsapp.approval_command remains inbound-only with real channel verification requirements
+ok 232 - platform.whatsapp.approval_command remains inbound-only with real channel verification requirements
+  ---
+  duration_ms: 1.3666
+  type: 'test'
+  ...
+# Subtest: usageRecorded is true only after successful ledger persistence
+ok 233 - usageRecorded is true only after successful ledger persistence
+  ---
+  duration_ms: 2.8821
+  type: 'test'
+  ...
+# Subtest: usageRecorded is false when ledger persistence throws
+ok 234 - usageRecorded is false when ledger persistence throws
+  ---
+  duration_ms: 2.46
+  type: 'test'
+  ...
+# Subtest: usageRecorded is false with explicit reason when ledger resolution is unavailable
+ok 235 - usageRecorded is false with explicit reason when ledger resolution is unavailable
+  ---
+  duration_ms: 3.0531
+  type: 'test'
+  ...
+# (node:34072) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:34072) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: POST /users returns require_approval after guard pass and does not execute mutation
+ok 236 - POST /users returns require_approval after guard pass and does not execute mutation
+  ---
+  duration_ms: 179.0555
+  type: 'test'
+  ...
+# Subtest: PATCH /settings returns require_approval after guard pass and does not execute mutation
+ok 237 - PATCH /settings returns require_approval after guard pass and does not execute mutation
+  ---
+  duration_ms: 56.2616
+  type: 'test'
+  ...
+# (node:40148) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:40148) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: production gate allows safe read action
+ok 238 - production gate allows safe read action
+  ---
+  duration_ms: 6.3725
+  type: 'test'
+  ...
+# Subtest: production gate blocks critical mutation when readiness is blocked
+ok 239 - production gate blocks critical mutation when readiness is blocked
+  ---
+  duration_ms: 2.3688
+  type: 'test'
+  ...
+# Subtest: commercial write policy enforcement does not return fake success when production gate is blocked
+ok 240 - commercial write policy enforcement does not return fake success when production gate is blocked
+  ---
+  duration_ms: 1.3231
+  type: 'test'
+  ...
+# Subtest: omnichannel reply production gate returns blocked before provider call
+ok 241 - omnichannel reply production gate returns blocked before provider call
+  ---
+  duration_ms: 1.2567
+  type: 'test'
+  ...
+# Subtest: ai source cannot bypass production gate
+ok 242 - ai source cannot bypass production gate
+  ---
+  duration_ms: 1.2061
+  type: 'test'
+  ...
+# Subtest: worker foundation handlers are marked non-live for production
+ok 243 - worker foundation handlers are marked non-live for production
+  ---
+  duration_ms: 0.3921
+  type: 'test'
+  ...
+# Subtest: approval execution is blocked by production gate and does not mark approved
+ok 244 - approval execution is blocked by production gate and does not mark approved
+  ---
+  duration_ms: 2.2203
+  type: 'test'
+  ...
+# Subtest: action mapping classifies critical production actions
+ok 245 - action mapping classifies critical production actions
+  ---
+  duration_ms: 0.7077
+  type: 'test'
+  ...
+# Subtest: safe read action does not get blocked when productionActionType is omitted
+ok 246 - safe read action does not get blocked when productionActionType is omitted
+  ---
+  duration_ms: 3.5254
+  type: 'test'
+  ...
+# (node:37768) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:37768) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: document generation service: render + regenerate
+ok 247 - document generation service: render + regenerate
+  ---
+  duration_ms: 52.1922
+  type: 'test'
+  ...
+# Subtest: integrations service: erp sync includes preview fields
+ok 248 - integrations service: erp sync includes preview fields
+  ---
+  duration_ms: 0.7157
+  type: 'test'
+  ...
+# Subtest: local output lifecycle: queue + status update + local-agent status
+ok 249 - local output lifecycle: queue + status update + local-agent status
+  ---
+  duration_ms: 0.6919
+  type: 'test'
+  ...
+# (node:29616) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:29616) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: auth/session resolver: valid session token sets authenticated context
+ok 250 - auth/session resolver: valid session token sets authenticated context
+  ---
+  duration_ms: 27.8615
+  type: 'test'
+  ...
+# Subtest: tenant guard: mismatch throws forbidden
+ok 251 - tenant guard: mismatch throws forbidden
+  ---
+  duration_ms: 0.6506
+  type: 'test'
+  ...
+# Subtest: approval execution dispatch: happy path and failure path
+ok 252 - approval execution dispatch: happy path and failure path
+  ---
+  duration_ms: 1.8541
+  type: 'test'
+  ...
+# Subtest: audit timeline write-back: execution emits records
+ok 253 - audit timeline write-back: execution emits records
+  ---
+  duration_ms: 0.409
+  type: 'test'
+  ...
+# Subtest: auth guard: anonymous blocked
+ok 254 - auth guard: anonymous blocked
+  ---
+  duration_ms: 0.3953
+  type: 'test'
+  ...
+# (node:43088) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:43088) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: production readiness endpoint requires auth
+ok 255 - production readiness endpoint requires auth
+  ---
+  duration_ms: 120.2429
+  type: 'test'
+  ...
+# Subtest: production readiness is tenant-scoped and fail-closed on mismatch
+ok 256 - production readiness is tenant-scoped and fail-closed on mismatch
+  ---
+  duration_ms: 34.389
+  type: 'test'
+  ...
+# Subtest: production readiness blocks when production DB and auth env are missing
+ok 257 - production readiness blocks when production DB and auth env are missing
+  ---
+  duration_ms: 11.7039
+  type: 'test'
+  ...
+# Subtest: production readiness reports mock providers as blocked in production
+ok 258 - production readiness reports mock providers as blocked in production
+  ---
+  duration_ms: 4.4168
+  type: 'test'
+  ...
+# (node:36676) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:36676) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: production safety report exports controlled-safe defaults
+ok 259 - production safety report exports controlled-safe defaults
+  ---
+  duration_ms: 3.6654
+  type: 'test'
+  ...
+# Subtest: production safety catches unsafe runtime modes
+ok 260 - production safety catches unsafe runtime modes
+  ---
+  duration_ms: 1.1287
+  type: 'test'
+  ...
+# Subtest: worker safety route is guarded and returns runtime metadata
+ok 261 - worker safety route is guarded and returns runtime metadata
+  ---
+  duration_ms: 148.4236
+  type: 'test'
+  ...
+# Subtest: unsupported worker repository does not fail-open safety route success
+ok 262 - unsupported worker repository does not fail-open safety route success
+  ---
+  duration_ms: 37.8372
+  type: 'test'
+  ...
+# Subtest: approval approve smoke produces outbox metadata and worker dry-run processing
+ok 263 - approval approve smoke produces outbox metadata and worker dry-run processing
+  ---
+  duration_ms: 10.4745
+  type: 'test'
+  ...
+# (node:35160) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:35160) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: quick operation submit returns approvalId when policy requires approval
+ok 264 - quick operation submit returns approvalId when policy requires approval
+  ---
+  duration_ms: 9.6059
+  type: 'test'
+  ...
+# (node:41204) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:41204) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# node:internal/modules/run_main:123
+#     triggerUncaughtException(
+#     ^
+# [Object: null prototype] {
+#   [Symbol(nodejs.util.inspect.custom)]: [Function: [nodejs.util.inspect.custom]]
+# }
+# Node.js v22.22.0
+# Subtest: src\\tests\\quick-operations.test.ts
+not ok 50 - src\\tests\\quick-operations.test.ts
+  ---
+  duration_ms: 8626.57
+  type: 'test'
+  location: 'C:\\Users\\mevlu\\Desktop\\HallederizCRM-PREMIUM-CURSOR\\apps\\api\\src\\tests\\quick-operations.test.ts:1:1'
+  failureType: 'testCodeFailure'
+  exitCode: 1
+  signal: ~
+  error: 'test failed'
+  code: 'ERR_TEST_FAILURE'
+  ...
+# (node:14328) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:14328) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: GET /orders returns 401 without auth when demo auth disabled
+ok 266 - GET /orders returns 401 without auth when demo auth disabled
+  ---
+  duration_ms: 137.6529
+  type: 'test'
+  ...
+# Subtest: GET /documents returns 401 without auth when demo auth disabled
+ok 267 - GET /documents returns 401 without auth when demo auth disabled
+  ---
+  duration_ms: 43.4393
+  type: 'test'
+  ...
+# Subtest: demo login session can read GET /orders
+ok 268 - demo login session can read GET /orders
+  ---
+  duration_ms: 43.1617
+  type: 'test'
+  ...
+# Subtest: authenticated user without orders permission gets 403
+ok 269 - authenticated user without orders permission gets 403
+  ---
+  duration_ms: 23.3657
+  type: 'test'
+  ...
+# Subtest: tenant mismatch remains forbidden on protected read endpoints
+ok 270 - tenant mismatch remains forbidden on protected read endpoints
+  ---
+  duration_ms: 23.8204
+  type: 'test'
+  ...
+# Subtest: public GET /health remains available
+ok 271 - public GET /health remains available
+  ---
+  duration_ms: 41.0049
+  type: 'test'
+  ...
+# (node:45524) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:45524) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: production demo auth flags are invalid
+ok 272 - production demo auth flags are invalid
+  ---
+  duration_ms: 3.7289
+  type: 'test'
+  ...
+# Subtest: production NEXT_PUBLIC_USE_DEMO_DATA is invalid
+ok 273 - production NEXT_PUBLIC_USE_DEMO_DATA is invalid
+  ---
+  duration_ms: 2.0948
+  type: 'test'
+  ...
+# Subtest: postgres mode without DB URL is invalid
+ok 274 - postgres mode without DB URL is invalid
+  ---
+  duration_ms: 1.8983
+  type: 'test'
+  ...
+# Subtest: postgres mode with POSTGRES_URL is valid
+ok 275 - postgres mode with POSTGRES_URL is valid
+  ---
+  duration_ms: 0.3204
+  type: 'test'
+  ...
+# Subtest: development demo mode is valid
+ok 276 - development demo mode is valid
+  ---
+  duration_ms: 0.2911
+  type: 'test'
+  ...
+# Subtest: WHATSAPP live provider missing secret is invalid
+ok 277 - WHATSAPP live provider missing secret is invalid
+  ---
+  duration_ms: 0.336
+  type: 'test'
+  ...
+# Subtest: production TENANT_ENCRYPTION_KEY missing is invalid
+ok 278 - production TENANT_ENCRYPTION_KEY missing is invalid
+  ---
+  duration_ms: 0.7703
+  type: 'test'
+  ...
+# (node:24108) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:24108) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: service config validators return misconfigured when live env is missing
+ok 279 - service config validators return misconfigured when live env is missing
+  ---
+  duration_ms: 7.0854
+  type: 'test'
+  ...
+# Subtest: integration health summary returns aggregate counts
+ok 280 - integration health summary returns aggregate counts
+  ---
+  duration_ms: 2.1475
+  type: 'test'
+  ...
+# (node:43048) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:43048) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: tenant usage ledger records and summarizes scoped usage events
+ok 281 - tenant usage ledger records and summarizes scoped usage events
+  ---
+  duration_ms: 3.1347
+  type: 'test'
+  ...
+# Subtest: tenant usage API requires auth and returns tenant scoped summary
+ok 282 - tenant usage API requires auth and returns tenant scoped summary
+  ---
+  duration_ms: 79.3322
+  type: 'test'
+  ...
+# Subtest: tenant usage API does not silently use memory fallback for production postgres mode
+ok 283 - tenant usage API does not silently use memory fallback for production postgres mode
+  ---
+  duration_ms: 20.5303
+  type: 'test'
+  ...
+# (node:41872) ExperimentalWarning: `--experimental-loader` may be removed in the future; instead use `register()`:
+# --import 'data:text/javascript,import { register } from "node:module"; import { pathToFileURL } from "node:url"; register("ts-node/esm", pathToFileURL("./"));'
+# (Use `node --trace-warnings ...` to show where the warning was created)
+# (node:41872) [DEP0180] DeprecationWarning: fs.Stats constructor is deprecated.
+# (Use `node --trace-deprecation ...` to show where the warning was created)
+# Subtest: bridge export is callable
+ok 284 - bridge export is callable
+  ---
+  duration_ms: 4.8793
+  type: 'test'
+  ...
+# Subtest: missing repositories does not fail-open
+ok 285 - missing repositories does not fail-open
+  ---
+  duration_ms: 0.4745
+  type: 'test'
+  ...
+# Subtest: missing transaction runner returns explicit unsupported
+ok 286 - missing transaction runner returns explicit unsupported
+  ---
+  duration_ms: 0.2431
+  type: 'test'
+  ...
+# Subtest: successful dry_run dispatch persists execution/audit/timeline and enqueues outbox
+ok 287 - successful dry_run dispatch persists execution/audit/timeline and enqueues outbox
+  ---
+  duration_ms: 0.5434
+  type: 'test'
+  ...
+# Subtest: duplicate idempotencyKey does not enqueue second outbox job
+ok 288 - duplicate idempotencyKey does not enqueue second outbox job
+  ---
+  duration_ms: 0.5014
+  type: 'test'
+  ...
+# Subtest: repository failure returns failed and does not pretend success
+ok 289 - repository failure returns failed and does not pretend success
+  ---
+  duration_ms: 0.3922
+  type: 'test'
+  ...
+1..289
+# tests 289
+# suites 0
+# pass 288
+# fail 1
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 66316.318
