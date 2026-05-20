@@ -1,24 +1,110 @@
 ﻿import type { WorkflowInstance, WorkflowStep } from "@hallederiz/types";
-import { MetricCard, PageHeader, SplitContentLayout } from "@hallederiz/ui";
+import { MetricCard, PageHeader } from "@hallederiz/ui";
+import Link from "next/link";
 
-const statusLabels: Record<WorkflowStep["status"], string> = { pending: "Bekliyor", active: "Aktif", completed: "Tamamlandi", skipped: "Atlandi", failed: "Basarisiz" };
+const statusLabels: Record<WorkflowStep["status"], string> = {
+  pending: "Bekliyor",
+  active: "Aktif",
+  completed: "Tamamlandı",
+  skipped: "Atlandı",
+  failed: "Başarısız"
+};
 
-function statusBadge(status: WorkflowStep["status"]) {
-  if (status === "completed") return "hz-badge hz-badge-success";
-  if (status === "active") return "hz-badge hz-badge-warning";
-  if (status === "failed") return "hz-badge hz-badge-danger";
-  return "hz-badge hz-badge-info";
+function stepToneClass(status: WorkflowStep["status"]): string {
+  if (status === "failed") return "is-failed";
+  if (status === "active" || status === "pending") return "is-critical";
+  return "";
+}
+
+function formatStepTime(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  try {
+    return new Intl.DateTimeFormat("tr-TR", { dateStyle: "short", timeStyle: "short" }).format(new Date(iso));
+  } catch {
+    return "—";
+  }
 }
 
 export function WorkflowProgressPanel({ workflow }: { workflow: WorkflowInstance }) {
   const completedCount = workflow.steps.filter((step) => step.status === "completed").length;
-  return <section className="hz-metric-grid"><MetricCard title="Workflow" value={workflow.workflowNo} detail={workflow.entityNo} tone="info" /><MetricCard title="Durum" value={workflow.status === "active" ? "Aktif" : "Tamam"} detail="Akis durumu" tone="success" /><MetricCard title="Adim" value={`${completedCount}/${workflow.steps.length}`} detail="Tamamlanan" tone="warning" /><MetricCard title="Aktif Adim" value={workflow.currentStepKey ?? "-"} detail="Siradaki is" tone="info" /></section>;
-}
-
-export function WorkflowStepList({ steps }: { steps: WorkflowStep[] }) {
-  return <section className="hz-content-card"><h3>Workflow Adimlari</h3><div className="table-wrap hz-table-wrap"><table className="table hz-table"><thead><tr><th>Sira</th><th>Adim</th><th>Aciklama</th><th>Durum</th><th>Baslama</th><th>Tamamlanma</th></tr></thead><tbody>{steps.map((step) => <tr key={step.id}><td>{step.sortOrder}</td><td>{step.title}</td><td>{step.description ?? "-"}</td><td><span className={statusBadge(step.status)}>{statusLabels[step.status]}</span></td><td>{step.startedAt ? new Date(step.startedAt).toLocaleString("tr-TR") : "-"}</td><td>{step.completedAt ? new Date(step.completedAt).toLocaleString("tr-TR") : "-"}</td></tr>)}</tbody></table></div></section>;
+  return (
+    <section className="hz-metric-grid" aria-label="Akış özeti">
+      <MetricCard title="Akış no" value={workflow.workflowNo} detail={workflow.entityNo} tone="info" />
+      <MetricCard
+        title="Durum"
+        value={workflow.status === "active" ? "Aktif" : "Tamamlandı"}
+        detail="Akış durumu"
+        tone="success"
+      />
+      <MetricCard
+        title="Adım"
+        value={`${completedCount}/${workflow.steps.length}`}
+        detail="Tamamlanan adımlar"
+        tone="warning"
+      />
+      <MetricCard title="Aktif adım" value={workflow.currentStepKey ?? "—"} detail="Sıradaki iş" tone="info" />
+    </section>
+  );
 }
 
 export function WorkflowTimelinePage({ workflow }: { workflow: WorkflowInstance }) {
-  return <div className="hz-page-stack"><PageHeader title="Workflow Timeline" description="Entity bazli operasyon adimlarini teklif, siparis, depo, tahsilat, teslim ve belge zinciri olarak izleyin." /><WorkflowProgressPanel workflow={workflow} /><SplitContentLayout main={<WorkflowStepList steps={workflow.steps} />} side={<aside className="hz-side-panel"><p className="drawer-eyebrow">Entity</p><h3>{workflow.entityNo}</h3><p className="muted">Bu timeline dogrudan menude yer almaz; ilgili kayitlardan veya gorevlerden erisilecek foundation ekranidir.</p><div className="detail-list"><span>Entity tipi</span><strong>{workflow.entityType}</strong><span>Workflow no</span><strong>{workflow.workflowNo}</strong><span>Current step</span><strong>{workflow.currentStepKey ?? "-"}</strong></div></aside>} /></div>;
+  const steps = [...workflow.steps].sort((a, b) => a.sortOrder - b.sortOrder);
+
+  return (
+    <div className="hz-workflow-page hz-page-stack">
+      <PageHeader
+        title="İşlem zaman çizelgesi"
+        description="Kayıt bazlı operasyon adımlarını teklif, sipariş, depo, tahsilat ve belge zinciri olarak izleyin."
+        breadcrumb={`${workflow.entityType} · ${workflow.entityNo}`}
+      />
+      <WorkflowProgressPanel workflow={workflow} />
+      <div className="hz-content-card">
+        <header className="hz-dash-work-head">
+          <h2>Zaman çizelgesi</h2>
+        </header>
+        {steps.length === 0 ? (
+          <p className="muted">İşlem geçmişi bulunmuyor.</p>
+        ) : (
+          <ol className="hz-workflow-timeline" aria-label="Akış adımları">
+            {steps.map((step) => (
+              <li key={step.id} className={`hz-workflow-timeline-item ${stepToneClass(step.status)}`}>
+                <time className="hz-workflow-timeline-time" dateTime={step.startedAt ?? undefined}>
+                  {formatStepTime(step.completedAt ?? step.startedAt)}
+                </time>
+                <p className="hz-workflow-timeline-title">{step.title}</p>
+                <p className="hz-workflow-timeline-meta">
+                  Durum: {statusLabels[step.status]}
+                  {step.description ? ` · ${step.description}` : ""}
+                </p>
+                <div className="hz-workflow-timeline-diff">
+                  <span>Önce / sonra: </span>
+                  {step.status === "completed"
+                    ? "Adım tamamlandı"
+                    : step.status === "failed"
+                      ? "Adımda sorun oluştu"
+                      : "Adım bekliyor veya devam ediyor"}
+                </div>
+              </li>
+            ))}
+          </ol>
+        )}
+      </div>
+      <aside className="hz-side-panel">
+        <p className="drawer-eyebrow">İlişkili kayıt</p>
+        <h3>{workflow.entityNo}</h3>
+        <p className="muted">Bu ekran ilgili kayıtlardan veya görevlerden açılır.</p>
+        <div className="detail-list">
+          <span>Kayıt tipi</span>
+          <strong>{workflow.entityType}</strong>
+          <span>Akış no</span>
+          <strong>{workflow.workflowNo}</strong>
+          <span>Aktif adım</span>
+          <strong>{workflow.currentStepKey ?? "—"}</strong>
+        </div>
+        <Link href="/onaylar" className="hz-btn hz-btn-secondary">
+          Onay kutusuna git
+        </Link>
+      </aside>
+    </div>
+  );
 }

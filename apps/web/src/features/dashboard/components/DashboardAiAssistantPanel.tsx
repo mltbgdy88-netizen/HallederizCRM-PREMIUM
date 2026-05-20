@@ -75,6 +75,9 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
   const [messages, setMessages] = useState<LocalMessage[]>([]);
   const [lastAssistantReply, setLastAssistantReply] = useState("");
   const [proposalFootnote, setProposalFootnote] = useState(false);
+  const [lastSuggestedActions, setLastSuggestedActions] = useState<
+    Array<{ actionKey: string; label: string; requiresApproval: boolean; suggestedOnly: true }>
+  >([]);
   const [introTs] = useState(() => Date.now());
 
   const voiceReady = health?.voice?.ttsReady === true && health?.voice?.status === "healthy";
@@ -125,10 +128,14 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
       const ext = item.externalProviderCallExecuted === true;
       const showFoot = !mut || !ext || item.status !== "live";
       setProposalFootnote(Boolean(showFoot));
+      setLastSuggestedActions(
+        (item.suggestedActions ?? []).filter((action) => action.suggestedOnly === true)
+      );
     } catch {
       const sysTs = Date.now();
       setMessages((previous) => [...previous, { id: `s_${sysTs}`, role: "system", text: "Yanıt alınamadı.", ts: sysTs }]);
       setProposalFootnote(false);
+      setLastSuggestedActions([]);
     } finally {
       setLoading(false);
     }
@@ -289,6 +296,32 @@ export function DashboardAiAssistantPanel({ compact = true }: { compact?: boolea
             </svg>
           </button>
         </footer>
+
+        {lastSuggestedActions.length > 0 ? (
+          <div className="hz-dash-ai-suggestions" aria-label="AI önerileri">
+            {lastSuggestedActions.map((action) => (
+              <button
+                key={action.actionKey}
+                type="button"
+                className="hz-dash-ai-review-cta"
+                disabled={loading}
+                onClick={() => {
+                  setMessages((previous) => [
+                    ...previous,
+                    {
+                      id: `r_${Date.now()}`,
+                      role: "system",
+                      text: `Öneri inceleniyor: ${action.label}`,
+                      ts: Date.now()
+                    }
+                  ]);
+                }}
+              >
+                İncele
+              </button>
+            ))}
+          </div>
+        ) : null}
       </section>
     </aside>
   );

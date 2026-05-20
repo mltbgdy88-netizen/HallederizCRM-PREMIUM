@@ -62,6 +62,15 @@ const ALL_CARDS: DashboardCard[] = [
 
 const DEFAULT_SELECTED: DashboardCardId[] = ["approvals", "collections", "stock-risk", "wa", "warehouse", "deliveries"];
 
+/** Agent 04 — sabit operasyon KPI şeridi (mockup) */
+const OPS_KPI_CARDS: Array<{ id: DashboardCardId; title: string; href: string }> = [
+  { id: "approvals", title: "Bekleyen onay", href: "/onaylar" },
+  { id: "collections", title: "Bugünkü tahsilat", href: "/tahsilatlar" },
+  { id: "orders", title: "Açık sipariş", href: "/siparisler" },
+  { id: "warehouse", title: "Depo hazırlık", href: "/depo" },
+  { id: "customer-risk", title: "Riskli cari", href: "/cariler" }
+];
+
 const QUICK_ACTIONS = [
   { href: "/cariler/yeni", label: "Yeni cari" },
   { href: "/hizli-islem", label: "Hızlı işlem" },
@@ -276,16 +285,22 @@ export function DashboardHomePage() {
               </p>
             )}
 
-            <section className="hz-dash-kpi-strip" aria-label="Özet göstergeler">
-              {selectedCards.map((card) => (
-                <MetricCard
-                  key={`kpi-${card.id}`}
-                  title={card.title}
-                  value={snapshotReady ? resolveCardValue(card, snapshot, isDemo) : "…"}
-                  detail={snapshotReady ? resolveCardNote(card, snapshot, isDemo) : undefined}
-                  tone={metricToneForCard(card.id)}
-                />
-              ))}
+            <section className="hz-dashboard-ops-kpi" aria-label="Günlük operasyon göstergeleri">
+              {OPS_KPI_CARDS.map((kpi) => {
+                const card = ALL_CARDS.find((c) => c.id === kpi.id);
+                if (!card) return null;
+                return (
+                  <Link key={kpi.id} href={kpi.href} className="hz-dashboard-ops-kpi-card">
+                    <span className="hz-dashboard-ops-kpi-label">{kpi.title}</span>
+                    <span className="hz-dashboard-ops-kpi-value">
+                      {snapshotReady ? resolveCardValue(card, snapshot, isDemo) : "…"}
+                    </span>
+                    <span className="hz-dashboard-ops-kpi-note">
+                      {snapshotReady ? resolveCardNote(card, snapshot, isDemo) : "Yükleniyor…"}
+                    </span>
+                  </Link>
+                );
+              })}
             </section>
 
             <section className="hz-dash-module-strip" aria-label="Modül durumları">

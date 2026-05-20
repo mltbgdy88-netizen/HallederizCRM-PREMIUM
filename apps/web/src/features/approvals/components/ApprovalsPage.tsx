@@ -2,14 +2,27 @@
 
 import { canExecuteApprovedAction, summarizeApprovalTarget } from "@hallederiz/domain";
 import type { Approval } from "@hallederiz/types";
-import { FilterActions, FilterBar, PageHeader, SplitContentLayout } from "@hallederiz/ui";
+import { EntityDetailLayout, FilterActions, FilterBar, PageHeader, SplitContentLayout } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { approveApprovalMutation, executeApprovalMutation, rejectApprovalMutation } from "../mutations";
 import { ApprovalInboxPage } from "./inbox";
 
-const statusLabels: Record<Approval["status"], string> = { pending: "Bekliyor", approved: "Onaylandi", rejected: "Reddedildi", expired: "Suresi Doldu", executed: "Icra Edildi" };
-const typeLabels: Record<Approval["type"], string> = { order_high_value: "Yuksek Tutar", delivery_payment_missing: "Eksik Tahsilatli Teslim", return_approval: "Iade Onayi", price_override: "Fiyat Override", ai_action_proposal: "AI Proposal", manual_operation: "Manuel Operasyon" };
+const statusLabels: Record<Approval["status"], string> = {
+  pending: "Bekliyor",
+  approved: "Onaylandı",
+  rejected: "Reddedildi",
+  expired: "Süresi doldu",
+  executed: "İşlendi"
+};
+const typeLabels: Record<Approval["type"], string> = {
+  order_high_value: "Yüksek tutar",
+  delivery_payment_missing: "Eksik tahsilatlı teslim",
+  return_approval: "İade onayı",
+  price_override: "Fiyat değişikliği",
+  ai_action_proposal: "AI önerisi",
+  manual_operation: "Manuel operasyon"
+};
 
 function statusBadge(status: Approval["status"]) { return status === "pending" ? "hz-badge hz-badge-warning" : status === "approved" ? "hz-badge hz-badge-success" : status === "rejected" ? "hz-badge hz-badge-danger" : "hz-badge hz-badge-info"; }
 
@@ -39,7 +52,20 @@ export function ApprovalSummaryPanel({ approval }: { approval: Approval }) {
 }
 
 export function ApprovalPayloadViewer({ approval }: { approval: Approval }) {
-  return <section className="hz-content-card"><h3>Payload Summary</h3><p className="muted">{approval.payloadSummary}</p><pre className="code-block">{JSON.stringify(approval.payload, null, 2)}</pre><h3>Approval History</h3><p className="muted">Karar gecmisi ve audit izi burada genisletilecek.</p></section>;
+  return (
+    <section className="hz-content-card hz-approvals-detail-section">
+      <h3>İşlem detayları</h3>
+      <p className="muted">{approval.payloadSummary || "Özet bilgisi bulunmuyor."}</p>
+      <h3>Onay geçmişi</h3>
+      <p className="muted">
+        {approval.decidedByName
+          ? `Son karar: ${approval.decidedByName} — ${statusLabels[approval.status]}`
+          : "Karar geçmişi henüz kayıtlı değil."}
+      </p>
+      <h3>Denetim izi</h3>
+      <p className="muted">Zaman çizelgesi bağlandığında adımlar burada listelenir.</p>
+    </section>
+  );
 }
 
 export function ApprovalActionsBar({ approval }: { approval: Approval }) {
@@ -64,16 +90,59 @@ export function ApprovalActionsBar({ approval }: { approval: Approval }) {
       if (action !== "execute") {
         setFeedback(action === "approve" ? "Onay kaydi onaylandi." : "Onay kaydi reddedildi.");
       }
-    } catch (error) {
-      setFeedback(error instanceof Error ? error.message : "Aksiyon tamamlanamadi.");
+    } catch {
+      setFeedback("İşlem tamamlanamadı. Lütfen tekrar deneyin.");
     } finally {
       setBusyAction(null);
     }
   };
 
-  return <section className="hz-content-card"><h3>Aksiyonlar</h3><div className="hz-inline-actions"><button className="hz-btn hz-btn-primary" type="button" disabled={busyAction !== null} onClick={() => void runAction("approve")}>Onayla</button><button className="hz-btn hz-btn-secondary" type="button" disabled={busyAction !== null} onClick={() => void runAction("reject")}>Reddet</button><button className="hz-btn hz-btn-secondary" type="button" disabled={busyAction !== null} onClick={() => void runAction("execute")}>Icra Et</button><button className="hz-btn hz-btn-secondary" type="button" onClick={() => router.push(approval.entityType === "delivery" ? `/teslimatlar/${approval.entityId}` : "/ai/onaylar")}>Ilgili Kayda Git</button></div>{feedback ? <p className="muted">{feedback}</p> : null}</section>;
+  return (
+    <section className="hz-content-card hz-approvals-detail-actions">
+      <h3>Onay kararı</h3>
+      <p className="muted">Kararlar denetim kaydına işlenir; geri alınamaz işlemlerde dikkatli ilerleyin.</p>
+      <div className="hz-inline-actions">
+        <button className="hz-btn hz-btn-primary" type="button" disabled={busyAction !== null} onClick={() => void runAction("approve")}>
+          Onayla
+        </button>
+        <button className="hz-btn hz-btn-secondary" type="button" disabled={busyAction !== null} onClick={() => void runAction("reject")}>
+          Reddet
+        </button>
+        <button className="hz-btn hz-btn-secondary" type="button" disabled={busyAction !== null} onClick={() => void runAction("execute")}>
+          İşle
+        </button>
+        <button
+          className="hz-btn hz-btn-secondary"
+          type="button"
+          onClick={() => router.push(approval.entityType === "delivery" ? `/teslimatlar/${approval.entityId}` : "/onaylar")}
+        >
+          İlgili kayda git
+        </button>
+      </div>
+      {feedback ? <p className="muted" role="status">{feedback}</p> : null}
+    </section>
+  );
 }
 
 export function ApprovalDetailPage({ approval }: { approval: Approval }) {
-  return <div className="hz-page-stack"><PageHeader title="Onay Detayi" description="Approval kararini, hedef entity'yi ve payload ozetini denetlenebilir sekilde gorun." /><ApprovalHeaderInfo approval={approval} /><SplitContentLayout main={<ApprovalPayloadViewer approval={approval} />} side={<><ApprovalSummaryPanel approval={approval} /><ApprovalActionsBar approval={approval} /></>} /></div>;
+  return (
+    <EntityDetailLayout
+      className="hz-approvals-detail-page"
+      header={
+        <PageHeader
+          title="Onay detayı"
+          description="Karar, hedef kayıt ve işlem özetini denetlenebilir şekilde görüntüleyin."
+          breadcrumb={approval.approvalNo}
+        />
+      }
+      summary={<div className="hz-approvals-detail-summary"><ApprovalHeaderInfo approval={approval} /></div>}
+      sections={<ApprovalPayloadViewer approval={approval} />}
+      sidebar={
+        <>
+          <ApprovalSummaryPanel approval={approval} />
+          <ApprovalActionsBar approval={approval} />
+        </>
+      }
+    />
+  );
 }

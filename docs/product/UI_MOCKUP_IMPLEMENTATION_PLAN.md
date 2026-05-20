@@ -118,7 +118,11 @@ PNG (referans, import YOK)
 
 ### Agent 04 — `ui/04-platform-operations`
 
-Routes: `/login`, `/dashboard`, `/panel`, `/hizli-islem`, `/onaylar`, `/onaylar/[id]`, `/onaylar/kurallar`, `/workflow/[type]/[id]`
+| | |
+|--|--|
+| **Routes** | `/login`, `/dashboard`, `/panel`, `/hizli-islem`, `/onaylar`, `/onaylar/[id]`, `/onaylar/kurallar`, `/workflow/[type]/[id]` |
+| **Status** | **Tamamlandı** — `UI_AGENT_04_REPORT.md`. Emerald/gold split login, ops KPI, QOP stepper, onay detay `EntityDetailLayout`, workflow timeline. PNG runtime import yasağı korunur. |
+| **Sonraki** | Agent 05 CRM/commercial |
 
 ### Agent 05 — `ui/05-crm-commercial`
 
