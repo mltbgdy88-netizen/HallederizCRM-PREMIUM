@@ -12,6 +12,8 @@ export type EntityListPageTemplateProps = {
   headerActions?: ReactNode;
   /** Özel üst blok (KPI, araç çubuğu vb.) — verilirse `PageHeader` çizilmez */
   header?: ReactNode;
+  /** KPI / özet şeridi (liste üstü, kompakt) */
+  summary?: ReactNode;
   filters?: ReactNode;
   bulkBar?: ReactNode;
   list: ReactNode;
@@ -20,13 +22,12 @@ export type EntityListPageTemplateProps = {
   preview?: ReactNode;
   /** `preview` varken `SplitContentLayout` sağ genişliği */
   previewSideWidth?: SplitSideWidth;
+  pageState?: ReactNode;
+  isLoading?: boolean;
 };
 
 /**
- * Task 12 — liste sayfaları için bileşim şablonu (shell içi).
- * - Üst: `header` **veya** `PageHeader` (`title` + `description` …)
- * - `preview` varsa: `SplitContentLayout` ile ana kolon (`filters` + `bulkBar` + liste gövdesi) | sağ panel
- * Kök: `hz-entity-list-page` + isteğe `className` (ör. `hz-customers-page`).
+ * Task 12 / Agent 03 — liste sayfaları için bileşim şablonu (shell içi).
  */
 export function EntityListPageTemplate({
   className = "",
@@ -35,27 +36,36 @@ export function EntityListPageTemplate({
   breadcrumb,
   headerActions,
   header,
+  summary,
   filters,
   bulkBar,
   list,
   pagination,
   preview,
-  previewSideWidth = "detail"
+  previewSideWidth = "detail",
+  pageState,
+  isLoading = false
 }: EntityListPageTemplateProps) {
   const mainColumn = (
-    <div className="hz-entity-list-page-main">
+    <div className="hz-entity-list-page-main hz-list-template-main">
       {filters ?? null}
       {bulkBar ?? null}
-      <div className="hz-entity-list-page-body">
-        {list}
+      <div className="hz-entity-list-page-body hz-list-template-body">
+        {pageState ?? list}
         {pagination ?? null}
       </div>
     </div>
   );
 
   return (
-    <div className={["hz-entity-list-page", className].filter(Boolean).join(" ")}>
-      {header ?? <PageHeader title={title ?? "Liste"} description={description} breadcrumb={breadcrumb} actions={headerActions} />}
+    <div
+      className={["hz-entity-list-page", "hz-list-template-page", className].filter(Boolean).join(" ")}
+      aria-busy={isLoading || undefined}
+    >
+      {header ?? (
+        <PageHeader title={title ?? "Liste"} description={description} breadcrumb={breadcrumb} actions={headerActions} />
+      )}
+      {summary ? <div className="hz-list-template-summary">{summary}</div> : null}
       {preview ? (
         <SplitContentLayout sideWidth={previewSideWidth} main={mainColumn} side={preview} />
       ) : (

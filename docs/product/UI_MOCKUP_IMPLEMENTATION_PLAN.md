@@ -114,6 +114,7 @@ PNG (referans, import YOK)
 | **Allowed** | `packages/ui/primitives/**`, `product-page-shell` taşıma kararı |
 | **Forbidden** | Route-specific KPI/mock data |
 | **Tests** | typecheck |
+| **Status** | **Tamamlandı** — `layout-templates.css`, slot API’ler, `UI_LAYOUT_PATTERNS.md`. Route adoption **Agent 04+**. PNG runtime import yasağı korunur. |
 
 ### Agent 04 — `ui/04-platform-operations`
 

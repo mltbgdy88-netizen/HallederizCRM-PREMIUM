@@ -1,6 +1,7 @@
 @import "../../../packages/ui/src/styles/tokens.css";
 @import "../../../packages/ui/src/styles/foundation-primitives.css";
 @import "../../../packages/ui/src/styles/shell-foundation.css";
+@import "../../../packages/ui/src/styles/layout-templates.css";
 
 :root,
 :root[data-theme="light"] {
