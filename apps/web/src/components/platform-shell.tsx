@@ -177,6 +177,10 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
   const isTasksWorkspace = normalizedPath === "/gorevler" || normalizedPath.startsWith("/gorevler/");
   const isAiWorkspace = normalizedPath === "/ai" || normalizedPath.startsWith("/ai/");
   const isDocumentsWorkspace = normalizedPath === "/belgeler" || normalizedPath.startsWith("/belgeler/");
+  const isFabrikalarList =
+    normalizedPath === "/fabrikalar/stoklar" || normalizedPath === "/fabrikalar/siparisler";
+  const isFabrikalarEntityDetail =
+    normalizedPath.startsWith("/fabrikalar/siparisler/") && normalizedPath !== "/fabrikalar/siparisler";
   const isCustomersEntityDetail =
     normalizedPath.startsWith("/cariler/") && normalizedPath !== "/cariler/yeni" && normalizedPath !== "/cariler/liste";
   const isOrdersEntityDetail =
@@ -251,6 +255,8 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
             isTasksWorkspace ||
             isAiWorkspace ||
             isDocumentsWorkspace ||
+            isFabrikalarList ||
+            isFabrikalarEntityDetail ||
             isCustomersEntityDetail ||
             isOrdersEntityDetail ||
             isOffersEntityDetail ||
@@ -272,9 +278,15 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
                 ? "Görev no, başlık, atanan, müşteri veya kayıt ara..."
                 : isAiWorkspace
                   ? "AI: taslak no, onay no, oturum, içgörü veya müşteri ara..."
-                  : isDocumentsWorkspace
-                    ? "Belge no, cari, entity, tip veya gonderim durumu ara..."
-                    : isApprovalsList
+                    : isDocumentsWorkspace
+                    ? "Belge no, cari, entity, tip veya gönderim durumu ara..."
+                    : isFabrikalarList
+                      ? normalizedPath === "/fabrikalar/stoklar"
+                        ? "Ürün kodu, fabrika, marka veya senkron durumu ara..."
+                        : "Fabrika sipariş no, satış siparişi veya durum ara..."
+                      : isFabrikalarEntityDetail
+                        ? "Fabrika sipariş detayı: satır, log veya durum ara..."
+                        : isApprovalsList
                       ? "Cari, onay no, belge no, tutar ara..."
                       : isWhatsApp
                         ? "Cari, telefon, mesaj, belge no veya tutar ara..."

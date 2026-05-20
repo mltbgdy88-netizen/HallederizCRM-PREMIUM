@@ -2,6 +2,7 @@
 
 import type { Task } from "@hallederiz/types";
 import {
+  EntityDetailLayout,
   FilterChip,
   FilterResetButton,
   FilterToolbar,
@@ -384,11 +385,8 @@ export function TaskCommentsPanel() {
   return (
     <section className="hz-content-card">
       <h3>Yorumlar</h3>
-      <p className="muted">Gorev yorumlari ve ic ekip notlari burada tutulur. Placeholder basari mesaji uretmez.</p>
-      <div className="timeline-item">
-        <strong>Satis Operasyon</strong>
-        <span>Kaynak plani kontrol edildi, aksiyon bekliyor.</span>
-      </div>
+      <p className="muted">Görev yorumları ve iç ekip notları canlı veri bağlandığında burada listelenir.</p>
+      <p className="hz-tasks-detail-empty-note">Henüz yorum kaydı yok veya API bekleniyor.</p>
     </section>
   );
 }
@@ -400,16 +398,16 @@ export function TaskActionsBar({ task }: { task: Task }) {
       <h3>Aksiyonlar</h3>
       <div className="hz-inline-actions">
         <button className="hz-btn hz-btn-primary" type="button">
-          Baslat
+          Başlat
         </button>
         <button className="hz-btn hz-btn-secondary" type="button">
           Tamamla
         </button>
         <button className="hz-btn hz-btn-secondary" type="button">
-          Iptal Et
+          İptal et
         </button>
         <button className="hz-btn hz-btn-secondary" type="button">
-          Not Ekle
+          Not ekle
         </button>
         {task.approvalId ? (
           <button className="hz-btn hz-btn-secondary" type="button" onClick={() => router.push(`/onaylar`)}>
@@ -426,10 +424,18 @@ export function TaskActionsBar({ task }: { task: Task }) {
 
 export function TaskDetailPage({ task }: { task: Task }) {
   return (
-    <div className="hz-page-stack">
-      <PageHeader title="Gorev Detayi" description="Gorev, ilgili kayit, yorum ve aksiyonlari tek ekranda yonetin." />
-      <TaskHeaderInfo task={task} />
-      <SplitContentLayout main={<TaskCommentsPanel />} side={<TaskActionsBar task={task} />} />
-    </div>
+    <EntityDetailLayout
+      className="hz-tasks-detail-page"
+      header={
+        <PageHeader
+          title="Görev detayı"
+          description="Görev, ilgili kayıt, yorum ve aksiyonları tek ekranda yönetin."
+          breadcrumb={task.taskNo}
+        />
+      }
+      summary={<TaskHeaderInfo task={task} />}
+      sections={<TaskCommentsPanel />}
+      sidebar={<TaskActionsBar task={task} />}
+    />
   );
 }

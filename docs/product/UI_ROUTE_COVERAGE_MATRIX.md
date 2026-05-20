@@ -1,6 +1,6 @@
 # UI Route Coverage Matrix — 53 route/layer
 
-**Base commit:** `f9943c7` (PR #128) — Agent 05 CRM/commercial routes güncellendi  
+**Base commit:** `0e55c75` (PR #129) — Agent 06 stock/documents/tasks güncellendi  
 **Mockup paketi:** `docs/design/ui-design-output/**` — **repoda yok** (tüm “Mockup” kolonları **MISSING**)
 
 **Implementation type kısaltmaları:**
@@ -31,7 +31,7 @@
 | 11 | `/cariler` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, mobile | İlk satır seçili / sağ panel dolu | 05 | **Agent 05 tamam** — `CustomersPage` + `EntityListPageTemplate` |
 | 12 | `/cariler/[id]` | Entity detail + timeline | MISSING | **Var** `[customerId]` | REAL | detail, audit timeline | `EntityDetailLayout` | 05 | **Agent 05 tamam** |
 | 13 | `/cariler/yeni` | FormPageShell | MISSING | **Var** | FORM | validation, submitted | **Gerçek form** (hub değil) | 05 | **Agent 05 tamam** — `CustomerCreatePage` |
-| 14 | `/stok` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, mobile | Stok yoğunluk kuralları | 06 | `StockPage` |
+| 14 | `/stok` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, mobile | Stok yoğunluk kuralları | 06 | **Agent 06 tamam** — `StockPage` + `EntityListPageTemplate` |
 | 15 | `/teklifler` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, mobile | — | 05 | **Agent 05 tamam** — `OffersPage` |
 | 16 | `/teklifler/[id]` | Entity detail + timeline | MISSING | **Var** `[offerId]` | REAL | detail, audit timeline | `EntityDetailLayout` | 05 | **Agent 05 tamam**; canlı timeline feed sonraki |
 | 17 | `/teklifler/yeni` | Hub → Hızlı İşlem | MISSING | **Var** | HUB | default, mobile | **Form değil**; CTA Hızlı İşlem | 05 | **Agent 05 tamam** — `OfferCreateHub` |
@@ -47,13 +47,13 @@
 | 27 | `/iadeler/[id]` | Entity detail + timeline | MISSING | **Var** `[returnId]` | REAL | detail | `EntityDetailLayout` | 05 | **Agent 05 tamam** |
 | 28 | `/faturalar` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, loading | Sahte fatura no yok | 05 | **Agent 05 tamam** — `InvoicesPage` |
 | 29 | `/faturalar/[id]` | Entity detail + timeline | MISSING | **Var** `[invoiceId]` | REAL | detail | PDF disabled; sahte önizleme yok | 05 | **Agent 05 tamam** |
-| 30 | `/depo` | Entity list + detail | MISSING | **Var** | REAL | default, detail | Depo hazırlık fişi | 06 | `WarehouseTasksPage` |
-| 31 | `/fabrikalar/*` | Factory list + detail | MISSING | **Var** siparisler + stoklar + `[factoryOrderId]` | REAL | default, detail | `fabrikalar/siparisler`, `stoklar` | 06 | Async server pages |
-| 32 | `/belgeler` | Entity list + preview | MISSING | **Var** | REAL | default, empty | — | 06 | `DocumentsPage` |
-| 33 | `/belgeler/[id]` | Entity detail + timeline | MISSING | **Var** `[documentId]` | REAL | detail, audit timeline | Timeline ✓ | 06 | `DocumentDetailPage` |
-| 34 | `/gorevler` | Task workspace list | MISSING | **Var** | REAL | default, empty | Merkez alias `/gorevler/merkez` | 06 | `TasksPage` |
-| 35 | `/gorevler/[id]` | Task detail | MISSING | **Var** `[taskId]` | REAL | detail | — | 06 | Task detail feature |
-| 36 | `/archive` | Archive hub + categories | MISSING | **Var** | REAL | default, empty, mobile | Kategori sidebar içinde değil | 06 | `ArchivePage` |
+| 30 | `/depo` | Entity list + detail | MISSING | **Var** | REAL | default, detail | Depo hazırlık fişi; harita yok | 06 | **Agent 06 tamam** — `WarehouseTasksPage` |
+| 31 | `/fabrikalar/*` | Factory list + detail | MISSING | **Var** siparisler + stoklar + `[factoryOrderId]` | REAL | default, detail | `EntityListPageTemplate` + detail layout | 06 | **Agent 06 tamam** |
+| 32 | `/belgeler` | Entity list + preview | MISSING | **Var** | REAL | default, empty | `EntityListPageTemplate` | 06 | **Agent 06 tamam** — `DocumentsPage` |
+| 33 | `/belgeler/[id]` | Entity detail + timeline | MISSING | **Var** `[documentId]` | REAL | detail, audit timeline | `EntityDetailLayout`; güvenli PDF | 06 | **Agent 06 tamam** |
+| 34 | `/gorevler` | Task workspace list | MISSING | **Var** | REAL | default, empty | Workspace korundu | 06 | **Agent 06 tamam** — `TasksPage` |
+| 35 | `/gorevler/[id]` | Task detail | MISSING | **Var** `[taskId]` | REAL | detail | `EntityDetailLayout` | 06 | **Agent 06 tamam** |
+| 36 | `/archive` | Archive hub + categories | MISSING | **Var** | REAL | default, empty, mobile | Referans layout korundu | 06 | **Agent 06 tamam** — `ArchivePage` |
 | 37 | `/raporlar` | Report analytics list | MISSING | **Var** | REAL | default, empty | Shell PageMeta gizli | 07 | `ReportsPage` |
 | 38 | `/raporlar/[...]` | Report sub-routes | MISSING | **Var** catch-all | CATCH | placeholder | Alt raporlar shell | 07 | `renderProductCatchAll` |
 | 39 | `/ai` | AI assistant (read-only) | MISSING | **Var** | REAL | default | **Sidebar’da ayrı AI menü yok** (tam sayfa) | 07 | `AIAssistantPage`; mutation CTA yasak |
@@ -70,7 +70,7 @@
 | 50 | `demo-mode` | System banner/state | MISSING | **Davranış** | Config | banner | `useDemoData` band | 08 | Global banner; ayrı route opsiyonel |
 | 51 | `live-empty` | Empty system state | MISSING | **Rota yok** | — | empty | Canlı boş veri | 08 | Feature-level `EmptyState` |
 | 52 | `mobile-drawer` | Shell behavior layer | MISSING | **Davranış** | AppShell | mobile | Hamburger drawer | 02 | `AppShell` mobile sidebar |
-| 53 | `print-export` | Print layout layer | MISSING | **Kısmi** | CSS/print | print | Belge yazdır | 06 | Warehouse print copy; dedicated print route yok |
+| 53 | `print-export` | Print layout layer | MISSING | **Kısmi** | CSS/print | print | `.hz-print-export-panel` + depo print | 06 | **Agent 06 tamam** (layer; ayrı route yok) |
 
 ---
 
