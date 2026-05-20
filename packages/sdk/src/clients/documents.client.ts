@@ -26,6 +26,10 @@ export class DocumentsClient {
     return this.api.get<ItemResponse<Document>>(`/documents/${id}`);
   }
 
+  listDeliveries(documentId: string) {
+    return this.api.get<ListResponse<Record<string, unknown>>>(`/documents/${documentId}/deliveries`);
+  }
+
   render(input: RenderDocumentInput) {
     return this.api.post<ItemResponse<Document>>("/documents/render", input);
   }

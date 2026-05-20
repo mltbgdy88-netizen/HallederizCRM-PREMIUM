@@ -1,4 +1,4 @@
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyRequest } from "fastify";
 import type { Delivery, Document, DocumentType, Invoice, PaymentReceipt, Return, SaleOrder, SaleOrderLine, WarehouseOrder } from "@hallederiz/types";
 import {
   addOrderLine,
@@ -34,6 +34,11 @@ import { recordAuditEvent } from "../shared/audit-timeline";
 import { withMutationPolicy } from "../shared/mutation-policy";
 import { readPermissions, requireReadAccess } from "../shared/read-guards";
 import { enforcePolicyForRoute } from "../shared/policy-route-enforcement";
+
+function resolveIdempotencyFromRequest(request: FastifyRequest): string | undefined {
+  const header = request.headers["idempotency-key"];
+  return typeof header === "string" && header.trim() ? header.trim() : undefined;
+}
 
 export async function registerCommercialOperationsRoutes(server: FastifyInstance) {
   server.get("/orders", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.orders), async (context) => {
@@ -307,6 +312,52 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
     return { items: await service.getPaymentAllocations(request.params.id) };
   }));
 
+  server.get<{ Params: { id: string } }>("/payments/:id/reversals", async (request, reply) =>
+    withGuards(request, reply, requireReadAccess(readPermissions.payments), async (context) => {
+      const service = new CommercialCoreService(context);
+      const items = await service.listPaymentReversals(request.params.id);
+      return { items, total: items.length, persistenceMode: context.persistenceMode };
+    })
+  );
+
+  server.post<{ Params: { id: string }; Body: { amount?: number; currency?: string; reason?: string } }>(
+    "/payments/:id/reversals",
+    async (request, reply) =>
+      withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["payments.write", "payments.reverse"])], async (context) => {
+        const wrapped = await withMutationPolicy({
+          request,
+          reply,
+          context,
+          actionKey: "platform.payments.reverse",
+          entityType: "payment",
+          entityId: request.params.id,
+          payload: {
+            paymentId: request.params.id,
+            amount: request.body?.amount,
+            reason: request.body?.reason
+          },
+          handler: async () => {
+            const service = new CommercialCoreService(context);
+            const payment = await service.getPayment(request.params.id);
+            if (!payment) return null;
+            return service.createPaymentReversal(request.params.id, {
+              amount: request.body?.amount ?? payment.amount,
+              currency: request.body?.currency,
+              reason: request.body?.reason ?? "Ters kayıt talebi",
+              idempotencyKey: resolveIdempotencyFromRequest(request)
+            });
+          }
+        });
+        if (wrapped.handled) {
+          return reply.status(wrapped.statusCode).send(wrapped.body);
+        }
+        if (!wrapped.value) {
+          return reply.status(404).send({ message: "Payment not found" });
+        }
+        return reply.status(201).send({ item: wrapped.value });
+      })
+  );
+
   server.get("/warehouse-orders", async (request, reply) => withGuards(request, reply, requireReadAccess(readPermissions.warehouse), async (context) => {
     const service = new CommercialCoreService(context);
     const items = await service.listWarehouseOrders();
@@ -424,6 +475,13 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
       return { item: delivery };
     });
   });
+  server.get<{ Params: { id: string } }>("/deliveries/:id/lines", async (request, reply) =>
+    withGuards(request, reply, requireReadAccess(readPermissions.deliveries), async (context) => {
+      const service = new CommercialCoreService(context);
+      const items = await service.listDeliveryLines(request.params.id);
+      return { items, total: items.length, persistenceMode: context.persistenceMode };
+    })
+  );
   server.post<{ Body: Partial<Delivery> }>("/deliveries", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["deliveries.write", "deliveries.manage"])], async (context) => {
       try {
@@ -502,6 +560,13 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
       return { item: invoice };
     });
   });
+  server.get<{ Params: { id: string } }>("/invoices/:id/lines", async (request, reply) =>
+    withGuards(request, reply, requireReadAccess(readPermissions.invoices), async (context) => {
+      const service = new CommercialCoreService(context);
+      const items = await service.listInvoiceLines(request.params.id);
+      return { items, total: items.length, persistenceMode: context.persistenceMode };
+    })
+  );
   server.post<{ Body: Partial<Invoice> }>("/invoices", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["invoices.write", "documents.write"])], async (context) => {
       const service = new CommercialCoreService(context);
@@ -574,6 +639,13 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
       return { item: returnRecord };
     });
   });
+  server.get<{ Params: { id: string } }>("/returns/:id/lines", async (request, reply) =>
+    withGuards(request, reply, requireReadAccess(readPermissions.returns), async (context) => {
+      const service = new CommercialCoreService(context);
+      const items = await service.listReturnLines(request.params.id);
+      return { items, total: items.length, persistenceMode: context.persistenceMode };
+    })
+  );
   server.post<{ Body: Partial<Return> }>("/returns", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["returns.write", "returns.manage"])], async (context) => {
       const service = new CommercialCoreService(context);
@@ -668,6 +740,13 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
       return { item: document };
     });
   });
+  server.get<{ Params: { id: string } }>("/documents/:id/deliveries", async (request, reply) =>
+    withGuards(request, reply, requireReadAccess(readPermissions.documents), async (context) => {
+      const service = new CommercialCoreService(context);
+      const items = await service.listDocumentDeliveries(request.params.id);
+      return { items, total: items.length, persistenceMode: context.persistenceMode };
+    })
+  );
   server.post<{ Body: { type: DocumentType; entityType: Document["entityType"]; entityId: string; entityNo: string; customerId?: string } }>("/documents/render", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["documents.write", "documents.render"])], async (context) => {
       const policyResult = await enforcePolicyForRoute(context, {

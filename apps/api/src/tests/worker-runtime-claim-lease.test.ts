@@ -43,7 +43,7 @@ test("processWorkerTick returns no_job when queue is empty", () => {
   assert.equal(result.reasons.includes("no_job_available"), true);
 });
 
-test("pending available job is claimed with lease metadata and completed", () => {
+test("pending available job is claimed with lease metadata but not completed without mutation", () => {
   resetWorkerJobHandlers();
   const repository = new InMemoryOutboxJobRepository();
   const now = "2026-05-12T10:00:00.000Z";
@@ -59,19 +59,19 @@ test("pending available job is claimed with lease metadata and completed", () =>
   });
 
   assert.equal(result.processed, 1);
-  assert.equal(result.completed, 1);
-  assert.equal(result.results[0]?.status, "completed");
+  assert.equal(result.completed, 0);
+  assert.notEqual(result.results[0]?.status, "completed");
   assert.equal(result.results[0]?.claimedJob?.lockedBy, "worker_runtime_A");
   assert.equal(result.results[0]?.claimedJob?.lockedAt, now);
 });
 
-test("approval.execution.dispatch handler runs dry_run and does not execute mutation/provider", () => {
+test("approval.execution.dispatch handler defers without mutation/provider execution", () => {
   resetWorkerJobHandlers();
   const repository = new InMemoryOutboxJobRepository();
   createOutboxJob(repository, baseJobInput({ idempotencyKey: "idem_dispatch_dry_run" }));
 
   const result = processWorkerTick(repository, { maxJobsPerTick: 1 });
-  assert.equal(result.results[0]?.status, "completed");
+  assert.notEqual(result.results[0]?.status, "completed");
   const reasons = result.results[0]?.reasons ?? [];
   assert.equal(reasons.includes("mutation_executed:false"), true);
   assert.equal(reasons.includes("provider_call_executed:false"), true);

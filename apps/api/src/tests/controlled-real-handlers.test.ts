@@ -237,8 +237,12 @@ test("worker validates execution gate metadata on approval dispatch jobs", () =>
   });
   const validGate = app.processTick({ maxJobsPerTick: 1 });
   const reasons = validGate.results[0]?.reasons ?? [];
-  assert.equal(validGate.completed, 1);
-  assert.ok(reasons.includes("execution_gate_metadata_verified"));
+  assert.equal(validGate.completed, 0);
+  assert.notEqual(validGate.results[0]?.status, "completed");
+  assert.ok(
+    reasons.includes("execution_gate_metadata_verified") ||
+      reasons.includes("approval_execution_dispatch_deferred")
+  );
   assert.ok(reasons.includes("mutation_executed:false"));
   assert.ok(reasons.includes("provider_call_executed:false"));
 });

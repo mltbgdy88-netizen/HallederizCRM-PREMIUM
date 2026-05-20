@@ -48,7 +48,7 @@ test("worker runtime process tick returns no_job on empty queue", () => {
   assert.equal(result.reasons.includes("no_job_available"), true);
 });
 
-test("worker runtime process tick claims and completes available job", () => {
+test("worker runtime process tick claims job but does not complete without mutation", () => {
   resetWorkerJobHandlers();
   const repository = new InMemoryOutboxJobRepository();
   const now = "2026-05-12T13:00:00.000Z";
@@ -57,8 +57,8 @@ test("worker runtime process tick claims and completes available job", () => {
 
   const result = app.processTick({ now, maxJobsPerTick: 1, lease: { claimLeaseMs: 60_000 } });
   assert.equal(result.processed, 1);
-  assert.equal(result.completed, 1);
-  assert.equal(result.results[0]?.status, "completed");
+  assert.equal(result.completed, 0);
+  assert.notEqual(result.results[0]?.status, "completed");
   assert.equal(result.results[0]?.claimedJob?.lockedBy, "worker_pack_A");
 });
 
@@ -119,7 +119,7 @@ test("worker runtime non_retryable failure moves job to dead_letter", () => {
   assert.equal(result.results[0]?.job?.deadLetterReason, "non_retryable_failure");
 });
 
-test("approval.execution.dispatch remains dry_run noop", () => {
+test("approval.execution.dispatch defers without fake completion", () => {
   resetWorkerJobHandlers();
   const repository = new InMemoryOutboxJobRepository();
   createOutboxJob(repository, baseJobInput({ idempotencyKey: "idem_pack_dispatch_dry_run" }));
@@ -127,7 +127,8 @@ test("approval.execution.dispatch remains dry_run noop", () => {
 
   const result = app.processTick({ maxJobsPerTick: 1 });
   const reasons = result.results[0]?.reasons ?? [];
-  assert.equal(result.completed, 1);
+  assert.equal(result.completed, 0);
+  assert.notEqual(result.results[0]?.status, "completed");
   assert.equal(reasons.includes("mutation_executed:false"), true);
   assert.equal(reasons.includes("provider_call_executed:false"), true);
 });
@@ -153,7 +154,7 @@ test("audit.timeline.writeback missing payload moves job to dead_letter", () => 
   assert.equal(result.results[0]?.job?.deadLetterReason, "non_retryable_failure");
 });
 
-test("audit.timeline.writeback valid payload returns safe foundation success", () => {
+test("audit.timeline.writeback valid payload defers without persisting mutation", () => {
   resetWorkerJobHandlers();
   const repository = new InMemoryOutboxJobRepository();
   createOutboxJob(
@@ -210,9 +211,8 @@ test("audit.timeline.writeback valid payload returns safe foundation success", (
   const app = createWorkerRuntimeApp({ repository });
   const result = app.processTick({ maxJobsPerTick: 1 });
   const reasons = result.results[0]?.reasons ?? [];
-  assert.equal(result.completed, 1);
-  assert.equal(reasons.includes("auditPersisted:false"), true);
-  assert.equal(reasons.includes("timelinePersisted:false"), true);
+  assert.equal(result.completed, 0);
+  assert.notEqual(result.results[0]?.status, "completed");
   assert.equal(reasons.includes("mutation_executed:false"), true);
   assert.equal(reasons.includes("provider_call_executed:false"), true);
 });

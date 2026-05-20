@@ -1,5 +1,6 @@
 import { getWorkerJobHandler } from "./handler-registry";
-import type { ProcessNextJobResult, WorkerJob } from "./model";
+import { isWorkerJobCompletable, normalizeHandlerResult } from "./handle-result";
+import type { ProcessNextJobResult, WorkerJob, WorkerJobHandleResult } from "./model";
 import { calculateNextRetryAt, classifyWorkerError, shouldRetryJob } from "./outbox";
 import type { WorkerJobClaimOptions } from "./repository";
 import type { WorkerLeaseOptions, WorkerRuntimeOptions, WorkerRuntimeResult } from "./runtime";
@@ -106,10 +107,10 @@ export async function processClaimedJobAsync(
   }
 
   try {
-    const result = handler.handle(job);
-    const reasons = result.reasons ?? [result.ok ? "handler_completed" : "handler_failed"];
+    const result = normalizeHandlerResult(handler.handle(job));
+    const reasons = result.reasons ?? [isWorkerJobCompletable(result) ? "handler_completed" : "handler_deferred"];
 
-    if (result.ok) {
+    if (isWorkerJobCompletable(result)) {
       const completed = await repository.complete(job.jobId, now);
       seenIdempotencyKeys?.add(job.idempotencyKey);
       return {

@@ -43,7 +43,11 @@ test("document_render does not complete without renderer", () => {
   const handler = createDocumentRenderHandler();
   const result = handler.handle(buildJob());
   assert.equal(result.ok, false);
-  assert.ok(result.reasons?.some((reason) => reason.includes("renderer")));
+  assert.ok(
+    result.reasons?.some(
+      (reason) => reason.includes("renderer") || reason.includes("domain_execution_port_not_registered")
+    )
+  );
 });
 
 test("document_archive rejects missing documentId", () => {
@@ -81,5 +85,10 @@ test("document_archive does not complete without repository implementation", () 
     process.env.DATABASE_URL = previousDb;
   }
   assert.equal(result.ok, false);
-  assert.ok(result.reasons?.some((reason) => reason.includes("archive_repository")));
+  assert.ok(
+    result.reasons?.some(
+      (reason) =>
+        reason.includes("archive_repository") || reason.includes("domain_execution_port_not_registered")
+    )
+  );
 });

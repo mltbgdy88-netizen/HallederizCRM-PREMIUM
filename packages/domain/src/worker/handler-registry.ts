@@ -160,12 +160,14 @@ function createFoundationHandler(jobType: string): WorkerJobHandler {
         }
 
         return {
-          ok: true,
-          retryable: false,
+          ok: false,
+          status: "deferred",
+          mutation_executed: false,
+          retryable: true,
           reasons: [
-            "approval_execution_dispatch_dry_run_handled",
+            "approval_execution_dispatch_deferred",
             gateDecision ? "execution_gate_metadata_verified" : "execution_gate_metadata_not_required_for_dry_run",
-            "handled:true",
+            "handled:false",
             "mode:dry_run",
             "mutation_executed:false",
             "provider_call_executed:false"
@@ -229,11 +231,13 @@ function createFoundationHandler(jobType: string): WorkerJobHandler {
         }
 
         return {
-          ok: true,
-          retryable: false,
+          ok: false,
+          status: "deferred",
+          mutation_executed: false,
+          retryable: true,
           reasons: [
-            "audit_timeline_writeback_foundation_validated",
-            "handled:true",
+            "audit_timeline_writeback_deferred",
+            "handled:false",
             "mode:dry_run",
             "auditPersisted:false",
             "timelinePersisted:false",

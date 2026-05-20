@@ -13,8 +13,12 @@ import { registerQuickOperationsRoutes } from "./quick-operations/routes";
 import { registerSalesCrmRoutes } from "./sales-crm/routes";
 import { buildApiCorsOptions } from "./shared/cors-config";
 import { bootstrapRuntimeEnvValidation } from "./shared/runtime-env-bootstrap";
+import { bootstrapApprovalCommercialActionHandlers } from "./shared/approval-commercial-action-handlers";
+import { bootstrapWorkerDomainExecutionPort } from "./shared/worker-domain-execution-port";
 
 bootstrapRuntimeEnvValidation();
+bootstrapApprovalCommercialActionHandlers();
+bootstrapWorkerDomainExecutionPort();
 
 const server = Fastify({
   logger: true

@@ -191,7 +191,8 @@ test("approval approve smoke produces outbox metadata and worker dry-run process
     maxJobsPerTick: 1,
     lease: { workerId: "worker_safety_smoke" }
   });
-  assert.equal(workerResult.completed, 1);
+  assert.equal(workerResult.completed, 0);
+  assert.notEqual(workerResult.results[0]?.status, "completed");
   assert.equal(workerResult.results[0]?.reasons.includes("mutation_executed:false"), true);
   assert.equal(workerResult.results[0]?.reasons.includes("provider_call_executed:false"), true);
 });
