@@ -26,7 +26,7 @@ export function DestructiveConfirmModal({
   title,
   message,
   children,
-  confirmLabel = "Sil",
+  confirmLabel = "Onayla",
   cancelLabel = "Vazgeç",
   onConfirm,
   onClose,

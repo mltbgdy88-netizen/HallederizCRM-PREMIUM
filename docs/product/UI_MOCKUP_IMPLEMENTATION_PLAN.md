@@ -16,6 +16,8 @@ Mockup PNG paketi (`docs/design/ui-design-output/**`) **runtime’da import edil
 
 **Agent 00B (2026-05-20):** Mockup paketi repoya eklendi (`docs/design/ui-design-output/**`, 319 PNG, 53 route). **Agent 01 başlatılabilir.** `CURSOR_REFERENCE_README.md` pakette yok — minor documentation gap.
 
+**Agent 01 (2026-05-20):** Tokens + primitives foundation tamamlandı (`ui/01-foundation-tokens-primitives`). Emerald/gold CSS variables, `hz-ui-*` overrides, shared state defaults. **Sonraki:** `ui/02-appshell-sidebar-header`. PNG runtime import yasağı korunur.
+
 ---
 
 ## 2. Source of truth
@@ -88,7 +90,8 @@ PNG (referans, import YOK)
 | **Allowed** | `packages/ui/**`, `apps/web/app/globals.css` (token blok), `docs/product/DESIGN_TOKENS.md` |
 | **Forbidden** | AppShell, route pages, API |
 | **Tests** | `web` + `ui` typecheck |
-| **Acceptance** | Mor/lacivert primary kaldırıldı; primitives Storybook veya doc örneği (opsiyonel) |
+| **Acceptance** | Foundation `hz-ui-*` emerald; shell legacy token Agent 02; bkz. `UI_PRIMITIVES.md` |
+| **Status** | **Tamamlandı** (branch `ui/01-foundation-tokens-primitives`) |
 
 ### Agent 02 — `ui/02-appshell-sidebar-header`
 
