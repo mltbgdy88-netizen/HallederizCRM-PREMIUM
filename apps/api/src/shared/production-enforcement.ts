@@ -61,9 +61,18 @@ export function mapActionKeyToProductionActionType(actionKey: string): Productio
     actionKey === "platform.customers.update" ||
     actionKey === "platform.offers.create" ||
     actionKey === "platform.orders.create" ||
-    actionKey === "platform.payments.create"
+    actionKey === "platform.payments.create" ||
+    actionKey === "platform.payments.confirm" ||
+    actionKey === "platform.payments.reverse"
   ) {
     return "commercial_write";
+  }
+  if (
+    actionKey === "platform.documents.send_whatsapp" ||
+    actionKey === "platform.documents.send_email" ||
+    actionKey === "platform.documents.archive"
+  ) {
+    return "document_send";
   }
   if (actionKey === "platform.documents.generate") return "document_send";
   if (actionKey === "platform.documents.send") return "document_send";

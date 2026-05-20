@@ -4,5 +4,7 @@ export * from "./schema";
 export * from "./scripts";
 export * from "./ai-foundation";
 export * from "./migrations";
+export * from "./migration-registry";
+export * from "./audit/redaction";
 export * from "./transaction";
 export * from "./repositories";

@@ -66,6 +66,11 @@ export interface ProductionReadinessReport {
   missingEnv: string[];
   unsafeFallbacks: string[];
   nextActions: string[];
+  mutationSafe: boolean;
+  readOnlySafe: boolean;
+  workerSafe: boolean;
+  providerSafe: boolean;
+  checks: Array<{ id: string; ok: boolean; severity: "blocker" | "warning" }>;
 }
 
 function hasText(value: string | undefined): boolean {
@@ -126,6 +131,27 @@ export async function evaluateProductionReadiness(context: RequestContext): Prom
   const omnichannel = resolveOmnichannelRuntime(context);
   const workerMode = process.env.WORKER_MODE?.trim() || "foundation";
   const approvalExecutionMode = process.env.APPROVAL_EXECUTION_MODE?.trim() || "foundation";
+
+  if (process.env.PERSISTENCE_MODE === "demo") {
+    blockers.push("persistence_mode_demo_blocked");
+    unsafeFallbacks.push("PERSISTENCE_MODE=demo");
+  }
+  if (process.env.NEXT_PUBLIC_USE_DEMO_DATA === "true") {
+    blockers.push("demo_data_flag_blocked");
+    unsafeFallbacks.push("NEXT_PUBLIC_USE_DEMO_DATA=true");
+  }
+  if (process.env.ALLOW_DEMO_FALLBACK === "true") {
+    blockers.push("demo_fallback_blocked");
+    unsafeFallbacks.push("ALLOW_DEMO_FALLBACK=true");
+  }
+  if (process.env.DEMO_AUTH_ENABLED === "true" || process.env.NEXT_PUBLIC_ENABLE_DEMO_AUTH === "true") {
+    blockers.push("demo_auth_blocked");
+    unsafeFallbacks.push("demo_auth_enabled");
+  }
+  if (process.env.OMNICHANNEL_ALLOW_MOCK_PROVIDERS === "true") {
+    blockers.push("mock_provider_flag_blocked");
+    unsafeFallbacks.push("OMNICHANNEL_ALLOW_MOCK_PROVIDERS=true");
+  }
 
   if (isProduction && authMode.persistenceMode !== "postgres") {
     blockers.push("production_requires_postgres_persistence_mode");
@@ -223,6 +249,25 @@ export async function evaluateProductionReadiness(context: RequestContext): Prom
   const overallStatus: ProductionReadinessStatus =
     uniqueBlockers.length > 0 ? "blocked" : uniqueWarnings.length > 0 ? "degraded" : "ready";
 
+  const workerSafe = workerMode === "durable" && authMode.persistenceMode === "postgres";
+  const providerSafe = !providerModes.some((item) => item.mode === "mock");
+  const mutationSafe =
+    overallStatus !== "blocked" &&
+    databaseConfigured &&
+    pendingApproval.mode === "postgres" &&
+    approvalExecutionMode !== "foundation" &&
+    workerSafe;
+  const readOnlySafe = databaseConfigured && hasText(process.env.AUTH_SESSION_SECRET);
+
+  const checks: Array<{ id: string; ok: boolean; severity: "blocker" | "warning" }> = [
+    { id: "database_configured", ok: databaseConfigured, severity: databaseConfigured ? "warning" : "blocker" },
+    { id: "postgres_persistence", ok: authMode.persistenceMode === "postgres", severity: "blocker" },
+    { id: "pending_approval_repository", ok: Boolean(pendingApproval.repository), severity: "blocker" },
+    { id: "worker_durable", ok: workerSafe, severity: "blocker" },
+    { id: "approval_execution_live", ok: approvalExecutionMode !== "foundation", severity: "blocker" },
+    { id: "providers_non_mock", ok: providerSafe, severity: "blocker" }
+  ];
+
   return {
     overallStatus,
     environment: {
@@ -286,7 +331,12 @@ export async function evaluateProductionReadiness(context: RequestContext): Prom
       "PERSISTENCE_MODE=postgres ve WORKER_MODE=durable ile canli acilisi dogrula.",
       "Mock/provider foundation modlarini canli entegrasyonla degistirmeden ready bekleme.",
       "Approval ve worker akislari icin dry_run sonucunu canli basari gibi raporlama."
-    ]
+    ],
+    mutationSafe,
+    readOnlySafe,
+    workerSafe,
+    providerSafe,
+    checks
   };
 }
 

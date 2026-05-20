@@ -1,7 +1,7 @@
 import { createHash } from "node:crypto";
 import { createQueryExecutor } from "./client.js";
 import type { DatabaseConfig, QueryExecutor, QueryResultRow } from "./types.js";
-import { aiFoundationMigrationName, aiFoundationMigrationSql } from "./ai-foundation/index.js";
+import { buildOrderedDatabaseMigrations } from "./migration-registry.js";
 
 export interface DatabaseMigration {
   name: string;
@@ -20,12 +20,7 @@ export interface MigrationApplyResult {
   checksum: string;
 }
 
-export const databaseMigrations: DatabaseMigration[] = [
-  {
-    name: aiFoundationMigrationName,
-    sql: aiFoundationMigrationSql,
-  },
-];
+export const databaseMigrations: DatabaseMigration[] = buildOrderedDatabaseMigrations();
 
 export function calculateMigrationChecksum(sql: string): string {
   return createHash("sha256").update(sql).digest("hex");
