@@ -2,37 +2,55 @@ import type { WorkerJob, WorkerJobHandleResult } from "./model";
 import type { WorkerJobHandler } from "./handler-registry";
 import { validateStandardJobPayload } from "./outbox-job-types";
 import { listDocumentJobHandlers } from "./document-job-handlers";
-
-const CONTRACT_JOB_TYPES = [
-  "approval_execution",
-  "ai_reply_send",
-  "integration_sync"
-] as const;
+import {
+  deferredHandlerResult,
+  failedHandlerResult,
+  invalidPayloadResult,
+  normalizeHandlerResult
+} from "./handle-result";
+import { getWorkerDomainExecutionPort, routeApprovalExecutionAction } from "./execution-port";
 
 function readPayload(job: WorkerJob): Record<string, unknown> {
   return job.payload && typeof job.payload === "object" ? (job.payload as Record<string, unknown>) : {};
 }
 
-function invalidPayload(reasons: string[]): WorkerJobHandleResult {
-  return {
-    ok: false,
-    retryable: false,
-    reasons: [...reasons, "mutation_executed:false", "provider_call_executed:false"]
-  };
-}
+function dispatchThroughPort(job: WorkerJob, jobType: string): WorkerJobHandleResult {
+  const port = getWorkerDomainExecutionPort();
+  if (!port) {
+    return deferredHandlerResult(jobType, "domain_execution_port_not_registered");
+  }
 
-function deferredResult(jobType: string, detail: string, retryable = true): WorkerJobHandleResult {
-  return {
-    ok: false,
-    retryable,
-    reasons: [
-      "handler_deferred",
-      `job_type:${jobType}`,
-      detail,
-      "mutation_executed:false",
-      "provider_call_executed:false"
-    ]
-  };
+  const payload = readPayload(job);
+  const actionKey = typeof payload.actionKey === "string" ? payload.actionKey : job.actionKey ?? "";
+  const result = port({
+    jobType,
+    tenantId: job.tenantId,
+    actionKey,
+    payload,
+    idempotencyKey: job.idempotencyKey
+  });
+
+  if (result.status === "completed" && result.mutation_executed) {
+    return normalizeHandlerResult({
+      ok: true,
+      status: "completed",
+      mutation_executed: true,
+      entityType: result.entityType,
+      entityId: result.entityId,
+      metadata: result.metadata,
+      retryable: false,
+      reasons: ["domain_execution_completed", ...result.reasons, "mutation_executed:true"]
+    });
+  }
+
+  if (result.status === "failed") {
+    return failedHandlerResult(jobType, result.reasons.join(";"), false);
+  }
+
+  return deferredHandlerResult(jobType, result.reasons[0] ?? "domain_execution_deferred", {
+    entityType: result.entityType,
+    entityId: result.entityId
+  });
 }
 
 export function createUnsupportedContractHandler(jobType: string): WorkerJobHandler {
@@ -44,13 +62,9 @@ export function createUnsupportedContractHandler(jobType: string): WorkerJobHand
     handle: (job) => {
       const validation = validateStandardJobPayload(jobType, readPayload(job));
       if (validation.length > 0) {
-        return invalidPayload(validation);
+        return invalidPayloadResult(validation);
       }
-      return {
-        ok: false,
-        retryable: false,
-        reasons: ["unsupported_job_type", `job_type:${jobType}`, "mutation_executed:false", "provider_call_executed:false"]
-      };
+      return failedHandlerResult(jobType, "unsupported_job_type", false);
     }
   };
 }
@@ -58,20 +72,20 @@ export function createUnsupportedContractHandler(jobType: string): WorkerJobHand
 function createApprovalExecutionHandler(): WorkerJobHandler {
   return {
     jobType: "approval_execution",
-    mode: "dry_run",
+    mode: "execute",
     productionAllowed: true,
-    liveReady: false,
+    liveReady: true,
     handle: (job) => {
       const validation = validateStandardJobPayload("approval_execution", readPayload(job));
       if (validation.length > 0) {
-        return invalidPayload(validation);
+        return invalidPayloadResult(validation);
       }
       const payload = readPayload(job);
       const actionKey = typeof payload.actionKey === "string" ? payload.actionKey : "";
       if (!actionKey.trim()) {
-        return invalidPayload(["missing_action_key"]);
+        return invalidPayloadResult(["missing_action_key"]);
       }
-      return deferredResult("approval_execution", "domain_execution_handler_not_wired");
+      return dispatchThroughPort(job, "approval_execution");
     }
   };
 }
@@ -79,15 +93,15 @@ function createApprovalExecutionHandler(): WorkerJobHandler {
 function createAiReplySendHandler(): WorkerJobHandler {
   return {
     jobType: "ai_reply_send",
-    mode: "dry_run",
+    mode: "execute",
     productionAllowed: true,
-    liveReady: false,
+    liveReady: true,
     handle: (job) => {
       const validation = validateStandardJobPayload("ai_reply_send", readPayload(job));
       if (validation.length > 0) {
-        return invalidPayload(validation);
+        return invalidPayloadResult(validation);
       }
-      return deferredResult("ai_reply_send", "omnichannel_provider_not_ready");
+      return dispatchThroughPort(job, "ai_reply_send");
     }
   };
 }
@@ -95,15 +109,15 @@ function createAiReplySendHandler(): WorkerJobHandler {
 function createIntegrationSyncHandler(): WorkerJobHandler {
   return {
     jobType: "integration_sync",
-    mode: "dry_run",
+    mode: "execute",
     productionAllowed: true,
-    liveReady: false,
+    liveReady: true,
     handle: (job) => {
       const validation = validateStandardJobPayload("integration_sync", readPayload(job));
       if (validation.length > 0) {
-        return invalidPayload(validation);
+        return invalidPayloadResult(validation);
       }
-      return deferredResult("integration_sync", "erp_factory_adapter_not_configured");
+      return dispatchThroughPort(job, "integration_sync");
     }
   };
 }
@@ -116,3 +130,5 @@ export function listContractJobHandlers(): WorkerJobHandler[] {
     ...listDocumentJobHandlers()
   ];
 }
+
+export { routeApprovalExecutionAction };

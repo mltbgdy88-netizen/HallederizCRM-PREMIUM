@@ -19,7 +19,14 @@ import {
   validateOrderTransition,
   validateReturnLinesAgainstOrder
 } from "@hallederiz/domain";
-import type { QueryExecutor } from "@hallederiz/database";
+import {
+  DatabaseCommercialLineRepository,
+  DatabaseDocumentDeliveryRepository,
+  DatabasePaymentReversalRepository,
+  type DocumentDeliveryRecord,
+  type PaymentReversalRecord,
+  type QueryExecutor
+} from "@hallederiz/database";
 import type {
   Delivery,
   DeliveryLine,
@@ -1592,15 +1599,24 @@ export class CommercialCoreRepository {
     if (!runtime.dbEnabled) return null;
     const document = await this.getDocument(documentId);
     if (!document) return null;
-    const request = buildDocumentDeliveryRequest(document, channel, recipient);
     try {
-      await runtime.executor.query(
-        `insert into document_deliveries
-         (id, tenant_id, document_id, channel, status, recipient, requested_at, sent_at)
-         values ($1,$2,$3,$4,$5,$6,$7,$8)`,
-        [request.id, this.context.tenantId, request.documentId, request.channel, "sent", request.recipient ?? null, request.requestedAt, nowIso()]
-      );
-      return { ...request, status: "sent", sentAt: nowIso() };
+      const repo = new DatabaseDocumentDeliveryRepository(runtime.executor);
+      const record = await repo.insert({
+        tenantId: this.context.tenantId,
+        documentId,
+        channel,
+        recipient,
+        status: "queued"
+      });
+      return {
+        id: record.id,
+        tenantId: record.tenantId,
+        documentId: record.documentId,
+        channel: record.channel as DocumentDelivery["channel"],
+        recipient: record.recipient,
+        status: record.status,
+        requestedAt: record.createdAt
+      } satisfies DocumentDelivery;
     } catch (error) {
       runtime.handleDbFailure(error);
       return null;
@@ -1745,18 +1761,118 @@ export class CommercialCoreRepository {
     try {
       const payment = await this.getPayment(id);
       if (!payment) return null;
-      await runtime.executor.query(`update payment_receipts set status = $3 where tenant_id = $1 and id = $2`, [this.context.tenantId, payment.id, "reversed"]);
-      return {
-        id: `reversal_${Date.now()}`,
+      const reversalRepo = new DatabasePaymentReversalRepository(runtime.executor);
+      const reversal = await reversalRepo.insert({
         tenantId: this.context.tenantId,
         paymentId: payment.id,
-        reason: reason ?? "Operator ters kayit talebi.",
+        amount: payment.amount,
+        currency: payment.currency,
+        reason: reason ?? "Operator ters kayıt talebi.",
+        requestedBy: this.context.userId,
+        status: "completed"
+      });
+      await runtime.executor.query(`update payment_receipts set status = $3 where tenant_id = $1 and id = $2`, [
+        this.context.tenantId,
+        payment.id,
+        "reversed"
+      ]);
+      return {
+        id: reversal.id,
+        tenantId: reversal.tenantId,
+        paymentId: reversal.paymentId,
+        reason: reversal.reason,
         reversedBy: this.context.userId,
-        reversedAt: nowIso()
+        reversedAt: reversal.createdAt
       };
     } catch (error) {
       runtime.handleDbFailure(error);
       return reversePayment(id, reason);
+    }
+  }
+
+  async listPaymentReversals(paymentId: string): Promise<PaymentReversalRecord[]> {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return [];
+    try {
+      return new DatabasePaymentReversalRepository(runtime.executor).listByPayment(this.context.tenantId, paymentId);
+    } catch (error) {
+      runtime.handleDbFailure(error);
+      return [];
+    }
+  }
+
+  async createPaymentReversal(
+    paymentId: string,
+    input: { amount: number; currency?: string; reason: string; idempotencyKey?: string }
+  ): Promise<PaymentReversalRecord | null> {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return null;
+    if (!input.amount || input.amount <= 0) {
+      throw new ApiDomainError("validation_error", "Geçersiz ters kayıt tutarı.");
+    }
+    if (!input.reason?.trim()) {
+      throw new ApiDomainError("validation_error", "Ters kayıt gerekçesi zorunludur.");
+    }
+    const payment = await this.getPayment(paymentId);
+    if (!payment) return null;
+    try {
+      return new DatabasePaymentReversalRepository(runtime.executor).insert({
+        tenantId: this.context.tenantId,
+        paymentId: payment.id,
+        amount: input.amount,
+        currency: input.currency ?? payment.currency,
+        reason: input.reason.trim(),
+        requestedBy: this.context.userId,
+        status: "pending",
+        metadata: input.idempotencyKey ? { idempotencyKey: input.idempotencyKey } : undefined
+      });
+    } catch (error) {
+      runtime.handleDbFailure(error);
+      return null;
+    }
+  }
+
+  async listDocumentDeliveries(documentId: string): Promise<DocumentDeliveryRecord[]> {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return [];
+    try {
+      return new DatabaseDocumentDeliveryRepository(runtime.executor).listByDocument(this.context.tenantId, documentId);
+    } catch (error) {
+      runtime.handleDbFailure(error);
+      return [];
+    }
+  }
+
+  async listDeliveryLines(deliveryId: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return [];
+    try {
+      return new DatabaseCommercialLineRepository(runtime.executor).listDeliveryLines(this.context.tenantId, deliveryId);
+    } catch (error) {
+      runtime.handleDbFailure(error);
+      return [];
+    }
+  }
+
+  async listInvoiceLines(invoiceId: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return [];
+    try {
+      return new DatabaseCommercialLineRepository(runtime.executor).listInvoiceLines(this.context.tenantId, invoiceId);
+    } catch (error) {
+      runtime.handleDbFailure(error);
+      return [];
+    }
+  }
+
+  async listReturnLines(returnId: string) {
+    const runtime = this.runtime();
+    if (!runtime.dbEnabled) return [];
+    try {
+      return new DatabaseCommercialLineRepository(runtime.executor).listReturnLines(this.context.tenantId, returnId);
+    } catch (error) {
+      runtime.handleDbFailure(error);
+      return [];
     }
   }
 

@@ -1,4 +1,5 @@
 import { getWorkerJobHandler } from "./handler-registry";
+import { isWorkerJobCompletable, normalizeHandlerResult } from "./handle-result";
 import type { ProcessNextJobResult, WorkerJob } from "./model";
 import { calculateNextRetryAt, classifyWorkerError, shouldRetryJob } from "./outbox";
 import type { OutboxJobRepository, WorkerJobClaimOptions } from "./repository";
@@ -119,10 +120,10 @@ export function processClaimedJob(
   }
 
   try {
-    const result = handler.handle(job);
-    const reasons = result.reasons ?? [result.ok ? "handler_completed" : "handler_failed"];
+    const result = normalizeHandlerResult(handler.handle(job));
+    const reasons = result.reasons ?? [isWorkerJobCompletable(result) ? "handler_completed" : "handler_deferred"];
 
-    if (result.ok) {
+    if (isWorkerJobCompletable(result)) {
       const completed = repository.complete(job.jobId, now);
       seenIdempotencyKeys?.add(job.idempotencyKey);
       return {

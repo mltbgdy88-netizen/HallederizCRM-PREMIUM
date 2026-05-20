@@ -22,10 +22,19 @@ export interface WorkerJob {
 
 export type WorkerHandlerMode = "noop" | "dry_run" | "execute";
 
+export type WorkerHandlerStatus = "completed" | "deferred" | "failed" | "skipped";
+
 export interface WorkerJobHandleResult {
   ok: boolean;
+  status?: WorkerHandlerStatus;
+  mutation_executed?: boolean;
   retryable?: boolean;
   reasons?: string[];
+  entityType?: string;
+  entityId?: string;
+  auditEventId?: string;
+  timelineEventId?: string;
+  metadata?: Record<string, unknown>;
 }
 
 export interface ProcessNextJobResult {

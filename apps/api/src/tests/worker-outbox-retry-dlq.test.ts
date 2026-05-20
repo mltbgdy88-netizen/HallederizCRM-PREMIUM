@@ -57,14 +57,14 @@ test("processNextJob returns no_job when outbox is empty", () => {
   assert.equal(result.status, "no_job");
 });
 
-test("registered dry_run handler completes job", () => {
+test("registered foundation dispatch handler does not complete without mutation", () => {
   resetWorkerJobHandlers();
   const repository = new InMemoryOutboxJobRepository();
   createOutboxJob(repository, baseJobInput({ idempotencyKey: "idem_dry_run" }));
   const result = processNextJob(repository);
-  assert.equal(result.status, "completed");
-  assert.equal(result.job?.status, "completed");
-  assert.equal(result.handlerMode, "dry_run");
+  assert.notEqual(result.status, "completed");
+  assert.notEqual(result.job?.status, "completed");
+  assert.ok(result.reasons?.some((reason) => reason.includes("mutation_executed:false")));
 });
 
 test("unknown handler moves job to dead_letter", () => {

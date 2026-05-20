@@ -17,6 +17,7 @@ import { PaymentDocumentPanel } from "./PaymentDocumentPanel";
 import { PaymentSummaryCards } from "./PaymentSummaryCards";
 import { getPaymentDetail } from "../queries/get-payments";
 import { getPaymentMethodLabel } from "../queries/payment-mock-data";
+import { EntityTimelinePanel } from "../../shared/components/EntityTimelinePanel";
 
 export function PaymentDetailPage({ paymentId }: { paymentId: string }) {
   const [payment, setPayment] = useState<PaymentReceipt | null>(null);
@@ -101,7 +102,12 @@ export function PaymentDetailPage({ paymentId }: { paymentId: string }) {
             <PaymentAllocationTable allocations={payment.allocations} />
           </FormPageShell>
         }
-        sidebar={<PaymentDocumentPanel payment={payment} />}
+        sidebar={
+          <>
+            <PaymentDocumentPanel payment={payment} />
+            <EntityTimelinePanel entityType="payment" entityId={payment.id} />
+          </>
+        }
       />
     </div>
   );

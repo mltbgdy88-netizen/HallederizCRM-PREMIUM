@@ -11,3 +11,5 @@ export * from "./document-job-handlers";
 export * from "./outbox-job-types";
 export * from "./production-config";
 export * from "./async-runtime";
+export * from "./handle-result";
+export * from "./execution-port";

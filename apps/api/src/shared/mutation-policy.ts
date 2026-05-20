@@ -1,6 +1,7 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { getPolicyAction } from "@hallederiz/domain";
 import { recordAuditEventStrict } from "./audit-timeline";
+import { resolveMutationTimelineSummary } from "./mutation-timeline-summary";
 import {
   assertProductionReadyForAction,
   buildProductionBlockedResponse,
@@ -142,12 +143,13 @@ export async function withMutationPolicy<T>(
   const value = await options.handler();
 
   if (registry?.auditRequired) {
+    const summary = resolveMutationTimelineSummary(options.actionKey);
     const audit = await recordAuditEventStrict(options.context, {
       entityType: options.entityType,
       entityId: options.entityId,
       eventType: options.actionKey,
-      title: registry.description,
-      description: registry.description,
+      title: summary.title,
+      description: summary.description,
       payload: options.payload
     });
     if (!audit.ok && process.env.NODE_ENV === "production") {

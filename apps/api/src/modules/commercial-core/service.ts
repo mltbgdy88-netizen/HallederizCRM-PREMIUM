@@ -58,6 +58,17 @@ export class CommercialCoreService {
   confirmPayment(id: string) { return this.repository.confirmPayment(id); }
   reversePayment(id: string, reason?: string) { return this.repository.reversePayment(id, reason); }
   getPaymentAllocations(id: string) { return this.repository.getPaymentAllocations(id); }
+  listPaymentReversals(paymentId: string) { return this.repository.listPaymentReversals(paymentId); }
+  createPaymentReversal(
+    paymentId: string,
+    input: { amount: number; currency?: string; reason: string; idempotencyKey?: string }
+  ) {
+    return this.repository.createPaymentReversal(paymentId, input);
+  }
+  listDocumentDeliveries(documentId: string) { return this.repository.listDocumentDeliveries(documentId); }
+  listDeliveryLines(deliveryId: string) { return this.repository.listDeliveryLines(deliveryId); }
+  listInvoiceLines(invoiceId: string) { return this.repository.listInvoiceLines(invoiceId); }
+  listReturnLines(returnId: string) { return this.repository.listReturnLines(returnId); }
 
   listWarehouseOrders() { return this.repository.listWarehouseOrders(); }
   getWarehouseOrder(id: string) { return this.repository.getWarehouseOrder(id); }
