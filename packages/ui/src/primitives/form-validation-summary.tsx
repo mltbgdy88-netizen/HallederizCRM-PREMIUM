@@ -9,7 +9,7 @@ export type FormValidationSummaryProps = {
 /** Task 17 — doğrulama / uyarı özeti (liste). */
 export function FormValidationSummary({
   messages,
-  title = "Doğrulama uyarıları",
+  title = "Formda düzeltilmesi gereken alanlar var.",
   variant = "danger"
 }: FormValidationSummaryProps) {
   if (!messages.length) {

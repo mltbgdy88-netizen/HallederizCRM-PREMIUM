@@ -56,6 +56,8 @@ Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 
 **Agent 02 (2026-05-20):** AppShell/Sidebar/Header/mobile drawer (`shell-foundation.css`, `app-shell.tsx` a11y). Sidebar `#064E3B`, active gold border, header ivory. **Route/template adoption yapılmadı.**
 
+**Agent 03 (2026-05-20):** Layout template foundation (`layout-templates.css`, slot API’ler, `ProductPageShell` packages/ui). **Route adoption yapılmadı** — Agent 04+.
+
 | Component (hedef ad) | Durum | Konum | Gap | Target agent |
 |----------------------|-------|-------|-----|--------------|
 | UiButton | **Hazır (foundation)** | `primitives/button.tsx` | Route `hz-btn` migration | 04+ |
@@ -73,14 +75,15 @@ Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 | SuccessState | **Hazır** | `primitives/success-state.tsx` | — | — |
 | DisabledNotice | **Hazır** | `primitives/disabled-notice.tsx` | apps/web kullanımı az | 07 |
 | DestructiveConfirmModal | **Hazır** | `primitives/destructive-confirm-modal.tsx` | apps/web adoption | 04+ |
-| FilterToolbar | **Kısmi** | `primitives/filter-bar.tsx` | İsim + API `FilterToolbar` | 03 |
-| DataTableShell | **Kısmi** | `primitives/data-table.tsx` | Yoğunluk token hizası | 03 |
-| DetailPanel | **Mevcut** | `primitives/detail-panel.tsx` | 360px hedef genişlik | 03 |
-| EntityListPageTemplate | **Mevcut** | `primitives/entity-list-page-template.tsx` | apps/web’de kısmi kullanım | 03, 05+ |
-| EntityDetailLayout | **Mevcut** | `primitives/entity-detail-layout.tsx` | Timeline slot standardı | 03, 05+ |
-| FormPageShell | **Mevcut** | `primitives/form-page-shell.tsx` | Hub route’larda kullanılmamalı | 03 |
-| SettingsLayout | **Mevcut** | `primitives/settings-layout.tsx` | — | 03, 08 |
-| ProductPageShell | **Eksik (packages/ui)** | `apps/web/src/components/product-page-shell.tsx` | Monorepo paylaşımı veya alias | 03 |
+| FilterToolbar | **Hazır (foundation)** | `primitives/filter-bar.tsx` | Route slot adoption | 04+ |
+| DataTableShell | **Hazır (foundation)** | `primitives/data-table.tsx` | Route state/mobile wiring | 05+ |
+| DetailPanel | **Hazır (foundation)** | `primitives/detail-panel.tsx` | Route preview adoption | 04+ |
+| EntityListPageTemplate | **Hazır (foundation)** | `primitives/entity-list-page-template.tsx` | apps/web tam adoption | 05+ |
+| EntityDetailLayout | **Hazır (foundation)** | `primitives/entity-detail-layout.tsx` | Timeline route adoption | 04–05+ |
+| FormPageShell | **Hazır (foundation)** | `primitives/form-page-shell.tsx` | Route form adoption | 04–05+ |
+| SettingsLayout | **Hazır (foundation)** | `primitives/settings-layout.tsx` | Route adoption | 08 |
+| ProductPageShell | **Hazır (packages/ui)** | `templates/product-page-shell.tsx` | apps/web duplicate migrate | 04+ |
+| PageSection / SummaryBar / StickyActionFooter | **Hazır** | `templates/*` | Route adoption | 05+ |
 
 **Duplicate / local risk:** Liste sayfalarının çoğu `apps/web/src/features/*/*Page.tsx` içinde özel `hz-*` CSS ile implemente; `EntityListPageTemplate` her yerde kullanılmıyor.
 
@@ -94,17 +97,17 @@ Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 |-------|--------|-----|
 | Global shell | **Hazır (Agent 02)** | `AppShell` + `shell-foundation.css` |
 | Sidebar tek kaynak | **Hazır (Agent 02)** | `#064E3B`, active gold left border |
-| İkinci sidebar (route içi) | **Yok (shell)** | Detay sağ kolon — Agent 03+ |
+| İkinci sidebar (route içi) | **Yok (shell)** | Detay sağ kolon — template hazır; route adoption 04+ |
 | `PageContent` + `platform-content` | **Korundu** | Sınıf ve `:has()` zinciri aynı |
 | Header | **Hazır (Agent 02)** | Ivory surface; PageMeta API aynı |
 | Mobile drawer | **Hazır (Agent 02)** | Escape, body lock, TR aria labels |
 | Content max width | **1604px** | `--hz-content-max-width` |
-| Detail panel width | **360px** | Agent 01 token; template adoption Agent 03 |
+| Detail panel width | **360px** | Agent 01 token + Agent 03 `DetailPanel` CSS |
 | Body / yatay scroll risk | **Orta** | Yerelde 1920×1080 / 390×844 doğrulanmalı |
 | Active nav style | **Korundu** | `resolveActiveHref` + `aria-current` |
 | Route metadata / PageMeta | **Korundu** | `suppressPageMeta` mantığı aynı |
 
-**Agent 03 odak:** layout templates; route adoption Agent 04+.
+**Agent 03:** layout template foundation tamam (`UI_LAYOUT_PATTERNS.md`). **Route adoption Agent 04+** (`ui/04-platform-operations` ilk dal).
 
 ---
 
