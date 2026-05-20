@@ -1,24 +1,47 @@
 import {
   InMemoryOmnichannelConversationRepository,
   InMemoryOmnichannelMessageRepository,
-  getDefaultProviderAdapters,
   type ChannelProviderAdapter,
   type OmnichannelConversationRepository,
   type OmnichannelMessageRepository
 } from "@hallederiz/domain";
 import {
   createQueryExecutor,
+  createDatabaseAiChatSessionRepository,
+  createDatabaseAiReplyJobRepository,
+  createDatabaseAiReplySuggestionRepository,
+  createDatabaseChannelCredentialRepository,
   DatabaseOmnichannelConversationRepository,
-  DatabaseOmnichannelMessageRepository
+  DatabaseOmnichannelMessageRepository,
+  createDatabaseOmnichannelConversationRepository,
+  createDatabaseOmnichannelMessageRepository,
+  createDatabaseSocialContactRepository,
+  createDatabaseSocialMediaAccountRepository,
+  createDatabaseWebhookEventRepository,
+  type DatabaseAiChatSessionRepository,
+  type DatabaseAiReplyJobRepository,
+  type DatabaseAiReplySuggestionRepository,
+  type DatabaseChannelCredentialRepository,
+  type DatabaseSocialContactRepository,
+  type DatabaseSocialMediaAccountRepository,
+  type DatabaseWebhookEventRepository
 } from "@hallederiz/database";
 import { getAuthMode } from "./auth-mode";
 import type { RequestContext } from "./request-context";
+import { buildProviderFactoryConfigSync, createProvidersFromConfig } from "./omnichannel-provider-runtime";
 
 export type OmnichannelPersistenceMode = "memory" | "postgres" | "unsupported";
 
 export interface OmnichannelRuntimeResolution {
   conversationRepository: OmnichannelConversationRepository | null;
   messageRepository: OmnichannelMessageRepository | null;
+  socialMediaAccountRepository: DatabaseSocialMediaAccountRepository | null;
+  channelCredentialRepository: DatabaseChannelCredentialRepository | null;
+  webhookEventRepository: DatabaseWebhookEventRepository | null;
+  socialContactRepository: DatabaseSocialContactRepository | null;
+  aiChatSessionRepository: DatabaseAiChatSessionRepository | null;
+  aiReplySuggestionRepository: DatabaseAiReplySuggestionRepository | null;
+  aiReplyJobRepository: DatabaseAiReplyJobRepository | null;
   providers: Map<string, ChannelProviderAdapter>;
   mode: OmnichannelPersistenceMode;
   reasons: string[];
@@ -27,11 +50,20 @@ export interface OmnichannelRuntimeResolution {
 let cachedPostgresConversations: OmnichannelConversationRepository | null = null;
 let cachedPostgresMessages: OmnichannelMessageRepository | null = null;
 let cachedPostgresUrl: string | null = null;
+let cachedPostgresExtras: Omit<OmnichannelRuntimeResolution, "conversationRepository" | "messageRepository" | "providers" | "mode" | "reasons"> | null = null;
 let cachedMemoryConversations: InMemoryOmnichannelConversationRepository | null = null;
 let cachedMemoryMessages: InMemoryOmnichannelMessageRepository | null = null;
+let cachedProviderMap: Map<string, ChannelProviderAdapter> | null = null;
 
 function getPostgresUrl() {
   return process.env.POSTGRES_URL ?? process.env.DATABASE_URL;
+}
+
+function resolveProviders(): Map<string, ChannelProviderAdapter> {
+  if (!cachedProviderMap) {
+    cachedProviderMap = createProvidersFromConfig(buildProviderFactoryConfigSync());
+  }
+  return cachedProviderMap;
 }
 
 function resolvePostgresRepositories(): OmnichannelRuntimeResolution {
@@ -40,7 +72,14 @@ function resolvePostgresRepositories(): OmnichannelRuntimeResolution {
     return {
       conversationRepository: null,
       messageRepository: null,
-      providers: getDefaultProviderAdapters(),
+      socialMediaAccountRepository: null,
+      channelCredentialRepository: null,
+      webhookEventRepository: null,
+      socialContactRepository: null,
+      aiChatSessionRepository: null,
+      aiReplySuggestionRepository: null,
+      aiReplyJobRepository: null,
+      providers: resolveProviders(),
       mode: "unsupported",
       reasons: ["omnichannel_postgres_url_missing"]
     };
@@ -56,21 +95,37 @@ function resolvePostgresRepositories(): OmnichannelRuntimeResolution {
       executor,
       persistenceMode: "postgres"
     });
+    cachedPostgresExtras = {
+      socialMediaAccountRepository: createDatabaseSocialMediaAccountRepository({ executor, persistenceMode: "postgres" }),
+      channelCredentialRepository: createDatabaseChannelCredentialRepository({ executor, persistenceMode: "postgres" }),
+      webhookEventRepository: createDatabaseWebhookEventRepository({ executor, persistenceMode: "postgres" }),
+      socialContactRepository: createDatabaseSocialContactRepository({ executor, persistenceMode: "postgres" }),
+      aiChatSessionRepository: createDatabaseAiChatSessionRepository({ executor, persistenceMode: "postgres" }),
+      aiReplySuggestionRepository: createDatabaseAiReplySuggestionRepository({ executor, persistenceMode: "postgres" }),
+      aiReplyJobRepository: createDatabaseAiReplyJobRepository({ executor, persistenceMode: "postgres" })
+    };
     cachedPostgresUrl = postgresUrl;
   }
 
   return {
     conversationRepository: cachedPostgresConversations,
     messageRepository: cachedPostgresMessages,
-    providers: getDefaultProviderAdapters(),
+    socialMediaAccountRepository: cachedPostgresExtras!.socialMediaAccountRepository,
+    channelCredentialRepository: cachedPostgresExtras!.channelCredentialRepository,
+    webhookEventRepository: cachedPostgresExtras!.webhookEventRepository,
+    socialContactRepository: cachedPostgresExtras!.socialContactRepository,
+    aiChatSessionRepository: cachedPostgresExtras!.aiChatSessionRepository,
+    aiReplySuggestionRepository: cachedPostgresExtras!.aiReplySuggestionRepository,
+    aiReplyJobRepository: cachedPostgresExtras!.aiReplyJobRepository,
+    providers: resolveProviders(),
     mode: "postgres",
     reasons: []
   };
 }
 
-export function resolveOmnichannelRuntime(context?: RequestContext): OmnichannelRuntimeResolution {
+export function resolveOmnichannelRuntime(_context?: RequestContext): OmnichannelRuntimeResolution {
   const authMode = getAuthMode();
-  const persistenceMode = context?.persistenceMode ?? authMode.persistenceMode;
+  const persistenceMode = _context?.persistenceMode ?? authMode.persistenceMode;
 
   if (persistenceMode === "postgres") {
     return resolvePostgresRepositories();
@@ -80,7 +135,14 @@ export function resolveOmnichannelRuntime(context?: RequestContext): Omnichannel
     return {
       conversationRepository: null,
       messageRepository: null,
-      providers: getDefaultProviderAdapters(),
+      socialMediaAccountRepository: null,
+      channelCredentialRepository: null,
+      webhookEventRepository: null,
+      socialContactRepository: null,
+      aiChatSessionRepository: null,
+      aiReplySuggestionRepository: null,
+      aiReplyJobRepository: null,
+      providers: resolveProviders(),
       mode: "unsupported",
       reasons: ["omnichannel_memory_fallback_forbidden_in_production"]
     };
@@ -96,7 +158,14 @@ export function resolveOmnichannelRuntime(context?: RequestContext): Omnichannel
   return {
     conversationRepository: cachedMemoryConversations,
     messageRepository: cachedMemoryMessages,
-    providers: getDefaultProviderAdapters(),
+    socialMediaAccountRepository: null,
+    channelCredentialRepository: null,
+    webhookEventRepository: null,
+    socialContactRepository: null,
+    aiChatSessionRepository: null,
+    aiReplySuggestionRepository: null,
+    aiReplyJobRepository: null,
+    providers: resolveProviders(),
     mode: "memory",
     reasons: []
   };
@@ -106,6 +175,8 @@ export function resetOmnichannelRuntimeForTests() {
   cachedPostgresConversations = null;
   cachedPostgresMessages = null;
   cachedPostgresUrl = null;
+  cachedPostgresExtras = null;
   cachedMemoryConversations = null;
   cachedMemoryMessages = null;
+  cachedProviderMap = null;
 }

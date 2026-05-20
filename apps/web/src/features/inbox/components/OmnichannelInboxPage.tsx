@@ -4,6 +4,8 @@ import { EmptyState, PageHeader } from "@hallederiz/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { sdk } from "../../../lib/data-source";
+import { channelLabel, mapProviderHealthLabel, sanitizeUserErrorMessage } from "../lib/omnichannel-ui";
 
 type Conversation = {
   id: string;
@@ -17,6 +19,7 @@ type ProviderHealth = {
   kind: string;
   ok: boolean;
   mode: string;
+  label?: string;
   reasons: string[];
 };
 
@@ -47,32 +50,21 @@ export function OmnichannelInboxPage() {
     async function load() {
       try {
         setLoading(true);
-        const [conversationsResponse, healthResponse] = await Promise.all([
-          fetch("/platform/omnichannel/conversations", { credentials: "include" }),
-          fetch("/platform/omnichannel/health", { credentials: "include" })
+        const [conversationsBody, healthBody] = await Promise.all([
+          sdk.omnichannel.listConversations(),
+          sdk.omnichannel.health()
         ]);
 
         if (!active) return;
 
-        if (!conversationsResponse.ok) {
-          const body = await conversationsResponse.json().catch(() => ({}));
-          const reason = typeof body?.error === "string" ? body.error : "omnichannel_api_unavailable";
-          setError(reason);
-          setItems([]);
-        } else {
-          const body = await conversationsResponse.json();
-          setItems(Array.isArray(body?.items) ? body.items : []);
-          setError(null);
-        }
-
-        if (healthResponse.ok) {
-          const healthBody = await healthResponse.json();
-          setProviders(Array.isArray(healthBody?.providers) ? healthBody.providers : []);
-        }
+        setItems(Array.isArray(conversationsBody?.items) ? conversationsBody.items : []);
+        setError(null);
+        setProviders(Array.isArray(healthBody?.providers) ? healthBody.providers : []);
       } catch (loadError) {
         if (active) {
-          setError(loadError instanceof Error ? loadError.message : "omnichannel_load_failed");
+          setError(sanitizeUserErrorMessage(loadError instanceof Error ? loadError.message : null));
           setItems([]);
+          setProviders([]);
         }
       } finally {
         if (active) setLoading(false);
@@ -124,9 +116,8 @@ export function OmnichannelInboxPage() {
 
         {error ? (
           <div className="hz-inbox-api-banner" role="alert">
-            <strong>Omnichannel API şu anda kullanılamıyor.</strong>
-            <span className="hz-inbox-api-banner-code">{error}</span>
-            <p className="hz-inbox-api-banner-hint">Yerel geliştirmede uçlar kapalı olabilir; üretimde tenant kapsamlı servis ve yetki gerekir.</p>
+            <strong>{error}</strong>
+            <p className="hz-inbox-api-banner-hint">Bağlantı tamamlandığında gelen mesajlar burada görünecek.</p>
           </div>
         ) : null}
 
@@ -158,7 +149,10 @@ export function OmnichannelInboxPage() {
               ) : null}
               {!loading && filtered.length === 0 ? (
                 <div className="hz-inbox-queue-empty">
-                  <EmptyState title="Konuşma yok" message="Bu kanal süzmesinde kayıt bulunamadı veya API boş döndü." />
+                  <EmptyState
+                    title="Bu kanalda konuşma bulunmuyor."
+                    message="Bağlantı tamamlandığında gelen mesajlar burada görünecek."
+                  />
                 </div>
               ) : null}
               {!loading && filtered.length > 0 ? (
@@ -175,7 +169,7 @@ export function OmnichannelInboxPage() {
                         >
                           <span className="hz-inbox-queue-name">{item.contactDisplayName ?? item.contactHandle ?? item.id}</span>
                           <span className="hz-inbox-queue-meta">
-                            <span className="hz-inbox-queue-channel">{item.channel}</span>
+                            <span className="hz-inbox-queue-channel">{channelLabel(item.channel)}</span>
                             <span className="hz-inbox-queue-dot" aria-hidden>
                               ·
                             </span>
@@ -205,7 +199,7 @@ export function OmnichannelInboxPage() {
                   <p className="hz-inbox-thread-lead">{selected.contactDisplayName ?? selected.contactHandle ?? selected.id}</p>
                   <p className="hz-inbox-thread-line">
                     <span className="hz-inbox-thread-k">Kanal</span>
-                    <span className="hz-inbox-thread-v">{selected.channel}</span>
+                    <span className="hz-inbox-thread-v">{channelLabel(selected.channel)}</span>
                   </p>
                   <p className="hz-inbox-thread-line">
                     <span className="hz-inbox-thread-k">Durum</span>
@@ -241,7 +235,7 @@ export function OmnichannelInboxPage() {
                     </li>
                     <li>
                       <span>Kanal</span>
-                      <strong>{selected.channel}</strong>
+                      <strong>{channelLabel(selected.channel)}</strong>
                     </li>
                     <li>
                       <span>Durum</span>
@@ -259,9 +253,8 @@ export function OmnichannelInboxPage() {
                 <ul className="hz-inbox-provider-list">
                   {providers.map((provider) => (
                     <li key={provider.kind} className={`hz-inbox-provider-row${provider.ok ? " hz-inbox-provider-row--ok" : ""}`}>
-                      <span className="hz-inbox-provider-kind">{provider.kind}</span>
-                      <span className="hz-inbox-provider-mode">{provider.ok ? "healthy" : provider.mode}</span>
-                      {provider.reasons.length ? <span className="hz-inbox-provider-reasons">{provider.reasons.join(", ")}</span> : null}
+                      <span className="hz-inbox-provider-kind">{channelLabel(provider.kind)}</span>
+                      <span className="hz-inbox-provider-mode">{mapProviderHealthLabel(provider)}</span>
                     </li>
                   ))}
                 </ul>
