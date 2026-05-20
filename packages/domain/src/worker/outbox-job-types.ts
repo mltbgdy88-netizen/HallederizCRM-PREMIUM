@@ -1,10 +1,14 @@
 export const STANDARD_OUTBOX_JOB_TYPES = [
   "approval.execution.dispatch",
+  "approval_execution",
   "document.send",
   "document.archive",
-  "document.render",
+  "document_render",
+  "document_archive",
   "omnichannel.reply.dispatch",
+  "ai_reply_send",
   "erp.sync",
+  "integration_sync",
   "factory.order.dispatch",
   "audit.timeline.writeback"
 ] as const;
@@ -17,6 +21,7 @@ export interface StandardOutboxJobPayload {
   entityType?: string;
   entityId?: string;
   approvalRequestId?: string;
+  approvalId?: string;
   executionLogId?: string;
   idempotencyKey: string;
   actorId?: string;
@@ -39,4 +44,55 @@ export function validateStandardOutboxPayload(payload: Record<string, unknown> |
     reasons.push("missing_idempotency_key");
   }
   return reasons;
+}
+
+export function validateStandardJobPayload(
+  jobType: string,
+  payload: Record<string, unknown> | undefined
+): string[] {
+  const base = validateStandardOutboxPayload(payload);
+  if (base.length > 0) {
+    return base;
+  }
+  const record = payload as Record<string, unknown>;
+
+  if (jobType === "approval_execution" || jobType === "approval.execution.dispatch") {
+    const approvalId =
+      (typeof record.approvalRequestId === "string" && record.approvalRequestId) ||
+      (typeof record.approvalId === "string" && record.approvalId);
+    if (!approvalId) {
+      base.push("missing_approval_id");
+    }
+  }
+
+  if (jobType === "document_render" || jobType === "document_archive") {
+    const documentId = typeof record.documentId === "string" ? record.documentId : record.entityId;
+    if (typeof documentId !== "string" || !documentId.trim()) {
+      base.push("missing_document_id");
+    }
+  }
+
+  if (jobType === "ai_reply_send" || jobType === "omnichannel.reply.dispatch") {
+    const conversationId =
+      typeof record.conversationId === "string"
+        ? record.conversationId
+        : record.entityType === "conversation"
+          ? record.entityId
+          : undefined;
+    if (typeof conversationId !== "string" || !conversationId.trim()) {
+      base.push("missing_conversation_id");
+    }
+  }
+
+  if (jobType === "integration_sync" || jobType === "erp.sync") {
+    if (typeof record.integrationKind !== "string" && typeof record.syncTarget !== "string") {
+      base.push("missing_integration_target");
+    }
+  }
+
+  return base;
+}
+
+export function isStandardOutboxJobType(jobType: string): jobType is StandardOutboxJobType {
+  return (STANDARD_OUTBOX_JOB_TYPES as readonly string[]).includes(jobType);
 }

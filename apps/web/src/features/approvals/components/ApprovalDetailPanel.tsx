@@ -12,6 +12,7 @@ import { ApprovalTimelinePreview } from "./ApprovalTimelinePreview";
 import { ApprovalInboxEmpty } from "./ApprovalInboxStates";
 import { getApprovalWaitingReasonSummary } from "../utils/inbox-helpers";
 import { summarizeGateDecision } from "../utils/inbox-helpers";
+import { EntityTimelinePanel } from "../../shared/components/EntityTimelinePanel";
 
 function formatDate(value?: string): string {
   if (!value) return "-";
@@ -213,6 +214,14 @@ export function ApprovalDetailPanel({
 
       <ApprovalRiskSummary item={item} />
       <ApprovalTimelinePreview item={item} />
+      <EntityTimelinePanel
+        entityType={typeof item.payload?.entityType === "string" ? item.payload.entityType : "approval"}
+        entityId={
+          typeof item.payload?.entityId === "string"
+            ? item.payload.entityId
+            : item.approvalRequestId
+        }
+      />
       <ApprovalOutboxStatusCard item={item} />
       <ApprovalActionBar item={item} busy={busy} onApprove={onApprove} onReject={onReject} />
     </DetailPanel>

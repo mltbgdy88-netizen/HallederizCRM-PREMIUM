@@ -20,6 +20,7 @@ import {
   sanitizeDocumentUserText
 } from "../utils/document-action-feedback";
 import { dateLabel } from "../utils";
+import { EntityTimelinePanel } from "../../shared/components/EntityTimelinePanel";
 
 function DocumentActions({ document, onReload }: { document: Document | null; onReload: () => Promise<void> }) {
   const router = useRouter();
@@ -283,7 +284,12 @@ export function DocumentDetailPage() {
             <DocumentOutputJobs printJobs={printJobs} fileSaveJobs={fileSaveJobs} localAgentHealth={localAgentHealth} />
           </>
         }
-        side={<DocumentSummary document={document} customer={customer} />}
+        side={
+          <>
+            <DocumentSummary document={document} customer={customer} />
+            <EntityTimelinePanel entityType="document" entityId={document.id} />
+          </>
+        }
       />
     </div>
   );

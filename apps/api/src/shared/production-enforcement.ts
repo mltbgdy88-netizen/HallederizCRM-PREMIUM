@@ -61,7 +61,10 @@ export function mapActionKeyToProductionActionType(actionKey: string): Productio
     actionKey === "platform.customers.update" ||
     actionKey === "platform.offers.create" ||
     actionKey === "platform.orders.create" ||
+    actionKey === "platform.orders.confirm" ||
+    actionKey === "platform.orders.cancel" ||
     actionKey === "platform.payments.create" ||
+    actionKey === "platform.returns.approve" ||
     actionKey === "platform.payments.confirm" ||
     actionKey === "platform.payments.reverse"
   ) {

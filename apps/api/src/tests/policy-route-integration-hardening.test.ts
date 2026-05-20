@@ -167,7 +167,10 @@ test("document send and commercial critical actions are approval-first", async (
     const sendDoc = await server.inject({
       method: "POST",
       url: "/documents/document_1/send-whatsapp",
-      headers: authHeaders(login.accessToken)
+      headers: {
+        ...authHeaders(login.accessToken),
+        "idempotency-key": "idem_policy_test_send_whatsapp"
+      }
     });
 
     assert.equal(order.statusCode, 202);

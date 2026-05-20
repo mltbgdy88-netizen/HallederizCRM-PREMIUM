@@ -34,7 +34,8 @@ export const ORDERED_SQL_MIGRATION_FILES = [
   "0010_sales_ai_knowledge.sql",
   "0011_payment_allocations.sql",
   "0012_warehouse_order_lines_tasks.sql",
-  "0013_omnichannel_provider_accounts_ai.sql"
+  "0013_omnichannel_provider_accounts_ai.sql",
+  "0014_commercial_line_tables.sql"
 ] as const;
 
 /** Tables that must appear in the ordered migration SQL corpus (Sprint 1 foundation). */
@@ -58,11 +59,7 @@ export const FOUNDATION_TABLE_NAMES = [
   "ai_reply_jobs",
   "payment_allocations",
   "warehouse_order_lines",
-  "warehouse_tasks"
-] as const;
-
-/** Commercial line tables tracked for parity reporting; not required in Sprint 1 SQL corpus. */
-export const PARITY_BACKLOG_TABLE_NAMES = [
+  "warehouse_tasks",
   "payment_reversals",
   "delivery_lines",
   "invoice_lines",

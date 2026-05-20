@@ -31,6 +31,16 @@ const USER_SAFE_BLOCKED = "İşlem güvenli yapılandırma tamamlandığında ç
 const USER_SAFE_APPROVAL = "İşlem onaya gönderildi.";
 const USER_SAFE_DENIED = "Bu işlem için yetkiniz yeterli değil.";
 
+function resolvePolicyChannel(actionKey: string): "api" | "whatsapp" | "email" {
+  if (actionKey.includes("send_whatsapp") || actionKey.includes(".whatsapp")) {
+    return "whatsapp";
+  }
+  if (actionKey.includes("send_email")) {
+    return "email";
+  }
+  return "api";
+}
+
 function resolveIdempotencyKey<T>(options: WithMutationPolicyOptions<T>): string | undefined {
   const header = options.request.headers["idempotency-key"];
   if (typeof header === "string" && header.trim()) {
@@ -77,6 +87,8 @@ export async function withMutationPolicy<T>(
 
   const policyDecision = evaluateRoutePolicy(options.context, {
     actionKey: options.actionKey,
+    channel: resolvePolicyChannel(options.actionKey),
+    source: "api",
     idempotencyKey,
     metadata: options.payload
   });
