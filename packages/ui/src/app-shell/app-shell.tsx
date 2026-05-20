@@ -1,4 +1,6 @@
-import type { ReactNode } from "react";
+"use client";
+
+import { useEffect, type ReactNode } from "react";
 
 export interface AppShellProps {
   sidebar: ReactNode;
@@ -8,6 +10,8 @@ export interface AppShellProps {
   onMobileSidebarOpenChange: (open: boolean) => void;
 }
 
+const MOBILE_NAV_ID = "hz-shell-mobile-nav";
+
 export function AppShell({
   sidebar,
   header,
@@ -15,10 +19,32 @@ export function AppShell({
   mobileSidebarOpen,
   onMobileSidebarOpenChange
 }: AppShellProps) {
+  useEffect(() => {
+    if (!mobileSidebarOpen) return;
+
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        event.preventDefault();
+        onMobileSidebarOpenChange(false);
+      }
+    };
+
+    document.addEventListener("keydown", onKeyDown);
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.removeEventListener("keydown", onKeyDown);
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [mobileSidebarOpen, onMobileSidebarOpenChange]);
+
   return (
     <div className="hz-shell">
       <div className="hz-shell-frame">
-        <aside className="hz-shell-sidebar hz-shell-sidebar-desktop">{sidebar}</aside>
+        <aside className="hz-shell-sidebar hz-shell-sidebar-desktop" aria-label="Ana menü">
+          {sidebar}
+        </aside>
 
         <div className="hz-shell-main">
           <div className="hz-shell-workspace">
@@ -27,7 +53,9 @@ export function AppShell({
                 type="button"
                 className="hz-shell-hamburger"
                 onClick={() => onMobileSidebarOpenChange(!mobileSidebarOpen)}
-                aria-label="Menüyü aç/kapat"
+                aria-label={mobileSidebarOpen ? "Menüyü kapat" : "Menüyü aç"}
+                aria-expanded={mobileSidebarOpen}
+                aria-controls={MOBILE_NAV_ID}
               >
                 <span />
                 <span />
@@ -47,17 +75,17 @@ export function AppShell({
       <div
         className={`hz-shell-mobile-backdrop ${mobileSidebarOpen ? "is-open" : ""}`}
         onClick={() => onMobileSidebarOpenChange(false)}
-        role="button"
-        aria-label="Kenar menüyü kapat"
-        tabIndex={0}
-        onKeyDown={(event) => {
-          if (event.key === "Enter" || event.key === " ") {
-            onMobileSidebarOpenChange(false);
-          }
-        }}
+        role="presentation"
+        aria-hidden={!mobileSidebarOpen}
       />
 
-      <aside className={`hz-shell-sidebar hz-shell-sidebar-mobile ${mobileSidebarOpen ? "is-open" : ""}`}>
+      <aside
+        id={MOBILE_NAV_ID}
+        className={`hz-shell-sidebar hz-shell-sidebar-mobile ${mobileSidebarOpen ? "is-open" : ""}`}
+        role="navigation"
+        aria-label="Ana menü"
+        aria-hidden={!mobileSidebarOpen}
+      >
         {sidebar}
       </aside>
     </div>

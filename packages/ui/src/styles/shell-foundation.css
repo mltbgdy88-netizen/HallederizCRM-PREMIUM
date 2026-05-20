@@ -1,0 +1,240 @@
+/**
+ * AppShell / Sidebar / Header / PageContent foundation (Agent 02).
+ * Emerald / gold / ivory — uses Agent 01 tokens. No mockup PNG paths.
+ */
+
+/* --- Shell frame --- */
+.hz-shell {
+  background: var(--hz-color-bg);
+}
+
+.hz-shell-frame {
+  border-color: var(--hz-border-subtle-foundation);
+  background: var(--hz-color-surface);
+  box-shadow: var(--hz-ui-shadow-hover);
+}
+
+.hz-shell-sidebar {
+  background: var(--hz-color-sidebar);
+  border-right-color: color-mix(in srgb, var(--hz-color-gold) 12%, transparent);
+  color: color-mix(in srgb, var(--hz-color-surface) 92%, #ffffff);
+}
+
+.hz-shell-workspace {
+  background: var(--hz-color-bg);
+}
+
+.hz-shell-workspace::after {
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--hz-color-surface) 65%, transparent);
+}
+
+.hz-shell-header {
+  background: color-mix(in srgb, var(--hz-color-surface) 96%, var(--hz-color-bg));
+  border-bottom-color: var(--hz-border-subtle-foundation);
+  backdrop-filter: blur(10px);
+}
+
+.hz-shell-content-frame {
+  border-color: var(--hz-border-subtle-foundation);
+  background: color-mix(in srgb, var(--hz-color-surface) 94%, var(--hz-color-bg));
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--hz-color-surface) 80%, transparent);
+}
+
+.hz-shell-content-frame:has(.hz-dashboard-page--fit),
+.hz-shell-content-frame:has(.hz-qop-page),
+.hz-shell-content-frame:has(.hz-approvals-page),
+.hz-shell-content-frame:has(.hz-tasks-ws-page),
+.hz-shell-content-frame:has(.hz-wa-page),
+.hz-shell-content-frame:has(.hz-inbox-page),
+.hz-shell-content-frame:has(.hz-customers-page),
+.hz-shell-content-frame:has(.hz-stock-page),
+.hz-shell-content-frame:has(.hz-orders-page),
+.hz-shell-content-frame:has(.hz-offers-page),
+.hz-shell-content-frame:has(.hz-tahsilatlar-page),
+.hz-shell-content-frame:has(.hz-customers-detail-page),
+.hz-shell-content-frame:has(.hz-customers-create-page),
+.hz-shell-content-frame:has(.hz-orders-detail-page),
+.hz-shell-content-frame:has(.hz-offers-detail-page),
+.hz-shell-content-frame:has(.hz-tahsilatlar-detail-page),
+.hz-shell-content-frame:has(.hz-archive-page),
+.hz-shell-content-frame:has(.hz-warehouse-prep-page),
+.hz-shell-content-frame:has(.hz-warehouse-prep-detail-page),
+.hz-shell-content-frame:has(.hz-reports-page),
+.hz-shell-content-frame:has(.hz-settings-page) {
+  background: var(--hz-color-bg);
+}
+
+.hz-shell-hamburger {
+  border-color: var(--hz-border-subtle-foundation);
+  background: var(--hz-color-surface);
+}
+
+.hz-shell-hamburger span {
+  background: var(--hz-color-text);
+}
+
+.hz-shell-hamburger:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--hz-color-surface), 0 0 0 4px var(--hz-ui-focus-ring);
+}
+
+/* --- Mobile drawer --- */
+.hz-shell-mobile-backdrop.is-open {
+  background: color-mix(in srgb, var(--hz-color-sidebar) 52%, transparent);
+}
+
+.hz-shell-sidebar-mobile {
+  width: min(288px, calc(100vw - 16px));
+  border-radius: 0 var(--hz-radius-card) var(--hz-radius-card) 0;
+  box-shadow: var(--hz-ui-shadow-hover);
+}
+
+.hz-shell-sidebar-mobile.is-open {
+  border-right: 1px solid color-mix(in srgb, var(--hz-color-gold) 18%, transparent);
+}
+
+/* --- Sidebar brand & nav --- */
+.hz-sidebar-brand {
+  border-bottom-color: color-mix(in srgb, var(--hz-color-gold-soft) 14%, transparent);
+}
+
+.hz-sidebar-logo-slot {
+  background: color-mix(in srgb, var(--hz-color-emerald) 28%, var(--hz-color-sidebar));
+  border-color: color-mix(in srgb, var(--hz-color-gold) 22%, transparent);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, #ffffff 8%, transparent);
+}
+
+.hz-sidebar-logo-placeholder-glyph {
+  background: linear-gradient(145deg, var(--hz-color-gold-soft), var(--hz-color-gold));
+  opacity: 1;
+}
+
+.hz-sidebar-logo-placeholder-label {
+  color: color-mix(in srgb, var(--hz-color-gold-soft) 75%, #ffffff);
+}
+
+.hz-sidebar-brand-app {
+  color: var(--hz-color-surface);
+}
+
+.hz-sidebar-brand-tag {
+  color: color-mix(in srgb, var(--hz-color-muted) 55%, #e8f0ea);
+}
+
+.hz-sidebar-section-title {
+  color: color-mix(in srgb, var(--hz-color-gold-soft) 55%, #a8c4b8);
+}
+
+.hz-sidebar-item {
+  color: color-mix(in srgb, var(--hz-color-surface) 88%, #ffffff);
+  border-radius: var(--hz-radius-control);
+}
+
+.hz-sidebar-item:hover {
+  background: color-mix(in srgb, var(--hz-color-emerald) 22%, var(--hz-color-sidebar));
+  border-color: color-mix(in srgb, var(--hz-color-emerald) 35%, transparent);
+}
+
+.hz-sidebar-item:focus-visible {
+  outline: none;
+  box-shadow: inset 3px 0 0 var(--hz-color-gold), 0 0 0 1px color-mix(in srgb, var(--hz-color-gold) 35%, transparent);
+}
+
+.hz-sidebar-item.is-active {
+  background: color-mix(in srgb, var(--hz-color-emerald) 38%, var(--hz-color-sidebar));
+  border-color: color-mix(in srgb, var(--hz-color-emerald) 45%, transparent);
+  border-left: 3px solid var(--hz-color-gold);
+  padding-left: 7px;
+  color: #ffffff;
+  box-shadow: 0 4px 14px color-mix(in srgb, var(--hz-color-sidebar) 55%, transparent);
+}
+
+.hz-sidebar-item.is-active .hz-sidebar-item-icon {
+  color: var(--hz-color-gold-soft);
+}
+
+.hz-sidebar-item-badge {
+  background: color-mix(in srgb, var(--hz-color-gold-soft) 35%, var(--hz-color-sidebar));
+  color: var(--hz-color-gold-soft);
+  border: 1px solid color-mix(in srgb, var(--hz-color-gold) 28%, transparent);
+}
+
+.hz-sidebar-footer {
+  border-top-color: color-mix(in srgb, var(--hz-color-gold-soft) 12%, transparent);
+}
+
+.hz-sidebar-company {
+  background: color-mix(in srgb, var(--hz-color-emerald) 18%, var(--hz-color-sidebar));
+  border-color: color-mix(in srgb, var(--hz-color-gold) 16%, transparent);
+}
+
+.hz-sidebar-version {
+  color: color-mix(in srgb, var(--hz-color-muted) 70%, #c5d4c8);
+}
+
+/* --- Header (ivory surface) --- */
+.hz-header-meta h2 {
+  color: var(--hz-color-text);
+}
+
+.hz-header-breadcrumb {
+  color: var(--hz-color-muted);
+}
+
+.hz-header-greeting-line {
+  color: var(--hz-color-text);
+}
+
+.hz-header-greeting-date {
+  color: var(--hz-color-muted);
+}
+
+.hz-header-search {
+  border-color: var(--hz-border-subtle-foundation);
+  background: var(--hz-color-surface);
+  color: var(--hz-color-text);
+}
+
+.hz-header-search:focus-visible {
+  outline: none;
+  border-color: color-mix(in srgb, var(--hz-color-emerald) 40%, var(--hz-border-subtle-foundation));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--hz-color-emerald) 20%, transparent);
+}
+
+.hz-header-root--dashboard .hz-header-search {
+  background: color-mix(in srgb, var(--hz-color-surface) 94%, var(--hz-color-bg));
+}
+
+.hz-header-quick-primary {
+  background: var(--hz-color-emerald);
+  box-shadow: 0 6px 16px color-mix(in srgb, var(--hz-color-emerald) 24%, transparent);
+}
+
+.hz-header-quick-primary:hover {
+  background: var(--hz-ui-brand-primary-hover);
+}
+
+.hz-header-quick-primary:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--hz-color-surface), 0 0 0 4px var(--hz-ui-focus-ring);
+}
+
+.hz-header-icon-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px var(--hz-color-surface), 0 0 0 4px var(--hz-ui-focus-ring);
+}
+
+/* --- Page content contract --- */
+.platform-content.hz-page-content {
+  color: var(--hz-color-text);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hz-shell-sidebar-mobile {
+    transition: none;
+  }
+
+  .hz-sidebar-item {
+    transition: none;
+  }
+}

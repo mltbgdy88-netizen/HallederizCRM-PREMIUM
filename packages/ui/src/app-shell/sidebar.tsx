@@ -43,6 +43,7 @@ function SidebarItem({
       type="button"
       onClick={() => onNavigate(item.href)}
       className={`hz-sidebar-item ${isActive ? "is-active" : ""} ${item.pulse ? "is-pulse" : ""}`}
+      aria-current={isActive ? "page" : undefined}
     >
       <span className="hz-sidebar-item-icon">{item.icon ?? <span className="hz-icon-placeholder" />}</span>
       <span className="hz-sidebar-item-label">{item.label}</span>
