@@ -36,11 +36,17 @@ export function runWorkerFoundationTick(options?: WorkerRuntimeOptions): WorkerB
   };
 }
 
-export {
+import {
   createWorkerRuntimeFromEnv,
   runWorkerProductionTick,
   type WorkerProductionTickResult
 } from "./production-runtime.js";
+
+export {
+  createWorkerRuntimeFromEnv,
+  runWorkerProductionTick,
+  type WorkerProductionTickResult
+};
 
 const workerMode = (process.env.WORKER_MODE ?? "foundation_dry_run").trim().toLowerCase();
 
