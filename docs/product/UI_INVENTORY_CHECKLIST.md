@@ -107,7 +107,9 @@ Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 | Active nav style | **Korundu** | `resolveActiveHref` + `aria-current` |
 | Route metadata / PageMeta | **Korundu** | `suppressPageMeta` mantığı aynı |
 
-**Agent 03:** layout template foundation tamam (`UI_LAYOUT_PATTERNS.md`). **Route adoption Agent 04+** (`ui/04-platform-operations` ilk dal).
+**Agent 03:** layout template foundation tamam (`UI_LAYOUT_PATTERNS.md`).
+
+**Agent 04 (2026-05-21):** Platform/operations route adoption tamam — `ui/04-platform-operations` @ `3fa7c74`. `/login` split, `/dashboard` 5 KPI + AI «İncele», `/panel` loading redirect, `/hizli-islem` stepper, `/onaylar` + detay + kurallar, `/workflow` timeline. `loading.tsx`: login, panel, dashboard, hizli-islem, onaylar. Detay: `UI_AGENT_04_REPORT.md`. **Sonraki:** Agent 05 CRM/commercial.
 
 ---
 
@@ -116,8 +118,8 @@ Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 | State | App Router | Feature component | Mockup PNG |
 |-------|------------|-------------------|------------|
 | default | `page.tsx` | Çoğu route | Paket yok |
-| loading | `loading.tsx` | **0 dosya** | — |
-| error | `error.tsx` | **0 dosya** | — |
+| loading | `loading.tsx` | **5 dosya** (Agent 04 platform) | error segment yok |
+| error | `error.tsx` | **0 dosya** | Agent 05+ |
 | empty | `EmptyState` / özel | Kısmi | — |
 | mobile | CSS breakpoint | Mevcut kırılım; 390×844 QA Agent 09 | — |
 | validation | Form sayfaları | `cariler/yeni`; hub’larda yok | — |

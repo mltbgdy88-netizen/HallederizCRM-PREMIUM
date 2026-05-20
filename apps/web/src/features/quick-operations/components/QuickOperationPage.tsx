@@ -37,6 +37,7 @@ import {
 } from "../hooks/use-quick-operation-state";
 import type { QuickOperationLine, QuickOperationSourceType, QuickOperationType } from "../types";
 import { QuickOperationSourceAccordion } from "./QuickOperationSourceAccordion";
+import { QuickOperationStepper, type QuickOperationStepId } from "./QuickOperationStepper";
 import { QuickOperationWorkbenchSide } from "./QuickOperationWorkbenchSide";
 
 const UNIT_OPTIONS = ["Adet", "Paket", "Takım", "Kutu", "Hizmet", "Metre"];
@@ -412,6 +413,16 @@ export function QuickOperationPage() {
       : selectedCustomer.receivableDisplay && selectedCustomer.receivableDisplay !== "—"
         ? `₺${selectedCustomer.receivableDisplay}`
         : "—";
+
+  const qopActiveStep = useMemo((): QuickOperationStepId => {
+    if (!customerReady) return "customer";
+    if (tabNeedsLines(activeTab) && !lines.some((line) => line.productCode.trim() || line.productName.trim())) {
+      return "lines";
+    }
+    if (submitLinks.showApprovalsLink || isSubmitting) return "approval";
+    return "preview";
+  }, [activeTab, customerReady, isSubmitting, lines, submitLinks.showApprovalsLink]);
+
   return (
     <div className="hz-qop-page hz-qop-page--v2 hz-qop-page--wb">
       {notice ? (
@@ -456,6 +467,8 @@ export function QuickOperationPage() {
           </p>
         </>
       ) : null}
+
+      <QuickOperationStepper activeStep={qopActiveStep} />
 
       <header className="hz-qop-wb-head hz-qop-wb-head--compact">
         <div className="hz-qop-wb-head-main">

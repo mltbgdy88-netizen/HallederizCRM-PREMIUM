@@ -1,6 +1,6 @@
 # UI Route Coverage Matrix — 53 route/layer
 
-**Base commit:** `10f2f40` (PR #122)  
+**Base commit:** `3fa7c74` (PR #127) — Agent 04 platform routes güncellendi  
 **Mockup paketi:** `docs/design/ui-design-output/**` — **repoda yok** (tüm “Mockup” kolonları **MISSING**)
 
 **Implementation type kısaltmaları:**
@@ -18,13 +18,13 @@
 
 | # | Route / Layer | Expected UI pattern | Mockup folder/status | apps/web status | Current implementation type | Required states | Key UI rules | Target agent | Notes / gaps |
 |---|---------------|---------------------|----------------------|-----------------|----------------------------|-----------------|--------------|--------------|--------------|
-| 1 | `/login` | Split login shell | MISSING | **Var** `app/login/page.tsx` | REAL | default, error, mobile | Auth dışı shell; demo credential UI | 04 | Platform shell dışı; emerald tema Agent 04 |
-| 2 | `/dashboard` | Operation dashboard + AI kolon | MISSING | **Var** | REAL | default, loading, mobile | AI kolon **yalnızca** dashboard | 04 | `DashboardHomePage`; legacy mor AI frame |
-| 3 | `/panel` | Redirect/loading page | MISSING | **Var** | REDIR → `/dashboard` | default | Panel = dashboard alias | 04 | `panel/page.tsx` redirect |
-| 4 | `/hizli-islem` | Quick Operation workbench | MISSING | **Var** | REAL | default, loading, validation, submitted | Submit → onay; mutation UI yok | 04 | `QuickOperationPage`; referans yoğunluk sayfası |
-| 5 | `/onaylar` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, error, mobile | Sahte onay kaydı yok (canlı) | 04 | `ApprovalInboxShell` |
-| 6 | `/onaylar/[id]` | Entity detail + timeline | MISSING | **Var** `[approvalId]` | REAL | detail, audit timeline | Timeline panel var | 04 | `ApprovalDetailPanel` + `EntityTimelinePanel` |
-| 7 | `/onaylar/kurallar` | Role permission matrix | MISSING | **Var** | REAL | default | Politika matrisi Türkçe | 04 | `ApprovalPolicyMatrixPage` |
+| 1 | `/login` | Split login shell | MISSING | **Var** `app/login/page.tsx` | REAL | default, loading, validation, mobile | `hz-login-*` split; auth logic korundu | 04 | **Agent 04 tamam** — `UI_AGENT_04_REPORT.md` |
+| 2 | `/dashboard` | Operation dashboard + AI kolon | MISSING | **Var** | REAL | default, loading, mobile | 5 ops KPI + AI «İncele» | 04 | **Agent 04 tamam** |
+| 3 | `/panel` | Redirect/loading page | MISSING | **Var** | REDIR → `/dashboard` | default, loading | Client spinner + TR copy | 04 | **Agent 04 tamam** |
+| 4 | `/hizli-islem` | Quick Operation workbench | MISSING | **Var** | REAL | default, loading, stepper | 4 adım stepper; submit korundu | 04 | **Agent 04 tamam** |
+| 5 | `/onaylar` | Entity list + right preview | MISSING | **Var** | REAL | default, loading, empty, error, mobile | Desk inbox + auto-select | 04 | **Agent 04 tamam** |
+| 6 | `/onaylar/[id]` | Entity detail + timeline | MISSING | **Var** `[approvalId]` | REAL | detail, audit placeholder | `EntityDetailLayout` | 04 | **Agent 04 tamam**; canlı timeline feed Agent 05+ |
+| 7 | `/onaylar/kurallar` | Role permission matrix | MISSING | **Var** | REAL | default, validation (local) | Tablo + sağ panel | 04 | **Agent 04 tamam** |
 | 8 | `/whatsapp` | Omnichannel / WA ops | MISSING | **Var** | REAL | default, empty, mobile | Kanal policy UI; mutation CTA yok | 07 | `WhatsAppPage`; `/gelen-kutu/whatsapp` manifest paraleli |
 | 9 | `/gelen-kutu` | Omnichannel three-panel inbox | MISSING | **Var** | REAL | default, empty, mobile | Üç panel inbox | 07 | `OmnichannelInboxPage` |
 | 10 | `/gelen-kutu/konusma/[id]` | Conversation detail | MISSING | **Var** `[conversationId]` | REAL (kısmi) | detail, mobile | Backend bağlantısı kısmi | 07 | `ConversationPage`; yerelde veri bağlantısı doğrulanmalı |
@@ -64,7 +64,7 @@
 | 44 | `/kullanicilar` | User list | MISSING | **Var** | REAL | default, empty | API list | 08 | `UsersPage` |
 | 45 | `/kullanicilar/roller` | Role permission matrix | MISSING | **Var** | REAL | default | — | 08 | `RolesPage` |
 | 46 | `/erp` | ERP integration panel | MISSING | **Var** | REAL | default | — | 08 | `ErpPage` |
-| 47 | `/workflow/[type]/[id]` | Workflow timeline | MISSING | **Var** | REAL | detail, audit timeline | `WorkflowTimelinePage` | 04 | `getWorkflowByEntity` |
+| 47 | `/workflow/[type]/[id]` | Workflow timeline | MISSING | **Var** | REAL | detail, timeline | `hz-workflow-*` timeline | 04 | **Agent 04 tamam** |
 | 48 | `unauthorized` | System state page | MISSING | **Rota yok** | — | error | 401 güvenli copy | 08 | Inline error / auth redirect; dedicated page Agent 08 |
 | 49 | `offline-api` | System state page | MISSING | **Rota yok** | — | error | Bağlantı kopuk | 08 | Smoke `api-offline` script var; UI route yok |
 | 50 | `demo-mode` | System banner/state | MISSING | **Davranış** | Config | banner | `useDemoData` band | 08 | Global banner; ayrı route opsiyonel |
@@ -82,7 +82,7 @@
 | Eksik dedicated route (48–53) | **3** (`unauthorized`, `offline-api`, `live-empty` sayfa yok) |
 | ProductPageShell / CATCH ağırlıklı | **~15+** alt rota (manifest `needs-api` / `shell`) |
 | Hub route (teklif/sipariş/tahsilat yeni) | **3** — uyumlu |
-| `loading.tsx` / `error.tsx` | **0** — App Router segment state eksik |
+| `loading.tsx` / `error.tsx` | **7** platform route loading (Agent 04); `error.tsx` hâlâ 0 |
 | Mockup PNG referans | **0** (paket repoda yok) |
 
 ---
