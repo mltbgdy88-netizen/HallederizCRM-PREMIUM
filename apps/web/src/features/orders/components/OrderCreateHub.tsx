@@ -65,7 +65,7 @@ export function OrderCreateHub({
         <p className="hz-commercial-create-hub-eyebrow">Siparişler</p>
         <h1 className="hz-commercial-create-hub-title">Yeni sipariş</h1>
         <p className="hz-commercial-create-hub-lead">
-          Hızlı İşlem&apos;de hazırlayın, onaya gönderin; onay sonrası kayıt işlenecek.
+          <strong>Sipariş oluşturma Hızlı İşlem üzerinden yapılır.</strong> Onay sonrası kayıt işlenir; bu ekranda form veya kayıt oluşturma yoktur.
         </p>
 
         {dataSourceConfig.useDemoData ? (
@@ -76,7 +76,7 @@ export function OrderCreateHub({
 
         <ul className="hz-commercial-create-hub-points">
           <li>Hızlı İşlem&apos;de <strong>Sipariş</strong> segmentini seçerek satır, kaynak ve operasyon etkisini hazırlayın.</li>
-          <li>Bu ekranda doğrudan kayıt oluşturulmaz; işlem onay zincirinden geçer.</li>
+          <li>Bu ekranda doğrudan kayıt oluşturulmaz; taslak hazırlandıktan sonra işlemi onaya gönderin.</li>
           {sourceOfferId ? (
             <li>
               Kaynak teklif: <strong>{resolving ? "yükleniyor…" : sourceOfferNo ?? sourceOfferId}</strong>
@@ -95,7 +95,7 @@ export function OrderCreateHub({
 
         <div className="hz-commercial-create-hub-actions">
           <button type="button" className="hz-btn hz-btn-primary hz-toolbar-btn" onClick={() => router.push(quickHref)}>
-            Hızlı İşlem&apos;de hazırla
+            Hızlı İşlem&apos;e git
           </button>
           <Link className="hz-btn hz-btn-secondary hz-toolbar-btn" href="/siparisler">
             Sipariş listesine dön

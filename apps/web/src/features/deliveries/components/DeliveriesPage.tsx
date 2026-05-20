@@ -1,59 +1,96 @@
 "use client";
 
-import { LoadingState, MetricCard, PageHeader, Pagination, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
+import { EntityListPageTemplate, EmptyState, LoadingState, Pagination } from "@hallederiz/ui";
 import type { Customer, Delivery } from "@hallederiz/types";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { dataSourceConfig } from "../../../lib/data-source";
 import { dateLabel } from "../utils";
 import { getDeliveries } from "../queries/get-deliveries";
 import { getDeliveryStatusLabel } from "../queries/delivery-mock-data";
 
-export function DeliveryFilterBar() {
+function DeliveryFilterBar() {
   return (
-    <section className="hz-filter-card">
+    <section className="hz-filter-card hz-deliveries-filter">
       <div className="hz-filter-grid">
-        <label>Musteri / Teslim No<input placeholder="DLV-401 veya cari adi" /></label>
-        <label>Durum<select defaultValue=""><option value="">Tum durumlar</option><option>Hazir</option><option>Bekliyor</option><option>Teslim Edildi</option></select></label>
-        <label className="hz-toggle"><input type="checkbox" />Hazir olanlar</label>
-        <label className="hz-toggle"><input type="checkbox" />Eksik odemeliler</label>
-        <label>Belge Durumu<select defaultValue=""><option value="">Tum belgeler</option><option>Hazir</option><option>Eksik</option><option>Gonderildi</option></select></label>
-        <label>Tarih<select defaultValue="week"><option value="week">Bu hafta</option><option value="today">Bugun</option><option value="month">Bu ay</option></select></label>
+        <label>
+          Müşteri / teslim no
+          <input placeholder="Teslim veya cari ara" />
+        </label>
+        <label>
+          Durum
+          <select defaultValue="">
+            <option value="">Tüm durumlar</option>
+            <option>Hazır</option>
+            <option>Bekliyor</option>
+            <option>Teslim edildi</option>
+          </select>
+        </label>
+        <label className="hz-toggle">
+          <input type="checkbox" />
+          Hazır olanlar
+        </label>
+        <label className="hz-toggle">
+          <input type="checkbox" />
+          Eksik ödemeliler
+        </label>
+        <label>
+          Belge durumu
+          <select defaultValue="">
+            <option value="">Tüm belgeler</option>
+            <option>Hazır</option>
+            <option>Eksik</option>
+            <option>Gönderildi</option>
+          </select>
+        </label>
+        <label>
+          Tarih
+          <select defaultValue="week">
+            <option value="week">Bu hafta</option>
+            <option value="today">Bugün</option>
+            <option value="month">Bu ay</option>
+          </select>
+        </label>
       </div>
     </section>
   );
 }
 
-export function DeliveryTable({ deliveries, customers, selectedId, onSelect, onOpen }: { deliveries: Delivery[]; customers: Customer[]; selectedId: string | null; onSelect: (id: string) => void; onOpen: (id: string) => void }) {
+function DeliveryPreviewPanel({ delivery, customerName }: { delivery: Delivery | null; customerName: string | null }) {
+  if (!delivery) {
+    return (
+      <aside className="hz-commercial-entity-side hz-deliveries-side">
+        <p className="hz-commercial-entity-side-empty">Listeden bir teslimat seçin.</p>
+      </aside>
+    );
+  }
   return (
-    <section className="hz-content-card">
-      <div className="table-wrap hz-table-wrap">
-        <table className="table hz-table hz-table-sticky">
-          <thead><tr><th>Teslim No</th><th>Siparis No</th><th>Musteri</th><th>Durum</th><th>Teslim Tarihi</th><th>Belge Durumu</th></tr></thead>
-          <tbody>
-            {deliveries.map((delivery) => (
-              <tr key={delivery.id} className={`stock-table-row ${selectedId === delivery.id ? "is-selected-row" : ""}`} onClick={() => onSelect(delivery.id)} onDoubleClick={() => onOpen(delivery.id)}>
-                <td>{delivery.deliveryNo}</td><td>{delivery.orderNo}</td><td>{customers.find((customer) => customer.id === delivery.customerId)?.name ?? delivery.customerId}</td>
-                <td><span className={`hz-badge hz-badge-${delivery.status === "delivered" ? "success" : delivery.validation.valid ? "info" : "warning"}`}>{getDeliveryStatusLabel(delivery.status)}</span></td>
-                <td>{dateLabel(delivery.deliveredAt ?? delivery.plannedAt)}</td><td>{delivery.documentStatus}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </section>
-  );
-}
-
-export function DeliveryPreviewPanel({ delivery }: { delivery: Delivery | null }) {
-  return (
-    <section className="hz-content-card">
-      <h3>Teslimat Preview</h3>
-      {delivery ? (
-        <ul className="hz-side-list hz-margin-top-sm">
-          <li>Siparis: {delivery.orderNo}</li><li>Durum: {getDeliveryStatusLabel(delivery.status)}</li><li>Depo hazir: {delivery.validation.warehouseReady ? "Evet" : "Hayir"}</li><li>Eksik odeme: {delivery.validation.paymentMissing ? "Var" : "Yok"}</li><li>Belge: {delivery.documentStatus}</li>
-        </ul>
-      ) : <p className="hz-content-card-description">Bir teslimat secin.</p>}
-    </section>
+    <aside className="hz-commercial-entity-side hz-deliveries-side">
+      <h3>Teslimat önizleme</h3>
+      <ul className="hz-commercial-entity-side-list">
+        <li>
+          <strong>Teslim:</strong> {delivery.deliveryNo}
+        </li>
+        <li>
+          <strong>Sipariş:</strong> {delivery.orderNo}
+        </li>
+        <li>
+          <strong>Cari:</strong> {customerName ?? "—"}
+        </li>
+        <li>
+          <strong>Durum:</strong> {getDeliveryStatusLabel(delivery.status)}
+        </li>
+        <li>
+          <strong>Depo hazır:</strong> {delivery.validation.warehouseReady ? "Evet" : "Hayır"}
+        </li>
+        <li>
+          <strong>Eksik ödeme:</strong> {delivery.validation.paymentMissing ? "Var" : "Yok"}
+        </li>
+        <li>
+          <strong>Belge:</strong> {delivery.documentStatus}
+        </li>
+      </ul>
+    </aside>
   );
 }
 
@@ -62,29 +99,160 @@ export function DeliveriesPage() {
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const pageSize = 10;
+  const pageSize = 12;
 
   useEffect(() => {
-    getDeliveries().then((result) => { setDeliveries(result.deliveries); setCustomers(result.customers); }).finally(() => setLoading(false));
+    setLoadError(false);
+    getDeliveries()
+      .then((result) => {
+        setDeliveries(result.deliveries);
+        setCustomers(result.customers);
+      })
+      .catch(() => {
+        setDeliveries([]);
+        setCustomers([]);
+        setLoadError(true);
+      })
+      .finally(() => setLoading(false));
   }, []);
 
-  const selected = useMemo(() => deliveries.find((delivery) => delivery.id === selectedId) ?? deliveries[0] ?? null, [deliveries, selectedId]);
+  useEffect(() => {
+    if (loading || deliveries.length === 0) {
+      if (!loading && deliveries.length === 0) setSelectedId(null);
+      return;
+    }
+    if (!selectedId || !deliveries.some((d) => d.id === selectedId)) {
+      setSelectedId(deliveries[0]?.id ?? null);
+    }
+  }, [loading, deliveries, selectedId]);
+
+  const selected = useMemo(
+    () => deliveries.find((delivery) => delivery.id === selectedId) ?? null,
+    [deliveries, selectedId]
+  );
+  const selectedCustomerName = useMemo(
+    () => (selected ? customers.find((c) => c.id === selected.customerId)?.name ?? null : null),
+    [customers, selected]
+  );
   const pagedDeliveries = useMemo(() => deliveries.slice((page - 1) * pageSize, page * pageSize), [deliveries, page]);
 
+  const statusBadgeClass = (delivery: Delivery) => {
+    if (delivery.status === "delivered") return "hz-badge hz-badge-success";
+    if (delivery.validation.valid) return "hz-badge hz-badge-info";
+    return "hz-badge hz-badge-warning";
+  };
+
   return (
-    <div className="hz-page-stack">
-      <PageHeader title="Teslimatlar" description="Teslimat dogrulama, musteri bilgilendirme ve belge akislarini yonetin." />
-      <section className="hz-metric-grid">
-        <MetricCard title="Teslimat" value={String(deliveries.length)} detail="Aktif kayit" tone="info" />
-        <MetricCard title="Hazir" value={String(deliveries.filter((item) => item.status === "ready").length)} detail="Tamamlanabilir" tone="success" />
-        <MetricCard title="Eksik Odeme" value={String(deliveries.filter((item) => item.validation.paymentMissing).length)} detail="Onay gerekebilir" tone="warning" />
-        <MetricCard title="Belge Eksik" value={String(deliveries.filter((item) => item.documentStatus === "missing").length)} detail="Uretilecek" tone="danger" />
-      </section>
-      <PrimaryActionToolbar><button className="hz-btn hz-btn-primary hz-toolbar-btn" type="button">Yeni Teslimat</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">Dogrula</button><button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">Musteriye Haber Ver</button></PrimaryActionToolbar>
-      <DeliveryFilterBar />
-      <SplitContentLayout main={loading ? <LoadingState title="Teslimatlar yukleniyor" message="Dogrulama ve belge durumlari hazirlaniyor." /> : <><DeliveryTable deliveries={pagedDeliveries} customers={customers} selectedId={selected?.id ?? null} onSelect={setSelectedId} onOpen={(id) => router.push(`/teslimatlar/${id}`)} /><Pagination totalItems={deliveries.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} /></>} side={<DeliveryPreviewPanel delivery={selected} />} />
-    </div>
+    <EntityListPageTemplate
+      className="hz-commercial-entity-page hz-deliveries-page"
+      header={
+        <>
+          <header className="hz-commercial-entity-topbar">
+            <div>
+              <h1 className="hz-commercial-entity-topbar-title">Teslimatlar</h1>
+              <p className="hz-commercial-entity-topbar-sub">
+                Teslimat doğrulama, müşteri bilgilendirme ve belge akışlarını yönetin.
+              </p>
+            </div>
+          </header>
+          <div className="hz-commercial-entity-kpi-strip" aria-label="Teslimat özeti">
+            <div className="hz-commercial-entity-kpi">
+              <span className="hz-commercial-entity-kpi-label">Kayıt</span>
+              <span className="hz-commercial-entity-kpi-value">{deliveries.length}</span>
+            </div>
+            <div className="hz-commercial-entity-kpi">
+              <span className="hz-commercial-entity-kpi-label">Hazır</span>
+              <span className="hz-commercial-entity-kpi-value">
+                {deliveries.filter((item) => item.status === "ready").length}
+              </span>
+            </div>
+            <div className="hz-commercial-entity-kpi">
+              <span className="hz-commercial-entity-kpi-label">Eksik ödeme</span>
+              <span className="hz-commercial-entity-kpi-value">
+                {deliveries.filter((item) => item.validation.paymentMissing).length}
+              </span>
+            </div>
+            <div className="hz-commercial-entity-kpi">
+              <span className="hz-commercial-entity-kpi-label">Belge eksik</span>
+              <span className="hz-commercial-entity-kpi-value">
+                {deliveries.filter((item) => item.documentStatus === "missing").length}
+              </span>
+            </div>
+          </div>
+          {dataSourceConfig.useDemoData ? (
+            <p className="hz-commercial-entity-preview-band" role="status">
+              Örnek veri modu: liste kayıtları demo amaçlıdır; canlı operasyon sonucu değildir.
+            </p>
+          ) : null}
+        </>
+      }
+      filters={<DeliveryFilterBar />}
+      list={
+        <div className="hz-commercial-entity-list-wrap">
+          {loading ? (
+            <LoadingState title="Teslimatlar yükleniyor" message="Doğrulama ve belge durumları hazırlanıyor." />
+          ) : loadError ? (
+            <EmptyState title="Teslimat listesi alınamadı" message="Bağlantı kurulamadı. Lütfen tekrar deneyin." />
+          ) : deliveries.length === 0 ? (
+            <EmptyState title="Teslimat bulunamadı" message="Kayıt yok veya filtre sonucu boş." />
+          ) : (
+            <>
+              <div className="hz-commercial-entity-table-head hz-deliveries-table-head" role="row">
+                <span>Teslim no</span>
+                <span>Sipariş</span>
+                <span>Cari</span>
+                <span>Durum</span>
+                <span>Tarih</span>
+                <span>Belge</span>
+                <span>AKSİYON</span>
+              </div>
+              <div className="hz-commercial-entity-table-body">
+                {pagedDeliveries.map((delivery) => {
+                  const customerName = customers.find((c) => c.id === delivery.customerId)?.name ?? "—";
+                  return (
+                    <div
+                      key={delivery.id}
+                      role="row"
+                      className={`hz-commercial-entity-table-row hz-deliveries-table-row${selectedId === delivery.id ? " is-selected" : ""}`}
+                      onClick={() => setSelectedId(delivery.id)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") setSelectedId(delivery.id);
+                      }}
+                      tabIndex={0}
+                    >
+                      <span>{delivery.deliveryNo}</span>
+                      <span>{delivery.orderNo}</span>
+                      <span>{customerName}</span>
+                      <span>
+                        <span className={statusBadgeClass(delivery)}>{getDeliveryStatusLabel(delivery.status)}</span>
+                      </span>
+                      <span>{dateLabel(delivery.deliveredAt ?? delivery.plannedAt)}</span>
+                      <span>{delivery.documentStatus}</span>
+                      <span>
+                        <button
+                          type="button"
+                          className="hz-commercial-entity-action-btn"
+                          onClick={(event) => {
+                            event.stopPropagation();
+                            router.push(`/teslimatlar/${delivery.id}`);
+                          }}
+                        >
+                          İncele
+                        </button>
+                      </span>
+                    </div>
+                  );
+                })}
+              </div>
+              <Pagination totalItems={deliveries.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
+            </>
+          )}
+        </div>
+      }
+      preview={<DeliveryPreviewPanel delivery={selected} customerName={selectedCustomerName} />}
+    />
   );
 }
