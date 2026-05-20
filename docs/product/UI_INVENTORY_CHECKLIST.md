@@ -1,15 +1,15 @@
 # UI Inventory Checklist — Agent 00
 
-**Base:** `10f2f40` — feat(platform): add live worker and commercial execution foundation (#122)  
-**İnceleme tarihi:** 2026-05-20 (repo dosya sistemi taraması)
+**Base:** `fd933b0` — docs(ui): mockup inventory + scope guard (#123)  
+**İnceleme tarihi:** 2026-05-20 (Agent 00 + Agent 00B)
 
 ---
 
 ## 1. Mockup package checklist
 
-| Madde | Beklenen | Repo durumu (10f2f40) |
-|-------|----------|------------------------|
-| Kök klasör `docs/design/ui-design-output/` | Var | **YOK** — `docs/design/` klasörü bile yok |
+| Madde | Beklenen | Repo durumu (00B) |
+|-------|----------|---------------------|
+| Kök klasör `docs/design/ui-design-output/` | Var | **YOK** — kaynak path bulunamadı, kopyalanmadı |
 | `MANIFEST.md` | Var | **YOK** |
 | `CHECKLIST.md` | Var | **YOK** |
 | `CURSOR_REFERENCE_README.md` | Var | **YOK** |
@@ -23,7 +23,7 @@
 | Route başına `notes.md` | Her route | **N/A** |
 | Zorunlu state PNG seti | default/loading/empty/error/mobile | **N/A** |
 
-**Sonuç:** Mockup referans paketi repoda **henüz commit edilmemiş** veya farklı konumda tutuluyor. UI dönüşümü başlamadan önce paketin repoya veya erişilebilir read-only mount’a eklenmesi gerekir. Agent 00 paketi **düzeltmez**; yalnızca gap kaydeder.
+**Sonuç (Agent 00B):** `MOCKUP_SOURCE_PATH` sağlanmadı. Aranan örnek yollar (`Desktop\ui-design-output`, `.zip`, `HallederizCRM-UI-REFERENCE\ui-design-output`) yok. **Agent 01 blokeli.** Rapor: `UI_DESIGN_REFERENCE_PACKAGE_REPORT.md`.
 
 **Geçici kaynaklar (mevcut):**
 
