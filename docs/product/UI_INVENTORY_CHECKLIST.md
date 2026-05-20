@@ -54,6 +54,8 @@ Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 
 **Agent 01 (2026-05-20):** Emerald/gold foundation tokens (`packages/ui/src/tokens/`, `src/styles/tokens.css`); `hz-ui-*` primitive CSS (`foundation-primitives.css`); shared state TR defaults. **AppShell / route adoption yapılmadı.**
 
+**Agent 02 (2026-05-20):** AppShell/Sidebar/Header/mobile drawer (`shell-foundation.css`, `app-shell.tsx` a11y). Sidebar `#064E3B`, active gold border, header ivory. **Route/template adoption yapılmadı.**
+
 | Component (hedef ad) | Durum | Konum | Gap | Target agent |
 |----------------------|-------|-------|-----|--------------|
 | UiButton | **Hazır (foundation)** | `primitives/button.tsx` | Route `hz-btn` migration | 04+ |
@@ -86,21 +88,23 @@ Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 
 ## 4. AppShell / layout checklist
 
+**Agent 02 (2026-05-20):** Shell foundation tamam — `shell-foundation.css`, emerald sidebar, ivory header, mobile drawer a11y. Bkz. `UI_APPSHELL_LAYOUT.md`.
+
 | Madde | Durum | Not |
 |-------|--------|-----|
-| Global shell | **Mevcut** | `apps/web/src/components/platform-shell.tsx` → `@hallederiz/ui` `AppShell` |
-| Sidebar tek kaynak | **Mevcut** | `packages/ui/app-shell/sidebar.tsx` + `product-sidebar-nav.tsx` |
-| İkinci sidebar (route içi) | **Yok (shell)** | Detay sayfalarında `EntityDetailLayout` **sağ özet** kolonu var (timeline değil) |
-| `PageContent` + `platform-content` | **Mevcut** | `packages/ui/primitives/page-content.tsx`; `globals.css` `:has()` kuralları |
-| Header | **Mevcut** | `packages/ui/app-shell/header.tsx` + `PlatformShell` PageMeta |
-| Mobile drawer | **Mevcut** | `AppShell` hamburger + `hz-shell-sidebar-mobile` |
+| Global shell | **Hazır (Agent 02)** | `AppShell` + `shell-foundation.css` |
+| Sidebar tek kaynak | **Hazır (Agent 02)** | `#064E3B`, active gold left border |
+| İkinci sidebar (route içi) | **Yok (shell)** | Detay sağ kolon — Agent 03+ |
+| `PageContent` + `platform-content` | **Korundu** | Sınıf ve `:has()` zinciri aynı |
+| Header | **Hazır (Agent 02)** | Ivory surface; PageMeta API aynı |
+| Mobile drawer | **Hazır (Agent 02)** | Escape, body lock, TR aria labels |
 | Content max width | **1604px** | `--hz-content-max-width` |
-| Detail panel width | **336px** (mevcut) | Hedef **360px** — Agent 03 |
-| Body / yatay scroll risk | **Orta** | Fit-viewport sayfalar (`hz-dashboard-page--fit`, `hz-qop-page`, vb.) özel; yerelde 1920×1080 doğrulanmalı |
-| Active nav style | **Mevcut** | `resolveActiveHref` + sidebar |
-| Route metadata / PageMeta | **Mevcut** | `shouldSuppressShellPageMeta` + `PAGE_META` |
+| Detail panel width | **360px** | Agent 01 token; template adoption Agent 03 |
+| Body / yatay scroll risk | **Orta** | Yerelde 1920×1080 / 390×844 doğrulanmalı |
+| Active nav style | **Korundu** | `resolveActiveHref` + `aria-current` |
+| Route metadata / PageMeta | **Korundu** | `suppressPageMeta` mantığı aynı |
 
-**Agent 02 odak:** emerald sidebar, gold accent, header yoğunluğu, mobile drawer polish, legacy mor/lacivert token temizliği (`globals.css`).
+**Agent 03 odak:** layout templates; route adoption Agent 04+.
 
 ---
 

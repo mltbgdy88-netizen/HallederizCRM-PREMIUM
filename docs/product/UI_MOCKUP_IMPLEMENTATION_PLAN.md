@@ -18,6 +18,8 @@ Mockup PNG paketi (`docs/design/ui-design-output/**`) **runtime’da import edil
 
 **Agent 01 (2026-05-20):** Tokens + primitives foundation tamamlandı (`ui/01-foundation-tokens-primitives`). Emerald/gold CSS variables, `hz-ui-*` overrides, shared state defaults. **Sonraki:** `ui/02-appshell-sidebar-header`. PNG runtime import yasağı korunur.
 
+**Agent 02 (2026-05-20):** AppShell/Sidebar/Header/mobile drawer foundation tamamlandı (`ui/02-appshell-sidebar-header`). `shell-foundation.css`, emerald sidebar, ivory header, `platform-content` korundu. **Sonraki:** `ui/03-layout-templates`. Route implementation yapılmadı.
+
 ---
 
 ## 2. Source of truth
@@ -101,7 +103,8 @@ PNG (referans, import YOK)
 | **Allowed** | `packages/ui/app-shell/**`, `apps/web/src/components/platform-shell.tsx`, shell CSS |
 | **Forbidden** | Feature business logic, route içerikleri |
 | **Tests** | typecheck + `smoke:navigation` |
-| **Acceptance** | Tek sidebar; hamburger 390px; max-width 1604 |
+| **Acceptance** | Tek sidebar; emerald/gold nav; ivory header; platform-content korunur; bkz. `UI_APPSHELL_LAYOUT.md` |
+| **Status** | **Tamamlandı** (branch `ui/02-appshell-sidebar-header`) |
 
 ### Agent 03 — `ui/03-layout-templates`
 

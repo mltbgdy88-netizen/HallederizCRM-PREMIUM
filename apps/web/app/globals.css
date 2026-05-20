@@ -1,5 +1,6 @@
 @import "../../../packages/ui/src/styles/tokens.css";
 @import "../../../packages/ui/src/styles/foundation-primitives.css";
+@import "../../../packages/ui/src/styles/shell-foundation.css";
 
 :root,
 :root[data-theme="light"] {
@@ -28,8 +29,8 @@
   --hz-content-max-width: 1604px;
   --hz-detail-panel-width: 360px;
 
-  --hz-bg: #f3f5f9;
-  --hz-surface: #ffffff;
+  --hz-bg: var(--hz-color-bg);
+  --hz-surface: var(--hz-color-surface);
   --hz-surface-soft: #f8fafc;
   --hz-surface-muted: #eef2f7;
   --hz-border: #d9dfeb;
