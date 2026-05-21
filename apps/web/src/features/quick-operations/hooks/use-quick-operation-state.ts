@@ -1,7 +1,8 @@
 ﻿"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import type { QuickOperationSubmitRequest } from "@hallederiz/types";
+import type { PaymentMethod, QuickOperationSubmitRequest } from "@hallederiz/types";
+import type { QuickOperationPaymentFormState } from "../components/QuickOperationPaymentBlock";
 import type {
   QuickOperationAiInsight,
   QuickOperationCustomer,
@@ -56,6 +57,8 @@ export type QuickOperationSubmitLinks = {
   approvalsHref?: string;
   detailHref?: string;
   detailLabel?: string;
+  paymentDetailHref?: string;
+  paymentDetailLabel?: string;
 };
 
 export const operationTypeLabels: Record<QuickOperationType, { label: string; title: string; description: string }> = {
@@ -298,9 +301,22 @@ export function defaultQuickOperationLinesForTab(tab: QuickOperationWorkflowTabI
   }
 }
 
+function defaultPaymentFormState(): QuickOperationPaymentFormState {
+  return {
+    enabled: false,
+    amount: 0,
+    method: "transfer",
+    receivedAt: new Date().toISOString(),
+    referenceNo: "",
+    note: "",
+    allocateToOrder: true
+  };
+}
+
 export function useQuickOperationState(options?: {
   initialCustomerId?: string | null;
   initialProductId?: string | null;
+  initialOrderId?: string | null;
 }) {
   const [catalogCustomers, setCatalogCustomers] = useState<QuickOperationCustomer[]>(() =>
     dataSourceConfig.useDemoData ? buildQuickOperationCustomers() : []
@@ -365,6 +381,8 @@ export function useQuickOperationState(options?: {
   const [expandedLineId, setExpandedLineId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
   const [operationNote, setOperationNote] = useState("");
+  const [linkedOrderId, setLinkedOrderId] = useState<string | null>(options?.initialOrderId?.trim() || null);
+  const [paymentForm, setPaymentForm] = useState<QuickOperationPaymentFormState>(defaultPaymentFormState);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [previewPending, setPreviewPending] = useState(false);
   const [previewError, setPreviewError] = useState<string | null>(null);
@@ -384,7 +402,13 @@ export function useQuickOperationState(options?: {
       fallbackCustomer
     );
   }, [customerId, catalogCustomers]);
-  const totals = useMemo(() => calculateQuickOperationTotals(lines), [lines]);
+  const lineTotals = useMemo(() => calculateQuickOperationTotals(lines), [lines]);
+  const totals = useMemo(() => {
+    if (!paymentForm.enabled || paymentForm.amount <= 0) {
+      return lineTotals;
+    }
+    return calculateQuickOperationTotals(lines, paymentForm.amount);
+  }, [lineTotals, lines, paymentForm.amount, paymentForm.enabled]);
   const calculatedImpacts = useMemo(() => mapSourceSelectionToWorkflow(operationType, lines), [operationType, lines]);
   const impacts = submittedImpacts ?? calculatedImpacts;
   const aiInsight: QuickOperationAiInsight | undefined = sideActions?.aiInsight;
@@ -484,13 +508,40 @@ export function useQuickOperationState(options?: {
     setOperationTypeState(next);
   };
 
+  const patchPaymentForm = (patch: Partial<QuickOperationPaymentFormState>) => {
+    setSubmittedImpacts(null);
+    setSideActions(null);
+    setPaymentForm((current) => ({ ...current, ...patch }));
+  };
+
   const buildSubmitPayload = (): QuickOperationSubmitRequest => {
+    const paymentPayload =
+      paymentForm.enabled && paymentForm.amount > 0
+        ? {
+            enabled: true,
+            amount: paymentForm.amount,
+            method: paymentForm.method,
+            receivedAt: paymentForm.receivedAt,
+            referenceNo: paymentForm.referenceNo.trim() || undefined,
+            note: paymentForm.note.trim() || undefined,
+            allocateToOrder: paymentForm.allocateToOrder
+          }
+        : undefined;
+
     return {
       operationType,
       customerId: selectedCustomer.id,
       customerName: selectedCustomer.name,
+      orderId: linkedOrderId ?? undefined,
       reason: operationType === "return" ? operationNote : undefined,
       note: operationNote,
+      paidAmount: paymentForm.enabled ? paymentForm.amount : undefined,
+      paymentMethod: paymentForm.enabled ? paymentForm.method : undefined,
+      paymentReceivedAt: paymentForm.enabled ? paymentForm.receivedAt : undefined,
+      paymentReferenceNo: paymentForm.referenceNo.trim() || undefined,
+      paymentNote: paymentForm.note.trim() || undefined,
+      allocatePaymentToOrder: paymentForm.allocateToOrder,
+      payment: paymentPayload,
       lines: lines.map((line) => ({
         id: line.id,
         productCode: line.productCode,
@@ -591,7 +642,9 @@ export function useQuickOperationState(options?: {
         showApprovalsLink: feedback.showApprovalsLink,
         approvalsHref: feedback.approvalsHref,
         detailHref: feedback.detailHref,
-        detailLabel: feedback.detailLabel
+        detailLabel: feedback.detailLabel,
+        paymentDetailHref: feedback.paymentDetailHref,
+        paymentDetailLabel: feedback.paymentDetailLabel
       });
       return { ok: true, toast: feedback.toast };
     } catch (error) {
@@ -628,6 +681,8 @@ export function useQuickOperationState(options?: {
     setCustomerId(catalogCustomers[0]?.id ?? fallbackCustomer.id);
     setOperationTypeState("sale_order");
     setOperationNote("");
+    setPaymentForm(defaultPaymentFormState());
+    setLinkedOrderId(null);
   };
 
   return {
@@ -682,6 +737,10 @@ export function useQuickOperationState(options?: {
     setWhatsappDraftVisible,
     openDocumentPreview,
     openWhatsappDraft,
-    resetDraft
+    resetDraft,
+    paymentForm,
+    patchPaymentForm,
+    linkedOrderId,
+    setLinkedOrderId
   };
 }

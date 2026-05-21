@@ -19,7 +19,7 @@
 | A5 | `pnpm --filter @hallederiz/web build` | PASS | ☐ | ☐ | Eng |
 | A6 | `pnpm smoke:navigation` | 24 checks PASS | ☐ | ☐ | Eng |
 | A7 | `pnpm smoke:routes` | 37 routes PASS | ☐ | ☐ | Eng |
-| A8 | `pnpm --filter @hallederiz/api test` | 421/421 PASS | ☐ | ☐ | Eng |
+| A8 | `pnpm --filter @hallederiz/api test` | 423/423 PASS | ☐ | ☐ | Eng |
 | A9 | `pnpm smoke:api-offline` | PASS (if API up) | ☐ | ☐ | Eng |
 | A10 | CI Quality Gate on deploy SHA | SUCCESS | ☐ | ☐ | Eng |
 
@@ -54,7 +54,10 @@
 |---|----------------|----------|------|-------|
 | W1 | `/login` | Login works; no demo auth in prod | ☐ | QA |
 | W2 | `/dashboard` | Loads; AI column dashboard-only | ☐ | QA |
-| W3 | `/hizli-islem` | Hub loads; no body scroll regression | ☐ | QA |
+| W3 | `/hizli-islem` | Workbench; sipariş sekmesinde ödeme bloğu; submit feedback net | ☐ | QA |
+| W3a | `/hizli-islem` sale_order + ödeme | Onay/canlıda order+payment veya approval; sahte başarı yok | ☐ | QA |
+| W3b | `/tahsilatlar/yeni` | Gerçek form; `Tahsilatı kaydet`; customer/order prefill | ☐ | QA |
+| W3c | Tahsilat başarı | Detay + kaynak sipariş linkleri | ☐ | QA |
 | W4 | `/onaylar` | List + detail safe | ☐ | QA |
 | W5 | `/whatsapp` | Health reflects real config | ☐ | QA |
 | W6 | `/cariler` | List + first row selection | ☐ | QA |

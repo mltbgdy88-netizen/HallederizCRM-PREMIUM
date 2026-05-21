@@ -76,6 +76,10 @@ export function OrderCreateHub({
 
         <ul className="hz-commercial-create-hub-points">
           <li>Hızlı İşlem&apos;de <strong>Sipariş</strong> segmentini seçerek satır, kaynak ve operasyon etkisini hazırlayın.</li>
+          <li>
+            Sipariş sırasında ödeme aldıysanız Hızlı İşlem&apos;de <strong>Ödeme alındı</strong> bloğunu doldurun; onay sonrası sipariş ve
+            tahsilat birlikte işlenir.
+          </li>
           <li>Bu ekranda doğrudan kayıt oluşturulmaz; taslak hazırlandıktan sonra işlemi onaya gönderin.</li>
           {sourceOfferId ? (
             <li>

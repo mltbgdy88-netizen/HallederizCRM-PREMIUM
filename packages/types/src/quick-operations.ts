@@ -1,3 +1,5 @@
+import type { OrderPaymentStatus, PaymentMethod } from "./commercial-operations";
+
 export type QuickOperationType = "offer" | "sale_order" | "delivery" | "payment" | "return";
 
 export type QuickOperationSourceType = "center_warehouse" | "factory" | "supplier" | "split" | "auto";
@@ -75,6 +77,16 @@ export interface QuickOperationValidationIssue {
   lineId?: string;
 }
 
+export interface QuickOperationPaymentInput {
+  enabled: boolean;
+  amount: number;
+  method: PaymentMethod;
+  receivedAt?: string;
+  referenceNo?: string;
+  note?: string;
+  allocateToOrder?: boolean;
+}
+
 export interface QuickOperationSubmitRequest {
   operationType: QuickOperationType;
   customerId: string;
@@ -83,7 +95,14 @@ export interface QuickOperationSubmitRequest {
   deliveryId?: string;
   reason?: string;
   note?: string;
+  /** @deprecated Prefer `payment.amount`; kept for backward compatibility */
   paidAmount?: number;
+  paymentMethod?: PaymentMethod;
+  paymentReceivedAt?: string;
+  paymentReferenceNo?: string;
+  paymentNote?: string;
+  allocatePaymentToOrder?: boolean;
+  payment?: QuickOperationPaymentInput;
   lines: QuickOperationLine[];
 }
 
@@ -147,6 +166,10 @@ export interface QuickOperationSubmitResponse {
   createdEntityType?: "offer" | "order" | "delivery" | "payment" | "return";
   createdEntityId?: string;
   createdEntityNo?: string;
+  createdPaymentId?: string;
+  createdPaymentNo?: string;
+  orderPaymentStatus?: OrderPaymentStatus;
+  paymentRecorded?: boolean;
   workflowImpacts: QuickOperationWorkflowImpact[];
   documentIds: string[];
   auditEventIds: string[];

@@ -43,9 +43,9 @@ const checks = [
     description: "Yeni sipariş Hızlı İşlem hub"
   },
   {
-    file: "apps/web/src/features/payments/components/PaymentCreateHub.tsx",
-    patterns: ["onaya gönderin", "buildQuickOpHref", "Tahsilat"],
-    description: "Yeni tahsilat Hızlı İşlem hub"
+    file: "apps/web/src/features/payments/components/PaymentCreatePage.tsx",
+    patterns: ["Tahsilatı kaydet", "Yeni tahsilat", "Hızlı İşlem"],
+    description: "Yeni tahsilat formu"
   },
   {
     file: "apps/web/src/features/quick-operations/data/quick-operation-messages.ts",

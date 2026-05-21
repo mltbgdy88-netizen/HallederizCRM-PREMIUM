@@ -1,4 +1,6 @@
 import type { QuickOperationSubmitRequest, QuickOperationValidationIssue } from "@hallederiz/types";
+import { calculateQuickOperationTotals } from "./totals";
+import { validateQuickOperationPayment } from "./payment-input";
 
 function createIssue(
   code: string,
@@ -18,11 +20,18 @@ export function validateQuickOperationRequest(request: QuickOperationSubmitReque
   }
 
   const hasLines = Array.isArray(request.lines) && request.lines.length > 0;
+  const totals = calculateQuickOperationTotals(request.lines);
+  const paymentOnly =
+    request.operationType === "payment" &&
+    (request.payment?.enabled || (request.paidAmount ?? 0) > 0);
+
   if (!hasLines) {
     if (request.operationType === "delivery" && request.orderId) {
       // Delivery can proceed with reference order even when explicit lines are omitted.
+    } else if (paymentOnly) {
+      // Tahsilat: satır olmadan yalnız tutar ile kayıt.
     } else {
-      issues.push(createIssue("line_required", "lines", "En az bir satir girilmelidir."));
+      issues.push(createIssue("line_required", "lines", "En az bir satır girilmelidir."));
       return issues;
     }
   }
@@ -55,9 +64,11 @@ export function validateQuickOperationRequest(request: QuickOperationSubmitReque
 
   if (request.operationType === "return") {
     if (!request.note?.trim() && !request.reason?.trim()) {
-      issues.push(createIssue("return_reason_required", "note", "Iade islemi icin aciklama veya iade sebebi girilmelidir."));
+      issues.push(createIssue("return_reason_required", "note", "İade işlemi için açıklama veya iade sebebi girilmelidir."));
     }
   }
+
+  issues.push(...validateQuickOperationPayment(request, totals.grandTotal));
 
   return issues;
 }

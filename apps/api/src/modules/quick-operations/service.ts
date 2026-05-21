@@ -4,7 +4,11 @@ import {
   buildQuickOperationWhatsappDraft,
   buildQuickOperationWorkflowImpacts,
   calculateQuickOperationTotals,
-  validateQuickOperationRequest
+  deriveOrderPaymentStatus,
+  deriveOrderPaymentStatusFromAmount,
+  resolveQuickOperationPayment,
+  validateQuickOperationRequest,
+  type ResolvedQuickOperationPayment
 } from "@hallederiz/domain";
 import type {
   Delivery,
@@ -75,19 +79,12 @@ export class QuickOperationsService {
 
   previewQuickOperation(request: QuickOperationSubmitRequest): QuickOperationPreviewResponse {
     const validationIssues = validateQuickOperationRequest(request);
-    if (request.operationType === "payment") {
-      const paymentAmount = request.paidAmount ?? calculateQuickOperationTotals(request.lines).grandTotal;
-      if (paymentAmount <= 0) {
-        validationIssues.push({
-          code: "payment_amount_required",
-          field: "paidAmount",
-          message: "Tahsilat islemi icin odeme tutari sifirdan buyuk olmalidir.",
-          level: "error"
-        });
-      }
-    }
-
     const totals = calculateQuickOperationTotals(request.lines);
+    const resolvedPayment = resolveQuickOperationPayment(request);
+    if (resolvedPayment.enabled && resolvedPayment.amount > 0) {
+      totals.paidAmount = resolvedPayment.amount;
+      totals.remainingAmount = Math.max(0, totals.grandTotal - resolvedPayment.amount);
+    }
     const workflowImpacts = this.buildImpacts(request, buildQuickOperationWorkflowImpacts(request.operationType, request.lines));
 
     return {
@@ -188,12 +185,51 @@ export class QuickOperationsService {
     });
   }
 
+  private buildPaymentDescription(request: QuickOperationSubmitRequest, order?: SaleOrder): string {
+    const resolved = resolveQuickOperationPayment(request);
+    const note = resolved.note ?? request.note;
+    if (order) {
+      return note?.trim() ? `${note.trim()} · ${order.orderNo}` : `Hızlı İşlem · ${order.orderNo}`;
+    }
+    return note?.trim() ? note.trim() : "Hızlı İşlem tahsilat kaydı";
+  }
+
+  private async recordPaymentForOrder(
+    request: QuickOperationSubmitRequest,
+    order: SaleOrder,
+    resolved: ResolvedQuickOperationPayment
+  ): Promise<PaymentReceipt> {
+    const paymentPayload: Partial<PaymentReceipt> = {
+      customerId: order.customerId,
+      amount: resolved.amount,
+      currency: order.currency,
+      method: resolved.method,
+      status: "draft",
+      description: this.buildPaymentDescription(request, order),
+      referenceNo: resolved.referenceNo,
+      createdBy: this.context.userId as PaymentReceipt["createdBy"],
+      receivedAt: resolved.receivedAt
+    };
+    return this.commercialService.createPayment(paymentPayload);
+  }
+
+  private async applyOrderPaymentTotals(order: SaleOrder, paidAmount: number): Promise<SaleOrder> {
+    const paymentStatus = deriveOrderPaymentStatusFromAmount(order.grandTotal, paidAmount);
+    const patched = await this.commercialService.patchOrder(order.id, {
+      paidTotal: paidAmount,
+      paymentStatus
+    });
+    return patched ?? order;
+  }
+
   private async executeSaleOrder(request: QuickOperationSubmitRequest, base: QuickOperationSubmitResponse): Promise<QuickOperationSubmitResponse> {
+    const resolvedPayment = resolveQuickOperationPayment(request);
     const orderPayload: Partial<SaleOrder> = {
       customerId: request.customerId as SaleOrder["customerId"],
       note: request.note,
       status: "draft",
-      paymentStatus: "unpaid",
+      paymentStatus: resolvedPayment.enabled && resolvedPayment.amount > 0 ? "partial" : "unpaid",
+      paidTotal: resolvedPayment.enabled ? resolvedPayment.amount : 0,
       deliveryStatus: "none",
       channel: "field",
       deliveryType: "warehouse",
@@ -226,31 +262,160 @@ export class QuickOperationsService {
     };
 
     const created = await this.commercialService.createOrder(orderPayload);
+    let updatedOrder = created;
+    let createdPayment: PaymentReceipt | undefined;
+    const extraImpacts: QuickOperationWorkflowImpact[] = [
+      impact("impact_order_created", "sale_order_source_plan", "Sipariş hazırlandı", `${created.orderNo} sipariş kaydı hazırlandı.`, "success")
+    ];
+
+    if (resolvedPayment.enabled && resolvedPayment.amount > 0) {
+      try {
+        createdPayment = await this.recordPaymentForOrder(request, created, resolvedPayment);
+        updatedOrder = await this.applyOrderPaymentTotals(created, resolvedPayment.amount);
+        extraImpacts.push(
+          impact(
+            "impact_payment_recorded",
+            "payment_recorded",
+            "Tahsilat kaydı hazırlandı",
+            `${createdPayment.receiptNo} tahsilat kaydı sipariş ile birlikte hazırlandı.`,
+            "success"
+          )
+        );
+        if (resolvedPayment.allocateToOrder) {
+          extraImpacts.push(
+            impact(
+              "impact_payment_linked",
+              "payment_status_check",
+              "Tahsilat siparişe bağlandı",
+              `${created.orderNo} siparişi için tahsilat eşleştirmesi tamamlandı.`,
+              "info"
+            )
+          );
+        }
+      } catch (error) {
+        return this.withSideActions(request, {
+          ...base,
+          ok: false,
+          mode: "executed",
+          createdEntityType: "order",
+          createdEntityId: created.id,
+          createdEntityNo: created.orderNo,
+          orderPaymentStatus: "unpaid",
+          paymentRecorded: false,
+          workflowImpacts: [
+            ...base.workflowImpacts,
+            ...extraImpacts,
+            impact(
+              "impact_payment_failed",
+              "payment_allocation_required",
+              "Tahsilat tamamlanamadı",
+              "Sipariş hazırlandı; tahsilat kaydı oluşturulamadı. Tahsilat ekranından tekrar deneyin.",
+              "warning"
+            )
+          ],
+          validationIssues: [
+            ...(base.validationIssues ?? []),
+            {
+              code: "payment_create_failed",
+              field: "payment",
+              message: error instanceof Error ? error.message : "Tahsilat kaydı tamamlanamadı.",
+              level: "error"
+            }
+          ]
+        });
+      }
+    }
+
+    const orderPaymentStatus = deriveOrderPaymentStatus(updatedOrder, createdPayment?.allocations ?? []);
+
     return this.withSideActions(request, {
       ...base,
       ok: true,
       mode: "executed",
       createdEntityType: "order",
       createdEntityId: created.id,
-      createdEntityNo: created.orderNo
+      createdEntityNo: created.orderNo,
+      createdPaymentId: createdPayment?.id,
+      createdPaymentNo: createdPayment?.receiptNo,
+      orderPaymentStatus,
+      paymentRecorded: Boolean(createdPayment),
+      workflowImpacts: [...base.workflowImpacts, ...extraImpacts]
     });
   }
 
   private async executePayment(request: QuickOperationSubmitRequest, base: QuickOperationSubmitResponse): Promise<QuickOperationSubmitResponse> {
     const totals = calculateQuickOperationTotals(request.lines);
-    const amount = request.paidAmount ?? totals.grandTotal;
+    const resolved = resolveQuickOperationPayment(request);
+    const amount = resolved.enabled ? resolved.amount : request.paidAmount ?? totals.grandTotal;
     const paymentPayload: Partial<PaymentReceipt> = {
       customerId: request.customerId as PaymentReceipt["customerId"],
       amount,
       currency: "TRY",
-      method: "transfer",
+      method: resolved.method,
       status: "draft",
-      description: request.note ?? "Hizli Islem Merkezi tahsilat kaydi",
+      description: this.buildPaymentDescription(request),
+      referenceNo: resolved.referenceNo,
       createdBy: this.context.userId as PaymentReceipt["createdBy"],
-      receivedAt: nowIso()
+      receivedAt: resolved.receivedAt ?? nowIso()
     };
 
     const created = await this.commercialService.createPayment(paymentPayload);
+    const linkedOrderId = request.orderId?.trim();
+    let allocationImpacts: QuickOperationWorkflowImpact[] = [
+      impact("impact_payment_recorded", "payment_recorded", "Tahsilat kaydı hazırlandı", `${created.receiptNo} tahsilat kaydı hazırlandı.`, "success")
+    ];
+
+    if (linkedOrderId) {
+      const order = await this.commercialService.getOrder(linkedOrderId);
+      if (order && resolved.allocateToOrder !== false) {
+        const nextPaid = Math.min(order.grandTotal, order.paidTotal + amount);
+        await this.commercialService.patchOrder(order.id, {
+          paidTotal: nextPaid,
+          paymentStatus: deriveOrderPaymentStatusFromAmount(order.grandTotal, nextPaid)
+        });
+        allocationImpacts = [
+          ...allocationImpacts,
+          impact(
+            "impact_payment_linked",
+            "payment_status_check",
+            "Siparişe bağlandı",
+            `${order.orderNo} siparişi ile tahsilat eşleştirildi.`,
+            "info"
+          )
+        ];
+      } else if (order) {
+        allocationImpacts.push(
+          impact(
+            "impact_payment_allocation",
+            "payment_allocation_required",
+            "Eşleştirme gerekli",
+            "Tahsilat kaydı hazırlandı; sipariş eşleştirmesini kontrol edin.",
+            "warning"
+          )
+        );
+      } else {
+        allocationImpacts.push(
+          impact(
+            "impact_payment_allocation",
+            "payment_allocation_required",
+            "Eşleştirme gerekli",
+            "Tahsilat kaydı hazırlandı; açık sipariş veya fatura eşleştirmesi yapılmalıdır.",
+            "warning"
+          )
+        );
+      }
+    } else {
+      allocationImpacts.push(
+        impact(
+          "impact_payment_allocation",
+          "payment_allocation_required",
+          "Eşleştirme gerekli",
+          "Tahsilat kaydı hazırlandı; açık sipariş veya fatura eşleştirmesi yapılmalıdır.",
+          "warning"
+        )
+      );
+    }
+
     return this.withSideActions(request, {
       ...base,
       ok: true,
@@ -258,11 +423,8 @@ export class QuickOperationsService {
       createdEntityType: "payment",
       createdEntityId: created.id,
       createdEntityNo: created.receiptNo,
-      workflowImpacts: [
-        ...base.workflowImpacts,
-        impact("impact_payment_recorded", "payment_recorded", "Tahsilat kaydi olustu", `${created.receiptNo} tahsilat kaydi olusturuldu.`, "success"),
-        impact("impact_payment_allocation", "payment_allocation_required", "Allocation adimi gerekli", "Tahsilat kaydi olustu, allocation adimi sonraki turda derinlestirilecektir.", "warning")
-      ]
+      paymentRecorded: true,
+      workflowImpacts: [...base.workflowImpacts, ...allocationImpacts]
     });
   }
 
@@ -415,6 +577,20 @@ export class QuickOperationsService {
     }
 
     const extraImpacts: QuickOperationWorkflowImpact[] = [];
+    const resolvedPayment = resolveQuickOperationPayment(request);
+    if (resolvedPayment.enabled && resolvedPayment.amount > 0) {
+      extraImpacts.push(
+        impact(
+          "impact_qo_payment_preview",
+          "payment_recorded",
+          "Tahsilat planlandı",
+          resolvedPayment.amount >= calculateQuickOperationTotals(request.lines).grandTotal
+            ? "Tam tahsilat sipariş ile birlikte işlenecek."
+            : "Kısmi tahsilat sipariş ile birlikte işlenecek.",
+          "info"
+        )
+      );
+    }
     if (request.lines.some((line) => line.sourceType === "center_warehouse")) {
       extraImpacts.push(
         impact("impact_qo_wh", "warehouse_prepare", "Depo hazirlik etkisi", "Merkez depo kaynakli satirlar icin depo hazirlik etkisi olusur.", "info")
@@ -513,7 +689,14 @@ export class QuickOperationsService {
         lines: request.lines,
         totals,
         orderId: request.orderId,
-        deliveryId: request.deliveryId
+        deliveryId: request.deliveryId,
+        paidAmount: request.paidAmount,
+        payment: request.payment,
+        paymentMethod: request.paymentMethod,
+        paymentReceivedAt: request.paymentReceivedAt,
+        paymentReferenceNo: request.paymentReferenceNo,
+        paymentNote: request.paymentNote,
+        allocatePaymentToOrder: request.allocatePaymentToOrder
       },
       idempotencyKey: `quick_operation.${request.operationType}.${request.customerId}.${Date.now()}`,
       requestedAt: nowIso(),

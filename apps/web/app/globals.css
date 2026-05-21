@@ -8192,6 +8192,61 @@ select.hz-qop-summary-input {
   color: #64748b;
 }
 
+.hz-qop-payment-block {
+  flex-shrink: 0;
+  margin-bottom: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--hz-border);
+  background: #f8fafc;
+}
+
+.hz-qop-payment-block-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+
+.hz-qop-payment-fields {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+  align-items: end;
+}
+
+.hz-qop-payment-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--hz-text);
+}
+
+.hz-qop-payment-toggle--inline {
+  grid-column: 1 / -1;
+}
+
+.hz-qop-payment-hint {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #475569;
+}
+
+.hz-qop-payment-hint--muted {
+  color: #64748b;
+}
+
+.hz-payments-create-form {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+  margin-top: 12px;
+}
+
 .hz-qop-wb-conditions--compact {
   padding: 4px 8px 5px;
 }
