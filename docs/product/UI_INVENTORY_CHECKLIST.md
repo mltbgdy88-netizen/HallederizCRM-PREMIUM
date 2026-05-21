@@ -166,3 +166,19 @@ Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 - Catch-all `ProductPageShell`: `[...productSlug]`, `raporlar/[...]`, `ayarlar/[...]`, `kurulum/[...]`, `stok/[...]`, `hizli-islem/[...]`, çok sayıda `gorevler/*` alt sayfa
 
 Detay matris: `UI_ROUTE_COVERAGE_MATRIX.md`.
+
+---
+
+## 8. Integration readiness checklist (2026-05-21)
+
+| Madde | Durum |
+|-------|--------|
+| WhatsApp provider `disabled` default | `.env.example` |
+| WhatsApp health `state` / `ready` in API | `integration-readiness.ts` |
+| WhatsApp UI no fake connected | `whatsapp-channel-health.ts` |
+| Outbound 503 when unconfigured | `integrations/routes.ts` |
+| Local AI `AI_PROVIDER=disabled` default | `.env.example` |
+| `GET /health/local-ai` | `integrations/routes.ts` |
+| AI review-only copy on `/ai` | `AIAssistantPage.tsx` |
+| Insights empty safe copy | `AiInsightsPage` |
+| Docs | `WHATSAPP_READINESS.md`, `LOCAL_AI_READINESS.md` |

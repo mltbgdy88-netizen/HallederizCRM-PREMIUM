@@ -153,12 +153,21 @@ export class IntegrationsService {
 
   getWhatsAppSession(): WhatsAppSessionSnapshot {
     const health = this.getWhatsAppHealth();
+    const details = health.details as Record<string, unknown> | undefined;
+    const ready = details?.ready === true;
+    const state = typeof details?.state === "string" ? details.state : undefined;
     let connectionStatus: WhatsAppSessionSnapshot["connectionStatus"] = "pending";
-    if (health.status === "misconfigured") {
+    if (ready && state === "ready") {
+      connectionStatus = "connected";
+    } else if (
+      state === "disabled" ||
+      state === "not_configured" ||
+      state === "error" ||
+      health.status === "misconfigured" ||
+      health.status === "disabled"
+    ) {
       connectionStatus = "disconnected";
     }
-
-    const details = health.details as Record<string, unknown> | undefined;
     const qrCandidate = details?.qrDataUrl;
     const qrDataUrl =
       typeof qrCandidate === "string" &&

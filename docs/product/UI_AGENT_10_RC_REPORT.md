@@ -86,7 +86,7 @@ All Agent 01–09 route groups reviewed at file/smoke level. Detail routes with 
 - Detail routes with real entity IDs.
 - Legacy color cleanup in `globals.css`.
 
-## Audit gap closure (same branch)
+## Audit gap closure (PR #135)
 
 | Area | Status |
 |------|--------|
@@ -99,8 +99,17 @@ All Agent 01–09 route groups reviewed at file/smoke level. Detail routes with 
 
 See `UI_AUDIT_GAP_CLOSURE_REPORT.md`, `UI_HARDENING_CHECKLIST.md`.
 
+## Integration readiness (follow-up branch)
+
+| Branch | `feature/whatsapp-local-ai-readiness` |
+| Work | WhatsApp + local AI fail-closed readiness |
+| Docs | `WHATSAPP_READINESS.md`, `LOCAL_AI_READINESS.md` |
+| API tests | `integration-readiness.test.ts` |
+| Runtime fake provider | No |
+
 ## Handoff
 
 - Merge PR for Agent 10 when ready.
+- Integration readiness: merge `feature/whatsapp-local-ai-readiness` after review.
 - Tag or branch `release/ui-rc-final` for deployment QA.
 - Post-RC: P2/P3 polish backlog in product docs.

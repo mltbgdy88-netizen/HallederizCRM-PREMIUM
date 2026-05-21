@@ -225,12 +225,15 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
           return;
         }
         const healthItem = healthResponse.item;
+        const details = healthItem?.details as Record<string, unknown> | undefined;
         setChannelHealth(
           healthItem
             ? {
                 status: healthItem.status,
                 message: healthItem.message ?? healthItem.reason ?? "",
-                mode: healthItem.mode
+                mode: healthItem.mode,
+                state: typeof details?.state === "string" ? details.state : undefined,
+                ready: details?.ready === true
               }
             : null
         );
@@ -253,7 +256,7 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
     [channelHealth, channelSession, useDemo]
   );
 
-  const outboundReady = canSendWhatsAppOutbound(channelSession, useDemo);
+  const outboundReady = canSendWhatsAppOutbound(channelSession, useDemo, channelHealth);
 
   const filtered = useMemo(() => filterConversations(conversations, chip, useDemo), [conversations, chip, useDemo]);
   const filteredKey = useMemo(() => filtered.map((c) => c.id).join("|"), [filtered]);
@@ -564,6 +567,7 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
                     void runWhatsAppOutboundSend({
                       useDemoData: false,
                       session: channelSession,
+                      health: channelHealth,
                       conversationId: selectedId,
                       body: aiDraft
                     }).then((outcome) => {

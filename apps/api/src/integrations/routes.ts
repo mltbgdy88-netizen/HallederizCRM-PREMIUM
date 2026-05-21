@@ -258,7 +258,22 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
       }
 
       const service = new IntegrationsService(context);
-      return reply.status(201).send({ item: await service.sendWhatsAppOutbound(request.body) });
+      const health = service.getWhatsAppHealth();
+      const ready = (health.details as Record<string, unknown> | undefined)?.ready === true;
+      if (!ready) {
+        return reply.status(503).send({
+          message: health.reason || "WhatsApp sağlayıcısı yapılandırılmadı."
+        });
+      }
+      try {
+        return reply.status(201).send({ item: await service.sendWhatsAppOutbound(request.body) });
+      } catch (error) {
+        const userMessage =
+          error && typeof error === "object" && "userMessage" in error && typeof error.userMessage === "string"
+            ? error.userMessage
+            : "WhatsApp gönderimi şu anda kullanılamıyor.";
+        return reply.status(503).send({ message: userMessage });
+      }
     })
   );
 
@@ -487,9 +502,44 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
     })
   );
 
+  server.get("/health/local-ai", async (request, reply) =>
+    withGuards(request, reply, requireReadAccess(readPermissions.integrations), async () => {
+      const { resolveLocalAiReadinessWithProbe } = await import("../shared/integration-readiness");
+      const item = await resolveLocalAiReadinessWithProbe();
+      return {
+        item: {
+          state: item.state,
+          provider: item.provider,
+          configured: item.configured,
+          ready: item.ready,
+          status: item.status,
+          message: item.message,
+          reasonCode: item.reasonCode,
+          missingEnv: item.missingEnv,
+          lastCheckedAt: item.lastCheckedAt,
+          details: item.details
+        }
+      };
+    })
+  );
+
   server.post("/health/whatsapp/test-send", async (request, reply) =>
     withGuards(request, reply, requireTenantPermissionGuards(["integrations.write", "whatsapp.write"]), async (context) => {
       const service = new IntegrationsService(context);
+      const health = service.getWhatsAppHealth();
+      const ready = (health.details as Record<string, unknown> | undefined)?.ready === true;
+      if (!ready) {
+        return reply.status(503).send({
+          item: {
+            ok: false,
+            mode: health.mode,
+            messageStatus: "failed",
+            reason: health.reason || "WhatsApp sağlayıcısı yapılandırılmadı.",
+            lastCheckedAt: new Date().toISOString(),
+            details: { ready: false }
+          }
+        });
+      }
       const message = await service.sendWhatsAppOutbound({
         conversationId: "wa_conv_1",
         body: "Staging test mesaji (dry-run).",

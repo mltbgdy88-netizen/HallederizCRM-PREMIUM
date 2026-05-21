@@ -308,7 +308,7 @@ export function AiInsightGrid({ insights }: { insights: AiInsight[] }) {
   if (insights.length === 0) {
     return (
       <section className="hz-content-card" role="status">
-        <p className="muted">Canlı AI içgörüsü bekleniyor. Sinyaller API bağlandığında kart olarak listelenir.</p>
+        <p className="muted">Lokal AI yapılandırıldığında içgörüler burada görünecek.</p>
       </section>
     );
   }

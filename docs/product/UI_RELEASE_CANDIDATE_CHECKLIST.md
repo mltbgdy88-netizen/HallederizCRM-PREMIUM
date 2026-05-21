@@ -5,6 +5,8 @@
 | Base commit | `282289d` |
 | Agent 10 branch | `ui/10-qa-bugfix-or-release-candidate` |
 | Last updated | 2026-05-21 |
+| WhatsApp readiness | Configured-pending — see `docs/product/WHATSAPP_READINESS.md` |
+| Local AI readiness | Configured-pending — see `docs/product/LOCAL_AI_READINESS.md` |
 
 ## UI adoption status
 
@@ -70,10 +72,21 @@
 | RC-P1-01..02 | P1 | No | Fixed in Agent 10 branch |
 | MANUAL-QA | Follow-up | No* | *Recommended before prod |
 
+## Integration readiness (Agent: whatsapp-local-ai)
+
+| Item | Status |
+|------|--------|
+| Runtime fake WhatsApp provider | No |
+| Runtime fake AI output | No |
+| Env examples safe placeholders | Yes (`.env.example`) |
+| WhatsApp live credentials | **Manual** — required for production send |
+| Ollama / local model | **Manual** — `ollama serve` + env |
+
 ## Go / No-Go
 
 | Decision | Value |
 |----------|--------|
 | Automated gate | **Go** |
+| Integration config gate | **Conditional Go** — credentials + Ollama manual |
 | Manual viewport gate | **Conditional Go** — run local pass |
 | Overall RC UI | **Go with follow-up QA** |

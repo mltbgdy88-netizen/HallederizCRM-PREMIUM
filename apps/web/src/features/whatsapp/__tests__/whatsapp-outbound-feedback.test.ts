@@ -9,7 +9,15 @@ import {
 test("canSendWhatsAppOutbound requires connected session in live mode", () => {
   assert.equal(canSendWhatsAppOutbound(null, true), false);
   assert.equal(canSendWhatsAppOutbound({ connectionStatus: "pending" }, false), false);
-  assert.equal(canSendWhatsAppOutbound({ connectionStatus: "connected" }, false), true);
+  assert.equal(canSendWhatsAppOutbound({ connectionStatus: "connected" }, false), false);
+  assert.equal(
+    canSendWhatsAppOutbound({ connectionStatus: "connected" }, false, { ready: true, state: "ready" }),
+    true
+  );
+  assert.equal(
+    canSendWhatsAppOutbound({ connectionStatus: "connected" }, false, { ready: false, state: "not_configured" }),
+    false
+  );
 });
 
 test("mapWhatsAppOutboundOutcome uses queue language unless delivered", () => {

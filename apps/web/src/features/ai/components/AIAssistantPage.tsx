@@ -298,8 +298,14 @@ export function AIAssistantPage() {
   const [voiceState, setVoiceState] = useState<{ transcript?: string; speakStatus?: string; reason?: string } | null>(null);
 
   const healthSummary = useMemo(() => {
-    if (!salesHealth) return "Health yükleniyor...";
-    return `Durum: ${salesHealth.status} | Model: ${salesHealth.model} | Fallback: ${salesHealth.fallbackModel} | Sebep: ${salesHealth.reason}`;
+    if (!salesHealth) return "Lokal AI durumu yükleniyor...";
+    if (salesHealth.status === "not_configured" || salesHealth.status === "blocked") {
+      return "Lokal AI yapılandırılmadı. Ollama veya OpenAI uyumlu lokal uç adresi env ile tanımlandığında durum burada güncellenir.";
+    }
+    if (salesHealth.status === "degraded") {
+      return "Lokal AI uç noktasına ulaşılamıyor veya model hazır değil. Ollama servisini ve model pull adımını kontrol edin.";
+    }
+    return `Lokal AI hazır. Model: ${salesHealth.model}. Öneriler yalnızca inceleme içindir.`;
   }, [salesHealth]);
 
   const reload = async () => {
@@ -456,8 +462,9 @@ export function AIAssistantPage() {
         {chatStatus ? <span className="hz-badge hz-badge-info">{`Aktif Provider: ${chatStatus.provider} (${chatStatus.mode})`}</span> : null}
       </PrimaryActionToolbar>
 
-      <section className="hz-content-card">
-        <h3>Satış Asistanı Sağlık Durumu</h3>
+      <section className="hz-content-card" aria-label="Lokal AI durumu">
+        <h3>Lokal AI durumu</h3>
+        <p className="hz-ai-review-note">AI önerileri kullanıcı onayı olmadan kayıt değiştirmez.</p>
         <p className="hz-content-card-description">{healthSummary}</p>
         {salesHealth ? (
           <div className="hz-inline-actions" style={{ flexWrap: "wrap", gap: "8px" }}>
