@@ -86,6 +86,19 @@ All Agent 01–09 route groups reviewed at file/smoke level. Detail routes with 
 - Detail routes with real entity IDs.
 - Legacy color cleanup in `globals.css`.
 
+## Audit gap closure (same branch)
+
+| Area | Status |
+|------|--------|
+| `/raporlar/[...]` | `ReportDetailPage` — safe empty/chart/table |
+| `/whatsapp` | `PageHeader` + provider notice |
+| Route `error.tsx` | 9 critical segments |
+| `platform-route-meta.ts` | Shell meta/search registry |
+| `/unauthorized` | Safe page |
+| `pnpm ui:guard` | `scripts/ui-guard.cjs` + CI step |
+
+See `UI_AUDIT_GAP_CLOSURE_REPORT.md`, `UI_HARDENING_CHECKLIST.md`.
+
 ## Handoff
 
 - Merge PR for Agent 10 when ready.

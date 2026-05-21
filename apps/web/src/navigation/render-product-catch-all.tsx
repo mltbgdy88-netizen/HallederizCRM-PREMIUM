@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 import { ProductModuleLanding } from "../components/product-module-landing";
 import { ProductPageShell } from "../components/product-page-shell";
 import { AiInsightsPage as AiInsightsFeaturePage } from "../features/ai/components";
+import { ReportDetailPage } from "../features/reports/components/ReportDetailPage";
 import { WhatsAppPage } from "../features/whatsapp/components";
 import { PRODUCT_ROUTE_FOREST, getProductRouteNode } from "./product-route-manifest";
 import type { ProductRouteNode } from "./product-route-types";
@@ -31,6 +32,11 @@ export function renderProductCatchAll(slug: string[]): ReactNode {
 
   if (node?.existingFeature === "ai-insights-page") {
     return <AiInsightsFeaturePage />;
+  }
+
+  if (path.startsWith("/raporlar/") && path !== "/raporlar") {
+    const tail = slug.filter(Boolean).slice(1);
+    return <ReportDetailPage slugSegments={tail} />;
   }
 
   if (PRODUCT_ROUTE_FOREST.some((m) => m.href === path)) {

@@ -169,7 +169,7 @@ PNG (referans, import YOK)
 | | |
 |--|--|
 | **Scope** | RC QA, P0/P1 UI bugfix, release docs |
-| **Status** | **Tamamlandı** — `UI_AGENT_10_RC_REPORT.md`, `UI_RELEASE_CANDIDATE_CHECKLIST.md`. Onaylar teknik copy P1 düzeltildi. Agent 01–09 zinciri + RC gate tamam. P2/P3 polish ayrı backlog. |
+| **Status** | **Tamamlandı** — RC QA + audit gap closure: raporlar detay, WhatsApp UX, `error.tsx`, `/unauthorized`, `platform-route-meta`, `ui:guard`. `UI_AUDIT_GAP_CLOSURE_REPORT.md`, `UI_HARDENING_CHECKLIST.md`. P2/P3 polish ayrı backlog. |
 | **Sonraki** | `release/ui-rc-final` veya prod deployment QA |
 
 ---

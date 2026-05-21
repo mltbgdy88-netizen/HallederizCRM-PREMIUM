@@ -109,7 +109,7 @@ Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 
 **Agent 03:** layout template foundation tamam (`UI_LAYOUT_PATTERNS.md`).
 
-**Agent 10 (2026-05-21):** RC QA tamam — `ui/10-qa-bugfix-or-release-candidate` @ `282289d`. P0 yok; P1 onaylar teknik copy düzeltildi; `UI_AGENT_10_RC_REPORT.md`, `UI_RELEASE_CANDIDATE_CHECKLIST.md`. **Go** (otomatik kapı); manuel viewport QA follow-up.
+**Agent 10 (2026-05-21):** RC QA + audit gap closure — `ui/10-qa-bugfix-or-release-candidate` @ `282289d`. P0 yok; P1 onaylar copy; `ReportDetailPage`, `/unauthorized`, route `error.tsx`, `platform-route-meta.ts`, `pnpm ui:guard`. **Go** (otomatik kapı); manuel viewport QA follow-up.
 
 **Agent 09 (2026-05-21):** Visual QA / polish tamam — `ui/09-visual-qa-polish` @ `22bf180`. Global density/overflow/emerald polish (`agent09-visual-qa-polish.css`); Türkçe/Foundation/onaylar güvenlik bandı copy; regression scan temiz. Detay: `UI_AGENT_09_REPORT.md`, `UI_VISUAL_QA_REPORT.md`.
 
@@ -131,7 +131,7 @@ Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 |-------|------------|-------------------|------------|
 | default | `page.tsx` | Çoğu route | Paket yok |
 | loading | `loading.tsx` | **5 dosya** (Agent 04 platform) | error segment yok |
-| error | `error.tsx` | **0 dosya** | Agent 05+ |
+| error | `error.tsx` | **9 segment** (raporlar, whatsapp, gelen-kutu, ai, kullanicilar, erp, belgeler, onaylar) | Agent 10 |
 | empty | `EmptyState` / özel | Kısmi | — |
 | mobile | CSS breakpoint | Mevcut kırılım; 390×844 QA Agent 09 | — |
 | validation | Form sayfaları | `cariler/yeni`; hub’larda yok | — |

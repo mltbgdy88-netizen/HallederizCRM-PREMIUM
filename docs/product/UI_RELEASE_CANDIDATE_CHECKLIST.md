@@ -19,7 +19,7 @@
 | 07 | Communication / reports / AI | Complete |
 | 08 | Settings / users / ERP / system | Complete |
 | 09 | Visual QA / polish | Complete |
-| 10 | RC QA / P0–P1 | Complete (this checklist) |
+| 10 | RC QA / P0–P1 + audit gap closure | Complete (this checklist) |
 
 ## Route group status
 
@@ -42,6 +42,7 @@
 | Web build | Pass |
 | smoke:navigation | Pass |
 | smoke:routes | Pass |
+| ui:guard | Pass |
 
 ## Manual QA status
 
@@ -50,9 +51,13 @@
 | 1920×1080 desktop | **Not run** — recommended before production cut |
 | 390×844 mobile | **Not run** — recommended before production cut |
 
+## Stash policy
+
+- `wip-mockup-inspiration-before-agent04` **must not** be restored on release branches.
+- Inspect on a throwaway branch only.
+
 ## Known gaps (non-blocking for RC gate)
 
-- `/unauthorized` dedicated page
 - `globals.css` legacy color tokens
 - Mock data ASCII strings (non-UI)
 - Detail route visual QA with live IDs
