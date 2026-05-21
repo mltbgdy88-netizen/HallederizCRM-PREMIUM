@@ -1,5 +1,5 @@
-import { DashboardHomePage } from "../../../src/features/dashboard/components/DashboardHomePage";
+import { DashboardCommandCenterPage } from "../../../src/features/dashboard/components/DashboardCommandCenterPage";
 
 export default function DashboardPage() {
-  return <DashboardHomePage />;
+  return <DashboardCommandCenterPage />;
 }
