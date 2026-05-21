@@ -16,6 +16,8 @@ export interface HeaderProps {
   userSlot: ReactNode;
   /** Adds layout class for wider search + greeting row. */
   layout?: "default" | "dashboard";
+  /** Emerald command-center chrome (dashboard). */
+  variant?: "default" | "command";
 }
 
 export function Header({
@@ -29,9 +31,17 @@ export function Header({
   notificationSlot,
   themeSlot,
   userSlot,
-  layout = "default"
+  layout = "default",
+  variant = "default"
 }: HeaderProps) {
-  const rootClass = `hz-header-root ${layout === "dashboard" ? "hz-header-root--dashboard" : ""} ${suppressPageMeta ? "hz-header-root--qop" : ""}`;
+  const rootClass = [
+    "hz-header-root",
+    layout === "dashboard" ? "hz-header-root--dashboard" : "",
+    variant === "command" ? "hz-header-root--command" : "",
+    suppressPageMeta ? "hz-header-root--qop" : ""
+  ]
+    .filter(Boolean)
+    .join(" ");
 
   return (
     <div className={rootClass}>
@@ -55,11 +65,17 @@ export function Header({
 
       <div className="hz-header-trailing">
         {toolbarSlot ? <div className="hz-header-toolbar">{toolbarSlot}</div> : null}
-        <div className="hz-header-actions">
-          {notificationSlot}
-          {themeSlot != null ? themeSlot : null}
-          {userSlot}
-        </div>
+        <details className="hz-header-actions-drawer">
+          <summary className="hz-header-actions-drawer-trigger" aria-label="Aksiyonlar">
+            <span className="hz-sr-only">Aksiyonlar</span>
+            <span aria-hidden>⋯</span>
+          </summary>
+          <div className="hz-header-actions">
+            {notificationSlot}
+            {themeSlot != null ? themeSlot : null}
+          </div>
+        </details>
+        {userSlot}
       </div>
     </div>
   );

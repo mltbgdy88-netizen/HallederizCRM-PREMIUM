@@ -6,47 +6,25 @@ import {
   PageContent,
   Sidebar,
   ThemeToggle,
-  UserMenu,
-  type AppShellNavItem
+  UserMenu
 } from "@hallederiz/ui";
-import type { SidebarNavSection } from "@hallederiz/ui";
+import type { AppShellNavItem } from "@hallederiz/ui";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
-import { buildProductSidebarNavSections } from "./product-sidebar-nav";
+import { buildCommandCenterSidebarNavSections } from "./command-center-sidebar-nav";
 import { normalizeShellPathname, resolveShellHeaderOptions } from "./platform-route-meta";
 import { useAuth } from "../providers/auth-provider";
 import { useTheme } from "../providers/theme-provider";
 
-/** Sidebar’da sayı badge’i gösterilmez (PR #31); kaynak veride olsa bile kaldırılır. */
-function stripNavBadges(sections: SidebarNavSection[]): SidebarNavSection[] {
-  return sections.map((section) => ({
-    ...section,
-    items: section.items.map(({ badge: _removed, ...rest }) => rest)
-  }));
-}
-
-const NAV_SECTIONS_FOR_SHELL = stripNavBadges(buildProductSidebarNavSections());
-
-const ALL_SHELL_NAV_ITEMS: AppShellNavItem[] = NAV_SECTIONS_FOR_SHELL.flatMap((s) => s.items);
-
-function resolveActiveHref(pathname: string): string {
+function resolveActiveHref(pathname: string, items: AppShellNavItem[]): string {
   const p = normalizeShellPathname(pathname);
-  const items = [...ALL_SHELL_NAV_ITEMS].sort((a, b) => b.href.length - a.href.length);
-  for (const item of items) {
+  const sorted = [...items].sort((a, b) => b.href.length - a.href.length);
+  for (const item of sorted) {
     if (p === item.href || p.startsWith(`${item.href}/`)) {
       return item.href;
     }
   }
   return "";
-}
-
-function formatDashboardDateLine(): string {
-  return new Intl.DateTimeFormat("tr-TR", {
-    weekday: "long",
-    day: "numeric",
-    month: "long",
-    year: "numeric"
-  }).format(new Date());
 }
 
 export function PlatformShell({ children }: { children: React.ReactNode }) {
@@ -60,20 +38,24 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
     setMobileSidebarOpen(false);
   }, [pathname]);
 
+  const navSections = useMemo(() => buildCommandCenterSidebarNavSections(), []);
+
+  const allNavItems = useMemo(() => navSections.flatMap((s) => s.items), [navSections]);
+
   const normalizedPath = useMemo(() => normalizeShellPathname(pathname), [pathname]);
   const headerOptions = useMemo(() => resolveShellHeaderOptions(pathname), [pathname]);
-  const activeHref = resolveActiveHref(pathname);
+  const activeHref = resolveActiveHref(pathname, allNavItems);
   const isDashboard = normalizedPath === "/dashboard";
 
-  const dashboardGreeting = useMemo(() => {
-    const display = session?.user.fullName?.trim() || "Ahmet Yılmaz";
-    return (
-      <div className="hz-header-greeting">
-        <p className="hz-header-greeting-line">Günaydın, {display}</p>
-        <p className="hz-header-greeting-date">{formatDashboardDateLine()}</p>
-      </div>
-    );
-  }, [session?.user.fullName]);
+  const displayFirstName = session?.user.fullName?.trim().split(" ")[0] ?? "Mevlüt";
+  const displayShortName = session?.user.fullName?.trim() || "Mevlüt K.";
+
+  const dashboardLeading = (
+    <div className="hz-header-cc-leading">
+      <h2 className="hz-header-cc-title">Ana Sayfa</h2>
+      <p className="hz-header-cc-sub">Hoş geldiniz, {displayFirstName} 👋</p>
+    </div>
+  );
 
   return (
     <AppShell
@@ -81,58 +63,49 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
       onMobileSidebarOpenChange={setMobileSidebarOpen}
       sidebar={
         <Sidebar
-          logoMarkLabel="LOGO ALANI"
-          appTitle="HallederizCRM Premium"
-          navSections={NAV_SECTIONS_FOR_SHELL}
+          appTitle="HallederizCRM"
+          navSections={navSections}
           activeHref={activeHref}
-          companyCard={{ name: "Hallederiz A.Ş.", branch: "Merkez", status: "Çevrimiçi" }}
+          variant="command-center"
           onNavigate={(href) => router.push(href)}
         />
       }
       header={
         <Header
           layout={headerOptions.layout}
+          variant={isDashboard ? "command" : "default"}
           suppressPageMeta={headerOptions.suppressPageMeta}
           title={headerOptions.pageMeta.title}
           subtitle={headerOptions.pageMeta.subtitle}
           breadcrumb={headerOptions.pageMeta.breadcrumb}
-          leadingSlot={isDashboard ? dashboardGreeting : undefined}
+          leadingSlot={isDashboard ? dashboardLeading : undefined}
           searchPlaceholder={headerOptions.searchPlaceholder}
-          toolbarSlot={
-            isDashboard ? (
-              <button
-                type="button"
-                className="hz-header-quick-primary"
-                onClick={() => {
-                  window.dispatchEvent(new CustomEvent("dashboard:open-card-editor"));
-                }}
-              >
-                Kartları Düzenle
-              </button>
-            ) : null
-          }
+          toolbarSlot={null}
           notificationSlot={
             <>
-              <button type="button" className="hz-header-icon-button hz-header-icon-button--ghost" aria-label="Bildirimler">
+              <button
+                type="button"
+                className="hz-header-icon-button hz-header-icon-button--ghost hz-header-icon-button--bell"
+                aria-label="Bildirimler"
+              >
                 <span className="hz-header-bell" aria-hidden />
                 <span className="hz-sr-only">Bildirimler</span>
               </button>
               <button
                 type="button"
                 className="hz-header-icon-button hz-header-icon-button--ghost"
-                aria-label="WhatsApp"
-                onClick={() => router.push("/whatsapp")}
+                aria-label="Yardım"
               >
-                <span className="hz-header-wa" aria-hidden />
-                <span className="hz-sr-only">WhatsApp</span>
+                <span aria-hidden>?</span>
+                <span className="hz-sr-only">Yardım</span>
               </button>
             </>
           }
           themeSlot={<ThemeToggle mode={theme} onToggle={toggleTheme} compact={isDashboard} />}
           userSlot={
             <UserMenu
-              fullName={session?.user.fullName ?? "Bilinmeyen Kullanıcı"}
-              roleLabel={session?.roles[0]?.name ?? "Rol tanımsız"}
+              fullName={displayShortName}
+              roleLabel={session?.roles[0]?.name ?? "Yönetici"}
               onLogout={logout}
             />
           }

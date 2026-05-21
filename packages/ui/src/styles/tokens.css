@@ -4,15 +4,15 @@
  */
 :root,
 :root[data-theme="light"] {
-  /* Canonical palette */
+  /* Canonical palette (emerald / gold / ivory) */
   --hz-color-emerald: #047857;
   --hz-color-sidebar: #064e3b;
-  --hz-color-gold: #d6a21e;
-  --hz-color-gold-soft: #f7d774;
-  --hz-color-bg: #f8f6ef;
-  --hz-color-surface: #fffdf7;
-  --hz-color-text: #17231d;
-  --hz-color-muted: #667568;
+  --hz-color-gold: #d4af37;
+  --hz-color-gold-soft: #f2c94c;
+  --hz-color-bg: #f8f5ec;
+  --hz-color-surface: #fffcf4;
+  --hz-color-text: #102a24;
+  --hz-color-muted: #5b6b63;
   --hz-color-danger: #b42318;
   --hz-color-info: #2563eb;
 
