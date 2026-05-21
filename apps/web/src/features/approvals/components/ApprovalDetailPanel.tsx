@@ -120,22 +120,22 @@ export function ApprovalDetailPanel({
       </section>
 
       <section className="hz-approvals-inbox-card">
-        <h3 className="hz-approvals-inbox-card-title">Runtime / bridge</h3>
+        <h3 className="hz-approvals-inbox-card-title">Çalışma zamanı özeti</h3>
         <dl className="hz-approvals-inbox-meta hz-approvals-inbox-meta--grid">
           <div>
-            <dt>Execution id</dt>
+            <dt>İşlem no</dt>
             <dd>{item.executionId ?? "-"}</dd>
           </div>
           <div>
-            <dt>Outbox job</dt>
+            <dt>İş kuyruğu no</dt>
             <dd>{item.outboxJobId ?? "-"}</dd>
           </div>
           <div>
-            <dt>Bridge transaction</dt>
+            <dt>İşlem modu</dt>
             <dd>{item.bridgeTransactionMode ?? "-"}</dd>
           </div>
           <div>
-            <dt>Bridge persistence</dt>
+            <dt>Kalıcılık modu</dt>
             <dd>{item.bridgePersistenceMode ?? "-"}</dd>
           </div>
           <div>
@@ -168,19 +168,19 @@ export function ApprovalDetailPanel({
           </p>
           <dl className="hz-approvals-inbox-meta hz-approvals-inbox-meta--grid">
             <div>
-              <dt>executionId</dt>
+              <dt>İşlem no</dt>
               <dd>{lastApprovalSummary.executionId ?? "-"}</dd>
             </div>
             <div>
-              <dt>outboxJobId</dt>
+              <dt>İş kuyruğu no</dt>
               <dd>{lastApprovalSummary.outboxJobId ?? "-"}</dd>
             </div>
             <div>
-              <dt>Bridge</dt>
+              <dt>Köprü özeti</dt>
               <dd className="hz-approvals-inbox-mono-wrap">{lastApprovalSummary.bridgeLine}</dd>
             </div>
             <div>
-              <dt>auditTimelineWritebackQueued</dt>
+              <dt>Denetim zaman çizelgesi</dt>
               <dd>
                 {lastApprovalSummary.auditTimelineWritebackQueued === true
                   ? "true"
