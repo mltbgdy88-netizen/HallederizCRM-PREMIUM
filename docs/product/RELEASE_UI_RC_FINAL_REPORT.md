@@ -4,7 +4,8 @@
 |------|--------|
 | Branch | `release/ui-rc-final` |
 | Base commit | `f96680a` |
-| Final main HEAD | `f96680a` — feat(integrations): prepare whatsapp and local ai readiness (#136) |
+| Final main HEAD | `2d2430f` — docs(release): finalize ui release candidate (#137) |
+| Integration commit | `f96680a` — feat(integrations): prepare whatsapp and local ai readiness (#136) |
 | Report date | 2026-05-21 |
 | Commit type | docs-only (release finalization) |
 
@@ -30,8 +31,9 @@ The UI transformation program (Agents 00–10), release-candidate hardening (#13
 | #134 | RC QA P1 fixes | Yes (`81f9283`) |
 | #135 | RC hardening / audit gaps | Yes (`1ba9dcb`) |
 | #136 | WhatsApp + local AI readiness | Yes (`f96680a`) |
+| #137 | UI RC final release docs | Yes (`2d2430f`) |
 
-No missing PR in the #123–#136 UI/integration chain.
+No missing PR in the #123–#137 UI/integration/release-docs chain.
 
 ## UI adoption status
 
@@ -171,12 +173,25 @@ AI_LOCAL_TIMEOUT_MS=20000
 
 See `RELEASE_UI_RC_GO_NO_GO.md` for sign-off checklist.
 
+## Production cutover documentation (2026-05-21)
+
+| Item | Status |
+|------|--------|
+| Branch `release/production-cutover` | Prepared |
+| `PRODUCTION_CUTOVER_RUNBOOK.md` | Created |
+| `PRODUCTION_ENV_CHECKLIST.md` | Created |
+| `PRODUCTION_SMOKE_CHECKLIST.md` | Created |
+| `PRODUCTION_ROLLBACK_PLAN.md` | Created |
+| `RELEASE_PRODUCTION_GO_NO_GO.md` | Created |
+| Runtime code changes | **None** |
+
 ## Release handoff
 
-1. Merge `release/ui-rc-final` docs PR when approved.
-2. Production cutover branch: `release/production-cutover` (recommended next).
+1. ~~Merge `release/ui-rc-final` docs PR~~ — **Done** (#137 → `2d2430f`).
+2. Open PR from `release/production-cutover` for production cutover docs.
 3. Do **not** restore stash `wip-mockup-inspiration-before-agent04` on release branches.
 4. Configure WhatsApp + Ollama (or compatible endpoint) before enabling live send / AI chat in production.
+5. Execute `PRODUCTION_CUTOVER_RUNBOOK.md` phases with sign-off in `RELEASE_PRODUCTION_GO_NO_GO.md`.
 
 ## Related documents
 

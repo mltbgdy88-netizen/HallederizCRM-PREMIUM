@@ -2,9 +2,11 @@
 
 | Alan | Durum |
 |------|--------|
-| Base commit | `f96680a` |
-| Release final branch | `release/ui-rc-final` |
+| Base commit | `2d2430f` |
+| Release final branch | `release/ui-rc-final` (merged #137) |
+| Production cutover branch | `release/production-cutover` |
 | Last updated | 2026-05-21 |
+| PR #137 on main | Yes — UI RC final docs |
 | PR #136 on main | Yes — integrations merged |
 | WhatsApp readiness | Configured-pending — see `WHATSAPP_READINESS.md` |
 | Local AI readiness | Configured-pending — see `LOCAL_AI_READINESS.md` |
@@ -103,4 +105,17 @@
 | Integration config gate | **Conditional Go** — credentials + Ollama manual |
 | Manual viewport gate | **Conditional Go** — run local pass |
 | Overall RC UI | **Conditional Go** — see `RELEASE_UI_RC_GO_NO_GO.md` |
-| Production cutover | Pending manual setup + QA sign-off |
+| Production cutover | Docs prepared — manual deploy/smoke pending |
+
+## Production cutover (2026-05-21)
+
+| Check | Result |
+|-------|--------|
+| `PRODUCTION_CUTOVER_RUNBOOK.md` | Prepared |
+| `PRODUCTION_ENV_CHECKLIST.md` | Prepared |
+| `PRODUCTION_SMOKE_CHECKLIST.md` | Prepared |
+| `PRODUCTION_ROLLBACK_PLAN.md` | Prepared |
+| `RELEASE_PRODUCTION_GO_NO_GO.md` | Prepared — **Conditional Go** |
+| Production manual gates listed | Yes — WhatsApp, Local AI, viewport, real-data |
+| Runtime code change in cutover branch | **No** (docs-only) |
+| Final production status | **Conditional Go** until operator sign-off |
