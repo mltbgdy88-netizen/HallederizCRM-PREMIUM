@@ -10,7 +10,14 @@ export function SettingsAreaShell({ children }: { children: ReactNode }) {
     <div className="hz-settings-page">
       <SettingsLayout
         nav={<SettingsSubNav />}
-        children={<div className="hz-settings-aux-body hz-page-stack">{children}</div>}
+        children={
+          <div className="hz-settings-aux-body hz-page-stack">
+            <p className="hz-settings-context-band" role="status">
+              Ayarlar kiracı yapılandırmasını gösterir; sahte kayıt veya otomatik başarı mesajı üretilmez.
+            </p>
+            {children}
+          </div>
+        }
       />
     </div>
   );

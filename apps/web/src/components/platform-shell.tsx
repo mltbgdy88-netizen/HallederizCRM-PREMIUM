@@ -84,6 +84,9 @@ const PAGE_META: Array<[string, PageMeta]> = [
   ["/raporlar", { title: "Raporlar", subtitle: "Operasyonel metrikler ve karar destek raporları.", breadcrumb: "Raporlar" }],
   ["/kullanicilar/roller", { title: "Roller", subtitle: "Rol, izin matrisi ve onay yetkileri.", breadcrumb: "Kullanıcılar / Roller" }],
   ["/kullanicilar", { title: "Kullanıcılar", subtitle: "Kullanıcı hesapları ve erişim kapsamlarının yönetimi.", breadcrumb: "Kullanıcılar" }],
+  ["/offline-api", { title: "API bağlantısı", subtitle: "Sunucuya ulaşılamıyor; güvenli sistem durumu.", breadcrumb: "Sistem" }],
+  ["/demo-mode", { title: "Önizleme modu", subtitle: "Demo ve canlı veri ayrımı.", breadcrumb: "Sistem" }],
+  ["/live-empty", { title: "Canlı veri boş", subtitle: "Bağlantı var, kayıt yok.", breadcrumb: "Sistem" }],
   ["/ayarlar", { title: "Ayarlar", subtitle: "Kiracı bazlı platform yapılandırması.", breadcrumb: "Ayarlar" }]
 ];
 
@@ -173,6 +176,11 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
   const isArchiveList = normalizedPath === "/archive";
   const isReportsList = normalizedPath === "/raporlar";
   const isSettingsArea = normalizedPath === "/ayarlar" || normalizedPath.startsWith("/ayarlar/");
+  const isUsersList = normalizedPath === "/kullanicilar";
+  const isUsersRoles = normalizedPath === "/kullanicilar/roller";
+  const isErpPage = normalizedPath === "/erp";
+  const isSystemStatePage =
+    normalizedPath === "/offline-api" || normalizedPath === "/demo-mode" || normalizedPath === "/live-empty";
   const isWarehousePrep = normalizedPath === "/depo" || normalizedPath.startsWith("/depo/");
   const isTasksWorkspace = normalizedPath === "/gorevler" || normalizedPath.startsWith("/gorevler/");
   const isAiWorkspace = normalizedPath === "/ai" || normalizedPath.startsWith("/ai/");
@@ -251,6 +259,10 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
             isArchiveList ||
             isReportsList ||
             isSettingsArea ||
+            isUsersList ||
+            isUsersRoles ||
+            isErpPage ||
+            isSystemStatePage ||
             isWarehousePrep ||
             isTasksWorkspace ||
             isAiWorkspace ||
@@ -316,7 +328,15 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
                                   ? "Rapor, cari, belge, tarih, metrik veya kullanıcı ara..."
                                   : isSettingsArea
                                     ? "Ayar, kullanıcı, bağlantı, depo, fiyat veya belge ara..."
-                                    : isCustomersEntityDetail
+                                    : isUsersList
+                                      ? "Kullanıcı adı, e-posta, rol veya durum ara..."
+                                      : isUsersRoles
+                                        ? "Rol adı, kod, modül veya yetki ara..."
+                                        : isErpPage
+                                          ? "ERP bağlantı, eşleme, senkron veya hata ara..."
+                                          : isSystemStatePage
+                                            ? "Sistem durumu veya mod ara..."
+                                            : isCustomersEntityDetail
                                       ? "Cari kartı: iletişim, hesap, teklif veya ekstre notu ara..."
                                       : isOrdersEntityDetail
                                         ? "Sipariş detayı: satır, belge no veya referans ara..."
