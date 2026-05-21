@@ -7,6 +7,7 @@
 @import "./styles/agent06-stock-documents-tasks.css";
 @import "./styles/agent07-communication-reports-ai.css";
 @import "./styles/agent08-settings-users-erp.css";
+@import "./styles/agent09-visual-qa-polish.css";
 
 :root,
 :root[data-theme="light"] {

@@ -28,10 +28,12 @@ export function QuickOperationSideActionsPanel({
   return (
     <section className="hz-content-card">
       <div className="crm-identity-header">
-        <h3>Yan Aksiyon Taslaklari</h3>
-        <span className="hz-badge hz-badge-warning">Foundation</span>
+        <h3>Yan aksiyon taslakları</h3>
+        <span className="hz-badge hz-badge-warning">Önizleme</span>
       </div>
-      <p className="hz-content-card-description">Bu turda taslak/onizleme olusturulur; gercek gonderim ve PDF cikti sonraki asamada etkinlesecektir.</p>
+      <p className="hz-content-card-description">
+        Bu turda yalnızca taslak ve önizleme hazırlanır; gerçek gönderim ve PDF çıktısı onay zincirinden sonra etkinleşir.
+      </p>
 
       {documentPreviewVisible && documentPreview ? (
         <div className="hz-state-card tone-info hz-margin-top-sm">

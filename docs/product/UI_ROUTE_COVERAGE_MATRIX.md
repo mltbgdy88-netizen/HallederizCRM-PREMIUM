@@ -99,4 +99,4 @@
 | 06 | `ui/06-stock-documents-tasks` | #14, 30–36, 53 |
 | 07 | `ui/07-communication-reports-ai` | #8–10, 37–41 |
 | 08 | `ui/08-settings-users-erp-common` | #42–46, 48–51 |
-| 09 | `ui/09-final-qa-polish` | Tümü QA |
+| 09 | `ui/09-visual-qa-polish` | Tümü visual QA — **Agent 09 tamam** |

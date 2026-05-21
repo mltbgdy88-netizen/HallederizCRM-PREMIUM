@@ -18,7 +18,7 @@ export function WarehouseTaskPreviewPanel({ warehouseOrder, customer }: { wareho
     <section className="hz-content-card">
       <h3>Depo Preview</h3>
       <ul className="hz-side-list hz-margin-top-sm">
-        <li>Musteri: {customer?.name ?? warehouseOrder.customerId}</li>
+        <li>Müşteri: {customer?.name ?? warehouseOrder.customerId}</li>
         <li>Siparis: {warehouseOrder.orderNo}</li>
         <li>Depo: {warehouseOrder.warehouseName}</li>
         <li>Durum: {getWarehouseOrderPrepLabel(warehouseOrder)}</li>

@@ -20,7 +20,7 @@ const TAB_ITEMS: { key: ProductTabKey; label: string }[] = [
   { key: "movements", label: "Hareketler" }
 ];
 
-const MSG_MODAL_SAVE = "Urun kaydi henuz canli API ve onay zincirine bagli degil.";
+const MSG_MODAL_SAVE = "Ürün kaydı henüz canlı API ve onay zincirine bağlı değil.";
 const MSG_MODAL_LABEL =
   "Etiket ve barkod ciktisi bu ortamda kapali. Canli uretim icin modul API baglantisi gerekiyor.";
 const MSG_MODAL_PRINT = "Yazdirma ciktisi bu ortamda henuz kullanima acik degil.";
@@ -40,11 +40,11 @@ function renderGeneralTab(product: Product, brandName: string, factoryName: stri
   return (
     <div className="hz-modal-panel-grid hz-tab-content">
       <article className="hz-kv-item">
-        <span>Urun kodu</span>
+        <span>Ürün kodu</span>
         <strong>{product.code}</strong>
       </article>
       <article className="hz-kv-item">
-        <span>Urun adi</span>
+        <span>Ürün adı</span>
         <strong>{product.name}</strong>
       </article>
       <article className="hz-kv-item">
@@ -132,7 +132,7 @@ export function ProductDetailModal({
       <aside className="hz-modal stock-drawer" role="dialog" aria-modal="true" onClick={(event) => event.stopPropagation()}>
         <header className="hz-modal-header stock-drawer-header">
           <div>
-            <p className="drawer-eyebrow">Urun karti</p>
+            <p className="drawer-eyebrow">Ürün kartı</p>
             <h3>
               {product.code} - {product.name}
             </h3>

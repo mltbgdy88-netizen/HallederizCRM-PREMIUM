@@ -1,0 +1,123 @@
+/* Agent 09 — cross-route visual QA polish (presentation only) */
+
+.platform-content {
+  overflow-x: hidden;
+}
+
+.hz-list-template-page,
+.hz-entity-list-page,
+.hz-page-stack {
+  max-width: var(--hz-content-max-width, 1604px);
+  margin: 0 auto;
+  width: 100%;
+  min-height: 0;
+  overflow-x: hidden;
+}
+
+.hz-list-template-body,
+.hz-entity-list-page-body {
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.hz-list-template-summary {
+  flex-shrink: 0;
+}
+
+/* Liste yoğunluğu — ilk görünümde daha fazla satır */
+.hz-customers-row,
+.hz-stock-row,
+.hz-users-row,
+.hz-orders-row,
+.hz-offers-row,
+.hz-payments-row,
+.hz-deliveries-row,
+.hz-returns-row,
+.hz-invoices-row,
+.hz-tasks-ws-row,
+.hz-archive-row,
+.hz-reports-row,
+.hz-wa-row,
+.hz-approvals-row {
+  min-height: 44px;
+}
+
+.hz-customers-list-header,
+.hz-stock-list-header,
+.hz-users-list-header,
+.hz-orders-list-header,
+.hz-offers-list-header,
+.hz-payments-list-header,
+.hz-deliveries-list-header,
+.hz-returns-list-header,
+.hz-invoices-list-header,
+.hz-tasks-ws-list-header,
+.hz-archive-list-header,
+.hz-reports-list-header,
+.hz-wa-list-header,
+.hz-approvals-list-header {
+  min-height: 26px;
+}
+
+/* Sağ panel — token genişliği */
+.hz-split-content-side,
+.hz-list-template-page .hz-split-content-side {
+  width: min(var(--hz-detail-panel-width, 360px), 100%);
+  max-width: var(--hz-detail-panel-width, 360px);
+  min-width: 0;
+}
+
+/* Legacy mor/lacivert CTA residue → emerald secondary */
+.hz-btn-primary:not(.hz-header-quick-primary):not(.hz-qop-step-active) {
+  background: var(--hz-color-emerald, #0d5c4d);
+  border-color: color-mix(in srgb, var(--hz-color-emerald, #0d5c4d) 85%, #000);
+}
+
+.hz-btn-primary:not(.hz-header-quick-primary):hover {
+  background: color-mix(in srgb, var(--hz-color-emerald, #0d5c4d) 88%, #fff);
+}
+
+/* Kompakt filtre bandı */
+.hz-filter-card,
+.hz-customers-filter-row,
+.hz-stock-filter-row,
+.hz-users-filter-row {
+  gap: 8px;
+}
+
+/* Mobile 390×844 */
+@media (max-width: 900px) {
+  .hz-split-content-layout {
+    flex-direction: column;
+  }
+
+  .hz-split-content-side {
+    width: 100%;
+    max-width: none;
+  }
+
+  .hz-metric-grid,
+  .hz-customers-kpi-strip,
+  .hz-stock-kpi-strip,
+  .hz-users-kpi-strip,
+  .hz-roles-kpi-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .table-wrap.hz-table-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+}
+
+@media (max-width: 480px) {
+  .hz-header-greeting-line {
+    font-size: 14px;
+  }
+
+  .hz-inline-actions {
+    flex-wrap: wrap;
+  }
+}

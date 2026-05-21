@@ -154,7 +154,7 @@ function TaskFilterWorkbench({
               <option value="order">Siparis</option>
               <option value="delivery">Teslimat</option>
               <option value="customer">Cari</option>
-              <option value="product">Urun</option>
+              <option value="product">Ürün</option>
               <option value="payment">Tahsilat</option>
               <option value="offer">Teklif</option>
               <option value="ai_proposal">AI proposal</option>
@@ -192,9 +192,9 @@ export function TaskTable({
         <table className="table hz-table hz-table-sticky">
           <thead>
             <tr>
-              <th>Gorev No</th>
+              <th>Görev No</th>
               <th>Baslik</th>
-              <th>Musteri / Kayit</th>
+              <th>Müşteri / Kayit</th>
               <th>Atanan</th>
               <th>Durum</th>
               <th>Oncelik</th>
@@ -308,12 +308,12 @@ export function TasksPage() {
       <header className="hz-tasks-ws-top">
         <div>
           <p className="hz-tasks-ws-eyebrow">Operator workspace</p>
-          <h1 className="hz-tasks-ws-title">Gorevler</h1>
+          <h1 className="hz-tasks-ws-title">Görevler</h1>
           <p className="hz-tasks-ws-subtitle">Orta is listesi, sag baglam paneli, AI ozet ve zaman cizelgesi.</p>
         </div>
       </header>
 
-      <div className="hz-tasks-ws-kpis" aria-label="Gorev ozetleri">
+      <div className="hz-tasks-ws-kpis" aria-label="Görev özetleri">
         <div className="hz-tasks-ws-kpi">
           <span className="hz-tasks-ws-kpi-label">Toplam</span>
           <span className="hz-tasks-ws-kpi-value">{tasks?.length ?? "—"}</span>
@@ -343,7 +343,7 @@ export function TasksPage() {
       </p>
 
       {!tasks ? (
-        <LoadingState title="Gorevler yukleniyor" message="Operasyon motoru kayitlari hazirlaniyor." />
+        <LoadingState title="Görevler yükleniyor" message="Operasyon motoru kayitlari hazırlanıyor." />
       ) : (
         <SplitContentLayout
           sideWidth="detail"
