@@ -21,7 +21,7 @@
 | 1 | `/login` | Split login shell | MISSING | **Var** `app/login/page.tsx` | REAL | default, loading, validation, mobile | `hz-login-*` split; auth logic korundu | 04 | **Agent 04 tamam** — `UI_AGENT_04_REPORT.md` |
 | 2 | `/dashboard` | Operation dashboard + AI kolon | MISSING | **Var** | REAL | default, loading, mobile | 5 ops KPI + AI «İncele» | 04 | **Agent 04 tamam** |
 | 3 | `/panel` | Redirect/loading page | MISSING | **Var** | REDIR → `/dashboard` | default, loading | Client spinner + TR copy | 04 | **Agent 04 tamam** |
-| 4 | `/hizli-islem` | Quick Operation workbench | MISSING | **Var** | REAL | default, loading, stepper | 4 adım stepper; submit korundu | 04 | **Agent 04 tamam** |
+| 4 | `/hizli-islem` | Quick Operation workbench | MISSING | **Var** | REAL | default, loading, stepper | Sipariş sekmesi ödeme bloğu; sale_order+payment | 04 | **Rework** — ödeme akışı |
 | 5 | `/onaylar` | Entity list + right preview | MISSING | **Var** | REAL | default, loading, empty, error, mobile | Desk inbox + auto-select | 04 | **Agent 04 tamam** |
 | 6 | `/onaylar/[id]` | Entity detail + timeline | MISSING | **Var** `[approvalId]` | REAL | detail, audit placeholder | `EntityDetailLayout` | 04 | **Agent 04 tamam**; canlı timeline feed Agent 05+ |
 | 7 | `/onaylar/kurallar` | Role permission matrix | MISSING | **Var** | REAL | default, validation (local) | Tablo + sağ panel | 04 | **Agent 04 tamam** |
@@ -40,7 +40,7 @@
 | 20 | `/siparisler/yeni` | Hub → Hızlı İşlem | MISSING | **Var** | HUB | default | Form değil | 05 | **Agent 05 tamam** — `OrderCreateHub` |
 | 21 | `/tahsilatlar` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, mobile | — | 05 | **Agent 05 tamam** — `PaymentsPage` |
 | 22 | `/tahsilatlar/[id]` | Entity detail + timeline | MISSING | **Var** `[paymentId]` | REAL | detail, audit timeline | `EntityTimelinePanel` | 05 | **Agent 05 tamam** |
-| 23 | `/tahsilatlar/yeni` | Hub → Hızlı İşlem | MISSING | **Var** | HUB | default | Form değil | 05 | **Agent 05 tamam** — `PaymentCreateHub` |
+| 23 | `/tahsilatlar/yeni` | Tahsilat giriş formu | MISSING | **Var** | REAL | default, customer/order query | Canlı create demo blok | 05 | **Rework** — `PaymentCreatePage` |
 | 24 | `/teslimatlar` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, loading | `EntityListPageTemplate` | 05 | **Agent 05 tamam** — `DeliveriesPage` |
 | 25 | `/teslimatlar/[id]` | Entity detail + timeline | MISSING | **Var** `[deliveryId]` | REAL | detail | `EntityDetailLayout`; harita yok | 05 | **Agent 05 tamam** |
 | 26 | `/iadeler` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, loading | — | 05 | **Agent 05 tamam** — `ReturnsPage` |

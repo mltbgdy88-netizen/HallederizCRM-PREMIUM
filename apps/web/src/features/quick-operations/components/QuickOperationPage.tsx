@@ -36,6 +36,7 @@ import {
   useQuickOperationState
 } from "../hooks/use-quick-operation-state";
 import type { QuickOperationLine, QuickOperationSourceType, QuickOperationType } from "../types";
+import { QuickOperationPaymentBlock } from "./QuickOperationPaymentBlock";
 import { QuickOperationSourceAccordion } from "./QuickOperationSourceAccordion";
 import { QuickOperationStepper, type QuickOperationStepId } from "./QuickOperationStepper";
 import { QuickOperationWorkbenchSide } from "./QuickOperationWorkbenchSide";
@@ -236,6 +237,7 @@ export function QuickOperationPage() {
   const searchParams = useSearchParams();
   const customerParam = searchParams.get("customer");
   const productParam = searchParams.get("product");
+  const orderParam = searchParams.get("order");
   const { pushToast } = useToast();
   const tableScrollRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState<WorkflowTabId>("order");
@@ -281,10 +283,15 @@ export function QuickOperationPage() {
     submitOperation,
     isSubmitting,
     resetDraft,
-    setOperationNote
+    setOperationNote,
+    paymentForm,
+    patchPaymentForm,
+    linkedOrderId,
+    setLinkedOrderId
   } = useQuickOperationState({
     initialCustomerId: customerParam,
-    initialProductId: productParam
+    initialProductId: productParam,
+    initialOrderId: orderParam
   });
 
   useEffect(() => {
@@ -436,6 +443,11 @@ export function QuickOperationPage() {
           {submitLinks.detailHref ? (
             <Link href={submitLinks.detailHref} className="hz-qop-inline-link">
               {submitLinks.detailLabel ?? "Detaya git"}
+            </Link>
+          ) : null}
+          {submitLinks.paymentDetailHref ? (
+            <Link href={submitLinks.paymentDetailHref} className="hz-qop-inline-link">
+              {submitLinks.paymentDetailLabel ?? "Tahsilat detayına git"}
             </Link>
           ) : null}
           <button type="button" className="hz-qop-notice-dismiss" onClick={() => setNotice(null)}>
@@ -606,8 +618,26 @@ export function QuickOperationPage() {
                 <span className="hz-qop-wb-meta-pill hz-qop-wb-meta-pill--date">{docDate} · Otomatik</span>
               </section>
 
+              {activeTab === "order" || activeTab === "payment" ? (
+                <QuickOperationPaymentBlock
+                  state={paymentForm}
+                  onChange={patchPaymentForm}
+                  grandTotal={totals.grandTotal}
+                  showAllocateToggle={activeTab === "order" || Boolean(linkedOrderId)}
+                  disabled={workbenchLocked}
+                />
+              ) : null}
+
+              {activeTab === "payment" && linkedOrderId ? (
+                <p className="hz-qop-payment-hint" role="status">
+                  Bağlı sipariş: <strong>{linkedOrderId}</strong>
+                </p>
+              ) : null}
+
               <div className="hz-qop-wb-table-head">
-                <h2 className="hz-qop-wb-table-title">Ürün / hizmet tablosu</h2>
+                <h2 className="hz-qop-wb-table-title">
+                  {activeTab === "payment" ? "Tahsilat satırı (isteğe bağlı)" : "Ürün / hizmet tablosu"}
+                </h2>
                 <button type="button" className="hz-qop-add-row-btn" onClick={() => addEmptyLine()}>
                   <span className="hz-qop-add-row-ico" aria-hidden>
                     <IconPlusCircle size={14} />

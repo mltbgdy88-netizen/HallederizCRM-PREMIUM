@@ -27,6 +27,8 @@ export type QuickOperationSubmitFeedback = {
   approvalsHref?: string;
   detailHref?: string;
   detailLabel?: string;
+  paymentDetailHref?: string;
+  paymentDetailLabel?: string;
 };
 
 function containsTechnicalTerms(value: string): boolean {
@@ -165,18 +167,38 @@ export function resolveSubmitFeedback(
   };
 
   if (result.mode === "executed" && result.createdEntityId) {
-    const notice = [
-      `${segmentLabel(options.operationType)} kaydı hazırlandı.`,
-      refSuffix,
-      MSG_SUBMIT_AFTER_APPROVAL
-    ]
-      .filter(Boolean)
-      .join(" ");
+    const paymentDetail =
+      result.createdPaymentId && !options.useDemoData
+        ? resolveOperationEntityHref("payment", result.createdPaymentId)
+        : null;
+    const hasPayment = Boolean(result.paymentRecorded && result.createdPaymentId);
+    const notice = hasPayment
+      ? [
+          "Sipariş ve tahsilat kaydı hazırlandı.",
+          refSuffix,
+          result.createdPaymentNo ? `Tahsilat: ${result.createdPaymentNo}` : "",
+          MSG_SUBMIT_AFTER_APPROVAL
+        ]
+          .filter(Boolean)
+          .join(" ")
+      : !result.ok && options.operationType === "sale_order"
+        ? ["Sipariş hazırlandı; tahsilat kaydı tamamlanamadı.", refSuffix].filter(Boolean).join(" ")
+        : [
+            `${segmentLabel(options.operationType)} kaydı hazırlandı.`,
+            refSuffix,
+            MSG_SUBMIT_AFTER_APPROVAL
+          ]
+            .filter(Boolean)
+            .join(" ");
 
     return {
       notice,
-      toast: [MSG_SUBMIT_SENT_FOR_APPROVAL, MSG_SUBMIT_APPROVALS_HINT].join(" "),
-      ...approvalsLink
+      toast: hasPayment
+        ? "Sipariş ve tahsilat bilgisi işlendi."
+        : [MSG_SUBMIT_SENT_FOR_APPROVAL, MSG_SUBMIT_APPROVALS_HINT].join(" "),
+      ...approvalsLink,
+      paymentDetailHref: paymentDetail?.href,
+      paymentDetailLabel: paymentDetail?.label
     };
   }
 

@@ -178,6 +178,75 @@ test("payment missing amount returns validation issue", async () => {
   });
 });
 
+test("sale_order with full payment creates order and payment when executed", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const preview = await server.inject({
+      method: "POST",
+      url: "/quick-operations/preview",
+      payload: baseSaleOrderPayload,
+      headers: authHeaders(login.accessToken)
+    });
+    const grandTotal = (preview.json() as { item: { totals: { grandTotal: number } } }).item.totals.grandTotal;
+    const payload: QuickOperationSubmitRequest = {
+      ...baseSaleOrderPayload,
+      payment: {
+        enabled: true,
+        amount: grandTotal,
+        method: "cash",
+        allocateToOrder: true
+      },
+      paidAmount: grandTotal
+    };
+    const response = await server.inject({
+      method: "POST",
+      url: "/quick-operations/submit",
+      payload,
+      headers: authHeaders(login.accessToken)
+    });
+    assert.equal(response.statusCode, 200);
+    const body = response.json() as {
+      item: {
+        mode: string;
+        createdEntityType?: string;
+        createdPaymentId?: string;
+        paymentRecorded?: boolean;
+        orderPaymentStatus?: string;
+      };
+    };
+    if (body.item.mode === "executed") {
+      assert.equal(body.item.createdEntityType, "order");
+      assert.equal(body.item.paymentRecorded, true);
+      assert.ok(body.item.createdPaymentId);
+      assert.ok(["paid", "partial"].includes(body.item.orderPaymentStatus ?? ""));
+    }
+    await server.close();
+  });
+});
+
+test("sale_order with overpayment returns validation error", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const payload: QuickOperationSubmitRequest = {
+      ...baseSaleOrderPayload,
+      payment: { enabled: true, amount: 999999, method: "transfer" }
+    };
+    const preview = await server.inject({
+      method: "POST",
+      url: "/quick-operations/preview",
+      payload,
+      headers: authHeaders(login.accessToken)
+    });
+    assert.equal(preview.statusCode, 200);
+    const body = preview.json() as { item: { ok: boolean; validationIssues?: Array<{ code: string }> } };
+    assert.equal(body.item.ok, false);
+    assert.ok((body.item.validationIssues ?? []).some((issue) => issue.code === "payment_over_grand_total"));
+    await server.close();
+  });
+});
+
 test("payment valid submit executed or controlled foundation", async () => {
   await withDemoAuth(async () => {
     const server = await buildServer();
