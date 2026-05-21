@@ -109,7 +109,9 @@ Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 
 **Agent 03:** layout template foundation tamam (`UI_LAYOUT_PATTERNS.md`).
 
-**Agent 06 (2026-05-21):** Stock/documents/tasks route adoption tamam — `ui/06-stock-documents-tasks` @ `0e55c75`. Belgeler/fabrikalar `EntityListPageTemplate`, detay `EntityDetailLayout`, print-export güvenli panel, `agent06-stock-documents-tasks.css`. Detay: `UI_AGENT_06_REPORT.md`. **Sonraki:** Agent 07 communication/reports/AI.
+**Agent 07 (2026-05-21):** Communication/reports/AI route adoption tamam — `ui/07-communication-reports-ai` @ `c1ea097`. Rapor canlı mod güvenli boş; AI hub + onaylar/içgörüler review-only; `agent07-communication-reports-ai.css`. Detay: `UI_AGENT_07_REPORT.md`. **Sonraki:** Agent 08 settings/users/ERP.
+
+**Agent 06 (2026-05-21):** Stock/documents/tasks route adoption tamam — `ui/06-stock-documents-tasks` @ `0e55c75`. Belgeler/fabrikalar `EntityListPageTemplate`, detay `EntityDetailLayout`, print-export güvenli panel, `agent06-stock-documents-tasks.css`. Detay: `UI_AGENT_06_REPORT.md`.
 
 **Agent 05 (2026-05-21):** CRM/commercial route adoption tamam — `ui/05-crm-commercial` @ `f9943c7`. Cariler/teklif/sipariş/tahsilat (liste+detay+hub), teslimat/iade/fatura liste+detay `EntityListPageTemplate` / `EntityDetailLayout`, hub CTA «Hızlı İşlem'e git», `agent05-crm-commercial.css`. `loading.tsx`: teslimatlar, iadeler, faturalar. Detay: `UI_AGENT_05_REPORT.md`. **Sonraki:** Agent 06 stock/documents/tasks.
 

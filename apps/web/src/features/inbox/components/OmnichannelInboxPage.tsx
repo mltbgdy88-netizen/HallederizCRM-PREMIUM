@@ -192,7 +192,7 @@ export function OmnichannelInboxPage() {
             <div className="hz-inbox-thread-body">
               {!selected ? (
                 <div className="hz-inbox-thread-placeholder">
-                  <p>Listeden bir konuşma seçin veya çift tıklayarak detay rotasına gidin.</p>
+                  <p>{filtered.length > 0 ? "Önizleme için soldan bir konuşma seçin." : "Canlı veri bekleniyor veya bu kanalda konuşma yok."}</p>
                 </div>
               ) : (
                 <div className="hz-inbox-thread-preview">
