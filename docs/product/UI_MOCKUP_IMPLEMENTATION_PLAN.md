@@ -264,11 +264,22 @@ Referans: `WHATSAPP_READINESS.md`, `LOCAL_AI_READINESS.md`.
 |------|--------|
 | RC hardening | Merged #135 |
 | Integrations | Merged #136 |
-| `release/ui-rc-final` docs | Complete |
+| `release/ui-rc-final` docs | Merged #137 |
 | Remaining code work | **None** for UI RC |
 | Remaining work | Manual production setup + P2/P3 follow-up only |
 
 Referans: `RELEASE_UI_RC_FINAL_REPORT.md`, `RELEASE_UI_RC_GO_NO_GO.md`.
+
+## 9d. Production cutover documentation (`release/production-cutover`)
+
+| Alan | Durum |
+|------|--------|
+| Production cutover runbook | `PRODUCTION_CUTOVER_RUNBOOK.md` |
+| Env / smoke / rollback / Go-No-Go | `PRODUCTION_*`, `RELEASE_PRODUCTION_GO_NO_GO.md` |
+| Runtime code in cutover branch | **None** (docs-only) |
+| Remaining work | **Manual deployment + smoke only** — no further UI adoption code |
+
+Referans: `PRODUCTION_CUTOVER_RUNBOOK.md`, `RELEASE_PRODUCTION_GO_NO_GO.md`.
 
 ---
 
