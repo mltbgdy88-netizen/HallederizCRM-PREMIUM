@@ -11,6 +11,7 @@ import {
 import type { AppShellNavItem } from "@hallederiz/ui";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { DashboardHeaderCardsButton } from "./dashboard-header-cards-button";
 import { buildCommandCenterSidebarNavSections } from "./command-center-sidebar-nav";
 import { normalizeShellPathname, resolveShellHeaderOptions } from "./platform-route-meta";
 import { useAuth } from "../providers/auth-provider";
@@ -80,7 +81,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
           breadcrumb={headerOptions.pageMeta.breadcrumb}
           leadingSlot={isDashboard ? dashboardLeading : undefined}
           searchPlaceholder={headerOptions.searchPlaceholder}
-          toolbarSlot={null}
+          toolbarSlot={isDashboard ? <DashboardHeaderCardsButton /> : null}
           notificationSlot={
             <>
               <button
