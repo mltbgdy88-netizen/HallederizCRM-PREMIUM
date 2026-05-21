@@ -109,7 +109,9 @@ Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 
 **Agent 03:** layout template foundation tamam (`UI_LAYOUT_PATTERNS.md`).
 
-**Agent 07 (2026-05-21):** Communication/reports/AI route adoption tamam — `ui/07-communication-reports-ai` @ `c1ea097`. Rapor canlı mod güvenli boş; AI hub + onaylar/içgörüler review-only; `agent07-communication-reports-ai.css`. Detay: `UI_AGENT_07_REPORT.md`. **Sonraki:** Agent 08 settings/users/ERP.
+**Agent 08 (2026-05-21):** Settings/users/ERP/system-state route adoption tamam — `ui/08-settings-users-erp` @ `ea07c92`. `UsersManagementPage`, `RolesManagementPage`, `ErpPage` Türkçe güvenli copy, `/offline-api` `/demo-mode` `/live-empty` sayfaları, `agent08-settings-users-erp.css`. Detay: `UI_AGENT_08_REPORT.md`. **Sonraki:** Agent 09 visual QA.
+
+**Agent 07 (2026-05-21):** Communication/reports/AI route adoption tamam — `ui/07-communication-reports-ai` @ `c1ea097`. Rapor canlı mod güvenli boş; AI hub + onaylar/içgörüler review-only; `agent07-communication-reports-ai.css`. Detay: `UI_AGENT_07_REPORT.md`.
 
 **Agent 06 (2026-05-21):** Stock/documents/tasks route adoption tamam — `ui/06-stock-documents-tasks` @ `0e55c75`. Belgeler/fabrikalar `EntityListPageTemplate`, detay `EntityDetailLayout`, print-export güvenli panel, `agent06-stock-documents-tasks.css`. Detay: `UI_AGENT_06_REPORT.md`.
 

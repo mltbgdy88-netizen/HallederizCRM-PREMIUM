@@ -148,11 +148,15 @@ PNG (referans, import YOK)
 | **Status** | **Tamamlandı** — `UI_AGENT_07_REPORT.md`. Canlı rapor modunda sahte grafik/KPI yok; AI review-only copy; `agent07-communication-reports-ai.css`. PNG runtime import yasağı ve AI mutation copy kuralı korunur. |
 | **Sonraki** | Agent 08 settings/users/ERP |
 
-### Agent 08 — `ui/08-settings-users-erp-common`
+### Agent 08 — `ui/08-settings-users-erp`
 
-Routes: ayarlar, kullanıcılar, erp + system state sayfaları (unauthorized, offline-api, live-empty)
+| | |
+|--|--|
+| **Routes** | `/ayarlar`, `/ayarlar/*`, `/kullanicilar`, `/kullanicilar/roller`, `/erp`, `/offline-api`, `/demo-mode`, `/live-empty` |
+| **Status** | **Tamamlandı** — `UI_AGENT_08_REPORT.md`. Settings context band; kullanıcı/rol listeleri `EntityListPageTemplate` + mevcut API; ERP Türkçe güvenli copy; sistem state sayfaları eklendi. Agent 01–08 UI route adoption zinciri tamamlandı. PNG runtime import yasağı korunur. |
+| **Sonraki** | Agent 09 visual QA / polish / bugfix |
 
-### Agent 09 — `ui/09-final-qa-polish`
+### Agent 09 — `ui/09-visual-qa-polish`
 
 Full smoke, scroll, 5+ satır liste görünümü, hub/AI/content safety audit
 
@@ -225,7 +229,7 @@ pnpm smoke:navigation
 2. **Legacy renkler** — `globals.css` lacivert/mor-ağırlıklı; emerald planı Agent 01.
 3. **App Router `loading.tsx` / `error.tsx`** — 0 dosya; segment state Agent 04+.
 4. **Detay timeline** — order, offer, delivery, return, invoice detayında `EntityTimelinePanel` eksik (payment/document/customer/approval var).
-5. **System routes** — `unauthorized`, `offline-api`, `live-empty` dedicated page yok (Agent 08).
+5. **System routes** — `unauthorized` dedicated page yok; `/offline-api`, `/demo-mode`, `/live-empty` Agent 08 ile eklendi.
 6. **ProductPageShell yoğunluğu** — manifest `needs-api` alt rotalar catch-all shell; API bağlandıkça REAL’e evrilecek.
 7. **Filtre placeholder** — `InvoicesPage` inline filter’da örnek fatura kodu metni (sahte numara hissi) — Agent 05 temizliği.
 8. **DESIGN_TOKENS.md** — hâlâ legacy primary/sidebar açıklaması; Agent 01 ile senkron.

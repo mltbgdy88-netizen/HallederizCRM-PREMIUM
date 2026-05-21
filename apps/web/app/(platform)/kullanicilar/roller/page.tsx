@@ -1,57 +1,5 @@
-﻿"use client";
-
-import { useEffect, useState } from "react";
-import type { RolePresetItem } from "@hallederiz/types";
-import { PageHeader } from "@hallederiz/ui";
-import { listRolePresetsApi } from "../../../../src/services/api";
+﻿import { RolesManagementPage } from "../../../../src/features/users/components/RolesManagementPage";
 
 export default function RolesPage() {
-  const [presets, setPresets] = useState<RolePresetItem[]>([]);
-
-  useEffect(() => {
-    void listRolePresetsApi().then(setPresets).catch(() => setPresets([]));
-  }, []);
-
-  return (
-    <div className="hz-page-stack">
-      <PageHeader
-        title="Roller"
-        description="Yönetici, satış, muhasebe, depo ve pazarlama için önerilen izin şablonları."
-      />
-
-      <section className="hz-content-card">
-        <div className="table-wrap hz-table-wrap">
-          <table className="table hz-table">
-            <thead>
-              <tr>
-                <th>Rol</th>
-                <th>Kod</th>
-                <th>Açıklama</th>
-                <th>Modül Erişimi</th>
-                <th>Onay</th>
-              </tr>
-            </thead>
-            <tbody>
-              {presets.length === 0 ? (
-                <tr>
-                  <td className="table-empty" colSpan={5}>Şablon bulunamadı.</td>
-                </tr>
-              ) : (
-                presets.map((preset) => (
-                  <tr key={preset.id}>
-                    <td>{preset.name}</td>
-                    <td>{preset.code}</td>
-                    <td>{preset.description}</td>
-                    <td>{preset.moduleAccess.join(", ")}</td>
-                    <td>{preset.approvalEnabled ? "Evet" : "Hayır"}</td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
-      </section>
-    </div>
-  );
+  return <RolesManagementPage />;
 }
-

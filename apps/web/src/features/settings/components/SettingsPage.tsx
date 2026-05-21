@@ -301,6 +301,9 @@ export function SettingsPage() {
           nav={<SettingsSubNav />}
           children={
             <div className="hz-settings-main">
+          <p className="hz-settings-context-band" role="status">
+            Ayarlar kiracı yapılandırmasını gösterir; sahte kayıt veya otomatik başarı mesajı üretilmez.
+          </p>
           <header className="hz-settings-topbar">
             <div className="hz-settings-topbar-text">
               <h1 className="hz-settings-topbar-title">

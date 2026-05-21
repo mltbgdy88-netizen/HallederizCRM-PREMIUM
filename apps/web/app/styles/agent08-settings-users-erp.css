@@ -1,0 +1,300 @@
+/* Agent 08 — settings / users / roles / ERP / system-state routes */
+
+.hz-users-page,
+.hz-roles-page,
+.hz-erp-page,
+.hz-system-state-page {
+  max-width: var(--hz-content-max-width, 1604px);
+  margin: 0 auto;
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.hz-users-topbar,
+.hz-roles-topbar,
+.hz-erp-topbar {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 0 0 8px;
+  flex-shrink: 0;
+}
+
+.hz-users-topbar-title,
+.hz-roles-topbar-title,
+.hz-erp-topbar-title {
+  margin: 0;
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--hz-color-text, var(--hz-text-strong));
+}
+
+.hz-users-topbar-sub,
+.hz-roles-topbar-sub,
+.hz-erp-topbar-sub {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--hz-color-muted, var(--hz-text-muted));
+}
+
+.hz-users-preview-band,
+.hz-roles-preview-band,
+.hz-erp-preview-band,
+.hz-settings-context-band {
+  flex-shrink: 0;
+  min-height: 20px;
+  max-height: 24px;
+  padding: 4px 10px;
+  font-size: 11px;
+  color: var(--hz-color-muted, var(--hz-text-muted));
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--hz-color-gold-soft, #f5ecd4) 40%, #fff);
+  border: 1px solid color-mix(in srgb, var(--hz-color-gold, #c9a227) 20%, transparent);
+}
+
+.hz-users-kpi-strip,
+.hz-roles-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+.hz-users-kpi,
+.hz-roles-kpi {
+  border: 1px solid var(--hz-border, #e2e8f0);
+  border-radius: var(--hz-radius-card, 16px);
+  background: var(--hz-color-surface, #fff);
+  padding: 8px 10px;
+}
+
+.hz-users-kpi-label,
+.hz-roles-kpi-label {
+  display: block;
+  font-size: 10px;
+  color: var(--hz-color-muted, var(--hz-text-muted));
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.hz-users-kpi-value,
+.hz-roles-kpi-value {
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--hz-color-text, var(--hz-text-strong));
+}
+
+.hz-users-filter-row,
+.hz-roles-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: flex-end;
+  flex-shrink: 0;
+}
+
+.hz-users-filter-field,
+.hz-roles-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  min-width: 0;
+}
+
+.hz-users-filter-label,
+.hz-roles-filter-label {
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--hz-color-muted, var(--hz-text-muted));
+}
+
+.hz-users-filter-input,
+.hz-users-filter-select,
+.hz-roles-filter-input,
+.hz-roles-filter-select {
+  height: 34px;
+  min-width: 120px;
+  border-radius: 10px;
+  border: 1px solid var(--hz-border, #e2e8f0);
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.hz-users-list-header,
+.hz-users-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.1fr) 90px 100px minmax(0, 0.9fr) 88px;
+  gap: 8px;
+  align-items: center;
+}
+
+.hz-users-list-header {
+  min-height: 28px;
+  padding: 0 10px;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--hz-color-muted, var(--hz-text-muted));
+  border-bottom: 1px solid var(--hz-border, #e2e8f0);
+  flex-shrink: 0;
+}
+
+.hz-users-list-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.hz-users-row {
+  min-height: 48px;
+  padding: 6px 10px;
+  border-bottom: 1px solid color-mix(in srgb, var(--hz-border, #e2e8f0) 65%, transparent);
+  cursor: pointer;
+  font-size: 12px;
+}
+
+.hz-users-row:hover,
+.hz-users-row--selected {
+  background: color-mix(in srgb, var(--hz-color-emerald, #0d5c4d) 6%, #fff);
+}
+
+.hz-users-row--selected {
+  box-shadow: inset 3px 0 0 var(--hz-color-gold, #c9a227);
+}
+
+.hz-users-cell-strong {
+  font-weight: 600;
+  color: var(--hz-color-text, var(--hz-text-strong));
+}
+
+.hz-users-cell-muted {
+  color: var(--hz-color-muted, var(--hz-text-muted));
+  font-size: 11px;
+}
+
+.hz-users-preview-card {
+  border: 1px solid var(--hz-border, #e2e8f0);
+  border-radius: var(--hz-radius-card, 16px);
+  background: var(--hz-color-surface, #fff);
+  padding: 12px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  height: 100%;
+  min-height: 0;
+}
+
+.hz-users-preview-title {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.hz-users-preview-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+}
+
+.hz-users-preview-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.hz-users-preview-list span {
+  color: var(--hz-color-muted, var(--hz-text-muted));
+}
+
+.hz-roles-matrix-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.hz-roles-matrix-card {
+  border: 1px solid var(--hz-border, #e2e8f0);
+  border-radius: var(--hz-radius-card, 16px);
+  background: var(--hz-color-surface, #fff);
+  padding: 12px;
+  margin-bottom: 8px;
+}
+
+.hz-roles-matrix-card h3 {
+  margin: 0 0 6px;
+  font-size: 13px;
+}
+
+.hz-roles-matrix-card p {
+  margin: 0;
+  font-size: 12px;
+  color: var(--hz-color-muted, var(--hz-text-muted));
+}
+
+.hz-roles-permission-note {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--hz-color-gold-soft, #f5ecd4) 55%, #fff);
+  border: 1px solid color-mix(in srgb, var(--hz-color-gold, #c9a227) 28%, transparent);
+  font-size: 12px;
+}
+
+.hz-system-state-page {
+  align-items: center;
+  justify-content: center;
+  padding: 24px 16px;
+}
+
+.hz-system-state-card {
+  max-width: 520px;
+  width: 100%;
+  border: 1px solid color-mix(in srgb, var(--hz-color-emerald, #0d5c4d) 18%, var(--hz-border, #e2e8f0));
+  border-radius: var(--hz-radius-card, 16px);
+  background: var(--hz-color-surface, #fff);
+  padding: 24px 28px;
+  text-align: center;
+}
+
+.hz-system-state-card h1 {
+  margin: 0 0 8px;
+  font-size: 1.25rem;
+  color: var(--hz-color-text, var(--hz-text-strong));
+}
+
+.hz-system-state-card p {
+  margin: 0 0 16px;
+  font-size: 13px;
+  color: var(--hz-color-muted, var(--hz-text-muted));
+  line-height: 1.45;
+}
+
+.hz-system-state-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  justify-content: center;
+}
+
+@media (max-width: 900px) {
+  .hz-users-list-header,
+  .hz-users-row {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .hz-users-kpi-strip,
+  .hz-roles-kpi-strip {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

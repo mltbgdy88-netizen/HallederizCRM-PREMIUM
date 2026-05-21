@@ -59,16 +59,16 @@
 | 39 | `/ai` | AI assistant (read-only) | MISSING | **Var** | REAL | default, loading | Hub + review-only | 07 | **Agent 07 tamam** — `AIAssistantPage` |
 | 40 | `/ai/onaylar` | AI approvals bridge | MISSING | **Var** | REAL | default | Onay ekranına git | 07 | **Agent 07 tamam** — `AiApprovalsPage` |
 | 41 | `/ai/icgoruler` | AI insights | MISSING | **Var** | REAL | default | Salt okunur kartlar | 07 | **Agent 07 tamam** — `AiInsightsPage` |
-| 42 | `/ayarlar` | Settings layout hub | MISSING | **Var** | REAL | default | — | 08 | `SettingsPage` |
-| 43 | `/ayarlar/*` | Settings deep routes | MISSING | **Var** + catch-all | REAL / CATCH | default, placeholder | operasyon-gozlem, veri-yukleme REAL | 08 | `[...ayarSlug]` catch-all |
-| 44 | `/kullanicilar` | User list | MISSING | **Var** | REAL | default, empty | API list | 08 | `UsersPage` |
-| 45 | `/kullanicilar/roller` | Role permission matrix | MISSING | **Var** | REAL | default | — | 08 | `RolesPage` |
-| 46 | `/erp` | ERP integration panel | MISSING | **Var** | REAL | default | — | 08 | `ErpPage` |
+| 42 | `/ayarlar` | Settings layout hub | **08 tamam** | **Var** | REAL | default | `SettingsLayout` + context band | 08 | **Agent 08 tamam** — `SettingsPage` |
+| 43 | `/ayarlar/*` | Settings deep routes | **08 tamam** | **Var** + catch-all | REAL / CATCH | default, placeholder | `SettingsAreaShell` context band | 08 | **Agent 08 tamam** |
+| 44 | `/kullanicilar` | User list | **08 tamam** | **Var** | REAL | default, empty, loading | `EntityListPageTemplate`; `listUsersApi` | 08 | **Agent 08 tamam** — `UsersManagementPage` |
+| 45 | `/kullanicilar/roller` | Role permission matrix | **08 tamam** | **Var** | REAL | default | `listRolePresetsApi`; salt okunur | 08 | **Agent 08 tamam** — `RolesManagementPage` |
+| 46 | `/erp` | ERP integration panel | **08 tamam** | **Var** | REAL | default, loading | Türkçe; Foundation copy kaldırıldı | 08 | **Agent 08 tamam** — `ErpPage` |
 | 47 | `/workflow/[type]/[id]` | Workflow timeline | MISSING | **Var** | REAL | detail, timeline | `hz-workflow-*` timeline | 04 | **Agent 04 tamam** |
 | 48 | `unauthorized` | System state page | MISSING | **Rota yok** | — | error | 401 güvenli copy | 08 | Inline error / auth redirect; dedicated page Agent 08 |
-| 49 | `offline-api` | System state page | MISSING | **Rota yok** | — | error | Bağlantı kopuk | 08 | Smoke `api-offline` script var; UI route yok |
-| 50 | `demo-mode` | System banner/state | MISSING | **Davranış** | Config | banner | `useDemoData` band | 08 | Global banner; ayrı route opsiyonel |
-| 51 | `live-empty` | Empty system state | MISSING | **Rota yok** | — | empty | Canlı boş veri | 08 | Feature-level `EmptyState` |
+| 49 | `/offline-api` | System state page | **08 tamam** | **Var** | STATE | error | Güvenli API kopuk copy | 08 | **Agent 08 tamam** — `OfflineApiStatePage` |
+| 50 | `/demo-mode` | System banner/state | **08 tamam** | **Var** + Config | STATE | banner | `dataSourceConfig.useDemoData` | 08 | **Agent 08 tamam** — `DemoModeStatePage` |
+| 51 | `/live-empty` | Empty system state | **08 tamam** | **Var** | STATE | empty | Canlı boş; sahte kayıt yok | 08 | **Agent 08 tamam** — `LiveEmptyStatePage` |
 | 52 | `mobile-drawer` | Shell behavior layer | MISSING | **Davranış** | AppShell | mobile | Hamburger drawer | 02 | `AppShell` mobile sidebar |
 | 53 | `print-export` | Print layout layer | MISSING | **Kısmi** | CSS/print | print | `.hz-print-export-panel` + depo print | 06 | **Agent 06 tamam** (layer; ayrı route yok) |
 
@@ -79,7 +79,7 @@
 | Metrik | Sayı |
 |--------|------|
 | apps/web route karşılığı (sayfa veya davranış) | **48** tam + **5** sistem katmanı (dedicated route yok) |
-| Eksik dedicated route (48–53) | **3** (`unauthorized`, `offline-api`, `live-empty` sayfa yok) |
+| Eksik dedicated route (48–53) | **1** (`unauthorized` sayfa yok; offline/demo/live-empty Agent 08) |
 | ProductPageShell / CATCH ağırlıklı | **~15+** alt rota (manifest `needs-api` / `shell`) |
 | Hub route (teklif/sipariş/tahsilat yeni) | **3** — uyumlu |
 | `loading.tsx` / `error.tsx` | **7** platform route loading (Agent 04); `error.tsx` hâlâ 0 |
