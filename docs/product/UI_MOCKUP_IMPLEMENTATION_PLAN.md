@@ -142,7 +142,11 @@ PNG (referans, import YOK)
 
 ### Agent 07 — `ui/07-communication-reports-ai`
 
-Routes: whatsapp, gelen-kutu, raporlar, ai/*
+| | |
+|--|--|
+| **Routes** | whatsapp, gelen-kutu, gelen-kutu/konusma/[id], raporlar, raporlar/[...], ai, ai/onaylar, ai/icgoruler |
+| **Status** | **Tamamlandı** — `UI_AGENT_07_REPORT.md`. Canlı rapor modunda sahte grafik/KPI yok; AI review-only copy; `agent07-communication-reports-ai.css`. PNG runtime import yasağı ve AI mutation copy kuralı korunur. |
+| **Sonraki** | Agent 08 settings/users/ERP |
 
 ### Agent 08 — `ui/08-settings-users-erp-common`
 

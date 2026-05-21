@@ -97,12 +97,22 @@ function formatUpdated(iso: string): string {
   }).format(new Date(iso));
 }
 
-function ReportsMiniTrendChart() {
+function ReportsChartSlot({ useDemo }: { useDemo: boolean }) {
+  if (!useDemo) {
+    return (
+      <div className="hz-reports-chart-empty" role="status">
+        <div>
+          <strong className="hz-reports-chart-empty-title">Grafik alanı</strong>
+          <span className="hz-reports-chart-empty-text">Canlı rapor verisi bağlandığında trend burada gösterilir. Sahte grafik çizilmez.</span>
+        </div>
+      </div>
+    );
+  }
   const bars = [22, 32, 26, 40, 36, 44, 28];
   const labels = ["Pt", "Sa", "Ça", "Pe", "Cu", "Ct", "Pz"];
   return (
-    <div className="hz-reports-mini-trend" role="img" aria-label="Haftalık indeks (demonstrasyon)">
-      <div className="hz-reports-mini-trend-cap">Haftalık indeks (demo)</div>
+    <div className="hz-reports-mini-trend" role="img" aria-label="Haftalık indeks (önizleme modu)">
+      <div className="hz-reports-mini-trend-cap">Haftalık indeks (önizleme)</div>
       <div className="hz-reports-mini-trend-inner">
         {bars.map((h, i) => (
           <div key={labels[i]} className="hz-reports-mini-trend-col">
@@ -112,6 +122,17 @@ function ReportsMiniTrendChart() {
         ))}
       </div>
     </div>
+  );
+}
+
+function ReportsKpiValue({ label, demoValue, useDemo }: { label: string; demoValue: string; useDemo: boolean }) {
+  return (
+    <span
+      className={`hz-reports-kpi-value${useDemo ? "" : " hz-reports-kpi-value--pending"}`}
+      title={useDemo ? undefined : `${label}: canlı veri bekleniyor`}
+    >
+      {useDemo ? demoValue : "—"}
+    </span>
   );
 }
 
@@ -408,7 +429,14 @@ export function ReportsPage() {
                       ? ` Kiracı kullanım API'si bağlı: ${usageSummary.totalEvents} olay, limit aşımı ${usageSummary.limitExceeded ? "var" : "yok"}.`
                       : " Kiracı kullanım API sonucu yok veya oturum bekleniyor."}
                   </div>
-                ) : null}
+                ) : (
+                  <div className="hz-reports-live-band" role="status">
+                    <div>
+                      <strong>Canlı rapor verisi bekleniyor</strong>
+                      <span>Metrik listesi API bağlandığında dolar; sahte KPI veya grafik üretilmez.</span>
+                    </div>
+                  </div>
+                )}
               </>
             }
             kpis={
@@ -419,7 +447,7 @@ export function ReportsPage() {
                   </span>
                   <span className="hz-reports-kpi-text">
                     <span className="hz-reports-kpi-label">Ciro</span>
-                    <span className="hz-reports-kpi-value">{KPI.ciro}</span>
+                    <ReportsKpiValue label="Ciro" demoValue={KPI.ciro} useDemo={REPORTS_USE_DEMO_DATA} />
                   </span>
                 </div>
                 <div className="hz-reports-kpi hz-reports-kpi--success">
@@ -428,7 +456,7 @@ export function ReportsPage() {
                   </span>
                   <span className="hz-reports-kpi-text">
                     <span className="hz-reports-kpi-label">Tahsilat</span>
-                    <span className="hz-reports-kpi-value">{KPI.tahsilat}</span>
+                    <ReportsKpiValue label="Tahsilat" demoValue={KPI.tahsilat} useDemo={REPORTS_USE_DEMO_DATA} />
                   </span>
                 </div>
                 <div className="hz-reports-kpi hz-reports-kpi--warn">
@@ -437,7 +465,7 @@ export function ReportsPage() {
                   </span>
                   <span className="hz-reports-kpi-text">
                     <span className="hz-reports-kpi-label">Açık Bakiye</span>
-                    <span className="hz-reports-kpi-value">{KPI.acik}</span>
+                    <ReportsKpiValue label="Açık Bakiye" demoValue={KPI.acik} useDemo={REPORTS_USE_DEMO_DATA} />
                   </span>
                 </div>
                 <div className="hz-reports-kpi hz-reports-kpi--danger">
@@ -446,7 +474,7 @@ export function ReportsPage() {
                   </span>
                   <span className="hz-reports-kpi-text">
                     <span className="hz-reports-kpi-label">Kritik Stok</span>
-                    <span className="hz-reports-kpi-value">{KPI.kritikStok}</span>
+                    <ReportsKpiValue label="Kritik Stok" demoValue={KPI.kritikStok} useDemo={REPORTS_USE_DEMO_DATA} />
                   </span>
                 </div>
                 <div className="hz-reports-kpi hz-reports-kpi--cyan">
@@ -455,7 +483,7 @@ export function ReportsPage() {
                   </span>
                   <span className="hz-reports-kpi-text">
                     <span className="hz-reports-kpi-label">WhatsApp Dönüşüm</span>
-                    <span className="hz-reports-kpi-value">{KPI.waDonusum}</span>
+                    <ReportsKpiValue label="WhatsApp Dönüşüm" demoValue={KPI.waDonusum} useDemo={REPORTS_USE_DEMO_DATA} />
                   </span>
                 </div>
                 <div className="hz-reports-kpi hz-reports-kpi--ai">
@@ -464,12 +492,12 @@ export function ReportsPage() {
                   </span>
                   <span className="hz-reports-kpi-text">
                     <span className="hz-reports-kpi-label">AI Tasarruf</span>
-                    <span className="hz-reports-kpi-value">{KPI.aiTasarruf}</span>
+                    <ReportsKpiValue label="AI Tasarruf" demoValue={KPI.aiTasarruf} useDemo={REPORTS_USE_DEMO_DATA} />
                   </span>
                 </div>
               </section>
             }
-            charts={<ReportsMiniTrendChart />}
+            charts={<ReportsChartSlot useDemo={REPORTS_USE_DEMO_DATA} />}
             table={
               <div className="hz-reports-list-wrap">
                 <div className="hz-reports-list-header" role="row">
@@ -484,8 +512,12 @@ export function ReportsPage() {
                 <div className="hz-reports-list-body">
                   {!filtered.length ? (
                     <div className="hz-reports-empty" role="status">
-                      <p className="hz-reports-empty-title">Kayıt yok</p>
-                      <p className="hz-reports-empty-text">Filtre veya rapor tipini değiştirin.</p>
+                      <p className="hz-reports-empty-title">{REPORTS_USE_DEMO_DATA ? "Kayıt yok" : "Canlı veri bekleniyor"}</p>
+                      <p className="hz-reports-empty-text">
+                        {REPORTS_USE_DEMO_DATA
+                          ? "Filtre veya rapor tipini değiştirin."
+                          : "Rapor metrikleri API üzerinden yüklendiğinde liste burada görünür."}
+                      </p>
                     </div>
                   ) : (
                     filtered.map((row) => (

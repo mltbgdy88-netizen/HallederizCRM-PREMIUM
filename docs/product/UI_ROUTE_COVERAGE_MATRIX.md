@@ -1,6 +1,6 @@
 # UI Route Coverage Matrix — 53 route/layer
 
-**Base commit:** `0e55c75` (PR #129) — Agent 06 stock/documents/tasks güncellendi  
+**Base commit:** `c1ea097` (PR #130) — Agent 07 communication/reports/AI güncellendi  
 **Mockup paketi:** `docs/design/ui-design-output/**` — **repoda yok** (tüm “Mockup” kolonları **MISSING**)
 
 **Implementation type kısaltmaları:**
@@ -25,9 +25,9 @@
 | 5 | `/onaylar` | Entity list + right preview | MISSING | **Var** | REAL | default, loading, empty, error, mobile | Desk inbox + auto-select | 04 | **Agent 04 tamam** |
 | 6 | `/onaylar/[id]` | Entity detail + timeline | MISSING | **Var** `[approvalId]` | REAL | detail, audit placeholder | `EntityDetailLayout` | 04 | **Agent 04 tamam**; canlı timeline feed Agent 05+ |
 | 7 | `/onaylar/kurallar` | Role permission matrix | MISSING | **Var** | REAL | default, validation (local) | Tablo + sağ panel | 04 | **Agent 04 tamam** |
-| 8 | `/whatsapp` | Omnichannel / WA ops | MISSING | **Var** | REAL | default, empty, mobile | Kanal policy UI; mutation CTA yok | 07 | `WhatsAppPage`; `/gelen-kutu/whatsapp` manifest paraleli |
-| 9 | `/gelen-kutu` | Omnichannel three-panel inbox | MISSING | **Var** | REAL | default, empty, mobile | Üç panel inbox | 07 | `OmnichannelInboxPage` |
-| 10 | `/gelen-kutu/konusma/[id]` | Conversation detail | MISSING | **Var** `[conversationId]` | REAL (kısmi) | detail, mobile | Backend bağlantısı kısmi | 07 | `ConversationPage`; yerelde veri bağlantısı doğrulanmalı |
+| 8 | `/whatsapp` | Omnichannel / WA ops | MISSING | **Var** | REAL | default, empty, mobile | Provider güvenli; sahte bağlı yok | 07 | **Agent 07 tamam** — `WhatsAppPage` |
+| 9 | `/gelen-kutu` | Omnichannel three-panel inbox | MISSING | **Var** | REAL | default, empty, loading, mobile | Üç panel + auto-select | 07 | **Agent 07 tamam** — `OmnichannelInboxPage` |
+| 10 | `/gelen-kutu/konusma/[id]` | Conversation detail | MISSING | **Var** `[conversationId]` | REAL | detail, mobile | API mesaj timeline; review-only AI | 07 | **Agent 07 tamam** — `OmnichannelConversationDetailPage` |
 | 11 | `/cariler` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, mobile | İlk satır seçili / sağ panel dolu | 05 | **Agent 05 tamam** — `CustomersPage` + `EntityListPageTemplate` |
 | 12 | `/cariler/[id]` | Entity detail + timeline | MISSING | **Var** `[customerId]` | REAL | detail, audit timeline | `EntityDetailLayout` | 05 | **Agent 05 tamam** |
 | 13 | `/cariler/yeni` | FormPageShell | MISSING | **Var** | FORM | validation, submitted | **Gerçek form** (hub değil) | 05 | **Agent 05 tamam** — `CustomerCreatePage` |
@@ -54,11 +54,11 @@
 | 34 | `/gorevler` | Task workspace list | MISSING | **Var** | REAL | default, empty | Workspace korundu | 06 | **Agent 06 tamam** — `TasksPage` |
 | 35 | `/gorevler/[id]` | Task detail | MISSING | **Var** `[taskId]` | REAL | detail | `EntityDetailLayout` | 06 | **Agent 06 tamam** |
 | 36 | `/archive` | Archive hub + categories | MISSING | **Var** | REAL | default, empty, mobile | Referans layout korundu | 06 | **Agent 06 tamam** — `ArchivePage` |
-| 37 | `/raporlar` | Report analytics list | MISSING | **Var** | REAL | default, empty | Shell PageMeta gizli | 07 | `ReportsPage` |
-| 38 | `/raporlar/[...]` | Report sub-routes | MISSING | **Var** catch-all | CATCH | placeholder | Alt raporlar shell | 07 | `renderProductCatchAll` |
-| 39 | `/ai` | AI assistant (read-only) | MISSING | **Var** | REAL | default | **Sidebar’da ayrı AI menü yok** (tam sayfa) | 07 | `AIAssistantPage`; mutation CTA yasak |
-| 40 | `/ai/onaylar` | AI approvals bridge | MISSING | **Var** | REAL | default | Onay köprüsü | 07 | `AiApprovalsPage` |
-| 41 | `/ai/icgoruler` | AI insights | MISSING | **Var** | REAL | default | Öneri/özet | 07 | `AiInsightsPage` |
+| 37 | `/raporlar` | Report analytics list | MISSING | **Var** | REAL | default, empty, loading | Canlı modda sahte grafik yok | 07 | **Agent 07 tamam** — `ReportsPage` |
+| 38 | `/raporlar/[...]` | Report sub-routes | MISSING | **Var** catch-all | CATCH | placeholder | Alt raporlar shell | 07 | **Agent 07 tamam** — catch-all korundu |
+| 39 | `/ai` | AI assistant (read-only) | MISSING | **Var** | REAL | default, loading | Hub + review-only | 07 | **Agent 07 tamam** — `AIAssistantPage` |
+| 40 | `/ai/onaylar` | AI approvals bridge | MISSING | **Var** | REAL | default | Onay ekranına git | 07 | **Agent 07 tamam** — `AiApprovalsPage` |
+| 41 | `/ai/icgoruler` | AI insights | MISSING | **Var** | REAL | default | Salt okunur kartlar | 07 | **Agent 07 tamam** — `AiInsightsPage` |
 | 42 | `/ayarlar` | Settings layout hub | MISSING | **Var** | REAL | default | — | 08 | `SettingsPage` |
 | 43 | `/ayarlar/*` | Settings deep routes | MISSING | **Var** + catch-all | REAL / CATCH | default, placeholder | operasyon-gozlem, veri-yukleme REAL | 08 | `[...ayarSlug]` catch-all |
 | 44 | `/kullanicilar` | User list | MISSING | **Var** | REAL | default, empty | API list | 08 | `UsersPage` |

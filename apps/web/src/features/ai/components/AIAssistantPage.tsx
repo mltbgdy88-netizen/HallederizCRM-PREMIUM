@@ -417,12 +417,29 @@ export function AIAssistantPage() {
     .filter(Boolean)
     .join(" ");
 
+  const router = useRouter();
+
   return (
-    <div className="hz-page-stack">
-      <PageHeader title="AI" description="Lokal satış asistanı: niyet analizi, bilgi tabanı ve güvenli onay akışı." />
+    <div className="hz-page-stack hz-ai-hub-page">
+      <PageHeader title="AI Merkezi" description="Lokal satış asistanı: niyet analizi, bilgi tabanı ve güvenli onay akışı (salt inceleme)." />
+      <nav className="hz-ai-hub-nav" aria-label="AI modülleri">
+        <button type="button" className="hz-ai-hub-nav-card" onClick={() => router.push("/ai/onaylar")}>
+          <p className="hz-ai-hub-nav-card-title">AI Onay Önerileri</p>
+          <p className="hz-ai-hub-nav-card-sub">Öneri listesi ve onay ekranına geçiş — doğrudan icra yok.</p>
+        </button>
+        <button type="button" className="hz-ai-hub-nav-card" onClick={() => router.push("/ai/icgoruler")}>
+          <p className="hz-ai-hub-nav-card-title">AI İçgörüler</p>
+          <p className="hz-ai-hub-nav-card-sub">Risk ve fırsat sinyalleri; salt okunur kartlar.</p>
+        </button>
+        <button type="button" className="hz-ai-hub-nav-card" onClick={() => router.push("/onaylar")}>
+          <p className="hz-ai-hub-nav-card-title">Merkezi Onaylar</p>
+          <p className="hz-ai-hub-nav-card-sub">İnsan onayı zorunlu işlemler için operasyon onay ekranı.</p>
+        </button>
+      </nav>
+      <p className="hz-ai-review-note">AI kayıt değiştirmez. Kritik işlemler onay zincirinden geçer.</p>
       <section className="hz-metric-grid">
-        <MetricCard title="Proposal" value={String(data.proposals.length)} detail="AI önerisi" tone="info" />
-        <MetricCard title="Onay Bekleyen" value={String(data.approvals.length)} detail="Mutation guard" tone="warning" />
+        <MetricCard title="Öneri" value={String(data.proposals.length)} detail="AI önerisi" tone="info" />
+        <MetricCard title="Onay bekleyen" value={String(data.approvals.length)} detail="Onay koruması" tone="warning" />
         <MetricCard title="Insight" value={String(data.insights.length)} detail="Dashboard uyumlu" tone="success" />
         <MetricCard title="Knowledge" value={String(knowledgeItems.length)} detail="Tenant kayıt" tone="info" />
       </section>
@@ -475,8 +492,8 @@ export function AIAssistantPage() {
             <div className="hz-inline-actions" style={{ flexWrap: "wrap", gap: "8px" }}>
               <span className={`hz-badge ${statusBadge(salesChatResult.status)}`}>{`Yanıt durumu: ${salesChatResult.status}`}</span>
               <span className="hz-badge hz-badge-info">{`Model: ${salesChatResult.provider.effectiveModel ?? salesChatResult.provider.model}`}</span>
-              <span className="hz-badge hz-badge-warning">mutationExecuted: false</span>
-              <span className="hz-badge hz-badge-warning">externalProviderCallExecuted: false</span>
+              <span className="hz-badge hz-badge-warning">İşlem uygulanmadı (onay gerekir)</span>
+              <span className="hz-badge hz-badge-info">Dış çağrı: yalnızca öneri modu</span>
             </div>
             {salesChatResult.usedSources.length > 0 ? (
               <ul className="hz-content-card-description" style={{ marginTop: "8px" }}>

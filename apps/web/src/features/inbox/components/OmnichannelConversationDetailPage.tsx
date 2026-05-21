@@ -137,8 +137,8 @@ export function OmnichannelConversationDetailPage({ conversationId }: Props) {
                         <button type="button" className="hz-btn hz-btn-primary hz-toolbar-btn" disabled title="Onaylar ekranından işlenir">
                           Onaya gönder
                         </button>
-                        <button type="button" className="hz-btn hz-toolbar-btn" disabled>
-                          Düzenle
+                        <button type="button" className="hz-btn hz-toolbar-btn" disabled title="Metin inceleme onay akışında yapılır">
+                          Metni incele
                         </button>
                         <button type="button" className="hz-btn hz-toolbar-btn" disabled>
                           Reddet
