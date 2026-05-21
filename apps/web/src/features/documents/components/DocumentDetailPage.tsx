@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { LoadingState, PageHeader, SplitContentLayout } from "@hallederiz/ui";
+import { EmptyState, EntityDetailLayout, LoadingState, PageHeader } from "@hallederiz/ui";
 import type { Customer, Document } from "@hallederiz/types";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -103,15 +103,28 @@ function DocumentSummary({ document, customer }: { document: Document; customer:
 }
 
 function DocumentPreview({ document }: { document: Document }) {
+  const canPreview = hasDownloadablePdf(document);
   return (
     <section className="hz-content-card">
       <h3>Önizleme</h3>
-      <p className="hz-content-card-description">
-        {dataSourceConfig.useDemoData
-          ? "Şablon önizlemesi gösterilir; canlı PDF üretimi ve gönderim henüz bağlı değildir."
-          : sanitizeDocumentUserText(document.previewText)}
-      </p>
-      <div className="hz-inline-note">
+      {canPreview ? (
+        <p className="hz-content-card-description">
+          Belge dosyası hazır. İndir veya yazdırma kuyruğuna ekleyebilirsiniz.
+        </p>
+      ) : (
+        <div className="hz-print-export-panel" role="status">
+          <p className="hz-print-export-panel-title">Önizleme kullanılamıyor</p>
+          <p className="hz-print-export-panel-desc">
+            {dataSourceConfig.useDemoData
+              ? "Örnek veri modunda PDF önizlemesi gösterilmez."
+              : "Canlı belge servisi bağlandığında önizleme açılır."}
+          </p>
+        </div>
+      )}
+      {document.previewText && canPreview ? (
+        <p className="muted hz-margin-top-sm">{sanitizeDocumentUserText(document.previewText)}</p>
+      ) : null}
+      <div className="hz-inline-note hz-margin-top-sm">
         <span className="hz-inline-note-label">Kayıt</span>
         <Link href="/belgeler" className="hz-inline-note-value">
           {formatDocumentEntityType(document.entityType)} / {document.entityNo}
@@ -255,42 +268,45 @@ export function DocumentDetailPage() {
 
   if (!document) {
     return (
-      <div className="hz-page-stack">
-        <PageHeader title="Belge bulunamadı" description="İstenen belge kaydı bulunamadı veya erişim kapsamında değil." />
-        <section className="hz-content-card">
-          <Link href="/belgeler">Belge listesine dön</Link>
-        </section>
-      </div>
+      <EmptyState
+        title="Belge bulunamadı"
+        message="İstenen belge kaydı bulunamadı veya erişim kapsamında değil."
+        actions={<Link href="/belgeler">Belge listesine dön</Link>}
+      />
     );
   }
 
   return (
-    <div className="hz-page-stack">
-      {dataSourceConfig.useDemoData ? (
-        <p className="hz-doc-preview-band" role="status">
-          Örnek veri modu: bu belge demo amaçlıdır; PDF üretimi ve gönderim canlıda bağlı değildir.
-        </p>
-      ) : null}
-      <PageHeader
-        title={`Belge ${document.documentNo}`}
-        description="Belge önizlemesi, kuyruk ve iletim işlemleri bu ekrandan yönetilir; canlı bağlantı gerektirir."
-      />
-      <DocumentActions document={document} onReload={load} />
-      <SplitContentLayout
-        main={
-          <>
-            <DocumentPreview document={document} />
-            <DocumentDeliveryHistory document={document} />
-            <DocumentOutputJobs printJobs={printJobs} fileSaveJobs={fileSaveJobs} localAgentHealth={localAgentHealth} />
-          </>
-        }
-        side={
-          <>
-            <DocumentSummary document={document} customer={customer} />
-            <EntityTimelinePanel entityType="document" entityId={document.id} />
-          </>
-        }
-      />
-    </div>
+    <EntityDetailLayout
+      className="hz-documents-detail-page"
+      header={
+        <>
+          {dataSourceConfig.useDemoData ? (
+            <p className="hz-documents-preview-band" role="status">
+              Örnek veri modu: bu belge demo amaçlıdır; PDF üretimi ve gönderim canlıda bağlı değildir.
+            </p>
+          ) : null}
+          <PageHeader
+            title={`Belge ${document.documentNo}`}
+            description="Belge önizlemesi, kuyruk ve iletim işlemleri bu ekrandan yönetilir."
+            breadcrumb={document.documentNo}
+          />
+        </>
+      }
+      summary={<DocumentSummary document={document} customer={customer} />}
+      sections={
+        <>
+          <DocumentActions document={document} onReload={load} />
+          <DocumentPreview document={document} />
+          <DocumentDeliveryHistory document={document} />
+          <DocumentOutputJobs
+            printJobs={printJobs}
+            fileSaveJobs={fileSaveJobs}
+            localAgentHealth={localAgentHealth}
+          />
+        </>
+      }
+      sidebar={<EntityTimelinePanel entityType="document" entityId={document.id} />}
+    />
   );
 }

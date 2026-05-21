@@ -1,6 +1,6 @@
 "use client";
 
-import { LoadingState, MetricCard, PageHeader, Pagination, SplitContentLayout } from "@hallederiz/ui";
+import { EntityListPageTemplate, EmptyState, LoadingState, Pagination } from "@hallederiz/ui";
 import type { Customer, Document, DocumentType } from "@hallederiz/types";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
@@ -87,94 +87,82 @@ export function DocumentTable({
   documents,
   customers,
   selectedId,
-  onSelect,
-  emptyMessage
+  onSelect
 }: {
   documents: Document[];
   customers: Customer[];
   selectedId: string | null;
   onSelect: (id: string) => void;
-  emptyMessage: string;
 }) {
   const router = useRouter();
   return (
-    <section className="hz-content-card hz-doc-table-wrap">
-      <div className="table-wrap hz-table-wrap">
-        <table className="table hz-table hz-table-sticky">
-          <thead>
-            <tr>
-              <th>Belge tipi</th>
-              <th>Şablon</th>
-              <th>Bağlı kayıt</th>
-              <th>Müşteri</th>
-              <th>Oluşturma</th>
-              <th>İletim</th>
-              <th>Aksiyon</th>
-            </tr>
-          </thead>
-          <tbody>
-            {documents.map((document) => {
-              const latestDelivery = document.deliveries[0];
-              return (
-                <tr
-                  key={document.id}
-                  className={`stock-table-row hz-doc-table-row ${selectedId === document.id ? "is-selected-row" : ""}`}
-                  onClick={() => onSelect(document.id)}
-                  onDoubleClick={() => router.push(`/belgeler/${document.id}`)}
-                >
-                  <td>{getDocumentTypeLabel(document.type)}</td>
-                  <td className="hz-doc-table-cell-muted">{formatDocumentTemplateVersion(document)}</td>
-                  <td>{document.entityNo}</td>
-                  <td>{customers.find((customer) => customer.id === document.customerId)?.name ?? document.customerId ?? "—"}</td>
-                  <td>{dateLabel(document.createdAt)}</td>
-                  <td>
-                    <span
-                      className={`hz-badge hz-badge-${latestDelivery?.status === "sent" || latestDelivery?.status === "delivered" ? "success" : latestDelivery?.status === "failed" ? "danger" : "warning"}`}
-                    >
-                      {getDocumentDeliveryStatusLabel(latestDelivery?.status)}
-                    </span>
-                  </td>
-                  <td>
-                    <button
-                      className="hz-btn hz-btn-secondary"
-                      type="button"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        router.push(`/belgeler/${document.id}`);
-                      }}
-                    >
-                      Detay
-                    </button>
-                  </td>
-                </tr>
-              );
-            })}
-            {documents.length === 0 ? (
-              <tr>
-                <td colSpan={7}>
-                  <div className="table-empty">{emptyMessage}</div>
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </table>
+    <>
+      <div className="hz-documents-table-head" role="row">
+        <span>Belge tipi</span>
+        <span>Şablon</span>
+        <span>Bağlı kayıt</span>
+        <span>Müşteri</span>
+        <span>Oluşturma</span>
+        <span>İletim</span>
+        <span>AKSİYON</span>
       </div>
-    </section>
+      <div className="hz-documents-table-body">
+        {documents.map((document) => {
+          const latestDelivery = document.deliveries[0];
+          const deliveryClass =
+            latestDelivery?.status === "sent" || latestDelivery?.status === "delivered"
+              ? "hz-badge hz-badge-success"
+              : latestDelivery?.status === "failed"
+                ? "hz-badge hz-badge-danger"
+                : "hz-badge hz-badge-warning";
+          return (
+            <div
+              key={document.id}
+              role="row"
+              className={`hz-documents-table-row${selectedId === document.id ? " is-selected" : ""}`}
+              onClick={() => onSelect(document.id)}
+              onDoubleClick={() => router.push(`/belgeler/${document.id}`)}
+              tabIndex={0}
+            >
+              <span>{getDocumentTypeLabel(document.type)}</span>
+              <span>{formatDocumentTemplateVersion(document)}</span>
+              <span>{document.entityNo}</span>
+              <span>{customers.find((customer) => customer.id === document.customerId)?.name ?? "—"}</span>
+              <span>{dateLabel(document.createdAt)}</span>
+              <span>
+                <span className={deliveryClass}>{getDocumentDeliveryStatusLabel(latestDelivery?.status)}</span>
+              </span>
+              <span>
+                <button
+                  type="button"
+                  className="hz-documents-action-btn"
+                  onClick={(event) => {
+                    event.stopPropagation();
+                    router.push(`/belgeler/${document.id}`);
+                  }}
+                >
+                  İncele
+                </button>
+              </span>
+            </div>
+          );
+        })}
+      </div>
+    </>
   );
 }
 
 export function DocumentPreviewPanel({ document }: { document: Document | null }) {
   if (!document) {
     return (
-      <section className="hz-content-card hz-doc-preview-panel">
-        <h3>Belge önizleme</h3>
-        <p className="hz-content-card-description">Bir belge seçin.</p>
-      </section>
+      <aside className="hz-documents-side">
+        <p className="hz-documents-side-empty">Listeden bir belge seçin.</p>
+      </aside>
     );
   }
   const deliveries = document.deliveries;
   return (
-    <section className="hz-content-card hz-doc-preview-panel">
+    <aside className="hz-documents-side">
       <h3>Belge önizleme</h3>
       <ul className="hz-side-list hz-doc-preview-list">
         <li>Belge no: {document.documentNo}</li>
@@ -187,9 +175,9 @@ export function DocumentPreviewPanel({ document }: { document: Document | null }
         <li>Arşiv: {describeArchivePolicy()}</li>
         <li>
           Önizleme:{" "}
-          {dataSourceConfig.useDemoData
-            ? "Şablon önizlemesi gösterilir; canlı PDF üretimi henüz bağlı değildir."
-            : sanitizeDocumentUserText(document.previewText)}
+          {hasDownloadablePdf(document)
+            ? "Belge dosyası indirilebilir."
+            : "Önizleme kullanılamıyor; canlı belge servisi bekleniyor."}
         </li>
       </ul>
       {deliveries.length > 0 ? (
@@ -219,7 +207,7 @@ export function DocumentPreviewPanel({ document }: { document: Document | null }
           </div>
         </div>
       ) : null}
-    </section>
+    </aside>
   );
 }
 
@@ -451,49 +439,75 @@ export function DocumentsPage() {
         typeFilter: typeParam
       });
 
+  const sentCount = filteredDocuments.filter((item) =>
+    item.deliveries.some((delivery) => delivery.status === "sent" || delivery.status === "delivered")
+  ).length;
+
   return (
-    <div className="hz-page-stack hz-doc-page">
-      {dataSourceConfig.useDemoData ? (
-        <div className="hz-doc-preview-band" role="status">
-          Örnek veri modu: belge listesi ve önizleme demo amaçlıdır; canlı PDF üretimi veya gönderim yapılmaz.
-        </div>
-      ) : null}
-      {contextBanner ? (
-        <p className="hz-doc-context-band" role="status">
-          {contextBanner}
-        </p>
-      ) : null}
-      {loadError ? (
-        <p className="hz-doc-context-band" role="alert">
-          {loadError} {MSG_DATA_WHEN_RECONNECTED} {MSG_REFRESH_RETRY}
-        </p>
-      ) : null}
-      <PageHeader
-        title="Belgeler"
-        description="Teklif, sipariş, tahsilat, depo, teslim, fatura ve iade belgelerini kayıt bağlamıyla yönetin."
-      />
-      <section className="hz-metric-grid">
-        <MetricCard title="Belge" value={String(filteredDocuments.length)} detail="Görünen kayıt" tone="info" />
-        <MetricCard
-          title="İletim kaydı"
-          value={String(filteredDocuments.filter((item) => item.deliveries.some((delivery) => delivery.status === "sent")).length)}
-          detail="Önizleme kayıtları"
-          tone="success"
-        />
-        <MetricCard
-          title="Bekleyen"
-          value={String(filteredDocuments.filter((item) => item.deliveries.length === 0).length)}
-          detail="İletim veya arşiv bekliyor"
-          tone="warning"
-        />
-        <MetricCard title="Belge tipi" value={String(new Set(filteredDocuments.map((item) => item.type)).size)} detail="Farklı tür" tone="neutral" />
-      </section>
-      <DocumentActionsBar document={selected} />
-      <DocumentFilterBar />
-      <SplitContentLayout
-        main={
-          loading ? (
+    <EntityListPageTemplate
+      className="hz-documents-page"
+      header={
+        <>
+          <header className="hz-documents-topbar">
+            <div>
+              <h1 className="hz-documents-topbar-title">Belgeler</h1>
+              <p className="hz-documents-topbar-sub">
+                Teklif, sipariş, tahsilat, depo, teslim, fatura ve iade belgelerini kayıt bağlamıyla yönetin.
+              </p>
+            </div>
+          </header>
+          <div className="hz-documents-kpi-strip" aria-label="Belge özeti">
+            <div className="hz-documents-kpi">
+              <span className="hz-documents-kpi-label">Belge</span>
+              <span className="hz-documents-kpi-value">{filteredDocuments.length}</span>
+            </div>
+            <div className="hz-documents-kpi">
+              <span className="hz-documents-kpi-label">İletim kaydı</span>
+              <span className="hz-documents-kpi-value">{sentCount}</span>
+            </div>
+            <div className="hz-documents-kpi">
+              <span className="hz-documents-kpi-label">Bekleyen</span>
+              <span className="hz-documents-kpi-value">
+                {filteredDocuments.filter((item) => item.deliveries.length === 0).length}
+              </span>
+            </div>
+            <div className="hz-documents-kpi">
+              <span className="hz-documents-kpi-label">Belge tipi</span>
+              <span className="hz-documents-kpi-value">
+                {new Set(filteredDocuments.map((item) => item.type)).size}
+              </span>
+            </div>
+          </div>
+          {dataSourceConfig.useDemoData ? (
+            <p className="hz-documents-preview-band" role="status">
+              Örnek veri modu: belge listesi demo amaçlıdır; canlı PDF üretimi veya gönderim yapılmaz.
+            </p>
+          ) : null}
+          {contextBanner ? (
+            <p className="hz-documents-context-band hz-doc-context-band" role="status">
+              {contextBanner}
+            </p>
+          ) : null}
+          {loadError ? (
+            <p className="hz-documents-context-band hz-doc-context-band" role="alert">
+              {loadError} {MSG_DATA_WHEN_RECONNECTED} {MSG_REFRESH_RETRY}
+            </p>
+          ) : null}
+          <div className="hz-documents-toolbar">
+            <DocumentActionsBar document={selected} />
+          </div>
+        </>
+      }
+      filters={<DocumentFilterBar />}
+      list={
+        <div className="hz-documents-list-wrap">
+          {loading ? (
             <LoadingState title="Belgeler yükleniyor" message="Kayıt bağlantıları ve iletim durumları hazırlanıyor." />
+          ) : loadError || filteredDocuments.length === 0 ? (
+            <EmptyState
+              title={loadError ? "Belge listesi alınamadı" : "Belge bulunamadı"}
+              message={emptyMessage}
+            />
           ) : (
             <>
               <DocumentTable
@@ -501,14 +515,18 @@ export function DocumentsPage() {
                 customers={customers}
                 selectedId={selected?.id ?? null}
                 onSelect={setSelectedId}
-                emptyMessage={emptyMessage}
               />
-              <Pagination totalItems={filteredDocuments.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
+              <Pagination
+                totalItems={filteredDocuments.length}
+                pageSize={pageSize}
+                currentPage={page}
+                onPageChange={setPage}
+              />
             </>
-          )
-        }
-        side={<DocumentPreviewPanel document={selected} />}
-      />
-    </div>
+          )}
+        </div>
+      }
+      preview={<DocumentPreviewPanel document={selected} />}
+    />
   );
 }

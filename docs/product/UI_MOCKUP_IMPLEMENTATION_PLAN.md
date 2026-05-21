@@ -134,7 +134,11 @@ PNG (referans, import YOK)
 
 ### Agent 06 — `ui/06-stock-documents-tasks`
 
-Routes: stok, depo, fabrikalar, belgeler, görevler, archive, print-export davranışı
+| | |
+|--|--|
+| **Routes** | stok, depo, fabrikalar, belgeler, görevler, archive, print-export |
+| **Status** | **Tamamlandı** — `UI_AGENT_06_REPORT.md`. Belgeler/fabrikalar list+detail template adoption; sahte PDF/harita/yorum kaldırıldı. PNG runtime import yasağı korunur. |
+| **Sonraki** | Agent 07 communication/reports/AI |
 
 ### Agent 07 — `ui/07-communication-reports-ai`
 
