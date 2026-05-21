@@ -9,6 +9,7 @@ import {
   sendWhatsAppOutbound,
   updateWhatsAppActionRequest
 } from "../../../integrations/mock-store";
+import { assertWhatsAppReady, IntegrationNotReadyError, resolveWhatsAppReadiness } from "../../../shared/integration-readiness";
 import { validateWhatsAppConfig } from "../../../shared/service-config";
 import { verifyHmacSha256Signature } from "../../../shared/webhook-security";
 
@@ -23,26 +24,33 @@ function withTimeout(signalTimeoutMs: number) {
   return { controller, clear: () => clearTimeout(timeout) };
 }
 
+function resolveApiToken(): string | undefined {
+  return process.env.WHATSAPP_API_TOKEN?.trim() || process.env.WHATSAPP_ACCESS_TOKEN?.trim();
+}
+
 export class WhatsAppAdapter {
   constructor(private readonly context: RequestContext) {}
 
+  private get readiness() {
+    return resolveWhatsAppReadiness();
+  }
+
   private get provider() {
-    return process.env.WHATSAPP_PROVIDER ?? "mock";
+    return this.readiness.provider;
   }
 
   private get hasLiveConfig() {
-    return Boolean(
-      process.env.WHATSAPP_API_BASE_URL &&
-      process.env.WHATSAPP_API_TOKEN &&
-      process.env.WHATSAPP_PHONE_NUMBER_ID
-    );
+    return this.readiness.ready;
   }
 
   private async sendLiveMessage(payload: Partial<WhatsAppMessage>) {
-    const apiBaseUrl = process.env.WHATSAPP_API_BASE_URL as string;
-    const token = process.env.WHATSAPP_API_TOKEN as string;
-    const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID as string;
-    const testRecipient = process.env.WHATSAPP_TEST_RECIPIENT;
+    const apiBaseUrl = (process.env.WHATSAPP_API_BASE_URL ?? "https://graph.facebook.com/v21.0").trim();
+    const token = resolveApiToken();
+    const phoneNumberId = process.env.WHATSAPP_PHONE_NUMBER_ID?.trim();
+    const testRecipient = process.env.WHATSAPP_TEST_RECIPIENT?.trim();
+    if (!token || !phoneNumberId) {
+      throw new IntegrationNotReadyError(this.readiness, "whatsapp_not_configured");
+    }
     if (!testRecipient) {
       throw new Error("WHATSAPP_TEST_RECIPIENT tanimsiz.");
     }
@@ -65,8 +73,7 @@ export class WhatsAppAdapter {
         signal: controller.signal
       });
       if (!response.ok) {
-        const reason = await response.text();
-        throw new Error(`WhatsApp outbound failed: ${response.status} ${reason}`);
+        throw new Error(`whatsapp_outbound_failed_${response.status}`);
       }
       return { ok: true as const };
     } finally {
@@ -95,17 +102,17 @@ export class WhatsAppAdapter {
   }
 
   async outbound(message: Partial<WhatsAppMessage>) {
+    assertWhatsAppReady();
     const next = sendWhatsAppOutbound(message);
     if (requiresStrictPolicy(message)) {
       next.status = "queued";
     }
-    if (this.provider === "live" && this.hasLiveConfig) {
+    if (this.hasLiveConfig && (this.provider === "live" || this.provider === "meta")) {
       try {
         await this.sendLiveMessage(next);
         next.status = "sent";
-      } catch (error) {
+      } catch {
         next.status = "failed";
-        next.body = `${next.body ?? ""}\n[provider-error] ${error instanceof Error ? error.message : "unknown"}`;
       }
     }
     return next;
@@ -147,6 +154,7 @@ export class WhatsAppAdapter {
     const config = validateWhatsAppConfig();
     return {
       ...config,
+      message: config.reason,
       details: {
         ...config.details,
         runtimeProvider: this.provider,

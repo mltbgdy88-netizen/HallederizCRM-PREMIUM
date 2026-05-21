@@ -6,11 +6,18 @@ import {
 } from "../data/whatsapp-action-messages";
 import { mapWhatsAppActionError } from "./whatsapp-action-feedback";
 
-export function canSendWhatsAppOutbound(session: WhatsAppSessionSnapshot | null, useDemoData: boolean): boolean {
+export function canSendWhatsAppOutbound(
+  session: WhatsAppSessionSnapshot | null,
+  useDemoData: boolean,
+  health?: { ready?: boolean; state?: string } | null
+): boolean {
   if (useDemoData) {
     return false;
   }
-  return session?.connectionStatus === "connected";
+  if (health?.state === "disabled" || health?.state === "not_configured") {
+    return false;
+  }
+  return health?.ready === true && session?.connectionStatus === "connected";
 }
 
 export function mapWhatsAppOutboundOutcome(message: WhatsAppMessage | undefined): string {
@@ -32,13 +39,14 @@ export function mapWhatsAppOutboundOutcome(message: WhatsAppMessage | undefined)
 export async function runWhatsAppOutboundSend(options: {
   useDemoData: boolean;
   session: WhatsAppSessionSnapshot | null;
+  health?: { ready?: boolean; state?: string } | null;
   conversationId: string;
   body: string;
 }): Promise<{ ok: boolean; toast: string }> {
   if (options.useDemoData) {
     return { ok: false, toast: MSG_WA_CONNECTION_REQUIRED };
   }
-  if (!canSendWhatsAppOutbound(options.session, false)) {
+  if (!canSendWhatsAppOutbound(options.session, false, options.health)) {
     return { ok: false, toast: MSG_WA_CONNECTION_REQUIRED };
   }
   const trimmed = options.body.trim();

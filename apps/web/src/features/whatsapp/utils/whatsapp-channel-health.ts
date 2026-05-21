@@ -12,6 +12,8 @@ export type WhatsAppChannelHealthSnapshot = {
   status: string;
   message: string;
   mode?: string;
+  state?: string;
+  ready?: boolean;
 };
 
 export type WhatsAppChannelHealthView = {
@@ -56,16 +58,25 @@ export function mapWhatsAppChannelHealthView(
     };
   }
 
-  if (session?.connectionStatus === "connected") {
+  if (health?.state === "disabled" || health?.state === "not_configured") {
+    return {
+      statusLine: "WhatsApp sağlayıcısı yapılandırılmadı",
+      note: sanitizeHealthMessage(health.message) || "Env ayarları tamamlandığında bağlantı durumu burada görünecek.",
+      dotTone: "warn",
+      qrDataUrl
+    };
+  }
+
+  if (health?.ready === true && session?.connectionStatus === "connected") {
     return {
       statusLine: MSG_WA_CHANNEL_READY,
-      note: MSG_WA_CHANNEL_WAITING,
+      note: sanitizeHealthMessage(health.message),
       dotTone: "ok",
       qrDataUrl
     };
   }
 
-  if (session?.connectionStatus === "disconnected") {
+  if (session?.connectionStatus === "disconnected" || health?.state === "error") {
     return {
       statusLine: MSG_WA_CONNECTION_NOT_LIVE,
       note: MSG_WA_CHANNEL_WAITING,

@@ -47,7 +47,7 @@ function isTruthyDemoFlag(env: RuntimeEnvironment, key: string): boolean {
 }
 
 function requiresWhatsAppLive(env: RuntimeEnvironment): boolean {
-  const provider = (env.WHATSAPP_PROVIDER ?? "mock").trim().toLowerCase();
+  const provider = (env.WHATSAPP_PROVIDER ?? "disabled").trim().toLowerCase();
   return provider === "live" || provider === "meta" || provider === "graph";
 }
 

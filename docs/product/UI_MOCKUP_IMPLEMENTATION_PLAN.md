@@ -248,6 +248,18 @@ pnpm smoke:navigation
 
 ---
 
+## 9b. Integration readiness (post–UI adoption)
+
+| Alan | Durum |
+|------|--------|
+| UI mockup adoption | Done (Agents 01–10) |
+| WhatsApp integration readiness | Code complete — **production credentials pending** |
+| Local AI integration readiness | Code complete — **Ollama/local endpoint pending** |
+
+Referans: `docs/product/WHATSAPP_READINESS.md`, `docs/product/LOCAL_AI_READINESS.md`.
+
+---
+
 ## 10. Korunan davranışlar (değişmez)
 
 - Backend API contract ve mutation policy

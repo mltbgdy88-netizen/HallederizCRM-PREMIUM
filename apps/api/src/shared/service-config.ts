@@ -1,3 +1,6 @@
+import { resolveWhatsAppReadiness, type IntegrationReadinessView } from "./integration-readiness";
+import { validateLocalAiEndpointUrl } from "./local-ai-url-policy";
+
 export type ServiceHealthStatus = "healthy" | "degraded" | "fallback" | "disabled" | "misconfigured" | "error";
 export type ServiceMode = "live" | "fallback" | "disabled" | "mock";
 
@@ -9,6 +12,25 @@ export interface ServiceHealthResult {
   reason: string;
   lastCheckedAt: string;
   details: Record<string, unknown>;
+}
+
+function readinessToServiceHealth(view: IntegrationReadinessView, service: ServiceHealthResult["service"]): ServiceHealthResult {
+  return {
+    service,
+    status: view.status,
+    mode: view.mode,
+    configured: view.configured,
+    reason: view.message,
+    lastCheckedAt: view.lastCheckedAt,
+    details: {
+      state: view.state,
+      ready: view.ready,
+      provider: view.provider,
+      reasonCode: view.reasonCode,
+      missingEnv: view.missingEnv,
+      ...view.details
+    }
+  };
 }
 
 interface ValidationResult {
@@ -111,30 +133,7 @@ export function validateAiConfig() {
 }
 
 export function validateWhatsAppConfig() {
-  const provider = process.env.WHATSAPP_PROVIDER ?? "mock";
-  const liveRequested = provider === "live";
-  const required = liveRequested
-    ? validateRequired([
-        "WHATSAPP_API_BASE_URL",
-        "WHATSAPP_API_TOKEN",
-        "WHATSAPP_PHONE_NUMBER_ID",
-        "WHATSAPP_BUSINESS_ACCOUNT_ID",
-        "WHATSAPP_WEBHOOK_VERIFY_TOKEN",
-        "WHATSAPP_WEBHOOK_APP_SECRET"
-      ])
-    : { configured: true, missing: [] };
-  return {
-    service: "whatsapp" as const,
-    status: liveRequested ? (required.configured ? "healthy" : "misconfigured") : "fallback",
-    mode: liveRequested ? (required.configured ? "live" : "fallback") : "mock",
-    configured: required.configured,
-    reason: required.configured ? (liveRequested ? "WhatsApp canli baglanti hazir." : "WhatsApp mock/fallback modunda.") : `Eksik env: ${required.missing.join(", ")}`,
-    lastCheckedAt: nowIso(),
-    details: {
-      provider,
-      missing: required.missing
-    }
-  } satisfies ServiceHealthResult;
+  return readinessToServiceHealth(resolveWhatsAppReadiness(), "whatsapp");
 }
 
 export function validateErpConfig() {
@@ -221,4 +220,3 @@ export function buildIntegrationsHealthSummary(healthItems: ServiceHealthResult[
     services: healthItems
   };
 }
-import { validateLocalAiEndpointUrl } from "./local-ai-url-policy";
