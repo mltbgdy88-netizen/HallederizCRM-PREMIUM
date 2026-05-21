@@ -18,7 +18,7 @@ type ImportTab = "customers" | "products" | "pricing" | "warehouses" | "stock-lo
 
 const IMPORT_TABS: Array<{ id: ImportTab; label: string }> = [
   { id: "customers", label: "Cariler" },
-  { id: "products", label: "Urunler" },
+  { id: "products", label: "Ürünler" },
   { id: "pricing", label: "Fiyatlar" },
   { id: "warehouses", label: "Depolar" },
   { id: "stock-locations", label: "Stok / Lokasyon" },

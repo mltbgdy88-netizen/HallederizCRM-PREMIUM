@@ -30,7 +30,7 @@ export function TaskListTable({ tasks }: { tasks: Task[] }) {
   return (
     <div className="table-wrap hz-table-wrap">
       <table className="table hz-table hz-table-sticky">
-        <thead><tr><th>Gorev Basligi</th><th>Ilgili Kayit</th><th>Musteri</th><th>Oncelik</th><th>Son Tarih</th><th>Kaynak</th><th>Durum</th><th>Aksiyon</th></tr></thead>
+        <thead><tr><th>Görev başlığı</th><th>İlgili kayıt</th><th>Müşteri</th><th>Öncelik</th><th>Son tarih</th><th>Kaynak</th><th>Durum</th><th>Aksiyon</th></tr></thead>
         <tbody>
           {tasks.map((task) => (
             <tr key={task.id}>

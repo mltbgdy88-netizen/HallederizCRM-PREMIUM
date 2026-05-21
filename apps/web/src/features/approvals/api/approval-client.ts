@@ -89,7 +89,7 @@ function defaultApprovalClientErrorMessage(status: number, endpoint: ApprovalApi
     ) {
       return "Worker uçları bu ortamda yayinlanmiyor (404). API route eslemesini kontrol edin.";
     }
-    return "Approval endpoint bulunamadi (404). Foundation route eslemesi ve API surumu kontrol edilmelidir.";
+    return "Onay uç noktası bulunamadı. API yapılandırması ve sürüm uyumu kontrol edilmelidir.";
   }
   if (status === 409) {
     return "Cakisma (409). Kayit zaten islendi veya mevcut durumda islem tekrarlanamaz.";

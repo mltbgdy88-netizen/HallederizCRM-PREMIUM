@@ -16,7 +16,7 @@ export function WarehouseTaskFilterBar({
       <FilterGrid>
         <label>Depo<input value={filters.warehouse} onChange={(event) => onFilterChange("warehouse", event.target.value)} placeholder="Merkez Depo" /></label>
         <label>
-          Gorev Durumu
+          Görev durumu
           <select value={filters.status} onChange={(event) => onFilterChange("status", event.target.value as "all" | WarehouseOrderStatus | WarehouseTaskStatus)}>
             <option value="all">Tum durumlar</option>
             <option value="waiting">Bekliyor</option>

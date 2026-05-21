@@ -17,10 +17,10 @@ export function WarehouseTaskTable({
         <table className="table hz-table hz-table-sticky">
           <thead>
             <tr>
-              <th>Gorev No</th>
+              <th>Görev no</th>
               <th>Siparis No</th>
-              <th>Musteri</th>
-              <th>Urun Sayisi</th>
+              <th>Müşteri</th>
+              <th>Ürün sayısı</th>
               <th>Depo</th>
               <th>Durum</th>
               <th>Son Tarih</th>

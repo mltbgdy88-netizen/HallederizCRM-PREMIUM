@@ -34,7 +34,7 @@ export function QuickOperationLineGrid({
     <section className="hz-content-card">
       <div className="crm-identity-header">
         <div>
-          <h3>Urun / Hizmet Satirlari</h3>
+          <h3>Ürün / hizmet satırları</h3>
           <p className="hz-content-card-description">Klasik fis/tablo hissi korunur; satir altindan kaynak akordiyonu acilir.</p>
         </div>
         <button type="button" className="hz-btn hz-btn-secondary" onClick={onAddLine}>Satir Ekle</button>

@@ -32,10 +32,13 @@ export function TaskCenterPage() {
 
   return (
     <div className="hz-page-stack">
-      <PageHeader title="Gorev Merkezi" description="Sistem ve AI kaynakli operasyon kartlarini tek panelden izleyin; karttan goreve, gorevden ilgili kayda ilerleyin." />
+      <PageHeader
+        title="Görev Merkezi"
+        description="Sistem ve AI kaynaklı operasyon kartlarını tek panelden izleyin; karttan göreve, görevden ilgili kayda ilerleyin."
+      />
 
       <section className="hz-metric-grid">
-        <MetricCard title="Acik Gorev" value={String(data?.tasks.filter((task) => task.status !== "done" && task.status !== "cancelled").length ?? 0)} detail="Sistem + AI" tone="info" />
+        <MetricCard title="Açık görev" value={String(data?.tasks.filter((task) => task.status !== "done" && task.status !== "cancelled").length ?? 0)} detail="Sistem + AI" tone="info" />
         <MetricCard title="Kritik" value={String(data?.tasks.filter((task) => task.priority === "critical" || task.status === "overdue").length ?? 0)} detail="Oncelikli takip" tone="danger" />
         <MetricCard title="Onay Bekleyen" value={String(data?.approvals.filter((approval) => approval.status === "pending").length ?? 0)} detail="Approval engine" tone="warning" />
         <MetricCard title="Aktif Workflow" value={String(data?.workflows.filter((workflow) => workflow.status === "active").length ?? 0)} detail="Entity bazli akis" tone="success" />
@@ -44,7 +47,11 @@ export function TaskCenterPage() {
       <DashboardViewTabs view={view} onChange={setView} />
       <DashboardFilterBar />
 
-      {!data ? <LoadingState title="Gorev merkezi yukleniyor" message="Workflow, task ve approval kayitlari hazirlaniyor." /> : <DashboardCardGrid cards={visibleCards} onOpenCard={setSelectedCard} />}
+      {!data ? (
+        <LoadingState title="Görev merkezi yükleniyor" message="İş akışı, görev ve onay kayıtları hazırlanıyor." />
+      ) : (
+        <DashboardCardGrid cards={visibleCards} onOpenCard={setSelectedCard} />
+      )}
 
       {selectedCard ? <TaskListModal card={selectedCard} tasks={modalTasks} onClose={() => setSelectedCard(null)} /> : null}
     </div>

@@ -90,7 +90,7 @@ export async function getPilotReadinessData(): Promise<PilotReadinessSummary> {
       warning: 4,
       missing: 3,
       total: 12,
-      blockers: ["Cariler import edildi", "Urunler import edildi", "ERP baglanti hazirligi"],
+      blockers: ["Cariler içe aktarıldı", "Ürünler içe aktarıldı", "ERP bağlantı hazırlığı"],
       items: [
         {
           id: "company-profile",

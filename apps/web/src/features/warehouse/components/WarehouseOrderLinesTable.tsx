@@ -8,8 +8,8 @@ export function WarehouseOrderLinesTable({ lines }: { lines: WarehouseOrderLine[
         <table className="table hz-table hz-table-sticky">
           <thead>
             <tr>
-              <th>Urun Kodu</th>
-              <th>Urun Adi</th>
+              <th>Ürün kodu</th>
+              <th>Ürün adı</th>
               <th>Istenen Adet</th>
               <th>Hazirlanan</th>
               <th>Depo</th>
