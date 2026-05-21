@@ -49,6 +49,10 @@ jobs:
       - name: Route + navigation smoke (ürün öncesi kapı)
         run: pnpm smoke:routes && pnpm smoke:navigation
 
+      - name: UI scope guard (PNG, leakage, fake copy)
+        run: pnpm ui:guard
+        continue-on-error: false
+
       - name: Dependency audit
         run: pnpm audit --audit-level moderate
         continue-on-error: true

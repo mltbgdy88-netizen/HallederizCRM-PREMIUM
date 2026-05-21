@@ -55,7 +55,7 @@
 | 35 | `/gorevler/[id]` | Task detail | MISSING | **Var** `[taskId]` | REAL | detail | `EntityDetailLayout` | 06 | **Agent 06 tamam** |
 | 36 | `/archive` | Archive hub + categories | MISSING | **Var** | REAL | default, empty, mobile | Referans layout korundu | 06 | **Agent 06 tamam** — `ArchivePage` |
 | 37 | `/raporlar` | Report analytics list | MISSING | **Var** | REAL | default, empty, loading | Canlı modda sahte grafik yok | 07 | **Agent 07 tamam** — `ReportsPage` |
-| 38 | `/raporlar/[...]` | Report sub-routes | MISSING | **Var** catch-all | CATCH | placeholder | Alt raporlar shell | 07 | **Agent 07 tamam** — catch-all korundu |
+| 38 | `/raporlar/[...]` | Report sub-routes | MISSING | **Var** catch-all | REAL | empty, loading, error | `ReportDetailPage` safe shell; fake chart yok | 10 | **Hardening tamam** — audit gap closure |
 | 39 | `/ai` | AI assistant (read-only) | MISSING | **Var** | REAL | default, loading | Hub + review-only | 07 | **Agent 07 tamam** — `AIAssistantPage` |
 | 40 | `/ai/onaylar` | AI approvals bridge | MISSING | **Var** | REAL | default | Onay ekranına git | 07 | **Agent 07 tamam** — `AiApprovalsPage` |
 | 41 | `/ai/icgoruler` | AI insights | MISSING | **Var** | REAL | default | Salt okunur kartlar | 07 | **Agent 07 tamam** — `AiInsightsPage` |
@@ -65,7 +65,7 @@
 | 45 | `/kullanicilar/roller` | Role permission matrix | **08 tamam** | **Var** | REAL | default | `listRolePresetsApi`; salt okunur | 08 | **Agent 08 tamam** — `RolesManagementPage` |
 | 46 | `/erp` | ERP integration panel | **08 tamam** | **Var** | REAL | default, loading | Türkçe; Foundation copy kaldırıldı | 08 | **Agent 08 tamam** — `ErpPage` |
 | 47 | `/workflow/[type]/[id]` | Workflow timeline | MISSING | **Var** | REAL | detail, timeline | `hz-workflow-*` timeline | 04 | **Agent 04 tamam** |
-| 48 | `unauthorized` | System state page | MISSING | **Rota yok** | — | error | 401 güvenli copy | 08 | Inline error / auth redirect; dedicated page Agent 08 |
+| 48 | `/unauthorized` | System state page | MISSING | **Var** `app/(platform)/unauthorized/page.tsx` | STATE | error | Güvenli erişim copy; auth logic değişmedi | 10 | **Hardening tamam** |
 | 49 | `/offline-api` | System state page | **08 tamam** | **Var** | STATE | error | Güvenli API kopuk copy | 08 | **Agent 08 tamam** — `OfflineApiStatePage` |
 | 50 | `/demo-mode` | System banner/state | **08 tamam** | **Var** + Config | STATE | banner | `dataSourceConfig.useDemoData` | 08 | **Agent 08 tamam** — `DemoModeStatePage` |
 | 51 | `/live-empty` | Empty system state | **08 tamam** | **Var** | STATE | empty | Canlı boş; sahte kayıt yok | 08 | **Agent 08 tamam** — `LiveEmptyStatePage` |
@@ -79,10 +79,10 @@
 | Metrik | Sayı |
 |--------|------|
 | apps/web route karşılığı (sayfa veya davranış) | **48** tam + **5** sistem katmanı (dedicated route yok) |
-| Eksik dedicated route (48–53) | **1** (`unauthorized` sayfa yok; offline/demo/live-empty Agent 08) |
-| ProductPageShell / CATCH ağırlıklı | **~15+** alt rota (manifest `needs-api` / `shell`) |
+| Eksik dedicated route (48–53) | **0** (`/unauthorized` eklendi; offline/demo/live-empty Agent 08) |
+| ProductPageShell / CATCH ağırlıklı | **~14** alt rota (raporlar detay hariç) |
 | Hub route (teklif/sipariş/tahsilat yeni) | **3** — uyumlu |
-| `loading.tsx` / `error.tsx` | **7** platform route loading (Agent 04); `error.tsx` hâlâ 0 |
+| `loading.tsx` / `error.tsx` | **8+** loading; **9** segment `error.tsx` (Agent 10 hardening) |
 | Mockup PNG referans | **0** (paket repoda yok) |
 
 ---

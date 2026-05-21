@@ -91,7 +91,7 @@ export function OperationalObservabilityPage() {
             <li>WhatsApp: imza ve secret fail-closed; ham onay tokeni loglanmiyor.</li>
             <li>AI: proposal-only; onaysiz execution yok; audit/timeline yazimi biliniyor.</li>
             <li>Entegrasyon: canli yoksa kontrollu hata; sessiz basari yok.</li>
-            <li>Operasyon: rollback plani; pilot durum dokumanlari guncel.</li>
+            <li>Operasyon: geri alma planı; pilot durum dokümanları güncel.</li>
           </ul>
           <p className="muted hz-ops-obs-foot">Asagida haftalik pilot geri bildirimi sablonu ve ornek ozet satirlari yer alir.</p>
         </section>

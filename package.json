@@ -28,6 +28,7 @@
     "smoke:all": "node scripts/smoke/all.cjs",
     "smoke:e2e": "node scripts/smoke/e2e.cjs",
     "smoke:product-readiness": "pnpm typecheck && pnpm smoke:routes && pnpm smoke:navigation",
+    "ui:guard": "node scripts/ui-guard.cjs",
     "smoke:production-safety": "pnpm --filter @hallederiz/api... build && pnpm --filter @hallederiz/api exec node --loader ts-node/esm --experimental-specifier-resolution=node --test src/tests/production-safety-smoke.test.ts",
     "local-ai:smoke": "node scripts/local-ai/health.cjs --degraded-ok",
     "dev:clean:windows": "powershell -ExecutionPolicy Bypass -File scripts/windows-clean-dev.ps1 -Reinstall"

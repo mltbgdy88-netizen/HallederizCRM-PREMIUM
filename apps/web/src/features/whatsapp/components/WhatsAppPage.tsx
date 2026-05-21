@@ -1,7 +1,7 @@
 "use client";
 
 import type { WhatsAppConversation, WhatsAppMessage } from "@hallederiz/types";
-import { LoadingState } from "@hallederiz/ui";
+import { LoadingState, PageHeader } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import {
@@ -177,7 +177,11 @@ function WhatsAppConnectionPanel({ healthView }: { healthView: ReturnType<typeof
           </>
         )}
       </div>
-      <p className="hz-wa-connection-note">{healthView.note || MSG_WA_CHANNEL_WAITING}</p>
+      <p className="hz-wa-connection-note">
+        {healthView.dotTone === "ok"
+          ? healthView.note || MSG_WA_CHANNEL_WAITING
+          : "WhatsApp sağlayıcısı bağlandığında durum burada gösterilecek."}
+      </p>
       <p className="hz-wa-connection-note">{MSG_WA_AUTO_REPLY_OFF}</p>
     </article>
   );
@@ -360,6 +364,12 @@ export function WhatsAppPage({ initialCustomerId = null }: { initialCustomerId?:
 
   return (
     <div className="hz-wa-page">
+      <div className="hz-wa-page-header-band">
+        <PageHeader
+          title="WhatsApp"
+          description="Kanal bazlı operasyon ve iletişim paneli. Gönderim ve senkron mevcut yetkiye göre açılır."
+        />
+      </div>
       {useDemo ? (
         <p className="hz-wa-preview-band hz-wa-preview-band--page" role="status">
           Örnek veri modu: sohbet ve mesajlar demo amaçlıdır; canlı WhatsApp iletimi yapılmaz.

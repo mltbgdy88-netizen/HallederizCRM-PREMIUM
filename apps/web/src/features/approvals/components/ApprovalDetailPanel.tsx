@@ -139,20 +139,20 @@ export function ApprovalDetailPanel({
             <dd>{item.bridgePersistenceMode ?? "-"}</dd>
           </div>
           <div>
-            <dt>Audit / timeline writeback</dt>
+            <dt>Denetim zaman çizelgesi</dt>
             <dd>
               {item.auditTimelineWritebackQueued === true
-                ? "Kuyruğlandı veya yanıtta true"
+                ? "Denetim kaydı kuyruğa alındı"
                 : item.auditTimelineWritebackQueued === false
-                  ? "Yanıtta false"
+                  ? "Denetim kaydı henüz oluşmadı"
                   : item.auditRequired
-                    ? "Gerekli (detay alanı boş)"
-                    : "Hayır"}
+                    ? "Denetim kaydı bekleniyor"
+                    : "Gerekli değil"}
             </dd>
           </div>
           <div>
-            <dt>Worker önerisi</dt>
-            <dd>{item.workerProcessingRecommended ? "İşlenmesi önerilir" : "Beklemede / yok"}</dd>
+            <dt>Arka plan işleme</dt>
+            <dd>{item.workerProcessingRecommended ? "İşlenmesi önerilir" : "Beklemede"}</dd>
           </div>
         </dl>
         <p className="hz-approvals-inbox-muted">Kapı özeti: {summarizeGateDecision(item.gateDecision)}</p>
@@ -183,14 +183,14 @@ export function ApprovalDetailPanel({
               <dt>Denetim zaman çizelgesi</dt>
               <dd>
                 {lastApprovalSummary.auditTimelineWritebackQueued === true
-                  ? "true"
+                  ? "Kayıt oluşturuldu"
                   : lastApprovalSummary.auditTimelineWritebackQueued === false
-                    ? "false"
+                    ? "Kayıt henüz yok"
                     : "-"}
               </dd>
             </div>
             <div>
-              <dt>gateDecision</dt>
+              <dt>Onay kapısı</dt>
               <dd className="hz-approvals-inbox-mono-wrap">{lastApprovalSummary.gateLine}</dd>
             </div>
             <div>

@@ -345,6 +345,8 @@ export function collectProductSuppressHeaderHrefs(): string[] {
 export function shouldSuppressShellPageMeta(pathname: string): boolean {
   const p = pathname.length > 1 && pathname.endsWith("/") ? pathname.replace(/\/+$/, "") : pathname;
   if (p.startsWith("/onaylar")) return true;
+  if (p.startsWith("/raporlar/")) return true;
+  if (p === "/unauthorized") return true;
   return collectProductSuppressHeaderHrefs().some((h) => p === h || p.startsWith(`${h}/`));
 }
 
