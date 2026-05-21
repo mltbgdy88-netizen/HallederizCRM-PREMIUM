@@ -117,8 +117,8 @@ const checks = [
     description: "Gorevler sag panel operasyon gozlem kisayolu"
   },
   {
-    file: "apps/web/src/components/platform-shell.tsx",
-    patterns: ["normalizedPath.startsWith(\"/gorevler/\")"],
+    file: "apps/web/src/components/platform-route-meta.ts",
+    patterns: ['path.startsWith("/gorevler/")', 'path === "/gorevler"'],
     description: "Gorev alt rotalari icin tasks workspace bayragi"
   },
   {
