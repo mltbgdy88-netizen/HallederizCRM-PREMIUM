@@ -83,7 +83,7 @@ export function ApprovalOperatorSmokePanel({
           <ul className="hz-approvals-operator-smoke-last-list">
             <li>{lastApprovalSummary.duplicate ? "Idempotent: kayit zaten islenmis." : "Onay API basarili."}</li>
             {lastApprovalSummary.executionId ? <li>executionId: {lastApprovalSummary.executionId}</li> : null}
-            {lastApprovalSummary.outboxJobId ? <li>outboxJobId: {lastApprovalSummary.outboxJobId}</li> : null}
+            {lastApprovalSummary.outboxJobId ? <li>İş kuyruğu no: {lastApprovalSummary.outboxJobId}</li> : null}
             <li>Bridge: {lastApprovalSummary.bridgeLine}</li>
             <li>
               Audit/timeline writeback:{" "}

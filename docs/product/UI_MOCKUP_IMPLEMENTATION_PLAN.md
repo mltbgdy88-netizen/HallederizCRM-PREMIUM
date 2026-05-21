@@ -162,7 +162,15 @@ PNG (referans, import YOK)
 |--|--|
 | **Scope** | Visual QA + polish across Agent 01–08 adopted routes |
 | **Status** | **Tamamlandı** — `UI_AGENT_09_REPORT.md`, `UI_VISUAL_QA_REPORT.md`. `agent09-visual-qa-polish.css`; copy/Türkçe/Foundation polish; regression scans. Route adoption zinciri Agent 01–08 + Agent 09 QA gate tamam. |
-| **Sonraki** | Agent 10 release-candidate QA / bugfix |
+| **Sonraki** | Release / prod cut |
+
+### Agent 10 — `ui/10-qa-bugfix-or-release-candidate`
+
+| | |
+|--|--|
+| **Scope** | RC QA, P0/P1 UI bugfix, release docs |
+| **Status** | **Tamamlandı** — `UI_AGENT_10_RC_REPORT.md`, `UI_RELEASE_CANDIDATE_CHECKLIST.md`. Onaylar teknik copy P1 düzeltildi. Agent 01–09 zinciri + RC gate tamam. P2/P3 polish ayrı backlog. |
+| **Sonraki** | `release/ui-rc-final` veya prod deployment QA |
 
 ---
 

@@ -109,7 +109,9 @@ Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 
 **Agent 03:** layout template foundation tamam (`UI_LAYOUT_PATTERNS.md`).
 
-**Agent 09 (2026-05-21):** Visual QA / polish tamam — `ui/09-visual-qa-polish` @ `22bf180`. Global density/overflow/emerald polish (`agent09-visual-qa-polish.css`); Türkçe/Foundation/onaylar güvenlik bandı copy; regression scan temiz. Detay: `UI_AGENT_09_REPORT.md`, `UI_VISUAL_QA_REPORT.md`. **Sonraki:** Agent 10 RC QA.
+**Agent 10 (2026-05-21):** RC QA tamam — `ui/10-qa-bugfix-or-release-candidate` @ `282289d`. P0 yok; P1 onaylar teknik copy düzeltildi; `UI_AGENT_10_RC_REPORT.md`, `UI_RELEASE_CANDIDATE_CHECKLIST.md`. **Go** (otomatik kapı); manuel viewport QA follow-up.
+
+**Agent 09 (2026-05-21):** Visual QA / polish tamam — `ui/09-visual-qa-polish` @ `22bf180`. Global density/overflow/emerald polish (`agent09-visual-qa-polish.css`); Türkçe/Foundation/onaylar güvenlik bandı copy; regression scan temiz. Detay: `UI_AGENT_09_REPORT.md`, `UI_VISUAL_QA_REPORT.md`.
 
 **Agent 08 (2026-05-21):** Settings/users/ERP/system-state route adoption tamam — `ui/08-settings-users-erp` @ `ea07c92`. `UsersManagementPage`, `RolesManagementPage`, `ErpPage` Türkçe güvenli copy, `/offline-api` `/demo-mode` `/live-empty` sayfaları, `agent08-settings-users-erp.css`. Detay: `UI_AGENT_08_REPORT.md`.
 

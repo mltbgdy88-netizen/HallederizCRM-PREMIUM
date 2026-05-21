@@ -72,13 +72,13 @@ function readReasons(payload: unknown): string[] | undefined {
 
 function defaultApprovalClientErrorMessage(status: number, endpoint: ApprovalApiEndpointKind): string {
   if (status === 400) {
-    return "Gecersiz istek (400). Validasyon veya zorunlu alanlar API tarafindan reddedildi.";
+    return "Geçersiz istek. Zorunlu alanlar veya doğrulama kuralları reddedildi.";
   }
   if (status === 401) {
-    return "Kimlik dogrulama gerekli (401). Oturum token'i gecersiz veya eksik.";
+    return "Kimlik doğrulama gerekli. Oturum süresi dolmuş veya eksik olabilir.";
   }
   if (status === 403) {
-    return "Yetki yok (403). Bu islem icin gerekli izinler tenant/rol bazinda kapali olabilir.";
+    return "Bu işlem için yetki gerekiyor.";
   }
   if (status === 404) {
     if (
@@ -87,12 +87,12 @@ function defaultApprovalClientErrorMessage(status: number, endpoint: ApprovalApi
       endpoint === "worker_outbox" ||
       endpoint === "worker_dead_letter"
     ) {
-      return "Worker uçları bu ortamda yayinlanmiyor (404). API route eslemesini kontrol edin.";
+      return "Arka plan servisi bu ortamda kullanılamıyor.";
     }
-    return "Onay uç noktası bulunamadı. API yapılandırması ve sürüm uyumu kontrol edilmelidir.";
+    return "Onay uç noktası bulunamadı. API yapılandırması kontrol edilmelidir.";
   }
   if (status === 409) {
-    return "Cakisma (409). Kayit zaten islendi veya mevcut durumda islem tekrarlanamaz.";
+    return "Kayıt zaten işlendi veya mevcut durumda tekrarlanamaz.";
   }
   if (status === 503) {
     if (
@@ -101,14 +101,14 @@ function defaultApprovalClientErrorMessage(status: number, endpoint: ApprovalApi
       endpoint === "worker_outbox" ||
       endpoint === "worker_dead_letter"
     ) {
-      return "Worker foundation hazir degil (503). Persistence veya repository baglantisi yok.";
+      return "Arka plan servisi şu an hazır değil. Bağlantı tamamlandığında tekrar deneyin.";
     }
-    return "Approval foundation hazir degil (503). Persistence baglantisi veya runtime modu uygun degil.";
+    return "Onay servisi şu an hazır değil. Bağlantı tamamlandığında tekrar deneyin.";
   }
   if (status >= 500) {
-    return `Sunucu hatasi (${status}). Approval API beklenmeyen hatayla dondu.`;
+    return "Sunucu hatası. Onay isteği tamamlanamadı; kısa süre sonra tekrar deneyin.";
   }
-  return `Approval API istegi tamamlanamadi (HTTP ${status}).`;
+  return "Onay isteği tamamlanamadı.";
 }
 
 export function mapApprovalClientError(

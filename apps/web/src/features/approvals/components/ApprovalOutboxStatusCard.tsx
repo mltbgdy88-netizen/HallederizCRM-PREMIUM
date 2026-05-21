@@ -2,24 +2,24 @@ import type { ApprovalInboxItem } from "../types";
 
 export function ApprovalOutboxStatusCard({ item }: { item: ApprovalInboxItem }) {
   return (
-    <section className="hz-approvals-inbox-card" aria-label="Outbox ve worker durumu">
-      <h3 className="hz-approvals-inbox-card-title">Outbox / worker</h3>
+    <section className="hz-approvals-inbox-card" aria-label="Arka plan iş durumu">
+      <h3 className="hz-approvals-inbox-card-title">Arka plan işleme</h3>
       <dl className="hz-approvals-inbox-meta">
         <div>
-          <dt>Outbox job</dt>
-          <dd>{item.outboxJobId ?? "Henuz kuyruga alinmadi"}</dd>
+          <dt>İş kuyruğu no</dt>
+          <dd>{item.outboxJobId ?? "Henüz kuyruğa alınmadı"}</dd>
         </div>
         <div>
-          <dt>Worker processing</dt>
-          <dd>{item.outboxJobId ? "Onerilen" : "Bekleniyor"}</dd>
+          <dt>İşleme önerisi</dt>
+          <dd>{item.outboxJobId ? "Önerilen" : "Bekleniyor"}</dd>
         </div>
         <div>
-          <dt>Audit writeback</dt>
-          <dd>{item.auditRequired ? "Kuyrukta veya planli" : "Gerekli degil"}</dd>
+          <dt>Denetim kaydı</dt>
+          <dd>{item.auditRequired ? "Kuyrukta veya planlı" : "Gerekli değil"}</dd>
         </div>
         <div>
-          <dt>Timeline writeback</dt>
-          <dd>{item.timelineRequired ? "Kuyrukta veya planli" : "Gerekli degil"}</dd>
+          <dt>Zaman çizelgesi</dt>
+          <dd>{item.timelineRequired ? "Kuyrukta veya planlı" : "Gerekli değil"}</dd>
         </div>
       </dl>
     </section>
