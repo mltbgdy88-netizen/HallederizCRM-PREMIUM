@@ -253,10 +253,22 @@ pnpm smoke:navigation
 | Alan | Durum |
 |------|--------|
 | UI mockup adoption | Done (Agents 01–10) |
-| WhatsApp integration readiness | Code complete — **production credentials pending** |
-| Local AI integration readiness | Code complete — **Ollama/local endpoint pending** |
+| WhatsApp integration readiness | Merged #136 — **production credentials pending** |
+| Local AI integration readiness | Merged #136 — **Ollama/local endpoint pending** |
 
-Referans: `docs/product/WHATSAPP_READINESS.md`, `docs/product/LOCAL_AI_READINESS.md`.
+Referans: `WHATSAPP_READINESS.md`, `LOCAL_AI_READINESS.md`.
+
+## 9c. Release finalization (`release/ui-rc-final`)
+
+| Alan | Durum |
+|------|--------|
+| RC hardening | Merged #135 |
+| Integrations | Merged #136 |
+| `release/ui-rc-final` docs | Complete |
+| Remaining code work | **None** for UI RC |
+| Remaining work | Manual production setup + P2/P3 follow-up only |
+
+Referans: `RELEASE_UI_RC_FINAL_REPORT.md`, `RELEASE_UI_RC_GO_NO_GO.md`.
 
 ---
 
