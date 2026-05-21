@@ -2,11 +2,14 @@
 
 | Alan | Durum |
 |------|--------|
-| Base commit | `282289d` |
-| Agent 10 branch | `ui/10-qa-bugfix-or-release-candidate` |
+| Base commit | `f96680a` |
+| Release final branch | `release/ui-rc-final` |
 | Last updated | 2026-05-21 |
-| WhatsApp readiness | Configured-pending — see `docs/product/WHATSAPP_READINESS.md` |
-| Local AI readiness | Configured-pending — see `docs/product/LOCAL_AI_READINESS.md` |
+| PR #136 on main | Yes — integrations merged |
+| WhatsApp readiness | Configured-pending — see `WHATSAPP_READINESS.md` |
+| Local AI readiness | Configured-pending — see `LOCAL_AI_READINESS.md` |
+| Release final report | `RELEASE_UI_RC_FINAL_REPORT.md` |
+| Go/No-Go | `RELEASE_UI_RC_GO_NO_GO.md` — **Conditional Go** |
 
 ## UI adoption status
 
@@ -82,6 +85,16 @@
 | WhatsApp live credentials | **Manual** — required for production send |
 | Ollama / local model | **Manual** — `ollama serve` + env |
 
+## Release finalization (2026-05-21)
+
+| Check | Result |
+|-------|--------|
+| PR chain #123–#136 on main | Verified |
+| `pnpm ui:guard` | Pass |
+| API tests (`pnpm --filter @hallederiz/api test`) | Pass (421/421) |
+| P0 blocker | None |
+| P1 blocker | None (closed in #134–#135) |
+
 ## Go / No-Go
 
 | Decision | Value |
@@ -89,4 +102,5 @@
 | Automated gate | **Go** |
 | Integration config gate | **Conditional Go** — credentials + Ollama manual |
 | Manual viewport gate | **Conditional Go** — run local pass |
-| Overall RC UI | **Go with follow-up QA** |
+| Overall RC UI | **Conditional Go** — see `RELEASE_UI_RC_GO_NO_GO.md` |
+| Production cutover | Pending manual setup + QA sign-off |

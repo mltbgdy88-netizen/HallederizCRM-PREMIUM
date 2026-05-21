@@ -182,3 +182,22 @@ Detay matris: `UI_ROUTE_COVERAGE_MATRIX.md`.
 | AI review-only copy on `/ai` | `AIAssistantPage.tsx` |
 | Insights empty safe copy | `AiInsightsPage` |
 | Docs | `WHATSAPP_READINESS.md`, `LOCAL_AI_READINESS.md` |
+
+---
+
+## 9. Release final checklist (2026-05-21)
+
+| Madde | Durum |
+|-------|--------|
+| Main HEAD `f96680a` (#136) | Yes |
+| PR chain #123–#136 | Complete on main |
+| P0 blocker | None |
+| P1 blocker | None open |
+| `pnpm ui:guard` | Pass |
+| API tests 421/421 | Pass |
+| Release final docs | `RELEASE_UI_RC_FINAL_REPORT.md`, `RELEASE_UI_RC_GO_NO_GO.md` |
+| Go/No-Go | **Conditional Go** |
+| Manual viewport QA | Pending (non-blocking) |
+| WhatsApp prod credentials | Pending (non-blocking for RC code) |
+| Local AI endpoint setup | Pending (non-blocking for RC code) |
+| Stash restore | **Not done** (`wip-mockup-inspiration-before-agent04`) |
