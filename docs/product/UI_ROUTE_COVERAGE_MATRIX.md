@@ -22,7 +22,7 @@
 | 2 | `/dashboard` | Operation dashboard + AI kolon | MISSING | **Var** | REAL | default, loading, mobile | 5 ops KPI + AI «İncele» | 04 | **Agent 04 tamam** |
 | 3 | `/panel` | Redirect/loading page | MISSING | **Var** | REDIR → `/dashboard` | default, loading | Client spinner + TR copy | 04 | **Agent 04 tamam** |
 | 4 | `/hizli-islem` | Quick Operation workbench | MISSING | **Var** | REAL | default, loading, stepper | Sipariş sekmesi ödeme bloğu; sale_order+payment | 04 | **Rework** — ödeme akışı |
-| 5 | `/onaylar` | Entity list + right preview | MISSING | **Var** | REAL | default, loading, empty, error, mobile | Desk inbox + auto-select | 04 | **Agent 04 tamam** |
+| 5 | `/onaylar` | Approval command desk (3-col) | MISSING | **Var** | REAL | default, loading, empty, error, mobile | Queue + detail + decision; policy band; source badges | 04+ | **Command desk redesign** — `APPROVALS_COMMAND_DESK_REDESIGN.md` |
 | 6 | `/onaylar/[id]` | Entity detail + timeline | MISSING | **Var** `[approvalId]` | REAL | detail, audit placeholder | `EntityDetailLayout` | 04 | **Agent 04 tamam**; canlı timeline feed Agent 05+ |
 | 7 | `/onaylar/kurallar` | Role permission matrix | MISSING | **Var** | REAL | default, validation (local) | Tablo + sağ panel | 04 | **Agent 04 tamam** |
 | 8 | `/whatsapp` | Omnichannel / WA ops | MISSING | **Var** | REAL | default, empty, mobile | Provider güvenli; sahte bağlı yok | 07 | **Agent 07 tamam** — `WhatsAppPage` |

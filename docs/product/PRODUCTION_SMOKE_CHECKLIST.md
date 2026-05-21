@@ -58,7 +58,7 @@
 | W3a | `/hizli-islem` sale_order + ödeme | Onay/canlıda order+payment veya approval; sahte başarı yok | ☐ | QA |
 | W3b | `/tahsilatlar/yeni` | Gerçek form; `Tahsilatı kaydet`; customer/order prefill | ☐ | QA |
 | W3c | Tahsilat başarı | Detay + kaynak sipariş linkleri | ☐ | QA |
-| W4 | `/onaylar` | List + detail safe | ☐ | QA |
+| W4 | `/onaylar` | Command desk: policy band, queue/detail/decision, Onayla/Reddet pending-only, no technical leakage | ☐ | QA |
 | W5 | `/whatsapp` | Health reflects real config | ☐ | QA |
 | W6 | `/cariler` | List + first row selection | ☐ | QA |
 | W7 | `/stok` | List density OK | ☐ | QA |

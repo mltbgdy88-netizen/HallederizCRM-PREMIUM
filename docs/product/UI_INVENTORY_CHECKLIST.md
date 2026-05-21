@@ -123,6 +123,8 @@ Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 
 **Quick-op + tahsilat rework (2026-05-21):** `QuickOperationPaymentBlock` (sipariş/tahsilat sekmesi); `PaymentCreatePage` (`/tahsilatlar/yeni` gerçek form, demo blok); `OrderCreateHub` ödeme yönlendirme metni. Detay: `QUICK_OPERATION_SALES_PAYMENT_REWORK.md`.
 
+**Approvals Command Desk (2026-05-22):** `/onaylar` — 3 kolon onay masası (kuyruk, detay, karar); policy band; AI/otomasyon/mesaj rozetleri; `approvals-command-desk.css`. Detay: `APPROVALS_COMMAND_DESK_REDESIGN.md`. `/onaylar/[id]` ve `/onaylar/kurallar` kapsam dışı.
+
 **Agent 04 (2026-05-21):** Platform/operations route adoption tamam — `ui/04-platform-operations` @ `3fa7c74`. `/login` split, `/dashboard` 5 KPI + AI «İncele», `/panel` loading redirect, `/hizli-islem` stepper, `/onaylar` + detay + kurallar, `/workflow` timeline. `loading.tsx`: login, panel, dashboard, hizli-islem, onaylar. Detay: `UI_AGENT_04_REPORT.md`.
 
 ---

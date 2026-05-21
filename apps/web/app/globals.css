@@ -10,6 +10,7 @@
 @import "./styles/agent08-settings-users-erp.css";
 @import "./styles/agent09-visual-qa-polish.css";
 @import "./styles/dashboard-command-center.css";
+@import "./styles/approvals-command-desk.css";
 
 :root,
 :root[data-theme="light"] {
