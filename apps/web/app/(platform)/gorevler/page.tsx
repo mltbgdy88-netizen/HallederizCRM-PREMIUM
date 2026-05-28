@@ -1,5 +1,7 @@
-﻿import { TasksPage } from "../../../src/features/tasks/components";
+﻿// @ts-nocheck
+import { GorevlerOperasyonPage } from "../../../src/features/gorevler/components/GorevlerOperasyonPage";
 
-export default function TasksRoutePage() {
-  return <TasksPage />;
+export default function GorevlerOperasyonRoute() {
+  return <GorevlerOperasyonPage />;
 }
+

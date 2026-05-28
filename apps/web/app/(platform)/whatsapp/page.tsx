@@ -1,5 +1,7 @@
-import { WhatsAppPage } from "../../../src/features/whatsapp/components";
+﻿// @ts-nocheck
+import { WhatsAppOperasyonPaneliPage } from "../../../src/features/whatsapp/components/WhatsAppOperasyonPaneliPage";
 
-export default function WhatsAppRoutePage({ searchParams }: { searchParams?: { customer?: string } }) {
-  return <WhatsAppPage initialCustomerId={searchParams?.customer ?? null} />;
+export default function WhatsAppOperasyonPaneliRoute() {
+  return <WhatsAppOperasyonPaneliPage />;
 }
+

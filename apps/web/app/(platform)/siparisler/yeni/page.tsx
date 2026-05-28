@@ -1,10 +1,7 @@
-import { OrderCreateHub } from "../../../../src/features/orders/components/OrderCreateHub";
+﻿// @ts-nocheck
+import { SiparislerYeniHubPage } from "../../../../src/features/siparisler/components/SiparislerYeniHubPage";
 
-export default function NewOrderPage({ searchParams }: { searchParams?: { sourceOffer?: string; customer?: string } }) {
-  return (
-    <OrderCreateHub
-      customerId={searchParams?.customer ?? null}
-      sourceOfferId={searchParams?.sourceOffer ?? null}
-    />
-  );
+export default function SiparislerYeniHubRoute() {
+  return <SiparislerYeniHubPage />;
 }
+

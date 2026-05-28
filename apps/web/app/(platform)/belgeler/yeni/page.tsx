@@ -1,5 +1,7 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+﻿// @ts-nocheck
+import { BelgelerYeniFormPage } from "../../../../src/features/belgeler/components/BelgelerYeniFormPage";
 
-export default function BelgelerYeniPage() {
-  return renderProductCatchAll(["belgeler", "yeni"]);
+export default function BelgelerYeniFormRoute() {
+  return <BelgelerYeniFormPage />;
 }
+

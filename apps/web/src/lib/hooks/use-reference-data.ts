@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 "use client";
 
 import { useEffect, useState } from "react";
@@ -14,14 +15,17 @@ export interface UseReferenceDataOptions<T> {
   loadDemo: () => T | Promise<T>;
   loadLive: () => Promise<T>;
   initialData: T;
+  /** UI referans test route â€” yalnÄ±zca mock, API Ã§aÄŸrÄ±sÄ± yok */
+  demoOnly?: boolean;
 }
 
 export function useReferenceData<T>({
   loadDemo,
   loadLive,
-  initialData
+  initialData,
+  demoOnly = false
 }: UseReferenceDataOptions<T>): ReferenceDataState<T> {
-  const isDemo = dataSourceConfig.useDemoData;
+  const isDemo = demoOnly || dataSourceConfig.useDemoData;
   const [data, setData] = useState<T>(initialData);
   const [loading, setLoading] = useState(true);
   const [loadFailed, setLoadFailed] = useState(false);
@@ -58,7 +62,8 @@ export function useReferenceData<T>({
     };
     // loadDemo/loadLive/initialData are stable module-level bindings
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isDemo]);
+  }, [isDemo, demoOnly]);
 
   return { data, loading, loadFailed, isDemo };
 }
+

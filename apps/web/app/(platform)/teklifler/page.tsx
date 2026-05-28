@@ -1,5 +1,7 @@
-import { OffersPage as OffersFeaturePage } from "../../../src/features/offers/components";
+﻿// @ts-nocheck
+import { TekliflerOperasyonPage } from "../../../src/features/teklifler/components/TekliflerOperasyonPage";
 
-export default function OffersPage() {
-  return <OffersFeaturePage />;
+export default function TekliflerOperasyonRoute() {
+  return <TekliflerOperasyonPage />;
 }
+

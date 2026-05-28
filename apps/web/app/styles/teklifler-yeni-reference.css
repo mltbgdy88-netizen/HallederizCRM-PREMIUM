@@ -1,0 +1,350 @@
+/* Yeni Teklif Hub — teklifler-yeni-hub-acik-mod.png */
+
+.tyh-home {
+  --tyh-gap: clamp(8px, 0.85vh, 10px);
+  --tyh-pad-x: clamp(12px, 1.2vw, 16px);
+  --tyh-pad-y: clamp(8px, 0.9vh, 12px);
+  --tyh-green: #047857;
+  --tyh-green-strong: #065f46;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: var(--tyh-gap);
+  height: 100%;
+  padding: var(--tyh-pad-y) var(--tyh-pad-x);
+  overflow: hidden;
+  background: #f4f6f8;
+}
+
+.tyh-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.tyh-crumb {
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.tyh-crumb-sep {
+  margin: 0 4px;
+}
+
+.tyh-crumb-current {
+  color: #64748b;
+}
+
+.tyh-head-copy h1 {
+  margin: 4px 0 0;
+  font-size: clamp(17px, 2vh, 22px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: var(--tyh-green-strong);
+}
+
+.tyh-head-copy p {
+  margin: 4px 0 0;
+  font-size: clamp(10px, 1.1vh, 12px);
+  color: #64748b;
+  max-width: 48ch;
+}
+
+.tyh-list-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 9px;
+  background: #fff;
+  color: #334155;
+  font-size: 11px;
+  font-weight: 750;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+  flex-shrink: 0;
+}
+
+.tyh-main {
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) minmax(0, 0.72fr);
+  gap: var(--tyh-gap);
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Hub */
+.tyh-hub {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: clamp(14px, 1.8vh, 22px) clamp(16px, 2vw, 28px);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tyh-hub-mark {
+  width: clamp(44px, 5.5vh, 54px);
+  height: clamp(44px, 5.5vh, 54px);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, #065f46 0%, #034b3a 100%);
+  color: #facc15;
+}
+
+.tyh-hub h2 {
+  margin: clamp(10px, 1.2vh, 14px) 0 0;
+  font-size: clamp(15px, 1.7vh, 18px);
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.tyh-hub-sub {
+  margin: 6px 0 0;
+  max-width: 46ch;
+  font-size: clamp(10px, 1.1vh, 12px);
+  line-height: 1.45;
+  color: #64748b;
+}
+
+.tyh-options {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: var(--tyh-gap);
+  width: min(100%, 720px);
+  margin-top: clamp(12px, 1.5vh, 18px);
+}
+
+.tyh-option-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 10px;
+  text-align: left;
+  padding: 12px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+  cursor: pointer;
+}
+
+.tyh-option-icon-wrap {
+  width: 40px;
+  height: 40px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  color: var(--tyh-green);
+}
+
+.tyh-option-copy h3 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.tyh-option-copy p {
+  margin: 4px 0 0;
+  font-size: 10px;
+  line-height: 1.4;
+  color: #64748b;
+}
+
+.tyh-option-go {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  color: #64748b;
+}
+
+.tyh-option-go-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* Drafts */
+.tyh-drafts {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.tyh-drafts-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 9px 12px;
+  border-bottom: 1px solid #f1f5f9;
+  flex-shrink: 0;
+}
+
+.tyh-drafts-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+}
+
+.tyh-drafts-icon {
+  color: var(--tyh-green);
+}
+
+.tyh-drafts h2 {
+  margin: 0;
+  font-size: 12px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.tyh-see-all {
+  border: none;
+  background: transparent;
+  color: var(--tyh-green);
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.tyh-draft-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--tyh-gap);
+  padding: 8px 10px 10px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tyh-draft-card {
+  display: grid;
+  grid-template-columns: auto 1fr auto auto;
+  align-items: start;
+  gap: 8px;
+  padding: 9px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #f8fafc;
+  min-width: 0;
+}
+
+.tyh-draft-doc {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: #fff;
+  border: 1px solid #e2e8f0;
+  color: #64748b;
+}
+
+.tyh-draft-body {
+  min-width: 0;
+}
+
+.tyh-draft-code {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.tyh-draft-customer {
+  margin: 2px 0 0;
+  font-size: 10px;
+  color: #475569;
+  font-weight: 700;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.tyh-draft-meta {
+  margin: 4px 0 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 9px;
+  color: #94a3b8;
+}
+
+.tyh-draft-amount {
+  font-weight: 800;
+  color: var(--tyh-green-strong);
+}
+
+.tyh-draft-badge {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #ffedd5;
+  border: 1px solid #fed7aa;
+  color: #c2410c;
+  font-size: 9px;
+  font-weight: 800;
+  align-self: start;
+}
+
+.tyh-draft-menu {
+  border: none;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0;
+  align-self: start;
+}
+
+/* Tip */
+.tyh-tip {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  background: #ecfdf5;
+  border: 1px solid #bbf7d0;
+  flex-shrink: 0;
+}
+
+.tyh-tip-icon {
+  color: var(--tyh-green);
+}
+
+.tyh-tip p {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.4;
+  color: #065f46;
+  font-weight: 600;
+}
+
+.tyh-tip-close {
+  border: none;
+  background: transparent;
+  color: #64748b;
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+  padding: 0 4px;
+}

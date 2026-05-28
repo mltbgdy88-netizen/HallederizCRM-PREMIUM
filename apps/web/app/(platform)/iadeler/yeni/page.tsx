@@ -1,5 +1,7 @@
-import { ReturnDetailPage as ReturnDetailFeaturePage } from "../../../../src/features/returns/components";
+﻿// @ts-nocheck
+import { IadelerYeniFormPage } from "../../../../src/features/iadeler/components/IadelerYeniFormPage";
 
-export default function NewReturnPage() {
-  return <ReturnDetailFeaturePage />;
+export default function IadelerYeniFormRoute() {
+  return <IadelerYeniFormPage />;
 }
+

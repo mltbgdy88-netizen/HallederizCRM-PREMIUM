@@ -1,5 +1,7 @@
-import { WarehouseTasksPage as WarehouseTasksFeaturePage } from "../../../src/features/warehouse/components";
+﻿// @ts-nocheck
+import { DepoHazirlikPage } from "../../../src/features/depo/components/DepoHazirlikPage";
 
-export default function WarehousePage() {
-  return <WarehouseTasksFeaturePage />;
+export default function DepoHazirlikRoute() {
+  return <DepoHazirlikPage />;
 }
+

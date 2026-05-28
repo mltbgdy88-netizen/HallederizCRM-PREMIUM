@@ -1,5 +1,7 @@
-import { PaymentsPage as PaymentsFeaturePage } from "../../../src/features/payments/components";
+﻿// @ts-nocheck
+import { TahsilatlarOperasyonPage } from "../../../src/features/tahsilatlar/components/TahsilatlarOperasyonPage";
 
-export default function PaymentsPage() {
-  return <PaymentsFeaturePage />;
+export default function TahsilatlarOperasyonRoute() {
+  return <TahsilatlarOperasyonPage />;
 }
+

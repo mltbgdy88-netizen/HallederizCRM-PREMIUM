@@ -1,0 +1,516 @@
+/*
+ * Operasyon + Restore masaları — koyu mod (Sprint 1 + Restore paketi)
+ * Açık mod ile aynı mantık: tek canvas, yüzey kartları, net border; gradient yok.
+ * layout.tsx içinde globals.css sonrası import — legacy dark kurallarını ezer.
+ */
+
+html:root[data-theme="dark"] .hz-stock-page--desk,
+html:root[data-theme="dark"] .hz-archive-page--desk,
+html:root[data-theme="dark"] .hz-reports-page--desk,
+html:root[data-theme="dark"] .hz-wa-page--desk,
+html:root[data-theme="dark"] .hz-dashboard-page--fit,
+html:root[data-theme="dark"] .hz-qop-page,
+html:root[data-theme="dark"] .hz-qop-page--wb,
+html:root[data-theme="dark"] .hz-approvals-command,
+html:root[data-theme="dark"] .hz-customers-page--desk,
+html:root[data-theme="dark"] .hz-orders-desk,
+html:root[data-theme="dark"] .hz-entity-layer-desk {
+  --desk-canvas: #020604;
+  --desk-surface: rgba(8, 24, 19, 0.96);
+  --desk-border: rgba(44, 255, 154, 0.22);
+  --desk-border-soft: rgba(44, 255, 154, 0.12);
+  --desk-text: #f5fff8;
+  --desk-muted: #b8c8bf;
+  --desk-green: #2cff9a;
+  --desk-green-strong: #2cff9a;
+  --desk-green-soft: rgba(44, 255, 154, 0.1);
+  --desk-table-head: rgba(6, 17, 13, 0.92);
+  --desk-input-bg: rgba(3, 12, 9, 0.55);
+  --desk-shadow: none;
+  color: var(--desk-text);
+}
+
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-entity-layer-desk),
+html:root[data-theme="dark"] .hz-shell-content:has(.hz-entity-layer-desk),
+html:root[data-theme="dark"] .hz-shell-content-frame:has(.hz-entity-layer-desk),
+html:root[data-theme="dark"] .platform-content:has(.hz-entity-layer-desk) {
+  background: var(--desk-canvas) !important;
+}
+
+html:root[data-theme="dark"] .hz-entity-layer-desk {
+  background: var(--desk-canvas) !important;
+}
+
+html:root[data-theme="dark"] .hz-offers-page--desk {
+  --hz-cus-primary: var(--desk-green);
+  --hz-cus-border: var(--desk-border);
+  --hz-cus-text: var(--desk-text);
+  --hz-cus-muted: var(--desk-muted);
+  --hz-cus-surface: var(--desk-surface);
+  --hz-cus-bg: var(--desk-canvas);
+  --hz-archive-primary: var(--desk-green);
+  --hz-archive-border: var(--desk-border);
+  --hz-archive-text: var(--desk-text);
+  --hz-archive-muted: var(--desk-muted);
+  --hz-archive-surface: var(--desk-surface);
+  --hz-archive-bg: var(--desk-canvas);
+  --archive-paper: var(--desk-surface);
+  --archive-border: var(--desk-border);
+  --archive-text: var(--desk-text);
+  --archive-muted: var(--desk-muted);
+  --hz-reports-primary: var(--desk-green);
+  --hz-reports-border: var(--desk-border);
+  --hz-reports-text: var(--desk-text);
+  --hz-reports-muted: var(--desk-muted);
+  --hz-reports-surface: var(--desk-surface);
+  --hz-reports-bg: var(--desk-canvas);
+  --desk-canvas: #020604;
+  --desk-surface: rgba(8, 24, 19, 0.96);
+  --desk-border: rgba(44, 255, 154, 0.22);
+  --desk-border-soft: rgba(44, 255, 154, 0.12);
+  --desk-text: #f5fff8;
+  --desk-muted: #b8c8bf;
+  --desk-green: #2cff9a;
+  --desk-green-strong: #2cff9a;
+  --desk-green-soft: rgba(44, 255, 154, 0.1);
+  --desk-table-head: rgba(6, 17, 13, 0.92);
+  --desk-info-soft: rgba(119, 200, 255, 0.12);
+  --desk-info-border: rgba(119, 200, 255, 0.28);
+  --desk-warn-soft: rgba(255, 209, 102, 0.1);
+  --desk-warn-border: rgba(255, 209, 102, 0.28);
+  --desk-shadow: none;
+  color: var(--desk-text);
+}
+
+/* Shell */
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-stock-page--desk),
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-archive-page--desk),
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-reports-page--desk),
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-wa-page--desk),
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-dashboard-page--fit),
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-qop-page),
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-approvals-command),
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-customers-page--desk),
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-orders-desk),
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-offers-page--desk) {
+  --hz-color-bg: var(--desk-canvas);
+  --hz-color-surface: var(--desk-surface);
+  --hz-bg: var(--desk-canvas);
+  --hz-surface: var(--desk-surface);
+  background: var(--desk-canvas) !important;
+}
+
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-stock-page--desk) .hz-shell-header,
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-archive-page--desk) .hz-shell-header,
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-reports-page--desk) .hz-shell-header,
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-wa-page--desk) .hz-shell-header,
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-dashboard-page--fit) .hz-shell-header,
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-qop-page) .hz-shell-header,
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-approvals-command) .hz-shell-header,
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-customers-page--desk) .hz-shell-header,
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-orders-desk) .hz-shell-header,
+html:root[data-theme="dark"] .hz-shell-workspace:has(.hz-offers-page--desk) .hz-shell-header {
+  background: var(--desk-canvas) !important;
+  border-bottom-color: var(--desk-border-soft) !important;
+  backdrop-filter: none !important;
+}
+
+html:root[data-theme="dark"] .hz-shell-content:has(.hz-stock-page--desk),
+html:root[data-theme="dark"] .hz-shell-content:has(.hz-archive-page--desk),
+html:root[data-theme="dark"] .hz-shell-content:has(.hz-reports-page--desk),
+html:root[data-theme="dark"] .hz-shell-content:has(.hz-wa-page--desk),
+html:root[data-theme="dark"] .hz-shell-content:has(.hz-dashboard-page--fit),
+html:root[data-theme="dark"] .hz-shell-content:has(.hz-qop-page),
+html:root[data-theme="dark"] .hz-shell-content:has(.hz-approvals-command),
+html:root[data-theme="dark"] .hz-shell-content:has(.hz-customers-page--desk),
+html:root[data-theme="dark"] .hz-shell-content:has(.hz-orders-desk),
+html:root[data-theme="dark"] .hz-shell-content:has(.hz-offers-page--desk) {
+  background: var(--desk-canvas) !important;
+}
+
+html:root[data-theme="dark"] .hz-shell-content-frame:has(.hz-stock-page--desk),
+html:root[data-theme="dark"] .hz-shell-content-frame:has(.hz-archive-page--desk),
+html:root[data-theme="dark"] .hz-shell-content-frame:has(.hz-reports-page--desk),
+html:root[data-theme="dark"] .hz-shell-content-frame:has(.hz-wa-page--desk),
+html:root[data-theme="dark"] .hz-shell-content-frame:has(.hz-dashboard-page--fit),
+html:root[data-theme="dark"] .hz-shell-content-frame:has(.hz-qop-page),
+html:root[data-theme="dark"] .hz-shell-content-frame:has(.hz-approvals-command),
+html:root[data-theme="dark"] .hz-shell-content-frame:has(.hz-customers-page--desk),
+html:root[data-theme="dark"] .hz-shell-content-frame:has(.hz-orders-desk),
+html:root[data-theme="dark"] .hz-shell-content-frame:has(.hz-offers-page--desk) {
+  background: var(--desk-canvas) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+html:root[data-theme="dark"] .platform-content:has(.hz-stock-page--desk),
+html:root[data-theme="dark"] .platform-content:has(.hz-archive-page--desk),
+html:root[data-theme="dark"] .platform-content:has(.hz-reports-page--desk),
+html:root[data-theme="dark"] .platform-content:has(.hz-wa-page--desk),
+html:root[data-theme="dark"] .platform-content:has(.hz-dashboard-page--fit),
+html:root[data-theme="dark"] .platform-content:has(.hz-qop-page),
+html:root[data-theme="dark"] .platform-content:has(.hz-approvals-command),
+html:root[data-theme="dark"] .platform-content:has(.hz-customers-page--desk),
+html:root[data-theme="dark"] .platform-content:has(.hz-orders-desk),
+html:root[data-theme="dark"] .platform-content:has(.hz-offers-page--desk) {
+  background: var(--desk-canvas) !important;
+}
+
+/* Sayfa kökü — düz canvas (eski dark gradient kapalı) */
+html:root[data-theme="dark"] .hz-stock-page--desk,
+html:root[data-theme="dark"] .hz-archive-page--desk,
+html:root[data-theme="dark"] .hz-reports-page--desk,
+html:root[data-theme="dark"] .hz-wa-page--desk,
+html:root[data-theme="dark"] .hz-dashboard-page--fit,
+html:root[data-theme="dark"] .hz-dashboard-page--v2.hz-dashboard-page--fit,
+html:root[data-theme="dark"] .hz-qop-page,
+html:root[data-theme="dark"] .hz-qop-page--wb,
+html:root[data-theme="dark"] .hz-approvals-command,
+html:root[data-theme="dark"] .hz-customers-page--desk,
+html:root[data-theme="dark"] .hz-orders-desk,
+html:root[data-theme="dark"] .hz-orders-page.hz-orders-desk,
+html:root[data-theme="dark"] .hz-offers-page--desk {
+  background: var(--desk-canvas) !important;
+  border-radius: 0 !important;
+  box-shadow: none !important;
+}
+
+/* Paneller */
+html:root[data-theme="dark"] .hz-stock-desk-head,
+html:root[data-theme="dark"] .hz-stock-desk-stats > article,
+html:root[data-theme="dark"] .hz-stock-desk-main,
+html:root[data-theme="dark"] .hz-stock-context,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-topbar,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-kpi,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-filter-bar,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-list-wrap,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-side,
+html:root[data-theme="dark"] .hz-reports-topbar,
+html:root[data-theme="dark"] .hz-reports-desk-card,
+html:root[data-theme="dark"] .hz-reports-side,
+html:root[data-theme="dark"] .hz-wa-desk-head,
+html:root[data-theme="dark"] .hz-wa-desk-stats > article,
+html:root[data-theme="dark"] .hz-wa-desk-main,
+html:root[data-theme="dark"] .hz-wa-desk-context,
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-dashboard-ops-kpi-card,
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-dash-surface-card,
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-dash-module-chip,
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-dash-card,
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-split-side > aside,
+html:root[data-theme="dark"] .hz-qop-page--wb .hz-qop-main-surface,
+html:root[data-theme="dark"] .hz-qop-page--wb .hz-qop-wb-side,
+html:root[data-theme="dark"] .hz-approvals-command .hz-approval-stat,
+html:root[data-theme="dark"] .hz-approvals-command .hz-approval-panel,
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-topbar,
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-kpi,
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-filter-bar,
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-list,
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-side,
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-intro,
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-card,
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-stat,
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-preview,
+html:root[data-theme="dark"] .hz-offers-page--desk .hz-offers-desk-head,
+html:root[data-theme="dark"] .hz-offers-page--desk .hz-offers-desk-stats > article,
+html:root[data-theme="dark"] .hz-offers-page--desk .hz-offers-desk-main,
+html:root[data-theme="dark"] .hz-offers-page--desk .hz-offers-context {
+  border-color: var(--desk-border) !important;
+  background: var(--desk-surface) !important;
+  box-shadow: var(--desk-shadow) !important;
+  backdrop-filter: none !important;
+}
+
+/* Başlıklar */
+html:root[data-theme="dark"] .hz-stock-desk-head__text h1,
+html:root[data-theme="dark"] .hz-archive-topbar-title,
+html:root[data-theme="dark"] .hz-reports-topbar-title,
+html:root[data-theme="dark"] .hz-wa-desk-head__text h1,
+html:root[data-theme="dark"] .hz-orders-intro__title,
+html:root[data-theme="dark"] .hz-offers-desk-head__text h1 {
+  color: var(--desk-green) !important;
+}
+
+/* Tablo */
+html:root[data-theme="dark"] .hz-stock-table th,
+html:root[data-theme="dark"] .hz-wa-desk-table th,
+html:root[data-theme="dark"] .hz-archive-list-header,
+html:root[data-theme="dark"] .hz-reports-list-header,
+html:root[data-theme="dark"] .hz-orders-table th,
+html:root[data-theme="dark"] .hz-offers-table th {
+  background: var(--desk-table-head) !important;
+  color: var(--desk-muted) !important;
+  border-bottom-color: var(--desk-border-soft) !important;
+}
+
+html:root[data-theme="dark"] .hz-stock-table td,
+html:root[data-theme="dark"] .hz-wa-desk-table td,
+html:root[data-theme="dark"] .hz-reports-row {
+  background: var(--desk-surface) !important;
+  border-bottom-color: var(--desk-border-soft) !important;
+  color: var(--desk-text);
+}
+
+html:root[data-theme="dark"] .hz-stock-row.is-selected,
+html:root[data-theme="dark"] .hz-wa-desk-row.is-selected,
+html:root[data-theme="dark"] .hz-archive-row--selected,
+html:root[data-theme="dark"] .hz-reports-row--selected,
+html:root[data-theme="dark"] .hz-orders-row.is-selected,
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-row--selected {
+  background: var(--desk-green-soft) !important;
+  box-shadow: inset 3px 0 0 var(--desk-green) !important;
+  border-color: var(--desk-border-soft) !important;
+}
+
+/* Form */
+html:root[data-theme="dark"] .hz-stock-filter-field input,
+html:root[data-theme="dark"] .hz-stock-filter-field select,
+html:root[data-theme="dark"] .hz-wa-desk-filter-field input,
+html:root[data-theme="dark"] .hz-wa-desk-filter-field select,
+html:root[data-theme="dark"] .hz-archive-filter-input,
+html:root[data-theme="dark"] .hz-archive-filter-select,
+html:root[data-theme="dark"] .hz-reports-filter-input,
+html:root[data-theme="dark"] .hz-reports-filter-select,
+html:root[data-theme="dark"] .hz-customers-filter-input,
+html:root[data-theme="dark"] .hz-customers-filter-select,
+html:root[data-theme="dark"] .hz-orders-search,
+html:root[data-theme="dark"] .hz-orders-filter-input,
+html:root[data-theme="dark"] .hz-orders-filter-select,
+html:root[data-theme="dark"] .hz-offers-filter-field input,
+html:root[data-theme="dark"] .hz-offers-filter-field select,
+html:root[data-theme="dark"] .hz-qop-page--wb .hz-qop-input,
+html:root[data-theme="dark"] .hz-approval-queue__search {
+  background: rgba(3, 12, 9, 0.55) !important;
+  border-color: var(--desk-border) !important;
+  color: var(--desk-text) !important;
+}
+
+/* Demo / önizleme bantları */
+html:root[data-theme="dark"] .hz-stock-preview-band,
+html:root[data-theme="dark"] .hz-archive-preview-band,
+html:root[data-theme="dark"] .hz-reports-preview-band,
+html:root[data-theme="dark"] .hz-wa-desk-preview-band,
+html:root[data-theme="dark"] .hz-dash-preview-band,
+html:root[data-theme="dark"] .hz-dash-live-band {
+  background: var(--desk-info-soft) !important;
+  border-color: var(--desk-info-border) !important;
+  color: #93c5fd !important;
+}
+
+html:root[data-theme="dark"] .hz-stock-context-notice--warn {
+  background: var(--desk-warn-soft) !important;
+  border-color: var(--desk-warn-border) !important;
+  color: #fcd34d !important;
+}
+
+html:root[data-theme="dark"] .hz-stock-context-notice--info {
+  background: var(--desk-info-soft) !important;
+  border-color: var(--desk-info-border) !important;
+  color: #93c5fd !important;
+}
+
+/* Birincil aksiyon — düz neon yeşil */
+html:root[data-theme="dark"] .hz-stock-desk-btn--primary,
+html:root[data-theme="dark"] .hz-archive-toolbar-btn--primary,
+html:root[data-theme="dark"] .hz-reports-toolbar-btn--primary,
+html:root[data-theme="dark"] .hz-wa-desk-btn--primary,
+html:root[data-theme="dark"] .hz-customers-toolbar-btn--primary,
+html:root[data-theme="dark"] .hz-customers-side-btn--primary,
+html:root[data-theme="dark"] .hz-orders-btn--primary,
+html:root[data-theme="dark"] .hz-offers-desk-btn--primary,
+html:root[data-theme="dark"] .hz-approval-button-primary {
+  background: var(--desk-green) !important;
+  border-color: var(--desk-green) !important;
+  color: #02100b !important;
+  box-shadow: 0 0 16px rgba(44, 255, 154, 0.2) !important;
+}
+
+/* Onay kuyruk öğeleri — gradient yerine düz ton */
+html:root[data-theme="dark"] .hz-approval-queue-item.is-active,
+html:root[data-theme="dark"] .hz-approval-queue__chip.is-active {
+  background: var(--desk-green-soft) !important;
+  border-color: var(--desk-green) !important;
+  color: var(--desk-green) !important;
+}
+
+html:root[data-theme="dark"] .hz-reports-type-tab--active,
+html:root[data-theme="dark"] .hz-archive-category-chip.is-active {
+  background: var(--desk-green-soft) !important;
+  border-color: var(--desk-green) !important;
+  color: var(--desk-green) !important;
+}
+
+/* ── Açık renk sızıntıları (#fff / #fafbff hardcode) ── */
+
+/* Liste satırları */
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-row,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-row,
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-row,
+html:root[data-theme="dark"] .hz-stock-page--desk .hz-stock-row,
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-row {
+  background: var(--desk-surface) !important;
+  border-color: var(--desk-border-soft) !important;
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-row:hover,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-row:hover,
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-row:hover,
+html:root[data-theme="dark"] .hz-stock-page--desk .hz-stock-row:hover,
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-row:hover {
+  background: rgba(44, 255, 154, 0.06) !important;
+  border-color: var(--desk-border) !important;
+}
+
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-row-name,
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-row-sub,
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-muted,
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-bal-line,
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-last-l1,
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-last-l2 {
+  color: var(--desk-text);
+}
+
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-row-sub,
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-muted {
+  color: var(--desk-muted) !important;
+}
+
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-row-ico {
+  background: rgba(3, 12, 9, 0.55) !important;
+  border-color: var(--desk-border-soft) !important;
+  color: var(--desk-green) !important;
+}
+
+/* KPI — arşiv (strip içi + tek kart) */
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-kpi,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-kpi-strip > .hz-archive-kpi {
+  background: var(--desk-surface) !important;
+  border-color: var(--desk-border) !important;
+  box-shadow: none !important;
+}
+
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-kpi-ico {
+  background: rgba(44, 255, 154, 0.1) !important;
+  border-color: var(--desk-border-soft) !important;
+  color: var(--desk-green) !important;
+}
+
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-kpi-label {
+  color: var(--desk-muted) !important;
+}
+
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-kpi-value {
+  color: var(--desk-green) !important;
+}
+
+/* Satır / yan panel aksiyon butonları */
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-act-btn,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-act-btn,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-act-icon,
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-act-btn,
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-act-icon,
+html:root[data-theme="dark"] .hz-stock-page--desk .hz-stock-act-btn {
+  background: rgba(3, 12, 9, 0.55) !important;
+  border-color: var(--desk-border) !important;
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-act-btn--primary {
+  background: rgba(44, 255, 154, 0.12) !important;
+  border-color: var(--desk-green) !important;
+  color: var(--desk-green) !important;
+}
+
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-act-btn--soft,
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-act-btn--soft {
+  background: rgba(3, 12, 9, 0.4) !important;
+}
+
+/* Yan panel bağlantı / outline butonlar */
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-link-btn,
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-side-btn,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-link-btn,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-side-btn:not(.hz-archive-side-btn--primary) {
+  background: rgba(3, 12, 9, 0.55) !important;
+  border-color: var(--desk-border) !important;
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-link-btn:hover,
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-side-btn:hover:not(:disabled),
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-link-btn:hover,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-side-btn:hover:not(:disabled) {
+  border-color: var(--desk-green) !important;
+  color: var(--desk-green) !important;
+}
+
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-side-btn--primary,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-side-btn--primary {
+  background: var(--desk-green) !important;
+  border-color: var(--desk-green) !important;
+  color: #02100b !important;
+}
+
+/* Cari radar — operasyon kutuları */
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-side-radar-op {
+  background: rgba(3, 12, 9, 0.55) !important;
+  border-color: var(--desk-border-soft) !important;
+}
+
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-side-radar-op span {
+  color: var(--desk-muted) !important;
+}
+
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-side-radar-op strong {
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-side-radar-metric {
+  background: rgba(3, 12, 9, 0.4) !important;
+  border-color: var(--desk-border-soft) !important;
+}
+
+/* Tarih alanları (native picker açık zemin) */
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-filter-input--date,
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-filter-input--date {
+  color-scheme: dark;
+  background: rgba(3, 12, 9, 0.55) !important;
+  border-color: var(--desk-border) !important;
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-filter-reset {
+  background: rgba(3, 12, 9, 0.55) !important;
+  border-color: var(--desk-border) !important;
+  color: var(--desk-text) !important;
+}
+
+/* Rapor rozetleri (yan panel) */
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-badge--success {
+  background: rgba(44, 255, 154, 0.12) !important;
+  color: #2cff9a !important;
+}
+
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-badge--warn,
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-badge--warning {
+  background: var(--desk-warn-soft) !important;
+  color: #fcd34d !important;
+}
+
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-badge--danger {
+  background: rgba(255, 107, 107, 0.12) !important;
+  color: #ff8a8a !important;
+}
+
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-badge--neutral {
+  background: rgba(3, 12, 9, 0.55) !important;
+  color: var(--desk-muted) !important;
+}
+
+/* Restore masaları — sipariş / teklif satır aksiyonları */
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-act-btn,
+html:root[data-theme="dark"] .hz-offers-page--desk .hz-offers-row-action {
+  background: rgba(3, 12, 9, 0.55) !important;
+  border-color: var(--desk-border) !important;
+  color: var(--desk-text) !important;
+}

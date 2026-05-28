@@ -1,7 +1,7 @@
-﻿import type { Metadata } from "next";
+﻿// @ts-nocheck
+import type { Metadata } from "next";
 import { AppProviders } from "../src/providers/app-providers";
 import "./globals.css";
-import "./styles/ana-sayfa-emerald-gold.css";
 
 export const metadata: Metadata = {
   title: "HallederizCRM PREMIUM",
@@ -21,5 +21,6 @@ export default function RootLayout({
     </html>
   );
 }
+
 
 

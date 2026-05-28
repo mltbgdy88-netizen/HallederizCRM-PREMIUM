@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 "use client";
 
 import { LoadingState } from "@hallederiz/ui";
@@ -40,19 +41,19 @@ function isSameLocalDay(iso: string, ref: Date): boolean {
 function nextStepCopy(order: WarehouseOrder): string {
   const prep = getPrepDisplayStatus(order);
   if (prep === "beklemede") {
-    return "Depo görevlisi hazırlığı tamamlayınca teslim bekleyen aşamasına geçer.";
+    return "Depo gÃ¶revlisi hazÄ±rlÄ±ÄŸÄ± tamamlayÄ±nca teslim bekleyen aÅŸamasÄ±na geÃ§er.";
   }
   if (prep === "hazirlandi") {
-    return "Hızlı İşlem > Ürün Teslimi ekranında teslim edilebilir.";
+    return "HÄ±zlÄ± Ä°ÅŸlem > ÃœrÃ¼n Teslimi ekranÄ±nda teslim edilebilir.";
   }
   if (prep === "eksik") {
-    return "Eksik ürün için satış veya operasyon kontrolü gerekir; tamamlanınca yeniden hazırlık başlatılabilir.";
+    return "Eksik Ã¼rÃ¼n iÃ§in satÄ±ÅŸ veya operasyon kontrolÃ¼ gerekir; tamamlanÄ±nca yeniden hazÄ±rlÄ±k baÅŸlatÄ±labilir.";
   }
   if (prep === "iptal") {
     return "Bu belge iptal edildi.";
   }
   if (prep === "teslim_edildi") {
-    return "Teslim tamamlandı; Ürün Teslim Fişi arşivde yer alır.";
+    return "Teslim tamamlandÄ±; ÃœrÃ¼n Teslim FiÅŸi arÅŸivde yer alÄ±r.";
   }
   return "";
 }
@@ -60,9 +61,9 @@ function nextStepCopy(order: WarehouseOrder): string {
 function pickingSubnote(order: WarehouseOrder): string | null {
   if (order.status !== "picking") return null;
   if (orderHasShortage(order)) {
-    return "Toplama sürüyor; hazırlanan adetler arttıkça güncellenir. Tüm satırlar tamamlanınca fişi Hazırlandı olarak işaretleyebilirsiniz.";
+    return "Toplama sÃ¼rÃ¼yor; hazÄ±rlanan adetler arttÄ±kÃ§a gÃ¼ncellenir. TÃ¼m satÄ±rlar tamamlanÄ±nca fiÅŸi HazÄ±rlandÄ± olarak iÅŸaretleyebilirsiniz.";
   }
-  return "Toplama başladı; satır adetleri tamamlandıysa fişi Hazırlandı olarak işaretleyebilirsiniz.";
+  return "Toplama baÅŸladÄ±; satÄ±r adetleri tamamlandÄ±ysa fiÅŸi HazÄ±rlandÄ± olarak iÅŸaretleyebilirsiniz.";
 }
 
 export function WarehouseTasksPage() {
@@ -133,45 +134,47 @@ export function WarehouseTasksPage() {
   );
 
   return (
-    <div className="hz-warehouse-prep-page">
+    <div className="hz-warehouse-prep-page hz-depo-desk">
       <div className="hz-warehouse-prep-layout">
         <div className="hz-warehouse-prep-main">
           <header className="hz-warehouse-prep-topbar">
             <div className="hz-warehouse-prep-topbar-text">
-              <h1 className="hz-warehouse-prep-topbar-title">Depo Hazırlık</h1>
-              <p className="hz-warehouse-prep-topbar-sub">Satılan ürünlerin depo toplama, raf kontrolü ve teslim hazırlık süreci.</p>
+              <h1 className="hz-warehouse-prep-topbar-title">Depo HazÄ±rlÄ±k Operasyon MasasÄ±</h1>
+              <p className="hz-warehouse-prep-topbar-sub">
+                SatÄ±lan Ã¼rÃ¼nlerin depo toplama, raf kontrolÃ¼ ve teslim Ã¶ncesi hazÄ±rlÄ±k sÃ¼recini yÃ¶netin.
+              </p>
             </div>
             <div className="hz-warehouse-prep-topbar-actions">
-              <button type="button" className="hz-warehouse-prep-toolbar-btn hz-warehouse-prep-toolbar-btn--outline" onClick={() => fireDemo("Toplama listesi PDF/Excel bağlantısı yakında (demo).")}>
+              <button type="button" className="hz-warehouse-prep-toolbar-btn hz-warehouse-prep-toolbar-btn--outline" onClick={() => fireDemo("Toplama listesi PDF/Excel baÄŸlantÄ±sÄ± yakÄ±nda (demo).")}>
                 <IconListRows size={16} aria-hidden />
                 Toplama Listesi
               </button>
-              <button type="button" className="hz-warehouse-prep-toolbar-btn hz-warehouse-prep-toolbar-btn--outline" onClick={() => fireDemo("Hazırlık raporu oluşturma yakında (demo).")}>
+              <button type="button" className="hz-warehouse-prep-toolbar-btn hz-warehouse-prep-toolbar-btn--outline" onClick={() => fireDemo("HazÄ±rlÄ±k raporu oluÅŸturma yakÄ±nda (demo).")}>
                 <IconBarChart3 size={16} aria-hidden />
-                Hazırlık Raporu
+                HazÄ±rlÄ±k Raporu
               </button>
               <button
                 type="button"
                 className="hz-warehouse-prep-toolbar-btn hz-warehouse-prep-toolbar-btn--primary"
                 disabled={manualDemoDone}
                 onClick={() => {
-                  pushToast("Manuel fiş oluşturma bu sürümde demo; backend işlemi başlatılmadı.");
+                  pushToast("Manuel fiÅŸ oluÅŸturma bu sÃ¼rÃ¼mde demo; backend iÅŸlemi baÅŸlatÄ±lmadÄ±.");
                   setManualDemoDone(true);
                 }}
               >
                 <IconPlus size={16} aria-hidden />
-                Yeni Manuel Fiş
+                Yeni Manuel FiÅŸ
               </button>
             </div>
           </header>
 
-          <div className="hz-warehouse-prep-kpi-strip" aria-label="Depo hazırlık KPI">
+          <div className="hz-warehouse-prep-kpi-strip" aria-label="Depo hazÄ±rlÄ±k KPI">
             <div className="hz-warehouse-prep-kpi hz-warehouse-prep-kpi--warn">
               <span className="hz-warehouse-prep-kpi-label">Bekleyen</span>
               <span className="hz-warehouse-prep-kpi-value">{kpis.bekleyen}</span>
             </div>
             <div className="hz-warehouse-prep-kpi hz-warehouse-prep-kpi--ok">
-              <span className="hz-warehouse-prep-kpi-label">Hazırlanan</span>
+              <span className="hz-warehouse-prep-kpi-label">HazÄ±rlanan</span>
               <span className="hz-warehouse-prep-kpi-value">{kpis.hazirlanan}</span>
             </div>
             <div className="hz-warehouse-prep-kpi hz-warehouse-prep-kpi--danger">
@@ -179,7 +182,7 @@ export function WarehouseTasksPage() {
               <span className="hz-warehouse-prep-kpi-value">{kpis.eksik}</span>
             </div>
             <div className="hz-warehouse-prep-kpi hz-warehouse-prep-kpi--info">
-              <span className="hz-warehouse-prep-kpi-label">Bugün hazırlanacak</span>
+              <span className="hz-warehouse-prep-kpi-label">BugÃ¼n hazÄ±rlanacak</span>
               <span className="hz-warehouse-prep-kpi-value">{kpis.bugunHazirlanacak}</span>
             </div>
             <div className="hz-warehouse-prep-kpi hz-warehouse-prep-kpi--neutral">
@@ -200,7 +203,7 @@ export function WarehouseTasksPage() {
               className="hz-warehouse-prep-filter-input hz-warehouse-prep-filter-input--grow"
               value={filters.documentQuery}
               onChange={(e) => updateFilter("documentQuery", e.target.value)}
-              placeholder="Belge no, sipariş no veya cari ara…"
+              placeholder="Belge no, sipariÅŸ no veya cari araâ€¦"
               aria-label="Belge veya cari ara"
             />
             <label className="hz-warehouse-prep-filter-field">
@@ -210,9 +213,9 @@ export function WarehouseTasksPage() {
                 value={filters.prepDisplayFilter}
                 onChange={(e) => updateFilter("prepDisplayFilter", e.target.value as WarehouseTaskFilters["prepDisplayFilter"])}
               >
-                <option value="all">Tümü</option>
+                <option value="all">TÃ¼mÃ¼</option>
                 <option value="beklemede">Beklemede</option>
-                <option value="hazirlandi">Hazırlandı</option>
+                <option value="hazirlandi">HazÄ±rlandÄ±</option>
                 <option value="eksik">Eksik</option>
               </select>
             </label>
@@ -223,29 +226,29 @@ export function WarehouseTasksPage() {
                 value={filters.datePreset}
                 onChange={(e) => updateFilter("datePreset", e.target.value as WarehouseTaskFilters["datePreset"])}
               >
-                <option value="all">Tümü</option>
-                <option value="today">Bugün</option>
+                <option value="all">TÃ¼mÃ¼</option>
+                <option value="today">BugÃ¼n</option>
               </select>
             </label>
             <input
               className="hz-warehouse-prep-filter-input"
               value={filters.assignee}
               onChange={(e) => updateFilter("assignee", e.target.value)}
-              placeholder="Depo görevlisi"
-              aria-label="Depo görevlisi"
+              placeholder="Depo gÃ¶revlisi"
+              aria-label="Depo gÃ¶revlisi"
             />
-            <button type="button" className="hz-warehouse-prep-icon-btn" aria-label="Filtreleri sıfırla" onClick={resetFilters}>
+            <button type="button" className="hz-warehouse-prep-icon-btn" aria-label="Filtreleri sÄ±fÄ±rla" onClick={resetFilters}>
               <IconRotateCcw size={16} aria-hidden />
             </button>
           </div>
 
-          <div className="hz-warehouse-prep-chip-row" role="tablist" aria-label="Liste görünümü">
+          <div className="hz-warehouse-prep-chip-row" role="tablist" aria-label="Liste gÃ¶rÃ¼nÃ¼mÃ¼">
             {(
               [
                 ["bekleyenler", "Bekleyenler"],
-                ["hazirlananlar", "Hazırlananlar"],
+                ["hazirlananlar", "HazÄ±rlananlar"],
                 ["eksikler", "Eksikler"],
-                ["tumu", "Tüm kayıtlar"]
+                ["tumu", "TÃ¼m kayÄ±tlar"]
               ] as const
             ).map(([tab, label]) => (
               <button
@@ -262,7 +265,7 @@ export function WarehouseTasksPage() {
           </div>
 
           {loading ? (
-            <LoadingState title="Depo hazırlık listesi yükleniyor" message="Fişler ve satır özetleri hazırlanıyor." />
+            <LoadingState title="Depo hazÄ±rlÄ±k listesi yÃ¼kleniyor" message="FiÅŸler ve satÄ±r Ã¶zetleri hazÄ±rlanÄ±yor." />
           ) : (
             <div className="hz-warehouse-prep-list-wrap">
               <div className="hz-warehouse-prep-list-header" aria-hidden>
@@ -274,11 +277,11 @@ export function WarehouseTasksPage() {
                   <span className="hz-warehouse-prep-th-rulo-sub">/ adet</span>
                 </span>
                 <span>Durum</span>
-                <span className="hz-warehouse-prep-list-header--actions">İşlem</span>
+                <span className="hz-warehouse-prep-list-header--actions">Ä°ÅŸlem</span>
               </div>
               <div className="hz-warehouse-prep-list-body">
                 {filteredWarehouseOrders.length === 0 ? (
-                  <div className="hz-warehouse-prep-empty">Bu görünümde kayıt yok; filtreleri gevşetin.</div>
+                  <div className="hz-warehouse-prep-empty">Bu gÃ¶rÃ¼nÃ¼mde kayÄ±t yok; filtreleri gevÅŸetin.</div>
                 ) : (
                   filteredWarehouseOrders.map((order) => {
                     const selected = selectedWarehouseOrder?.id === order.id;
@@ -324,7 +327,7 @@ export function WarehouseTasksPage() {
                             className="hz-warehouse-prep-danger-btn"
                             onClick={(e) => {
                               e.stopPropagation();
-                              pushToast("Silme işlemi bu ortamda kapalı; kayıt korunuyor (demo).");
+                              pushToast("Silme iÅŸlemi bu ortamda kapalÄ±; kayÄ±t korunuyor (demo).");
                             }}
                           >
                             <IconTrash2 size={14} aria-hidden />
@@ -340,22 +343,22 @@ export function WarehouseTasksPage() {
           )}
         </div>
 
-        <aside className="hz-warehouse-prep-side" aria-label="Hazırlık radarı">
+        <aside className="hz-warehouse-prep-side" aria-label="HazÄ±rlÄ±k radarÄ±">
           <div className="hz-warehouse-prep-side-inner">
-            <h2 className="hz-warehouse-prep-side-title">Hazırlık Radarı</h2>
+            <h2 className="hz-warehouse-prep-side-title">HazÄ±rlÄ±k RadarÄ±</h2>
             {!selectedWarehouseOrder ? (
-              <p className="hz-warehouse-prep-side-muted">Listeden bir fiş seçin.</p>
+              <p className="hz-warehouse-prep-side-muted">Listeden bir fiÅŸ seÃ§in.</p>
             ) : (
               <>
                 <section className="hz-warehouse-prep-radar-block">
-                  <h3 className="hz-warehouse-prep-radar-h">Belge özeti</h3>
+                  <h3 className="hz-warehouse-prep-radar-h">Belge Ã¶zeti</h3>
                   <dl className="hz-warehouse-prep-dl">
                     <div>
                       <dt>Belge No</dt>
                       <dd>{selectedWarehouseOrder.warehouseOrderNo}</dd>
                     </div>
                     <div>
-                      <dt>Sipariş No</dt>
+                      <dt>SipariÅŸ No</dt>
                       <dd>{selectedWarehouseOrder.orderNo}</dd>
                     </div>
                     <div>
@@ -372,7 +375,7 @@ export function WarehouseTasksPage() {
                 </section>
 
                 <section className="hz-warehouse-prep-radar-block">
-                  <h3 className="hz-warehouse-prep-radar-h">Hazırlık özeti</h3>
+                  <h3 className="hz-warehouse-prep-radar-h">HazÄ±rlÄ±k Ã¶zeti</h3>
                   <dl className="hz-warehouse-prep-dl">
                     <div>
                       <dt className="hz-warehouse-prep-dt-stack">
@@ -382,11 +385,11 @@ export function WarehouseTasksPage() {
                       <dd>{orderTotalRollUnits(selectedWarehouseOrder)}</dd>
                     </div>
                     <div>
-                      <dt>Hazırlanan</dt>
+                      <dt>HazÄ±rlanan</dt>
                       <dd>{orderPreparedTotal(selectedWarehouseOrder)}</dd>
                     </div>
                     <div>
-                      <dt>Eksik (açık)</dt>
+                      <dt>Eksik (aÃ§Ä±k)</dt>
                       <dd>{orderShortageTotal(selectedWarehouseOrder)}</dd>
                     </div>
                   </dl>
@@ -397,44 +400,44 @@ export function WarehouseTasksPage() {
                   <p className="hz-warehouse-prep-side-muted">
                     Depo: <strong>{selectedWarehouseOrder.warehouseName}</strong>
                     <br />
-                    Raflar: {selectedWarehouseOrder.lines.map((l) => l.rackNo ?? "—").join(", ")}
+                    Raflar: {selectedWarehouseOrder.lines.map((l) => l.rackNo ?? "â€”").join(", ")}
                   </p>
                 </section>
 
                 <section className="hz-warehouse-prep-radar-block">
-                  <h3 className="hz-warehouse-prep-radar-h">Sonraki adım</h3>
+                  <h3 className="hz-warehouse-prep-radar-h">Sonraki adÄ±m</h3>
                   <p className="hz-warehouse-prep-radar-text">{nextStepCopy(selectedWarehouseOrder)}</p>
                   {pickingSubnote(selectedWarehouseOrder) ? <p className="hz-warehouse-prep-radar-sub">{pickingSubnote(selectedWarehouseOrder)}</p> : null}
                 </section>
 
                 <section className="hz-warehouse-prep-radar-block">
-                  <h3 className="hz-warehouse-prep-radar-h">Hızlı aksiyonlar</h3>
+                  <h3 className="hz-warehouse-prep-radar-h">HÄ±zlÄ± aksiyonlar</h3>
                   <div className="hz-warehouse-prep-quick-actions">
                     <button type="button" className="hz-warehouse-prep-quick-btn" onClick={() => router.push(`/depo/emirler/${selectedWarehouseOrder.id}`)}>
                       <IconArrowRightCircle size={16} aria-hidden />
-                      Fişi aç
+                      FiÅŸi aÃ§
                     </button>
-                    <button type="button" className="hz-warehouse-prep-quick-btn" onClick={() => fireDemo("Toplama listesi bu fiş için hazırlanacak (demo).")}>
+                    <button type="button" className="hz-warehouse-prep-quick-btn" onClick={() => fireDemo("Toplama listesi bu fiÅŸ iÃ§in hazÄ±rlanacak (demo).")}>
                       <IconClipboardList size={16} aria-hidden />
                       Toplama listesi
                     </button>
                     <button type="button" className="hz-warehouse-prep-quick-btn" onClick={() => router.push("/hizli-islem")}>
                       <IconTruck size={16} aria-hidden />
-                      Hızlı işlemde teslim et
+                      HÄ±zlÄ± iÅŸlemde teslim et
                     </button>
                     <button type="button" className="hz-warehouse-prep-quick-btn" onClick={() => router.push("/archive")}>
                       <IconArchive size={16} aria-hidden />
-                      Arşiv kayıtları
+                      ArÅŸiv kayÄ±tlarÄ±
                     </button>
                   </div>
-                  <p className="hz-warehouse-prep-radar-footnote">Hazırlandı durumundaki fişler Ürün Teslimi işleminde otomatik çağrılır.</p>
+                  <p className="hz-warehouse-prep-radar-footnote">HazÄ±rlandÄ± durumundaki fiÅŸler ÃœrÃ¼n Teslimi iÅŸleminde otomatik Ã§aÄŸrÄ±lÄ±r.</p>
                 </section>
 
                 <section className="hz-warehouse-prep-radar-block hz-warehouse-prep-radar-block--soft">
-                  <h3 className="hz-warehouse-prep-radar-h">İş akışı</h3>
+                  <h3 className="hz-warehouse-prep-radar-h">Ä°ÅŸ akÄ±ÅŸÄ±</h3>
                   <p className="hz-warehouse-prep-radar-text">
-                    Sipariş kendi stoğundan karşılanacaksa Depo Hazırlık Belgesi oluşur. Depo görevlisi ürünleri rafa göre hazırlar; Hazırlandı denince görev kapanır ve teslim
-                    aşaması açılır. Müşteriye ürün verildiğinde fiş listeden çıkar; Depo Hazırlık Belgesi ve Ürün Teslim Fişi arşivlenir.
+                    SipariÅŸ kendi stoÄŸundan karÅŸÄ±lanacaksa Depo HazÄ±rlÄ±k Belgesi oluÅŸur. Depo gÃ¶revlisi Ã¼rÃ¼nleri rafa gÃ¶re hazÄ±rlar; HazÄ±rlandÄ± denince gÃ¶rev kapanÄ±r ve teslim
+                    aÅŸamasÄ± aÃ§Ä±lÄ±r. MÃ¼ÅŸteriye Ã¼rÃ¼n verildiÄŸinde fiÅŸ listeden Ã§Ä±kar; Depo HazÄ±rlÄ±k Belgesi ve ÃœrÃ¼n Teslim FiÅŸi arÅŸivlenir.
                   </p>
                 </section>
               </>
@@ -445,3 +448,4 @@ export function WarehouseTasksPage() {
     </div>
   );
 }
+

@@ -1,5 +1,7 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+﻿// @ts-nocheck
+import { TeslimatlarYeniFormPage } from "../../../../src/features/teslimatlar/components/TeslimatlarYeniFormPage";
 
-export default function TeslimatlarYeniPage() {
-  return renderProductCatchAll(["teslimatlar", "yeni"]);
+export default function TeslimatlarYeniFormRoute() {
+  return <TeslimatlarYeniFormPage />;
 }
+

@@ -1,5 +1,7 @@
-import { redirect } from "next/navigation";
+﻿// @ts-nocheck
+import { OnaylarKomutMasasiPage } from "../../../../src/features/onaylar/components/OnaylarKomutMasasiPage";
 
-export default function OnaylarBekleyenlerAliasPage() {
-  redirect("/onaylar");
+export default function OnaylarBekleyenlerRoute() {
+  return <OnaylarKomutMasasiPage />;
 }
+

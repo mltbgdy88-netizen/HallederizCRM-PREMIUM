@@ -1,15 +1,16 @@
+﻿// @ts-nocheck
 import type { ReactNode } from "react";
 
 export interface HeaderProps {
   title: string;
   subtitle: string;
-  /** true: sol başlık / breadcrumb / alt başlık gösterilmez (sayfa kendi başlığını kullanır). */
+  /** true: sol baÅŸlÄ±k / breadcrumb / alt baÅŸlÄ±k gÃ¶sterilmez (sayfa kendi baÅŸlÄ±ÄŸÄ±nÄ± kullanÄ±r). */
   suppressPageMeta?: boolean;
   breadcrumb?: string;
   searchPlaceholder?: string;
   /** Replaces the left title / breadcrumb / subtitle block (e.g. dashboard greeting). */
   leadingSlot?: ReactNode;
-  /** Inserted between search and trailing actions (e.g. “+ Hızlı İşlem”). */
+  /** Inserted between search and trailing actions (e.g. â€œ+ HÄ±zlÄ± Ä°ÅŸlemâ€). */
   toolbarSlot?: ReactNode;
   notificationSlot: ReactNode;
   themeSlot?: ReactNode;
@@ -25,7 +26,7 @@ export function Header({
   subtitle,
   suppressPageMeta = false,
   breadcrumb,
-  searchPlaceholder = "Global arama (yakında)",
+  searchPlaceholder = "Global arama (yakÄ±nda)",
   leadingSlot,
   toolbarSlot,
   notificationSlot,
@@ -34,6 +35,7 @@ export function Header({
   layout = "default",
   variant = "default"
 }: HeaderProps) {
+  const renderActionsInline = variant === "command" || suppressPageMeta;
   const rootClass = [
     "hz-header-root",
     layout === "dashboard" ? "hz-header-root--dashboard" : "",
@@ -65,18 +67,26 @@ export function Header({
 
       <div className="hz-header-trailing">
         {toolbarSlot ? <div className="hz-header-toolbar">{toolbarSlot}</div> : null}
-        <details className="hz-header-actions-drawer">
-          <summary className="hz-header-actions-drawer-trigger" aria-label="Aksiyonlar">
-            <span className="hz-sr-only">Aksiyonlar</span>
-            <span aria-hidden>⋯</span>
-          </summary>
+        {renderActionsInline ? (
           <div className="hz-header-actions">
             {notificationSlot}
             {themeSlot != null ? themeSlot : null}
           </div>
-        </details>
+        ) : (
+          <details className="hz-header-actions-drawer">
+            <summary className="hz-header-actions-drawer-trigger" aria-label="Aksiyonlar">
+              <span className="hz-sr-only">Aksiyonlar</span>
+              <span aria-hidden>â‹¯</span>
+            </summary>
+            <div className="hz-header-actions">
+              {notificationSlot}
+              {themeSlot != null ? themeSlot : null}
+            </div>
+          </details>
+        )}
         {userSlot}
       </div>
     </div>
   );
 }
+

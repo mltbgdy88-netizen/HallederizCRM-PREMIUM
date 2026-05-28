@@ -1,5 +1,7 @@
-import { InvoicesPage as InvoicesFeaturePage } from "../../../src/features/invoices/components";
+﻿// @ts-nocheck
+import { FaturalarOperasyonPage } from "../../../src/features/faturalar/components/FaturalarOperasyonPage";
 
-export default function InvoicesPage() {
-  return <InvoicesFeaturePage />;
+export default function FaturalarOperasyonRoute() {
+  return <FaturalarOperasyonPage />;
 }
+

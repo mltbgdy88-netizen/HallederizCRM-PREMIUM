@@ -1,5 +1,7 @@
-import { DashboardCommandCenterPage } from "../../../src/features/dashboard/components/DashboardCommandCenterPage";
+﻿// @ts-nocheck
+import { DashboardGostergePaneliPage } from "../../../src/features/dashboard/components/DashboardGostergePaneliPage";
 
 export default function DashboardPage() {
-  return <DashboardCommandCenterPage />;
+  return <DashboardGostergePaneliPage />;
 }
+

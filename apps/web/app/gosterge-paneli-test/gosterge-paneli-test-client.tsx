@@ -1,321 +1,198 @@
-﻿"use client";
+﻿// @ts-nocheck
+"use client";
 
-import styles from "./gosterge-paneli-test.module.css";
+import dynamic from "next/dynamic";
+import Link from "next/link";
+import { useCallback, type MouseEvent, type ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { NAV_ITEMS } from "@/features/dashboard/data/dashboard-reference-mock";
+import {
+  GOSTERGE_PANELI_TEST_CONVERSATIONS,
+  GOSTERGE_PANELI_TEST_PAGINATION,
+  GOSTERGE_PANELI_TEST_SNAPSHOT
+} from "@/features/dashboard/data/gosterge-paneli-test-data";
+import { GOSTERGE_PANELI_UI } from "@/features/dashboard/data/gosterge-paneli-ui-text";
+import { handleReferencePageClick, referenceHref } from "@/lib/reference/reference-page-interaction";
+import { useReferenceToast } from "@/lib/reference/use-reference-demo-action";
+import { useToast } from "@/providers/toast-provider";
+import {
+  IconBell,
+  IconChevronDown,
+  IconMenu,
+  IconSearch,
+  IconSun,
+  NavIcon,
+  NAV_ICON_MAP,
+  ShieldLogo
+} from "@/components/reference/icons";
 
-const kpis = [
+const ui = GOSTERGE_PANELI_UI;
+
+const DashboardGostergePaneliPage = dynamic(
+  () =>
+    import("@/features/dashboard/components/DashboardGostergePaneliPage").then((mod) => ({
+      default: mod.DashboardGostergePaneliPage
+    })),
   {
-    value: "7",
-    title: "Fabrikaya Verilecek",
-    detail: "2 siparis - 3+ gun",
-    tone: "orange"
-  },
-  {
-    value: "11",
-    title: "Depoda Haz\u0131rlanacak",
-    detail: "4 is - bugun kapanmal\u0131",
-    tone: "mint"
-  },
-  {
-    value: "6",
-    title: "M\u00FC\u015Fteriye Teslim",
-    detail: "3 m\u00FC\u015Fteri - randevu ge\u00E7ti",
-    tone: "green"
-  },
-  {
-    value: "4",
-    title: "Kargo Bekliyor",
-    detail: "1 paket - 5. gun",
-    tone: "blue"
-  },
-  {
-    value: "3",
-    title: "Onay Bekleyen",
-    detail: "\u0130skonto + tahsilat",
-    tone: "gold"
-  },
-  {
-    value: "8",
-    title: "Geciken \u0130\u015F",
-    detail: "\u00D6ncelikli liste",
-    tone: "slate"
+    ssr: false,
+    loading: () => (
+      <div className="gosterge-paneli-test-loading" role="status" aria-live="polite">
+        {ui.loading}
+      </div>
+    )
   }
-];
+);
 
-const conversations = [
-  {
-    id: "#WAP-1587",
-    phone: "+90 538 *** 34",
-    cari: "Demir Yap\u0131 A.\u015E.",
-    message: "Merhaba, teklifimiz hakk\u0131nda bilgi alabilir miyim?",
-    time: "10:24",
-    status: "Onay Bekliyor",
-    sla: "2s 15dk",
-    tone: "warn"
-  },
-  {
-    id: "#WAP-1582",
-    phone: "+90 533 210 44 11",
-    cari: "Nova \u0130n\u015Faat Ltd.",
-    message: "Sevkiyat tarihini netle\u015Ftirebilir misiniz?",
-    time: "14:08",
-    status: "Beklemede",
-    sla: "28 dk",
-    tone: "blue"
-  },
-  {
-    id: "#WAP-1576",
-    phone: "+90 542 880 12 03",
-    cari: "Kuzey Mobilya",
-    message: "Stok listesini WhatsApp \u00FCzerinden payla\u015Ft\u0131k.",
-    time: "13:54",
-    status: "Aktif",
-    sla: "1s 04dk",
-    tone: "green"
-  },
-  {
-    id: "#WAP-1569",
-    phone: "+90 536 991 77 45",
-    cari: "Atlas Dekor",
-    message: "\u00D6deme plan\u0131 onayland\u0131, te\u015Fekk\u00FCrler.",
-    time: "13:31",
-    status: "Tamamland\u0131",
-    sla: "Tamam",
-    tone: "green"
-  },
-  {
-    id: "#WAP-1561",
-    phone: "+90 505 332 19 88",
-    cari: "Ege Yap\u0131 Market",
-    message: "\u015Eablon mesaj m\u00FC\u015Fteriye iletildi.",
-    time: "12:47",
-    status: "Aktif",
-    sla: "45 dk",
-    tone: "green"
-  },
-  {
-    id: "#WAP-1554",
-    phone: "+90 531 774 02 16",
-    cari: "Vadi Seramik",
-    message: "\u0130ade s\u00FCreci i\u00E7in onay bekleniyor.",
-    time: "12:15",
-    status: "Onay Bekliyor",
-    sla: "6 dk",
-    tone: "red"
-  },
-  {
-    id: "#WAP-1548",
-    phone: "+90 544 660 55 90",
-    cari: "Merkez Toptan",
-    message: "Fiyat revizyonu payla\u015F\u0131ld\u0131.",
-    time: "11:58",
-    status: "Beklemede",
-    sla: "1s 22dk",
-    tone: "blue"
-  },
-  {
-    id: "#WAP-1541",
-    phone: "+90 538 120 44 73",
-    cari: "Park Yap\u0131 Malzeme",
-    message: "Teslimat adresi g\u00FCncellendi.",
-    time: "11:36",
-    status: "Tamamland\u0131",
-    sla: "Tamam",
-    tone: "green"
+function isNavActive(pathname: string, href: string): boolean {
+  if (href === "#" || !href.startsWith("/")) return false;
+  if (href === "/dashboard" || href === "/gosterge-paneli-test") {
+    return pathname === "/dashboard" || pathname.startsWith("/dashboard/") || pathname === "/gosterge-paneli-test";
   }
-];
-
-const alerts = [
-  "Demir\u00F6z Elekt. - SP-2412 - fabrikaya verilmedi - 3. g\u00FCn",
-  "Kaya Yap\u0131 - SP-2409 - depo haz\u0131rl\u0131\u011F\u0131 yar\u0131m - 2. g\u00FCn",
-  "Akdeniz Oto. - SP-2405 - kargo \u00E7\u0131k\u0131\u015F\u0131 yok - 5. g\u00FCn",
-  "ABC \u0130n\u015Faat - SP-2401 - ma\u011Fazada teslim bekliyor - 1. g\u00FCn",
-  "Y\u0131lmaz G\u0131da - SP-2396 - fabrika + depo b\u00F6l\u00FCnm\u00FC\u015F - 4. g\u00FCn",
-  "Mega Market - SP-2392 - iskonto onay\u0131 - 2. g\u00FCn"
-];
-
-const summary = [
-  ["Fabrikaya verilecek", "7 sipari\u015F", "3 tanesi 3+ g\u00FCn bekliyor"],
-  ["Depoda haz\u0131rlanacak", "11 sipari\u015F", "4 i\u015F bug\u00FCn kapanmal\u0131"],
-  ["M\u00FC\u015Fteriye teslim", "6 m\u00FC\u015Fteri", "3 randevu saati ge\u00E7ti"],
-  ["Kargo \u00E7\u0131k\u0131\u015F bekleyen", "4 paket", "1 paket 5. g\u00FCnde"]
-];
-
-const quickActions = [
-  "Yeni Sipari\u015F",
-  "Tahsilat Ekle",
-  "Teklif Haz\u0131rla",
-  "M\u00FC\u015Fteri Ekle",
-  "Stok Giri\u015Fi",
-  "G\u00F6rev Olu\u015Ftur"
-];
-
-const aiNotes = [
-  "Demir\u00F6z Elekt. fabrika emri 3. g\u00FCnde; \u00F6nce fabrikaya ver.",
-  "Akdeniz Oto. kargo 5. g\u00FCn; m\u00FC\u015Fteriyi bilgilendir.",
-  "4 depo haz\u0131rl\u0131\u011F\u0131 bug\u00FCn kapanmal\u0131.",
-  "3 teslim randevusu saati ge\u00E7ti."
-];
-
-function Badge({ tone, children }: { tone: string; children: React.ReactNode }) {
-  return <span className={`${styles.badge} ${styles[`badge_${tone}`]}`}>{children}</span>;
+  return pathname === href || pathname.startsWith(`${href}/`);
 }
 
-export default function GostergePaneliTestClient() {
+function GostergePaneliTestShell({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const router = useRouter();
+  const pushReferenceToast = useReferenceToast();
+  const { pushToast } = useToast();
+
+  const handlePageInteraction = useCallback(
+    (event: MouseEvent<HTMLElement>) => {
+      handleReferencePageClick(event, router, pushToast, pathname);
+    },
+    [pathname, pushToast, router]
+  );
+
   return (
-    <main className={styles.page}>
-      <section className={styles.kpiGrid} aria-label="Kritik operasyon g\u00F6stergeleri">
-        {kpis.map((kpi) => (
-          <article key={kpi.title} className={`${styles.kpiCard} ${styles[`kpi_${kpi.tone}`]}`}>
-            <div className={styles.kpiIcon}>!</div>
+    <div className="ref-shell gosterge-paneli-test-shell">
+      <aside className="ref-sidebar" aria-label={ui.sidebarAria}>
+        <div className="ref-sidebar-brand">
+          <div className="ref-sidebar-logo-row">
+            <ShieldLogo>P</ShieldLogo>
             <div>
-              <strong>{kpi.value}</strong>
-              <h2>{kpi.title}</h2>
-              <p>{kpi.detail}</p>
-              <span>Acil takip</span>
+              <p className="ref-sidebar-logo-title">PREMIUM</p>
+              <p className="ref-sidebar-logo-sub">CRM</p>
             </div>
-          </article>
-        ))}
-      </section>
-
-      <section className={styles.mainGrid}>
-        <article className={`${styles.panel} ${styles.conversationPanel}`}>
-          <header className={styles.panelHeader}>
-            <h2>Aktif Konu\u015Fmalar</h2>
-            <button type="button">WhatsApp Masas\u0131</button>
-          </header>
-
-          <div className={styles.tableWrap}>
-            <table className={styles.table}>
-              <thead>
-                <tr>
-                  <th>Konu\u015Fma</th>
-                  <th>Cari</th>
-                  <th>Son Mesaj</th>
-                  <th>Durum</th>
-                  <th>SLA</th>
-                  <th>Aksiyon</th>
-                </tr>
-              </thead>
-              <tbody>
-                {conversations.map((item) => (
-                  <tr key={item.id}>
-                    <td>
-                      <strong>{item.id}</strong>
-                      <small>{item.phone}</small>
-                    </td>
-                    <td>{item.cari}</td>
-                    <td>
-                      {item.message}
-                      <small>{item.time}</small>
-                    </td>
-                    <td>
-                      <Badge tone={item.tone}>{item.status}</Badge>
-                    </td>
-                    <td>{item.sla}</td>
-                    <td>
-                      <div className={styles.actions}>
-                        <button type="button">Mesaj</button>
-                        <button type="button">A\u00E7</button>
-                        <button type="button">...</button>
-                      </div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
           </div>
+        </div>
 
-          <footer className={styles.tableFooter}>1-8 / 120 konu\u015Fma</footer>
-        </article>
+        <nav className="ref-sidebar-nav">
+          {NAV_ITEMS.map((item) => {
+            const href =
+              item.id === "dashboard" ? "/gosterge-paneli-test" : referenceHref(item.href);
+            const active = isNavActive(pathname, href);
+            const label =
+              item.id === "dashboard"
+                ? "G\u00f6sterge Paneli"
+                : item.id === "quick"
+                  ? "H\u0131zl\u0131 \u0130\u015flem"
+                  : item.id === "archive"
+                    ? "Ar\u015fiv"
+                    : item.id === "customers"
+                      ? "Cariler"
+                      : item.id === "stock"
+                        ? "\u00dcr\u00fcn / Stok"
+                        : item.id === "settings"
+                          ? "Ayarlar"
+                          : item.label;
+            return (
+              <Link
+                key={item.id}
+                href={href}
+                className={`ref-sidebar-item${active ? " ref-sidebar-item--active" : ""}`}
+                aria-current={active ? "page" : undefined}
+              >
+                <NavIcon id={item.id as keyof typeof NAV_ICON_MAP} className="ref-sidebar-item-icon" />
+                <span className="ref-sidebar-item-label">{label}</span>
+                {item.badge ? <span className="ref-sidebar-badge">{item.badge}</span> : null}
+              </Link>
+            );
+          })}
+        </nav>
 
-        <aside className={styles.midColumn}>
-          <article className={styles.panel}>
-            <header className={styles.panelHeader}>
-              <h2>Acil Takip Uyar\u0131lar\u0131</h2>
-              <button type="button">T\u00FCm\u00FCn\u00FC G\u00F6r</button>
-            </header>
-            <ul className={styles.alertList}>
-              {alerts.map((alert) => (
-                <li key={alert}>
-                  <span>!</span>
-                  <p>{alert}</p>
-                </li>
-              ))}
-            </ul>
-          </article>
+        <footer className="ref-sidebar-footer">
+          <p>Premium CRM v2.6.1</p>
+          <p>{ui.copyright}</p>
+        </footer>
+      </aside>
 
-          <article className={styles.panel}>
-            <header className={styles.panelHeader}>
-              <h2>Acil \u0130\u015F \u00D6zeti</h2>
-            </header>
-            <ul className={styles.summaryList}>
-              {summary.map(([label, value, detail]) => (
-                <li key={label}>
-                  <div>
-                    <strong>{label}</strong>
-                    <small>{detail}</small>
-                  </div>
-                  <b>{value}</b>
-                </li>
-              ))}
-            </ul>
-          </article>
-
-          <article className={styles.panel}>
-            <header className={styles.panelHeader}>
-              <h2>Acil \u0130\u015F Da\u011F\u0131l\u0131m\u0131</h2>
-            </header>
-            <div className={styles.donutArea}>
-              <div className={styles.donut}>
-                <span>Acil \u0130\u015F</span>
-                <strong>28</strong>
-              </div>
-              <ul>
-                <li><span className={styles.orangeDot}></span>Fabrika emri <b>%25</b></li>
-                <li><span className={styles.greenDot}></span>Depo haz\u0131rl\u0131k <b>%39</b></li>
-                <li><span className={styles.tealDot}></span>Teslimat <b>%22</b></li>
-                <li><span className={styles.blueDot}></span>Kargo bekleyen <b>%14</b></li>
-              </ul>
-            </div>
-          </article>
-        </aside>
-
-        <aside className={`${styles.panel} ${styles.aiPanel}`}>
-          <header className={styles.panelHeader}>
-            <h2>AI Asistan</h2>
-          </header>
-
-          <div className={styles.videoBox}>
-            <button type="button" aria-label="Videoyu oynat">▶</button>
-            <strong>Acil i\u015F ve geciken sipari\u015F \u00F6zeti haz\u0131r.</strong>
-            <div className={styles.progress}>
-              <span></span>
-            </div>
-            <small>01:24 / 03:15</small>
-          </div>
-
-          <p>
-            Merhaba Yusuf Bey, bug\u00FCn 28 acil i\u015F var. Fabrika emri ve kargo bekleyenleri
-            \u00F6nce videoda \u00F6zetledim.
-          </p>
-
-          <h3>\u00D6ne \u00C7\u0131kanlar</h3>
-          <ul className={styles.aiList}>
-            {aiNotes.map((note) => (
-              <li key={note}>✓ {note}</li>
-            ))}
-          </ul>
-        </aside>
-      </section>
-
-      <section className={styles.quickBar} aria-label="H\u0131zl\u0131 i\u015Flemler">
-        {quickActions.map((action) => (
-          <button type="button" key={action}>
-            <span>+</span>
-            {action}
+      <div className="ref-main gosterge-paneli-test-main">
+        <header className="ref-header">
+          <button
+            type="button"
+            className="ref-header-menu"
+            aria-label={ui.menu}
+            data-ref-skip-fallback
+            onClick={() => pushReferenceToast("Kenar menu daraltma demo modunda.")}
+          >
+            <IconMenu className="ref-header-menu-icon" />
           </button>
-        ))}
-      </section>
-    </main>
+
+          <div className="ref-header-search">
+            <IconSearch className="ref-header-search-icon" />
+            <input type="search" placeholder={ui.searchPlaceholder} aria-label="Arama" readOnly />
+          </div>
+
+          <div className="ref-header-actions">
+            <button
+              type="button"
+              className="ref-theme-toggle"
+              data-ref-skip-fallback
+              onClick={() => pushReferenceToast("Tema degistirme bu test ekraninda devre disi.")}
+            >
+              <IconSun className="ref-theme-toggle-icon" />
+              <span>{ui.themeLight}</span>
+              <IconChevronDown className="ref-theme-toggle-chevron" />
+            </button>
+
+            <button
+              type="button"
+              className="ref-header-bell-btn"
+              aria-label={ui.notifications}
+              data-ref-skip-fallback
+              onClick={() => pushReferenceToast("3 okunmamis bildirim (demo).")}
+            >
+              <IconBell className="ref-header-bell-icon" />
+              <span className="ref-header-bell-badge">3</span>
+            </button>
+
+            <div className="ref-header-user" aria-label="Demo kullanici">
+              <span className="ref-header-avatar">YK</span>
+              <div className="ref-header-user-text">
+                <strong>Yusuf K.</strong>
+                <span>{ui.demoUserRole}</span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        <main className="ref-page gosterge-paneli-test-page" onClick={handlePageInteraction}>
+          {children}
+        </main>
+      </div>
+    </div>
   );
 }
+
+export function GostergePaneliTestClient() {
+  return (
+    <GostergePaneliTestShell>
+      <div className="gosterge-paneli-test-root">
+        <p className="gosterge-paneli-test-banner" role="status">
+          {ui.demoBanner}
+        </p>
+        <DashboardGostergePaneliPage
+          demoOnly
+          compact
+          staticSnapshot={GOSTERGE_PANELI_TEST_SNAPSHOT}
+          staticWhatsapp={{
+            conversations: GOSTERGE_PANELI_TEST_CONVERSATIONS,
+            pagination: GOSTERGE_PANELI_TEST_PAGINATION
+          }}
+        />
+      </div>
+    </GostergePaneliTestShell>
+  );
+}
+

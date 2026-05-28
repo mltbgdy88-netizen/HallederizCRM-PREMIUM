@@ -399,19 +399,19 @@
 }
 
 .wop-table thead th:nth-child(1) {
-  width: 18%;
+  width: 16%;
 }
 
 .wop-table thead th:nth-child(2) {
-  width: 14%;
+  width: 13%;
 }
 
 .wop-table thead th:nth-child(3) {
-  width: 30%;
+  width: 28%;
 }
 
 .wop-table thead th:nth-child(4) {
-  width: 13%;
+  width: 14%;
 }
 
 .wop-table thead th:nth-child(5) {
@@ -419,7 +419,7 @@
 }
 
 .wop-table thead th:nth-child(6) {
-  width: 11%;
+  width: 12%;
 }
 
 .wop-row td {
@@ -460,6 +460,7 @@
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 100%;
 }
 
 .wop-msg-cell {
@@ -469,9 +470,11 @@
 }
 
 .wop-msg-text {
+  display: block;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  max-width: 100%;
   color: #475569;
 }
 

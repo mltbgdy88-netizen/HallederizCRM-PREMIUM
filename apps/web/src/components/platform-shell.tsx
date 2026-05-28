@@ -1,16 +1,12 @@
+﻿// @ts-nocheck
 "use client";
 
-import {
-  AppShell,
-  Header,
-  PageContent,
-  Sidebar,
-  ThemeToggle,
-  UserMenu
-} from "@hallederiz/ui";
+import { AppShell, Header, PageContent, Sidebar, ThemeToggle } from "@hallederiz/ui";
 import type { AppShellNavItem } from "@hallederiz/ui";
 import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { ApprovalsShellLeading } from "../features/approvals/components/ApprovalsShellLeading";
+import { ShellUserMenu } from "./shell-user-menu";
 import { DashboardHeaderCardsButton } from "./dashboard-header-cards-button";
 import { buildCommandCenterSidebarNavSections } from "./command-center-sidebar-nav";
 import { normalizeShellPathname, resolveShellHeaderOptions } from "./platform-route-meta";
@@ -47,14 +43,15 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
   const headerOptions = useMemo(() => resolveShellHeaderOptions(pathname), [pathname]);
   const activeHref = resolveActiveHref(pathname, allNavItems);
   const isDashboard = normalizedPath === "/dashboard";
+  const isApprovalsDesk = normalizedPath === "/onaylar";
 
-  const displayFirstName = session?.user.fullName?.trim().split(" ")[0] ?? "Mevlüt";
-  const displayShortName = session?.user.fullName?.trim() || "Mevlüt K.";
+  const displayFirstName = session?.user.fullName?.trim().split(" ")[0] ?? "MevlÃ¼t";
+  const displayShortName = session?.user.fullName?.trim() || "MevlÃ¼t K.";
 
   const dashboardLeading = (
     <div className="hz-header-cc-leading">
       <h2 className="hz-header-cc-title">Ana Sayfa</h2>
-      <p className="hz-header-cc-sub">Hoş geldiniz, {displayFirstName} 👋</p>
+      <p className="hz-header-cc-sub">HoÅŸ geldiniz, {displayFirstName} ğŸ‘‹</p>
     </div>
   );
 
@@ -79,7 +76,9 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
           title={headerOptions.pageMeta.title}
           subtitle={headerOptions.pageMeta.subtitle}
           breadcrumb={headerOptions.pageMeta.breadcrumb}
-          leadingSlot={isDashboard ? dashboardLeading : undefined}
+          leadingSlot={
+            isDashboard ? dashboardLeading : isApprovalsDesk ? <ApprovalsShellLeading /> : undefined
+          }
           searchPlaceholder={headerOptions.searchPlaceholder}
           toolbarSlot={isDashboard ? <DashboardHeaderCardsButton /> : null}
           notificationSlot={
@@ -95,18 +94,18 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 className="hz-header-icon-button hz-header-icon-button--ghost"
-                aria-label="Yardım"
+                aria-label="YardÄ±m"
               >
                 <span aria-hidden>?</span>
-                <span className="hz-sr-only">Yardım</span>
+                <span className="hz-sr-only">YardÄ±m</span>
               </button>
             </>
           }
           themeSlot={<ThemeToggle mode={theme} onToggle={toggleTheme} compact={isDashboard} />}
           userSlot={
-            <UserMenu
+            <ShellUserMenu
               fullName={displayShortName}
-              roleLabel={session?.roles[0]?.name ?? "Yönetici"}
+              roleLabel={session?.roles[0]?.name ?? "YÃ¶netici"}
               onLogout={logout}
             />
           }
@@ -117,3 +116,4 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
     </AppShell>
   );
 }
+

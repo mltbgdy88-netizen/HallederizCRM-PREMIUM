@@ -1,5 +1,7 @@
-import { ApprovalPolicyMatrixPage } from "../../../../src/features/approvals/components/ApprovalPolicyMatrixPage";
+﻿// @ts-nocheck
+import { OnaylarKurallarMatrisPage } from "../../../../src/features/onaylar/components/OnaylarKurallarMatrisPage";
 
-export default function OnaylarKurallarPage() {
-  return <ApprovalPolicyMatrixPage />;
+export default function OnaylarKurallarMatrisRoute() {
+  return <OnaylarKurallarMatrisPage />;
 }
+

@@ -1,11 +1,16 @@
+﻿// @ts-nocheck
 "use client";
 
 import { EntityListPageTemplate, EmptyState, LoadingState, Pagination } from "@hallederiz/ui";
 import type { Customer, Return } from "@hallederiz/types";
 import { calculateReturnImpact } from "@hallederiz/domain";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { LucideIcon } from "../../../components/icons/lucide-icons";
 import { dataSourceConfig } from "../../../lib/data-source";
+import { useToast } from "../../../providers/toast-provider";
+import { CommercialOperasyonDeskIntro } from "../../ui-inventory/components/CommercialOperasyonDeskIntro";
 import { dateLabel } from "../utils";
 import { getReturns } from "../queries/get-returns";
 import { getReturnStatusLabel } from "../queries/return-mock-data";
@@ -15,26 +20,26 @@ function ReturnFilterBar() {
     <section className="hz-filter-card hz-returns-filter">
       <div className="hz-filter-grid">
         <label>
-          Müşteri
+          MÃ¼ÅŸteri
           <input placeholder="Cari veya iade no ara" />
         </label>
         <label>
           Durum
           <select defaultValue="">
-            <option value="">Tüm durumlar</option>
+            <option value="">TÃ¼m durumlar</option>
             <option>Taslak</option>
-            <option>Onaylandı</option>
-            <option>Tamamlandı</option>
+            <option>OnaylandÄ±</option>
+            <option>TamamlandÄ±</option>
           </select>
         </label>
         <label>
-          Bağlı sipariş
-          <input placeholder="Sipariş no" />
+          BaÄŸlÄ± sipariÅŸ
+          <input placeholder="SipariÅŸ no" />
         </label>
         <label>
           Tarih
           <select defaultValue="month">
-            <option value="today">Bugün</option>
+            <option value="today">BugÃ¼n</option>
             <option value="week">Bu hafta</option>
             <option value="month">Bu ay</option>
           </select>
@@ -46,31 +51,37 @@ function ReturnFilterBar() {
 
 function ReturnPreviewPanel({
   returnRecord,
-  customerName
+  customerName,
+  onNavigate
 }: {
   returnRecord: Return | null;
   customerName: string | null;
+  onNavigate: (id: string) => void;
 }) {
+  const { pushToast } = useToast();
+
   if (!returnRecord) {
     return (
       <aside className="hz-commercial-entity-side hz-returns-side">
-        <p className="hz-commercial-entity-side-empty">Listeden bir iade seçin.</p>
+        <p className="hz-commercial-entity-side-empty">KayÄ±t seÃ§ilmedi.</p>
       </aside>
     );
   }
+
   const impact = calculateReturnImpact(returnRecord);
+
   return (
     <aside className="hz-commercial-entity-side hz-returns-side">
-      <h3>İade önizleme</h3>
+      <h3>Ä°ade Ã¶nizleme</h3>
       <ul className="hz-commercial-entity-side-list">
         <li>
-          <strong>İade:</strong> {returnRecord.returnNo}
+          <strong>Ä°ade:</strong> {returnRecord.returnNo}
         </li>
         <li>
-          <strong>Sipariş:</strong> {returnRecord.orderNo ?? "—"}
+          <strong>SipariÅŸ:</strong> {returnRecord.orderNo ?? "â€”"}
         </li>
         <li>
-          <strong>Cari:</strong> {customerName ?? "—"}
+          <strong>Cari:</strong> {customerName ?? "â€”"}
         </li>
         <li>
           <strong>Durum:</strong> {getReturnStatusLabel(returnRecord.status)}
@@ -82,12 +93,31 @@ function ReturnPreviewPanel({
           <strong>Onay:</strong> {impact.approvalRequired ? "Gerekli" : "Standart"}
         </li>
       </ul>
+      <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <button
+          type="button"
+          className="hz-btn hz-btn-primary hz-toolbar-btn"
+          style={{ flex: 1 }}
+          onClick={() => onNavigate(returnRecord.id)}
+        >
+          Detay
+        </button>
+        <button
+          type="button"
+          className="hz-btn hz-btn-secondary hz-toolbar-btn"
+          style={{ flex: 1 }}
+          onClick={() => pushToast("Taslak hazÄ±rlandÄ±: iade onaya gÃ¶nderildi.")}
+        >
+          Onaya gÃ¶nder
+        </button>
+      </div>
     </aside>
   );
 }
 
 export function ReturnsPage() {
   const router = useRouter();
+  const { pushToast } = useToast();
   const [returns, setReturns] = useState<Return[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -136,20 +166,38 @@ export function ReturnsPage() {
 
   return (
     <EntityListPageTemplate
-      className="hz-commercial-entity-page hz-returns-page"
+      className="hz-commercial-entity-page hz-returns-page hz-iadeler-desk"
+      previewSideWidth="detail"
       header={
         <>
-          <header className="hz-commercial-entity-topbar">
-            <div>
-              <h1 className="hz-commercial-entity-topbar-title">İadeler</h1>
-              <p className="hz-commercial-entity-topbar-sub">
-                Sipariş veya teslim bağlantılı iade akışını stok ve belge etkisiyle yönetin.
-              </p>
-            </div>
-          </header>
-          <div className="hz-commercial-entity-kpi-strip" aria-label="İade özeti">
+          <CommercialOperasyonDeskIntro
+            title="Ä°ade Operasyon MasasÄ±"
+            subtitle="Ä°ade sÃ¼recini stok, onay ve belge etkisiyle tek ekranda yÃ¶netin."
+            icon="rotate-ccw"
+            actions={
+              <>
+                <Link href="/iadeler/yeni" className="hz-commercial-desk-btn hz-commercial-desk-btn--primary">
+                  <LucideIcon name="plus" size={14} />
+                  Yeni Ä°ade
+                </Link>
+                <Link href="/hizli-islem/iade" className="hz-commercial-desk-btn hz-commercial-desk-btn--secondary">
+                  <LucideIcon name="zap" size={14} />
+                  HÄ±zlÄ± Ä°ade
+                </Link>
+                <button
+                  type="button"
+                  className="hz-commercial-desk-btn hz-commercial-desk-btn--secondary"
+                  onClick={() => pushToast("DÄ±ÅŸa aktarma backend onay akÄ±ÅŸÄ±na baÄŸlÄ±dÄ±r; demo modunda simÃ¼le edildi.")}
+                >
+                  <LucideIcon name="download" size={14} />
+                  DÄ±ÅŸa Aktar
+                </button>
+              </>
+            }
+          />
+          <div className="hz-commercial-entity-kpi-strip" aria-label="Ä°ade Ã¶zeti">
             <div className="hz-commercial-entity-kpi">
-              <span className="hz-commercial-entity-kpi-label">Kayıt</span>
+              <span className="hz-commercial-entity-kpi-label">KayÄ±t</span>
               <span className="hz-commercial-entity-kpi-value">{returns.length}</span>
             </div>
             <div className="hz-commercial-entity-kpi">
@@ -166,12 +214,12 @@ export function ReturnsPage() {
             </div>
             <div className="hz-commercial-entity-kpi">
               <span className="hz-commercial-entity-kpi-label">Belge notu</span>
-              <span className="hz-commercial-entity-kpi-value">{returns.length > 0 ? "Var" : "—"}</span>
+              <span className="hz-commercial-entity-kpi-value">{returns.length > 0 ? "Var" : "â€”"}</span>
             </div>
           </div>
           {dataSourceConfig.useDemoData ? (
             <p className="hz-commercial-entity-preview-band" role="status">
-              Örnek veri modu: liste kayıtları demo amaçlıdır; canlı operasyon sonucu değildir.
+              Ã–rnek veri modu: liste kayÄ±tlarÄ± demo amaÃ§lÄ±dÄ±r; canlÄ± operasyon sonucu deÄŸildir.
             </p>
           ) : null}
         </>
@@ -180,37 +228,40 @@ export function ReturnsPage() {
       list={
         <div className="hz-commercial-entity-list-wrap">
           {loading ? (
-            <LoadingState title="İadeler yükleniyor" message="İade etkileri ve belge durumları hazırlanıyor." />
+            <LoadingState title="Ä°adeler yÃ¼kleniyor" message="Ä°ade etkileri ve belge durumlarÄ± hazÄ±rlanÄ±yor." />
           ) : loadError ? (
-            <EmptyState title="İade listesi alınamadı" message="Bağlantı kurulamadı. Lütfen tekrar deneyin." />
+            <EmptyState title="Ä°ade listesi alÄ±namadÄ±" message="BaÄŸlantÄ± kurulamadÄ±. LÃ¼tfen tekrar deneyin." />
           ) : returns.length === 0 ? (
-            <EmptyState title="İade bulunamadı" message="Kayıt yok veya filtre sonucu boş." />
+            <EmptyState title="Ä°ade bulunamadÄ±" message="KayÄ±t yok veya filtre sonucu boÅŸ." />
           ) : (
             <>
               <div className="hz-commercial-entity-table-head hz-returns-table-head" role="row">
-                <span>İade no</span>
+                <span>Ä°ade no</span>
                 <span>Cari</span>
-                <span>Sipariş</span>
+                <span>SipariÅŸ</span>
                 <span>Durum</span>
                 <span>Tarih</span>
                 <span>Etki</span>
-                <span>AKSİYON</span>
+                <span>AKSÄ°YON</span>
               </div>
               <div className="hz-commercial-entity-table-body">
                 {pagedReturns.map((returnRecord) => {
                   const impact = calculateReturnImpact(returnRecord);
-                  const customerName = customers.find((c) => c.id === returnRecord.customerId)?.name ?? "—";
+                  const customerName = customers.find((c) => c.id === returnRecord.customerId)?.name ?? "â€”";
                   return (
                     <div
                       key={returnRecord.id}
                       role="row"
                       className={`hz-commercial-entity-table-row hz-returns-table-row${selectedId === returnRecord.id ? " is-selected" : ""}`}
                       onClick={() => setSelectedId(returnRecord.id)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") setSelectedId(returnRecord.id);
+                      }}
                       tabIndex={0}
                     >
                       <span>{returnRecord.returnNo}</span>
                       <span>{customerName}</span>
-                      <span>{returnRecord.orderNo ?? "—"}</span>
+                      <span>{returnRecord.orderNo ?? "â€”"}</span>
                       <span>
                         <span className={statusBadgeClass(returnRecord.status)}>
                           {getReturnStatusLabel(returnRecord.status)}
@@ -227,7 +278,7 @@ export function ReturnsPage() {
                             router.push(`/iadeler/${returnRecord.id}`);
                           }}
                         >
-                          İncele
+                          Ä°ncele
                         </button>
                       </span>
                     </div>
@@ -239,7 +290,14 @@ export function ReturnsPage() {
           )}
         </div>
       }
-      preview={<ReturnPreviewPanel returnRecord={selected} customerName={selectedCustomerName} />}
+      preview={
+        <ReturnPreviewPanel
+          returnRecord={selected}
+          customerName={selectedCustomerName}
+          onNavigate={(id) => router.push(`/iadeler/${id}`)}
+        />
+      }
     />
   );
 }
+

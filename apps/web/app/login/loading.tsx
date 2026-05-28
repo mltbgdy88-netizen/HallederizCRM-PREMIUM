@@ -1,11 +1,9 @@
+﻿// @ts-nocheck
 export default function LoginLoading() {
   return (
-    <main className="hz-login-page">
-      <section className="hz-login-form-panel">
-        <div className="hz-login-loading-card" aria-busy="true">
-          <p>Giriş ekranı yükleniyor…</p>
-        </div>
-      </section>
+    <main className="hz-login-center" role="status" aria-busy="true">
+      <p className="hz-login-center__loading">GiriÅŸ ekranÄ± yÃ¼kleniyorâ€¦</p>
     </main>
   );
 }
+

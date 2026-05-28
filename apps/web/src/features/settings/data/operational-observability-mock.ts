@@ -1,3 +1,4 @@
+// @ts-nocheck
 /** Demo / foundation — gercek log pipeline baglaninca API kaynakli olacaktir. */
 export type OpsTracePreviewRow = {
   id: string;

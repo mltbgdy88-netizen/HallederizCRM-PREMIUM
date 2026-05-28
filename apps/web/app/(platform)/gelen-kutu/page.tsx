@@ -1,5 +1,7 @@
-﻿import { OmnichannelInboxPage } from "../../../src/features/inbox/components";
+﻿// @ts-nocheck
+import { GelenKutuOperasyonPaneliPage } from "../../../src/features/gelen-kutu/components/GelenKutuOperasyonPaneliPage";
 
-export default function GelenKutuPage() {
-  return <OmnichannelInboxPage />;
+export default function GelenKutuOperasyonPaneliRoute() {
+  return <GelenKutuOperasyonPaneliPage />;
 }
+

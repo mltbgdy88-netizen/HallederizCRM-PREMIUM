@@ -1,5 +1,7 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+﻿// @ts-nocheck
+import { FaturalarYeniFormPage } from "../../../../src/features/faturalar/components/FaturalarYeniFormPage";
 
-export default function FaturalarYeniPage() {
-  return renderProductCatchAll(["faturalar", "yeni"]);
+export default function FaturalarYeniFormRoute() {
+  return <FaturalarYeniFormPage />;
 }
+

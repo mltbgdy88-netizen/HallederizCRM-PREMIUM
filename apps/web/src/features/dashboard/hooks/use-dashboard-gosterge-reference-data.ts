@@ -10,11 +10,12 @@ import {
   type DashboardGostergeReferenceSnapshot
 } from "../adapters/dashboard-gosterge-reference-adapter";
 
-export function useDashboardGostergeReferenceData() {
+export function useDashboardGostergeReferenceData(options?: { demoOnly?: boolean }) {
   const { data, loading, loadFailed, isDemo } = useReferenceData<DashboardGostergeReferenceSnapshot>({
     loadDemo: loadDashboardGostergeReferenceDemo,
     loadLive: loadDashboardGostergeReferenceLive,
-    initialData: DASHBOARD_GOSTERGE_REFERENCE_INITIAL
+    initialData: DASHBOARD_GOSTERGE_REFERENCE_INITIAL,
+    demoOnly: options?.demoOnly
   });
 
   return useMemo(() => ({ ...data, loading, loadFailed, isDemo }), [data, loading, loadFailed, isDemo]);

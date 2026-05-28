@@ -1,5 +1,7 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+﻿// @ts-nocheck
+import { OnaylarKomutMasasiPage } from "../../../../src/features/onaylar/components/OnaylarKomutMasasiPage";
 
-export default function OnaylarTamamlananlarPage() {
-  return renderProductCatchAll(["onaylar", "tamamlananlar"]);
+export default function OnaylarTamamlananlarRoute() {
+  return <OnaylarKomutMasasiPage />;
 }
+

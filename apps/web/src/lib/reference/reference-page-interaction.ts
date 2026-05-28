@@ -5,6 +5,12 @@ import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.
 export const REF_SKIP_FALLBACK_ATTR = "data-ref-skip-fallback";
 const REF_HANDLED_CLICK_ATTR = "data-ref-handled-click";
 
+/** Next.js Link â€” undefined href uyarÄ±larÄ±nÄ± Ã¶nler; gerÃ§ek route varsa korunur. */
+export function referenceHref(href?: string | null): string {
+  const trimmed = href?.trim();
+  return trimmed ? trimmed : "#";
+}
+
 export function markReferenceClickHandled(target: EventTarget | null): void {
   if (target instanceof HTMLElement) {
     target.setAttribute(REF_HANDLED_CLICK_ATTR, "1");

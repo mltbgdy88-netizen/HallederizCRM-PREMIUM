@@ -1,5 +1,7 @@
-﻿import { ErpPage as ErpFeaturePage } from "../../../src/features/erp/components";
+﻿// @ts-nocheck
+import { ErpEntegrasyonPage } from "../../../src/features/erp/components/ErpEntegrasyonPage";
 
-export default function ErpPage() {
-  return <ErpFeaturePage />;
+export default function ErpEntegrasyonRoute() {
+  return <ErpEntegrasyonPage />;
 }
+

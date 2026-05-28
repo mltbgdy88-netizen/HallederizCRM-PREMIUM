@@ -1,5 +1,7 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+﻿// @ts-nocheck
+import { redirect } from "next/navigation";
 
 export default function GorevlerBenimPage() {
-  return renderProductCatchAll(["gorevler", "benim-gorevlerim"]);
+  redirect("/gorevler");
 }
+

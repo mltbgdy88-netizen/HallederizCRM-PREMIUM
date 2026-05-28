@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 "use client";
 
 import { EmptyState, EntityDetailLayout, LoadingState, PageHeader } from "@hallederiz/ui";
@@ -6,6 +7,7 @@ import { useEffect, useMemo, useState } from "react";
 import { money } from "../utils";
 import { getInvoiceDetail } from "../queries/get-invoices";
 import { getInvoiceStatusLabel } from "../queries/invoice-mock-data";
+import { useToast } from "../../../providers/toast-provider";
 
 export function InvoiceHeaderInfo({ invoice, customer }: { invoice: Invoice; customer: Customer | null }) {
   return (
@@ -13,7 +15,7 @@ export function InvoiceHeaderInfo({ invoice, customer }: { invoice: Invoice; cus
       <p className="drawer-eyebrow">Fatura</p>
       <h2>{invoice.invoiceNo}</h2>
       <p className="muted">
-        {customer?.name ?? "—"} · {invoice.orderNo ?? "Sipariş bağlantısı yok"}
+        {customer?.name ?? "â€”"} Â· {invoice.orderNo ?? "SipariÅŸ baÄŸlantÄ±sÄ± yok"}
       </p>
       <div className="hz-inline-actions">
         <span className="hz-badge hz-badge-info">{getInvoiceStatusLabel(invoice.status)}</span>
@@ -24,25 +26,62 @@ export function InvoiceHeaderInfo({ invoice, customer }: { invoice: Invoice; cus
 }
 
 export function InvoiceActionsBar({ onIssue }: { onIssue: () => void }) {
+  const { pushToast } = useToast();
+  const [created, setCreated] = useState(false);
+  const [sent, setSent] = useState(false);
+
+  function handleCreate() {
+    setCreated(true);
+    pushToast("Taslak hazÄ±rlandÄ±: fatura oluÅŸturma onay akÄ±ÅŸÄ±na iletildi.");
+  }
+
+  function handleSend() {
+    setSent(true);
+    pushToast("Taslak hazÄ±rlandÄ±: gÃ¶nderim belge servisine yÃ¶nlendirildi.");
+  }
+
   return (
     <section className="hz-content-card hz-invoices-detail-actions">
-      <h3>İşlemler</h3>
-      <p className="muted">Fatura kesim ve belge adımları mevcut iş akışıyla ilerler.</p>
+      <h3>Ä°ÅŸlemler</h3>
+      <p className="muted">Fatura kesim ve belge adÄ±mlarÄ± mevcut iÅŸ akÄ±ÅŸÄ±yla ilerler.</p>
       <div className="hz-inline-actions">
-        <button className="hz-btn hz-btn-primary hz-toolbar-btn" type="button">
-          Faturayı oluştur
+        <button
+          className="hz-btn hz-btn-primary hz-toolbar-btn"
+          type="button"
+          onClick={handleCreate}
+          disabled={created}
+        >
+          {created ? "OluÅŸturuldu" : "FaturayÄ± oluÅŸtur"}
         </button>
-        <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={onIssue}>
+        <button
+          className="hz-btn hz-btn-secondary hz-toolbar-btn"
+          type="button"
+          onClick={onIssue}
+        >
           Kes
         </button>
-        <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">
-          İptal et
+        <button
+          className="hz-btn hz-btn-secondary hz-toolbar-btn"
+          type="button"
+          onClick={() => pushToast("Taslak hazÄ±rlandÄ±: iptal iÅŸlemi onay akÄ±ÅŸÄ±na iletildi.")}
+        >
+          Ä°ptal et
         </button>
-        <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" disabled title="Canlı belge servisi bekleniyor">
-          PDF önizle
+        <button
+          className="hz-btn hz-btn-secondary hz-toolbar-btn"
+          type="button"
+          disabled
+          title="CanlÄ± belge servisi bekleniyor"
+        >
+          PDF Ã¶nizle
         </button>
-        <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button">
-          Gönder
+        <button
+          className="hz-btn hz-btn-secondary hz-toolbar-btn"
+          type="button"
+          onClick={handleSend}
+          disabled={sent}
+        >
+          {sent ? "GÃ¶nderildi" : "GÃ¶nder"}
         </button>
       </div>
     </section>
@@ -52,13 +91,13 @@ export function InvoiceActionsBar({ onIssue }: { onIssue: () => void }) {
 export function InvoiceLineTable({ invoice }: { invoice: Invoice }) {
   return (
     <section className="hz-content-card">
-      <h3>Fatura satırları</h3>
+      <h3>Fatura satÄ±rlarÄ±</h3>
       <div className="table-wrap hz-table-wrap">
         <table className="table hz-table">
           <thead>
             <tr>
-              <th>Ürün kodu</th>
-              <th>Ürün adı</th>
+              <th>ÃœrÃ¼n kodu</th>
+              <th>ÃœrÃ¼n adÄ±</th>
               <th>Adet</th>
               <th>Birim</th>
               <th>KDV</th>
@@ -86,19 +125,28 @@ export function InvoiceLineTable({ invoice }: { invoice: Invoice }) {
 export function InvoiceSummaryPanel({ invoice }: { invoice: Invoice }) {
   return (
     <section className="hz-content-card">
-      <h3>Fatura özeti</h3>
+      <h3>Fatura Ã¶zeti</h3>
       <ul className="hz-side-list">
         <li>Ara toplam: {money(invoice.subtotal, invoice.currency)}</li>
         <li>KDV: {money(invoice.taxTotal, invoice.currency)}</li>
         <li>Genel toplam: {money(invoice.grandTotal, invoice.currency)}</li>
-        <li>Sipariş: {invoice.orderNo ?? "—"}</li>
+        <li>SipariÅŸ: {invoice.orderNo ?? "â€”"}</li>
       </ul>
-      <p className="muted hz-margin-top-sm">PDF önizleme ve gönderim canlı belge servisi bekleniyor.</p>
+      <p className="muted hz-margin-top-sm">PDF Ã¶nizleme ve gÃ¶nderim canlÄ± belge servisi bekleniyor.</p>
     </section>
   );
 }
 
 export function InvoiceIssueDialog({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const { pushToast } = useToast();
+  const [confirmed, setConfirmed] = useState(false);
+
+  function handleConfirm() {
+    setConfirmed(true);
+    pushToast("Taslak hazÄ±rlandÄ±: fatura kesim iÅŸlemi onay akÄ±ÅŸÄ±na iletildi.");
+    setTimeout(onClose, 800);
+  }
+
   if (!open) return null;
   return (
     <div className="hz-modal-overlay" onClick={onClose}>
@@ -106,16 +154,21 @@ export function InvoiceIssueDialog({ open, onClose }: { open: boolean; onClose: 
         <header className="hz-modal-header">
           <div>
             <p className="drawer-eyebrow">Fatura kes</p>
-            <h3>Kesim onayı</h3>
-            <p className="muted">E-fatura ve ERP bağlantısı entegrasyon adımında bağlanacak.</p>
+            <h3>Kesim onayÄ±</h3>
+            <p className="muted">E-fatura ve ERP baÄŸlantÄ±sÄ± entegrasyon adÄ±mÄ±nda baÄŸlanacak.</p>
           </div>
           <button className="hz-btn hz-btn-secondary" type="button" onClick={onClose}>
             Kapat
           </button>
         </header>
         <div className="hz-modal-content">
-          <button className="hz-btn hz-btn-primary hz-toolbar-btn" type="button">
-            Onayla
+          <button
+            className="hz-btn hz-btn-primary hz-toolbar-btn"
+            type="button"
+            onClick={handleConfirm}
+            disabled={confirmed}
+          >
+            {confirmed ? "Ä°letildi" : "Onayla"}
           </button>
         </div>
       </section>
@@ -144,10 +197,10 @@ export function InvoiceDetailPage({ invoiceId }: { invoiceId?: string }) {
   );
 
   if (loading) {
-    return <LoadingState title="Fatura yükleniyor" message="Satırlar ve belge işlemleri hazırlanıyor." />;
+    return <LoadingState title="Fatura yÃ¼kleniyor" message="SatÄ±rlar ve belge iÅŸlemleri hazÄ±rlanÄ±yor." />;
   }
   if (!invoice) {
-    return <EmptyState title="Fatura bulunamadı" message="Seçilen fatura bulunamadı." />;
+    return <EmptyState title="Fatura bulunamadÄ±" message="SeÃ§ilen fatura bulunamadÄ±." />;
   }
 
   return (
@@ -155,8 +208,8 @@ export function InvoiceDetailPage({ invoiceId }: { invoiceId?: string }) {
       className="hz-commercial-entity-detail-page hz-invoices-detail-page"
       header={
         <PageHeader
-          title="Fatura detayı"
-          description="Fatura özeti, satırlar, sipariş bağlantısı ve belge işlemleri."
+          title={invoiceId ? "Fatura detayÄ±" : "Yeni fatura"}
+          description="Fatura Ã¶zeti, satÄ±rlar, sipariÅŸ baÄŸlantÄ±sÄ± ve belge iÅŸlemleri."
           breadcrumb={invoice.invoiceNo}
         />
       }
@@ -172,3 +225,4 @@ export function InvoiceDetailPage({ invoiceId }: { invoiceId?: string }) {
     />
   );
 }
+

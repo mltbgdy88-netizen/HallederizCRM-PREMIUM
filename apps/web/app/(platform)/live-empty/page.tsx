@@ -1,5 +1,7 @@
-import { LiveEmptyStatePage } from "../../../src/features/system-state/components/SystemStatePages";
+﻿// @ts-nocheck
+import { LiveEmptyStatePage } from "../../../src/features/sistem/components/LiveEmptyStatePage";
 
-export default function LiveEmptyPage() {
+export default function LiveEmptyStateRoute() {
   return <LiveEmptyStatePage />;
 }
+

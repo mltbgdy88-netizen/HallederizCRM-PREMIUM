@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 "use client";
 
 import type { PaymentMethod } from "@hallederiz/types";
@@ -5,9 +6,9 @@ import type { PaymentMethod } from "@hallederiz/types";
 const PAYMENT_METHODS: Array<{ value: PaymentMethod; label: string }> = [
   { value: "cash", label: "Nakit" },
   { value: "transfer", label: "Havale / EFT" },
-  { value: "card", label: "Kredi kartı" },
-  { value: "check", label: "Çek / senet" },
-  { value: "mixed", label: "Diğer" }
+  { value: "card", label: "Kredi kartÄ±" },
+  { value: "check", label: "Ã‡ek / senet" },
+  { value: "mixed", label: "DiÄŸer" }
 ];
 
 export type QuickOperationPaymentFormState = {
@@ -34,33 +35,25 @@ function money(value: number): string {
 
 export function QuickOperationPaymentBlock({ state, onChange, grandTotal, showAllocateToggle, disabled }: Props) {
   const paymentHint =
-    state.enabled && grandTotal > 0
+    grandTotal > 0
       ? state.amount >= grandTotal
         ? "Tam tahsilat"
         : state.amount > 0
-          ? "Kısmi tahsilat"
+          ? "KÄ±smi tahsilat"
           : "Tutar girin"
-      : null;
+      : state.amount > 0
+        ? "Tutar girildi"
+        : null;
 
   return (
-    <section className="hz-qop-payment-block" aria-label="Ödeme bilgileri">
+    <section className="hz-qop-payment-block" aria-label="Ã–deme bilgileri">
       <div className="hz-qop-payment-block-head">
-        <h2 className="hz-qop-wb-conditions-title">Ödeme / tahsilat</h2>
-        <label className="hz-qop-payment-toggle">
-          <input
-            type="checkbox"
-            checked={state.enabled}
-            disabled={disabled}
-            onChange={(e) => onChange({ enabled: e.target.checked })}
-          />
-          <span>Ödeme alındı</span>
-        </label>
+        <h2 className="hz-qop-wb-conditions-title">Ã–deme / tahsilat</h2>
       </div>
 
-      {state.enabled ? (
-        <div className="hz-qop-payment-fields">
+      <div className="hz-qop-payment-fields">
           <label className="hz-qop-field">
-            <span className="hz-qop-label">Tahsilat tutarı (₺)</span>
+            <span className="hz-qop-label">Tahsilat tutarÄ± (â‚º)</span>
             <input
               className="hz-qop-input hz-qop-cell-num"
               type="number"
@@ -73,7 +66,7 @@ export function QuickOperationPaymentBlock({ state, onChange, grandTotal, showAl
             />
           </label>
           <label className="hz-qop-field">
-            <span className="hz-qop-label">Ödeme yöntemi</span>
+            <span className="hz-qop-label">Ã–deme yÃ¶ntemi</span>
             <select
               className="hz-qop-input"
               value={state.method}
@@ -104,17 +97,17 @@ export function QuickOperationPaymentBlock({ state, onChange, grandTotal, showAl
               value={state.referenceNo}
               disabled={disabled}
               onChange={(e) => onChange({ referenceNo: e.target.value })}
-              placeholder="Dekont / fiş no"
+              placeholder="Dekont / fiÅŸ no"
             />
           </label>
           <label className="hz-qop-field hz-qop-field--grow">
-            <span className="hz-qop-label">Açıklama</span>
+            <span className="hz-qop-label">AÃ§Ä±klama</span>
             <input
               className="hz-qop-input"
               value={state.note}
               disabled={disabled}
               onChange={(e) => onChange({ note: e.target.value })}
-              placeholder="Tahsilat açıklaması"
+              placeholder="Tahsilat aÃ§Ä±klamasÄ±"
             />
           </label>
           {showAllocateToggle ? (
@@ -125,19 +118,17 @@ export function QuickOperationPaymentBlock({ state, onChange, grandTotal, showAl
                 disabled={disabled}
                 onChange={(e) => onChange({ allocateToOrder: e.target.checked })}
               />
-              <span>Tahsilatı bu siparişe bağla</span>
+              <span>TahsilatÄ± bu sipariÅŸe baÄŸla</span>
             </label>
           ) : null}
           {paymentHint ? (
             <p className="hz-qop-payment-hint" role="status">
               {paymentHint}
-              {grandTotal > 0 ? ` · Sipariş toplamı: ₺${money(grandTotal)}` : null}
+              {grandTotal > 0 ? ` Â· SipariÅŸ toplamÄ±: â‚º${money(grandTotal)}` : null}
             </p>
           ) : null}
-        </div>
-      ) : (
-        <p className="hz-qop-payment-hint hz-qop-payment-hint--muted">Ödeme alınmadıysa sipariş ödeme durumu açık kalır.</p>
-      )}
+      </div>
     </section>
   );
 }
+

@@ -10,14 +10,14 @@ import {
   type WhatsAppReferenceSnapshot
 } from "../adapters/whatsapp-reference-adapter";
 
-export function useWhatsAppReferenceData() {
+export function useWhatsAppReferenceData(options?: { demoOnly?: boolean }) {
   const { data, loading, loadFailed, isDemo } = useReferenceData<WhatsAppReferenceSnapshot>({
     loadDemo: loadWhatsAppReferenceDemo,
     loadLive: loadWhatsAppReferenceLive,
-    initialData: WHATSAPP_REFERENCE_INITIAL
+    initialData: WHATSAPP_REFERENCE_INITIAL,
+    demoOnly: options?.demoOnly
   });
 
   return useMemo(() => ({ ...data, loading, loadFailed, isDemo }), [data, loading, loadFailed, isDemo]);
 }
-
 

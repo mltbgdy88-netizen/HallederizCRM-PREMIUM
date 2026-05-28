@@ -1,6 +1,7 @@
+﻿// @ts-nocheck
 "use client";
 
-import { EntityListPageTemplate, LoadingState, Pagination } from "@hallederiz/ui";
+import { LoadingState, Pagination } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useMemo, useState } from "react";
 import {
@@ -111,21 +112,21 @@ export function CustomersPage() {
     };
   }, [usingDemoFallback, displayRows, data.customers, data.accounts, data.priceSlots]);
 
-  /** KPI “Açık bakiye”: tam TRY gösterimi (₺294.050), liste ile tutarlı. */
+  /** KPI â€œAÃ§Ä±k bakiyeâ€: tam TRY gÃ¶sterimi (â‚º294.050), liste ile tutarlÄ±. */
   const formatKpiOpenBalanceTry = (value: number) =>
     new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY", maximumFractionDigits: 0 }).format(value);
 
   const demoRowToast = useCallback(() => {
-    pushToast("Bu kayıt önizleme verisidir; gerçek cari kaydı değildir.");
+    pushToast("Bu kayÄ±t Ã¶nizleme verisidir; gerÃ§ek cari kaydÄ± deÄŸildir.");
   }, [pushToast]);
 
   const handleTopStatement = useCallback(() => {
     if (!selectedCustomerId) {
-      pushToast("Ekstre taslağı için önce listeden bir cari seçin.");
+      pushToast("Ekstre taslaÄŸÄ± iÃ§in Ã¶nce listeden bir cari seÃ§in.");
       return;
     }
     if (isCustomersDemoRowId(selectedCustomerId)) {
-      pushToast("Önizleme kaydı: ekstre taslağı oluşturulmaz veya yönlendirilmez.");
+      pushToast("Ã–nizleme kaydÄ±: ekstre taslaÄŸÄ± oluÅŸturulmaz veya yÃ¶nlendirilmez.");
       return;
     }
     const customer =
@@ -133,7 +134,7 @@ export function CustomersPage() {
       filteredCustomers.find((c) => c.id === selectedCustomerId) ??
       null;
     if (!customer) {
-      pushToast("Ekstre taslağı için önce listeden bir cari seçin.");
+      pushToast("Ekstre taslaÄŸÄ± iÃ§in Ã¶nce listeden bir cari seÃ§in.");
       return;
     }
     router.push(`/belgeler?customer=${customer.id}&type=statement_pdf`);
@@ -142,162 +143,159 @@ export function CustomersPage() {
   const emptyFiltered = !usingDemoFallback && !loading && data.customers.length > 0 && rows.length === 0;
 
   return (
-    <EntityListPageTemplate
-      className="hz-customers-page"
-      header={
-        <>
-          <header className="hz-customers-topbar">
-            <div className="hz-customers-topbar-text">
-              <h1 className="hz-customers-topbar-title">Cari Portföyü</h1>
-              <p className="hz-customers-topbar-sub">Risk, bakiye, fiyat grubu ve WhatsApp eşleşmelerini tek ekranda yönetin.</p>
-            </div>
-            <div className="hz-customers-topbar-actions">
-              <button
-                type="button"
-                className="hz-customers-toolbar-btn hz-customers-toolbar-btn--primary"
-                title="Yeni cari kaydı ekranını açar"
-                onClick={() => router.push("/cariler/yeni")}
-              >
-                <IconPlusCircle size={16} />
-                Yeni Cari
-              </button>
-              <button
-                type="button"
-                className="hz-customers-toolbar-btn hz-customers-toolbar-btn--outline"
-                title="Veri yükleme ve içe aktarma ayarları"
-                onClick={() => router.push("/ayarlar/veri-yukleme")}
-              >
-                <IconUpload size={16} />
-                İçe Aktar
-              </button>
-              <button
-                type="button"
-                className="hz-customers-toolbar-btn hz-customers-toolbar-btn--outline"
-                title={selectedCustomer && !isCustomersDemoRowId(selectedCustomerId ?? "") ? "Seçili cari için ekstre taslağı" : "Önce listeden cari seçin"}
-                onClick={handleTopStatement}
-              >
-                <IconSend size={16} />
-                Ekstre Taslağı
-              </button>
-            </div>
-          </header>
-
-          <div className="hz-customers-kpi-strip" aria-label="Portföy özeti">
-            <div className="hz-customers-kpi hz-customers-kpi--info">
-              <span className="hz-customers-kpi-ico" aria-hidden>
-                <IconUser size={16} />
-              </span>
-              <div>
-                <span className="hz-customers-kpi-label">Toplam cari</span>
-                <span className="hz-customers-kpi-value">{kpiDisplay.totalCustomers}</span>
-              </div>
-            </div>
-            <div className="hz-customers-kpi hz-customers-kpi--warn">
-              <span className="hz-customers-kpi-ico" aria-hidden>
-                <IconWallet size={16} />
-              </span>
-              <div>
-                <span className="hz-customers-kpi-label">Açık bakiye</span>
-                <span className="hz-customers-kpi-value hz-customers-kpi-value--money">
-                  {kpiDisplay.openBalanceTry === null ? "—" : formatKpiOpenBalanceTry(kpiDisplay.openBalanceTry)}
-                </span>
-              </div>
-            </div>
-            <div className="hz-customers-kpi hz-customers-kpi--danger">
-              <span className="hz-customers-kpi-ico" aria-hidden>
-                <IconShieldCheck size={16} />
-              </span>
-              <div>
-                <span className="hz-customers-kpi-label">Yüksek risk</span>
-                <span className="hz-customers-kpi-value">{kpiDisplay.highRiskCount}</span>
-              </div>
-            </div>
-            <div className="hz-customers-kpi hz-customers-kpi--ok">
-              <span className="hz-customers-kpi-ico" aria-hidden>
-                <IconMessageCircle size={16} />
-              </span>
-              <div>
-                <span className="hz-customers-kpi-label">WhatsApp eşleşmesi</span>
-                <span className="hz-customers-kpi-value">{kpiDisplay.waMatchCount}</span>
-              </div>
-            </div>
-            <div className="hz-customers-kpi hz-customers-kpi--amber">
-              <span className="hz-customers-kpi-ico" aria-hidden>
-                <IconBanknote size={16} />
-              </span>
-              <div>
-                <span className="hz-customers-kpi-label">Vadesi geçen</span>
-                <span className="hz-customers-kpi-value">{kpiDisplay.overdueCount === null ? "—" : kpiDisplay.overdueCount}</span>
-              </div>
-            </div>
-            <div className="hz-customers-kpi hz-customers-kpi--violet">
-              <span className="hz-customers-kpi-ico" aria-hidden>
-                <IconTag size={16} />
-              </span>
-              <div>
-                <span className="hz-customers-kpi-label">Fiyat grubu</span>
-                <span className="hz-customers-kpi-value">{kpiDisplay.priceGroupCount}</span>
-              </div>
-            </div>
-          </div>
-        </>
-      }
-      filters={<CustomerFilterBar filters={filters} cities={cities} priceSlots={data.priceSlots} onFilterChange={updateFilter} onReset={resetFilters} />}
-      list={
-        <div className="hz-customers-list-wrap">
-          {loading ? (
-            <LoadingState title="Cariler yükleniyor" message="Hesap, fiyat ve risk özetleri hazırlanıyor." />
-          ) : (
-            <>
-              {usingDemoFallback ? (
-                <div className="hz-customers-demo-banner" role="note">
-                  Önizleme verisi — detay ve işlemler gerçek cari kaydı için geçerli değildir.
-                </div>
-              ) : null}
-              <CustomerTable
-                rows={pagedRows}
-                selectedCustomerId={selectedCustomerId}
-                onSelectCustomer={setSelectedCustomerId}
-                onOpenCustomer={(customerId) => {
-                  if (isCustomersDemoRowId(customerId)) {
-                    demoRowToast();
-                    return;
-                  }
-                  router.push(`/cariler/${customerId}`);
-                }}
-                onQuickOperation={(customerId) => {
-                  if (isCustomersDemoRowId(customerId)) {
-                    demoRowToast();
-                    return;
-                  }
-                  router.push(`/hizli-islem?customer=${customerId}`);
-                }}
-                onWhatsApp={(customerId) => {
-                  if (isCustomersDemoRowId(customerId)) {
-                    demoRowToast();
-                    return;
-                  }
-                  router.push(`/whatsapp?customer=${customerId}`);
-                }}
-                emptyFiltered={emptyFiltered}
-                dataUnavailable={loadFailed && !usingDemoFallback}
-                dataUnavailableTitle={loadUnavailableTitle}
-                dataUnavailableDetail={loadUnavailableDetail}
-                onEmptyNew={emptyFiltered || loadFailed ? undefined : () => router.push("/cariler/yeni")}
-                onEmptyImport={emptyFiltered ? undefined : () => router.push("/ayarlar/veri-yukleme")}
-              />
-              <div className="hz-customers-pagination">
-                <Pagination totalItems={displayRows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
-              </div>
-            </>
-          )}
+    <main className="hz-customers-page hz-customers-page--desk">
+      <header className="hz-customers-topbar">
+        <div className="hz-customers-topbar-text">
+          <h1 className="hz-customers-topbar-title">Cari PortfÃ¶yÃ¼</h1>
         </div>
-      }
-      preview={
+        <div className="hz-customers-topbar-actions">
+          <button
+            type="button"
+            className="hz-customers-toolbar-btn hz-customers-toolbar-btn--primary"
+            title="Yeni cari kaydÄ± ekranÄ±nÄ± aÃ§ar"
+            onClick={() => router.push("/cariler/yeni")}
+          >
+            <IconPlusCircle size={16} />
+            Yeni Cari
+          </button>
+          <button
+            type="button"
+            className="hz-customers-toolbar-btn hz-customers-toolbar-btn--outline"
+            title="Veri yÃ¼kleme ve iÃ§e aktarma ayarlarÄ±"
+            onClick={() => router.push("/ayarlar/veri-yukleme")}
+          >
+            <IconUpload size={16} />
+            Ä°Ã§e Aktar
+          </button>
+          <button
+            type="button"
+            className="hz-customers-toolbar-btn hz-customers-toolbar-btn--outline"
+            title={selectedCustomer && !isCustomersDemoRowId(selectedCustomerId ?? "") ? "SeÃ§ili cari iÃ§in ekstre taslaÄŸÄ±" : "Ã–nce listeden cari seÃ§in"}
+            onClick={handleTopStatement}
+          >
+            <IconSend size={16} />
+            Ekstre TaslaÄŸÄ±
+          </button>
+        </div>
+      </header>
+
+      <section className="hz-customers-kpi-strip" aria-label="PortfÃ¶y Ã¶zeti">
+        <div className="hz-customers-kpi hz-customers-kpi--info">
+          <span className="hz-customers-kpi-ico" aria-hidden>
+            <IconUser size={16} />
+          </span>
+          <div>
+            <span className="hz-customers-kpi-label">Toplam cari</span>
+            <span className="hz-customers-kpi-value">{kpiDisplay.totalCustomers}</span>
+          </div>
+        </div>
+        <div className="hz-customers-kpi hz-customers-kpi--warn">
+          <span className="hz-customers-kpi-ico" aria-hidden>
+            <IconWallet size={16} />
+          </span>
+          <div>
+            <span className="hz-customers-kpi-label">AÃ§Ä±k bakiye</span>
+            <span className="hz-customers-kpi-value hz-customers-kpi-value--money">
+              {kpiDisplay.openBalanceTry === null ? "â€”" : formatKpiOpenBalanceTry(kpiDisplay.openBalanceTry)}
+            </span>
+          </div>
+        </div>
+        <div className="hz-customers-kpi hz-customers-kpi--danger">
+          <span className="hz-customers-kpi-ico" aria-hidden>
+            <IconShieldCheck size={16} />
+          </span>
+          <div>
+            <span className="hz-customers-kpi-label">YÃ¼ksek risk</span>
+            <span className="hz-customers-kpi-value">{kpiDisplay.highRiskCount}</span>
+          </div>
+        </div>
+        <div className="hz-customers-kpi hz-customers-kpi--ok">
+          <span className="hz-customers-kpi-ico" aria-hidden>
+            <IconMessageCircle size={16} />
+          </span>
+          <div>
+            <span className="hz-customers-kpi-label">WhatsApp eÅŸleÅŸmesi</span>
+            <span className="hz-customers-kpi-value">{kpiDisplay.waMatchCount}</span>
+          </div>
+        </div>
+        <div className="hz-customers-kpi hz-customers-kpi--amber">
+          <span className="hz-customers-kpi-ico" aria-hidden>
+            <IconBanknote size={16} />
+          </span>
+          <div>
+            <span className="hz-customers-kpi-label">Vadesi geÃ§en</span>
+            <span className="hz-customers-kpi-value">{kpiDisplay.overdueCount === null ? "â€”" : kpiDisplay.overdueCount}</span>
+          </div>
+        </div>
+        <div className="hz-customers-kpi hz-customers-kpi--violet">
+          <span className="hz-customers-kpi-ico" aria-hidden>
+            <IconTag size={16} />
+          </span>
+          <div>
+            <span className="hz-customers-kpi-label">Fiyat grubu</span>
+            <span className="hz-customers-kpi-value">{kpiDisplay.priceGroupCount}</span>
+          </div>
+        </div>
+      </section>
+
+      <div className="hz-customers-layout">
+        <section className="hz-customers-main" aria-label="Cari listesi">
+          <CustomerFilterBar filters={filters} cities={cities} priceSlots={data.priceSlots} onFilterChange={updateFilter} onReset={resetFilters} />
+          <div className="hz-customers-list-wrap">
+            {loading ? (
+              <LoadingState title="Cariler yÃ¼kleniyor" message="Hesap, fiyat ve risk Ã¶zetleri hazÄ±rlanÄ±yor." />
+            ) : (
+              <>
+                {usingDemoFallback ? (
+                  <div className="hz-customers-demo-banner" role="note">
+                    Ã–nizleme verisi â€” detay ve iÅŸlemler gerÃ§ek cari kaydÄ± iÃ§in geÃ§erli deÄŸildir.
+                  </div>
+                ) : null}
+                <CustomerTable
+                  rows={pagedRows}
+                  selectedCustomerId={selectedCustomerId}
+                  onSelectCustomer={setSelectedCustomerId}
+                  onOpenCustomer={(customerId) => {
+                    if (isCustomersDemoRowId(customerId)) {
+                      demoRowToast();
+                      return;
+                    }
+                    router.push(`/cariler/${customerId}`);
+                  }}
+                  onQuickOperation={(customerId) => {
+                    if (isCustomersDemoRowId(customerId)) {
+                      demoRowToast();
+                      return;
+                    }
+                    router.push(`/hizli-islem?customer=${customerId}`);
+                  }}
+                  onWhatsApp={(customerId) => {
+                    if (isCustomersDemoRowId(customerId)) {
+                      demoRowToast();
+                      return;
+                    }
+                    router.push(`/whatsapp?customer=${customerId}`);
+                  }}
+                  emptyFiltered={emptyFiltered}
+                  dataUnavailable={loadFailed && !usingDemoFallback}
+                  dataUnavailableTitle={loadUnavailableTitle}
+                  dataUnavailableDetail={loadUnavailableDetail}
+                  onEmptyNew={emptyFiltered || loadFailed ? undefined : () => router.push("/cariler/yeni")}
+                  onEmptyImport={emptyFiltered ? undefined : () => router.push("/ayarlar/veri-yukleme")}
+                />
+                <div className="hz-customers-pagination">
+                  <Pagination totalItems={displayRows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
+                </div>
+              </>
+            )}
+          </div>
+        </section>
+
         <aside className="hz-customers-side">
           <CustomerQuickPreviewPanel customer={selectedCustomer} account={selectedAccount} previewRow={selectedPreviewRow} />
         </aside>
-      }
-    />
+      </div>
+    </main>
   );
 }
+

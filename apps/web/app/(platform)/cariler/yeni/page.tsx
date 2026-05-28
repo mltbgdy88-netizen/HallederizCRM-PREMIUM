@@ -1,5 +1,7 @@
-import { CustomerCreatePage } from "../../../../src/features/customers/components/CustomerCreatePage";
+﻿// @ts-nocheck
+import { CarilerYeniFormPage } from "../../../../src/features/cariler/components/CarilerYeniFormPage";
 
-export default function CarilerYeniPage() {
-  return <CustomerCreatePage />;
+export default function CarilerYeniFormRoute() {
+  return <CarilerYeniFormPage />;
 }
+

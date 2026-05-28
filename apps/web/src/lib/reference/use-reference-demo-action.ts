@@ -1,18 +1,33 @@
 ﻿// @ts-nocheck
-import { markReferenceClickHandled } from "./reference-page-interaction";
+"use client";
+
+import { useCallback, type MouseEvent } from "react";
+import { markReferenceClickHandled } from "@/lib/reference/reference-page-interaction";
+import { useToast } from "@/providers/toast-provider";
 
 export function useReferenceToast() {
-  return function pushReferenceToast(message: string, target?: EventTarget | null) {
-    markReferenceClickHandled(target);
+  const { pushToast } = useToast();
 
-    if (typeof window !== "undefined") {
-      window.dispatchEvent(
-        new CustomEvent("hallederiz:reference-toast", {
-          detail: { message }
-        })
-      );
-    }
-
-    console.info("[reference-toast]", message);
-  };
+  return useCallback(
+    (message: string, target?: EventTarget | null) => {
+      markReferenceClickHandled(target ?? null);
+      pushToast(message);
+    },
+    [pushToast]
+  );
 }
+
+export function useReferenceDemoAction() {
+  const pushReferenceToast = useReferenceToast();
+
+  return useCallback(
+    (label: string, event?: MouseEvent<HTMLElement>) => {
+      pushReferenceToast(
+        `${label} â€” demo modunda gerÃ§ek CRM iÅŸlemi yapÄ±lmaz.`,
+        event?.currentTarget ?? null
+      );
+    },
+    [pushReferenceToast]
+  );
+}
+

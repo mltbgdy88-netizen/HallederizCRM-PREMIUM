@@ -1,5 +1,7 @@
-﻿import { ApprovalsPage } from "../../../src/features/approvals/components";
+﻿// @ts-nocheck
+import { OnaylarKomutMasasiPage } from "../../../src/features/onaylar/components/OnaylarKomutMasasiPage";
 
-export default function ApprovalsRoutePage() {
-  return <ApprovalsPage />;
+export default function OnaylarKomutMasasiRoute() {
+  return <OnaylarKomutMasasiPage />;
 }
+

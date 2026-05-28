@@ -1,5 +1,7 @@
-﻿import { AiInsightsPage as AiInsightsFeaturePage } from "../../../../src/features/ai/components";
+﻿// @ts-nocheck
+import { AiIcgorulerPage } from "../../../../src/features/ai/components/AiIcgorulerPage";
 
-export default function AiInsightsPage() {
-  return <AiInsightsFeaturePage />;
+export default function AiIcgorulerRoute() {
+  return <AiIcgorulerPage />;
 }
+

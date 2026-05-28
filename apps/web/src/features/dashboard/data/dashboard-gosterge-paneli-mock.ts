@@ -49,66 +49,61 @@ export type DonutSegment = {
   detail?: string;
 };
 
-/** Acil takip — mağaza operasyonu KPI şeridi */
+/** Stok gösterge paneli — referans KPI şeridi */
 export const DGP_KPIS: GostergeKpi[] = [
   {
-    id: "factory-order",
-    label: "Fabrikaya Verilecek",
-    value: "7",
-    href: "/fabrikalar/siparis",
-    trend: "2 sipariş · 3+ gün",
-    trendTone: "warn",
-    compareLabel: "Acil takip",
-    tone: "orange"
-  },
-  {
-    id: "warehouse-prep",
-    label: "Depoda Hazırlanacak",
-    value: "11",
-    href: "/depo",
-    trend: "4 iş · bugün kapanmalı",
-    trendTone: "warn",
-    compareLabel: "Acil takip",
-    tone: "teal"
-  },
-  {
-    id: "customer-delivery",
-    label: "Müşteriye Teslim",
-    value: "6",
-    trend: "3 müşteri · randevu geçti",
-    trendTone: "warn",
-    compareLabel: "Acil takip",
+    id: "total",
+    label: "Toplam Ürün",
+    value: "2.458",
+    href: "/stok",
+    trend: "%12,5 ↑",
+    trendTone: "up",
     tone: "green"
   },
   {
-    id: "cargo-wait",
-    label: "Kargo Bekliyor",
-    value: "4",
-    href: "/teslimatlar",
-    trend: "1 paket · 5. gün",
+    id: "critical",
+    label: "Kritik Stok",
+    value: "86",
+    href: "/stok",
+    trend: "%8,3 ↑",
     trendTone: "warn",
-    compareLabel: "Acil takip",
+    tone: "orange"
+  },
+  {
+    id: "center",
+    label: "Merkez Stok",
+    value: "125.430",
+    href: "/stok",
+    trend: "%15,7 ↑",
+    trendTone: "up",
+    tone: "teal"
+  },
+  {
+    id: "factory",
+    label: "Fabrika Stok",
+    value: "98.210",
+    href: "/stok",
+    trend: "%11,4 ↑",
+    trendTone: "up",
     tone: "blue"
   },
   {
-    id: "approval-wait",
-    label: "Onay Bekleyen",
-    value: "3",
-    href: "/onaylar",
-    trend: "iskonto + tahsilat",
-    trendTone: "neutral",
-    compareLabel: "Acil takip",
-    tone: "gold"
+    id: "shelf",
+    label: "Depo Raf",
+    value: "76.880",
+    href: "/stok",
+    trend: "%9,8 ↑",
+    trendTone: "up",
+    tone: "slate"
   },
   {
-    id: "overdue",
-    label: "Geciken İş",
-    value: "8",
-    href: "/siparisler",
-    trend: "öncelikli liste",
-    trendTone: "warn",
-    compareLabel: "2+ gün bekleyen",
-    tone: "slate"
+    id: "price",
+    label: "Fiyat Grubu",
+    value: "12",
+    href: "/stok",
+    trend: "%0,0 Değişim yok",
+    trendTone: "neutral",
+    tone: "gold"
   }
 ];
 
@@ -123,139 +118,83 @@ export const DGP_QUICK_ACTIONS = [
 export const DGP_MOVEMENTS: StockMovement[] = [
   {
     id: "1",
-    date: "27.05.2026 14:32",
-    product: "SP-2412 · Demiröz Elekt. · fabrika emri",
-    type: "Çıkış",
-    qty: "Bekliyor",
-    warehouse: "Fabrika",
+    date: "21.05.2026 14:32",
+    product: "UR-10008 · Premium Duvar Kağıdı",
+    type: "Giriş",
+    qty: "+240",
+    warehouse: "Merkez Depo",
     user: "Ayşe K."
   },
   {
     id: "2",
-    date: "27.05.2026 13:18",
-    product: "SP-2409 · Kaya Yapı · depo hazırlık",
+    date: "21.05.2026 13:18",
+    product: "UR-1042 · Kritik Stok Ürün",
     type: "Çıkış",
-    qty: "2. gün",
-    warehouse: "Merkez Depo",
+    qty: "-86",
+    warehouse: "Fabrika A",
     user: "Mehmet D."
   },
   {
     id: "3",
-    date: "27.05.2026 11:45",
-    product: "SP-2405 · Akdeniz Oto. · kargo",
-    type: "Çıkış",
-    qty: "5. gün",
-    warehouse: "Sevkiyat",
+    date: "21.05.2026 11:45",
+    product: "UR-1021 · Standart Rulo",
+    type: "Giriş",
+    qty: "+120",
+    warehouse: "Depo Raf B",
     user: "Zeynep A."
   },
   {
     id: "4",
-    date: "27.05.2026 10:22",
-    product: "SP-2401 · ABC İnşaat · teslim",
+    date: "21.05.2026 10:22",
+    product: "UR-10015 · Altın Seri",
     type: "Çıkış",
-    qty: "Bugün",
-    warehouse: "Mağaza",
+    qty: "-45",
+    warehouse: "Merkez Depo",
     user: "Yusuf K."
   },
   {
     id: "5",
-    date: "27.05.2026 09:08",
-    product: "SP-2398 · Sarılar Petrol · onay",
+    date: "21.05.2026 09:08",
+    product: "UR-10002 · Klasik Desen",
     type: "Giriş",
-    qty: "Bekliyor",
-    warehouse: "Onay",
+    qty: "+500",
+    warehouse: "Fabrika B",
     user: "Ayşe K."
   }
 ];
 
-/** Yalnızca acil takip — kısa müşteri adı + gün */
 export const DGP_ALERTS: CriticalAlert[] = [
-  {
-    id: "1",
-    text: "Demiröz Elekt. · SP-2412 · fabrikaya verilmedi · 3. gün",
-    href: "/fabrikalar/siparis",
-    icon: "factory"
-  },
-  {
-    id: "2",
-    text: "Kaya Yapı · SP-2409 · depo hazırlığı yarım · 2. gün",
-    href: "/depo",
-    icon: "warehouse"
-  },
-  {
-    id: "3",
-    text: "Akdeniz Oto. · SP-2405 · kargo çıkışı yok · 5. gün",
-    href: "/teslimatlar",
-    icon: "cargo"
-  },
-  {
-    id: "4",
-    text: "ABC İnşaat · SP-2401 · mağazada teslim bekliyor · 1. gün",
-    href: "/teslimatlar",
-    icon: "delivery"
-  },
-  {
-    id: "5",
-    text: "Yılmaz Gıda · SP-2396 · fabrika + depo bölünmüş · 4. gün",
-    href: "/siparisler",
-    icon: "warn"
-  },
-  {
-    id: "6",
-    text: "Mega Market · SP-2392 · iskonto onayı · 2. gün",
-    href: "/onaylar",
-    icon: "price"
-  }
+  { id: "1", text: "86 ürün kritik stok seviyesinde", href: "/stok", icon: "warn" },
+  { id: "2", text: "3 transfer talebi onay bekliyor", href: "/depo", icon: "transfer" },
+  { id: "3", text: "12 ürünün fiyatı güncel değil", href: "/stok", icon: "price" }
 ];
 
-/** Acil iş kuyrukları — stok özeti paneli */
 export const DGP_SUMMARY: StockSummaryRow[] = [
-  {
-    label: "Fabrikaya verilecek",
-    value: "7 sipariş",
-    href: "/fabrikalar/siparis",
-    hint: "3 tanesi 3+ gün bekliyor"
-  },
-  {
-    label: "Depoda hazırlanacak",
-    value: "11 sipariş",
-    href: "/depo",
-    hint: "4 iş bugün kapanmalı"
-  },
-  {
-    label: "Müşteriye teslim",
-    value: "6 müşteri",
-    href: "/teslimatlar",
-    hint: "3 randevu saati geçti"
-  },
-  {
-    label: "Kargo çıkışı bekleyen",
-    value: "4 paket",
-    href: "/teslimatlar",
-    hint: "1 paket 5. günde"
-  }
+  { label: "Merkez Stok", value: "125.430", href: "/stok" },
+  { label: "Fabrika Stok", value: "98.210", href: "/stok" },
+  { label: "Depo Raf", value: "76.880", href: "/stok" },
+  { label: "Rezerv", value: "12.340", href: "/stok" }
 ];
 
-export const DGP_ALERTS_VIEW_ALL_HREF = "/siparisler";
+export const DGP_ALERTS_VIEW_ALL_HREF = "/stok";
 
-/** Acil iş dağılımı — depo dağılımı paneli */
 export const DGP_DONUT: DonutSegment[] = [
-  { label: "Fabrika emri", pct: 25, color: "#c2410c", detail: "7 iş" },
-  { label: "Depo hazırlık", pct: 39, color: "#0f766e", detail: "11 iş" },
-  { label: "Teslimat", pct: 22, color: "#047857", detail: "6 müşteri" },
-  { label: "Kargo bekliyor", pct: 14, color: "#1d4ed8", detail: "4 paket" }
+  { label: "Merkez Depo", pct: 48, color: "#047857" },
+  { label: "Fabrika Depo", pct: 28, color: "#0f766e" },
+  { label: "Depo Raf", pct: 16, color: "#d4af37" },
+  { label: "Diğer", pct: 8, color: "#94a3b8" }
 ];
 
-export const DGP_DONUT_TOTAL = "28 acil iş";
+export const DGP_DONUT_TOTAL = "125.430";
 
-export const DGP_AI_VIDEO_TITLE = "Acil iş ve geciken sipariş özeti hazır!";
+export const DGP_AI_VIDEO_TITLE = "Stok analiz videonuz hazır!";
 
 export const DGP_AI_HIGHLIGHTS = [
-  "Demiröz Elekt. fabrika emri 3. günde — önce fabrikaya ver",
-  "Akdeniz Oto. kargo 5. gün — müşteriyi bilgilendir",
-  "4 depo hazırlığı bugün kapanmalı",
-  "3 teslim randevusu saati geçti"
+  "86 ürün kritik stok seviyesinde",
+  "Bugün 14 yeni stok hareketi kaydedildi",
+  "3 transfer talebi onay bekliyor",
+  "Merkez depo doluluk oranı optimal aralıkta"
 ];
 
 export const DGP_AI_GREETING =
-  "Merhaba Yusuf Bey, bugün 28 acil iş var. Fabrika emri ve kargo bekleyenleri önce videoda özetledim.";
+  "Merhaba Yusuf Bey, Stok hareketlerinizi analiz ettim. Kritik stok ve transfer önerileri videoda özetlendi.";

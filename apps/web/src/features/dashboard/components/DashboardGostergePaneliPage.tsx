@@ -1,20 +1,9 @@
 ﻿// @ts-nocheck
 "use client";
 
-import Link from "next/link";
-import type {
-  CriticalAlert,
-  DonutSegment,
-  GostergeKpi,
-  GostergeQuickAction,
-  StockSummaryRow
-} from "../data/dashboard-gosterge-paneli-mock";
-import { DGP_ALERTS_VIEW_ALL_HREF } from "../data/dashboard-gosterge-paneli-mock";
-import { IconArrowRight, IconInfo, IconPlay, IconSparkle, KpiIcon } from "../../../components/reference/icons";
-import { useDashboardGostergeReferenceData } from "../hooks/use-dashboard-gosterge-reference-data";
-import { WopConversationTablePanel } from "../../whatsapp/components/WopConversationTablePanel";
-import { useWhatsAppReferenceData } from "../../whatsapp/hooks/use-whatsapp-reference-data";
-import { useReferenceToast } from "../../../lib/reference/use-reference-demo-action";
+import type { CriticalAlert, DonutSegment } from "@/features/dashboard/data/dashboard-gosterge-paneli-mock";
+import { IconArrowRight, IconInfo, IconPlay, IconSparkle, KpiIcon } from "@/components/reference/icons";
+import { useDashboardGostergeReferenceData } from "@/features/dashboard/hooks/use-dashboard-gosterge-reference-data";
 
 function QuickActionIcon({ kind }: { kind: string }) {
   const props = {
@@ -71,11 +60,7 @@ function QuickActionIcon({ kind }: { kind: string }) {
   }
 }
 
-function AlertIcon({
-  kind
-}: {
-  kind: "warn" | "transfer" | "price" | "factory" | "warehouse" | "delivery" | "cargo";
-}) {
+function AlertIcon({ kind }: { kind: CriticalAlert["icon"] }) {
   const props = {
     className: "dgp-alert-icon-svg",
     width: 14,
@@ -86,39 +71,7 @@ function AlertIcon({
     strokeWidth: 1.75,
     "aria-hidden": true as const
   };
-  if (kind === "factory") {
-    return (
-      <svg {...props}>
-        <path d="M3 21h18M5 21V9l7-4 7 4v12M9 21v-6h6v6" />
-      </svg>
-    );
-  }
-  if (kind === "warehouse") {
-    return (
-      <svg {...props}>
-        <path d="M3 9l9-5 9 5v12H3V9z" />
-        <path d="M9 21V12h6v9" />
-      </svg>
-    );
-  }
-  if (kind === "delivery") {
-    return (
-      <svg {...props}>
-        <path d="M3 7h11v8H3zM14 10h4l3 3v2h-7v-5z" />
-        <circle cx="7" cy="17" r="2" />
-        <circle cx="17" cy="17" r="2" />
-      </svg>
-    );
-  }
-  if (kind === "cargo") {
-    return (
-      <svg {...props}>
-        <path d="M8 6h8l2 4v9H6V6z" />
-        <path d="M8 6V4h8v2M10 14h4" />
-      </svg>
-    );
-  }
-  if (kind === "transfer") {
+  if (kind === "transfer" || kind === "warehouse") {
     return (
       <svg {...props}>
         <path d="M7 7h11M14 4l4 3-4 3M17 17H6M10 20l-4-3 4-3" />
@@ -141,25 +94,6 @@ function AlertIcon({
   );
 }
 
-function alertIconClass(kind: CriticalAlert["icon"]): string {
-  switch (kind) {
-    case "factory":
-      return " dgp-alert-icon--factory";
-    case "warehouse":
-      return " dgp-alert-icon--warehouse";
-    case "delivery":
-      return " dgp-alert-icon--delivery";
-    case "cargo":
-      return " dgp-alert-icon--cargo";
-    case "price":
-      return " dgp-alert-icon--price";
-    case "transfer":
-      return " dgp-alert-icon--transfer";
-    default:
-      return " dgp-alert-icon--warn";
-  }
-}
-
 function donutGradient(segments: DonutSegment[]): string {
   let acc = 0;
   const parts = segments.map((s) => {
@@ -176,190 +110,174 @@ function trendClass(tone?: string): string {
   return " dgp-kpi-trend--up";
 }
 
-function DgpQuickActionButton({
-  action,
-  onDemo
-}: {
-  action: GostergeQuickAction;
-  onDemo: (message: string, target?: EventTarget | null) => void;
-}) {
-  const body = (
-    <>
-      <span className="dgp-quick-icon">
-        <QuickActionIcon kind={action.icon} />
-      </span>
-      <span>{action.label}</span>
-    </>
-  );
-
-  if (action.href) {
-    return (
-      <Link href={(action.href) ?? "#"} className="dgp-quick-btn">
-        {body}
-      </Link>
-    );
-  }
-
-  return (
-    <button
-      type="button"
-      className="dgp-quick-btn"
-      onClick={(e) => onDemo(action.demoToast ?? `${action.label} demo modunda.`, e.currentTarget)}
-    >
-      {body}
-    </button>
-  );
-}
-
-function DgpKpiCard({
-  kpi,
-  onInfo
-}: {
-  kpi: GostergeKpi;
-  onInfo: (label: string, target?: EventTarget | null) => void;
-}) {
-  return (
-    <article className={`dgp-kpi-card dgp-kpi-card--${kpi.tone}`}>
-      <Link href={(kpi.href) ?? "#"} className="dgp-kpi-card-link" aria-label={`${kpi.label} â€” listeye git`}>
-        <div className={`dgp-kpi-icon dgp-kpi-icon--${kpi.tone}`}>
-          <KpiIcon tone={kpi.tone} />
-        </div>
-        <div className="dgp-kpi-body">
-          <span className="dgp-kpi-value">{kpi.value}</span>
-          <span className="dgp-kpi-label">{kpi.label}</span>
-          {kpi.trend ? (
-            <>
-              <span className={`dgp-kpi-trend${trendClass(kpi.trendTone)}`}>{kpi.trend}</span>
-              <span className="dgp-kpi-compare">{kpi.compareLabel ?? "Acil takip"}</span>
-            </>
-          ) : null}
-        </div>
-      </Link>
-      <button
-        type="button"
-        className="dgp-kpi-info"
-        aria-label={`${kpi.label} bilgisi`}
-        onClick={(e) => onInfo(kpi.label, e.currentTarget)}
-      >
-        <IconInfo className="dgp-kpi-info-icon" />
-      </button>
-    </article>
-  );
-}
-
-function DgpSummaryRow({ row }: { row: StockSummaryRow }) {
-  return (
-    <li>
-      <Link href={(row.href) ?? "#"} className="dgp-summary-link">
-        <span>
-          {row.label}
-          {row.hint ? <small className="dgp-summary-hint">{row.hint}</small> : null}
-        </span>
-        <strong>{row.value}</strong>
-      </Link>
-    </li>
-  );
-}
-
-function DgpAlertRow({ alert }: { alert: CriticalAlert }) {
-  return (
-    <li>
-      <Link href={(alert.href) ?? "#"} className={`dgp-alert-item dgp-alert-item--${alert.icon}`}>
-        <span className={`dgp-alert-icon${alertIconClass(alert.icon)}`}>
-          <AlertIcon kind={alert.icon} />
-        </span>
-        <span className="dgp-alert-text">{alert.text}</span>
-      </Link>
-    </li>
-  );
-}
-
 export function DashboardGostergePaneliPage() {
-  const pushReferenceToast = useReferenceToast();
   const {
     kpis,
     quickActions,
+    movements,
     alerts,
     summary,
     donut,
     donutTotal,
     aiVideoTitle,
     aiHighlights,
-    aiGreeting
+    aiGreeting,
+    demoBanner,
+    isDemo,
+    loadFailed
   } = useDashboardGostergeReferenceData();
-  const { conversations, pagination } = useWhatsAppReferenceData();
 
-  const showDemoToast = (message: string, target?: EventTarget | null) =>
-    pushReferenceToast(message, target);
+  const previewMessage =
+    demoBanner ??
+    (isDemo ? "Demo gÃ¶sterge verisi â€” canlÄ± mod iÃ§in NEXT_PUBLIC_USE_DEMO_DATA=false" : null) ??
+    (loadFailed ? "CanlÄ± veri yÃ¼klenemedi; Ã¶nizleme verisi gÃ¶steriliyor" : null);
 
   return (
     <div className="dgp-home">
+      {previewMessage ? (
+        <p className="dgp-demo-band" role="status">
+          {previewMessage}
+        </p>
+      ) : null}
+
+      <header className="dgp-head">
+        <h1>GÃ¶sterge Paneli</h1>
+        <p>Ä°ÅŸ sÃ¼reÃ§lerinizi anlÄ±k olarak takip edin ve hÄ±zlÄ±ca aksiyon alÄ±n.</p>
+      </header>
+
       <section className="dgp-kpi-row" aria-label="Ã–zet gÃ¶stergeler">
         {kpis.map((kpi) => (
-          <DgpKpiCard
-            key={kpi.id}
-            kpi={kpi}
-            onInfo={(label, target) =>
-              showDemoToast(`${label} â€” acil iÅŸ listesine yÃ¶nlendiriliyorsunuz.`, target)
-            }
-          />
+          <article key={kpi.id} className={`dgp-kpi-card dgp-kpi-card--${kpi.tone}`}>
+            <div className={`dgp-kpi-icon dgp-kpi-icon--${kpi.tone}`}>
+              <KpiIcon tone={kpi.tone} />
+            </div>
+            <div className="dgp-kpi-body">
+              <span className="dgp-kpi-value">{kpi.value}</span>
+              <span className="dgp-kpi-label">{kpi.label}</span>
+              {kpi.trend ? (
+                <>
+                  <span className={`dgp-kpi-trend${trendClass(kpi.trendTone)}`}>{kpi.trend}</span>
+                  <span className="dgp-kpi-compare">GeÃ§en aya gÃ¶re</span>
+                </>
+              ) : null}
+            </div>
+            <button type="button" className="dgp-kpi-info" aria-label={`${kpi.label} bilgisi`}>
+              <IconInfo className="dgp-kpi-info-icon" />
+            </button>
+          </article>
         ))}
       </section>
 
-      <div className="dgp-col dgp-col--left" aria-label="KonuÅŸma listesi ve hÄ±zlÄ± iÅŸlemler">
-          <WopConversationTablePanel
-            className="dgp-wop-table-panel"
-            conversations={conversations}
-            pagination={pagination}
-          />
-
+      <section className="dgp-grid" aria-label="Panel iÃ§eriÄŸi">
+        <div className="dgp-col dgp-col--left">
           <article className="dgp-panel dgp-panel--quick">
             <header className="dgp-panel-head">
               <h2>HÄ±zlÄ± Ä°ÅŸlemler</h2>
             </header>
             <div className="dgp-quick-actions">
               {quickActions.map((action) => (
-                <DgpQuickActionButton key={action.id} action={action} onDemo={showDemoToast} />
+                <button key={action.id} type="button" className="dgp-quick-btn">
+                  <span className="dgp-quick-icon">
+                    <QuickActionIcon kind={action.icon} />
+                  </span>
+                  <span>{action.label}</span>
+                </button>
               ))}
+            </div>
+          </article>
+
+          <article className="dgp-panel dgp-panel--table">
+            <header className="dgp-panel-head">
+              <h2>Son Stok Hareketleri</h2>
+              <button type="button" className="dgp-panel-link">
+                TÃ¼mÃ¼nÃ¼ GÃ¶r
+                <IconArrowRight className="dgp-panel-link-icon" />
+              </button>
+            </header>
+            <div className="dgp-table-wrap">
+              <table className="dgp-table">
+                <thead>
+                  <tr>
+                    <th>Tarih</th>
+                    <th>ÃœrÃ¼n</th>
+                    <th>Hareket Tipi</th>
+                    <th>Miktar</th>
+                    <th>Depo</th>
+                    <th>KullanÄ±cÄ±</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {movements.map((row) => (
+                    <tr key={row.id}>
+                      <td>{row.date}</td>
+                      <td className="dgp-table-product">{row.product}</td>
+                      <td>
+                        <span className={`dgp-badge dgp-badge--${row.type === "GiriÅŸ" ? "in" : "out"}`}>
+                          {row.type}
+                        </span>
+                      </td>
+                      <td
+                        className={
+                          row.qty.startsWith("+") || row.type === "GiriÅŸ"
+                            ? "dgp-qty--in"
+                            : "dgp-qty--out"
+                        }
+                      >
+                        {row.qty}
+                      </td>
+                      <td>{row.warehouse}</td>
+                      <td>{row.user}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </article>
         </div>
 
-        <div className="dgp-col dgp-col--mid" aria-label="UyarÄ±lar ve Ã¶zet">
+        <div className="dgp-col dgp-col--mid">
           <article className="dgp-panel dgp-panel--alerts">
             <header className="dgp-panel-head">
-              <h2>Acil Takip UyarÄ±larÄ±</h2>
-              <Link href={(DGP_ALERTS_VIEW_ALL_HREF) ?? "#"} className="dgp-panel-link">
+              <h2>Kritik UyarÄ±lar</h2>
+              <button type="button" className="dgp-panel-link">
                 TÃ¼mÃ¼nÃ¼ GÃ¶r
                 <IconArrowRight className="dgp-panel-link-icon" />
-              </Link>
+              </button>
             </header>
             <ul className="dgp-alert-list">
               {alerts.map((a) => (
-                <DgpAlertRow key={a.id} alert={a} />
+                <li key={a.id} className={`dgp-alert-item dgp-alert-item--${a.icon}`}>
+                  <span className={`dgp-alert-icon dgp-alert-icon--${a.icon === "warehouse" || a.icon === "factory" || a.icon === "delivery" || a.icon === "cargo" ? "transfer" : a.icon === "price" ? "price" : "warn"}`}>
+                    <AlertIcon kind={a.icon} />
+                  </span>
+                  <span>{a.text}</span>
+                </li>
               ))}
             </ul>
           </article>
 
           <article className="dgp-panel dgp-panel--summary">
             <header className="dgp-panel-head">
-              <h2>Acil Ä°ÅŸ Ã–zeti</h2>
+              <h2>Stok Ã–zeti</h2>
             </header>
             <ul className="dgp-summary-list">
               {summary.map((row) => (
-                <DgpSummaryRow key={row.label} row={row} />
+                <li key={row.label}>
+                  <span>{row.label}</span>
+                  <strong>{row.value}</strong>
+                </li>
               ))}
             </ul>
           </article>
 
           <article className="dgp-panel dgp-panel--donut">
             <header className="dgp-panel-head">
-              <h2>Acil Ä°ÅŸ DaÄŸÄ±lÄ±mÄ±</h2>
+              <h2>Depo DaÄŸÄ±lÄ±mÄ±</h2>
             </header>
             <div className="dgp-donut-wrap">
               <div className="dgp-donut" style={{ background: donutGradient(donut) }}>
                 <div className="dgp-donut-hole">
-                  <span className="dgp-donut-hole-label">Acil iÅŸ</span>
+                  <span className="dgp-donut-hole-label">Toplam</span>
                   <strong>{donutTotal}</strong>
                 </div>
               </div>
@@ -367,10 +285,7 @@ export function DashboardGostergePaneliPage() {
                 {donut.map((s) => (
                   <li key={s.label}>
                     <span className="dgp-donut-swatch" style={{ background: s.color }} />
-                    <span>
-                      {s.label}
-                      {s.detail ? <small className="dgp-donut-detail">{s.detail}</small> : null}
-                    </span>
+                    <span>{s.label}</span>
                     <strong>%{s.pct}</strong>
                   </li>
                 ))}
@@ -379,58 +294,59 @@ export function DashboardGostergePaneliPage() {
           </article>
         </div>
 
-      <article className="dgp-panel dgp-panel--ai" aria-label="AI Asistan">
-        <header className="dgp-panel-head dgp-panel-head--ai">
-          <h2>
-            <IconSparkle className="dgp-ai-sparkle" />
-            AI Asistan
-          </h2>
-        </header>
+        <article className="dgp-panel dgp-panel--ai" aria-label="AI Asistan">
+          <header className="dgp-panel-head dgp-panel-head--ai">
+            <h2>
+              <IconSparkle className="dgp-ai-sparkle" />
+              AI Asistan
+            </h2>
+          </header>
 
-        <div className="dgp-ai-video">
-          <div className="dgp-ai-video-inner">
-            <p className="dgp-ai-video-title">{aiVideoTitle}</p>
-            <button
-              type="button"
-              className="dgp-ai-play"
-              aria-label="Videoyu oynat"
-              onClick={(e) => showDemoToast("Ã–zet video oynatÄ±lÄ±yor (demo).", e.currentTarget)}
-            >
-              <IconPlay />
-            </button>
-          </div>
-          <div className="dgp-ai-video-bar">
-            <span>01:24</span>
-            <div className="dgp-ai-track">
-              <div className="dgp-ai-progress" />
+          <div className="dgp-ai-video">
+            <div className="dgp-ai-video-inner">
+              <p className="dgp-ai-video-title">{aiVideoTitle}</p>
+              <button type="button" className="dgp-ai-play" aria-label="Videoyu oynat">
+                <IconPlay />
+              </button>
             </div>
-            <span>03:15</span>
+            <div className="dgp-ai-video-bar">
+              <span>01:24</span>
+              <div className="dgp-ai-track">
+                <div className="dgp-ai-progress" />
+              </div>
+              <span>03:15</span>
+              <span className="dgp-ai-vol" aria-hidden>
+                â™ª
+              </span>
+              <span className="dgp-ai-fs" aria-hidden>
+                â›¶
+              </span>
+            </div>
           </div>
-        </div>
 
-        <p className="dgp-ai-greeting">{aiGreeting}</p>
+          <p className="dgp-ai-greeting">{aiGreeting}</p>
 
-        <div className="dgp-ai-highlights">
-          <h3>Ã–ne Ã‡Ä±kanlar</h3>
-          <ul>
-            {aiHighlights.map((item) => (
-              <li key={item}>
-                <span className="dgp-ai-check" aria-hidden>
-                  âœ“
-                </span>
-                {item}
-              </li>
-            ))}
-          </ul>
-        </div>
+          <div className="dgp-ai-highlights">
+            <h3>Ã–ne Ã‡Ä±kanlar</h3>
+            <ul>
+              {aiHighlights.map((item) => (
+                <li key={item}>
+                  <span className="dgp-ai-check" aria-hidden>
+                    âœ“
+                  </span>
+                  {item}
+                </li>
+              ))}
+            </ul>
+          </div>
 
-        <Link href="/ai" className="dgp-ai-cta">
-          <IconSparkle className="dgp-ai-cta-icon" />
-          Yeni Analiz OluÅŸtur
-        </Link>
-      </article>
+          <button type="button" className="dgp-ai-cta">
+            <IconSparkle className="dgp-ai-cta-icon" />
+            Yeni Analiz OluÅŸtur
+          </button>
+        </article>
+      </section>
     </div>
   );
 }
-
 
