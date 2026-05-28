@@ -1,0 +1,31 @@
+{
+  "name": "@hallederiz/database",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "migrate:list": "node dist/cli.js migrations",
+    "migrate:status": "node dist/cli.js migrate:status",
+    "migrate:apply": "node dist/cli.js migrate:apply",
+    "seed:list": "node dist/cli.js seeds",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "clean": "node -e \"console.log('clean: no-op for @hallederiz/database')\""
+  },
+  "devDependencies": {
+    "@types/pg": "^8.20.0",
+    "typescript": "^5.6.3"
+  },
+  "dependencies": {
+    "pg": "^8.20.0"
+  }
+}

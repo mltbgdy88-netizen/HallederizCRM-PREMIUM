@@ -1,0 +1,88 @@
+/**
+ * @hallederiz/ui primitive foundation overrides (Agent 01).
+ * Scoped to hz-ui-*; does not restyle AppShell / route-specific classes.
+ */
+
+.hz-ui-btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--hz-ui-surface), 0 0 0 4px var(--hz-ui-focus-ring);
+}
+
+.hz-ui-btn--primary {
+  background: var(--hz-ui-brand-primary);
+  color: #ffffff;
+  border-color: color-mix(in srgb, var(--hz-ui-brand-primary) 55%, transparent);
+  box-shadow: 0 2px 8px color-mix(in srgb, var(--hz-ui-brand-primary) 22%, transparent);
+}
+
+.hz-ui-btn--primary:hover:not(:disabled):not(.is-disabled) {
+  background: var(--hz-ui-brand-primary-hover);
+  filter: none;
+  box-shadow: 0 4px 12px color-mix(in srgb, var(--hz-ui-brand-primary) 28%, transparent);
+}
+
+.hz-ui-btn--secondary {
+  color: var(--hz-ui-brand-primary);
+  border-color: color-mix(in srgb, var(--hz-ui-brand-primary) 28%, var(--hz-ui-border));
+}
+
+.hz-ui-btn--secondary:hover:not(:disabled):not(.is-disabled) {
+  background: var(--hz-ui-brand-primary-soft);
+}
+
+.hz-ui-badge--success {
+  color: var(--hz-ui-success);
+  background: var(--hz-ui-success-soft);
+  border-color: color-mix(in srgb, var(--hz-ui-success) 32%, transparent);
+}
+
+.hz-ui-badge--warning {
+  color: var(--hz-ui-warning);
+  background: var(--hz-ui-warning-soft);
+  border-color: color-mix(in srgb, var(--hz-ui-warning) 32%, transparent);
+}
+
+.hz-ui-badge--danger {
+  color: var(--hz-ui-danger);
+  background: var(--hz-ui-danger-soft);
+  border-color: color-mix(in srgb, var(--hz-ui-danger) 32%, transparent);
+}
+
+.hz-ui-card {
+  background: var(--hz-ui-surface);
+  border-color: var(--hz-ui-border);
+  box-shadow: var(--hz-ui-shadow-card);
+}
+
+.hz-ui-card--interactive:hover {
+  box-shadow: var(--hz-ui-shadow-hover);
+}
+
+.hz-ui-input:focus,
+.hz-ui-select:focus {
+  border-color: color-mix(in srgb, var(--hz-ui-brand-primary) 45%, var(--hz-ui-border));
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--hz-ui-brand-primary) 22%, transparent);
+}
+
+.hz-ui-empty,
+.hz-ui-error {
+  background: color-mix(in srgb, var(--hz-ui-canvas) 65%, var(--hz-ui-surface));
+  border-color: var(--hz-ui-border-strong);
+}
+
+.hz-ui-error {
+  border-color: color-mix(in srgb, var(--hz-ui-danger) 35%, var(--hz-ui-border));
+  background: color-mix(in srgb, var(--hz-ui-danger-soft) 72%, var(--hz-ui-surface));
+}
+
+.hz-ui-success {
+  border-color: color-mix(in srgb, var(--hz-ui-success) 32%, var(--hz-ui-border));
+  background: color-mix(in srgb, var(--hz-ui-success-soft) 72%, var(--hz-ui-surface));
+}
+
+.hz-ui-modal-close:focus-visible {
+  box-shadow: 0 0 0 2px var(--hz-ui-surface), 0 0 0 4px var(--hz-ui-focus-ring);
+}
+
+.hz-ui-modal {
+  background: var(--hz-ui-surface);
+}

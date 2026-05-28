@@ -1,0 +1,28 @@
+{
+  "route": "/siparisler",
+  "branch": "fix/ui-crm-commercial-visual-redesign",
+  "baseCommit": "30d5629f8c221b847a1f5067a353a6b5685e5ab7",
+  "capturedAt": "2026-05-22",
+  "screenshots": {
+    "desktop1366": { "path": "orders-1366x768.png", "status": "pending" },
+    "desktop1920": { "path": "orders-1920x1080.png", "status": "pending" },
+    "mobile390": { "path": "orders-mobile.png", "status": "pending" }
+  },
+  "qa": {
+    "horizontalOverflow": "pass_css",
+    "paymentVisibility": "pass",
+    "approvalWording": "pass",
+    "technicalLeakage": "pass",
+    "fakeSuccess": "pass"
+  },
+  "tests": {
+    "uiGuard": "pass",
+    "webTypecheck": "pass",
+    "uiTypecheck": "pass",
+    "apiTest": "pass",
+    "webBuild": "pass",
+    "uiBuild": "pass",
+    "smokeNavigation": "pass",
+    "smokeRoutes": "pass"
+  }
+}

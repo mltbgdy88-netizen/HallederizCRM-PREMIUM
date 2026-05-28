@@ -1,0 +1,3 @@
+import type { TenantUsageEventInput } from "../usage";
+import type { PolicyContext, PolicyDecision, PolicySubject } from "./model";
+export function buildPolicyDecisionUsageEvent(decision: PolicyDecision, subject: PolicySubject, context: PolicyContext): TenantUsageEventInput | null { if (!decision.usagePolicy?.usageRecordRequired || !decision.usagePolicy.usageEventType) return null; return { tenantId: context.tenantId, eventType: decision.usagePolicy.usageEventType, source: context.source, quantity: 1, unit: "decision", metadata: { actionKey: decision.actionKey, effect: decision.effect, reasons: decision.reasons, requestId: context.requestId, subjectUserId: subject.userId, channel: context.channel ?? subject.channel }, occurredAt: new Date().toISOString() }; }

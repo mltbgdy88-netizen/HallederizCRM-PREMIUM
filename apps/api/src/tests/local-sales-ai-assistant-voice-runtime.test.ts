@@ -1,0 +1,533 @@
+import assert from "node:assert/strict";
+import test from "node:test";
+import Fastify from "fastify";
+import { AiRuntimeService } from "../modules/ai-runtime/service";
+import { registerPlatformCoreRoutes } from "../platform-core/routes";
+import type { RequestContext } from "../shared/request-context";
+import { createSession } from "../shared/session-store";
+import { resetSalesAiRuntimeForTests, resolveSalesAiKnowledgeRepository } from "../shared/sales-ai-runtime";
+import { withDemoAuth, withEnv } from "./test-env";
+
+function authHeaders(token: string, extra?: Record<string, string>) {
+  return {
+    "x-session-token": token,
+    authorization: `Bearer ${token}`,
+    ...(extra ?? {})
+  };
+}
+
+async function buildServer() {
+  const server = Fastify();
+  await registerPlatformCoreRoutes(server);
+  return server;
+}
+
+function buildContext(): RequestContext {
+  return {
+    tenantId: "tenant_1",
+    userId: "user_admin",
+    persistenceMode: "demo",
+    roles: ["admin"],
+    permissions: ["*"]
+  };
+}
+
+test("sales assistant health returns degraded when ollama is unavailable", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async () => {
+      throw new Error("connection refused");
+    }) as typeof fetch;
+    try {
+      const response = await server.inject({
+        method: "GET",
+        url: "/platform/ai/sales-assistant/health",
+        headers: authHeaders(login.accessToken)
+      });
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.json().item.status, "degraded");
+    } finally {
+      globalThis.fetch = originalFetch;
+      await server.close();
+      resetSalesAiRuntimeForTests();
+    }
+  });
+});
+
+test("sales assistant health returns not_configured when configured models are missing", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input) => {
+      const url = String(input);
+      if (url.includes("/api/tags")) {
+        return new Response(JSON.stringify({ models: [{ name: "other-model:latest" }] }), { status: 200 });
+      }
+      return new Response("{}", { status: 404 });
+    }) as typeof fetch;
+    try {
+      const response = await server.inject({
+        method: "GET",
+        url: "/platform/ai/sales-assistant/health",
+        headers: authHeaders(login.accessToken)
+      });
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.json().item.status, "not_configured");
+    } finally {
+      globalThis.fetch = originalFetch;
+      await server.close();
+      resetSalesAiRuntimeForTests();
+    }
+  });
+});
+
+test("sales assistant health returns healthy when primary model exists", async () => {
+  await withDemoAuth(async () => {
+    const service = new AiRuntimeService(buildContext());
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input) => {
+      const url = String(input);
+      if (url.includes("11434") && url.includes("/api/tags")) {
+        return new Response(JSON.stringify({ models: [{ name: "RefinedNeuro/Turkcell-LLM-7b-v1:latest" }] }), { status: 200 });
+      }
+      if (url.includes("8008") && url.includes("/health")) {
+        return new Response(JSON.stringify({ ok: true, speaker_ready: false, whisper_model: "small" }), { status: 200 });
+      }
+      throw new Error(`unexpected_fetch_${url}`);
+    }) as typeof fetch;
+
+    try {
+      const health = await service.getSalesAssistantHealth();
+      assert.equal(health.status, "healthy");
+      assert.equal(health.modelReady, true);
+      assert.equal(health.fallbackReady, false);
+    } finally {
+      globalThis.fetch = originalFetch;
+      resetSalesAiRuntimeForTests();
+    }
+  });
+});
+
+test("sales assistant chat denies unauthenticated access", async () => {
+  const server = await buildServer();
+  const response = await server.inject({
+    method: "POST",
+    url: "/platform/ai/sales-assistant/chat",
+    payload: { message: "Merhaba" }
+  });
+  assert.equal(response.statusCode, 401);
+  await server.close();
+});
+
+test("sales assistant chat is tenant fail-closed on mismatch", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const response = await server.inject({
+      method: "POST",
+      url: "/platform/ai/sales-assistant/chat",
+      headers: authHeaders(login.accessToken, { "x-tenant-id": "tenant_other" }),
+      payload: { message: "Merhaba" }
+    });
+    assert.equal(response.statusCode, 403);
+    await server.close();
+  });
+});
+
+test("sales knowledge CRUD does not fallback when postgres repository is unavailable", async () => {
+  await withEnv(
+    {
+      NODE_ENV: "development",
+      PERSISTENCE_MODE: "postgres",
+      DATABASE_URL: ""
+    },
+    async () => {
+      const resolution = resolveSalesAiKnowledgeRepository({
+        tenantId: "tenant_hallederiz",
+        userId: "user_test",
+        persistenceMode: "postgres",
+        roles: ["admin"],
+        permissions: ["*"]
+      });
+      assert.equal(resolution.mode, "unsupported");
+      assert.equal(resolution.repository, null);
+      assert.equal(resolution.skipped, true);
+      resetSalesAiRuntimeForTests();
+    }
+  );
+});
+
+test("sales knowledge CRUD requires authentication", async () => {
+  const server = await buildServer();
+  const list = await server.inject({
+    method: "GET",
+    url: "/platform/ai/sales-knowledge"
+  });
+  assert.equal(list.statusCode, 401);
+  const create = await server.inject({
+    method: "POST",
+    url: "/platform/ai/sales-knowledge",
+    payload: { productName: "Alpha" }
+  });
+  assert.equal(create.statusCode, 401);
+  await server.close();
+});
+
+test("chat uses tenant scoped knowledge and does not hallucinate hidden price", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const otherLogin = createSession({ tenantSlug: "other", email: "admin@hallederiz.com", password: "demo" });
+
+    const createTenantOne = await server.inject({
+      method: "POST",
+      url: "/platform/ai/sales-knowledge",
+      headers: authHeaders(login.accessToken),
+      payload: {
+        productId: "p-100",
+        productName: "Alpha Pompa",
+        priceVisibility: "hidden",
+        stockVisibility: "visible",
+        salesNotes: "Yalnizca yetkili fiyat gorur"
+      }
+    });
+    assert.equal(createTenantOne.statusCode, 201);
+
+    const createTenantOther = await server.inject({
+      method: "POST",
+      url: "/platform/ai/sales-knowledge",
+      headers: authHeaders(otherLogin.accessToken),
+      payload: {
+        productId: "p-200",
+        productName: "Beta Valf",
+        priceVisibility: "visible",
+        stockVisibility: "visible"
+      }
+    });
+    assert.equal(createTenantOther.statusCode, 201);
+
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input) => {
+      const url = String(input);
+      if (url.includes("/api/tags")) {
+        return new Response(JSON.stringify({ models: [{ name: "RefinedNeuro/Turkcell-LLM-7b-v1:latest" }] }), { status: 200 });
+      }
+      if (url.includes("/api/generate")) {
+        return new Response(JSON.stringify({ response: "Sistemde fiyat görünmüyor." }), { status: 200 });
+      }
+      throw new Error(`unexpected_fetch_${url}`);
+    }) as typeof fetch;
+
+    try {
+      const chat = await server.inject({
+        method: "POST",
+        url: "/platform/ai/sales-assistant/chat",
+        headers: authHeaders(login.accessToken),
+        payload: { message: "Alpha Pompa fiyatı nedir?" }
+      });
+      assert.equal(chat.statusCode, 200);
+      assert.equal(chat.json().item.intent, "price_question");
+      assert.match(chat.json().item.reply, /sistemde görünmüyor/i);
+      assert.equal(chat.json().item.mutationExecuted, false);
+      assert.equal(chat.json().item.externalProviderCallExecuted, false);
+      assert.ok(Array.isArray(chat.json().item.usedSources));
+      assert.equal(chat.json().item.usedSources.every((source: { id: string }) => source.id !== createTenantOther.json().item.id), true);
+    } finally {
+      globalThis.fetch = originalFetch;
+      await server.close();
+      resetSalesAiRuntimeForTests();
+    }
+  });
+});
+
+test("order intent only returns suggested actions and never executes mutation", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input) => {
+      const url = String(input);
+      if (url.includes("/api/tags")) {
+        return new Response(JSON.stringify({ models: [{ name: "RefinedNeuro/Turkcell-LLM-7b-v1:latest" }] }), { status: 200 });
+      }
+      if (url.includes("/api/generate")) {
+        return new Response(JSON.stringify({ response: "Sipariş için taslak hazırlayıp onay akışına yönlendirebilirim." }), { status: 200 });
+      }
+      throw new Error(`unexpected_fetch_${url}`);
+    }) as typeof fetch;
+
+    try {
+      const response = await server.inject({
+        method: "POST",
+        url: "/platform/ai/sales-assistant/chat",
+        headers: authHeaders(login.accessToken),
+        payload: { message: "Hemen sipariş açalım." }
+      });
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.json().item.intent, "order_intent");
+      assert.equal(response.json().item.mutationExecuted, false);
+      assert.equal(response.json().item.externalProviderCallExecuted, false);
+      assert.ok(Array.isArray(response.json().item.suggestedActions));
+      assert.equal(response.json().item.suggestedActions.length > 0, true);
+    } finally {
+      globalThis.fetch = originalFetch;
+      await server.close();
+      resetSalesAiRuntimeForTests();
+    }
+  });
+});
+
+test("fallback model is used when primary model is missing", async () => {
+  await withDemoAuth(async () => {
+    const service = new AiRuntimeService(buildContext());
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input, init) => {
+      const url = String(input);
+      if (url.includes("8008") && url.includes("/health")) {
+        return new Response(JSON.stringify({ ok: true, speaker_ready: false, whisper_model: "small" }), { status: 200 });
+      }
+      if (url.includes("/api/tags")) {
+        return new Response(JSON.stringify({ models: [{ name: "llama3.2:3b" }] }), { status: 200 });
+      }
+      if (url.includes("/api/generate")) {
+        const payload = JSON.parse(String(init?.body ?? "{}")) as { model?: string };
+        assert.equal(payload.model, "llama3.2:3b");
+        return new Response(JSON.stringify({ response: "Fallback model ile güvenli yanıt." }), { status: 200 });
+      }
+      throw new Error(`unexpected_fetch_${url}`);
+    }) as typeof fetch;
+
+    try {
+      const result = await service.chatSalesAssistant({
+        message: "Alpha pompa hakkında bilgi verir misin?",
+        channel: "web",
+        knowledge: [
+          {
+            id: "kb_1",
+            tenantId: "tenant_1",
+            productName: "Alpha Pompa",
+            allowedClaims: ["debi"],
+            blockedClaims: [],
+            priceVisibility: "hidden",
+            stockVisibility: "hidden",
+            faqSnippets: [],
+            selectedDocuments: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        ]
+      });
+      assert.equal(result.status, "degraded");
+      assert.equal(result.provider.fallbackUsed, true);
+      assert.equal(result.provider.effectiveModel, "llama3.2:3b");
+    } finally {
+      globalThis.fetch = originalFetch;
+      resetSalesAiRuntimeForTests();
+    }
+  });
+});
+
+test("empty generate response returns safe non-hallucinated message", async () => {
+  await withDemoAuth(async () => {
+    const service = new AiRuntimeService(buildContext());
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async (input) => {
+      const url = String(input);
+      if (url.includes("8008") && url.includes("/health")) {
+        return new Response(JSON.stringify({ ok: true, speaker_ready: false, whisper_model: "small" }), { status: 200 });
+      }
+      if (url.includes("/api/tags")) {
+        return new Response(JSON.stringify({ models: [{ name: "RefinedNeuro/Turkcell-LLM-7b-v1:latest" }] }), { status: 200 });
+      }
+      if (url.includes("/api/generate")) {
+        return new Response(JSON.stringify({ response: "" }), { status: 200 });
+      }
+      throw new Error(`unexpected_fetch_${url}`);
+    }) as typeof fetch;
+
+    try {
+      const result = await service.chatSalesAssistant({
+        message: "Alpha pompa hakkında bilgi verir misin?",
+        channel: "web",
+        knowledge: [
+          {
+            id: "kb_1",
+            tenantId: "tenant_1",
+            productName: "Alpha Pompa",
+            allowedClaims: ["debi"],
+            blockedClaims: [],
+            priceVisibility: "visible",
+            stockVisibility: "visible",
+            faqSnippets: [],
+            selectedDocuments: [],
+            createdAt: new Date().toISOString(),
+            updatedAt: new Date().toISOString()
+          }
+        ]
+      });
+      assert.equal(result.status, "live");
+      assert.match(result.reply, /Bu bilgi sistemde/i);
+      assert.equal(result.mutationExecuted, false);
+      assert.equal(result.externalProviderCallExecuted, false);
+    } finally {
+      globalThis.fetch = originalFetch;
+      resetSalesAiRuntimeForTests();
+    }
+  });
+});
+
+test("voice runtime returns degraded when local providers are unavailable", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const originalFetch = globalThis.fetch;
+    globalThis.fetch = (async () => {
+      throw new Error("voice_provider_unavailable");
+    }) as typeof fetch;
+
+    try {
+      const transcribe = await server.inject({
+        method: "POST",
+        url: "/platform/ai/sales-assistant/voice/transcribe",
+        headers: authHeaders(login.accessToken),
+        payload: { audioBase64: "ZGVtbw==" }
+      });
+      assert.equal(transcribe.statusCode, 200);
+      assert.equal(transcribe.json().item.status, "degraded");
+
+      const speak = await server.inject({
+        method: "POST",
+        url: "/platform/ai/sales-assistant/voice/speak",
+        headers: authHeaders(login.accessToken),
+        payload: { text: "Merhaba" }
+      });
+      assert.equal(speak.statusCode, 200);
+      assert.equal(speak.json().item.status, "degraded");
+    } finally {
+      globalThis.fetch = originalFetch;
+      await server.close();
+      resetSalesAiRuntimeForTests();
+    }
+  });
+});
+
+test("sales assistant health blocks public ollama URL by default", async () => {
+  await withEnv(
+    {
+      NODE_ENV: "production",
+      OLLAMA_BASE_URL: "https://example.com",
+      LOCAL_AI_ALLOW_PUBLIC_URLS: "false"
+    },
+    async () => {
+      const service = new AiRuntimeService(buildContext());
+      const health = await service.getSalesAssistantHealth();
+      assert.equal(health.status, "blocked");
+      assert.equal(health.reason, "local_ai_url_not_allowed");
+    }
+  );
+});
+
+test("sales assistant health allows public ollama URL only with explicit override", async () => {
+  await withEnv(
+    {
+      NODE_ENV: "production",
+      OLLAMA_BASE_URL: "https://example.com",
+      LOCAL_AI_ALLOW_PUBLIC_URLS: "true"
+    },
+    async () => {
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = (async () => {
+        throw new Error("connection refused");
+      }) as typeof fetch;
+      try {
+        const service = new AiRuntimeService(buildContext());
+        const health = await service.getSalesAssistantHealth();
+        assert.equal(health.status, "degraded");
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    }
+  );
+});
+
+test("localhost and loopback local AI URLs are allowed", async () => {
+  await withEnv(
+    {
+      OLLAMA_BASE_URL: "http://localhost:11434",
+      LOCAL_AI_SERVICE_URL: "http://127.0.0.1:8008",
+      LOCAL_AI_ALLOW_PUBLIC_URLS: "false"
+    },
+    async () => {
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = (async () => {
+        throw new Error("connection refused");
+      }) as typeof fetch;
+      try {
+        const service = new AiRuntimeService(buildContext());
+        const health = await service.getSalesAssistantHealth();
+        assert.notEqual(health.status, "blocked");
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    }
+  );
+});
+
+test("private LAN local AI URL is allowed by default", async () => {
+  await withEnv(
+    {
+      OLLAMA_BASE_URL: "http://192.168.1.10:11434",
+      LOCAL_AI_ALLOW_PUBLIC_URLS: "false"
+    },
+    async () => {
+      const originalFetch = globalThis.fetch;
+      globalThis.fetch = (async () => {
+        throw new Error("connection refused");
+      }) as typeof fetch;
+      try {
+        const service = new AiRuntimeService(buildContext());
+        const health = await service.getSalesAssistantHealth();
+        assert.notEqual(health.status, "blocked");
+      } finally {
+        globalThis.fetch = originalFetch;
+      }
+    }
+  );
+});
+
+test("invalid local AI URL returns blocked/not_configured and does not fake chat or voice success", async () => {
+  await withEnv(
+    {
+      OLLAMA_BASE_URL: "file:///etc/passwd",
+      LOCAL_AI_SERVICE_URL: "gopher://127.0.0.1:8008",
+      LOCAL_AI_ALLOW_PUBLIC_URLS: "false"
+    },
+    async () => {
+      const service = new AiRuntimeService(buildContext());
+      const health = await service.getSalesAssistantHealth();
+      assert.equal(health.status, "not_configured");
+      assert.equal(health.reason, "local_ai_url_protocol_not_allowed");
+
+      const chat = await service.chatSalesAssistant({
+        message: "Merhaba",
+        channel: "web",
+        knowledge: []
+      });
+      assert.equal(chat.status, "not_configured");
+      assert.equal(chat.mutationExecuted, false);
+      assert.equal(chat.externalProviderCallExecuted, false);
+
+      const transcribe = await service.transcribeSalesVoice({ audioBase64: "ZGVtbw==" });
+      assert.equal(transcribe.status, "not_configured");
+      assert.equal(transcribe.reason, "local_ai_url_protocol_not_allowed");
+
+      const speak = await service.speakSalesVoice({ text: "Merhaba" });
+      assert.equal(speak.status, "not_configured");
+      assert.equal(speak.reason, "local_ai_url_protocol_not_allowed");
+    }
+  );
+});

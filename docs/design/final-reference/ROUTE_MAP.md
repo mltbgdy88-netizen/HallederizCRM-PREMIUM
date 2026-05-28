@@ -1,0 +1,39 @@
+﻿# Route Map (implementer)
+
+| Slug | Route |
+|------|-------|
+| gelen-kutu-operasyon-paneli-acik-mod | /gelen-kutu |
+| gelen-kutu-konusma-detay-acik-mod | /gelen-kutu/konusma |
+| gelen-kutu-uc-panel-acik-mod | /gelen-kutu/uc-panel |
+| hizli-satis-masasi-acik-mod | /hizli-satis |
+| hizli-islem-satis-masasi-acik-mod | /hizli-islem/satis-masasi |
+| hizli-islem-merkezi-acik-mod | /hizli-islem |
+| arsiv-operasyon-merkezi-acik-mod | /arsiv |
+| rapor-operasyon-merkezi-acik-mod | /raporlar |
+| stok-operasyon-masasi-acik-mod | /stok |
+| whatsapp-operasyon-paneli-acik-mod | /whatsapp |
+| dashboard-operasyon-acik-mod | /dashboard |
+| ana-sayfa-emerald-gold-acik-mod | /ana-sayfa |
+| teklifler-operasyon-masasi-acik-mod | /teklifler |
+| teklifler-detay-masasi-acik-mod | /teklifler/detay |
+| teklifler-yeni-hub-acik-mod | /teklifler/yeni |
+| teklifler-katman-ozet-acik-mod | /teklifler/katman/ozet |
+| teklifler-katman-satirlar-acik-mod | /teklifler/katman/satirlar |
+| teklifler-katman-musteri-acik-mod | /teklifler/katman/musteri |
+| teklifler-katman-belgeler-acik-mod | /teklifler/katman/belgeler |
+| teklifler-katman-timeline-acik-mod | /teklifler/katman/timeline |
+| teklifler-katman-donusum-acik-mod | /teklifler/katman/donusum |
+| siparisler-operasyon-masasi-acik-mod | /siparisler |
+| siparisler-detay-masasi-acik-mod | /siparisler/detay |
+| siparisler-yeni-hub-acik-mod | /siparisler/yeni |
+| cariler-operasyon-masasi-acik-mod | /cariler |
+| cariler-detay-masasi-acik-mod | /cariler/detay |
+| cariler-yeni-form-acik-mod | /cariler/yeni |
+| login-split-acik-mod | /login |
+| demo-mode-state-acik-mod | /demo |
+| live-empty-state-acik-mod | /empty |
+| offline-api-state-acik-mod | /offline |
+| unauthorized-state-acik-mod | /unauthorized |
+| ai-operator-hub-acik-mod | /ai/operator-hub |
+| ai-icgoruler-acik-mod | /ai/icgoruler |
+| workflow-timeline-detay-acik-mod | /workflow/timeline |

@@ -1,0 +1,290 @@
+/* Yeni İade Form — iadeler-yeni-form-acik-mod.png */
+
+.iyf-home {
+  --iyf-green: #047857;
+  --iyf-green-strong: #065f46;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 8px;
+  height: 100%;
+  padding: clamp(8px, 0.9vh, 12px) clamp(12px, 1.2vw, 16px);
+  overflow: hidden;
+  background: #f4f6f8;
+}
+
+.iyf-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.iyf-crumb {
+  font-size: 10px;
+  color: #94a3b8;
+  font-weight: 600;
+}
+
+.iyf-crumb-sep {
+  margin: 0 4px;
+}
+
+.iyf-crumb-current {
+  color: #64748b;
+}
+
+.iyf-head-actions {
+  display: flex;
+  gap: 6px;
+}
+
+.iyf-btn {
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.iyf-btn--primary {
+  border: 1px solid var(--iyf-green);
+  background: var(--iyf-green);
+  color: #fff;
+}
+
+.iyf-btn--outline {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+}
+
+.iyf-btn--block {
+  width: 100%;
+  justify-content: center;
+}
+
+.iyf-steps {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.iyf-step {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.iyf-step--active {
+  border-color: #86efac;
+  background: #ecfdf5;
+  color: var(--iyf-green-strong);
+}
+
+.iyf-step-num {
+  width: 20px;
+  height: 20px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: #e2e8f0;
+  font-size: 10px;
+  font-weight: 900;
+}
+
+.iyf-step--active .iyf-step-num {
+  background: var(--iyf-green);
+  color: #fff;
+}
+
+.iyf-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 280px);
+  gap: 8px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.iyf-main {
+  min-height: 0;
+  overflow: auto;
+  display: grid;
+  gap: 8px;
+}
+
+.iyf-aside {
+  min-height: 0;
+  overflow: auto;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.iyf-card {
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+  background: #fff;
+}
+
+.iyf-card h2,
+.iyf-card h3 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.iyf-order-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin: 0;
+  font-size: 10px;
+}
+
+.iyf-order-grid dt {
+  color: #64748b;
+  font-weight: 650;
+}
+
+.iyf-order-grid dd {
+  margin: 0;
+  font-weight: 800;
+}
+
+.iyf-table-wrap {
+  overflow: auto;
+  max-height: 36vh;
+}
+
+.iyf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 9px;
+}
+
+.iyf-table th,
+.iyf-table td {
+  padding: 5px 6px;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.iyf-table th {
+  background: #f8fafc;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.iyf-product-code {
+  display: block;
+  font-weight: 800;
+  color: #334155;
+}
+
+.iyf-product-name {
+  display: block;
+  color: #64748b;
+}
+
+.iyf-table-foot {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  font-size: 10px;
+}
+
+.iyf-link-btn {
+  border: none;
+  background: transparent;
+  color: var(--iyf-green);
+  font-weight: 750;
+  cursor: pointer;
+  padding: 0;
+}
+
+.iyf-info {
+  margin: 8px 0 0;
+  padding: 7px 8px;
+  border-radius: 8px;
+  background: #eff6ff;
+  border: 1px solid #bfdbfe;
+  font-size: 10px;
+  color: #1e40af;
+}
+
+.iyf-warn {
+  margin: 6px 0 0;
+  padding: 7px 8px;
+  border-radius: 8px;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  font-size: 10px;
+  color: #92400e;
+}
+
+.iyf-why-list {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 10px;
+  color: #475569;
+}
+
+.iyf-field {
+  display: grid;
+  gap: 4px;
+  margin-bottom: 8px;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.iyf-field select {
+  min-height: 30px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 0 8px;
+  font-size: 10px;
+}
+
+.iyf-preview-stats {
+  margin: 0 0 8px;
+  display: grid;
+  gap: 4px;
+  font-size: 10px;
+}
+
+.iyf-preview-stats div {
+  display: flex;
+  justify-content: space-between;
+}
+
+.iyf-preview-details {
+  margin: 0 0 10px;
+  padding-left: 16px;
+  font-size: 10px;
+  color: #475569;
+}
+
+.iyf-continue-hint {
+  margin: 6px 0 0;
+  text-align: center;
+  font-size: 9px;
+  color: #64748b;
+}

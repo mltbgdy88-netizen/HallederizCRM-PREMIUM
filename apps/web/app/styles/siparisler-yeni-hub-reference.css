@@ -1,0 +1,186 @@
+/* Yeni Sipariş Hub — siparisler-yeni-hub-acik-mod.png */
+
+@import url("https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600;700&display=swap");
+
+.syh-home {
+  --syh-gold: #d4af37;
+  --syh-gold-soft: rgba(212, 175, 55, 0.35);
+  position: relative;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: clamp(12px, 2vh, 20px);
+  height: 100%;
+  padding: clamp(16px, 2.5vh, 28px) clamp(18px, 2vw, 32px);
+  overflow: hidden;
+  background:
+    radial-gradient(ellipse 80% 60% at 50% 0%, rgba(6, 78, 59, 0.45), transparent 55%),
+    linear-gradient(165deg, #0a1f1a 0%, #0d2820 42%, #061510 100%);
+}
+
+.syh-glow {
+  position: absolute;
+  width: clamp(180px, 28vw, 320px);
+  height: clamp(180px, 28vw, 320px);
+  border-radius: 999px;
+  border: 1px solid var(--syh-gold-soft);
+  pointer-events: none;
+  opacity: 0.55;
+}
+
+.syh-glow--left {
+  left: -8%;
+  top: 18%;
+}
+
+.syh-glow--right {
+  right: -6%;
+  bottom: 22%;
+}
+
+.syh-hero {
+  position: relative;
+  z-index: 1;
+  text-align: center;
+  padding-top: clamp(8px, 1.5vh, 16px);
+}
+
+.syh-hero h1 {
+  margin: 0;
+  font-family: "Cormorant Garamond", Georgia, "Times New Roman", serif;
+  font-size: clamp(32px, 5vh, 52px);
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: var(--syh-gold);
+  text-shadow: 0 2px 24px rgba(212, 175, 55, 0.25);
+}
+
+.syh-hero p {
+  margin: clamp(6px, 1vh, 10px) 0 0;
+  font-size: clamp(12px, 1.4vh, 14px);
+  color: rgba(250, 250, 249, 0.72);
+}
+
+.syh-cards {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: clamp(12px, 1.6vw, 20px);
+  align-items: stretch;
+  min-height: 0;
+  max-width: 980px;
+  width: 100%;
+  margin: 0 auto;
+}
+
+.syh-card {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  justify-items: center;
+  text-align: center;
+  min-height: 0;
+  padding: clamp(20px, 2.8vh, 32px) clamp(14px, 1.4vw, 20px) clamp(16px, 2vh, 24px);
+  border: 1px solid var(--syh-gold-soft);
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(15, 45, 38, 0.92) 0%, rgba(8, 28, 24, 0.96) 100%);
+  box-shadow:
+    0 0 0 1px rgba(212, 175, 55, 0.08) inset,
+    0 12px 40px rgba(0, 0, 0, 0.35),
+    0 0 32px rgba(212, 175, 55, 0.08);
+}
+
+.syh-card-icon-wrap {
+  width: clamp(64px, 8vh, 80px);
+  height: clamp(64px, 8vh, 80px);
+  border-radius: 999px;
+  border: 1px solid var(--syh-gold-soft);
+  display: grid;
+  place-items: center;
+  color: var(--syh-gold);
+  background: radial-gradient(circle at 50% 30%, rgba(212, 175, 55, 0.12), transparent 70%);
+  box-shadow: 0 0 24px rgba(212, 175, 55, 0.12);
+}
+
+.syh-card-icon-svg {
+  width: clamp(28px, 3.5vh, 36px);
+  height: clamp(28px, 3.5vh, 36px);
+}
+
+.syh-card h2 {
+  margin: clamp(12px, 1.6vh, 16px) 0 0;
+  font-size: clamp(15px, 1.8vh, 18px);
+  font-weight: 800;
+  color: #fafaf9;
+}
+
+.syh-card p {
+  margin: clamp(6px, 0.9vh, 8px) 0 0;
+  font-size: clamp(10px, 1.15vh, 12px);
+  line-height: 1.45;
+  color: rgba(250, 250, 249, 0.65);
+  max-width: 24ch;
+}
+
+.syh-card-go {
+  width: 40px;
+  height: 40px;
+  margin-top: clamp(10px, 1.4vh, 14px);
+  border: 1px solid var(--syh-gold-soft);
+  border-radius: 999px;
+  background: rgba(212, 175, 55, 0.08);
+  color: var(--syh-gold);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  align-self: end;
+}
+
+.syh-card-go-icon {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+.syh-features {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0;
+  max-width: 900px;
+  width: 100%;
+  margin: 0 auto;
+  padding: clamp(10px, 1.2vh, 14px) 0;
+  border-top: 1px solid rgba(212, 175, 55, 0.22);
+}
+
+.syh-feature {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: clamp(10px, 1.2vw, 16px);
+  min-width: 0;
+}
+
+.syh-feature-divider {
+  width: 1px;
+  height: 28px;
+  background: rgba(212, 175, 55, 0.28);
+  flex-shrink: 0;
+}
+
+.syh-feature-copy {
+  display: grid;
+  gap: 2px;
+  text-align: center;
+}
+
+.syh-feature-copy strong {
+  font-size: clamp(11px, 1.25vh, 13px);
+  font-weight: 800;
+  color: var(--syh-gold);
+}
+
+.syh-feature-copy span {
+  font-size: clamp(9px, 1.05vh, 11px);
+  color: rgba(250, 250, 249, 0.55);
+}

@@ -1,0 +1,166 @@
+"use client";
+
+import { createMockLoginResponse, isSessionActive } from "@hallederiz/domain";
+import type { AuthState, LoginInput, SessionModel } from "@hallederiz/types";
+import { createContext, useContext, useEffect, useMemo, useState } from "react";
+import { adminRole, defaultTenant, defaultUser } from "../lib/platform-mocks";
+import {
+  clearPersistedDemoAuth,
+  readPersistedDemoAuth,
+  writePersistedDemoAuth
+} from "../lib/auth-demo-session-storage";
+import { mapUserFacingLoginError } from "../lib/user-facing-data-error";
+
+interface LoginResult {
+  success: boolean;
+  message?: string;
+}
+
+interface AuthContextValue {
+  state: AuthState;
+  session: SessionModel | null;
+  accessToken: string | null;
+  login: (input: LoginInput) => Promise<LoginResult>;
+  logout: () => void;
+}
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
+const ENABLE_DEMO_AUTH =
+  process.env.NODE_ENV !== "production" && process.env.NEXT_PUBLIC_ENABLE_DEMO_AUTH === "true";
+
+const AuthContext = createContext<AuthContextValue | undefined>(undefined);
+
+export function AuthProvider({ children }: { children: React.ReactNode }) {
+  const [state, setState] = useState<AuthState>("loading");
+  const [session, setSession] = useState<SessionModel | null>(null);
+  const [accessToken, setAccessToken] = useState<string | null>(null);
+
+  useEffect(() => {
+    const hydrateSession = async () => {
+      try {
+        const response = await fetch(`${API_BASE_URL}/auth/session`, {
+          credentials: "include",
+          cache: "no-store"
+        });
+
+        if (!response.ok) {
+          throw new Error("session_invalid");
+        }
+
+        const payload = (await response.json()) as { item: SessionModel };
+        if (isSessionActive(payload.item)) {
+          clearPersistedDemoAuth();
+          setSession(payload.item);
+          setAccessToken(null);
+          setState("authenticated");
+          return;
+        }
+        throw new Error("session_expired");
+      } catch {
+        if (ENABLE_DEMO_AUTH) {
+          const persisted = readPersistedDemoAuth();
+          if (persisted) {
+            setSession(persisted.session);
+            setAccessToken(persisted.accessToken);
+            setState("authenticated");
+            return;
+          }
+        }
+
+        clearPersistedDemoAuth();
+        setSession(null);
+        setAccessToken(null);
+        setState("anonymous");
+      }
+    };
+
+    void hydrateSession();
+  }, []);
+
+  const login = async (input: LoginInput): Promise<LoginResult> => {
+    if (!input.email || !input.password || !input.tenantSlug) {
+      return {
+        success: false,
+        message: "Lütfen kiracı, e-posta ve parola alanlarını doldurun."
+      };
+    }
+
+    let loginResponse = null as Response | null;
+    let networkError = false;
+    try {
+      loginResponse = await fetch(`${API_BASE_URL}/auth/login`, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify(input),
+        credentials: "include"
+      });
+    } catch {
+      loginResponse = null;
+      networkError = true;
+    }
+
+    if (!loginResponse?.ok && !ENABLE_DEMO_AUTH) {
+      let serverMessage: string | null = null;
+      try {
+        const errorPayload = loginResponse ? ((await loginResponse.json()) as { message?: string }) : null;
+        serverMessage = errorPayload?.message ?? null;
+      } catch {
+        serverMessage = null;
+      }
+      return {
+        success: false,
+        message: mapUserFacingLoginError({ networkError, serverMessage })
+      };
+    }
+
+    const payload =
+      loginResponse && loginResponse.ok
+        ? ((await loginResponse.json()) as { session: SessionModel; accessToken: string })
+        : createMockLoginResponse(input, defaultTenant, defaultUser, [adminRole]);
+
+    const isDemoLogin = ENABLE_DEMO_AUTH && !loginResponse?.ok;
+    setSession(payload.session);
+    setAccessToken(isDemoLogin ? payload.accessToken : null);
+    if (isDemoLogin) {
+      writePersistedDemoAuth(payload.session, payload.accessToken);
+    } else {
+      clearPersistedDemoAuth();
+    }
+    setState("authenticated");
+
+    return { success: true };
+  };
+
+  const logout = (): void => {
+    clearPersistedDemoAuth();
+    void fetch(`${API_BASE_URL}/auth/logout`, {
+      method: "POST",
+      credentials: "include",
+      cache: "no-store"
+    }).catch(() => undefined);
+    setSession(null);
+    setAccessToken(null);
+    setState("anonymous");
+  };
+
+  const value = useMemo<AuthContextValue>(
+    () => ({
+      state,
+      session,
+      accessToken,
+      login,
+      logout
+    }),
+    [state, session, accessToken]
+  );
+
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+}
+
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error("useAuth must be used within AuthProvider");
+  }
+  return context;
+}

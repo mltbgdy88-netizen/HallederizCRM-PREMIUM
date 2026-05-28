@@ -1,0 +1,279 @@
+/* Hızlı İşlem Merkezi — hizli-islem-merkezi-acik-mod.png */
+
+.hi-home {
+  --hi-gap: clamp(8px, 0.9vh, 12px);
+  --hi-pad-x: clamp(14px, 1.4vw, 20px);
+  --hi-pad-y: clamp(12px, 1.2vh, 16px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) minmax(0, 0.72fr);
+  gap: var(--hi-gap);
+  height: 100%;
+  padding: var(--hi-pad-y) var(--hi-pad-x);
+  overflow: hidden;
+  background: #f4f6f8;
+}
+
+.hi-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 0;
+}
+
+.hi-head-copy h1 {
+  margin: 0;
+  font-size: clamp(20px, 2.4vh, 28px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: #0f172a;
+}
+
+.hi-head-copy p {
+  margin: 5px 0 0;
+  font-size: clamp(11px, 1.25vh, 13px);
+  color: #64748b;
+  max-width: 52ch;
+}
+
+.hi-history-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  height: 34px;
+  padding: 0 12px;
+  border: 1px solid #cbd5e1;
+  border-radius: 10px;
+  background: #fff;
+  color: #334155;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+  flex-shrink: 0;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05);
+}
+
+.hi-history-btn-icon {
+  width: 15px;
+  height: 15px;
+  color: #047857;
+}
+
+/* —— Action cards —— */
+.hi-actions {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: var(--hi-gap);
+  min-height: 0;
+  align-items: stretch;
+}
+
+.hi-action-card {
+  display: grid;
+  grid-template-rows: auto auto 1fr auto;
+  justify-items: center;
+  text-align: center;
+  min-height: 0;
+  padding: clamp(14px, 1.6vh, 20px) clamp(10px, 1vw, 14px) clamp(12px, 1.4vh, 16px);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+}
+
+.hi-action-icon-wrap {
+  width: clamp(52px, 6.5vh, 64px);
+  height: clamp(52px, 6.5vh, 64px);
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(180deg, #065f46 0%, #034b3a 100%);
+  color: #facc15;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.hi-action-icon-svg {
+  width: clamp(24px, 3vh, 30px);
+  height: clamp(24px, 3vh, 30px);
+}
+
+.hi-action-card h2 {
+  margin: clamp(10px, 1.2vh, 14px) 0 0;
+  font-size: clamp(14px, 1.6vh, 17px);
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.hi-action-card p {
+  margin: 6px 0 0;
+  font-size: clamp(10px, 1.1vh, 11px);
+  line-height: 1.45;
+  color: #64748b;
+  max-width: 16ch;
+}
+
+.hi-action-go {
+  width: 32px;
+  height: 32px;
+  margin-top: clamp(10px, 1.2vh, 14px);
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #fff;
+  color: #047857;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  align-self: end;
+}
+
+.hi-action-go-icon {
+  width: 14px;
+  height: 14px;
+}
+
+/* —— Son İşlemler —— */
+.hi-recent-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+  min-height: 0;
+  padding: clamp(10px, 1.1vh, 12px) clamp(12px, 1.2vw, 14px);
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.05);
+  overflow: hidden;
+}
+
+.hi-recent-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.hi-recent-head h2 {
+  margin: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  font-size: clamp(13px, 1.45vh, 15px);
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.hi-recent-head-icon {
+  color: #047857;
+}
+
+.hi-recent-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  background: transparent;
+  color: #047857;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  padding: 0;
+}
+
+.hi-recent-link-icon {
+  width: 12px;
+  height: 12px;
+}
+
+.hi-recent-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: var(--hi-gap);
+  min-height: 0;
+  align-items: stretch;
+}
+
+.hi-recent-card {
+  position: relative;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  align-items: start;
+  min-height: 0;
+  padding: 10px 10px 28px;
+  border: 1px solid #e8edf2;
+  border-radius: 12px;
+  background: #f8fafc;
+}
+
+.hi-recent-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+}
+
+.hi-recent-icon--green {
+  background: #d1fae5;
+  color: #047857;
+}
+
+.hi-recent-icon--gold {
+  background: #fef3c7;
+  color: #b45309;
+}
+
+.hi-recent-icon-inner .hi-action-icon-svg {
+  width: 16px;
+  height: 16px;
+}
+
+.hi-recent-body {
+  display: grid;
+  gap: 2px;
+  min-width: 0;
+}
+
+.hi-recent-body strong {
+  font-size: 12px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.hi-recent-ref {
+  font-size: 10px;
+  font-weight: 800;
+  color: #334155;
+}
+
+.hi-recent-customer {
+  font-size: 10px;
+  color: #64748b;
+}
+
+.hi-recent-time {
+  font-size: 10px;
+  color: #94a3b8;
+}
+
+.hi-recent-badge {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  padding: 3px 7px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.hi-recent-badge--done {
+  background: #dcfce7;
+  color: #15803d;
+}
+
+.hi-recent-badge--pending {
+  background: #fef9c3;
+  color: #a16207;
+}

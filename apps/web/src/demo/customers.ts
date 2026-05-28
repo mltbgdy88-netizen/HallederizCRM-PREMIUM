@@ -1,0 +1,48 @@
+﻿import type { Customer, CustomerAccount, CustomerAddress, CustomerContact, CustomerLedgerEntry, CustomerPricingProfile } from "@hallederiz/types";
+import { demoPriceSlots, demoTenantId } from "./pricing";
+
+function profile(customerId: string, slot: CustomerPricingProfile["selectedPriceSlotNo"], label: string, type: "none" | "percentage" | "manual_review" = "none", value?: number): CustomerPricingProfile {
+  return { id: `cpp_${customerId}`, tenantId: demoTenantId, customerId, selectedPriceSlotNo: slot, assignedPriceSlot: slot, priceSlotLabelSnapshot: label, discountPolicy: { type, value, note: type === "manual_review" ? "Pilot risk kontrolu" : undefined }, preferredCurrency: "TRY", active: true };
+}
+
+export const customerPriceSlots = demoPriceSlots;
+
+export const customers: Customer[] = [
+  { id: "customer_1", tenantId: demoTenantId, code: "CUS-001", name: "Aydin Dekor", type: "bayi", taxOffice: "Kadikoy", taxNumber: "1234567890", phone: "0532 111 22 33", email: "satinalma@aydindekor.com", city: "Istanbul", district: "Kadikoy", addressLine: "Egitim Mah. Operasyon Cad. No: 12", active: true, riskLevel: "medium", pricingProfile: profile("customer_1", 4, "Bayi", "percentage", 3), whatsappMatched: true, lastOrderAt: "2026-04-24T12:30:00.000Z", createdAt: "2026-01-04T10:00:00.000Z", updatedAt: "2026-04-26T09:00:00.000Z" },
+  { id: "customer_2", tenantId: demoTenantId, code: "CUS-002", name: "Mira Yapi", type: "kurumsal", taxOffice: "Cankaya", taxNumber: "9876543210", phone: "0533 444 55 66", email: "muhasebe@mirayapi.com", city: "Ankara", district: "Cankaya", addressLine: "Turan Gunes Bulvari No: 80", active: true, riskLevel: "high", pricingProfile: profile("customer_2", 2, "Proje", "manual_review"), whatsappMatched: true, lastOrderAt: "2026-04-22T09:45:00.000Z", createdAt: "2026-01-07T10:00:00.000Z", updatedAt: "2026-04-27T11:00:00.000Z" },
+  { id: "customer_3", tenantId: demoTenantId, code: "CUS-003", name: "Pera Mimarlik", type: "mimar", taxOffice: "Beyoglu", taxNumber: "1122334455", phone: "0535 000 11 22", email: "proje@peramimarlik.com", city: "Istanbul", district: "Beyoglu", addressLine: "Tomtom Mah. Tasarim Sok. No: 5", active: true, riskLevel: "low", pricingProfile: profile("customer_3", 3, "Mimar"), whatsappMatched: false, lastOrderAt: "2026-04-18T15:20:00.000Z", createdAt: "2026-02-02T10:00:00.000Z", updatedAt: "2026-04-19T10:00:00.000Z" },
+  { id: "customer_4", tenantId: demoTenantId, code: "CUS-004", name: "Ege Bayi Market", type: "bayi", taxOffice: "Konak", taxNumber: "3344556677", phone: "0534 222 33 44", email: "ege@bayimarket.com", city: "Izmir", district: "Konak", addressLine: "Alsancak Cad. No: 42", active: true, riskLevel: "low", pricingProfile: profile("customer_4", 4, "Bayi"), whatsappMatched: true, lastOrderAt: "2026-04-20T13:15:00.000Z", createdAt: "2026-01-20T10:00:00.000Z", updatedAt: "2026-04-20T13:15:00.000Z" },
+  { id: "customer_5", tenantId: demoTenantId, code: "CUS-005", name: "Bursa Duvar Bayi", type: "bayi", taxOffice: "Nilufer", taxNumber: "4455667788", phone: "0538 222 11 00", email: "operasyon@bursaduvar.com", city: "Bursa", district: "Nilufer", addressLine: "FSM Bulvari No: 18", active: true, riskLevel: "medium", pricingProfile: profile("customer_5", 4, "Bayi", "percentage", 2), whatsappMatched: true, lastOrderAt: "2026-03-20T09:20:00.000Z", createdAt: "2026-02-14T10:00:00.000Z", updatedAt: "2026-04-01T09:00:00.000Z" },
+  { id: "customer_6", tenantId: demoTenantId, code: "CUS-006", name: "Ayse Yilmaz", type: "perakende", phone: "0542 900 10 10", email: "ayse@example.com", city: "Istanbul", district: "Uskudar", addressLine: "Kisikli Mah. No: 21", active: true, riskLevel: "low", pricingProfile: profile("customer_6", 1, "Perakende"), whatsappMatched: true, lastOrderAt: "2026-04-25T17:10:00.000Z", createdAt: "2026-03-02T10:00:00.000Z", updatedAt: "2026-04-25T17:10:00.000Z" },
+  { id: "customer_7", tenantId: demoTenantId, code: "CUS-007", name: "Mehmet Kaya", type: "perakende", phone: "0544 123 45 67", email: "mehmet@example.com", city: "Ankara", district: "Yenimahalle", addressLine: "Demetevler Cad. No: 7", active: true, riskLevel: "low", pricingProfile: profile("customer_7", 1, "Perakende"), whatsappMatched: false, lastOrderAt: "2026-04-10T12:00:00.000Z", createdAt: "2026-03-12T10:00:00.000Z", updatedAt: "2026-04-10T12:00:00.000Z" },
+  { id: "customer_8", tenantId: demoTenantId, code: "CUS-008", name: "Kuzey Insaat", type: "kurumsal", taxOffice: "Maslak", taxNumber: "5566778899", phone: "0539 777 66 55", email: "finans@kuzeyinsaat.com", city: "Istanbul", district: "Sariyer", addressLine: "Maslak Meydan No: 4", active: true, riskLevel: "blocked", pricingProfile: profile("customer_8", 2, "Proje", "manual_review"), whatsappMatched: true, lastOrderAt: "2026-02-12T09:00:00.000Z", createdAt: "2025-12-20T10:00:00.000Z", updatedAt: "2026-04-18T10:00:00.000Z" }
+];
+
+export const customerAccounts: CustomerAccount[] = [
+  { id: "account_1", tenantId: demoTenantId, customerId: "customer_1", balance: 245000, currency: "TRY", creditLimit: 500000, overdueAmount: 35000, openOfferCount: 2, openOrderCount: 3, lastPaymentAt: "2026-04-22T09:00:00.000Z" },
+  { id: "account_2", tenantId: demoTenantId, customerId: "customer_2", balance: 388450, currency: "TRY", creditLimit: 300000, overdueAmount: 112000, openOfferCount: 1, openOrderCount: 2, lastPaymentAt: "2026-04-16T10:30:00.000Z" },
+  { id: "account_3", tenantId: demoTenantId, customerId: "customer_3", balance: 74300, currency: "TRY", creditLimit: 250000, overdueAmount: 0, openOfferCount: 3, openOrderCount: 1, lastPaymentAt: "2026-04-24T14:15:00.000Z" },
+  { id: "account_4", tenantId: demoTenantId, customerId: "customer_4", balance: 28200, currency: "TRY", creditLimit: 220000, overdueAmount: 0, openOfferCount: 1, openOrderCount: 1, lastPaymentAt: "2026-04-21T12:10:00.000Z" },
+  { id: "account_5", tenantId: demoTenantId, customerId: "customer_5", balance: 156900, currency: "TRY", creditLimit: 260000, overdueAmount: 68500, openOfferCount: 1, openOrderCount: 1, lastPaymentAt: "2026-03-18T10:00:00.000Z" },
+  { id: "account_6", tenantId: demoTenantId, customerId: "customer_6", balance: 0, currency: "TRY", creditLimit: 0, overdueAmount: 0, openOfferCount: 0, openOrderCount: 0, lastPaymentAt: "2026-04-25T18:00:00.000Z" },
+  { id: "account_7", tenantId: demoTenantId, customerId: "customer_7", balance: 8200, currency: "TRY", creditLimit: 0, overdueAmount: 0, openOfferCount: 0, openOrderCount: 0, lastPaymentAt: "2026-04-10T13:00:00.000Z" },
+  { id: "account_8", tenantId: demoTenantId, customerId: "customer_8", balance: 612300, currency: "TRY", creditLimit: 400000, overdueAmount: 241000, openOfferCount: 0, openOrderCount: 2, lastPaymentAt: "2026-02-16T10:30:00.000Z" }
+];
+
+export const customerContacts: CustomerContact[] = customers.map((customer, index) => ({ id: `contact_${index + 1}`, tenantId: demoTenantId, customerId: customer.id, fullName: index === 0 ? "Selin Aydin" : index === 1 ? "Murat Kaya" : index === 2 ? "Deniz Pera" : customer.name, title: customer.type === "perakende" ? "Musteri" : "Yetkili", phone: customer.phone, email: customer.email, isPrimary: true }));
+
+export const customerAddresses: CustomerAddress[] = customers.flatMap((customer, index) => [{ id: `addr_${index + 1}_billing`, tenantId: demoTenantId, customerId: customer.id, type: "billing", title: "Fatura Adresi", city: customer.city, district: customer.district, line: customer.addressLine, isDefault: true }, { id: `addr_${index + 1}_delivery`, tenantId: demoTenantId, customerId: customer.id, type: "delivery", title: "Teslimat Adresi", city: customer.city, district: customer.district, line: customer.addressLine, isDefault: true }]);
+
+export const customerLedgerEntries: CustomerLedgerEntry[] = [
+  { id: "ledger_1", tenantId: demoTenantId, customerId: "customer_1", direction: "debit", amount: 124300, currency: "TRY", description: "SO-2481 siparis borclandirma", referenceType: "order", referenceId: "SO-2481", occurredAt: "2026-04-24T12:30:00.000Z" },
+  { id: "ledger_2", tenantId: demoTenantId, customerId: "customer_1", direction: "credit", amount: 90000, currency: "TRY", description: "PAY-930 tahsilat", referenceType: "payment", referenceId: "PAY-930", occurredAt: "2026-04-22T09:00:00.000Z" },
+  { id: "ledger_3", tenantId: demoTenantId, customerId: "customer_2", direction: "debit", amount: 228100, currency: "TRY", description: "SO-2478 siparis borclandirma", referenceType: "order", referenceId: "SO-2478", occurredAt: "2026-04-22T09:45:00.000Z" },
+  { id: "ledger_4", tenantId: demoTenantId, customerId: "customer_8", direction: "debit", amount: 612300, currency: "TRY", description: "Uzun sureli proje bakiyesi", referenceType: "manual", occurredAt: "2026-02-12T09:00:00.000Z" }
+];
+
+export function getCustomerById(customerId: string): Customer | undefined { return customers.find((customer) => customer.id === customerId); }
+export function getCustomerAccount(customerId: string): CustomerAccount { return customerAccounts.find((account) => account.customerId === customerId) ?? { id: `account_${customerId}`, tenantId: demoTenantId, customerId, balance: 0, currency: "TRY", overdueAmount: 0, openOfferCount: 0, openOrderCount: 0 }; }
+export function getCustomerContacts(customerId: string): CustomerContact[] { return customerContacts.filter((contact) => contact.customerId === customerId); }
+export function getCustomerAddresses(customerId: string): CustomerAddress[] { return customerAddresses.filter((address) => address.customerId === customerId); }
+export function getCustomerLedger(customerId: string): CustomerLedgerEntry[] { return customerLedgerEntries.filter((entry) => entry.customerId === customerId); }
+

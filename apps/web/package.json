@@ -1,0 +1,30 @@
+{
+  "name": "@hallederiz/web",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node scripts/dev.cjs",
+    "dev:clean": "node -e \"const fs=require('fs'); for (const p of ['.runtime-next','.runtime-next-dev','tsconfig.tsbuildinfo']) { try { fs.rmSync(p,{recursive:true,force:true}); } catch {} } console.log('web dev cache cleaned');\"",
+    "build": "next build",
+    "start": "next start",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "clean": "node -e \"console.log('clean: no-op for @hallederiz/web')\""
+  },
+  "dependencies": {
+    "@hallederiz/domain": "workspace:*",
+    "@hallederiz/sdk": "workspace:*",
+    "@hallederiz/types": "workspace:*",
+    "@hallederiz/ui": "workspace:*",
+    "next": "14.2.35",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "@types/react": "^18.3.8",
+    "@types/react-dom": "^18.3.0",
+    "typescript": "^5.6.3"
+  }
+}

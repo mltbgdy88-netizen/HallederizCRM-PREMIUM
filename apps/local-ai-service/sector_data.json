@@ -1,0 +1,16 @@
+{
+  "documents": [
+    {
+      "id": "seed-001",
+      "title": "HallederizCRM Genel Kural",
+      "content": "Müşteri sorularına kısa ve net cevap ver. İstenen bilgi dışında ek detay verme. Şüpheli durumda kullanıcıdan soruyu tekrarlamasını iste.",
+      "tags": ["genel", "yardim", "cevap-kurali"]
+    },
+    {
+      "id": "seed-002",
+      "title": "WhatsApp Operasyon",
+      "content": "Sipariş, depo seçimi ve finansal risk içeren akışlar insan onayı gerektirir. Stok/fiyat/ekstre gibi düşük riskli sorgular otomatik cevaplanabilir.",
+      "tags": ["whatsapp", "operasyon", "onay"]
+    }
+  ]
+}

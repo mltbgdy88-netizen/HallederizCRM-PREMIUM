@@ -1,0 +1,222 @@
+import { resolveWhatsAppReadiness, type IntegrationReadinessView } from "./integration-readiness";
+import { validateLocalAiEndpointUrl } from "./local-ai-url-policy";
+
+export type ServiceHealthStatus = "healthy" | "degraded" | "fallback" | "disabled" | "misconfigured" | "error";
+export type ServiceMode = "live" | "fallback" | "disabled" | "mock";
+
+export interface ServiceHealthResult {
+  service: "ai" | "whatsapp" | "erp" | "factory" | "local-agent";
+  status: ServiceHealthStatus;
+  mode: ServiceMode;
+  configured: boolean;
+  reason: string;
+  lastCheckedAt: string;
+  details: Record<string, unknown>;
+}
+
+function readinessToServiceHealth(view: IntegrationReadinessView, service: ServiceHealthResult["service"]): ServiceHealthResult {
+  return {
+    service,
+    status: view.status,
+    mode: view.mode,
+    configured: view.configured,
+    reason: view.message,
+    lastCheckedAt: view.lastCheckedAt,
+    details: {
+      state: view.state,
+      ready: view.ready,
+      provider: view.provider,
+      reasonCode: view.reasonCode,
+      missingEnv: view.missingEnv,
+      ...view.details
+    }
+  };
+}
+
+interface ValidationResult {
+  configured: boolean;
+  missing: string[];
+}
+
+function validateRequired(keys: string[]) {
+  const missing = keys.filter((key) => {
+    const value = process.env[key];
+    return value === undefined || value === null || `${value}`.trim().length === 0;
+  });
+  return {
+    configured: missing.length === 0,
+    missing
+  } satisfies ValidationResult;
+}
+
+function nowIso() {
+  return new Date().toISOString();
+}
+
+function resolveAiProvider(channelProvider: string | undefined) {
+  return (process.env.AI_PROVIDER ?? channelProvider ?? "local").toLowerCase();
+}
+
+export function validateAiConfig() {
+  const primaryProvider = (process.env.AI_PROVIDER ?? "local").toLowerCase();
+  const llmProvider = resolveAiProvider(process.env.AI_LLM_PROVIDER);
+  const sttProvider = resolveAiProvider(process.env.AI_STT_PROVIDER);
+  const ttsProvider = resolveAiProvider(process.env.AI_TTS_PROVIDER);
+  const externalRequested = [llmProvider, sttProvider, ttsProvider].includes("openai");
+  const localRequested = [llmProvider, sttProvider, ttsProvider].includes("local");
+  const localService = validateLocalAiEndpointUrl({
+    rawUrl: process.env.LOCAL_AI_SERVICE_URL,
+    fallbackUrl: "http://127.0.0.1:8008",
+    allowPublicUrls: process.env.LOCAL_AI_ALLOW_PUBLIC_URLS === "true"
+  });
+  const required = externalRequested
+    ? validateRequired([
+        "OPENAI_API_KEY",
+        "AI_MODEL",
+        "AI_STT_MODEL",
+        "AI_TTS_MODEL",
+        "AI_TTS_VOICE",
+        "AI_TIMEOUT_MS",
+        "AI_RETRY_COUNT"
+      ])
+    : { configured: true, missing: [] };
+
+  const externalConfigured = required.configured;
+  const localConfigured = !localRequested || (localService.configured && localService.allowed);
+  const activeMode: "local" | "external" | "fallback" = localRequested
+    ? "local"
+    : externalRequested && externalConfigured
+      ? "external"
+      : "fallback";
+  const status: ServiceHealthStatus = activeMode === "local"
+    ? !localConfigured
+      ? "misconfigured"
+      : externalRequested && !externalConfigured
+      ? "degraded"
+      : "healthy"
+    : activeMode === "external"
+      ? "healthy"
+      : externalRequested
+        ? "misconfigured"
+        : "fallback";
+
+  return {
+    service: "ai" as const,
+    status,
+    mode: activeMode === "fallback" ? "fallback" : "live",
+    configured: activeMode !== "fallback" && localConfigured,
+    reason:
+      activeMode === "local"
+        ? !localConfigured
+          ? `Lokal AI servis URL ayari gecersiz: ${localService.reason ?? "invalid_url"}.`
+          : externalRequested && !externalConfigured
+          ? "Lokal AI aktif. Harici provider eksik ayar nedeniyle opsiyonel modda bekliyor."
+          : "Lokal AI aktif ve birincil modda hazir."
+        : activeMode === "external"
+          ? "Harici AI provider aktif. Lokal provider opsiyonel olarak acilabilir."
+          : externalRequested
+            ? `Harici AI icin eksik env: ${required.missing.join(", ")}`
+            : "AI fallback modunda calisiyor.",
+    lastCheckedAt: nowIso(),
+    details: {
+      primaryProvider,
+      providers: { llmProvider, sttProvider, ttsProvider },
+      localServiceUrl: localService.value,
+      localTimeoutMs: Number(process.env.LOCAL_AI_TIMEOUT_MS ?? 30000),
+      localStatus: localRequested ? (localConfigured ? "ready" : "misconfigured") : "missing",
+      externalStatus: externalRequested ? (externalConfigured ? "ready" : "missing") : "optional",
+      activeProviderMode: activeMode,
+      localServiceReason: localService.reason,
+      missing: [...required.missing, ...(!localConfigured ? ["LOCAL_AI_SERVICE_URL"] : [])]
+    }
+  } satisfies ServiceHealthResult;
+}
+
+export function validateWhatsAppConfig() {
+  return readinessToServiceHealth(resolveWhatsAppReadiness(), "whatsapp");
+}
+
+export function validateErpConfig() {
+  const provider = process.env.ERP_PROVIDER ?? "mock";
+  const liveRequested = provider === "live";
+  const required = liveRequested
+    ? validateRequired(["ERP_API_BASE_URL", "ERP_TIMEOUT_MS"])
+    : { configured: true, missing: [] };
+  const authModes = [process.env.ERP_API_KEY ? "api_key" : null, process.env.ERP_USERNAME && process.env.ERP_PASSWORD ? "username_password" : null].filter(Boolean);
+  const authConfigured = !liveRequested || authModes.length > 0;
+  const configured = required.configured && authConfigured;
+  const missing = [...required.missing, ...(authConfigured ? [] : ["ERP_API_KEY veya ERP_USERNAME+ERP_PASSWORD"])];
+  return {
+    service: "erp" as const,
+    status: liveRequested ? (configured ? "healthy" : "misconfigured") : "fallback",
+    mode: liveRequested ? (configured ? "live" : "fallback") : "mock",
+    configured,
+    reason: configured ? (liveRequested ? "ERP canli baglanti hazir." : "ERP mock/fallback modunda.") : `Eksik env: ${missing.join(", ")}`,
+    lastCheckedAt: nowIso(),
+    details: {
+      provider,
+      authModes,
+      missing
+    }
+  } satisfies ServiceHealthResult;
+}
+
+export function validateFactoryConfig() {
+  const provider = process.env.FACTORY_PROVIDER ?? "mock";
+  const liveRequested = provider === "live";
+  const required = liveRequested ? validateRequired(["FACTORY_API_BASE_URL", "FACTORY_API_KEY", "FACTORY_TIMEOUT_MS"]) : { configured: true, missing: [] };
+  return {
+    service: "factory" as const,
+    status: liveRequested ? (required.configured ? "healthy" : "misconfigured") : "fallback",
+    mode: liveRequested ? (required.configured ? "live" : "fallback") : "mock",
+    configured: required.configured,
+    reason: required.configured ? (liveRequested ? "Factory canli baglanti hazir." : "Factory mock/fallback modunda.") : `Eksik env: ${required.missing.join(", ")}`,
+    lastCheckedAt: nowIso(),
+    details: {
+      provider,
+      missing: required.missing
+    }
+  } satisfies ServiceHealthResult;
+}
+
+export function validateLocalAgentConfig() {
+  const mode = (process.env.LOCAL_AGENT_MODE ?? "enabled") as "enabled" | "disabled";
+  const required = mode === "enabled" ? validateRequired(["LOCAL_OUTPUT_ROOT", "DEFAULT_PRINTER_NAME", "LOCAL_AGENT_POLL_INTERVAL_MS"]) : { configured: true, missing: [] };
+  const hasHealthSecret = Boolean(process.env.LOCAL_AGENT_HEALTH_SECRET);
+  return {
+    service: "local-agent" as const,
+    status: mode === "disabled" ? "disabled" : required.configured ? "healthy" : "misconfigured",
+    mode: mode === "disabled" ? "disabled" : required.configured ? "live" : "fallback",
+    configured: required.configured,
+    reason: mode === "disabled" ? "Local agent disabled modunda." : required.configured ? "Local agent canli moda hazir." : `Eksik env: ${required.missing.join(", ")}`,
+    lastCheckedAt: nowIso(),
+    details: {
+      mode,
+      hasHealthSecret,
+      missing: required.missing
+    }
+  } satisfies ServiceHealthResult;
+}
+
+export function buildIntegrationsHealthSummary(healthItems: ServiceHealthResult[]) {
+  const severityRank: Record<ServiceHealthStatus, number> = {
+    healthy: 0,
+    degraded: 1,
+    fallback: 2,
+    disabled: 3,
+    misconfigured: 4,
+    error: 5
+  };
+  const highest = healthItems.reduce<ServiceHealthStatus>((acc, item) => {
+    return severityRank[item.status] > severityRank[acc] ? item.status : acc;
+  }, "healthy");
+  return {
+    status: highest,
+    configuredCount: healthItems.filter((item) => item.configured).length,
+    liveCount: healthItems.filter((item) => item.mode === "live").length,
+    fallbackCount: healthItems.filter((item) => item.mode === "fallback" || item.mode === "mock").length,
+    disabledCount: healthItems.filter((item) => item.mode === "disabled").length,
+    lastCheckedAt: nowIso(),
+    services: healthItems
+  };
+}

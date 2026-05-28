@@ -1,0 +1,221 @@
+.gku-home {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+  height: 100%;
+  padding: 8px 12px;
+  overflow: hidden;
+  background: #f4f6f8;
+}
+
+.gku-head h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  color: #065f46;
+}
+
+.gku-head p {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.gku-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 0.55fr) minmax(0, 0.7fr) minmax(0, 1fr) minmax(0, 0.65fr);
+  gap: 8px;
+  min-height: 0;
+}
+
+.gku-folders,
+.gku-list,
+.gku-chat,
+.gku-customer {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.gku-folders {
+  padding: 8px;
+  overflow: auto;
+}
+
+.gku-folders h2 {
+  margin: 8px 0 4px;
+  font-size: 10px;
+  color: #94a3b8;
+  text-transform: uppercase;
+}
+
+.gku-folders ul {
+  margin: 0 0 8px;
+  padding: 0;
+  list-style: none;
+}
+
+.gku-folder,
+.gku-channel {
+  display: flex;
+  justify-content: space-between;
+  padding: 6px 8px;
+  border-radius: 8px;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.gku-folder--active {
+  background: #ecfdf5;
+  color: #065f46;
+  font-weight: 700;
+}
+
+.gku-list {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.gku-list-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  padding: 8px;
+  border-bottom: 1px solid #e2e8f0;
+  font-size: 9px;
+}
+
+.gku-list ul {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  overflow: auto;
+}
+
+.gku-conv {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid #f1f5f9;
+  font-size: 10px;
+}
+
+.gku-conv--selected {
+  border: 1px solid #f59e0b;
+  border-radius: 8px;
+  margin: 4px;
+}
+
+.gku-chat {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+}
+
+.gku-chat header {
+  padding: 8px 10px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.gku-tags span {
+  margin-right: 4px;
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  font-size: 9px;
+}
+
+.gku-tabs {
+  display: flex;
+  gap: 4px;
+  padding: 6px 8px;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.gku-tab {
+  min-height: 26px;
+  padding: 0 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 6px;
+  background: #f8fafc;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.gku-tab--active {
+  background: #ecfdf5;
+  border-color: #047857;
+  color: #065f46;
+}
+
+.gku-messages {
+  padding: 8px;
+  overflow: auto;
+}
+
+.gku-msg {
+  max-width: 80%;
+  margin-bottom: 6px;
+  padding: 8px;
+  border-radius: 10px;
+  background: #f8fafc;
+  font-size: 11px;
+}
+
+.gku-msg--out {
+  margin-left: auto;
+  background: #d1fae5;
+}
+
+.gku-chat footer {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 6px;
+  padding: 8px;
+  border-top: 1px solid #e2e8f0;
+}
+
+.gku-send {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #047857;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.gku-customer {
+  padding: 10px;
+  overflow: auto;
+  font-size: 10px;
+}
+
+.gku-customer dl {
+  display: grid;
+  gap: 4px;
+}
+
+.gku-tag-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin: 8px 0;
+}
+
+.gku-tag-list span {
+  padding: 3px 8px;
+  border-radius: 999px;
+  background: #ecfdf5;
+  color: #065f46;
+  font-size: 9px;
+}
+
+.gku-stats p {
+  display: flex;
+  justify-content: space-between;
+  margin: 4px 0;
+}

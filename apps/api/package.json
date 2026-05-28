@@ -1,0 +1,32 @@
+{
+  "name": "@hallederiz/api",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "node --watch --experimental-specifier-resolution=node --loader ts-node/esm src/index.ts",
+    "build": "tsc -p tsconfig.json",
+    "start": "node --experimental-specifier-resolution=node --loader ts-node/esm src/index.ts",
+    "seed:auth-admin": "node --experimental-specifier-resolution=node --loader ts-node/esm src/scripts/seed-admin-user.ts",
+    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node scripts/run-tests.cjs",
+    "lint": "tsc -p tsconfig.json --noEmit",
+    "clean": "node -e \"console.log('clean: no-op for @hallederiz/api')\""
+  },
+  "dependencies": {
+    "@fastify/cors": "9.0.1",
+    "@hallederiz/ai-contracts": "workspace:*",
+    "@hallederiz/config": "workspace:*",
+    "@hallederiz/database": "workspace:*",
+    "@hallederiz/domain": "workspace:*",
+    "@hallederiz/types": "workspace:*",
+    "@hallederiz/utils": "workspace:*",
+    "exceljs": "^4.4.0",
+    "fastify": "^4.28.1"
+  },
+  "devDependencies": {
+    "@types/node": "^22.7.4",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.6.3"
+  }
+}

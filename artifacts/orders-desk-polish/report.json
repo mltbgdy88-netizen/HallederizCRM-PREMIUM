@@ -1,0 +1,30 @@
+{
+  "capturedAt": "2026-05-22T11:00:57.474Z",
+  "baseUrl": "http://localhost:3000",
+  "viewports": {
+    "orders-1366x768.png": {
+      "horizontalOverflow": false,
+      "hasOrdersDesk": true,
+      "hasPolicyBand": false,
+      "papProfilLeak": false,
+      "onayaGonderCopy": false,
+      "listFooter": true
+    },
+    "orders-1920x1080.png": {
+      "horizontalOverflow": false,
+      "hasOrdersDesk": true,
+      "hasPolicyBand": false,
+      "papProfilLeak": false,
+      "onayaGonderCopy": false,
+      "listFooter": true
+    },
+    "orders-mobile.png": {
+      "horizontalOverflow": false,
+      "hasOrdersDesk": true,
+      "hasPolicyBand": false,
+      "papProfilLeak": false,
+      "onayaGonderCopy": false,
+      "listFooter": true
+    }
+  }
+}

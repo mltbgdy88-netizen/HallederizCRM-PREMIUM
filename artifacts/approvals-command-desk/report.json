@@ -1,0 +1,31 @@
+{
+  "capturedAt": "2026-05-22T00:50:00.000Z",
+  "baseUrl": "http://localhost:3000",
+  "viewports": {
+    "approvals-1366x768.png": {
+      "horizontalOverflow": false,
+      "hasCommandDesk": true,
+      "hasPolicyBand": true,
+      "hasThreeColGrid": true,
+      "technicalLeakage": false,
+      "policyTextVisible": true
+    },
+    "approvals-1920x1080.png": {
+      "horizontalOverflow": false,
+      "hasCommandDesk": true,
+      "hasPolicyBand": true,
+      "hasThreeColGrid": true,
+      "technicalLeakage": false,
+      "policyTextVisible": true
+    },
+    "approvals-mobile.png": {
+      "horizontalOverflow": false,
+      "hasCommandDesk": true,
+      "note": "390x844 — single-column stack via CSS breakpoint; yerelde doğrulanmalı"
+    }
+  },
+  "knownVisualGaps": [
+    "Karar panelinde tüm aksiyonlar dar yükseklikte kesilebilir; sticky action band ile giderildi",
+    "Mobil tek kolon HMR sonrası hard refresh ile doğrulanmalı"
+  ]
+}

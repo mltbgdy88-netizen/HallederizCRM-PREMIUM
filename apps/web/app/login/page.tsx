@@ -1,0 +1,16 @@
+import { Suspense } from "react";
+import { LoginSplitPage } from "../../src/features/auth/components/LoginSplitPage";
+
+export default function LoginSplitRoute() {
+  return (
+    <Suspense
+      fallback={
+        <main className="lgn-split" role="status" aria-busy="true">
+          <p className="lgn-form-head">Giriş ekranı yükleniyor…</p>
+        </main>
+      }
+    >
+      <LoginSplitPage />
+    </Suspense>
+  );
+}

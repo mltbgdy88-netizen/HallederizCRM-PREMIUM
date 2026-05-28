@@ -1,0 +1,223 @@
+.hism-home {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 8px;
+  height: 100%;
+  padding: 8px 12px;
+  overflow: hidden;
+  background: #f4f6f8;
+}
+
+.hism-head h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  color: #065f46;
+}
+
+.hism-head p {
+  margin: 2px 0 0;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.hism-recent-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.hism-recent-row {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.hism-recent-card {
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 10px;
+}
+
+.hism-recent-card > span {
+  display: block;
+  font-weight: 800;
+  color: #047857;
+}
+
+.hism-recent-card footer {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 6px;
+}
+
+.hism-badge {
+  padding: 2px 6px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.hism-badge--pending {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.hism-badge--ok {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.hism-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.55fr);
+  gap: 8px;
+  min-height: 0;
+}
+
+.hism-main {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 8px;
+  min-height: 0;
+}
+
+.hism-form,
+.hism-table-wrap,
+.hism-summary {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  padding: 10px;
+}
+
+.hism-form h2,
+.hism-table-wrap h2,
+.hism-summary h2 {
+  margin: 0 0 8px;
+  font-size: 12px;
+}
+
+.hism-form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.hism-span-2 {
+  grid-column: 1 / -1;
+}
+
+.hism-form label span {
+  display: block;
+  font-size: 10px;
+  color: #64748b;
+  margin-bottom: 3px;
+}
+
+.hism-form input {
+  width: 100%;
+  min-height: 32px;
+  padding: 0 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+}
+
+.hism-table-wrap {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.hism-table-wrap header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.hism-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 10px;
+  overflow: auto;
+}
+
+.hism-table th,
+.hism-table td {
+  padding: 6px 8px;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+}
+
+.hism-summary {
+  display: grid;
+  gap: 8px;
+  align-content: start;
+  overflow: auto;
+}
+
+.hism-summary dl {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  font-size: 10px;
+}
+
+.hism-summary dt {
+  color: #94a3b8;
+}
+
+.hism-grand {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 900;
+  color: #047857;
+}
+
+.hism-summary label span {
+  display: block;
+  font-size: 10px;
+  color: #64748b;
+}
+
+.hism-summary input,
+.hism-summary textarea {
+  width: 100%;
+  margin-top: 3px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 6px 8px;
+  font-size: 10px;
+}
+
+.hism-actions {
+  display: grid;
+  gap: 6px;
+}
+
+.hism-save,
+.hism-approve {
+  min-height: 36px;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.hism-save {
+  border: 1px solid #047857;
+  background: #fff;
+  color: #065f46;
+}
+
+.hism-approve {
+  border: 0;
+  background: #047857;
+  color: #fff;
+}

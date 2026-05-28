@@ -1,0 +1,214 @@
+.wft-home {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 8px;
+  height: 100%;
+  padding: 8px 12px;
+  overflow: hidden;
+  background: #f4f6f8;
+}
+
+.wft-crumb {
+  margin: 0;
+  font-size: 10px;
+  color: #64748b;
+}
+
+.wft-product {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.wft-thumb {
+  width: 48px;
+  height: 48px;
+  border-radius: 10px;
+  background: #e2e8f0;
+}
+
+.wft-status {
+  display: inline-flex;
+  padding: 2px 8px;
+  border-radius: 999px;
+  background: #d1fae5;
+  color: #065f46;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.wft-product h1 {
+  margin: 4px 0;
+  font-size: 16px;
+  font-weight: 900;
+}
+
+.wft-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  font-size: 10px;
+  color: #64748b;
+}
+
+.wft-body {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(0, 0.6fr);
+  gap: 8px;
+  min-height: 0;
+}
+
+.wft-timeline-panel,
+.wft-side {
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+  min-height: 0;
+}
+
+.wft-timeline-panel {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  padding: 10px;
+}
+
+.wft-timeline-panel header {
+  display: flex;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.wft-timeline-panel h2 {
+  margin: 0;
+  font-size: 14px;
+}
+
+.wft-timeline {
+  margin: 10px 0 0;
+  padding: 0 0 0 18px;
+  list-style: none;
+  border-left: 2px solid #d1fae5;
+  overflow: auto;
+}
+
+.wft-timeline li {
+  position: relative;
+  margin-bottom: 14px;
+  padding-left: 12px;
+}
+
+.wft-timeline li::before {
+  content: "";
+  position: absolute;
+  left: -23px;
+  top: 4px;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: #047857;
+  border: 2px solid #fff;
+  box-shadow: 0 0 0 2px #d1fae5;
+}
+
+.wft-timeline time {
+  font-size: 9px;
+  color: #94a3b8;
+}
+
+.wft-event {
+  margin-top: 4px;
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fafafa;
+}
+
+.wft-event-head {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.wft-badge {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.wft-badge--ok {
+  background: #d1fae5;
+  color: #065f46;
+}
+.wft-badge--wait {
+  background: #fef3c7;
+  color: #92400e;
+}
+.wft-badge--sys {
+  background: #ecfdf5;
+  color: #047857;
+}
+.wft-badge--upd {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.wft-event p {
+  margin: 4px 0;
+  font-size: 10px;
+  color: #64748b;
+}
+
+.wft-event footer {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+  color: #94a3b8;
+}
+
+.wft-more {
+  justify-self: center;
+  margin-top: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  padding: 6px 12px;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.wft-side {
+  padding: 10px;
+  overflow: auto;
+  font-size: 10px;
+}
+
+.wft-side h3 {
+  margin: 0 0 8px;
+  font-size: 12px;
+}
+
+.wft-side dl {
+  display: grid;
+  gap: 4px;
+}
+
+.wft-active {
+  display: inline-flex;
+  margin-top: 8px;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: #d1fae5;
+  color: #065f46;
+  font-weight: 800;
+}
+
+.wft-last {
+  margin-top: 8px;
+  color: #64748b;
+}

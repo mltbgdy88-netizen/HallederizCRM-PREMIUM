@@ -1,0 +1,20 @@
+{
+  "app\\gosterge-paneli-test\\gosterge-paneli-test-client.tsx -> @/features/dashboard/components/DashboardGostergePaneliPage": {
+    "id": 46514,
+    "files": [
+      "static/chunks/4357-ec852053a10af0da.js",
+      "static/chunks/3490-656330264666f2fc.js",
+      "static/chunks/741-71a17dd7fac72724.js",
+      "static/chunks/8068-5701e8eb6fd8e53c.js",
+      "static/chunks/6514-54fc5cdcad3fb169.js"
+    ]
+  },
+  "src\\features\\archive\\queries\\get-archive-live-records.ts -> ../../../lib/data-source": {
+    "id": 54357,
+    "files": []
+  },
+  "src\\features\\dashboard\\queries\\get-dashboard-live-snapshot.ts -> ../../../lib/data-source": {
+    "id": 54357,
+    "files": []
+  }
+}

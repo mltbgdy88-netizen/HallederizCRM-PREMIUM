@@ -1,0 +1,24 @@
+import type { ReturnLine, SaleOrder } from "@hallederiz/types";
+
+export function validateReturnLinesAgainstOrder(order: SaleOrder | null, lines: ReturnLine[]): { valid: boolean; blockers: string[] } {
+  const blockers: string[] = [];
+  const orderLineById = new Map((order?.lines ?? []).map((line) => [line.id, line]));
+
+  for (const line of lines) {
+    if (!line.orderLineId) continue;
+    if (!order) {
+      blockers.push(`Iade satiri ${line.productCode}: siparis baglami olmadan siparis satir referansi verilemez.`);
+      continue;
+    }
+    const orderLine = orderLineById.get(line.orderLineId);
+    if (!orderLine) {
+      blockers.push(`Iade satiri ${line.productCode}: siparis satiri bulunamadi (${line.orderLineId}).`);
+      continue;
+    }
+    if (line.quantity > orderLine.quantity) {
+      blockers.push(`Iade satiri ${line.productCode}: miktar (${line.quantity}) siparis satir miktarini (${orderLine.quantity}) asamaz.`);
+    }
+  }
+
+  return { valid: blockers.length === 0, blockers };
+}
