@@ -1,8 +1,6 @@
 ﻿import type { Metadata } from "next";
 import { AppProviders } from "../src/providers/app-providers";
 import "./globals.css";
-import "./styles/dashboard-gosterge-paneli.css";
-import "./styles/whatsapp-operasyon-reference.css";
 import "./styles/ana-sayfa-emerald-gold.css";
 
 export const metadata: Metadata = {
@@ -23,4 +21,5 @@ export default function RootLayout({
     </html>
   );
 }
+
 
