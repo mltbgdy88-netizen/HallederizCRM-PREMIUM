@@ -1,4 +1,4 @@
-import type { Customer, Offer, PriceSlotConfig } from "@hallederiz/types";
+﻿import type { Customer, Offer, PriceSlotConfig } from "@hallederiz/types";
 
 export function OfferLineEditor({
   offer,
@@ -56,3 +56,4 @@ export function OfferLineEditor({
     </section>
   );
 }
+

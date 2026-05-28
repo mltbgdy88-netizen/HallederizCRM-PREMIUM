@@ -14,7 +14,7 @@ export type ApprovalDeskStat = {
 
 export function ApprovalStatsStrip({ stats }: { stats: ApprovalDeskStat[] }) {
   return (
-    <div className="hz-approval-stats" aria-label="Onay Ã¶zetleri">
+    <div className="hz-approval-stats" aria-label="Onay özetleri">
       {stats.map((stat) => (
         <article key={stat.id} className={`hz-approval-stat hz-approval-stat--${stat.tone}`}>
           <span className="hz-approval-stat__icon" aria-hidden>
@@ -30,4 +30,5 @@ export function ApprovalStatsStrip({ stats }: { stats: ApprovalDeskStat[] }) {
     </div>
   );
 }
+
 

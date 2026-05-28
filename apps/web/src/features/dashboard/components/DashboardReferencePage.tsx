@@ -16,8 +16,8 @@ import {
 } from "@/components/reference/icons";
 
 function statusClass(status: string): string {
-  if (status === "BaÅŸarÄ±lÄ±") return "ref-badge ref-badge--success";
-  if (status === "UyarÄ±") return "ref-badge ref-badge--warn";
+  if (status === "Başarılı") return "ref-badge ref-badge--success";
+  if (status === "Uyarı") return "ref-badge ref-badge--warn";
   return "ref-badge ref-badge--info";
 }
 
@@ -28,12 +28,12 @@ export function DashboardReferencePage() {
     <div className="ref-dashboard">
       <header className="ref-dashboard-head">
         <div>
-          <h1>GÃ¶sterge Paneli</h1>
-          <p>GÃ¼nlÃ¼k operasyon vitrini; stok KPI, akÄ±ÅŸ ve AI asistan.</p>
+          <h1>Gösterge Paneli</h1>
+          <p>Günlük operasyon vitrini; stok KPI, akış ve AI asistan.</p>
         </div>
       </header>
 
-      <section className="ref-kpi-row" aria-label="Ã–zet gÃ¶stergeler">
+      <section className="ref-kpi-row" aria-label="Özet göstergeler">
         {kpiCards.map((card) => (
           <article key={card.id} className={`ref-kpi-card ref-kpi-card--${card.tone}`}>
             <div className={`ref-kpi-icon ref-kpi-icon--${card.tone}`}>
@@ -54,12 +54,12 @@ export function DashboardReferencePage() {
         <article className="ref-flow-panel">
           <header className="ref-panel-head">
             <div>
-              <h2>Operasyon AkÄ±ÅŸÄ±</h2>
-              <p>GÃ¼ncel stok, hareket ve sistem bildirimleri.</p>
+              <h2>Operasyon Akışı</h2>
+              <p>Güncel stok, hareket ve sistem bildirimleri.</p>
             </div>
             <div className="ref-panel-tools">
               <button type="button" className="ref-tool-btn">
-                TÃ¼mÃ¼
+                Tümü
                 <IconChevronDown className="ref-tool-btn-icon" />
               </button>
               <button type="button" className="ref-tool-btn ref-tool-btn--primary">
@@ -86,7 +86,7 @@ export function DashboardReferencePage() {
           </ul>
 
           <button type="button" className="ref-flow-footer-btn">
-            TÃ¼m AkÄ±ÅŸÄ± GÃ¶rÃ¼ntÃ¼le
+            Tüm Akışı Görüntüle
             <IconArrowRight className="ref-flow-footer-icon" />
           </button>
         </article>
@@ -98,14 +98,14 @@ export function DashboardReferencePage() {
                 <IconSparkle className="ref-ai-title-icon" />
                 AI Asistan
               </h2>
-              <p>Operasyonel sÃ¼reÃ§lerinizi kolaylaÅŸtÄ±rÄ±n</p>
+              <p>Operasyonel süreçlerinizi kolaylaştırın</p>
             </div>
           </header>
 
           <div className="ref-ai-video">
             <div className="ref-ai-video-inner">
               <span className="ref-ai-video-logo">PREMIUM CRM</span>
-              <p>Operasyon AkÄ±llÄ± YÃ¶netim AsistanÄ±</p>
+              <p>Operasyon Akıllı Yönetim Asistanı</p>
               <button type="button" className="ref-ai-play" aria-label="Videoyu oynat">
                 <IconPlay />
               </button>
@@ -120,7 +120,7 @@ export function DashboardReferencePage() {
           </div>
 
           <p className="ref-ai-prompt">
-            Stok, hareket, transfer ve raporlama sÃ¼reÃ§lerinizde size nasÄ±l yardÄ±mcÄ± olabilirim?
+            Stok, hareket, transfer ve raporlama süreçlerinizde size nasıl yardımcı olabilirim?
           </p>
 
           <ul className="ref-ai-actions">
@@ -136,11 +136,12 @@ export function DashboardReferencePage() {
 
           <button type="button" className="ref-ai-chat-btn">
             <IconChat className="ref-ai-chat-icon" />
-            AI Asistan ile Sohbet BaÅŸlat
+            AI Asistan ile Sohbet Başlat
           </button>
         </article>
       </section>
     </div>
   );
 }
+
 

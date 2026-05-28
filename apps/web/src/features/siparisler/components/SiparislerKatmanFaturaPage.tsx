@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { SiparisBadge, SiparisKatmanBreadcrumbHead, SiparislerKatmanTabs } from "./SiparislerKatmanShared";
@@ -186,3 +186,4 @@ export function SiparislerKatmanFaturaPage() {
     </div>
   );
 }
+

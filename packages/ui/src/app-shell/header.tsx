@@ -4,13 +4,13 @@ import type { ReactNode } from "react";
 export interface HeaderProps {
   title: string;
   subtitle: string;
-  /** true: sol baÅŸlÄ±k / breadcrumb / alt baÅŸlÄ±k gÃ¶sterilmez (sayfa kendi baÅŸlÄ±ÄŸÄ±nÄ± kullanÄ±r). */
+  /** true: sol başlık / breadcrumb / alt başlık gösterilmez (sayfa kendi başlığını kullanır). */
   suppressPageMeta?: boolean;
   breadcrumb?: string;
   searchPlaceholder?: string;
   /** Replaces the left title / breadcrumb / subtitle block (e.g. dashboard greeting). */
   leadingSlot?: ReactNode;
-  /** Inserted between search and trailing actions (e.g. â€œ+ HÄ±zlÄ± Ä°ÅŸlemâ€). */
+  /** Inserted between search and trailing actions (e.g. “+ Hızlı İşlem”). */
   toolbarSlot?: ReactNode;
   notificationSlot: ReactNode;
   themeSlot?: ReactNode;
@@ -26,7 +26,7 @@ export function Header({
   subtitle,
   suppressPageMeta = false,
   breadcrumb,
-  searchPlaceholder = "Global arama (yakÄ±nda)",
+  searchPlaceholder = "Global arama (yakında)",
   leadingSlot,
   toolbarSlot,
   notificationSlot,
@@ -76,7 +76,7 @@ export function Header({
           <details className="hz-header-actions-drawer">
             <summary className="hz-header-actions-drawer-trigger" aria-label="Aksiyonlar">
               <span className="hz-sr-only">Aksiyonlar</span>
-              <span aria-hidden>â‹¯</span>
+              <span aria-hidden>⋯</span>
             </summary>
             <div className="hz-header-actions">
               {notificationSlot}
@@ -89,4 +89,5 @@ export function Header({
     </div>
   );
 }
+
 

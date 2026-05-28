@@ -45,13 +45,13 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
   const isDashboard = normalizedPath === "/dashboard";
   const isApprovalsDesk = normalizedPath === "/onaylar";
 
-  const displayFirstName = session?.user.fullName?.trim().split(" ")[0] ?? "MevlÃ¼t";
-  const displayShortName = session?.user.fullName?.trim() || "MevlÃ¼t K.";
+  const displayFirstName = session?.user.fullName?.trim().split(" ")[0] ?? "Mevlüt";
+  const displayShortName = session?.user.fullName?.trim() || "Mevlüt K.";
 
   const dashboardLeading = (
     <div className="hz-header-cc-leading">
       <h2 className="hz-header-cc-title">Ana Sayfa</h2>
-      <p className="hz-header-cc-sub">HoÅŸ geldiniz, {displayFirstName} ğŸ‘‹</p>
+      <p className="hz-header-cc-sub">Hoş geldiniz, {displayFirstName} g���</p>
     </div>
   );
 
@@ -94,10 +94,10 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 className="hz-header-icon-button hz-header-icon-button--ghost"
-                aria-label="YardÄ±m"
+                aria-label="Yardım"
               >
                 <span aria-hidden>?</span>
-                <span className="hz-sr-only">YardÄ±m</span>
+                <span className="hz-sr-only">Yardım</span>
               </button>
             </>
           }
@@ -105,7 +105,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
           userSlot={
             <ShellUserMenu
               fullName={displayShortName}
-              roleLabel={session?.roles[0]?.name ?? "YÃ¶netici"}
+              roleLabel={session?.roles[0]?.name ?? "Yönetici"}
               onLogout={logout}
             />
           }
@@ -116,4 +116,5 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
     </AppShell>
   );
 }
+
 

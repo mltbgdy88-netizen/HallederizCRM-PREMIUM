@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const DEMO_MODAL = {
   title: "DEMO MODU",
   lead: "Bu bir demo ortamdır. Gerçek veriler kullanılmamaktadır.",
@@ -40,7 +40,7 @@ export const OFFLINE_SHELL_HEADER = {
 };
 
 export const OFFLINE_SHELL_FOOTER = {
-  title: "ÇEVRİMDIŞI MOD",
+  title: "ÇEVRİMDI�?I MOD",
   hint: "Bazı özellikler sınırlı olabilir.",
   link: "Detaylar >"
 };
@@ -50,7 +50,7 @@ export const OFFLINE_STATE = {
   desc: "Sunucuya şu anda ulaşılamıyor. Lütfen internet bağlantınızı kontrol edin veya daha sonra yeniden deneyin.",
   retry: "Yeniden Dene",
   badge: "OFFLINE MOD",
-  note: "Şu anda çevrimdışısınız. Verileriniz yerel olarak saklanıyor. Bağlantı sağlandığında otomatik olarak senkronize edilecektir.",
+  note: "�?u anda çevrimdışısınız. Verileriniz yerel olarak saklanıyor. Bağlantı sağlandığında otomatik olarak senkronize edilecektir.",
   banner: "Bağlantı Sorunu. İnternet bağlantınızı kontrol edin veya ağ yöneticinizle iletişime geçin.",
   bannerAction: "Bağlantı Durumunu Kontrol Et"
 };
@@ -61,3 +61,4 @@ export const UNAUTHORIZED_STATE = {
   back: "Geri Dön",
   home: "Ana Sayfa"
 };
+

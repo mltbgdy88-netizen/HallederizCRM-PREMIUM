@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import test from "node:test";
 import {
   MSG_DOC_DOWNLOAD_NOT_READY,
@@ -79,3 +79,4 @@ test("resolveDocumentDownloadUserMessage maps 202 to preparing copy", () => {
 test("resolveDocumentDownloadUserMessage maps 404 to not ready copy", () => {
   assert.equal(resolveDocumentDownloadUserMessage({ httpStatus: 404 }), MSG_DOC_DOWNLOAD_NOT_READY);
 });
+

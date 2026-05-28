@@ -1,4 +1,4 @@
-import type { AppShellNavItem } from "./types";
+﻿import type { AppShellNavItem } from "./types";
 
 export type SidebarNavSection = {
   title: string;
@@ -169,3 +169,4 @@ export function Sidebar({
     </div>
   );
 }
+

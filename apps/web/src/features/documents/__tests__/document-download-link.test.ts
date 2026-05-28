@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import test from "node:test";
 import type { Document } from "@hallederiz/types";
 import { hasDownloadablePdf } from "../utils/document-delivery-utils";
@@ -43,3 +43,4 @@ test("hasDownloadablePdf rejects empty url", () => {
 test("hasDownloadablePdf rejects pending without verified url", () => {
   assert.equal(hasDownloadablePdf(baseDocument), false);
 });
+

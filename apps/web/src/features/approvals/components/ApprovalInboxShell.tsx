@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   FilterChip,
@@ -554,3 +554,4 @@ export function ApprovalInboxShell() {
     </main>
   );
 }
+

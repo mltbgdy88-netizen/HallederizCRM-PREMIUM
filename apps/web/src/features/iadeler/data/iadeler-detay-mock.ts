@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const IDM_PAGE = {
   title: "İadeler Detay Masası",
   subtitle: "İade talebinin detaylarını görüntüleyin, onay sürecini yönetin ve stok etkisini takip edin.",
@@ -12,7 +12,7 @@ export const IDM_HERO = {
   creator: "Yusuf Kaya",
   orderNo: "SIP-2025-1587",
   orderDate: "10.05.2025",
-  customer: "ABC Otomasyon San. ve Tic. Ltd. Şti.",
+  customer: "ABC Otomasyon San. ve Tic. Ltd. �?ti.",
   reason: "Arızalı / Çalışmıyor",
   note: "Cihaz çalışmıyor, ekran hiç açılmıyor."
 } as const;
@@ -113,3 +113,4 @@ export const IDM_WAREHOUSE = {
   note: "Ürün arızalı olarak iade edilmiştir.",
   file: { name: "ariza-videosu.mp4", size: "23.6 MB" }
 } as const;
+

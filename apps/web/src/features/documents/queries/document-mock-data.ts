@@ -1,4 +1,4 @@
-import { buildDocumentDeliveryRequest, buildDocumentRecord } from "@hallederiz/domain";
+﻿import { buildDocumentDeliveryRequest, buildDocumentRecord } from "@hallederiz/domain";
 import type { Document, DocumentDeliveryStatus, DocumentType } from "@hallederiz/types";
 import { customers } from "../../customers/queries/customer-mock-data";
 import { getDeliveryMockData } from "../../deliveries/queries/delivery-mock-data";
@@ -193,3 +193,4 @@ export function getDocumentDeliveryStatusLabel(status?: DocumentDeliveryStatus):
 }
 
 export { customers };
+

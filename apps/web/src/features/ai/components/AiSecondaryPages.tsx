@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { AiInsight, AiProposal, Approval } from "@hallederiz/types";
 import { FilterActions, FilterBar, MetricCard, PageHeader, SplitContentLayout } from "@hallederiz/ui";
@@ -374,3 +374,4 @@ export function AiInsightsPage() {
     </div>
   );
 }
+

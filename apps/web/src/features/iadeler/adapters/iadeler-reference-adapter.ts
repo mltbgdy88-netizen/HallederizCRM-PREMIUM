@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import type { Customer, Return, ReturnStatus } from "@hallederiz/types";
 import { getReturns } from "../../returns/queries/get-returns";
 import { getReturnStatusLabel } from "../../returns/queries/return-mock-data";
@@ -150,3 +150,4 @@ export async function loadIadelerReferenceLive(): Promise<IadelerReferenceSnapsh
 }
 
 export const IADELER_REFERENCE_INITIAL = loadIadelerReferenceDemo();
+

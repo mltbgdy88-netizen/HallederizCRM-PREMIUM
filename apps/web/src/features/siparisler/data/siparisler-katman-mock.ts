@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type SkmTabId =
   | "ozet"
   | "satirlar"
@@ -24,7 +24,7 @@ export const SKM_HEADER = {
   orderId: "SP-24031",
   orderDate: "23.05.2025 14:35",
   status: "Onaylandı",
-  customer: "ABC Makina Sanayi A.Ş.",
+  customer: "ABC Makina Sanayi A.�?.",
   customerBadge: "Kurumsal",
   customerCode: "MUS-00015",
   email: "info@abcmakina.com",
@@ -102,7 +102,7 @@ export const SKM_SATIRLAR_HEADER = {
   back: "← Siparişlere Dön",
   title: "Sipariş Yönetimi",
   orderNo: "SIP-2025-000246",
-  customer: "ABC Makina San. Ltd. Şti.",
+  customer: "ABC Makina San. Ltd. �?ti.",
   orderDate: "22.05.2025",
   deliveryDate: "29.05.2025",
   status: "Onaylandı",
@@ -203,7 +203,7 @@ export const SKM_FATURA_HEADER = {
   orderId: "SO-2025-000246",
   status: "Onaylandı",
   created: "Oluşturulma: 15.05.2025 14:30",
-  customer: "Müşteri: ABC Makina San. ve Tic. A.Ş."
+  customer: "Müşteri: ABC Makina San. ve Tic. A.�?."
 } as const;
 
 export const SKM_FATURA_KPIS = [
@@ -249,7 +249,7 @@ export const SKM_FATURA_ROWS = [
 export const SKM_FATURA_CONTEXT = {
   title: "Fatura Bağlamı",
   orderNo: "SO-2025-000246",
-  customer: "ABC Makina San. ve Tic. A.Ş.",
+  customer: "ABC Makina San. ve Tic. A.�?.",
   date: "15.05.2025",
   total: "₺68.750,00",
   remaining: "₺25.000,00",
@@ -268,7 +268,7 @@ export const SKM_FATURA_CONTEXT = {
 export const SKM_IADE_META = {
   breadcrumb: ["Ana Sayfa", "Siparişler", "Sipariş Detayı", "İadeler"],
   orderNo: "SP-2025-000246",
-  customer: "ABC İnşaat A.Ş.",
+  customer: "ABC İnşaat A.�?.",
   orderDate: "12.06.2025 14:35",
   total: "₺48.250,00",
   payStatus: "Ödendi",
@@ -301,7 +301,7 @@ export const SKM_ODEME_HEADER = {
   orderId: "SO-2025-000124",
   status: "Onaylandı",
   created: "28.05.2025 14:30",
-  customer: "ABC Makina San. ve Tic. A.Ş."
+  customer: "ABC Makina San. ve Tic. A.�?."
 } as const;
 
 export const SKM_ODEME_KPIS = [
@@ -360,7 +360,7 @@ export const SKM_ODEME_CONTEXT = {
 export const SKM_TESLIMAT_ORDER = {
   orderNo: "SIP-2025-000246",
   status: "Onaylandı",
-  customer: "Anadolu Yapı A.Ş.",
+  customer: "Anadolu Yapı A.�?.",
   orderDate: "15.05.2025 10:35",
   total: "₺125.430,00",
   remaining: "₺25.430,00"
@@ -380,7 +380,7 @@ export const SKM_TESLIMAT_CONTEXT = {
   routeCode: "R-2025-0058",
   routeName: "Anadolu Yapı - Merkez Rota",
   start: "Merkez Depo",
-  end: "Anadolu Yapı A.Ş.",
+  end: "Anadolu Yapı A.�?.",
   distance: "48 km",
   duration: "1 sa 25 dk",
   driver: "Mehmet Yılmaz",
@@ -403,7 +403,7 @@ export const SKM_TIMELINE_HEADER = {
   breadcrumb: ["Siparişler", "Sipariş Detayı"],
   orderId: "SO-2025-00568",
   status: "Onaylandı",
-  meta: "Oluşturulma: 24.05.2025 10:32 • Müşteri: ABC Makina San. ve Tic. A.Ş."
+  meta: "Oluşturulma: 24.05.2025 10:32 • Müşteri: ABC Makina San. ve Tic. A.�?."
 } as const;
 
 export const SKM_TIMELINE_EVENTS = [
@@ -420,7 +420,7 @@ export const SKM_TIMELINE_EVENTS = [
     time: "24.05.2025 14:10",
     actor: "Zeynep Demir, Satış Uzmanı",
     title: "Sipariş Güncellendi",
-    desc: "Sipariş bilgileri güncellendi. • Teslimat Tarihi: 28.05.2025 → 30.05.2025 • Ödeme Şartı: 30 Gün → 45 Gün • Not eklendi: Müşteri acil teslimat talep etti.",
+    desc: "Sipariş bilgileri güncellendi. • Teslimat Tarihi: 28.05.2025 → 30.05.2025 • Ödeme �?artı: 30 Gün → 45 Gün • Not eklendi: Müşteri acil teslimat talep etti.",
     tone: "blue" as const
   },
   {
@@ -453,7 +453,7 @@ export const SKM_TIMELINE_CONTEXT = {
   title: "Sipariş Bağlamı",
   orderNo: "SO-2025-00568",
   status: "Onaylandı",
-  customer: "ABC Makina San. ve Tic. A.Ş.",
+  customer: "ABC Makina San. ve Tic. A.�?.",
   total: "₺86.780,00",
   created: "24.05.2025 10:32",
   delivery: "30.05.2025",
@@ -474,3 +474,4 @@ export const SKM_TIMELINE_CONTEXT = {
   ],
   actions: ["Sipariş Yazdır", "Fatura Oluştur", "Sevkiyat Oluştur", "İptal Et"]
 } as const;
+

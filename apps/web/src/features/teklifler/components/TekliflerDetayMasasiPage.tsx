@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import type { TdmTab } from "@/features/teklifler/data/teklifler-detay-mock";
@@ -280,3 +280,4 @@ export function TekliflerDetayMasasiPage({ offerId }: { offerId?: string } = {})
     </div>
   );
 }
+

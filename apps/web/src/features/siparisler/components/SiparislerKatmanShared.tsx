@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -283,3 +283,4 @@ export function SkmKpiIcon({ tone }: { tone: string }) {
     </span>
   );
 }
+

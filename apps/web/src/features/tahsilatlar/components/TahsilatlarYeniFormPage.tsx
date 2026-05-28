@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { StokOperasyonPage } from "@/features/stok/components/StokOperasyonPage";
@@ -212,3 +212,4 @@ export function TahsilatlarYeniFormPage() {
     </div>
   );
 }
+

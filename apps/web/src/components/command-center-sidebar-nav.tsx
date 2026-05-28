@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { AppShellNavItem, SidebarNavSection } from "@hallederiz/ui";
 import { LucideIcon, type LucideIconName } from "./icons/lucide-icons";
@@ -39,3 +39,4 @@ export function buildCommandCenterSidebarNavSections(): SidebarNavSection[] {
     }
   ];
 }
+

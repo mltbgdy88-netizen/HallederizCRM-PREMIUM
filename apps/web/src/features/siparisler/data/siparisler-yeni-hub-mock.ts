@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type SiparisYeniCard = {
   id: string;
   title: string;
@@ -41,3 +41,4 @@ export const SYH_FEATURES: SiparisYeniFeature[] = [
   { id: "smart", title: "Akıllı Yönetim", subtitle: "Verimli iş süreçleri" },
   { id: "support", title: "7/24 Destek", subtitle: "Her zaman yanınızdayız" }
 ];
+

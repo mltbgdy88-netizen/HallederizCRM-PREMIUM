@@ -1,4 +1,4 @@
-import type { HTMLAttributes, ReactNode } from "react";
+﻿import type { HTMLAttributes, ReactNode } from "react";
 
 export type DataTableDensity = "default" | "compact";
 
@@ -74,3 +74,4 @@ export function DataTableShell({
 export function DataTableFooter({ children }: { children: ReactNode }) {
   return <div className="hz-ui-data-table-footer">{children}</div>;
 }
+

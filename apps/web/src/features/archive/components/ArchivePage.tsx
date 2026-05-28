@@ -31,7 +31,7 @@ import type {
 
 function buildArchiveKpi(rows: ArchiveRecord[]) {
   if (!rows.length) {
-    return { total: 0, today: 0, approvedDocs: 0, pendingOps: 0, risky: 0, retention: "â€”" };
+    return { total: 0, today: 0, approvedDocs: 0, pendingOps: 0, risky: 0, retention: "—" };
   }
   const todayStart = new Date();
   todayStart.setHours(0, 0, 0, 0);
@@ -41,7 +41,7 @@ function buildArchiveKpi(rows: ArchiveRecord[]) {
     approvedDocs: rows.filter((row) => row.status === "onaylandi" || row.status === "arsivlendi").length,
     pendingOps: rows.filter((row) => row.status === "bekliyor").length,
     risky: rows.filter((row) => row.status === "riskli").length,
-    retention: "5 yÄ±l"
+    retention: "5 yıl"
   };
 }
 
@@ -56,7 +56,7 @@ function formatArchiveTime(iso: string): string {
 function statusLabel(s: ArchiveRecordStatus): string {
   switch (s) {
     case "onaylandi":
-      return "OnaylandÄ±";
+      return "Onaylandı";
     case "bekliyor":
       return "Bekliyor";
     case "reddedildi":
@@ -64,7 +64,7 @@ function statusLabel(s: ArchiveRecordStatus): string {
     case "riskli":
       return "Riskli";
     case "arsivlendi":
-      return "ArÅŸivlendi";
+      return "Arşivlendi";
     default:
       return s;
   }
@@ -79,11 +79,11 @@ function sourceLabel(src: ArchiveSourceKind): string {
     case "ai":
       return "AI";
     case "kullanici":
-      return "KullanÄ±cÄ±";
+      return "Kullanıcı";
     case "sistem":
       return "Sistem";
     case "ice_aktar":
-      return "Ä°Ã§e aktar";
+      return "İçe aktar";
     default:
       return src;
   }
@@ -175,7 +175,7 @@ export function ArchivePage() {
       .catch(() => {
         if (!active) return;
         setLiveRows([]);
-        setLiveMessage("ArÅŸiv kayÄ±tlarÄ± ÅŸu anda alÄ±namÄ±yor.");
+        setLiveMessage("Arşiv kayıtları şu anda alınamıyor.");
         setLiveReady(false);
         setLiveLoading(false);
       });
@@ -227,7 +227,7 @@ export function ArchivePage() {
 
   const notLiveAction = useCallback(
     (key: string, detail: string) => {
-      lockAction(key, `Bu iÅŸlem henÃ¼z canlÄ± kullanÄ±ma baÄŸlÄ± deÄŸil. ${detail}`);
+      lockAction(key, `Bu işlem henüz canlı kullanıma bağlı değil. ${detail}`);
     },
     [lockAction]
   );
@@ -240,23 +240,23 @@ export function ArchivePage() {
     setDateFrom("");
     setDateTo("");
     setUserFilter("");
-    pushToast("Filtreler sÄ±fÄ±rlandÄ±.");
+    pushToast("Filtreler sıfırlandı.");
   }, [pushToast]);
 
   const navigateSafe = useCallback(
     (href: string) => {
-      pushToast("YÃ¶nlendiriliyorâ€¦");
+      pushToast("Yönlendiriliyor…");
       router.push(href);
     },
     [pushToast, router]
   );
 
   const categoryChips: { key: ArchiveCategoryFilter; label: string }[] = [
-    { key: "all", label: "TÃ¼m KayÄ±tlar" },
-    { key: "siparis", label: "SipariÅŸ" },
+    { key: "all", label: "Tüm Kayıtlar" },
+    { key: "siparis", label: "Sipariş" },
     { key: "tahsilat", label: "Tahsilat" },
     { key: "onay", label: "Onay" },
-    { key: "iade", label: "Ä°ade" },
+    { key: "iade", label: "İade" },
     { key: "fatura", label: "Fatura" },
     { key: "belge", label: "Belge" }
   ];
@@ -267,42 +267,42 @@ export function ArchivePage() {
         <div className="hz-archive-main">
           <header className="hz-archive-topbar">
             <div className="hz-archive-topbar-text">
-              <h1 className="hz-archive-topbar-title">ArÅŸiv Operasyon Merkezi</h1>
-              <p className="hz-archive-topbar-sub">GeÃ§miÅŸ iÅŸlemler, belgeler ve denetim kayÄ±tlarÄ±nÄ± tek ekranda yÃ¶netin.</p>
+              <h1 className="hz-archive-topbar-title">Arşiv Operasyon Merkezi</h1>
+              <p className="hz-archive-topbar-sub">Geçmiş işlemler, belgeler ve denetim kayıtlarını tek ekranda yönetin.</p>
             </div>
             <div className="hz-archive-topbar-actions">
               <button
                 type="button"
                 className="hz-archive-toolbar-btn hz-archive-toolbar-btn--primary"
                 disabled={!!actionLocks.upload}
-                onClick={() => notLiveAction("upload", "Belge yÃ¼kleme baÄŸlantÄ±sÄ± gerekir.")}
+                onClick={() => notLiveAction("upload", "Belge yükleme bağlantısı gerekir.")}
               >
                 <IconUpload size={15} />
-                Belge YÃ¼kle
+                Belge Yükle
               </button>
               <button
                 type="button"
                 className="hz-archive-toolbar-btn hz-archive-toolbar-btn--outline"
                 disabled={!!actionLocks.export}
-                onClick={() => notLiveAction("export", "DÄ±ÅŸa aktarma henÃ¼z baÄŸlÄ± deÄŸil.")}
+                onClick={() => notLiveAction("export", "Dışa aktarma henüz bağlı değil.")}
               >
                 <IconExternalLink size={14} />
-                DÄ±ÅŸa Aktar
+                Dışa Aktar
               </button>
               <button
                 type="button"
                 className="hz-archive-toolbar-btn hz-archive-toolbar-btn--outline"
                 disabled={!!actionLocks.bulk}
-                onClick={() => notLiveAction("bulk", "Toplu indirme henÃ¼z baÄŸlÄ± deÄŸil.")}
+                onClick={() => notLiveAction("bulk", "Toplu indirme henüz bağlı değil.")}
               >
                 <IconDownload size={15} />
-                Toplu Ä°ndir
+                Toplu İndir
               </button>
               <button
                 type="button"
                 className="hz-archive-toolbar-btn hz-archive-toolbar-btn--outline"
                 disabled={!!actionLocks.audit}
-                onClick={() => notLiveAction("audit", "Denetim raporu henÃ¼z baÄŸlÄ± deÄŸil.")}
+                onClick={() => notLiveAction("audit", "Denetim raporu henüz bağlı değil.")}
               >
                 <IconShieldCheck size={15} />
                 Denetim Raporu
@@ -310,13 +310,13 @@ export function ArchivePage() {
             </div>
           </header>
 
-          <section className="hz-archive-kpi-strip" aria-label="Ã–zet gÃ¶stergeler">
+          <section className="hz-archive-kpi-strip" aria-label="Özet göstergeler">
             <div className="hz-archive-kpi hz-archive-kpi--info">
               <span className="hz-archive-kpi-ico" aria-hidden>
                 <IconDatabase size={15} />
               </span>
               <span className="hz-archive-kpi-text">
-                <span className="hz-archive-kpi-label">Toplam KayÄ±t</span>
+                <span className="hz-archive-kpi-label">Toplam Kayıt</span>
                 <span className="hz-archive-kpi-value">{kpi.total}</span>
               </span>
             </div>
@@ -325,7 +325,7 @@ export function ArchivePage() {
                 <IconClock size={15} />
               </span>
               <span className="hz-archive-kpi-text">
-                <span className="hz-archive-kpi-label">BugÃ¼n Eklenen</span>
+                <span className="hz-archive-kpi-label">Bugün Eklenen</span>
                 <span className="hz-archive-kpi-value">{kpi.today}</span>
               </span>
             </div>
@@ -334,7 +334,7 @@ export function ArchivePage() {
                 <IconCheckCircle size={15} />
               </span>
               <span className="hz-archive-kpi-text">
-                <span className="hz-archive-kpi-label">OnaylÄ± Belge</span>
+                <span className="hz-archive-kpi-label">Onaylı Belge</span>
                 <span className="hz-archive-kpi-value">{kpi.approvedDocs}</span>
               </span>
             </div>
@@ -343,7 +343,7 @@ export function ArchivePage() {
                 <IconArrowRightCircle size={15} />
               </span>
               <span className="hz-archive-kpi-text">
-                <span className="hz-archive-kpi-label">Bekleyen Ä°ÅŸlem</span>
+                <span className="hz-archive-kpi-label">Bekleyen İşlem</span>
                 <span className="hz-archive-kpi-value">{kpi.pendingOps}</span>
               </span>
             </div>
@@ -352,7 +352,7 @@ export function ArchivePage() {
                 <IconAlertTriangle size={15} />
               </span>
               <span className="hz-archive-kpi-text">
-                <span className="hz-archive-kpi-label">Riskli KayÄ±t</span>
+                <span className="hz-archive-kpi-label">Riskli Kayıt</span>
                 <span className="hz-archive-kpi-value">{kpi.risky}</span>
               </span>
             </div>
@@ -361,13 +361,13 @@ export function ArchivePage() {
                 <IconArchive size={15} />
               </span>
               <span className="hz-archive-kpi-text">
-                <span className="hz-archive-kpi-label">Saklama SÃ¼resi</span>
+                <span className="hz-archive-kpi-label">Saklama Süresi</span>
                 <span className="hz-archive-kpi-value">{kpi.retention}</span>
               </span>
             </div>
           </section>
 
-          <nav className="hz-archive-category-chips" aria-label="ArÅŸiv kategorileri">
+          <nav className="hz-archive-category-chips" aria-label="Arşiv kategorileri">
             {categoryChips.map((chip) => (
               <button
                 key={chip.key}
@@ -392,7 +392,7 @@ export function ArchivePage() {
                   <input
                     id="hz-archive-q"
                     className="hz-archive-filter-input hz-archive-filter-input--with-icon"
-                    placeholder="Belge no, cari, iÅŸlem, etiket"
+                    placeholder="Belge no, cari, işlem, etiket"
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
                   />
@@ -408,11 +408,11 @@ export function ArchivePage() {
                   value={category}
                   onChange={(e) => setCategory(e.target.value as ArchiveCategoryFilter)}
                 >
-                  <option value="all">TÃ¼mÃ¼</option>
-                  <option value="siparis">SipariÅŸ</option>
+                  <option value="all">Tümü</option>
+                  <option value="siparis">Sipariş</option>
                   <option value="tahsilat">Tahsilat</option>
                   <option value="fatura">Fatura</option>
-                  <option value="iade">Ä°ade</option>
+                  <option value="iade">İade</option>
                   <option value="whatsapp">WhatsApp</option>
                   <option value="stok">Stok</option>
                   <option value="onay">Onay</option>
@@ -429,13 +429,13 @@ export function ArchivePage() {
                   value={source}
                   onChange={(e) => setSource(e.target.value as ArchiveSourceKind | "all")}
                 >
-                  <option value="all">TÃ¼mÃ¼</option>
+                  <option value="all">Tümü</option>
                   <option value="crm">CRM</option>
                   <option value="whatsapp">WhatsApp</option>
                   <option value="ai">AI</option>
-                  <option value="kullanici">KullanÄ±cÄ±</option>
+                  <option value="kullanici">Kullanıcı</option>
                   <option value="sistem">Sistem</option>
-                  <option value="ice_aktar">Ä°Ã§e aktar</option>
+                  <option value="ice_aktar">İçe aktar</option>
                 </select>
               </div>
               <div className="hz-archive-filter-field hz-archive-filter-field--select">
@@ -448,12 +448,12 @@ export function ArchivePage() {
                   value={status}
                   onChange={(e) => setStatus(e.target.value as ArchiveRecordStatus | "all")}
                 >
-                  <option value="all">TÃ¼mÃ¼</option>
-                  <option value="onaylandi">OnaylandÄ±</option>
+                  <option value="all">Tümü</option>
+                  <option value="onaylandi">Onaylandı</option>
                   <option value="bekliyor">Bekliyor</option>
                   <option value="reddedildi">Reddedildi</option>
                   <option value="riskli">Riskli</option>
-                  <option value="arsivlendi">ArÅŸivlendi</option>
+                  <option value="arsivlendi">Arşivlendi</option>
                 </select>
               </div>
               <div className="hz-archive-filter-field hz-archive-filter-field--dates">
@@ -465,18 +465,18 @@ export function ArchivePage() {
                     id="hz-archive-d1"
                     type="date"
                     className="hz-archive-filter-input hz-archive-filter-input--date"
-                    aria-label="BaÅŸlangÄ±Ã§ tarihi"
+                    aria-label="Başlangıç tarihi"
                     value={dateFrom}
                     onChange={(e) => setDateFrom(e.target.value)}
                   />
                   <span className="hz-archive-filter-date-sep" aria-hidden>
-                    â€“
+                    –
                   </span>
                   <input
                     id="hz-archive-d2"
                     type="date"
                     className="hz-archive-filter-input hz-archive-filter-input--date"
-                    aria-label="BitiÅŸ tarihi"
+                    aria-label="Bitiş tarihi"
                     value={dateTo}
                     onChange={(e) => setDateTo(e.target.value)}
                   />
@@ -484,12 +484,12 @@ export function ArchivePage() {
               </div>
               <div className="hz-archive-filter-field hz-archive-filter-field--user">
                 <label className="hz-archive-filter-label" htmlFor="hz-archive-user">
-                  KullanÄ±cÄ±
+                  Kullanıcı
                 </label>
                 <input
                   id="hz-archive-user"
                   className="hz-archive-filter-input"
-                  placeholder="Sorumlu veya oluÅŸturan"
+                  placeholder="Sorumlu veya oluşturan"
                   value={userFilter}
                   onChange={(e) => setUserFilter(e.target.value)}
                 />
@@ -501,8 +501,8 @@ export function ArchivePage() {
                 <button
                   type="button"
                   className="hz-archive-filter-reset hz-archive-filter-reset--icon"
-                  title="Filtreleri sÄ±fÄ±rla"
-                  aria-label="Filtreleri sÄ±fÄ±rla"
+                  title="Filtreleri sıfırla"
+                  aria-label="Filtreleri sıfırla"
                   onClick={resetFilters}
                 >
                   <IconFilter size={17} />
@@ -513,15 +513,15 @@ export function ArchivePage() {
 
           {ARCHIVE_USE_DEMO_DATA ? (
             <div className="hz-archive-preview-band" role="status">
-              Ã–rnek veri modu: arÅŸiv listesi demo kayÄ±tlarÄ±dÄ±r; canlÄ± arÅŸiv ve indirme henÃ¼z baÄŸlÄ± deÄŸildir.
+              Örnek veri modu: arşiv listesi demo kayıtlarıdır; canlı arşiv ve indirme henüz bağlı değildir.
             </div>
           ) : liveLoading ? (
             <div className="hz-archive-preview-band" role="status">
-              ArÅŸiv kayÄ±tlarÄ± yÃ¼kleniyor.
+              Arşiv kayıtları yükleniyor.
             </div>
           ) : !liveReady ? (
             <div className="hz-archive-preview-band" role="status">
-              ArÅŸiv kayÄ±tlarÄ± ÅŸu anda alÄ±namÄ±yor.
+              Arşiv kayıtları şu anda alınamıyor.
             </div>
           ) : liveMessage ? (
             <div className="hz-archive-preview-band" role="status">
@@ -531,9 +531,9 @@ export function ArchivePage() {
 
           <div className="hz-archive-list-wrap">
             <div className="hz-archive-list-header" role="row">
-              <div role="columnheader">KayÄ±t</div>
-              <div role="columnheader">Cari / BaÄŸlam</div>
-              <div role="columnheader">TÃ¼r</div>
+              <div role="columnheader">Kayıt</div>
+              <div role="columnheader">Cari / Bağlam</div>
+              <div role="columnheader">Tür</div>
               <div role="columnheader">Tarih</div>
               <div role="columnheader">Durum</div>
               <div role="columnheader">Sorumlu</div>
@@ -542,8 +542,8 @@ export function ArchivePage() {
             <div className="hz-archive-list-body">
               {!filtered.length ? (
                 <div className="hz-archive-empty" role="status">
-                  <p className="hz-archive-empty-title">KayÄ±t bulunamadÄ±</p>
-                  <p className="hz-archive-empty-text">Filtreleri gevÅŸetin veya sÄ±fÄ±rlayÄ±n.</p>
+                  <p className="hz-archive-empty-title">Kayıt bulunamadı</p>
+                  <p className="hz-archive-empty-text">Filtreleri gevşetin veya sıfırlayın.</p>
                 </div>
               ) : (
                 filtered.map((row) => (
@@ -591,7 +591,7 @@ export function ArchivePage() {
                         aria-label="Detay"
                         onClick={() => {
                           setSelectedId(row.id);
-                          pushToast("KayÄ±t seÃ§ildi; detay saÄŸ panelde.");
+                          pushToast("Kayıt seçildi; detay sağ panelde.");
                         }}
                       >
                         Detay
@@ -599,11 +599,11 @@ export function ArchivePage() {
                       <button
                         type="button"
                         className="hz-archive-act-icon hz-archive-act-icon--labeled"
-                        aria-label="Ä°ndir"
-                        title="Ä°ndir"
+                        aria-label="İndir"
+                        title="İndir"
                         disabled={!!rowDownloadLocks[row.id]}
                         onClick={() => {
-                          pushToast("Belge indirme henÃ¼z canlÄ± kullanÄ±ma baÄŸlÄ± deÄŸil.");
+                          pushToast("Belge indirme henüz canlı kullanıma bağlı değil.");
                           setRowDownloadLocks((s) => ({ ...s, [row.id]: true }));
                         }}
                       >
@@ -612,8 +612,8 @@ export function ArchivePage() {
                       <button
                         type="button"
                         className="hz-archive-act-icon hz-archive-act-icon--labeled"
-                        title="BaÄŸlantÄ±"
-                        aria-label="BaÄŸlantÄ±"
+                        title="Bağlantı"
+                        aria-label="Bağlantı"
                         onClick={() => {
                           const href = row.relatedLinks[0]?.href ?? "/archive";
                           navigateSafe(href);
@@ -629,24 +629,24 @@ export function ArchivePage() {
           </div>
         </div>
 
-        <aside className="hz-archive-side" aria-label="ArÅŸiv baÄŸlamÄ±">
+        <aside className="hz-archive-side" aria-label="Arşiv bağlamı">
           <div className="hz-archive-side-inner">
             <header className="hz-archive-side-head">
-              <h2 className="hz-archive-side-title">ArÅŸiv BaÄŸlamÄ±</h2>
-              <p className="hz-archive-side-sub">SeÃ§ili kaydÄ±n belge, denetim ve iÅŸlem Ã¶zeti.</p>
+              <h2 className="hz-archive-side-title">Arşiv Bağlamı</h2>
+              <p className="hz-archive-side-sub">Seçili kaydın belge, denetim ve işlem özeti.</p>
             </header>
             {!selected ? (
               <div className="hz-archive-empty hz-archive-empty--side" role="status">
-                <p className="hz-archive-empty-title">Listeden bir kayÄ±t seÃ§in.</p>
+                <p className="hz-archive-empty-title">Listeden bir kayıt seçin.</p>
               </div>
             ) : (
               <div className="hz-archive-side-stack">
                 <article className="hz-archive-side-card">
-                  <h3 className="hz-archive-side-card-title">KayÄ±t Ã–zeti</h3>
+                  <h3 className="hz-archive-side-card-title">Kayıt Özeti</h3>
                   <p className="hz-archive-side-strong">{selected.title}</p>
                   <dl className="hz-archive-dl">
                     <div>
-                      <dt>Belge / iÅŸlem no</dt>
+                      <dt>Belge / işlem no</dt>
                       <dd>{selected.documentNumber}</dd>
                     </div>
                     <div>
@@ -664,7 +664,7 @@ export function ArchivePage() {
                 </article>
 
                 <article className="hz-archive-side-card">
-                  <h3 className="hz-archive-side-card-title">BaÄŸlantÄ±lar</h3>
+                  <h3 className="hz-archive-side-card-title">Bağlantılar</h3>
                   <div className="hz-archive-side-links">
                     {selected.relatedLinks.map((l) => (
                       <button key={l.href + l.label} type="button" className="hz-archive-link-btn" onClick={() => navigateSafe(l.href)}>
@@ -676,14 +676,14 @@ export function ArchivePage() {
                 </article>
 
                 <article className="hz-archive-side-card">
-                  <h3 className="hz-archive-side-card-title">Denetim Ä°zi</h3>
+                  <h3 className="hz-archive-side-card-title">Denetim İzi</h3>
                   <ol className="hz-archive-audit-timeline">
                     <li>
                       <span className="hz-archive-audit-dot hz-archive-audit-dot--ok" aria-hidden />
                       <div>
-                        <strong>OluÅŸturuldu</strong>
+                        <strong>Oluşturuldu</strong>
                         <p>
-                          {selected.auditCreatedBy} Â· {formatArchiveDate(selected.createdAt)}{" "}
+                          {selected.auditCreatedBy} · {formatArchiveDate(selected.createdAt)}{" "}
                           {formatArchiveTime(selected.createdAt)}
                         </p>
                       </div>
@@ -691,7 +691,7 @@ export function ArchivePage() {
                     <li>
                       <span className="hz-archive-audit-dot" aria-hidden />
                       <div>
-                        <strong>Son iÅŸlem</strong>
+                        <strong>Son işlem</strong>
                         <p>{selected.auditLastAction}</p>
                       </div>
                     </li>
@@ -709,55 +709,55 @@ export function ArchivePage() {
                   <h3 className="hz-archive-side-card-title">Belge Bilgisi</h3>
                   <dl className="hz-archive-dl">
                     <div>
-                      <dt>Dosya adÄ±</dt>
-                      <dd>{selected.fileName ?? "â€”"}</dd>
+                      <dt>Dosya adı</dt>
+                      <dd>{selected.fileName ?? "—"}</dd>
                     </div>
                     <div>
-                      <dt>TÃ¼r</dt>
-                      <dd>{selected.fileTypeLabel ?? "â€”"}</dd>
+                      <dt>Tür</dt>
+                      <dd>{selected.fileTypeLabel ?? "—"}</dd>
                     </div>
                     <div>
                       <dt>Boyut</dt>
-                      <dd>{selected.fileSizeLabel ?? "â€”"}</dd>
+                      <dd>{selected.fileSizeLabel ?? "—"}</dd>
                     </div>
                     <div>
                       <dt>Saklama</dt>
-                      <dd>{selected.retentionYears != null ? `${selected.retentionYears} yÄ±l` : "â€”"}</dd>
+                      <dd>{selected.retentionYears != null ? `${selected.retentionYears} yıl` : "—"}</dd>
                     </div>
                     <div>
-                      <dt>Ä°mza / hash</dt>
-                      <dd>{selected.hashPreview ?? "â€”"}</dd>
+                      <dt>İmza / hash</dt>
+                      <dd>{selected.hashPreview ?? "—"}</dd>
                     </div>
                   </dl>
                 </article>
 
                 <article className="hz-archive-side-card">
-                  <h3 className="hz-archive-side-card-title">HÄ±zlÄ± Aksiyonlar</h3>
+                  <h3 className="hz-archive-side-card-title">Hızlı Aksiyonlar</h3>
                   <div className="hz-archive-side-actions hz-archive-side-actions--grid">
-                    <button type="button" className="hz-archive-side-btn" onClick={() => pushToast("Belge Ã¶nizleme demo modunda.")}>
-                      Belgeyi GÃ¶rÃ¼ntÃ¼le
+                    <button type="button" className="hz-archive-side-btn" onClick={() => pushToast("Belge önizleme demo modunda.")}>
+                      Belgeyi Görüntüle
                     </button>
                     <button
                       type="button"
                       className="hz-archive-side-btn"
                       disabled={!!actionLocks.sideDl}
-                      onClick={() => notLiveAction("sideDl", "Belge indirme henÃ¼z baÄŸlÄ± deÄŸil.")}
+                      onClick={() => notLiveAction("sideDl", "Belge indirme henüz bağlı değil.")}
                     >
-                      Belgeyi Ä°ndir
+                      Belgeyi İndir
                     </button>
-                    <button type="button" className="hz-archive-side-btn" onClick={() => pushToast("BaÄŸlantÄ± panoya kopyalandÄ± (demo).")}>
-                      BaÄŸlantÄ± Kopyala
+                    <button type="button" className="hz-archive-side-btn" onClick={() => pushToast("Bağlantı panoya kopyalandı (demo).")}>
+                      Bağlantı Kopyala
                     </button>
                     <button
                       type="button"
                       className="hz-archive-side-btn"
                       disabled={!!actionLocks.sideNote}
-                      onClick={() => notLiveAction("sideNote", "ArÅŸiv notu kaydÄ± henÃ¼z baÄŸlÄ± deÄŸil.")}
+                      onClick={() => notLiveAction("sideNote", "Arşiv notu kaydı henüz bağlı değil.")}
                     >
                       Not Ekle
                     </button>
                   </div>
-                  <p className="hz-archive-retention-note">Bu kayÄ±t 7 yÄ±l saklama politikasÄ±na tabidir.</p>
+                  <p className="hz-archive-retention-note">Bu kayıt 7 yıl saklama politikasına tabidir.</p>
                 </article>
 
                 <article className="hz-archive-side-card hz-archive-risk-note">
@@ -765,8 +765,8 @@ export function ArchivePage() {
                     <IconSparkles size={14} />
                     AI / Risk Notu
                   </h3>
-                  <p>Bu kayÄ±t yalnÄ±zca denetim ve izleme amaÃ§lÄ± Ã¶zetlenir.</p>
-                  <p>AI arÅŸiv kaydÄ±nÄ± deÄŸiÅŸtirmez; yalnÄ±zca Ã¶zet ve uyarÄ± Ã¼retir.</p>
+                  <p>Bu kayıt yalnızca denetim ve izleme amaçlı özetlenir.</p>
+                  <p>AI arşiv kaydını değiştirmez; yalnızca özet ve uyarı üretir.</p>
                 </article>
               </div>
             )}
@@ -776,4 +776,5 @@ export function ArchivePage() {
     </div>
   );
 }
+
 

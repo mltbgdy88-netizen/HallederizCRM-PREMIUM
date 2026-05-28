@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useFaturalarYeniFormReferenceData } from "@/features/faturalar/hooks/use-faturalar-yeni-form-reference-data";
@@ -199,3 +199,4 @@ export function FaturalarYeniFormPage() {
     </div>
   );
 }
+

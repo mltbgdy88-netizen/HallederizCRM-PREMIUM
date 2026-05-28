@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const FYF_PAGE = {
   title: "Yeni Fatura",
   subtitle: "Müşterinize yeni bir fatura oluşturun."
@@ -36,7 +36,7 @@ export const FYF_OTHER = {
   fields: [
     { label: "Sevk Adresi", placeholder: "Opsiyonel" },
     { label: "Açıklama", placeholder: "Opsiyonel" },
-    { label: "Ödeme Şekli", placeholder: "Seçiniz" },
+    { label: "Ödeme �?ekli", placeholder: "Seçiniz" },
     { label: "Proje", placeholder: "Seçiniz" }
   ]
 } as const;
@@ -91,3 +91,4 @@ export const FYF_TOTALS = {
 
 export const FYF_INFO =
   "Fatura oluşturulduktan sonra düzenlenebilir. Taslaklar Raporlar > Faturalar bölümünden yönetilir.";
+

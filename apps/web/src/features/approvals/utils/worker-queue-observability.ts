@@ -1,4 +1,4 @@
-import type { WorkerHealthResponse, WorkerOutboxJobSnapshot } from "../types";
+﻿import type { WorkerHealthResponse, WorkerOutboxJobSnapshot } from "../types";
 
 /** Kapali `<details>` ozeti: outbox/DLQ toplamlari ve varsa repo sayimlari. */
 export function formatWorkerQueueHeadline(
@@ -32,3 +32,4 @@ export function formatJobAttempts(job: WorkerOutboxJobSnapshot): string {
   if (typeof a === "number") return String(a);
   return "—";
 }
+

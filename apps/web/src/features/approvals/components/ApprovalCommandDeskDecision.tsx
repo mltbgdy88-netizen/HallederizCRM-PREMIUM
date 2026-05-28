@@ -30,7 +30,7 @@ export function ApprovalCommandDeskDecision({
   if (!record) {
     return (
       <aside className="hz-approval-decision hz-approval-panel hz-approval-panel--empty" aria-label="Karar paneli">
-        <p className="hz-approval-panel__empty">Karar iÃ§in listeden bir kayÄ±t seÃ§in.</p>
+        <p className="hz-approval-panel__empty">Karar için listeden bir kayıt seçin.</p>
       </aside>
     );
   }
@@ -48,7 +48,7 @@ export function ApprovalCommandDeskDecision({
       </header>
 
       <div className="hz-approval-decision__body">
-        <article className={`hz-approval-risk-card hz-approval-risk-card--${risk === "YÃ¼ksek" ? "high" : risk === "Orta" ? "mid" : "low"}`}>
+        <article className={`hz-approval-risk-card hz-approval-risk-card--${risk === "Yüksek" ? "high" : risk === "Orta" ? "mid" : "low"}`}>
           <p className="hz-approval-risk-card__label">Risk Seviyesi</p>
           <p className="hz-approval-risk-card__value">
             <LucideIcon name="shield-alert" size={14} />
@@ -60,7 +60,7 @@ export function ApprovalCommandDeskDecision({
 
         <dl className="hz-approval-decision-meta">
           <div>
-            <dt>Ä°ÅŸlem TÃ¼rÃ¼</dt>
+            <dt>İşlem Türü</dt>
             <dd>{approvalOperationTypeLabel(approval.type)}</dd>
           </div>
           <div>
@@ -79,7 +79,7 @@ export function ApprovalCommandDeskDecision({
             onClick={onApprove}
           >
             <LucideIcon name="check-circle-2" size={14} />
-            {actionPending === "approve" ? "OnaylanÄ±yorâ€¦" : "Onayla"}
+            {actionPending === "approve" ? "Onaylanıyor…" : "Onayla"}
           </button>
           <button
             type="button"
@@ -88,16 +88,17 @@ export function ApprovalCommandDeskDecision({
             onClick={onReject}
           >
             <LucideIcon name="x" size={14} />
-            {actionPending === "reject" ? "Reddediliyorâ€¦" : "Reddet"}
+            {actionPending === "reject" ? "Reddediliyor…" : "Reddet"}
           </button>
           <button type="button" className="hz-approval-button-secondary" onClick={onOpenDetail}>
             <LucideIcon name="external-link" size={14} />
-            DetayÄ± AÃ§
+            Detayı Aç
           </button>
         </div>
-        <p className="hz-approval-decision-foot">Manuel kullanÄ±cÄ± iÅŸlemleri onay beklemez.</p>
+        <p className="hz-approval-decision-foot">Manuel kullanıcı işlemleri onay beklemez.</p>
       </div>
     </aside>
   );
 }
+
 

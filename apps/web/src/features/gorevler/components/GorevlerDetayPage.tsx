@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -170,7 +170,7 @@ export function GorevlerDetayPage() {
                 <span key={tag}>{tag}</span>
               ))}
             </div>
-            <p className="gdm-reminder">🔔 Hatırlatma: {GDM_REMINDER}</p>
+            <p className="gdm-reminder">g��� Hatırlatma: {GDM_REMINDER}</p>
           </article>
 
           <button type="button" className="gdm-delete-btn">
@@ -181,3 +181,4 @@ export function GorevlerDetayPage() {
     </div>
   );
 }
+

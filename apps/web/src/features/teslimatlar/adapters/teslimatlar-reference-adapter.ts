@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import type { Customer, Delivery, DeliveryStatus } from "@hallederiz/types";
 import { getDeliveries } from "../../deliveries/queries/get-deliveries";
 import { buildTableMeta, formatTrDate } from "../../../lib/reference/formatters";
@@ -173,3 +173,4 @@ export async function loadTeslimatlarReferenceLive(): Promise<TeslimatlarReferen
 }
 
 export const TESLIMATLAR_REFERENCE_INITIAL = loadTeslimatlarReferenceDemo();
+

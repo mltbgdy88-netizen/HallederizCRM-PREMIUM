@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { MuhasebeHubCard } from "@/features/muhasebe/data/muhasebe-hub-mock";
@@ -66,3 +66,4 @@ export function MuhasebeHubPage() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import type { GkopConversation, GkopOrder } from "@/features/gelen-kutu/data/gelen-kutu-operasyon-mock";
@@ -545,3 +545,4 @@ export function GelenKutuOperasyonPaneliPage() {
     </div>
   );
 }
+

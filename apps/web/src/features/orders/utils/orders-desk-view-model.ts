@@ -57,11 +57,11 @@ export function mapPaymentDeskBadge(order: SaleOrder): { label: string; tone: Or
   }
 
   if (status === "paid" || status === "overpaid") {
-    return { label: "Ã–dendi", tone: "success" };
+    return { label: "Ödendi", tone: "success" };
   }
 
   if (status === "partial") {
-    return { label: "KÄ±smi", tone: "gold" };
+    return { label: "Kısmi", tone: "gold" };
   }
 
   if (status === "unpaid" && isOrderAtRisk(order)) {
@@ -85,7 +85,7 @@ export function mapShipmentDeskBadge(status: OrderDeliveryStatus | undefined): {
   }
 
   if (status === "preparing") {
-    return { label: "HazÄ±rlanÄ±yor", tone: "info" };
+    return { label: "Hazırlanıyor", tone: "info" };
   }
 
   if (status === "ready") {
@@ -93,7 +93,7 @@ export function mapShipmentDeskBadge(status: OrderDeliveryStatus | undefined): {
   }
 
   if (status === "partial") {
-    return { label: "KÄ±smi sevk", tone: "warning" };
+    return { label: "Kısmi sevk", tone: "warning" };
   }
 
   return { label: getDeliveryStatusLabel(status), tone: "gold" };
@@ -128,7 +128,7 @@ export function mapInvoiceDeskBadge(order: SaleOrder): { label: string; tone: Or
     return { label: "Kesildi", tone: "success" };
   }
   if (order.status === "cancelled") {
-    return { label: "Ä°ptal", tone: "danger" };
+    return { label: "İptal", tone: "danger" };
   }
   return { label: "Bekliyor", tone: "gold" };
 }
@@ -166,12 +166,12 @@ export function buildOrdersDeskStats(orders: SaleOrder[]): OrdersDeskStat[] {
   const paymentPending = orders.filter((o) => o.paymentStatus === "unpaid" || o.paymentStatus === "partial").length;
   const deliveredToday = orders.filter(isDeliveredToday).length;
   const atRisk = orders.filter(isOrderAtRisk).length;
-  const liveHint = orders.length === 0 ? "CanlÄ± veri bekleniyor" : "";
+  const liveHint = orders.length === 0 ? "Canlı veri bekleniyor" : "";
 
   return [
     {
       id: "open",
-      label: "AÃ§Ä±k SipariÅŸ",
+      label: "Açık Sipariş",
       value: String(openCount),
       subtitle: liveHint,
       icon: "shopping-cart",
@@ -187,7 +187,7 @@ export function buildOrdersDeskStats(orders: SaleOrder[]): OrdersDeskStat[] {
     },
     {
       id: "payment",
-      label: "Ã–deme Bekleyen",
+      label: "Ödeme Bekleyen",
       value: String(paymentPending),
       subtitle: liveHint,
       icon: "circle-dollar-sign",
@@ -195,7 +195,7 @@ export function buildOrdersDeskStats(orders: SaleOrder[]): OrdersDeskStat[] {
     },
     {
       id: "today",
-      label: "BugÃ¼n Teslim",
+      label: "Bugün Teslim",
       value: String(deliveredToday),
       subtitle: liveHint,
       icon: "package-check",
@@ -224,7 +224,7 @@ export function mapOrdersDeskRow(order: SaleOrder, customers: Customer[]): Order
     orderNo: order.orderNo,
     customerName: customer?.name ?? "Cari bilgisi bekleniyor",
     dateLabel: dateLabel(order.createdAt),
-    totalLabel: order.grandTotal ? formatTryMoney(order.grandTotal, order.currency) : "â€”",
+    totalLabel: order.grandTotal ? formatTryMoney(order.grandTotal, order.currency) : "—",
     invoiceLabel: invoice.label,
     invoiceTone: invoice.tone,
     paymentLabel: payment.label,
@@ -267,9 +267,9 @@ export function paymentBreakdownForPreview(order: SaleOrder): OrdersDeskPaymentB
   if (!order.paymentStatus && total <= 0) {
     return {
       hasInfo: false,
-      totalLabel: "â€”",
-      paidLabel: "â€”",
-      remainingLabel: "â€”",
+      totalLabel: "—",
+      paidLabel: "—",
+      remainingLabel: "—",
       remainingTone: "gold",
       lastCollectionLabel: null,
       statusLabel: status.label,
@@ -304,16 +304,17 @@ export function fulfillmentSummaryForPreview(order: SaleOrder): { headline: stri
 
   return {
     headline: shipment.label,
-    detail: impact.needsFactoryOrder ? "Depo + fabrika kaynak planÄ±" : "Merkez depo sevkiyatÄ±",
+    detail: impact.needsFactoryOrder ? "Depo + fabrika kaynak planı" : "Merkez depo sevkiyatı",
     tone: shipment.tone
   };
 }
 
 export const ORDERS_DESK_CHIPS: { id: OrdersDeskChip; label: string }[] = [
-  { id: "all", label: "TÃ¼mÃ¼" },
-  { id: "preparing", label: "HazÄ±rlanÄ±yor" },
+  { id: "all", label: "Tümü" },
+  { id: "preparing", label: "Hazırlanıyor" },
   { id: "shipment", label: "Sevkiyat" },
-  { id: "payment_pending", label: "Ã–deme Bekliyor" },
+  { id: "payment_pending", label: "Ödeme Bekliyor" },
   { id: "completed", label: "Tamamlanan" }
 ];
+
 

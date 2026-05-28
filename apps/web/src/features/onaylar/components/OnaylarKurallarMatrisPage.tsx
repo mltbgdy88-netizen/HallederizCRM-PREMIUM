@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { IconRefresh, IconSearch } from "@/components/reference/icons";
@@ -116,7 +116,7 @@ export function OnaylarKurallarMatrisPage() {
                       <td>{row.requiredApproval}</td>
                       <td className="okr-cell-actions">
                         <button type="button" aria-label="Düzenle">
-                          ✎
+                          �?
                         </button>
                         <button type="button" aria-label="Kopyala">
                           ⧉
@@ -234,3 +234,4 @@ export function OnaylarKurallarMatrisPage() {
     </div>
   );
 }
+

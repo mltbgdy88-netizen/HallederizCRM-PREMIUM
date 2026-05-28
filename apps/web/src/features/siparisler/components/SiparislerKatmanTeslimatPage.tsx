@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { SiparisBadge, SiparisKatmanBreadcrumbHead, SiparislerKatmanTabs } from "./SiparislerKatmanShared";
@@ -33,7 +33,7 @@ export function SiparislerKatmanTeslimatPage() {
 
       <article className="skm-order-strip">
         <span className="skm-order-strip-icon" aria-hidden>
-          📄
+          g���
         </span>
         <div className="skm-order-strip-grid">
           <div>
@@ -187,3 +187,4 @@ export function SiparislerKatmanTeslimatPage() {
     </div>
   );
 }
+

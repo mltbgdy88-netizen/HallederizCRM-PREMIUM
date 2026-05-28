@@ -1,6 +1,7 @@
 ﻿// @ts-nocheck
 export const REFERENCE_DEMO_BANNER =
-  "Demo Verisi: Bu ekran demo amaÃ§lÄ±dÄ±r. GerÃ§ek veriler farklÄ±lÄ±k gÃ¶sterebilir.";
+  "Demo Verisi: Bu ekran demo amaçlıdır. Gerçek veriler farklılık gösterebilir.";
 
-export const REFERENCE_LIVE_EMPTY_HINT = "CanlÄ± veri baÄŸlandÄ±; kayÄ±t bulunamadÄ±.";
+export const REFERENCE_LIVE_EMPTY_HINT = "Canlı veri bağlandı; kayıt bulunamadı.";
+
 

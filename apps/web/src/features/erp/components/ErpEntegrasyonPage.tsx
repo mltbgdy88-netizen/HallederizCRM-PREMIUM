@@ -34,7 +34,7 @@ export function ErpEntegrasyonPage() {
             + Yeni Entegrasyon
           </button>
           <button type="button" className="eem-btn eem-btn--outline">
-            Entegrasyon AyarlarÄ±
+            Entegrasyon Ayarları
           </button>
           <button type="button" className="eem-btn eem-btn--outline">
             Yenile
@@ -102,9 +102,9 @@ export function ErpEntegrasyonPage() {
                       </td>
                       <td>{row.time}</td>
                       <td className="eem-cell-actions">
-                        <button type="button">GÃ¶r</button>
-                        {row.status !== "BaÅŸarÄ±lÄ±" ? <button type="button">Tekrar</button> : null}
-                        {row.status === "Bekliyor" ? <button type="button">â–¶</button> : null}
+                        <button type="button">Gör</button>
+                        {row.status !== "Başarılı" ? <button type="button">Tekrar</button> : null}
+                        {row.status === "Bekliyor" ? <button type="button">▶</button> : null}
                       </td>
                     </tr>
                   ))}
@@ -116,7 +116,7 @@ export function ErpEntegrasyonPage() {
               <div className="eem-pagination">
                 <label className="eem-page-size">
                   <select defaultValue="10" aria-label="Sayfa boyutu">
-                    <option value="10">10 satÄ±r</option>
+                    <option value="10">10 satır</option>
                   </select>
                 </label>
                 <div className="eem-page-nums">
@@ -131,14 +131,14 @@ export function ErpEntegrasyonPage() {
           </div>
         </section>
 
-        <aside className="eem-context" aria-label="BaÄŸlantÄ± durumu">
-          <h2>BaÄŸlantÄ± Durumu</h2>
+        <aside className="eem-context" aria-label="Bağlantı durumu">
+          <h2>Bağlantı Durumu</h2>
           {EEM_CONNECTIONS.map((c) => (
             <article key={c.id} className="eem-conn-card">
               <header>
                 <strong>{c.name}</strong>
                 <span className={c.online ? "eem-badge eem-badge--ok" : "eem-badge eem-badge--err"}>
-                  {c.online ? "Ã‡evrimiÃ§i" : "Ã‡evrimdÄ±ÅŸÄ±"}
+                  {c.online ? "Çevrimiçi" : "Çevrimdışı"}
                 </span>
               </header>
               <dl>
@@ -148,7 +148,7 @@ export function ErpEntegrasyonPage() {
                 </div>
                 {c.responseMs ? (
                   <div>
-                    <dt>YanÄ±t SÃ¼resi</dt>
+                    <dt>Yanıt Süresi</dt>
                     <dd>{c.responseMs}</dd>
                   </div>
                 ) : null}
@@ -160,7 +160,7 @@ export function ErpEntegrasyonPage() {
             </article>
           ))}
           <article className="eem-health-card">
-            <h3>Sistem SaÄŸlÄ±ÄŸÄ±</h3>
+            <h3>Sistem Sağlığı</h3>
             <ul>
               {EEM_HEALTH.map((h) => (
                 <li key={h.label}>
@@ -175,7 +175,7 @@ export function ErpEntegrasyonPage() {
               Entegrasyon Raporu
             </button>
             <button type="button" className="eem-btn eem-btn--outline eem-btn--block">
-              Bildirim AyarlarÄ±
+              Bildirim Ayarları
             </button>
           </footer>
         </aside>
@@ -183,4 +183,5 @@ export function ErpEntegrasyonPage() {
     </div>
   );
 }
+
 

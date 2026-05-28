@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type KrmPermLevel = "full" | "limited" | "none";
 
 export type KrmModule = { id: string; label: string };
@@ -95,3 +95,4 @@ export const KRM_FILTERS = [
 
 export const KRM_FOOTER_NOTE =
   "Yetki değişiklikleri anında kaydedilir. Tarayıcı önbelleğini temizlemeniz gerekebilir.";
+

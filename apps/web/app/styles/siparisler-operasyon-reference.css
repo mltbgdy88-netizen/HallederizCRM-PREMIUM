@@ -1,4 +1,4 @@
-/* Siparişler Operasyon Masası — siparisler-operasyon-masasi-acik-mod.png */
+﻿/* Siparişler Operasyon Masası — siparisler-operasyon-masasi-acik-mod.png */
 
 .sip-home {
   --sip-gap: clamp(6px, 0.75vh, 9px);
@@ -685,3 +685,4 @@
 .skm-fulfillment-bar {
   margin: 0 0 10px;
 }
+

@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import type { Customer, Invoice, InvoicePaymentStatus, InvoiceStatus } from "@hallederiz/types";
 import { getInvoices } from "../../invoices/queries/get-invoices";
 import { getInvoiceStatusLabel } from "../../invoices/queries/invoice-mock-data";
@@ -129,3 +129,4 @@ export async function loadFaturalarReferenceLive(): Promise<FaturalarReferenceSn
 }
 
 export const FATURALAR_REFERENCE_INITIAL = loadFaturalarReferenceDemo();
+

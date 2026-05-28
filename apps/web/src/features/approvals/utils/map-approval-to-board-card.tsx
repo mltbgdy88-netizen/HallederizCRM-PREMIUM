@@ -1,4 +1,4 @@
-import type { Approval, ApprovalType } from "@hallederiz/types";
+﻿import type { Approval, ApprovalType } from "@hallederiz/types";
 import {
   IconFileText,
   IconShieldCheck,
@@ -14,18 +14,18 @@ const nfTry = new Intl.NumberFormat("tr-TR", { style: "currency", currency: "TRY
 function approvalTypeToCategory(type: ApprovalType): string {
   switch (type) {
     case "order_high_value":
-      return "SATIŞ";
+      return "SATI�?";
     case "delivery_payment_missing":
       return "TESLİMAT";
     case "return_approval":
       return "İADE";
     case "price_override":
-      return "SATIŞ";
+      return "SATI�?";
     case "ai_action_proposal":
       return "AI PROPOSAL";
     case "manual_operation":
     default:
-      return "SATIŞ";
+      return "SATI�?";
   }
 }
 
@@ -117,3 +117,4 @@ export function mapApprovalToBoardCard(approval: Approval): ApprovalsBoardCard {
     icon: approvalTypeToIcon(approval.type)
   };
 }
+

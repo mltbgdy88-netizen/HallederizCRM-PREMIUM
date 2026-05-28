@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const TYH_PAGE = {
   breadcrumb: ["Teklifler", "Yeni Teklif"],
   title: "Yeni Teklif Oluştur",
@@ -31,7 +31,7 @@ export const TYH_DRAFTS = [
   {
     id: "1",
     code: "TEK-2025-0047",
-    customer: "ABC Makine A.Ş.",
+    customer: "ABC Makine A.�?.",
     datetime: "12.05.2025 14:30",
     amount: "₺125.000,00"
   },
@@ -45,7 +45,7 @@ export const TYH_DRAFTS = [
   {
     id: "3",
     code: "TEK-2025-0045",
-    customer: "Mega İnşaat A.Ş.",
+    customer: "Mega İnşaat A.�?.",
     datetime: "12.05.2025 09:45",
     amount: "₺210.500,00"
   }
@@ -53,3 +53,4 @@ export const TYH_DRAFTS = [
 
 export const TYH_TIP =
   "İpucu: Hızlı teklif ile zamandan tasarruf edin veya detaylı teklif ile tüm ihtiyaçlarınızı karşılayın.";
+

@@ -1,4 +1,4 @@
-﻿/* SipariÅŸler Operasyon MasasÄ± â€” siparisler-operasyon-masasi-acik-mod.png */
+﻿/* Siparişler Operasyon Masası — siparisler-operasyon-masasi-acik-mod.png */
 
 .tsm-home {
   --tsm-gap: clamp(6px, 0.75vh, 9px);
@@ -668,4 +668,5 @@
   color: var(--tsm-green);
   font-weight: 750;
 }
+
 

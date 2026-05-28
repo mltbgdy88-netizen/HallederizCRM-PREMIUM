@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { IconChevronDown, IconInfo } from "@/components/reference/icons";
@@ -336,3 +336,4 @@ export function OnaylarKomutMasasiPage() {
     </div>
   );
 }
+

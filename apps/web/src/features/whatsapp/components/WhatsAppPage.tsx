@@ -4,11 +4,11 @@
 import { resolveCustomerEmptyMessage } from "../utils/whatsapp-action-feedback";
 import { WhatsAppOperationsDesk } from "./WhatsAppOperationsDesk";
 
-/** BaÄŸlam rotalarÄ±: /cariler/ /siparisler/ /tahsilatlar/ /belgeler?document= */
+/** Bağlam rotaları: /cariler/ /siparisler/ /tahsilatlar/ /belgeler?document= */
 const CONTEXT_ROUTE_INVENTORY = ["/cariler/", "/siparisler/", "/tahsilatlar/", "/belgeler?document="] as const;
 
 /**
- * OnaylÄ± referans: tablo tabanlÄ± WhatsApp Operasyon Paneli
+ * Onaylı referans: tablo tabanlı WhatsApp Operasyon Paneli
  * (`docs/design/reference/whatsapp-operasyon-paneli-acik-mod.png`).
  */
 export function WhatsAppPage({ initialCustomerId }: { initialCustomerId?: string | null }) {
@@ -17,4 +17,5 @@ export function WhatsAppPage({ initialCustomerId }: { initialCustomerId?: string
 
   return <WhatsAppOperationsDesk initialCustomerId={initialCustomerId} />;
 }
+
 

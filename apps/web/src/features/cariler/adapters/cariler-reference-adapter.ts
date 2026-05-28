@@ -1,4 +1,4 @@
-import { resolveCustomerDisplayType } from "@hallederiz/domain";
+﻿import { resolveCustomerDisplayType } from "@hallederiz/domain";
 import type { Customer, CustomerAccount } from "@hallederiz/types";
 import { mapCustomerToRow } from "../../customers/mappers/map-customer-row";
 import { getCustomers } from "../../customers/queries/get-customers";
@@ -145,3 +145,4 @@ export async function loadCarilerReferenceLive(): Promise<CarilerReferenceSnapsh
 }
 
 export const CARILER_REFERENCE_INITIAL = loadCarilerReferenceDemo();
+

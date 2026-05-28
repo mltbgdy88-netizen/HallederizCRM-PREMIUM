@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type OkmRuleRole =
   | "Satış Yetkilisi"
   | "Satış Müdürü"
@@ -144,3 +144,4 @@ export function okrRoleClass(role: OkmRuleRole): string {
   if (role === "Finans Müdürü") return " okr-badge--teal";
   return " okr-badge--green";
 }
+

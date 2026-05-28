@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type TahsilatDistributionRow = {
   id: string;
   docType: string;
@@ -33,3 +33,4 @@ export const THYF_SUMMARY = {
   collectionTotal: "₺0,00",
   remainingBalance: "₺12.450,00"
 } as const;
+

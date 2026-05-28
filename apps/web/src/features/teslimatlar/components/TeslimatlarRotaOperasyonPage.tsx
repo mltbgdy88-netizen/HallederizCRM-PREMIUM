@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { IconRefresh } from "@/components/reference/icons";
@@ -99,7 +99,7 @@ export function TeslimatlarRotaOperasyonPage() {
         ))}
       </section>
 
-      <section className="tsrm-drivers" aria-label="Şoför kartları">
+      <section className="tsrm-drivers" aria-label="�?oför kartları">
         {drivers.map((driver) => (
           <article key={driver.id} className="tsrm-driver-card">
             <strong>{driver.name}</strong>
@@ -117,7 +117,7 @@ export function TeslimatlarRotaOperasyonPage() {
               <thead>
                 <tr>
                   <th>Rota No</th>
-                  <th>Şoför</th>
+                  <th>�?oför</th>
                   <th>Durum</th>
                   <th>Durak</th>
                   <th>Mesafe</th>
@@ -191,7 +191,7 @@ export function TeslimatlarRotaOperasyonPage() {
           </div>
           <dl className="tsrm-context-dl">
             <div>
-              <dt>Şoför</dt>
+              <dt>�?oför</dt>
               <dd>{context.driver}</dd>
             </div>
             <div>
@@ -252,3 +252,4 @@ export function TeslimatlarRotaOperasyonPage() {
     </div>
   );
 }
+

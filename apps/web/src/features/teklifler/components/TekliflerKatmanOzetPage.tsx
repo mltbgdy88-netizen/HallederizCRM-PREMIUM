@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   OzetKpiIcon,
@@ -131,3 +131,4 @@ export function TekliflerKatmanOzetPage() {
     </div>
   );
 }
+

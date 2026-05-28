@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const LOGIN_BRAND = {
   title: "Hallederiz",
   titleAccent: "CRM",
@@ -28,13 +28,14 @@ export const LOGIN_FORM = {
   subtitle: "HallederizCRM hesabınıza giriş yapın.",
   emailLabel: "E-posta",
   emailPlaceholder: "E-posta adresinizi girin",
-  passwordLabel: "Şifre",
-  passwordPlaceholder: "Şifrenizi girin",
+  passwordLabel: "�?ifre",
+  passwordPlaceholder: "�?ifrenizi girin",
   remember: "Beni hatırla",
-  forgot: "Şifremi unuttum",
+  forgot: "�?ifremi unuttum",
   submit: "Giriş Yap",
   divider: "veya",
   demoTitle: "Demo erişim",
   demoEmail: "demo@hallederizcrm.com",
   demoPassword: "demo123"
 };
+

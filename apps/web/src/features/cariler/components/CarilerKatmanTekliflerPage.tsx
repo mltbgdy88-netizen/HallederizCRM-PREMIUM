@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCarilerDemoAction } from "@/features/cariler/hooks/use-cariler-demo-action";
 import { useCarilerKatmanReferenceData } from "@/features/cariler/hooks/use-cariler-katman-reference-data";
@@ -136,3 +136,4 @@ export function CarilerKatmanTekliflerPage({ customerId }: { customerId?: string
     </div>
   );
 }
+

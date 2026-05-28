@@ -63,8 +63,8 @@ export function OffersPage() {
     <main className="hz-offers-page hz-offers-page--desk">
       <header className="hz-offers-desk-head">
         <div className="hz-offers-desk-head__text">
-          <h1>Teklif Operasyon MasasÄ±</h1>
-          <p>Teklif hazÄ±rlÄ±ÄŸÄ±, mÃ¼ÅŸteri takibi ve sipariÅŸe dÃ¶nÃ¼ÅŸÃ¼mÃ¼ tek ekranda yÃ¶netin.</p>
+          <h1>Teklif Operasyon Masası</h1>
+          <p>Teklif hazırlığı, müşteri takibi ve siparişe dönüşümü tek ekranda yönetin.</p>
         </div>
         <div className="hz-offers-desk-head__actions">
           <button type="button" className="hz-offers-desk-btn hz-offers-desk-btn--primary" onClick={() => router.push("/teklifler/yeni")}>
@@ -73,41 +73,41 @@ export function OffersPage() {
           </button>
           <button type="button" className="hz-offers-desk-btn" onClick={() => router.push("/hizli-islem")}>
             <LucideIcon name="zap" size={14} />
-            HÄ±zlÄ± SatÄ±ÅŸ
+            Hızlı Satış
           </button>
-          <button type="button" className="hz-offers-desk-btn" onClick={() => pushToast("DÄ±ÅŸa aktarÄ±m taslaÄŸÄ± hazÄ±rlandÄ±.")}>
+          <button type="button" className="hz-offers-desk-btn" onClick={() => pushToast("Dışa aktarım taslağı hazırlandı.")}>
             <LucideIcon name="file-text" size={14} />
-            DÄ±ÅŸa Aktar
+            Dışa Aktar
           </button>
         </div>
       </header>
 
-      <section className="hz-offers-desk-stats" aria-label="Teklif Ã¶zetleri">
+      <section className="hz-offers-desk-stats" aria-label="Teklif özetleri">
         <article>
           <span className="hz-offers-stat-ico" aria-hidden><LucideIcon name="file-text" size={18} /></span>
-          <div><span>AÃ§Ä±k Teklif</span><strong>{filteredOffers.length}</strong><small>â‚º{Math.round(volume / 1000).toLocaleString("tr-TR")}.000</small></div>
+          <div><span>Açık Teklif</span><strong>{filteredOffers.length}</strong><small>₺{Math.round(volume / 1000).toLocaleString("tr-TR")}.000</small></div>
         </article>
         <article>
           <span className="hz-offers-stat-ico" aria-hidden><LucideIcon name="send" size={18} /></span>
-          <div><span>GÃ¶nderilen</span><strong>{approvedCount}</strong><small>SipariÅŸe hazÄ±r</small></div>
+          <div><span>Gönderilen</span><strong>{approvedCount}</strong><small>Siparişe hazır</small></div>
         </article>
         <article>
           <span className="hz-offers-stat-ico" aria-hidden><LucideIcon name="clock" size={18} /></span>
-          <div><span>YanÄ±t Bekleyen</span><strong>{waitingCount}</strong><small>Takip gerekli</small></div>
+          <div><span>Yanıt Bekleyen</span><strong>{waitingCount}</strong><small>Takip gerekli</small></div>
         </article>
         <article>
           <span className="hz-offers-stat-ico hz-offers-stat-ico--gold" aria-hidden><LucideIcon name="alert-triangle" size={18} /></span>
-          <div><span>SÃ¼resi YaklaÅŸan</span><strong>{expiringCount}</strong><small>7 gÃ¼n iÃ§inde dolacak</small></div>
+          <div><span>Süresi Yaklaşan</span><strong>{expiringCount}</strong><small>7 gün içinde dolacak</small></div>
         </article>
         <article>
           <span className="hz-offers-stat-ico" aria-hidden><LucideIcon name="shopping-cart" size={18} /></span>
-          <div><span>SipariÅŸe DÃ¶nÃ¼ÅŸen</span><strong>{convertedCount}</strong><small>Bu ay</small></div>
+          <div><span>Siparişe Dönüşen</span><strong>{convertedCount}</strong><small>Bu ay</small></div>
         </article>
       </section>
 
       {dataSourceConfig.useDemoData ? (
         <p className="hz-offers-preview-band" role="status">
-          Ã–rnek veri modu: liste kayÄ±tlarÄ± demo amaÃ§lÄ±dÄ±r.
+          Örnek veri modu: liste kayıtları demo amaçlıdır.
         </p>
       ) : null}
 
@@ -115,7 +115,7 @@ export function OffersPage() {
         <section className="hz-offers-desk-main">
           <OfferFilterBar filters={filters} customers={customers} onFilterChange={updateFilter} onReset={resetFilters} />
           {loading ? (
-            <LoadingState title="Teklifler yÃ¼kleniyor" message="Teklif, follow-up ve fiyat grubu Ã¶zetleri hazÄ±rlanÄ±yor." />
+            <LoadingState title="Teklifler yükleniyor" message="Teklif, follow-up ve fiyat grubu özetleri hazırlanıyor." />
           ) : (
             <>
               <OfferTable
@@ -137,4 +137,5 @@ export function OffersPage() {
     </main>
   );
 }
+
 

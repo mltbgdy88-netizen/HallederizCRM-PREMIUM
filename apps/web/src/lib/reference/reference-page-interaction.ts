@@ -5,7 +5,7 @@ import type { AppRouterInstance } from "next/dist/shared/lib/app-router-context.
 export const REF_SKIP_FALLBACK_ATTR = "data-ref-skip-fallback";
 const REF_HANDLED_CLICK_ATTR = "data-ref-handled-click";
 
-/** Next.js Link â€” undefined href uyarÄ±larÄ±nÄ± Ã¶nler; gerÃ§ek route varsa korunur. */
+/** Next.js Link — undefined href uyarılarını önler; gerçek route varsa korunur. */
 export function referenceHref(href?: string | null): string {
   const trimmed = href?.trim();
   return trimmed ? trimmed : "#";
@@ -20,24 +20,24 @@ export function markReferenceClickHandled(target: EventTarget | null): void {
 type PushToast = (message: string) => void;
 
 const LABEL_HREFS: ReadonlyArray<{ re: RegExp; href: string }> = [
-  { re: /hÄ±zlÄ±\s*satÄ±ÅŸ/i, href: "/hizli-islem" },
-  { re: /hÄ±zlÄ±\s*iÅŸlem/i, href: "/hizli-islem" },
-  { re: /yeni\s+sipariÅŸ/i, href: "/siparisler/yeni" },
+  { re: /hızlı\s*satış/i, href: "/hizli-islem" },
+  { re: /hızlı\s*işlem/i, href: "/hizli-islem" },
+  { re: /yeni\s+sipariş/i, href: "/siparisler/yeni" },
   { re: /yeni\s+teklif/i, href: "/teklifler/yeni" },
-  { re: /yeni\s+(cari|mÃ¼ÅŸteri)/i, href: "/cariler/yeni" },
+  { re: /yeni\s+(cari|müşteri)/i, href: "/cariler/yeni" },
   { re: /yeni\s+fatura/i, href: "/faturalar/yeni" },
   { re: /yeni\s+tahsilat/i, href: "/tahsilatlar/yeni" },
   { re: /yeni\s+teslimat/i, href: "/teslimatlar/yeni" },
   { re: /yeni\s+iade/i, href: "/iadeler/yeni" },
-  { re: /yeni\s+Ã¼rÃ¼n|stok\s*giriÅŸ/i, href: "/stok" },
-  { re: /yeni\s+gÃ¶rev/i, href: "/gorevler" },
+  { re: /yeni\s+ürün|stok\s*giriş/i, href: "/stok" },
+  { re: /yeni\s+görev/i, href: "/gorevler" },
   { re: /yeni\s+belge/i, href: "/belgeler" },
   { re: /whatsapp|sohbet/i, href: "/whatsapp" },
   { re: /^onaylar?$|onay\s*merkezi/i, href: "/onaylar" },
-  { re: /^raporlar?$|rapor\s*oluÅŸtur/i, href: "/raporlar" },
-  { re: /^arÅŸiv$/i, href: "/arsiv" },
+  { re: /^raporlar?$|rapor\s*oluştur/i, href: "/raporlar" },
+  { re: /^arşiv$/i, href: "/arsiv" },
   { re: /ai\s*asistan|yapay\s*zeka/i, href: "/ai" },
-  { re: /fabrika\s*sipariÅŸ/i, href: "/fabrikalar/siparis" },
+  { re: /fabrika\s*sipariş/i, href: "/fabrikalar/siparis" },
   { re: /muhasebe/i, href: "/muhasebe" },
   { re: /ayarlar/i, href: "/ayarlar" }
 ];
@@ -54,7 +54,7 @@ function inferHrefFromLabel(label: string, pathname: string): string | null {
     if (re.test(normalized)) return href;
   }
 
-  if (/tÃ¼mÃ¼nÃ¼\s*gÃ¶r|tÃ¼m\s*kayÄ±tlarÄ±/i.test(normalized)) {
+  if (/tümünü\s*gör|tüm\s*kayıtları/i.test(normalized)) {
     if (pathname.startsWith("/dashboard")) return "/siparisler";
     const segments = pathname.split("/").filter(Boolean);
     if (segments.length >= 1) return `/${segments[0]}`;
@@ -108,7 +108,7 @@ function runReferenceButtonFallback(
   const label = normalizeLabel(
     button.getAttribute("aria-label")?.replace(/\s*bilgisi$/i, "") ??
       button.textContent ??
-      "Ä°ÅŸlem"
+      "İşlem"
   );
 
   if (explicitToast) {
@@ -122,7 +122,7 @@ function runReferenceButtonFallback(
     return;
   }
 
-  pushToast(`${label} â€” demo Ã¶nizleme; canlÄ± iÅŸlem onay akÄ±ÅŸÄ±yla yapÄ±lÄ±r.`);
+  pushToast(`${label} — demo önizleme; canlı işlem onay akışıyla yapılır.`);
 }
 
 export function handleReferencePageClick(
@@ -150,4 +150,5 @@ export function handleReferencePageClick(
     runReferenceButtonFallback(button, router, pushToast, pathname);
   });
 }
+
 

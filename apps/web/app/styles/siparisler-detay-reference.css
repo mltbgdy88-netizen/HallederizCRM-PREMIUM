@@ -1,4 +1,4 @@
-/* Sipariş Detayı — siparisler-detay-masasi-acik-mod.png */
+﻿/* Sipariş Detayı — siparisler-detay-masasi-acik-mod.png */
 
 .sdm-home {
   --sdm-gap: clamp(6px, 0.7vh, 8px);
@@ -488,3 +488,4 @@
   resize: none;
   background: #f8fafc;
 }
+

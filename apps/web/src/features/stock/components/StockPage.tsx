@@ -23,11 +23,11 @@ import { StockFilterBar } from "./StockFilterBar";
 import { StockTable } from "./StockTable";
 
 const MSG_STOCK_MOVE =
-  "Stok hareketi henÃ¼z canlÄ± kullanÄ±ma baÄŸlÄ± deÄŸil. Onay ve iÅŸlem kuyruÄŸu baÄŸlantÄ±sÄ± tamamlandÄ±ÄŸÄ±nda uygulanÄ±r.";
+  "Stok hareketi henüz canlı kullanıma bağlı değil. Onay ve işlem kuyruğu bağlantısı tamamlandığında uygulanır.";
 const MSG_LABEL =
-  "Etiket ve barkod Ã§Ä±ktÄ±sÄ± bu ortamda kapalÄ±. CanlÄ± Ã¼retim iÃ§in modÃ¼l API baÄŸlantÄ±sÄ± gerekiyor.";
-const MSG_NEW_PRODUCT = "Yeni Ã¼rÃ¼n oluÅŸturma henÃ¼z canlÄ± API ve onay zincirine baÄŸlÄ± deÄŸil.";
-const MSG_IMPORT_HINT = "Toplu Ã¼rÃ¼n aktarÄ±mÄ± iÃ§in Veri yÃ¼kleme ekranÄ±nÄ± kullanÄ±n.";
+  "Etiket ve barkod çıktısı bu ortamda kapalı. Canlı üretim için modül API bağlantısı gerekiyor.";
+const MSG_NEW_PRODUCT = "Yeni ürün oluşturma henüz canlı API ve onay zincirine bağlı değil.";
+const MSG_IMPORT_HINT = "Toplu ürün aktarımı için Veri yükleme ekranını kullanın.";
 
 export function StockPage() {
   const router = useRouter();
@@ -91,7 +91,7 @@ export function StockPage() {
   );
 
   const demoRowToast = useCallback(() => {
-    pushToast("Bu kayÄ±t Ã¶nizleme verisidir; gerÃ§ek stok kaydÄ± ile iÅŸlem yapÄ±lmaz.");
+    pushToast("Bu kayıt önizleme verisidir; gerçek stok kaydı ile işlem yapılmaz.");
   }, [pushToast]);
 
   const handleOpenDetail = useCallback(
@@ -147,13 +147,13 @@ export function StockPage() {
       <main className="hz-stock-page hz-stock-page--desk">
         <header className="hz-stock-desk-head">
           <div className="hz-stock-desk-head__text">
-            <h1>Stok Operasyon MasasÄ±</h1>
-            <p>Merkez, fabrika, depo, raf ve fiyat gÃ¶rÃ¼nÃ¼rlÃ¼ÄŸÃ¼nÃ¼ tek ekranda yÃ¶netin.</p>
+            <h1>Stok Operasyon Masası</h1>
+            <p>Merkez, fabrika, depo, raf ve fiyat görünürlüğünü tek ekranda yönetin.</p>
           </div>
           <div className="hz-stock-desk-head__actions">
             <button type="button" className="hz-stock-desk-btn hz-stock-desk-btn--primary" onClick={() => pushToast(MSG_NEW_PRODUCT)}>
               <LucideIcon name="plus-square" size={14} />
-              Yeni ÃœrÃ¼n
+              Yeni Ürün
             </button>
             <button type="button" className="hz-stock-desk-btn" onClick={() => pushToast(MSG_STOCK_MOVE)}>
               <LucideIcon name="truck" size={14} />
@@ -168,18 +168,18 @@ export function StockPage() {
               }}
             >
               <LucideIcon name="file-text" size={14} />
-              DÄ±ÅŸa Aktar
+              Dışa Aktar
             </button>
           </div>
         </header>
 
-        <section className="hz-stock-desk-stats" aria-label="Stok Ã¶zetleri">
+        <section className="hz-stock-desk-stats" aria-label="Stok özetleri">
           <article>
             <span className="hz-stock-stat-ico" aria-hidden>
               <LucideIcon name="package" size={18} />
             </span>
             <div>
-              <span>Toplam ÃœrÃ¼n</span>
+              <span>Toplam Ürün</span>
               <strong>{kpi.totalProducts}</strong>
               <small>Aktif katalog</small>
             </div>
@@ -191,7 +191,7 @@ export function StockPage() {
             <div>
               <span>Kritik Stok</span>
               <strong>{kpi.criticalCount}</strong>
-              <small>EÅŸik altÄ±</small>
+              <small>Eşik altı</small>
             </div>
           </article>
           <article>
@@ -211,7 +211,7 @@ export function StockPage() {
             <div>
               <span>Fabrika Stok</span>
               <strong>{kpi.totalFactoryStock}</strong>
-              <small>Ãœretim hattÄ±</small>
+              <small>Üretim hattı</small>
             </div>
           </article>
           <article>
@@ -240,7 +240,7 @@ export function StockPage() {
           <section className="hz-stock-desk-main">
             {usingDemoFallback ? (
               <p className="hz-stock-preview-band" role="status">
-                Ã–nizleme modu: Ã¶rnek stok kayÄ±tlarÄ± gÃ¶steriliyor.
+                Önizleme modu: örnek stok kayıtları gösteriliyor.
               </p>
             ) : null}
             <StockFilterBar
@@ -255,7 +255,7 @@ export function StockPage() {
               onReset={resetFilters}
             />
             {loading ? (
-              <LoadingState title="Stok verisi yÃ¼kleniyor" message="Merkez depo ve fabrika Ã¶zetleri getiriliyor." />
+              <LoadingState title="Stok verisi yükleniyor" message="Merkez depo ve fabrika özetleri getiriliyor." />
             ) : (
               <>
                 <StockTable
@@ -280,7 +280,7 @@ export function StockPage() {
             onOpenDetail={handleOpenDetail}
             onStockMovement={handleStockMovement}
             onLabelAction={handleLabelAction}
-            onTransfer={() => pushToast("Transfer talebi onay sonrasÄ± iÅŸlenir.")}
+            onTransfer={() => pushToast("Transfer talebi onay sonrası işlenir.")}
           />
         </div>
       </main>
@@ -298,4 +298,5 @@ export function StockPage() {
     </>
   );
 }
+
 

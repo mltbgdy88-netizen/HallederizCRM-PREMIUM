@@ -1,4 +1,4 @@
-import { flattenProductRoutes } from "../../../navigation/product-route-manifest";
+﻿import { flattenProductRoutes } from "../../../navigation/product-route-manifest";
 import type { ProductRouteNode, RouteStatus } from "../../../navigation/product-route-types";
 
 export type PanelScopeRow = {
@@ -87,3 +87,4 @@ export const PANEL_READINESS_DIMENSIONS = [
   { key: "audit", label: "Audit", ready: false, hint: "Panel aksiyon izi" },
   { key: "export", label: "Export", ready: false, hint: "Devre dışı" }
 ] as const;
+

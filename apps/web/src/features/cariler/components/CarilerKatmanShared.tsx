@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -202,3 +202,4 @@ export function CkmKpiIcon({ tone }: { tone: string }) {
 export function CkmPersonAvatar({ initials }: { initials: string }) {
   return <span className="ckm-person-avatar">{initials}</span>;
 }
+

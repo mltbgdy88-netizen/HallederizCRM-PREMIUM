@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Desk koyu mod — tam tarama (Sprint 1 + Restore)
  * globals.css içindeki #fff / slate metin sızıntılarını masa kökü altında kapatır.
  * layout: desk-dark-mode.css sonrası import.
@@ -628,3 +628,4 @@ html:root[data-theme="dark"] .hz-entity-layer-nav__back:hover {
   border-color: var(--desk-green) !important;
   color: var(--desk-green) !important;
 }
+

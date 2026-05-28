@@ -1,4 +1,4 @@
-// @ts-nocheck — katman snapshot tipleri mock ile hizalı; PREMIUM veri eşlemesi öncelikli.
+﻿// @ts-nocheck — katman snapshot tipleri mock ile hizalı; PREMIUM veri eşlemesi öncelikli.
 import type { Customer, CustomerAccount, CustomerContact, CustomerLedgerEntry, Offer, PaymentReceipt, SaleOrder } from "@hallederiz/types";
 import { REFERENCE_DEMO_BANNER } from "../../../lib/reference/constants";
 import { REFERENCE_ROUTE_IDS } from "../../../lib/reference/reference-route-ids";
@@ -671,3 +671,4 @@ export async function loadCarilerKatmanReferenceLive(customerId: string): Promis
 }
 
 export const CARILER_KATMAN_REFERENCE_INITIAL = loadCarilerKatmanReferenceDemo();
+

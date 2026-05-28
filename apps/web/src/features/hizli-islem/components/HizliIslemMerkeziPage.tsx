@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { HizliActionCard } from "@/features/hizli-islem/data/hizli-islem-mock";
 import { HizliIslemActionPreviewPanel } from "@/features/hizli-islem/components/HizliIslemActionPreviewPanel";
@@ -222,3 +222,4 @@ export function HizliIslemMerkeziPage() {
     </div>
   );
 }
+

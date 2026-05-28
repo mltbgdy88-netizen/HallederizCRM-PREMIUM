@@ -12,14 +12,14 @@ import { IconBell, IconChevronDown, IconMenu, IconSearch, ShieldLogo } from "./i
 export function OfflineShell({ children }: { children: ReactNode }) {
   return (
     <div className="ref-shell offline-shell">
-      <aside className="ref-sidebar offline-shell-sidebar" aria-label="Ã‡evrimdÄ±ÅŸÄ± menÃ¼">
+      <aside className="ref-sidebar offline-shell-sidebar" aria-label="Çevrimdışı menü">
         <div className="ref-sidebar-brand">
           <div className="ref-sidebar-logo-row">
             <ShieldLogo>P</ShieldLogo>
             <div>
               <p className="ref-sidebar-logo-title">PREMIUM</p>
               <p className="ref-sidebar-logo-sub">CRM</p>
-              <p className="offline-shell-sys">YÃ–NETÄ°M SÄ°STEMÄ°</p>
+              <p className="offline-shell-sys">YÖNETİM SİSTEMİ</p>
             </div>
           </div>
         </div>
@@ -55,7 +55,7 @@ export function OfflineShell({ children }: { children: ReactNode }) {
 
       <div className="ref-main">
         <header className="ref-header offline-shell-header">
-          <button type="button" className="ref-header-menu" aria-label="MenÃ¼">
+          <button type="button" className="ref-header-menu" aria-label="Menü">
             <IconMenu className="ref-header-menu-icon" />
           </button>
           <h1 className="offline-shell-page-title">{OFFLINE_SHELL_HEADER.title}</h1>
@@ -94,4 +94,5 @@ export function OfflineShell({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
 

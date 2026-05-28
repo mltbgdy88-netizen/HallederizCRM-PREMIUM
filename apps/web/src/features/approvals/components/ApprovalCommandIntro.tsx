@@ -18,14 +18,14 @@ export function ApprovalCommandIntro({ onRefresh, refreshing, onSearchFocus }: A
         </span>
         <div>
           <h1 className="hz-approval-intro__title">Onaylar</h1>
-          <p className="hz-approval-intro__subtitle">AI, otomasyon ve mesaj kaynaklÄ± Ã¶neriler burada incelenir.</p>
+          <p className="hz-approval-intro__subtitle">AI, otomasyon ve mesaj kaynaklı öneriler burada incelenir.</p>
         </div>
       </div>
       <div className="hz-approval-intro__actions">
         <button
           type="button"
           className="hz-approval-icon-btn"
-          aria-label="Arama alanÄ±na git"
+          aria-label="Arama alanına git"
           title="Ara"
           onClick={onSearchFocus}
         >
@@ -44,4 +44,5 @@ export function ApprovalCommandIntro({ onRefresh, refreshing, onSearchFocus }: A
     </header>
   );
 }
+
 

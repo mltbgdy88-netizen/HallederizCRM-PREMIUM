@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import test from "node:test";
 import {
   containsTechnicalUserText,
@@ -34,3 +34,4 @@ test("containsTechnicalUserText flags internal terms", () => {
   assert.equal(containsTechnicalUserText("mock fallback"), true);
   assert.equal(containsTechnicalUserText("Cari listesi güncellenemedi"), false);
 });
+

@@ -1,4 +1,4 @@
-/* Gelen Kutusu Operasyon Paneli — gelen-kutu-operasyon-paneli-acik-mod.png */
+﻿/* Gelen Kutusu Operasyon Paneli — gelen-kutu-operasyon-paneli-acik-mod.png */
 
 .gkop-home {
   --gkop-gap: clamp(6px, 0.75vh, 9px);
@@ -795,3 +795,4 @@
   display: grid;
   gap: 6px;
 }
+

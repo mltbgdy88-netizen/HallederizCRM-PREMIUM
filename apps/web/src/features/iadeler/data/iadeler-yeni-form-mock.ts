@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const IYF_PAGE = {
   breadcrumb: ["İade Yönetimi", "Yeni İade Formu"],
   cancel: "İptal",
@@ -17,7 +17,7 @@ export const IYF_ORDER = {
   fields: [
     { label: "Sipariş No", value: "SIP-2025-000124" },
     { label: "Tarih", value: "15.05.2025 14:30" },
-    { label: "Cari", value: "ABC Elektrik Ltd. Şti." },
+    { label: "Cari", value: "ABC Elektrik Ltd. �?ti." },
     { label: "Toplam Tutar", value: "₺25.680,00" }
   ]
 } as const;
@@ -105,3 +105,4 @@ export const IYF_PREVIEW = {
   continue: "Devam Et",
   continueHint: "İade Bilgileri adımına geçin"
 } as const;
+

@@ -1,4 +1,4 @@
-/* Teklifler Operasyon Masası — teklifler-operasyon-masasi-acik-mod.png */
+﻿/* Teklifler Operasyon Masası — teklifler-operasyon-masasi-acik-mod.png */
 
 .tom-home {
   --tom-gap: clamp(6px, 0.75vh, 9px);
@@ -645,3 +645,4 @@
   margin-top: auto;
   padding-top: 4px;
 }
+

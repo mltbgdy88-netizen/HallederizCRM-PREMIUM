@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const BYM_PAGE = {
   title: "Yeni Belge",
   subtitle: "Cari ile ilgili yeni bir belge yükleyin ve kaydedin."
@@ -29,3 +29,4 @@ export const BYM_UPLOAD_INFO = [
 
 export const BYM_SECURE =
   "Yüklediğiniz belgeler güvenli bir şekilde saklanır ve yetkilendirilmiş kullanıcılar tarafından görüntülenebilir.";
+

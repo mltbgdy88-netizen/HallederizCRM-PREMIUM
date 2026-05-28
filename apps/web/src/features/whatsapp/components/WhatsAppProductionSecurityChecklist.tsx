@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 /** Kanal güvenliği — kullanıcıya yönelik özet (teknik yapılandırma detayı yok). */
 export function WhatsAppProductionSecurityChecklist() {
@@ -23,3 +23,4 @@ export function WhatsAppProductionSecurityChecklist() {
     </article>
   );
 }
+

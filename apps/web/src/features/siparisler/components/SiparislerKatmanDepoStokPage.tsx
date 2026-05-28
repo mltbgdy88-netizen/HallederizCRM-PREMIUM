@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { SiparisBadge, SiparislerKatmanTabs, SkmKpiIcon } from "./SiparislerKatmanShared";
@@ -183,3 +183,4 @@ export function SiparislerKatmanDepoStokPage() {
     </div>
   );
 }
+

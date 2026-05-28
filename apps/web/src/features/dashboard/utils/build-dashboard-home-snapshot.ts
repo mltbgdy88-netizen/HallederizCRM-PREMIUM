@@ -1,4 +1,4 @@
-import type { Approval, Offer, SaleOrder, Task } from "@hallederiz/types";
+﻿import type { Approval, Offer, SaleOrder, Task } from "@hallederiz/types";
 import type { OperationsEngineData } from "../queries/operations-engine-mock-data";
 
 /** Dashboard kart kimlikleri — DashboardHomePage ALL_CARDS ile aynı olmalı */
@@ -294,3 +294,4 @@ export const DASHBOARD_CARD_HREF: Partial<Record<DashboardCardId, string>> = {
   "ai-suggestions": "/ai/icgoruler",
   "ai-approval": "/ai/onaylar"
 };
+

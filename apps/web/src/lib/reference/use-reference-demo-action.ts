@@ -23,11 +23,12 @@ export function useReferenceDemoAction() {
   return useCallback(
     (label: string, event?: MouseEvent<HTMLElement>) => {
       pushReferenceToast(
-        `${label} â€” demo modunda gerÃ§ek CRM iÅŸlemi yapÄ±lmaz.`,
+        `${label} — demo modunda gerçek CRM işlemi yapılmaz.`,
         event?.currentTarget ?? null
       );
     },
     [pushReferenceToast]
   );
 }
+
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { QuickOperationPreviewResponse } from "@hallederiz/types";
 import type { HizliActionCard } from "../data/hizli-islem-mock";
@@ -102,3 +102,4 @@ export function HizliIslemActionPreviewPanel({
     </section>
   );
 }
+

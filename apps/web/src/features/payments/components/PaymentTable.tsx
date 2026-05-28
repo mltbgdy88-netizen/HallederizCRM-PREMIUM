@@ -32,9 +32,9 @@ export function PaymentTable({
           <th>Tahsilat No</th>
           <th>Cari</th>
           <th>Tarih</th>
-          <th>YÃ¶ntem</th>
+          <th>Yöntem</th>
           <th>Tutar</th>
-          <th>Kalan BorÃ§</th>
+          <th>Kalan Borç</th>
           <th>Durum</th>
           <th>Belge</th>
           <th>Aksiyon</th>
@@ -60,7 +60,7 @@ export function PaymentTable({
             </td>
             <td>
               <span
-                className={`hz-tahsilatlar-row__remaining${row.remainingBalanceLabel === "â‚º0,00" ? " is-zero" : ""}`}
+                className={`hz-tahsilatlar-row__remaining${row.remainingBalanceLabel === "₺0,00" ? " is-zero" : ""}`}
               >
                 {row.remainingBalanceLabel}
               </span>
@@ -69,10 +69,10 @@ export function PaymentTable({
               <span className={badgeClass(row.statusTone)}>{row.statusLabel}</span>
             </td>
             <td className="hz-tahsilatlar-td-center">
-              {row.documentCountLabel !== "â€”" ? (
+              {row.documentCountLabel !== "—" ? (
                 <span className="hz-tahsilatlar-row__doccount">{row.documentCountLabel}</span>
               ) : (
-                <span className="hz-tahsilatlar-row__doccount hz-tahsilatlar-row__doccount--none">â€”</span>
+                <span className="hz-tahsilatlar-row__doccount hz-tahsilatlar-row__doccount--none">—</span>
               )}
             </td>
             <td>
@@ -80,8 +80,8 @@ export function PaymentTable({
                 <button
                   type="button"
                   className="hz-tahsilatlar-icon-action"
-                  title="DetayÄ± AÃ§"
-                  aria-label="DetayÄ± AÃ§"
+                  title="Detayı Aç"
+                  aria-label="Detayı Aç"
                   onClick={(e) => {
                     e.stopPropagation();
                     onOpenPayment(row.paymentId);
@@ -104,8 +104,8 @@ export function PaymentTable({
                 <button
                   type="button"
                   className="hz-tahsilatlar-icon-action"
-                  title="HatÄ±rlatma GÃ¶nder"
-                  aria-label="HatÄ±rlatma GÃ¶nder"
+                  title="Hatırlatma Gönder"
+                  aria-label="Hatırlatma Gönder"
                   onClick={(e) => {
                     e.stopPropagation();
                     onReminder(row.paymentId);
@@ -120,7 +120,7 @@ export function PaymentTable({
         {rows.length === 0 ? (
           <tr>
             <td colSpan={9}>
-              <div className="hz-tahsilatlar-list__empty">Filtrelere uygun tahsilat bulunamadÄ±.</div>
+              <div className="hz-tahsilatlar-list__empty">Filtrelere uygun tahsilat bulunamadı.</div>
             </td>
           </tr>
         ) : null}
@@ -128,4 +128,5 @@ export function PaymentTable({
     </table>
   );
 }
+
 

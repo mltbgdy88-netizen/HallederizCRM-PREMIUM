@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const FDM_PAGE = {
   breadcrumb: ["Faturalar", "Fatura Detay"],
   title: "Fatura Detay",
@@ -24,7 +24,7 @@ export const FDM_CUSTOMER = {
   title: "Müşteri Bilgileri",
   detailBtn: "Müşteri Detay",
   fields: [
-    { label: "Müşteri", value: "ABC Teknoloji A.Ş." },
+    { label: "Müşteri", value: "ABC Teknoloji A.�?." },
     { label: "Cari Kodu", value: "ABC001" },
     { label: "Vergi Dairesi", value: "Büyük Mükellefler VD." },
     { label: "Vergi Numarası", value: "123 456 7890" },
@@ -76,7 +76,7 @@ export const FDM_CONTEXT = {
     { label: "Vade Tarihi", value: "28.05.2025" },
     { label: "Belge No", value: "A1B2C3D4E5F6" },
     { label: "Senaryo", value: "TICARIFATURA" },
-    { label: "Fatura Tipi", value: "SATIŞ" },
+    { label: "Fatura Tipi", value: "SATI�?" },
     { label: "Oluşturan", value: "Yusuf Kaya" },
     { label: "Oluşturma Zamanı", value: "14.05.2025 10:45" },
     { label: "Son Güncelleme", value: "15.05.2025 09:12" }
@@ -89,3 +89,4 @@ export const FDM_CONTEXT = {
     { label: "Fatura Sil", tone: "danger" as const }
   ]
 } as const;
+

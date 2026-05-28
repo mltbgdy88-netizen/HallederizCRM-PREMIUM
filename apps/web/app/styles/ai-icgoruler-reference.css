@@ -1,4 +1,4 @@
-.aic-home {
+﻿.aic-home {
   display: grid;
   grid-template-rows: auto auto minmax(0, 1fr);
   gap: clamp(6px, 0.75vh, 9px);
@@ -315,3 +315,4 @@
   color: #047857;
   font-weight: 900;
 }
+

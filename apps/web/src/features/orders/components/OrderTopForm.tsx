@@ -1,4 +1,4 @@
-import type { Customer, SaleOrder } from "@hallederiz/types";
+﻿import type { Customer, SaleOrder } from "@hallederiz/types";
 import { getOrderChannelLabel } from "../queries/order-mock-data";
 
 export function OrderTopForm({ order, customer }: { order: SaleOrder; customer: Customer | null }) {
@@ -38,3 +38,4 @@ export function OrderTopForm({ order, customer }: { order: SaleOrder; customer: 
     </section>
   );
 }
+

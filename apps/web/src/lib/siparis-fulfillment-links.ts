@@ -60,7 +60,7 @@ export function fulfillmentFromSaleOrder(order: SaleOrder): SiparisFulfillment {
   if (hasFactory && hasWarehouse) {
     return {
       kind: "bolunmus",
-      label: `BÃ¶lÃ¼nmÃ¼ÅŸ (merkez ${warehouseQty} Â· fabrika ${factoryQty})`,
+      label: `Bölünmüş (merkez ${warehouseQty} · fabrika ${factoryQty})`,
       factoryOrderId: mapDemoFactoryOrderId(order.id),
       warehouseOrderId: mapDemoWarehouseOrderId(order.id)
     };
@@ -82,7 +82,7 @@ export function fulfillmentFromSaleOrder(order: SaleOrder): SiparisFulfillment {
     };
   }
 
-  return { kind: "none", label: "Kaynak planÄ± bekleniyor" };
+  return { kind: "none", label: "Kaynak planı bekleniyor" };
 }
 
 export function fulfillmentFromDemoRow(input: {
@@ -111,4 +111,5 @@ export function fulfillmentShowsDepoLink(fulfillment: SiparisFulfillment): boole
     (fulfillment.kind === "merkez" || fulfillment.kind === "bolunmus") && Boolean(fulfillment.warehouseOrderId)
   );
 }
+
 

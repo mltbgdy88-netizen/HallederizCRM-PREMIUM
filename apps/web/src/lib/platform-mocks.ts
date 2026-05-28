@@ -1,4 +1,4 @@
-import type { Permission, Role, Tenant, User } from "@hallederiz/types";
+﻿import type { Permission, Role, Tenant, User } from "@hallederiz/types";
 
 export const platformPermissions: Permission[] = [
   {
@@ -67,3 +67,4 @@ export const defaultUser: User = {
   directPermissions: [],
   lastLoginAt: new Date().toISOString()
 };
+

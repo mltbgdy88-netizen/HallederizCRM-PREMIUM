@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useId, useRef, type ReactNode } from "react";
 
@@ -78,3 +78,4 @@ export function UiDrawer({ open, title, children, onClose, side = "right", close
     </>
   );
 }
+

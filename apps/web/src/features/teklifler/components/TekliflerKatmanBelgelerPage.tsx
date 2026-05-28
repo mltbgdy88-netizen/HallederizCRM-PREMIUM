@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { TeklifBadge } from "./TekliflerKatmanShared";
 import { useTekliflerKatmanReferenceData } from "@/features/teklifler/hooks/use-teklifler-katman-reference-data";
@@ -131,7 +131,7 @@ export function TekliflerKatmanBelgelerPage() {
                     <td>
                       <span className="tkm-cell-actions" aria-label="İşlemler">
                         <button type="button" title="Görüntüle">
-                          👁
+                          g���
                         </button>
                         <button type="button" title="İndir">
                           ↓
@@ -167,7 +167,7 @@ export function TekliflerKatmanBelgelerPage() {
             <span>{layer.belgelerPreview.page}</span>
             <span>{layer.belgelerPreview.zoom}</span>
             <span className="tkm-preview-tools" aria-hidden>
-              − + 🔍 ↓ ⤢
+              − + g��� ↓ ⤢
             </span>
           </div>
           <div className="tkm-preview-canvas">
@@ -197,3 +197,4 @@ export function TekliflerKatmanBelgelerPage() {
     </div>
   );
 }
+

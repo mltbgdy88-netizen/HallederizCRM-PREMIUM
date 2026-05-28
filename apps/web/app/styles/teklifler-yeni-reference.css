@@ -1,4 +1,4 @@
-/* Yeni Teklif Hub — teklifler-yeni-hub-acik-mod.png */
+﻿/* Yeni Teklif Hub — teklifler-yeni-hub-acik-mod.png */
 
 .tyh-home {
   --tyh-gap: clamp(8px, 0.85vh, 10px);
@@ -348,3 +348,4 @@
   cursor: pointer;
   padding: 0 4px;
 }
+

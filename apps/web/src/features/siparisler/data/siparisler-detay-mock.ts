@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const SDM_PAGE = {
   breadcrumb: ["Siparişler", "Sipariş Detayı"],
   title: "Sipariş",
@@ -32,7 +32,7 @@ export type SdmTab = (typeof SDM_TABS)[number];
 export const SDM_INFO_LEFT = [
   { label: "Sipariş No", value: "SP-24031" },
   { label: "Sipariş Tarihi", value: "24.05.2025 14:35" },
-  { label: "Müşteri", value: "ABC Makina San. ve Tic. A.Ş." },
+  { label: "Müşteri", value: "ABC Makina San. ve Tic. A.�?." },
   { label: "Cari Kodu", value: "C-1024" },
   { label: "İletişim", value: "Ahmet Yılmaz" },
   { label: "Telefon", value: "+90 212 555 15 20" },
@@ -96,3 +96,4 @@ export const SDM_NOTES = {
   placeholder: "İç not ekleyin...",
   sample: "Müşteri proje kapsamında düzenli alım yapmaktadır."
 } as const;
+

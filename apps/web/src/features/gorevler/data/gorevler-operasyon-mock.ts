@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type GomKpiTone = "green" | "red" | "orange" | "teal" | "slate";
 
 export type GomKpi = {
@@ -97,8 +97,8 @@ export const GOM_TABLE_ROWS: GomTableRow[] = [
     id: "4",
     title: "Teklif revizyonu — ABC Tekstil",
     subtitle: "Teklifler",
-    assignee: "Dilara Şen",
-    initials: "DŞ",
+    assignee: "Dilara �?en",
+    initials: "D�?",
     priority: "Yüksek",
     status: "Açık",
     due: "02.06.2025",
@@ -119,8 +119,8 @@ export const GOM_TABLE_ROWS: GomTableRow[] = [
     id: "6",
     title: "WhatsApp şablonları güncelleme",
     subtitle: "İletişim",
-    assignee: "Dilara Şen",
-    initials: "DŞ",
+    assignee: "Dilara �?en",
+    initials: "D�?",
     priority: "Düşük",
     status: "Açık",
     due: "05.06.2025",
@@ -203,3 +203,4 @@ const CONTEXTS: Record<string, GomContext> = {
 export function getGomContext(rowId: string): GomContext {
   return CONTEXTS[rowId] ?? CONTEXTS["1"];
 }
+

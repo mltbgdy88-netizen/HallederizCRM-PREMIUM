@@ -1,4 +1,4 @@
-export interface UserMenuProps {
+﻿export interface UserMenuProps {
   fullName: string;
   roleLabel: string;
   onLogout: () => void;
@@ -38,3 +38,4 @@ export function UserMenu({ fullName, roleLabel, onLogout }: UserMenuProps) {
     </details>
   );
 }
+

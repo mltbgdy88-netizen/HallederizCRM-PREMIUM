@@ -1,4 +1,4 @@
-export type ApprovalInboxStatus = "pending" | "approved" | "rejected" | "expired" | "cancelled";
+﻿export type ApprovalInboxStatus = "pending" | "approved" | "rejected" | "expired" | "cancelled";
 
 export type ApprovalInboxStatusFilter = "all" | ApprovalInboxStatus;
 
@@ -171,3 +171,4 @@ export interface ApprovalClientError {
   message: string;
   reasons?: string[];
 }
+

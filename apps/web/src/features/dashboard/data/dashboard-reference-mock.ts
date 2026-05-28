@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type KpiCard = {
   id: string;
   label: string;
@@ -133,3 +133,4 @@ export const USER = {
   name: "Yusuf Kaya",
   role: "Yönetici"
 };
+

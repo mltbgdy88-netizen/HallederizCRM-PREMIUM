@@ -1,4 +1,4 @@
-import { defaultPlatformSettings, type PlatformSettings, type RolePresetItem, type User } from "@hallederiz/types";
+﻿import { defaultPlatformSettings, type PlatformSettings, type RolePresetItem, type User } from "@hallederiz/types";
 import { dataSourceConfig } from "../../../lib/data-source";
 import {
   getPilotReadinessApi,
@@ -160,3 +160,4 @@ export async function getPilotReadinessData(): Promise<PilotReadinessSummary> {
 export async function getProductionReadinessData() {
   return getProductionReadinessApi();
 }
+

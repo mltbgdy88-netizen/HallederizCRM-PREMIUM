@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const WFT_PAGE = {
   breadcrumb: "Ürün Stok > UR-10001 - Rulman 6205 2RS",
   productCode: "UR-10001",
@@ -68,3 +68,4 @@ export const WFT_CONTEXT = {
   capacity: "Kapasite: 1.250 / 1.860 adet (%68)",
   lastActivity: "24.05.2025 14:45 — Stok Güncellendi"
 };
+

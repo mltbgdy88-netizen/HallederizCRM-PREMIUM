@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { TeklifBadge, TekliflerKatmanTabs, UserAvatar } from "./TekliflerKatmanShared";
 import { useTekliflerKatmanReferenceData } from "@/features/teklifler/hooks/use-teklifler-katman-reference-data";
@@ -57,7 +57,7 @@ export function TekliflerKatmanMusteriPage() {
           <article className="tkm-snapshot-card">
             <header className="tkm-snapshot-head">
               <div>
-                <span className="tkm-eyebrow">MÜŞTERİ SNAPSHOT</span>
+                <span className="tkm-eyebrow">MÜ�?TERİ SNAPSHOT</span>
                 <h2>{header.customer}</h2>
               </div>
               <div className="tkm-risk-box">
@@ -252,3 +252,4 @@ export function TekliflerKatmanMusteriPage() {
     </div>
   );
 }
+

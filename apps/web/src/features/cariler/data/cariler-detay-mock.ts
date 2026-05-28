@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const CDM_HERO = {
   initials: "UR",
   title: "UR-10001 Rulman 6205 2RS",
@@ -27,7 +27,7 @@ export const CDM_SUMMARY = {
   title: "Cari Özeti",
   fields: [
     { label: "Cari Adı", value: "UR-10001 Rulman 6205 2RS" },
-    { label: "Firma Ünvanı", value: "Rulman 6205 2RS San. ve Tic. Ltd. Şti." },
+    { label: "Firma Ünvanı", value: "Rulman 6205 2RS San. ve Tic. Ltd. �?ti." },
     { label: "Cari Grubu", value: "Sanayi" },
     { label: "Fiyat Grubu", value: "Standart" },
     { label: "Para Birimi", value: "TRY" },
@@ -121,3 +121,4 @@ export const CDM_NEXT_STEPS = {
   ],
   cta: "+ Yeni Aksiyon Ekle"
 } as const;
+

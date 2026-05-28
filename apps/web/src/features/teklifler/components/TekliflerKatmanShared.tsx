@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -146,3 +146,4 @@ export function UserAvatar({ name }: { name: string }) {
     .slice(0, 2);
   return <span className="tkm-avatar">{initials}</span>;
 }
+

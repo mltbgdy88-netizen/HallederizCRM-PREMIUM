@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { TeklifBadge } from "./TekliflerKatmanShared";
 import { useTekliflerKatmanReferenceData } from "@/features/teklifler/hooks/use-teklifler-katman-reference-data";
@@ -204,3 +204,4 @@ export function TekliflerKatmanDonusumPage() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import {
+﻿import {
   buildConfig,
   type InventoryPageConfig,
   type InventoryScopeRow,
@@ -455,3 +455,4 @@ export function buildCustomerLayerConfig(
     listNav: { href: "/cariler", label: "← Cari listesi" }
   });
 }
+

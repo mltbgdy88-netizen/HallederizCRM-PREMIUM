@@ -1,4 +1,4 @@
-import { dataSourceConfig } from "../../../lib/data-source";
+﻿import { dataSourceConfig } from "../../../lib/data-source";
 import type { LucideIconName } from "../../../components/icons/lucide-icons";
 
 export type InventoryScopeStatus = "ready" | "shell" | "needs-api" | "blocked";
@@ -328,3 +328,4 @@ export const PRINT_EXPORT_CONFIG = buildConfig({
   alertCopy: "Export ve yazdırma işlemleri API hazır olana kadar disabled kalır; fake dosya veya indirme üretilmez.",
   rows: PRINT_EXPORT_ROWS
 });
+

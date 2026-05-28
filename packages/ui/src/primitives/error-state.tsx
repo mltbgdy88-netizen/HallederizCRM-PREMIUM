@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 
 export type ErrorStateProps = {
   title?: string;
@@ -27,3 +27,4 @@ export function ErrorState({
     </div>
   );
 }
+

@@ -7,7 +7,7 @@ export default function LoginSplitRoute() {
     <Suspense
       fallback={
         <main className="lgn-split" role="status" aria-busy="true">
-          <p className="lgn-form-head">GiriÅŸ ekranÄ± yÃ¼kleniyorâ€¦</p>
+          <p className="lgn-form-head">Giriş ekranı yükleniyor…</p>
         </main>
       }
     >
@@ -15,4 +15,5 @@ export default function LoginSplitRoute() {
     </Suspense>
   );
 }
+
 

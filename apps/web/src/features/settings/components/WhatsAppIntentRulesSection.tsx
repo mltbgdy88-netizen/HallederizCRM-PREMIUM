@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useMemo } from "react";
 import type {
@@ -132,7 +132,7 @@ export function WhatsAppIntentRulesSection({
       </div>
 
       <article className="hz-settings-info-card hz-settings-info-card--muted hz-settings-rule-security-inline">
-        <h4 className="hz-settings-rule-security-inline-title">Şablon güvenliği</h4>
+        <h4 className="hz-settings-rule-security-inline-title">�?ablon güvenliği</h4>
         <p className="hz-settings-rule-security-inline-text">
           Kesin fiyat / stok / termin taahhüdü vermeyin. Kritik işlemler onaydan sonra gider. Değişkenler: {"{cari}"},{" "}
           {"{ürün}"}, {"{belge_no}"}, {"{saat}"}.
@@ -173,7 +173,7 @@ export function WhatsAppIntentRulesSection({
               CRM onay
             </div>
             <div className="hz-settings-rule-preview hz-settings-rule-th" role="columnheader">
-              Şablon
+              �?ablon
             </div>
             <div className="hz-settings-rule-actions hz-settings-rule-th" role="columnheader">
               İşlem
@@ -373,3 +373,4 @@ export function IntentRuleAssistantPanel({
     </>
   );
 }
+

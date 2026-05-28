@@ -3,10 +3,10 @@ export function money(amount: number, currency = "TRY"): string {
   return `${amount.toLocaleString("tr-TR", { maximumFractionDigits: 2 })} ${currency}`;
 }
 
-/** SipariÅŸ masasÄ± ve Ã¶nizleme â€” tek tip â‚º formatÄ± */
+/** Sipariş masası ve önizleme — tek tip ₺ formatı */
 export function formatTryMoney(amount: number, currency = "TRY"): string {
   if (!Number.isFinite(amount)) {
-    return "â€”";
+    return "—";
   }
 
   const code = currency === "TL" || currency === "TRY" ? "TRY" : currency;
@@ -37,4 +37,5 @@ export function dateLabel(value?: string): string {
     year: "numeric"
   }).format(new Date(value));
 }
+
 

@@ -1,4 +1,4 @@
-import { dataSourceConfig } from "../../../lib/data-source";
+﻿import { dataSourceConfig } from "../../../lib/data-source";
 
 export type LoginScopeStatus = "ready" | "shell" | "needs-api" | "blocked";
 
@@ -137,3 +137,4 @@ export const LOGIN_READINESS_DIMENSIONS = [
 export function isDemoAuthEnabled(): boolean {
   return ENABLE_DEMO_AUTH;
 }
+

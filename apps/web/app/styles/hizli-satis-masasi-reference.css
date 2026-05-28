@@ -1,4 +1,4 @@
-/* Hızlı Satış Masası — hizli-satis-masasi-acik-mod.png */
+﻿/* Hızlı Satış Masası — hizli-satis-masasi-acik-mod.png */
 
 .hsm-home {
   --hsm-gap: clamp(6px, 0.75vh, 9px);
@@ -458,3 +458,4 @@
 .hsm-btn--outline:hover {
   filter: brightness(0.97);
 }
+

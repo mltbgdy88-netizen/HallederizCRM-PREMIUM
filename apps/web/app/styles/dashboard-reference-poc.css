@@ -1,4 +1,4 @@
-:root {
+﻿:root {
   --ref-sidebar-w: 204px;
   --ref-header-h: 56px;
   --ref-emerald: #047857;
@@ -840,3 +840,4 @@
     display: none;
   }
 }
+

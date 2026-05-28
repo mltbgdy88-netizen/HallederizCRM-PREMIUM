@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   ApprovalClientError,
   ApprovalInboxItem,
   ApprovalInboxStatus,
@@ -326,3 +326,4 @@ export function describeApprovalActionDisabledReason(item: ApprovalInboxItem | n
   }
   return null;
 }
+

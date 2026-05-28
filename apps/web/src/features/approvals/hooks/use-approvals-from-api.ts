@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { Approval } from "@hallederiz/types";
 import { useCallback, useEffect, useState } from "react";
@@ -41,3 +41,4 @@ export function useApprovalsFromApi(enabled: boolean) {
 
   return { items, loading, error, reload };
 }
+

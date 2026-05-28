@@ -24,14 +24,14 @@ function deskStatus(conversation: WhatsAppConversation): { label: string; tone: 
   }
   const risk = WA_QUEUE_META[conversation.id]?.risk;
   if (risk === "kritik") {
-    return { label: "SLA AÅŸÄ±mÄ±", tone: "sla" };
+    return { label: "SLA Aşımı", tone: "sla" };
   }
   return { label: "Aktif", tone: "ok" };
 }
 
 function slaLabel(conversation: WhatsAppConversation): { text: string; tone: "ok" | "warn" | "bad" } {
   const risk = WA_QUEUE_META[conversation.id]?.risk;
-  if (risk === "kritik") return { text: "AÅŸÄ±ldÄ±", tone: "bad" };
+  if (risk === "kritik") return { text: "Aşıldı", tone: "bad" };
   if (risk === "orta") return { text: "2s 14dk", tone: "warn" };
   return { text: "Normal", tone: "ok" };
 }
@@ -94,25 +94,25 @@ export function WhatsAppOperationsDesk({ initialCustomerId }: { initialCustomerI
       <header className="hz-wa-desk-head">
         <div className="hz-wa-desk-head__text">
           <h1>WhatsApp Operasyon Paneli</h1>
-          <p>Kanal mesajlarÄ±, onay bekleyenler ve SLA takibini tek ekranda yÃ¶netin.</p>
+          <p>Kanal mesajları, onay bekleyenler ve SLA takibini tek ekranda yönetin.</p>
         </div>
         <div className="hz-wa-desk-head__actions">
-          <button type="button" className="hz-wa-desk-btn hz-wa-desk-btn--primary" onClick={() => pushToast("Yeni konuÅŸma henÃ¼z canlÄ±ya baÄŸlÄ± deÄŸil.")}>
+          <button type="button" className="hz-wa-desk-btn hz-wa-desk-btn--primary" onClick={() => pushToast("Yeni konuşma henüz canlıya bağlı değil.")}>
             <LucideIcon name="plus-square" size={14} />
-            Yeni KonuÅŸma
+            Yeni Konuşma
           </button>
-          <button type="button" className="hz-wa-desk-btn" onClick={() => pushToast("Åablon gÃ¶nderimi onay zincirinden geÃ§er.")}>
+          <button type="button" className="hz-wa-desk-btn" onClick={() => pushToast("�?ablon gönderimi onay zincirinden geçer.")}>
             <LucideIcon name="send" size={14} />
-            Åablon GÃ¶nder
+            �?ablon Gönder
           </button>
-          <button type="button" className="hz-wa-desk-btn" onClick={() => pushToast("DÄ±ÅŸa aktarÄ±m taslaÄŸÄ± hazÄ±rlandÄ±.")}>
+          <button type="button" className="hz-wa-desk-btn" onClick={() => pushToast("Dışa aktarım taslağı hazırlandı.")}>
             <LucideIcon name="file-text" size={14} />
-            DÄ±ÅŸa Aktar
+            Dışa Aktar
           </button>
         </div>
       </header>
 
-      <section className="hz-wa-desk-stats" aria-label="WhatsApp Ã¶zetleri">
+      <section className="hz-wa-desk-stats" aria-label="WhatsApp özetleri">
         <article>
           <span className="hz-wa-desk-stat-ico" aria-hidden>
             <LucideIcon name="message-circle" size={16} />
@@ -120,7 +120,7 @@ export function WhatsAppOperationsDesk({ initialCustomerId }: { initialCustomerI
           <div>
             <span>Bekleyen Mesaj</span>
             <strong>{unreadTotal || (useDemo ? 24 : 0)}</strong>
-            <small>â†‘ {useDemo ? "12%" : "â€”"} dÃ¼nden</small>
+            <small>↑ {useDemo ? "12%" : "—"} dünden</small>
           </div>
         </article>
         <article>
@@ -128,9 +128,9 @@ export function WhatsAppOperationsDesk({ initialCustomerId }: { initialCustomerI
             <LucideIcon name="send" size={16} />
           </span>
           <div>
-            <span>BugÃ¼n Giden</span>
+            <span>Bugün Giden</span>
             <strong>{useDemo ? 128 : 0}</strong>
-            <small>â†‘ {useDemo ? "8%" : "â€”"} dÃ¼nden</small>
+            <small>↑ {useDemo ? "8%" : "—"} dünden</small>
           </div>
         </article>
         <article>
@@ -138,9 +138,9 @@ export function WhatsAppOperationsDesk({ initialCustomerId }: { initialCustomerI
             <LucideIcon name="message-circle" size={16} />
           </span>
           <div>
-            <span>OkunmamÄ±ÅŸ</span>
+            <span>Okunmamış</span>
             <strong>{unreadTotal || (useDemo ? 4 : 0)}</strong>
-            <small>{useDemo ? "4 sohbet" : "â€”"}</small>
+            <small>{useDemo ? "4 sohbet" : "—"}</small>
           </div>
         </article>
         <article>
@@ -150,7 +150,7 @@ export function WhatsAppOperationsDesk({ initialCustomerId }: { initialCustomerI
           <div>
             <span>Onay Bekleyen</span>
             <strong>{approvalTotal || (useDemo ? 7 : 0)}</strong>
-            <small>{useDemo ? "2 kritik" : "â€”"}</small>
+            <small>{useDemo ? "2 kritik" : "—"}</small>
           </div>
         </article>
         <article>
@@ -158,9 +158,9 @@ export function WhatsAppOperationsDesk({ initialCustomerId }: { initialCustomerI
             <LucideIcon name="alert-triangle" size={16} />
           </span>
           <div>
-            <span>SLA AÅŸÄ±mÄ±</span>
+            <span>SLA Aşımı</span>
             <strong>{slaBreaches || (useDemo ? 2 : 0)}</strong>
-            <small>{useDemo ? "Acil mÃ¼dahale" : "â€”"}</small>
+            <small>{useDemo ? "Acil müdahale" : "—"}</small>
           </div>
         </article>
         <article>
@@ -168,16 +168,16 @@ export function WhatsAppOperationsDesk({ initialCustomerId }: { initialCustomerI
             <LucideIcon name="shopping-cart" size={16} />
           </span>
           <div>
-            <span>DÃ¶nÃ¼ÅŸÃ¼m OranÄ±</span>
-            <strong>{useDemo ? "%38" : "â€”"}</strong>
-            <small>â†‘ {useDemo ? "3 puan" : "â€”"}</small>
+            <span>Dönüşüm Oranı</span>
+            <strong>{useDemo ? "%38" : "—"}</strong>
+            <small>↑ {useDemo ? "3 puan" : "—"}</small>
           </div>
         </article>
       </section>
 
       {useDemo ? (
         <p className="hz-wa-desk-preview-band" role="status">
-          Ã–nizleme modu: konuÅŸma listesi demo amaÃ§lÄ±dÄ±r; canlÄ± gÃ¶nderim onay zincirinden geÃ§er.
+          Önizleme modu: konuşma listesi demo amaçlıdır; canlı gönderim onay zincirinden geçer.
         </p>
       ) : listError ? (
         <p className="hz-wa-desk-preview-band hz-wa-desk-preview-band--error" role="alert">
@@ -195,13 +195,13 @@ export function WhatsAppOperationsDesk({ initialCustomerId }: { initialCustomerI
               <span>Arama</span>
               <span className="hz-wa-desk-filter-search">
                 <LucideIcon name="search" size={14} />
-                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="KonuÅŸma, cari veya mesaj ara" aria-label="Arama" />
+                <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Konuşma, cari veya mesaj ara" aria-label="Arama" />
               </span>
             </label>
             <label className="hz-wa-desk-filter-field">
               <span>Durum</span>
               <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value as DeskStatusFilter)} aria-label="Durum">
-                <option value="all">TÃ¼mÃ¼</option>
+                <option value="all">Tümü</option>
                 <option value="pending">Beklemede</option>
                 <option value="approval">Onay Bekliyor</option>
                 <option value="active">Aktif</option>
@@ -210,21 +210,21 @@ export function WhatsAppOperationsDesk({ initialCustomerId }: { initialCustomerI
             <label className="hz-wa-desk-filter-field">
               <span>Kanal</span>
               <select value={channel} onChange={(e) => setChannel(e.target.value)} aria-label="Kanal">
-                <option value="all">TÃ¼mÃ¼</option>
+                <option value="all">Tümü</option>
                 <option value="whatsapp">WhatsApp</option>
               </select>
             </label>
             <label className="hz-wa-desk-filter-field">
               <span>Temsilci</span>
               <select value={agent} onChange={(e) => setAgent(e.target.value)} aria-label="Temsilci">
-                <option value="all">TÃ¼mÃ¼</option>
-                <option value="emre">Emre AydÄ±n</option>
+                <option value="all">Tümü</option>
+                <option value="emre">Emre Aydın</option>
               </select>
             </label>
             <label className="hz-wa-desk-filter-field">
               <span>Tarih</span>
               <select aria-label="Tarih" defaultValue="today">
-                <option value="today">BugÃ¼n</option>
+                <option value="today">Bugün</option>
                 <option value="week">Bu hafta</option>
                 <option value="month">Bu ay</option>
               </select>
@@ -232,14 +232,14 @@ export function WhatsAppOperationsDesk({ initialCustomerId }: { initialCustomerI
             <button
               type="button"
               className="hz-wa-desk-filter-reset"
-              title="Filtreleri sÄ±fÄ±rla"
-              aria-label="Filtreleri sÄ±fÄ±rla"
+              title="Filtreleri sıfırla"
+              aria-label="Filtreleri sıfırla"
               onClick={() => {
                 setSearch("");
                 setStatusFilter("all");
                 setChannel("all");
                 setAgent("all");
-                pushToast("Filtreler sÄ±fÄ±rlandÄ±.");
+                pushToast("Filtreler sıfırlandı.");
               }}
             >
               <LucideIcon name="x" size={13} />
@@ -247,7 +247,7 @@ export function WhatsAppOperationsDesk({ initialCustomerId }: { initialCustomerI
           </div>
 
           {listLoading ? (
-            <LoadingState title="KonuÅŸmalar yÃ¼kleniyor" message="WhatsApp kuyruÄŸu hazÄ±rlanÄ±yor." />
+            <LoadingState title="Konuşmalar yükleniyor" message="WhatsApp kuyruğu hazırlanıyor." />
           ) : (
             <>
               <section className="hz-wa-desk-table-card">
@@ -255,7 +255,7 @@ export function WhatsAppOperationsDesk({ initialCustomerId }: { initialCustomerI
                   <table className="hz-wa-desk-table">
                     <thead>
                       <tr>
-                        <th>KonuÅŸma</th>
+                        <th>Konuşma</th>
                         <th>Cari</th>
                         <th>Son Mesaj</th>
                         <th>Durum</th>
@@ -286,10 +286,10 @@ export function WhatsAppOperationsDesk({ initialCustomerId }: { initialCustomerI
                                 </div>
                               </div>
                             </td>
-                            <td>{customer?.name ?? "â€”"}</td>
+                            <td>{customer?.name ?? "—"}</td>
                             <td>
                               <span className="hz-wa-desk-msg">{row.lastMessagePreview || meta?.subtitle}</span>
-                              <span className="hz-wa-desk-msg-time">{meta?.timeLabel ?? "â€”"}</span>
+                              <span className="hz-wa-desk-msg-time">{meta?.timeLabel ?? "—"}</span>
                             </td>
                             <td>
                               <span className={`hz-wa-desk-badge hz-wa-desk-badge--${status.tone}`}>{status.label}</span>
@@ -304,7 +304,7 @@ export function WhatsAppOperationsDesk({ initialCustomerId }: { initialCustomerI
                               <button type="button" className="hz-wa-desk-row-action" title="Detay" onClick={() => setSelectedId(row.id)}>
                                 <LucideIcon name="eye" size={13} />
                               </button>
-                              <button type="button" className="hz-wa-desk-row-action" title="Mesaj akÄ±ÅŸÄ±" onClick={() => router.push(`/gelen-kutu?channel=whatsapp&conversation=${row.id}`)}>
+                              <button type="button" className="hz-wa-desk-row-action" title="Mesaj akışı" onClick={() => router.push(`/gelen-kutu?channel=whatsapp&conversation=${row.id}`)}>
                                 <LucideIcon name="message-circle" size={13} />
                               </button>
                               <button type="button" className="hz-wa-desk-row-action" title="Onaylar" onClick={() => router.push("/onaylar")}>
@@ -317,7 +317,7 @@ export function WhatsAppOperationsDesk({ initialCustomerId }: { initialCustomerI
                       {paged.length === 0 ? (
                         <tr>
                           <td colSpan={6}>
-                            <div className="table-empty">Filtrelere uygun konuÅŸma bulunamadÄ±.</div>
+                            <div className="table-empty">Filtrelere uygun konuşma bulunamadı.</div>
                           </td>
                         </tr>
                       ) : null}
@@ -335,11 +335,12 @@ export function WhatsAppOperationsDesk({ initialCustomerId }: { initialCustomerI
         <WhatsAppDeskPreview
           conversation={selected}
           onOpenApprovals={() => router.push("/onaylar")}
-          onSelectTemplate={() => pushToast("Åablon seÃ§imi onay sonrasÄ± uygulanÄ±r.")}
-          onSelectFile={() => pushToast("Belge gÃ¶nderimi onay zincirinden geÃ§er.")}
+          onSelectTemplate={() => pushToast("�?ablon seçimi onay sonrası uygulanır.")}
+          onSelectFile={() => pushToast("Belge gönderimi onay zincirinden geçer.")}
         />
       </div>
     </main>
   );
 }
+
 

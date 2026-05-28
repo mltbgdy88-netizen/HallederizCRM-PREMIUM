@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   HSM_APPROVAL,
@@ -312,3 +312,4 @@ export function HizliSatisMasasiPage() {
     </div>
   );
 }
+

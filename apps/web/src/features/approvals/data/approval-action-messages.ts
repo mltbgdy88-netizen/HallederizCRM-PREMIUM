@@ -1,4 +1,4 @@
-export const MSG_APPROVAL_APPROVED = "Onay kaydı onaylandı.";
+﻿export const MSG_APPROVAL_APPROVED = "Onay kaydı onaylandı.";
 export const MSG_APPROVAL_REJECTED = "Onay kaydı reddedildi.";
 
 export const MSG_APPROVAL_SENT_FOR_APPROVAL = "İşlem onaya gönderildi.";
@@ -40,3 +40,4 @@ export const MSG_APPROVAL_DEMO_BAND =
 export const MSG_APPROVAL_LIVE_QUEUE_BAND = MSG_APPROVAL_AFTER_APPROVAL;
 
 export const MSG_REFRESH_STATUS = "Sayfayı yenileyerek durumu kontrol edebilirsiniz.";
+

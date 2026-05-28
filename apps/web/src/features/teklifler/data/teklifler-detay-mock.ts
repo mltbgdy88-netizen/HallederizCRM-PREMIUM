@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const TDM_PAGE = {
   breadcrumb: ["Teklifler", "Teklif Detayı"],
   title: "Teklif Detayı"
@@ -10,7 +10,7 @@ export const TDM_HERO = {
   status: "Müşteri Durumunda",
   created: "Oluşturulma: 18.06.2025 10:30",
   updated: "Son Güncelleme: 18.06.2025 11:45",
-  customer: "ABC Makine San. ve Tic. A.Ş.",
+  customer: "ABC Makine San. ve Tic. A.�?.",
   contact: "Ahmet Yılmaz",
   email: "ahmet.yilmaz@abcmakine.com",
   total: "₺125.430,00",
@@ -100,3 +100,4 @@ export const TDM_CONVERT = {
   text: "Bu teklifi siparişe dönüştürerek sipariş sürecini başlatın.",
   cta: "Siparişe Dönüştür →"
 } as const;
+

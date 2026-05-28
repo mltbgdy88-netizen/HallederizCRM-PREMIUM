@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import type { ImportApplyResult, ImportHistoryRecord, ImportPreviewResult, ImportType } from "@hallederiz/types";
@@ -456,3 +456,4 @@ export function DataImportPage() {
     </SettingsAreaShell>
   );
 }
+

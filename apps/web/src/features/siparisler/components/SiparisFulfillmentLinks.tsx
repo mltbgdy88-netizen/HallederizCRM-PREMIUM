@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { SiparisFulfillment } from "@/lib/siparis-fulfillment-links";
@@ -68,3 +68,4 @@ export function SiparisFulfillmentLinks({
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { ReactNode } from "react";
@@ -16,7 +16,7 @@ const MAX_RISK_BULLETS = 3;
 const MAX_TIMELINE_STEPS = 5;
 
 const RISK_LEVEL_LABELS: Record<NonNullable<ApprovalInboxRecord["riskLevel"]>, string> = {
-  dusuk: "DÜŞÜK RİSK",
+  dusuk: "DÜ�?ÜK RİSK",
   orta: "ORTA RİSK",
   yuksek: "YÜKSEK RİSK",
   kritik: "KRİTİK RİSK"

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { InventoryCommandCenterPage } from "./InventoryCommandCenterPage";
 import { buildConfig, type InventoryScopeRow } from "../utils/system-state-command-center-data";
@@ -99,3 +99,4 @@ export function QuickOperationResultPage() {
 export function QuickOperationImpactPage() {
   return <InventoryCommandCenterPage config={IMPACT_CONFIG} />;
 }
+

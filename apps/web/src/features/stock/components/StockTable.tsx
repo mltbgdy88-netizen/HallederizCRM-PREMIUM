@@ -34,11 +34,11 @@ function statusLabel(status: StockRow["displayStatus"]): string {
     case "kritik":
       return "Kritik";
     case "tukeniyor":
-      return "TÃ¼keniyor";
+      return "Tükeniyor";
     case "blokeli":
       return "Blokeli";
     default:
-      return "SaÄŸlÄ±klÄ±";
+      return "Sağlıklı";
   }
 }
 
@@ -58,7 +58,7 @@ export function StockTable({
         <table className="hz-stock-table">
           <thead>
             <tr>
-              <th>ÃœrÃ¼n</th>
+              <th>Ürün</th>
               <th>Merkez Stok</th>
               <th>Fabrika Stok</th>
               <th>Depo / Raf</th>
@@ -120,8 +120,8 @@ export function StockTable({
                       type="button"
                       className="hz-stock-row-action hz-stock-row-action--icon"
                       onClick={() => onQuickOperation(row)}
-                      title="HÄ±zlÄ± iÅŸlem"
-                      aria-label="HÄ±zlÄ± iÅŸlem"
+                      title="Hızlı işlem"
+                      aria-label="Hızlı işlem"
                     >
                       <LucideIcon name="zap" size={13} />
                     </button>
@@ -134,7 +134,7 @@ export function StockTable({
               <tr>
                 <td colSpan={7}>
                   <div className="table-empty">
-                    {emptyFiltered ? "Filtrelere uygun Ã¼rÃ¼n bulunamadÄ±." : "KayÄ±t yok."}
+                    {emptyFiltered ? "Filtrelere uygun ürün bulunamadı." : "Kayıt yok."}
                   </div>
                 </td>
               </tr>
@@ -145,4 +145,5 @@ export function StockTable({
     </section>
   );
 }
+
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import { TYH_OPTIONS as TYH_OPTIONS_REF } from "@/features/teklifler/data/teklifler-yeni-mock";
@@ -161,3 +161,4 @@ export function TekliflerYeniHubPage() {
     </div>
   );
 }
+

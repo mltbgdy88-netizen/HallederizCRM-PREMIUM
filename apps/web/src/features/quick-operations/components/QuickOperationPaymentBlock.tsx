@@ -6,9 +6,9 @@ import type { PaymentMethod } from "@hallederiz/types";
 const PAYMENT_METHODS: Array<{ value: PaymentMethod; label: string }> = [
   { value: "cash", label: "Nakit" },
   { value: "transfer", label: "Havale / EFT" },
-  { value: "card", label: "Kredi kartÄ±" },
-  { value: "check", label: "Ã‡ek / senet" },
-  { value: "mixed", label: "DiÄŸer" }
+  { value: "card", label: "Kredi kartı" },
+  { value: "check", label: "Çek / senet" },
+  { value: "mixed", label: "Diğer" }
 ];
 
 export type QuickOperationPaymentFormState = {
@@ -39,21 +39,21 @@ export function QuickOperationPaymentBlock({ state, onChange, grandTotal, showAl
       ? state.amount >= grandTotal
         ? "Tam tahsilat"
         : state.amount > 0
-          ? "KÄ±smi tahsilat"
+          ? "Kısmi tahsilat"
           : "Tutar girin"
       : state.amount > 0
         ? "Tutar girildi"
         : null;
 
   return (
-    <section className="hz-qop-payment-block" aria-label="Ã–deme bilgileri">
+    <section className="hz-qop-payment-block" aria-label="Ödeme bilgileri">
       <div className="hz-qop-payment-block-head">
-        <h2 className="hz-qop-wb-conditions-title">Ã–deme / tahsilat</h2>
+        <h2 className="hz-qop-wb-conditions-title">Ödeme / tahsilat</h2>
       </div>
 
       <div className="hz-qop-payment-fields">
           <label className="hz-qop-field">
-            <span className="hz-qop-label">Tahsilat tutarÄ± (â‚º)</span>
+            <span className="hz-qop-label">Tahsilat tutarı (₺)</span>
             <input
               className="hz-qop-input hz-qop-cell-num"
               type="number"
@@ -66,7 +66,7 @@ export function QuickOperationPaymentBlock({ state, onChange, grandTotal, showAl
             />
           </label>
           <label className="hz-qop-field">
-            <span className="hz-qop-label">Ã–deme yÃ¶ntemi</span>
+            <span className="hz-qop-label">Ödeme yöntemi</span>
             <select
               className="hz-qop-input"
               value={state.method}
@@ -97,17 +97,17 @@ export function QuickOperationPaymentBlock({ state, onChange, grandTotal, showAl
               value={state.referenceNo}
               disabled={disabled}
               onChange={(e) => onChange({ referenceNo: e.target.value })}
-              placeholder="Dekont / fiÅŸ no"
+              placeholder="Dekont / fiş no"
             />
           </label>
           <label className="hz-qop-field hz-qop-field--grow">
-            <span className="hz-qop-label">AÃ§Ä±klama</span>
+            <span className="hz-qop-label">Açıklama</span>
             <input
               className="hz-qop-input"
               value={state.note}
               disabled={disabled}
               onChange={(e) => onChange({ note: e.target.value })}
-              placeholder="Tahsilat aÃ§Ä±klamasÄ±"
+              placeholder="Tahsilat açıklaması"
             />
           </label>
           {showAllocateToggle ? (
@@ -118,17 +118,18 @@ export function QuickOperationPaymentBlock({ state, onChange, grandTotal, showAl
                 disabled={disabled}
                 onChange={(e) => onChange({ allocateToOrder: e.target.checked })}
               />
-              <span>TahsilatÄ± bu sipariÅŸe baÄŸla</span>
+              <span>Tahsilatı bu siparişe bağla</span>
             </label>
           ) : null}
           {paymentHint ? (
             <p className="hz-qop-payment-hint" role="status">
               {paymentHint}
-              {grandTotal > 0 ? ` Â· SipariÅŸ toplamÄ±: â‚º${money(grandTotal)}` : null}
+              {grandTotal > 0 ? ` · Sipariş toplamı: ₺${money(grandTotal)}` : null}
             </p>
           ) : null}
       </div>
     </section>
   );
 }
+
 

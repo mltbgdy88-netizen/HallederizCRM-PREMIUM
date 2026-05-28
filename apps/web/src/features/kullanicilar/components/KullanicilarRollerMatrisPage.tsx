@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { KrmPermLevel } from "@/features/kullanicilar/data/kullanicilar-roller-matris-mock";
 import { useKullanicilarRollerReferenceData } from "@/features/kullanicilar/hooks/use-kullanicilar-roller-reference-data";
@@ -50,7 +50,7 @@ export function KullanicilarRollerMatrisPage() {
             Raporu Dışa Aktar
           </button>
           <button type="button" className="krm-btn krm-btn--primary">
-            Yetki Şablonları
+            Yetki �?ablonları
           </button>
         </div>
       </header>
@@ -122,3 +122,4 @@ export function KullanicilarRollerMatrisPage() {
     </div>
   );
 }
+

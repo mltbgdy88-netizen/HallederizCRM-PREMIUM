@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useSearchParams } from "next/navigation";
 import { REFERENCE_ROUTE_IDS } from "@/lib/reference/reference-route-ids";
@@ -62,7 +62,7 @@ export function GelenKutuKonusmaDetayPage() {
           <footer className="gkk-composer">
             <input type="text" placeholder="Mesajınızı yazın..." readOnly />
             <button type="button" className="gkk-send" aria-label="Gönder">
-              ➤
+              �?�
             </button>
           </footer>
         </section>
@@ -128,3 +128,4 @@ export function GelenKutuKonusmaDetayPage() {
     </div>
   );
 }
+

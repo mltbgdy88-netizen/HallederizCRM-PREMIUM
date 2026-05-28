@@ -96,24 +96,24 @@ export function WhatsAppOperasyonPaneliPage() {
             <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
               <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H7l-4 3V11.5A8.5 8.5 0 0 1 11.5 3h1A8.5 8.5 0 0 1 21 11.5z" />
             </svg>
-            Yeni KonuÅŸma
+            Yeni Konuşma
           </button>
           <button type="button" className="wop-btn wop-btn--ghost">
             <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
               <path d="m22 2-7 20-4-9-9-4 20-7z" />
             </svg>
-            Åablon GÃ¶nder
+            �?ablon Gönder
           </button>
           <button type="button" className="wop-btn wop-btn--ghost">
             <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
               <path d="M12 3v12M8 11l4 4 4-4M4 21h16" />
             </svg>
-            DÄ±ÅŸa Aktar
+            Dışa Aktar
           </button>
         </div>
       </header>
 
-      <section className="wop-kpi-row" aria-label="Ã–zet gÃ¶stergeler">
+      <section className="wop-kpi-row" aria-label="Özet göstergeler">
         {kpis.map((kpi) => (
           <article key={kpi.id} className={`wop-kpi-card wop-kpi-card--${kpi.tone}`}>
             <div className={`wop-kpi-icon wop-kpi-icon--${kpi.tone}`}>
@@ -167,16 +167,16 @@ export function WhatsAppOperasyonPaneliPage() {
         </label>
         <button type="button" className="wop-filter-reset">
           <IconRefresh className="wop-filter-reset-icon" />
-          SÄ±fÄ±rla
+          Sıfırla
         </button>
       </section>
 
-      <section className="wop-body" aria-label="KonuÅŸma listesi ve baÄŸlam">
+      <section className="wop-body" aria-label="Konuşma listesi ve bağlam">
         <WopConversationTablePanel conversations={conversations} pagination={pagination} />
 
-        <aside className="wop-detail" aria-label="KonuÅŸma baÄŸlamÄ±">
+        <aside className="wop-detail" aria-label="Konuşma bağlamı">
           <header className="wop-detail-head">
-            <h2>KonuÅŸma BaÄŸlamÄ±</h2>
+            <h2>Konuşma Bağlamı</h2>
           </header>
 
           <div className="wop-detail-meta">
@@ -194,7 +194,7 @@ export function WhatsAppOperasyonPaneliPage() {
               </div>
             </div>
             <p className="wop-detail-started">
-              <span>BaÅŸlangÄ±Ã§</span>
+              <span>Başlangıç</span>
               <strong>{detail.startedAt}</strong>
             </p>
           </div>
@@ -207,7 +207,7 @@ export function WhatsAppOperasyonPaneliPage() {
           </div>
 
           <section className="wop-detail-block">
-            <h3>Son Mesaj Ã–zeti</h3>
+            <h3>Son Mesaj Özeti</h3>
             <p>{detail.lastSummary}</p>
             <p className="wop-detail-source">{detail.lastSource}</p>
           </section>
@@ -223,7 +223,7 @@ export function WhatsAppOperasyonPaneliPage() {
               {suggestedReplies.map((reply) => (
                 <li key={reply.id}>
                   <p>{reply.text}</p>
-                  <button type="button" className="wop-reply-send" aria-label="GÃ¶nder">
+                  <button type="button" className="wop-reply-send" aria-label="Gönder">
                     <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
                       <path d="m22 2-7 20-4-9-9-4 20-7z" />
                     </svg>
@@ -249,4 +249,5 @@ export function WhatsAppOperasyonPaneliPage() {
     </div>
   );
 }
+
 

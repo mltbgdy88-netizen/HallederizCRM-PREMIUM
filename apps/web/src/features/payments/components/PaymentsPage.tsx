@@ -63,7 +63,7 @@ function buildKpiStats(payments: import("@hallederiz/types").PaymentReceipt[]) {
 }
 
 function fmtTry(amount: number): string {
-  return `â‚º${amount.toLocaleString("tr-TR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
+  return `₺${amount.toLocaleString("tr-TR", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}`;
 }
 
 export function PaymentsPage() {
@@ -114,16 +114,16 @@ export function PaymentsPage() {
   }, [filteredPayments, selectedPaymentId]);
 
   function handleMakbuz(paymentId: string) {
-    pushToast(`Makbuz taslaÄŸÄ± hazÄ±rlandÄ±. (${paymentId}) Demo modunda gerÃ§ek PDF gÃ¶nderimi yapÄ±lmaz.`);
+    pushToast(`Makbuz taslağı hazırlandı. (${paymentId}) Demo modunda gerçek PDF gönderimi yapılmaz.`);
   }
 
   function handleApprove(paymentId: string) {
     setApprovedIds((prev) => new Set([...prev, paymentId]));
-    pushToast("Tahsilat onay zincirine gÃ¶nderildi. Demo modunda gerÃ§ek onay iÅŸlemi yapÄ±lmaz.");
+    pushToast("Tahsilat onay zincirine gönderildi. Demo modunda gerçek onay işlemi yapılmaz.");
   }
 
   function handleReminder() {
-    pushToast("HatÄ±rlatma gÃ¶nderme backend onay akÄ±ÅŸÄ±na baÄŸlÄ±dÄ±r; demo modunda simÃ¼le edildi.");
+    pushToast("Hatırlatma gönderme backend onay akışına bağlıdır; demo modunda simüle edildi.");
   }
 
   return (
@@ -137,9 +137,9 @@ export function PaymentsPage() {
               <LucideIcon name="circle-dollar-sign" size={22} />
             </div>
             <div>
-              <h1 className="hz-tahsilatlar-intro__title">Tahsilat Operasyon MasasÄ±</h1>
+              <h1 className="hz-tahsilatlar-intro__title">Tahsilat Operasyon Masası</h1>
               <p className="hz-tahsilatlar-intro__subtitle">
-                Tahsilat akÄ±ÅŸÄ±nÄ±, bekleyen Ã¶demeleri ve cari bakiyelerini tek ekranda yÃ¶netin
+                Tahsilat akışını, bekleyen ödemeleri ve cari bakiyelerini tek ekranda yönetin
               </p>
             </div>
           </div>
@@ -158,15 +158,15 @@ export function PaymentsPage() {
               onClick={() => router.push("/hizli-islem/tahsilat")}
             >
               <LucideIcon name="zap" size={14} />
-              HÄ±zlÄ± Tahsilat
+              Hızlı Tahsilat
             </button>
             <button
               type="button"
               className="hz-tahsilatlar-intro-btn hz-tahsilatlar-intro-btn--secondary"
-              onClick={() => pushToast("DÄ±ÅŸa aktarma backend onay akÄ±ÅŸÄ±na baÄŸlÄ±dÄ±r; demo modunda simÃ¼le edildi.")}
+              onClick={() => pushToast("Dışa aktarma backend onay akışına bağlıdır; demo modunda simüle edildi.")}
             >
               <LucideIcon name="download" size={14} />
-              DÄ±ÅŸa Aktar
+              Dışa Aktar
             </button>
           </div>
         </div>
@@ -178,9 +178,9 @@ export function PaymentsPage() {
               <LucideIcon name="wallet" size={16} />
             </div>
             <div className="hz-tahsilatlar-stat__body">
-              <p className="hz-tahsilatlar-stat__label">BugÃ¼n Tahsilat</p>
+              <p className="hz-tahsilatlar-stat__label">Bugün Tahsilat</p>
               <p className="hz-tahsilatlar-stat__value">{fmtTry(kpi.todayTotal)}</p>
-              <p className="hz-tahsilatlar-stat__subtitle">({kpi.todayCount} iÅŸlem)</p>
+              <p className="hz-tahsilatlar-stat__subtitle">({kpi.todayCount} işlem)</p>
             </div>
           </div>
 
@@ -191,7 +191,7 @@ export function PaymentsPage() {
             <div className="hz-tahsilatlar-stat__body">
               <p className="hz-tahsilatlar-stat__label">Bekleyen Tahsilat</p>
               <p className="hz-tahsilatlar-stat__value">{fmtTry(kpi.pendingTotal)}</p>
-              <p className="hz-tahsilatlar-stat__subtitle">({kpi.pendingCount} kayÄ±t)</p>
+              <p className="hz-tahsilatlar-stat__subtitle">({kpi.pendingCount} kayıt)</p>
             </div>
           </div>
 
@@ -200,7 +200,7 @@ export function PaymentsPage() {
               <LucideIcon name="alert-triangle" size={16} />
             </div>
             <div className="hz-tahsilatlar-stat__body">
-              <p className="hz-tahsilatlar-stat__label">Vadesi GeÃ§en</p>
+              <p className="hz-tahsilatlar-stat__label">Vadesi Geçen</p>
               <p className="hz-tahsilatlar-stat__value hz-tahsilatlar-stat__value--gold">
                 {fmtTry(kpi.overdueTotal)}
               </p>
@@ -223,7 +223,7 @@ export function PaymentsPage() {
               <LucideIcon name="users" size={16} />
             </div>
             <div className="hz-tahsilatlar-stat__body">
-              <p className="hz-tahsilatlar-stat__label">AÃ§Ä±k Bakiye</p>
+              <p className="hz-tahsilatlar-stat__label">Açık Bakiye</p>
               <p className="hz-tahsilatlar-stat__value">{fmtTry(kpi.totalRemaining)}</p>
             </div>
           </div>
@@ -242,7 +242,7 @@ export function PaymentsPage() {
           {/* Table */}
           <div className="hz-tahsilatlar-table-wrap">
             {loading ? (
-              <p className="hz-tahsilatlar-list__loading">Tahsilatlar yÃ¼kleniyorâ€¦</p>
+              <p className="hz-tahsilatlar-list__loading">Tahsilatlar yükleniyor…</p>
             ) : (
               <PaymentTable
                 rows={pagedRows}
@@ -259,7 +259,7 @@ export function PaymentsPage() {
           {!loading && rows.length > 0 && (
             <div className="hz-tahsilatlar-list__footer">
               <span>
-                {(page - 1) * PAGE_SIZE + 1}â€“{Math.min(page * PAGE_SIZE, rows.length)} / {rows.length} kayÄ±t
+                {(page - 1) * PAGE_SIZE + 1}–{Math.min(page * PAGE_SIZE, rows.length)} / {rows.length} kayıt
               </span>
               <div className="hz-tahsilatlar-pagination">
                 <button
@@ -267,7 +267,7 @@ export function PaymentsPage() {
                   className="hz-tahsilatlar-page-btn"
                   disabled={page <= 1}
                   onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  aria-label="Ã–nceki sayfa"
+                  aria-label="Önceki sayfa"
                 >
                   <LucideIcon name="chevron-left" size={13} />
                 </button>
@@ -308,4 +308,5 @@ export function PaymentsPage() {
     </main>
   );
 }
+
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   EmptyState,
@@ -112,3 +112,4 @@ export function PaymentDetailPage({ paymentId }: { paymentId: string }) {
     </div>
   );
 }
+

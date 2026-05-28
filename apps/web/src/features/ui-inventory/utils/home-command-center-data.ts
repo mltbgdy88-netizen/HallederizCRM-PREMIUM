@@ -1,4 +1,4 @@
-import {
+﻿import {
   flattenProductRoutes,
   PRODUCT_MODULE_ROOT_HREFS
 } from "../../../navigation/product-route-manifest";
@@ -93,3 +93,4 @@ export const HOME_READINESS_DIMENSIONS = [
   { key: "audit", label: "Audit", ready: false, hint: "Timeline + audit event" },
   { key: "export", label: "Export", ready: false, hint: "PDF/Excel readiness ayrı" }
 ] as const;
+

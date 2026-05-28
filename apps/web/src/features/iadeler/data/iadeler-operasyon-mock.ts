@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type IadelerKpi = {
   id: string;
   label: string;
@@ -73,7 +73,7 @@ export const IAD_TABLE_ROWS: IadelerTableRow[] = [
     returnNo: "İA-2025-000124",
     returnMeta: "17.05.2025 14:32",
     orderNo: "SP-2025-001245",
-    customer: "ABC Mağazacılık A.Ş.",
+    customer: "ABC Mağazacılık A.�?.",
     date: "17.05.2025",
     amount: "₺12.450,00",
     status: "Bekliyor"
@@ -83,7 +83,7 @@ export const IAD_TABLE_ROWS: IadelerTableRow[] = [
     returnNo: "İA-2025-000123",
     returnMeta: "16.05.2025 11:20",
     orderNo: "SIP-2025-1586",
-    customer: "Delta Makina Ltd. Şti.",
+    customer: "Delta Makina Ltd. �?ti.",
     date: "16.05.2025",
     amount: "₺8.920,00",
     status: "Onaylandı"
@@ -93,7 +93,7 @@ export const IAD_TABLE_ROWS: IadelerTableRow[] = [
     returnNo: "İA-2025-000122",
     returnMeta: "15.05.2025 09:45",
     orderNo: "SIP-2025-1585",
-    customer: "Ege Yapı Malzemeleri A.Ş.",
+    customer: "Ege Yapı Malzemeleri A.�?.",
     date: "15.05.2025",
     amount: "₺18.750,00",
     status: "Reddedildi"
@@ -103,7 +103,7 @@ export const IAD_TABLE_ROWS: IadelerTableRow[] = [
     returnNo: "İA-2025-000121",
     returnMeta: "14.05.2025 16:10",
     orderNo: "SIP-2025-1584",
-    customer: "Kuzey Gıda San. Tic. A.Ş.",
+    customer: "Kuzey Gıda San. Tic. A.�?.",
     date: "14.05.2025",
     amount: "₺6.480,00",
     status: "Bekliyor"
@@ -113,7 +113,7 @@ export const IAD_TABLE_ROWS: IadelerTableRow[] = [
     returnNo: "İA-2025-000120",
     returnMeta: "13.05.2025 10:05",
     orderNo: "SIP-2025-1583",
-    customer: "Marmara Lojistik A.Ş.",
+    customer: "Marmara Lojistik A.�?.",
     date: "13.05.2025",
     amount: "₺24.300,00",
     status: "Onaylandı"
@@ -123,7 +123,7 @@ export const IAD_TABLE_ROWS: IadelerTableRow[] = [
     returnNo: "İA-2025-000119",
     returnMeta: "12.05.2025 15:22",
     orderNo: "SIP-2025-1582",
-    customer: "Nova Elektrik Ltd. Şti.",
+    customer: "Nova Elektrik Ltd. �?ti.",
     date: "12.05.2025",
     amount: "₺10.425,00",
     status: "Bekliyor"
@@ -133,7 +133,7 @@ export const IAD_TABLE_ROWS: IadelerTableRow[] = [
     returnNo: "İA-2025-000118",
     returnMeta: "11.05.2025 08:40",
     orderNo: "SIP-2025-1581",
-    customer: "Penta Teknoloji A.Ş.",
+    customer: "Penta Teknoloji A.�?.",
     date: "11.05.2025",
     amount: "₺15.680,00",
     status: "Onaylandı"
@@ -159,7 +159,7 @@ export const IAD_CONTEXT_BY_ROW: Record<string, IadelerContextDetail> = {
     status: "Bekliyor",
     createdAt: "22.05.2025 14:35",
     orderNo: "SP-2025-001245",
-    customer: "ABC Mağazacılık A.Ş.",
+    customer: "ABC Mağazacılık A.�?.",
     contact: "Ahmet Yılmaz",
     amount: "₺12.450,00",
     reason: "Hasarlı Ürün",
@@ -190,3 +190,4 @@ export function iadStatusBadgeClass(status: IadelerStatus): string {
   if (status === "Reddedildi") return " iad-badge--rejected";
   return " iad-badge--pending";
 }
+

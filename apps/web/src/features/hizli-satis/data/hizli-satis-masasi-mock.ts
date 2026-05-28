@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type HsmLineRow = {
   id: string;
   code: string;
@@ -101,7 +101,7 @@ export const HSM_LINES: HsmLineRow[] = [
   {
     id: "5",
     code: "PRD-00987",
-    product: "A4 Şeffaf Poşet 100'lü",
+    product: "A4 �?effaf Poşet 100'lü",
     unit: "Pak",
     qty: "10",
     source: "Stok",

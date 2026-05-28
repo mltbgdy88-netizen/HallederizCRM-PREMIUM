@@ -1,4 +1,4 @@
-/*
+﻿/*
  * Operasyon + Restore masaları — koyu mod (Sprint 1 + Restore paketi)
  * Açık mod ile aynı mantık: tek canvas, yüzey kartları, net border; gradient yok.
  * layout.tsx içinde globals.css sonrası import — legacy dark kurallarını ezer.
@@ -514,3 +514,4 @@ html:root[data-theme="dark"] .hz-offers-page--desk .hz-offers-row-action {
   border-color: var(--desk-border) !important;
   color: var(--desk-text) !important;
 }
+

@@ -1,4 +1,4 @@
-import type { WhatsAppConversation } from "@hallederiz/types";
+﻿import type { WhatsAppConversation } from "@hallederiz/types";
 import { sdk } from "../../../lib/data-source";
 import { getCustomerById } from "../../customers/queries/customer-mock-data";
 import { formatTrDateTime } from "../../../lib/reference/formatters";
@@ -116,3 +116,4 @@ export async function loadWhatsAppReferenceLive(): Promise<WhatsAppReferenceSnap
 }
 
 export const WHATSAPP_REFERENCE_INITIAL = loadWhatsAppReferenceDemo();
+

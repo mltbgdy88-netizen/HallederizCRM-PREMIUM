@@ -1,4 +1,4 @@
-/* Teslimat Detay — teslimatlar-detay-masasi-acik-mod.png */
+﻿/* Teslimat Detay — teslimatlar-detay-masasi-acik-mod.png */
 
 .tsdm-home {
   --tsdm-gap: clamp(6px, 0.7vh, 8px);
@@ -318,3 +318,4 @@
   display: grid;
   gap: 6px;
 }
+

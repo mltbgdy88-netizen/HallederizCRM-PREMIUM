@@ -1,4 +1,4 @@
-import type { Customer, Product, SaleOrder } from "@hallederiz/types";
+﻿import type { Customer, Product, SaleOrder } from "@hallederiz/types";
 import { mapOrderRow } from "../../orders/mappers/map-order-row";
 import { getOrders } from "../../orders/queries/get-orders";
 import { getStockCatalog } from "../../stock/queries/get-stock-catalog";
@@ -161,3 +161,4 @@ export async function loadHizliIslemSatisMasasiLive(): Promise<HizliIslemSatisMa
 }
 
 export const HIZLI_ISLEM_SATIS_MASASI_INITIAL = loadHizliIslemSatisMasasiDemo();
+

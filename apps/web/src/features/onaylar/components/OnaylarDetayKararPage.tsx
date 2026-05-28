@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useSearchParams } from "next/navigation";
 import { REFERENCE_ROUTE_IDS } from "@/lib/reference/reference-route-ids";
@@ -174,3 +174,4 @@ export function OnaylarDetayKararPage() {
     </div>
   );
 }
+

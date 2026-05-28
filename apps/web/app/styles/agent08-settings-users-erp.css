@@ -1,4 +1,4 @@
-/* Agent 08 — settings / users / roles / ERP / system-state routes */
+﻿/* Agent 08 — settings / users / roles / ERP / system-state routes */
 
 .hz-users-page,
 .hz-roles-page,
@@ -298,3 +298,4 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+

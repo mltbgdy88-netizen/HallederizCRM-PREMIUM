@@ -1,4 +1,4 @@
-export type AccessScopeStatus = "ready" | "shell" | "needs-api" | "blocked";
+﻿export type AccessScopeStatus = "ready" | "shell" | "needs-api" | "blocked";
 
 export type UnauthorizedScopeRow = {
   id: string;
@@ -126,3 +126,4 @@ export const UNAUTHORIZED_READINESS_DIMENSIONS = [
   { key: "audit", label: "Audit", ready: false, hint: "Red kaydı API bekleniyor" },
   { key: "export", label: "Export", ready: false, hint: "Devre dışı" }
 ] as const;
+

@@ -1,4 +1,4 @@
-/* Tahsilat Detay Masası — tahsilatlar-detay-masasi-acik-mod.png */
+﻿/* Tahsilat Detay Masası — tahsilatlar-detay-masasi-acik-mod.png */
 
 .thdm-home {
   --thdm-gap: clamp(6px, 0.7vh, 8px);
@@ -474,3 +474,4 @@
   color: #475569;
   line-height: 1.4;
 }
+

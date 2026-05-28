@@ -1,4 +1,4 @@
-export function formatTryMoney(amount: number, currency = "TRY"): string {
+﻿export function formatTryMoney(amount: number, currency = "TRY"): string {
   return new Intl.NumberFormat("tr-TR", {
     style: "currency",
     currency,
@@ -57,3 +57,4 @@ export function buildTableMeta(total: number, pageSize = 10): {
     pageNumbers
   };
 }
+

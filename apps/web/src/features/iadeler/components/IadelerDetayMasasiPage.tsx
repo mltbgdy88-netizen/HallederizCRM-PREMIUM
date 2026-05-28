@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useIadelerDetayReferenceData } from "@/features/iadeler/hooks/use-iadeler-detay-reference-data";
@@ -212,3 +212,4 @@ export function IadelerDetayMasasiPage() {
     </div>
   );
 }
+

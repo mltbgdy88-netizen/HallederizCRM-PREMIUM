@@ -59,13 +59,13 @@ export function OrdersDeskPreview({ order, customer }: OrdersDeskPreviewProps) {
 
     return (
 
-      <aside className="hz-orders-preview hz-orders-card hz-orders-card--empty" aria-label="SipariÅŸ Ã¶nizleme">
+      <aside className="hz-orders-preview hz-orders-card hz-orders-card--empty" aria-label="Sipariş önizleme">
 
         <div className="hz-orders-preview__empty">
 
-          <p className="hz-orders-preview__empty-title">Bir sipariÅŸ seÃ§in.</p>
+          <p className="hz-orders-preview__empty-title">Bir sipariş seçin.</p>
 
-          <p className="hz-orders-preview__empty-desc">SeÃ§ili sipariÅŸin Ã¶deme ve sevkiyat durumu burada gÃ¶rÃ¼nÃ¼r.</p>
+          <p className="hz-orders-preview__empty-desc">Seçili siparişin ödeme ve sevkiyat durumu burada görünür.</p>
 
         </div>
 
@@ -89,11 +89,11 @@ export function OrdersDeskPreview({ order, customer }: OrdersDeskPreviewProps) {
 
   return (
 
-    <aside className="hz-orders-preview hz-orders-card" aria-label="SipariÅŸ baÄŸlamÄ±">
+    <aside className="hz-orders-preview hz-orders-card" aria-label="Sipariş bağlamı">
 
       <header className="hz-orders-preview__header">
 
-        <p className="hz-orders-preview__eyebrow">SipariÅŸ BaÄŸlamÄ±</p>
+        <p className="hz-orders-preview__eyebrow">Sipariş Bağlamı</p>
         <h2 className="hz-orders-preview__title">{order.orderNo}</h2>
 
         <p className="hz-orders-preview__subtitle">
@@ -166,7 +166,7 @@ export function OrdersDeskPreview({ order, customer }: OrdersDeskPreviewProps) {
 
               {payment.lastCollectionLabel ? (
 
-                <p className="hz-orders-preview-section__meta">Son tahsilat kaydÄ±: {payment.lastCollectionLabel}</p>
+                <p className="hz-orders-preview-section__meta">Son tahsilat kaydı: {payment.lastCollectionLabel}</p>
 
               ) : null}
 
@@ -188,7 +188,7 @@ export function OrdersDeskPreview({ order, customer }: OrdersDeskPreviewProps) {
 
             <LucideIcon name="truck" size={14} />
 
-            Teslimat HazÄ±rlÄ±ÄŸÄ±
+            Teslimat Hazırlığı
 
           </h3>
 
@@ -211,9 +211,9 @@ export function OrdersDeskPreview({ order, customer }: OrdersDeskPreviewProps) {
           </h3>
 
           <p className="hz-orders-preview-section__headline">
-            {order.status === "completed" || order.status === "delivered" ? "Belge hazÄ±r" : "Fatura bekliyor"}
+            {order.status === "completed" || order.status === "delivered" ? "Belge hazır" : "Fatura bekliyor"}
           </p>
-          <p className="hz-orders-preview-section__detail">Son gÃ¼ncelleme: {dateLabel(order.updatedAt)}</p>
+          <p className="hz-orders-preview-section__detail">Son güncelleme: {dateLabel(order.updatedAt)}</p>
 
         </section>
 
@@ -227,7 +227,7 @@ export function OrdersDeskPreview({ order, customer }: OrdersDeskPreviewProps) {
 
           <LucideIcon name="eye" size={14} />
 
-          DetayÄ± AÃ§
+          Detayı Aç
 
         </Link>
 
@@ -237,7 +237,7 @@ export function OrdersDeskPreview({ order, customer }: OrdersDeskPreviewProps) {
 
             <LucideIcon name="circle-dollar-sign" size={14} />
 
-          Tahsilat AÃ§
+          Tahsilat Aç
 
           </Link>
 
@@ -247,7 +247,7 @@ export function OrdersDeskPreview({ order, customer }: OrdersDeskPreviewProps) {
 
             <LucideIcon name="circle-dollar-sign" size={14} />
 
-          TahsilatÄ± GÃ¶r
+          Tahsilatı Gör
 
           </Link>
 
@@ -268,6 +268,7 @@ export function OrdersDeskPreview({ order, customer }: OrdersDeskPreviewProps) {
   );
 
 }
+
 
 
 

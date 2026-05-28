@@ -1,4 +1,4 @@
-/* Cariler katman — 03-cariler/katmanlar/* */
+﻿/* Cariler katman — 03-cariler/katmanlar/* */
 
 .ckm-home {
   --ckm-gap: clamp(6px, 0.75vh, 9px);
@@ -1082,3 +1082,4 @@
     grid-template-columns: 1fr;
   }
 }
+

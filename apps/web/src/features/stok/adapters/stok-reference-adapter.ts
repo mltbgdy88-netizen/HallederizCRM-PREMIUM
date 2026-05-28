@@ -1,4 +1,4 @@
-import type { Product } from "@hallederiz/types";
+﻿import type { Product } from "@hallederiz/types";
 import { mapProductToStockRow } from "../../stock/mappers/map-stock-row";
 import { getStockCatalog } from "../../stock/queries/get-stock-catalog";
 import { REFERENCE_DEMO_BANNER } from "../../../lib/reference/constants";
@@ -156,3 +156,4 @@ export async function loadStokReferenceLive(): Promise<StokReferenceSnapshot> {
 }
 
 export const STOK_REFERENCE_INITIAL = loadStokReferenceDemo();
+

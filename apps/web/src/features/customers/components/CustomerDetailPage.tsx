@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { EmptyState, EntityDetailLayout, LoadingState, PageHeader } from "@hallederiz/ui";
 import Link from "next/link";
@@ -138,3 +138,4 @@ export function CustomerDetailPage({ customerId }: { customerId: string }) {
     </div>
   );
 }
+

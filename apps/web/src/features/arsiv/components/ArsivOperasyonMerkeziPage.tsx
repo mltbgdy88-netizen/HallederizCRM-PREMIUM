@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { IconInfo, IconRefresh, IconSearch, KpiIcon } from "@/components/reference/icons";
@@ -384,3 +384,4 @@ export function ArsivOperasyonMerkeziPage() {
     </div>
   );
 }
+

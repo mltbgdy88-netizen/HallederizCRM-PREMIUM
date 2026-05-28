@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { IconChevronDown, IconInfo, IconRefresh } from "@/components/reference/icons";
@@ -385,3 +385,4 @@ export function RaporOperasyonMerkeziPage() {
     </div>
   );
 }
+

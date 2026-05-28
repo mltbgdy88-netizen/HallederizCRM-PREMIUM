@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type TeklifKpi = {
   id: string;
   label: string;
@@ -75,7 +75,7 @@ export const TOM_TABLE_ROWS: TeklifTableRow[] = [
   {
     id: "1",
     offerNo: "TKL-2025-0487",
-    customer: "ABC Otomotiv A.Ş.",
+    customer: "ABC Otomotiv A.�?.",
     amount: "₺125.800,00",
     status: "Açık",
     validity: "20.06.2025",
@@ -111,7 +111,7 @@ export const TOM_TABLE_ROWS: TeklifTableRow[] = [
   {
     id: "5",
     offerNo: "TKL-2025-0483",
-    customer: "Marmara Lojistik A.Ş.",
+    customer: "Marmara Lojistik A.�?.",
     amount: "₺178.600,00",
     status: "Açık",
     validity: "02.07.2025",
@@ -155,7 +155,7 @@ export const TOM_CONTEXT_BY_ROW: Record<string, TeklifContextDetail> = {
     offerNo: "TKL-2025-0487",
     status: "Açık",
     createdAt: "15.05.2025",
-    customer: "ABC Otomotiv A.Ş.",
+    customer: "ABC Otomotiv A.�?.",
     contact: "Ahmet Yılmaz",
     phone: "+90 532 123 45 67",
     email: "ahmet.yilmaz@abc.com.tr",
@@ -213,3 +213,4 @@ export const TOM_CONTEXT_BY_ROW: Record<string, TeklifContextDetail> = {
 export function getTomContext(rowId: string): TeklifContextDetail {
   return TOM_CONTEXT_BY_ROW[rowId] ?? TOM_CONTEXT_BY_ROW["1"]!;
 }
+

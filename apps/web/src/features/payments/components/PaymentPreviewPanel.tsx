@@ -18,7 +18,7 @@ function fmtDate(iso: string): string {
 }
 
 function fmtTry(amount: number): string {
-  return `â‚º${amount.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `₺${amount.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 function statusToneClass(status: PaymentReceipt["status"]): string {
@@ -30,14 +30,14 @@ function statusToneClass(status: PaymentReceipt["status"]): string {
 }
 
 function getNextStep(payment: PaymentReceipt): string {
-  if (payment.status === "confirmed") return "Tahsilat eÅŸleÅŸmesi yapÄ±n ve belge tahsis edin.";
+  if (payment.status === "confirmed") return "Tahsilat eşleşmesi yapın ve belge tahsis edin.";
   if (payment.status === "partially_allocated") {
     const daysOverdue = getDaysOverdue(payment);
-    if (daysOverdue > 5) return "MÃ¼ÅŸteri ile hatÄ±rlatma gÃ¶rÃ¼ÅŸmesi planla.";
-    return "Kalan bakiye iÃ§in sipariÅŸ tahsisini tamamlayÄ±n.";
+    if (daysOverdue > 5) return "Müşteri ile hatırlatma görüşmesi planla.";
+    return "Kalan bakiye için sipariş tahsisini tamamlayın.";
   }
-  if (payment.status === "allocated") return "Tahsilat tamamlandÄ± â€” makbuz gÃ¶nderilmedi ise gÃ¶nderin.";
-  if (payment.status === "reversed") return "Ters kayÄ±t iÅŸlemini kontrol edin ve dÃ¼zeltme yapÄ±n.";
+  if (payment.status === "allocated") return "Tahsilat tamamlandı — makbuz gönderilmedi ise gönderin.";
+  if (payment.status === "reversed") return "Ters kayıt işlemini kontrol edin ve düzeltme yapın.";
   return "Durumu kontrol edin.";
 }
 
@@ -60,12 +60,12 @@ export function PaymentPreviewPanel({
 }: PreviewProps) {
   if (!payment) {
     return (
-      <aside className="hz-tahsilatlar-preview hz-tahsilatlar-card" aria-label="Tahsilat baÄŸlamÄ±">
+      <aside className="hz-tahsilatlar-preview hz-tahsilatlar-card" aria-label="Tahsilat bağlamı">
         <div className="hz-tahsilatlar-preview__empty">
           <LucideIcon name="circle-dollar-sign" size={28} />
-          <p className="hz-tahsilatlar-preview__empty-title">Tahsilat seÃ§in</p>
+          <p className="hz-tahsilatlar-preview__empty-title">Tahsilat seçin</p>
           <p className="hz-tahsilatlar-preview__empty-desc">
-            Listeden bir kayÄ±t seÃ§tiÄŸinizde baÄŸlam ve aksiyon paneli burada gÃ¶rÃ¼nÃ¼r.
+            Listeden bir kayıt seçtiğinizde bağlam ve aksiyon paneli burada görünür.
           </p>
         </div>
       </aside>
@@ -84,11 +84,11 @@ export function PaymentPreviewPanel({
   const lastReminderDate = daysOverdue > 0 ? fmtDate(payment.receivedAt) : null;
 
   return (
-    <aside className="hz-tahsilatlar-preview hz-tahsilatlar-card" aria-label="Tahsilat baÄŸlamÄ±">
+    <aside className="hz-tahsilatlar-preview hz-tahsilatlar-card" aria-label="Tahsilat bağlamı">
       {/* Header */}
       <header className="hz-tahsilatlar-preview__header">
         <div className="hz-tahsilatlar-preview__head-top">
-          <div className="hz-tahsilatlar-preview__eyebrow">Tahsilat BaÄŸlamÄ±</div>
+          <div className="hz-tahsilatlar-preview__eyebrow">Tahsilat Bağlamı</div>
           <div className="hz-tahsilatlar-preview__meta-row">
             <span className="hz-tahsilatlar-preview__receipt-no">{payment.receiptNo}</span>
             <span className="hz-tahsilatlar-preview__date">{fmtDate(payment.receivedAt)}</span>
@@ -115,30 +115,30 @@ export function PaymentPreviewPanel({
           {daysOverdue > 0 ? (
             <>
               <p className="hz-tahsilatlar-preview-section__line hz-tahsilatlar-preview-section__line--warn">
-                Vadesi geÃ§en: {daysOverdue} gÃ¼n
+                Vadesi geçen: {daysOverdue} gün
               </p>
               {lastReminderDate && (
                 <p className="hz-tahsilatlar-preview-section__line">
-                  Son hatÄ±rlatma: {lastReminderDate}
+                  Son hatırlatma: {lastReminderDate}
                 </p>
               )}
             </>
           ) : (
-            <p className="hz-tahsilatlar-preview-section__line">Vade aÅŸÄ±mÄ± yok</p>
+            <p className="hz-tahsilatlar-preview-section__line">Vade aşımı yok</p>
           )}
         </section>
 
-        {/* BaÄŸlÄ± Belgeler */}
+        {/* Bağlı Belgeler */}
         <section className="hz-tahsilatlar-preview-section">
           <h3>
             <LucideIcon name="link-2" size={13} />
-            BaÄŸlÄ± Belgeler
+            Bağlı Belgeler
           </h3>
           {linkedOrder || linkedInvoice ? (
             <>
               {linkedOrder && (
                 <div className="hz-tahsilatlar-preview-section__doc-row">
-                  <span className="hz-tahsilatlar-preview-section__doc-type">SipariÅŸ</span>
+                  <span className="hz-tahsilatlar-preview-section__doc-type">Sipariş</span>
                   <span className="hz-tahsilatlar-preview-section__doc-no">{linkedOrder.targetNo}</span>
                 </div>
               )}
@@ -150,18 +150,18 @@ export function PaymentPreviewPanel({
               )}
             </>
           ) : (
-            <p className="hz-tahsilatlar-preview-section__line">BaÄŸlÄ± belge yok â€” tahsis bekliyor</p>
+            <p className="hz-tahsilatlar-preview-section__line">Bağlı belge yok — tahsis bekliyor</p>
           )}
         </section>
 
-        {/* Ã–deme YÃ¶ntemi */}
+        {/* Ödeme Yöntemi */}
         <section className="hz-tahsilatlar-preview-section">
           <h3>
             <LucideIcon name="credit-card" size={13} />
-            Ã–deme YÃ¶ntemi
+            Ödeme Yöntemi
           </h3>
           <p className="hz-tahsilatlar-preview-section__line">
-            {payment.method === "transfer" ? "Havale" : payment.method === "cash" ? "Nakit" : payment.method === "card" ? "Kredi KartÄ±" : payment.method === "check" ? "Ã‡ek" : "Karma"}
+            {payment.method === "transfer" ? "Havale" : payment.method === "cash" ? "Nakit" : payment.method === "card" ? "Kredi Kartı" : payment.method === "check" ? "Çek" : "Karma"}
           </p>
           <p className="hz-tahsilatlar-preview-section__line hz-tahsilatlar-preview-section__line--muted">
             {bankLabel}
@@ -173,11 +173,11 @@ export function PaymentPreviewPanel({
           )}
         </section>
 
-        {/* Sonraki AdÄ±m */}
+        {/* Sonraki Adım */}
         <section className="hz-tahsilatlar-preview-section">
           <h3>
             <LucideIcon name="flag" size={13} />
-            Sonraki AdÄ±m
+            Sonraki Adım
           </h3>
           <p className="hz-tahsilatlar-preview-section__line">{nextStep}</p>
           {summary.remainingAmount > 0 && (
@@ -197,7 +197,7 @@ export function PaymentPreviewPanel({
           onClick={() => onApprove(payment.id)}
         >
           <LucideIcon name="check-circle-2" size={14} />
-          {isApproved ? "Onaya GÃ¶nderildi" : "TahsilatÄ± Onayla"}
+          {isApproved ? "Onaya Gönderildi" : "Tahsilatı Onayla"}
         </button>
         <button
           type="button"
@@ -205,7 +205,7 @@ export function PaymentPreviewPanel({
           onClick={onReminder}
         >
           <LucideIcon name="mail" size={14} />
-          HatÄ±rlatma GÃ¶nder
+          Hatırlatma Gönder
         </button>
         <button
           type="button"
@@ -213,10 +213,11 @@ export function PaymentPreviewPanel({
           onClick={() => onOpenDetail(payment.id)}
         >
           <LucideIcon name="external-link" size={14} />
-          DetayÄ± AÃ§
+          Detayı Aç
         </button>
       </div>
     </aside>
   );
 }
+
 

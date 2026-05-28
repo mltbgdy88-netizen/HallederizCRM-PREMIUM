@@ -1,4 +1,4 @@
-import { getDashboardLiveSnapshot } from "../queries/get-dashboard-live-snapshot";
+﻿import { getDashboardLiveSnapshot } from "../queries/get-dashboard-live-snapshot";
 import { formatCount } from "../../../lib/reference/formatters";
 import {
   AI_QUICK_ACTIONS,
@@ -112,3 +112,4 @@ export async function loadDashboardReferenceLive(): Promise<DashboardReferenceSn
 }
 
 export const DASHBOARD_REFERENCE_INITIAL = loadDashboardReferenceDemo();
+

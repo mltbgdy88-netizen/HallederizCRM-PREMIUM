@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { SiparisBadge, SiparislerKatmanTabs } from "./SiparislerKatmanShared";
@@ -90,7 +90,7 @@ export function SiparislerKatmanSatirlarPage() {
                       {row.disc}
                     </td>
                     <td>{row.total}</td>
-                    <td className="skm-cell-actions">✎ 🗑</td>
+                    <td className="skm-cell-actions">�? g���</td>
                   </tr>
                 ))}
               </tbody>
@@ -197,3 +197,4 @@ export function SiparislerKatmanSatirlarPage() {
     </div>
   );
 }
+

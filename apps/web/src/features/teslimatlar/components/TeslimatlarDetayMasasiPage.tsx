@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { IconChevronDown } from "@/components/reference/icons";
@@ -166,3 +166,4 @@ export function TeslimatlarDetayMasasiPage() {
     </div>
   );
 }
+

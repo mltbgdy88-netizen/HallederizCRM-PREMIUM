@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { AhbCard } from "@/features/ayarlar/data/ayarlar-hub-mock";
@@ -106,3 +106,4 @@ export function AyarlarHubPage() {
     </div>
   );
 }
+

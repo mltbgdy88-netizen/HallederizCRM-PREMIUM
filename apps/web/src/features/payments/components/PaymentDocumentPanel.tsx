@@ -1,4 +1,4 @@
-import type { PaymentReceipt } from "@hallederiz/types";
+﻿import type { PaymentReceipt } from "@hallederiz/types";
 
 export function PaymentDocumentPanel({ payment }: { payment: PaymentReceipt }) {
   return (
@@ -13,3 +13,4 @@ export function PaymentDocumentPanel({ payment }: { payment: PaymentReceipt }) {
     </section>
   );
 }
+

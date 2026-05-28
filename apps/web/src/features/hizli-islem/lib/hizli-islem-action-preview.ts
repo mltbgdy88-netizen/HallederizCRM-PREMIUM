@@ -1,4 +1,4 @@
-import type { QuickOperationSubmitRequest, QuickOperationType } from "@hallederiz/types";
+﻿import type { QuickOperationSubmitRequest, QuickOperationType } from "@hallederiz/types";
 import { HZ_CUSTOMERS_DEMO_PREFIX } from "../../customers/data/customers-demo-rows";
 import { loadQuickOperationCustomers } from "../../quick-operations/data/quick-operation-catalog";
 import { isQuickOpPreviewCustomerId } from "../../quick-operations/data/quick-operation-guards";
@@ -71,3 +71,4 @@ export async function fetchHizliIslemActionPreview(card: HizliActionCard) {
   }
   return previewQuickOperationRecord(payload);
 }
+

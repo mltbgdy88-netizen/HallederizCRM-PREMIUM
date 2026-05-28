@@ -14,7 +14,7 @@ export function DeliveryHeaderInfo({ delivery, customer }: { delivery: Delivery;
       <p className="drawer-eyebrow">Teslimat</p>
       <h2>{delivery.deliveryNo}</h2>
       <p className="muted">
-        {customer?.name ?? "â€”"} Â· {delivery.orderNo}
+        {customer?.name ?? "—"} · {delivery.orderNo}
       </p>
       <div className="hz-inline-actions">
         <span className="hz-badge hz-badge-info">{getDeliveryStatusLabel(delivery.status)}</span>
@@ -31,18 +31,18 @@ export function DeliveryActionsBar({ onRollback }: { onRollback: () => void }) {
 
   function handleConfirm() {
     setConfirmed(true);
-    pushToast("Taslak hazÄ±rlandÄ±: doÄŸrulama onay zincirine iletildi.");
+    pushToast("Taslak hazırlandı: doğrulama onay zincirine iletildi.");
   }
 
   function handleComplete() {
     setCompleted(true);
-    pushToast("Taslak hazÄ±rlandÄ±: teslim tamamlama yetkilendirme akÄ±ÅŸÄ±na aktarÄ±ldÄ±.");
+    pushToast("Taslak hazırlandı: teslim tamamlama yetkilendirme akışına aktarıldı.");
   }
 
   return (
     <section className="hz-content-card hz-deliveries-detail-actions">
-      <h3>Ä°ÅŸlemler</h3>
-      <p className="muted">Teslimat doÄŸrulama ve belge adÄ±mlarÄ± mevcut iÅŸ akÄ±ÅŸÄ±yla ilerler.</p>
+      <h3>İşlemler</h3>
+      <p className="muted">Teslimat doğrulama ve belge adımları mevcut iş akışıyla ilerler.</p>
       <div className="hz-inline-actions">
         <button
           className="hz-btn hz-btn-primary hz-toolbar-btn"
@@ -50,7 +50,7 @@ export function DeliveryActionsBar({ onRollback }: { onRollback: () => void }) {
           onClick={handleConfirm}
           disabled={confirmed}
         >
-          {confirmed ? "DoÄŸrulandÄ±" : "DoÄŸrula"}
+          {confirmed ? "Doğrulandı" : "Doğrula"}
         </button>
         <button
           className="hz-btn hz-btn-secondary hz-toolbar-btn"
@@ -58,7 +58,7 @@ export function DeliveryActionsBar({ onRollback }: { onRollback: () => void }) {
           onClick={handleComplete}
           disabled={completed}
         >
-          {completed ? "TamamlandÄ±" : "Teslimi tamamla"}
+          {completed ? "Tamamlandı" : "Teslimi tamamla"}
         </button>
         <button
           className="hz-btn hz-btn-secondary hz-toolbar-btn"
@@ -70,23 +70,23 @@ export function DeliveryActionsBar({ onRollback }: { onRollback: () => void }) {
         <button
           className="hz-btn hz-btn-secondary hz-toolbar-btn"
           type="button"
-          onClick={() => pushToast("Taslak hazÄ±rlandÄ±: mÃ¼ÅŸteri bildirim mesajÄ± onay sonrasÄ± iletilecek.")}
+          onClick={() => pushToast("Taslak hazırlandı: müşteri bildirim mesajı onay sonrası iletilecek.")}
         >
-          MÃ¼ÅŸteriye haber ver
+          Müşteriye haber ver
         </button>
         <button
           className="hz-btn hz-btn-secondary hz-toolbar-btn"
           type="button"
-          onClick={() => pushToast("Taslak hazÄ±rlandÄ±: teslim fiÅŸi belge servisine yÃ¶nlendirildi.")}
+          onClick={() => pushToast("Taslak hazırlandı: teslim fişi belge servisine yönlendirildi.")}
         >
-          Teslim fiÅŸi
+          Teslim fişi
         </button>
         <button
           className="hz-btn hz-btn-secondary hz-toolbar-btn"
           type="button"
-          onClick={() => pushToast("Taslak hazÄ±rlandÄ±: irsaliye belge servisine yÃ¶nlendirildi.")}
+          onClick={() => pushToast("Taslak hazırlandı: irsaliye belge servisine yönlendirildi.")}
         >
-          Ä°rsaliye
+          İrsaliye
         </button>
       </div>
     </section>
@@ -97,14 +97,14 @@ export function DeliveryValidationPanel({ delivery }: { delivery: Delivery }) {
   const validation = delivery.validation;
   return (
     <section className="hz-content-card">
-      <h3>Teslim doÄŸrulama</h3>
+      <h3>Teslim doğrulama</h3>
       <ul className="hz-side-list hz-margin-top-sm">
-        <li>MÃ¼ÅŸteri doÄŸrulandÄ±: {validation.customerVerified ? "Evet" : "HayÄ±r"}</li>
-        <li>SipariÅŸ eÅŸleÅŸmesi: {validation.orderMatched ? "DoÄŸru" : "Kontrol gerekli"}</li>
-        <li>Depo emri hazÄ±r: {validation.warehouseReady ? "Evet" : "HayÄ±r"}</li>
-        <li>Eksik Ã¶deme: {validation.paymentMissing ? "Var" : "Yok"}</li>
-        <li>Onay gerekiyor: {validation.approvalRequired ? "Evet" : "HayÄ±r"}</li>
-        <li>Risk notu: {validation.riskNote || "â€”"}</li>
+        <li>Müşteri doğrulandı: {validation.customerVerified ? "Evet" : "Hayır"}</li>
+        <li>Sipariş eşleşmesi: {validation.orderMatched ? "Doğru" : "Kontrol gerekli"}</li>
+        <li>Depo emri hazır: {validation.warehouseReady ? "Evet" : "Hayır"}</li>
+        <li>Eksik ödeme: {validation.paymentMissing ? "Var" : "Yok"}</li>
+        <li>Onay gerekiyor: {validation.approvalRequired ? "Evet" : "Hayır"}</li>
+        <li>Risk notu: {validation.riskNote || "—"}</li>
       </ul>
     </section>
   );
@@ -113,15 +113,15 @@ export function DeliveryValidationPanel({ delivery }: { delivery: Delivery }) {
 export function DeliveryLineTable({ delivery }: { delivery: Delivery }) {
   return (
     <section className="hz-content-card">
-      <h3>Teslim satÄ±rlarÄ±</h3>
+      <h3>Teslim satırları</h3>
       <div className="table-wrap hz-table-wrap">
         <table className="table hz-table">
           <thead>
             <tr>
-              <th>ÃœrÃ¼n kodu</th>
-              <th>ÃœrÃ¼n adÄ±</th>
-              <th>SipariÅŸ adedi</th>
-              <th>HazÄ±rlanan</th>
+              <th>Ürün kodu</th>
+              <th>Ürün adı</th>
+              <th>Sipariş adedi</th>
+              <th>Hazırlanan</th>
               <th>Teslim edilen</th>
             </tr>
           </thead>
@@ -145,12 +145,12 @@ export function DeliveryLineTable({ delivery }: { delivery: Delivery }) {
 export function CustomerNotificationCard({ delivery }: { delivery: Delivery }) {
   return (
     <section className="hz-content-card">
-      <h3>MÃ¼ÅŸteri bildirimi</h3>
-      <p className="hz-content-card-description">Teslim bilgisi kanal politikasÄ±na gÃ¶re iletilir.</p>
+      <h3>Müşteri bildirimi</h3>
+      <p className="hz-content-card-description">Teslim bilgisi kanal politikasına göre iletilir.</p>
       <ul className="hz-side-list">
-        <li>Bildirim: {delivery.confirmation?.customerNotified ? "GÃ¶nderildi" : "Taslak"}</li>
+        <li>Bildirim: {delivery.confirmation?.customerNotified ? "Gönderildi" : "Taslak"}</li>
         <li>Kanal: WhatsApp</li>
-        <li>Yedek: PDF baÄŸlantÄ±sÄ± ve operatÃ¶r notu</li>
+        <li>Yedek: PDF bağlantısı ve operatör notu</li>
       </ul>
     </section>
   );
@@ -161,11 +161,11 @@ export function DeliveryDocumentPanel({ delivery }: { delivery: Delivery }) {
     <section className="hz-content-card">
       <h3>Belge</h3>
       <ul className="hz-side-list">
-        <li>Teslim fiÅŸi: {delivery.documentStatus}</li>
-        <li>Ä°rsaliye: {delivery.documentStatus === "missing" ? "Ãœretilecek" : "HazÄ±r"}</li>
-        <li>Belge kaydÄ± teslimat ile iliÅŸkilidir.</li>
+        <li>Teslim fişi: {delivery.documentStatus}</li>
+        <li>İrsaliye: {delivery.documentStatus === "missing" ? "Üretilecek" : "Hazır"}</li>
+        <li>Belge kaydı teslimat ile ilişkilidir.</li>
       </ul>
-      <p className="muted hz-margin-top-sm">PDF Ã¶nizleme baÄŸlantÄ±sÄ± canlÄ± belge servisi bekleniyor.</p>
+      <p className="muted hz-margin-top-sm">PDF önizleme bağlantısı canlı belge servisi bekleniyor.</p>
     </section>
   );
 }
@@ -176,7 +176,7 @@ export function DeliveryRollbackDialog({ open, onClose }: { open: boolean; onClo
 
   function handleConfirm() {
     setConfirmed(true);
-    pushToast("Taslak hazÄ±rlandÄ±: geri alma iÅŸlemi onay ve denetim kaydÄ±yla iletildi.");
+    pushToast("Taslak hazırlandı: geri alma işlemi onay ve denetim kaydıyla iletildi.");
     setTimeout(onClose, 800);
   }
 
@@ -188,7 +188,7 @@ export function DeliveryRollbackDialog({ open, onClose }: { open: boolean; onClo
           <div>
             <p className="drawer-eyebrow">Geri alma</p>
             <h3>Teslim geri alma</h3>
-            <p className="muted">Geri alma iÅŸlemi onay ve denetim kaydÄ± ile ilerler.</p>
+            <p className="muted">Geri alma işlemi onay ve denetim kaydı ile ilerler.</p>
           </div>
           <button className="hz-btn hz-btn-secondary" type="button" onClick={onClose}>
             Kapat
@@ -201,7 +201,7 @@ export function DeliveryRollbackDialog({ open, onClose }: { open: boolean; onClo
             onClick={handleConfirm}
             disabled={confirmed}
           >
-            {confirmed ? "Ä°letildi" : "Onayla"}
+            {confirmed ? "İletildi" : "Onayla"}
           </button>
         </div>
       </section>
@@ -230,10 +230,10 @@ export function DeliveryDetailPage({ deliveryId }: { deliveryId?: string }) {
   );
 
   if (loading) {
-    return <LoadingState title="Teslimat yÃ¼kleniyor" message="DoÄŸrulama ve satÄ±rlar hazÄ±rlanÄ±yor." />;
+    return <LoadingState title="Teslimat yükleniyor" message="Doğrulama ve satırlar hazırlanıyor." />;
   }
   if (!delivery) {
-    return <EmptyState title="Teslimat bulunamadÄ±" message="SeÃ§ilen teslimat kaydÄ± bulunamadÄ±." />;
+    return <EmptyState title="Teslimat bulunamadı" message="Seçilen teslimat kaydı bulunamadı." />;
   }
 
   return (
@@ -241,8 +241,8 @@ export function DeliveryDetailPage({ deliveryId }: { deliveryId?: string }) {
       className="hz-commercial-entity-detail-page hz-deliveries-detail-page"
       header={
         <PageHeader
-          title={deliveryId ? "Teslimat detayÄ±" : "Yeni teslimat"}
-          description="Teslim doÄŸrulama, bildirim, belge ve geri alma adÄ±mlarÄ±."
+          title={deliveryId ? "Teslimat detayı" : "Yeni teslimat"}
+          description="Teslim doğrulama, bildirim, belge ve geri alma adımları."
           breadcrumb={delivery.deliveryNo}
         />
       }
@@ -260,4 +260,5 @@ export function DeliveryDetailPage({ deliveryId }: { deliveryId?: string }) {
     />
   );
 }
+
 

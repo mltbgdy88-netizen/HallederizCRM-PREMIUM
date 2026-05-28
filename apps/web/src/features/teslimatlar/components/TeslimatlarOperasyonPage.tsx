@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useEffect, useState } from "react";
@@ -241,7 +241,7 @@ export function TeslimatlarOperasyonPage() {
               <dd>{context.location}</dd>
             </div>
             <div>
-              <dt>Şoför</dt>
+              <dt>�?oför</dt>
               <dd>{context.driver}</dd>
             </div>
             <div>
@@ -339,3 +339,4 @@ function TeslimatTableRowView({
     </tr>
   );
 }
+

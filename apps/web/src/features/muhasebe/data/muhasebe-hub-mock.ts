@@ -1,4 +1,4 @@
-export type MuhasebeHubCard = {
+﻿export type MuhasebeHubCard = {
   id: string;
   title: string;
   description: string;
@@ -33,3 +33,4 @@ export const MUHASEBE_HUB_CARDS: MuhasebeHubCard[] = [
     icon: "returns"
   }
 ];
+

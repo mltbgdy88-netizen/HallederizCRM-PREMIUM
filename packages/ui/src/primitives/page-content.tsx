@@ -1,4 +1,4 @@
-import type { HTMLAttributes, ReactNode } from "react";
+﻿import type { HTMLAttributes, ReactNode } from "react";
 
 export type PageContentProps = HTMLAttributes<HTMLDivElement> & {
   children: ReactNode;
@@ -20,3 +20,4 @@ export function PageContent({ children, className = "", asPlatformRoot = true, .
     </div>
   );
 }
+

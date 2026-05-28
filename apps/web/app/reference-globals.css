@@ -1,4 +1,4 @@
-@import url("https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap");
+﻿@import url("https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap");
 @import "./styles/auth-root.css";
 @import "./styles/login-split-reference.css";
 @import "./styles/sistem-state-reference.css";
@@ -9,7 +9,6 @@
 @import "./styles/workflow-timeline-reference.css";
 @import "./styles/hizli-islem-satis-masasi-reference.css";
 @import "./styles/dashboard-reference-poc.css";
-@import "./styles/ana-sayfa-emerald-gold.css";
 @import "./styles/dashboard-gosterge-paneli.css";
 @import "./styles/stok-operasyon-reference.css";
 @import "./styles/cariler-operasyon-reference.css";
@@ -73,3 +72,5 @@ html.ref-ui-root body {
   background: var(--ref-canvas, #f8f5ec);
   color: var(--ref-text, #102a24);
 }
+
+

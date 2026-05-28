@@ -1,4 +1,4 @@
-import type { WarehouseOrderLine } from "@hallederiz/types";
+﻿import type { WarehouseOrderLine } from "@hallederiz/types";
 
 export function WarehouseOrderLinesTable({ lines }: { lines: WarehouseOrderLine[] }) {
   return (
@@ -35,3 +35,4 @@ export function WarehouseOrderLinesTable({ lines }: { lines: WarehouseOrderLine[
     </section>
   );
 }
+

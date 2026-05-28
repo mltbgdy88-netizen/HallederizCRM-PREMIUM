@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { EntityListPageTemplate, LoadingState, MetricCard, Pagination, PrimaryActionToolbar } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
@@ -124,3 +124,4 @@ export function OrdersPage() {
     />
   );
 }
+

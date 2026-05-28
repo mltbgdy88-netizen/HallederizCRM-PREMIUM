@@ -1,4 +1,4 @@
-import type { ArchiveRecord } from "../types";
+﻿import type { ArchiveRecord } from "../types";
 import { dataSourceConfig } from "../../../lib/data-source";
 
 /** `NEXT_PUBLIC_USE_DEMO_DATA` ile uyumlu; API modunda `false` iken örnek satırlar kullanılmaz. */
@@ -9,7 +9,7 @@ export const ARCHIVE_DEMO_RECORDS: ArchiveRecord[] = [
     id: "r1",
     documentNumber: "SO-2026-0148",
     title: "Sipariş oluşturuldu",
-    customerName: "Delta A.Ş.",
+    customerName: "Delta A.�?.",
     contextRef: "Sipariş satırları onaylı",
     recordType: "Sipariş",
     categoryKey: "siparis",
@@ -61,7 +61,7 @@ export const ARCHIVE_DEMO_RECORDS: ArchiveRecord[] = [
     id: "r3",
     documentNumber: "TF-2026-0189",
     title: "Teklif PDF",
-    customerName: "Delta A.Ş.",
+    customerName: "Delta A.�?.",
     contextRef: "Teklif TF-2026-0189",
     recordType: "Belge",
     categoryKey: "belge",
@@ -136,7 +136,7 @@ export const ARCHIVE_DEMO_RECORDS: ArchiveRecord[] = [
     id: "r6",
     documentNumber: "FA-2026-0112",
     title: "Fatura kesimi",
-    customerName: "Ege Un A.Ş.",
+    customerName: "Ege Un A.�?.",
     contextRef: "KDV dahil fatura",
     recordType: "Fatura",
     categoryKey: "fatura",
@@ -208,7 +208,7 @@ export const ARCHIVE_DEMO_RECORDS: ArchiveRecord[] = [
     id: "r9",
     documentNumber: "BG-2026-021",
     title: "Sevk belgesi",
-    customerName: "Delta A.Ş.",
+    customerName: "Delta A.�?.",
     contextRef: "Sevk irsaliyesi",
     recordType: "Belge",
     categoryKey: "belge",
@@ -251,3 +251,4 @@ export const ARCHIVE_DEMO_RECORDS: ArchiveRecord[] = [
     relatedLinks: [{ label: "Stok", href: "/stok" }]
   }
 ];
+

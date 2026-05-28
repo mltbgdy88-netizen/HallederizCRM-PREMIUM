@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { EmptyState, LoadingState } from "@hallederiz/ui";
 import type { Customer, WarehouseOrder, WarehouseOrderLine } from "@hallederiz/types";
@@ -321,3 +321,4 @@ export function WarehouseOrderDetailPage({ warehouseOrderId }: { warehouseOrderI
     </div>
   );
 }
+

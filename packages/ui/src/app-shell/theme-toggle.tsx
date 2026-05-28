@@ -26,12 +26,12 @@ function ThemeModeIcon({ mode }: { mode: ThemeMode }) {
 }
 
 export function ThemeToggle({ mode, onToggle, compact = false }: ThemeToggleProps) {
-  const currentLabel = mode === "light" ? "AÃ§Ä±k" : "Koyu";
-  const nextLabel = mode === "light" ? "Koyu" : "AÃ§Ä±k";
+  const currentLabel = mode === "light" ? "Açık" : "Koyu";
+  const nextLabel = mode === "light" ? "Koyu" : "Açık";
 
   if (compact) {
     return (
-      <button type="button" onClick={onToggle} className="hz-theme-toggle hz-theme-toggle--compact" aria-label={`Tema: ${currentLabel}. ${nextLabel} moda geÃ§`} title={`${nextLabel} moda geÃ§`}>
+      <button type="button" onClick={onToggle} className="hz-theme-toggle hz-theme-toggle--compact" aria-label={`Tema: ${currentLabel}. ${nextLabel} moda geç`} title={`${nextLabel} moda geç`}>
         <span className="hz-theme-toggle-ico" aria-hidden>
           <ThemeModeIcon mode={mode} />
         </span>
@@ -41,7 +41,7 @@ export function ThemeToggle({ mode, onToggle, compact = false }: ThemeToggleProp
   }
 
   return (
-    <button type="button" onClick={onToggle} className="hz-theme-toggle" aria-label={`Tema: ${currentLabel}. ${nextLabel} moda geÃ§`}>
+    <button type="button" onClick={onToggle} className="hz-theme-toggle" aria-label={`Tema: ${currentLabel}. ${nextLabel} moda geç`}>
       <span className="hz-theme-toggle-ico" aria-hidden>
         <ThemeModeIcon mode={mode} />
       </span>
@@ -49,4 +49,5 @@ export function ThemeToggle({ mode, onToggle, compact = false }: ThemeToggleProp
     </button>
   );
 }
+
 

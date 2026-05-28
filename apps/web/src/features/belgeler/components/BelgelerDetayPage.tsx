@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
@@ -137,3 +137,4 @@ export function BelgelerDetayPage() {
     </div>
   );
 }
+

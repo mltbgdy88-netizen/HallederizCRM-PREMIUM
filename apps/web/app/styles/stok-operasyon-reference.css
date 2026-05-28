@@ -1,4 +1,4 @@
-/* Stok Operasyon Masası — stok-operasyon-masasi-acik-mod.png */
+﻿/* Stok Operasyon Masası — stok-operasyon-masasi-acik-mod.png */
 
 .som-home {
   --som-gap: clamp(6px, 0.75vh, 9px);
@@ -679,3 +679,4 @@
   margin-top: auto;
   padding-top: 4px;
 }
+

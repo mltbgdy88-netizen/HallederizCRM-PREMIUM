@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const GKU_PAGE = {
   title: "Gelen Kutu",
   subtitle: "Tüm kanallardan gelen mesajları tek merkezden yönetin."
@@ -86,3 +86,4 @@ export const GKU_STATS = [
   { label: "Ort. Yanıt", value: "2dk 15sn" },
   { label: "Memnuniyet", value: "4.5/5" }
 ];
+

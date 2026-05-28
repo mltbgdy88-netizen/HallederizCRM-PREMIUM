@@ -58,10 +58,11 @@ export function ShellUserMenu({
           <p className="hz-user-menu-role">{roleLabel}</p>
         </div>
         <button type="button" onClick={onLogout} className="hz-user-menu-logout">
-          Ã‡Ä±kÄ±ÅŸ
+          Çıkış
         </button>
       </div>
     </details>
   );
 }
+
 

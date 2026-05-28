@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { UiButton, UiModal } from "@hallederiz/ui";
 import { useMemo } from "react";
@@ -110,3 +110,4 @@ export function DashboardCommandCenterCardEditor({ open, draftIds, onClose, onTo
     </UiModal>
   );
 }
+

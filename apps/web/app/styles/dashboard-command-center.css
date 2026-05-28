@@ -1,4 +1,4 @@
-/* Dashboard command center — viewport-locked (1366×768 effective ~640–660px content) */
+﻿/* Dashboard command center — viewport-locked (1366×768 effective ~640–660px content) */
 
 .hz-shell-frame:has(.hz-sidebar-root--command) {
   --hz-sidebar-width: 204px;
@@ -1554,3 +1554,4 @@
     height: auto;
   }
 }
+

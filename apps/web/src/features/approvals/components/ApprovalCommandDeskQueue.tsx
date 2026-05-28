@@ -12,11 +12,11 @@ import {
 import type { ApprovalInboxRecord } from "./inbox/types";
 
 const SOURCE_CHIPS: { id: ApprovalSourceFilter; label: string }[] = [
-  { id: "all", label: "TÃ¼mÃ¼" },
+  { id: "all", label: "Tümü" },
   { id: "ai", label: "AI" },
   { id: "automation", label: "Otomasyon" },
   { id: "message", label: "Mesaj" },
-  { id: "high_risk", label: "YÃ¼ksek Risk" }
+  { id: "high_risk", label: "Yüksek Risk" }
 ];
 
 function sourceIcon(kind: ReturnType<typeof approvalSourceFromRecord>): LucideIconName {
@@ -45,11 +45,11 @@ export function ApprovalCommandDeskQueue({
   onSelect
 }: ApprovalCommandDeskQueueProps) {
   return (
-    <section className="hz-approval-queue hz-approval-panel" aria-label="Onay kuyruÄŸu">
+    <section className="hz-approval-queue hz-approval-panel" aria-label="Onay kuyruğu">
       <header className="hz-approval-panel__head">
         <div>
-          <h2 className="hz-approval-panel__title">Onay KuyruÄŸu</h2>
-          <p className="hz-approval-panel__meta">{rows.length} kayÄ±t</p>
+          <h2 className="hz-approval-panel__title">Onay Kuyruğu</h2>
+          <p className="hz-approval-panel__meta">{rows.length} kayıt</p>
         </div>
         <button type="button" className="hz-approval-icon-btn" aria-label="Filtreler" title="Filtreler">
           <LucideIcon name="filter" size={14} />
@@ -60,7 +60,7 @@ export function ApprovalCommandDeskQueue({
         id="hz-approval-queue-search"
         type="search"
         className="hz-approval-queue__search"
-        placeholder="Onay, cari veya kayÄ±t ara..."
+        placeholder="Onay, cari veya kayıt ara..."
         value={searchQuery}
         onChange={(event) => onSearchChange(event.target.value)}
         aria-label="Onay ara"
@@ -79,7 +79,7 @@ export function ApprovalCommandDeskQueue({
         ))}
       </div>
 
-      <div className="hz-approval-queue__list" role="listbox" aria-label="Onay kayÄ±tlarÄ±">
+      <div className="hz-approval-queue__list" role="listbox" aria-label="Onay kayıtları">
         {rows.map((row) => {
           const source = approvalSourceFromRecord(row);
           const risk = approvalRiskLabel(row);
@@ -107,7 +107,7 @@ export function ApprovalCommandDeskQueue({
               <div className="hz-approval-queue-item__foot">
                 <span className="hz-approval-queue-item__amount">{row.amountLabel}</span>
                 <span
-                  className={`hz-approval-risk-pill hz-approval-risk-pill--${risk === "YÃ¼ksek" ? "high" : risk === "Orta" ? "mid" : "low"}`}
+                  className={`hz-approval-risk-pill hz-approval-risk-pill--${risk === "Yüksek" ? "high" : risk === "Orta" ? "mid" : "low"}`}
                 >
                   {risk}
                 </span>
@@ -116,10 +116,11 @@ export function ApprovalCommandDeskQueue({
           );
         })}
         {rows.length === 0 ? (
-          <p className="hz-approval-queue__empty">Filtreye uygun onay kaydÄ± bulunamadÄ±.</p>
+          <p className="hz-approval-queue__empty">Filtreye uygun onay kaydı bulunamadı.</p>
         ) : null}
       </div>
     </section>
   );
 }
+
 

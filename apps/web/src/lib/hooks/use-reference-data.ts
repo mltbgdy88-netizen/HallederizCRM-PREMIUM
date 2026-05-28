@@ -15,7 +15,7 @@ export interface UseReferenceDataOptions<T> {
   loadDemo: () => T | Promise<T>;
   loadLive: () => Promise<T>;
   initialData: T;
-  /** UI referans test route â€” yalnÄ±zca mock, API Ã§aÄŸrÄ±sÄ± yok */
+  /** UI referans test route — yalnızca mock, API çağrısı yok */
   demoOnly?: boolean;
 }
 
@@ -66,4 +66,5 @@ export function useReferenceData<T>({
 
   return { data, loading, loadFailed, isDemo };
 }
+
 

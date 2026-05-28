@@ -93,8 +93,8 @@ export function ReferenceAppShell({ children }: { children: ReactNode }) {
   const { theme, toggleTheme } = useTheme();
   const { pushToast } = useToast();
 
-  const displayName = session?.user.fullName?.trim() || "MevlÃ¼t K.";
-  const displayRole = session?.user.title?.trim() || "Operasyon YÃ¶neticisi";
+  const displayName = session?.user.fullName?.trim() || "Mevlüt K.";
+  const displayRole = session?.user.title?.trim() || "Operasyon Yöneticisi";
   const initials = userInitials(session?.user.fullName);
 
   const handleLogout = () => {
@@ -111,7 +111,7 @@ export function ReferenceAppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="ref-shell">
-      <aside className="ref-sidebar" aria-label="Ana menÃ¼">
+      <aside className="ref-sidebar" aria-label="Ana menü">
         <div className="ref-sidebar-brand">
           <div className="ref-sidebar-logo-row">
             <ShieldLogo>P</ShieldLogo>
@@ -142,7 +142,7 @@ export function ReferenceAppShell({ children }: { children: ReactNode }) {
 
         <footer className="ref-sidebar-footer">
           <p>Premium CRM v2.6.1</p>
-          <p>Â© 2025 TÃ¼m haklarÄ± saklÄ±dÄ±r.</p>
+          <p>© 2025 Tüm hakları saklıdır.</p>
         </footer>
       </aside>
 
@@ -151,22 +151,22 @@ export function ReferenceAppShell({ children }: { children: ReactNode }) {
           <button
             type="button"
             className="ref-header-menu"
-            aria-label="MenÃ¼"
+            aria-label="Menü"
             data-ref-skip-fallback
-            onClick={() => pushToast("Kenar menÃ¼ daraltma demo modunda.")}
+            onClick={() => pushToast("Kenar menü daraltma demo modunda.")}
           >
             <IconMenu className="ref-header-menu-icon" />
           </button>
 
           <div className="ref-header-search">
             <IconSearch className="ref-header-search-icon" />
-            <input type="search" placeholder="Arama yapÄ±n..." aria-label="Arama" readOnly />
+            <input type="search" placeholder="Arama yapın..." aria-label="Arama" readOnly />
           </div>
 
           <div className="ref-header-actions">
             <button type="button" className="ref-theme-toggle" onClick={toggleTheme}>
               <IconSun className="ref-theme-toggle-icon" />
-              <span>Tema: {theme === "dark" ? "Koyu" : "AÃ§Ä±k"}</span>
+              <span>Tema: {theme === "dark" ? "Koyu" : "Açık"}</span>
               <IconChevronDown className="ref-theme-toggle-chevron" />
             </button>
 
@@ -175,7 +175,7 @@ export function ReferenceAppShell({ children }: { children: ReactNode }) {
               className="ref-header-bell-btn"
               aria-label="Bildirimler"
               data-ref-skip-fallback
-              onClick={() => pushToast("3 okunmamÄ±ÅŸ bildirim (demo).")}
+              onClick={() => pushToast("3 okunmamış bildirim (demo).")}
             >
               <IconBell className="ref-header-bell-icon" />
               <span className="ref-header-bell-badge">3</span>
@@ -198,4 +198,5 @@ export function ReferenceAppShell({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   SiparisKatmanContextPanel,
@@ -102,3 +102,4 @@ export function SiparislerKatmanOzetPage() {
     </div>
   );
 }
+

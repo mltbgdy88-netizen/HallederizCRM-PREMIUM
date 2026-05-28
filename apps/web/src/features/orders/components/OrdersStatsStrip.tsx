@@ -6,7 +6,7 @@ import type { OrdersDeskStat } from "../utils/orders-desk-view-model";
 
 export function OrdersStatsStrip({ stats }: { stats: OrdersDeskStat[] }) {
   return (
-    <div className="hz-orders-stats" aria-label="SipariÅŸ Ã¶zetleri">
+    <div className="hz-orders-stats" aria-label="Sipariş özetleri">
       {stats.map((stat) => (
         <article key={stat.id} className={`hz-orders-stat hz-orders-stat--${stat.tone}`}>
           <span className="hz-orders-stat__icon" aria-hidden>
@@ -22,4 +22,5 @@ export function OrdersStatsStrip({ stats }: { stats: OrdersDeskStat[] }) {
     </div>
   );
 }
+
 

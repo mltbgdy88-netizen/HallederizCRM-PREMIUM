@@ -1,4 +1,4 @@
-import type { QuickOperationAiInsight, QuickOperationImpact } from "../types";
+﻿import type { QuickOperationAiInsight, QuickOperationImpact } from "../types";
 
 interface Props {
   impacts: QuickOperationImpact[];
@@ -89,3 +89,4 @@ export function QuickOperationImpactPanel({ impacts, aiInsight, layout = "card" 
     </section>
   );
 }
+

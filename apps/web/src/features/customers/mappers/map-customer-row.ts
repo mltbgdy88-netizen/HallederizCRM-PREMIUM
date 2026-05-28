@@ -1,4 +1,4 @@
-import { calculateCustomerRiskState, resolveCustomerDisplayType } from "@hallederiz/domain";
+﻿import { calculateCustomerRiskState, resolveCustomerDisplayType } from "@hallederiz/domain";
 import type { Customer, CustomerAccount } from "@hallederiz/types";
 import { isCustomerFinanceLinked } from "../utils/customer-finance";
 
@@ -101,3 +101,4 @@ export function mapCustomerToRow(customer: Customer, account: CustomerAccount | 
     financeLinked: true
   };
 }
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useMemo, useState, type ReactNode } from "react";
@@ -283,3 +283,4 @@ export function InventoryCommandCenterPage({
     </div>
   );
 }
+

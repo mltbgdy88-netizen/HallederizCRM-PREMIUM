@@ -1,4 +1,4 @@
-import { summarizeOrderOperationalImpact } from "@hallederiz/domain";
+﻿import { summarizeOrderOperationalImpact } from "@hallederiz/domain";
 import type { Customer, SaleOrder } from "@hallederiz/types";
 import { money } from "../utils";
 import { getDeliveryStatusLabel, getPaymentStatusLabel } from "../queries/order-mock-data";
@@ -29,3 +29,4 @@ export function OrderQuickPreviewPanel({ order, customer }: { order: SaleOrder |
     </section>
   );
 }
+

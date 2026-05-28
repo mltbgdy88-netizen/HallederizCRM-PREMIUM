@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type KumKpiTone = "green" | "teal" | "gold" | "blue" | "slate";
 
 export type KumKpi = { id: string; label: string; value: string; tone: KumKpiTone };
@@ -78,7 +78,7 @@ export const KUM_TABLE_ROWS: KumTableRow[] = [
   },
   {
     id: "6",
-    name: "Dilara Şen",
+    name: "Dilara �?en",
     email: "dilara.sen@premiumcrm.com",
     role: "Satış Temsilcisi",
     lastLogin: "20.05.2025 14:22",
@@ -154,3 +154,4 @@ export function kumRoleClass(role: KumRole): string {
   if (role === "Operasyon Müdürü") return " kum-badge--ops";
   return " kum-badge--std";
 }
+

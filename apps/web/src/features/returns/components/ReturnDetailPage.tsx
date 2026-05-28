@@ -12,10 +12,10 @@ import { useToast } from "../../../providers/toast-provider";
 export function ReturnHeaderInfo({ returnRecord, customer }: { returnRecord: Return; customer: Customer | null }) {
   return (
     <section className="hz-content-card hz-returns-detail-summary">
-      <p className="drawer-eyebrow">Ä°ade</p>
+      <p className="drawer-eyebrow">İade</p>
       <h2>{returnRecord.returnNo}</h2>
       <p className="muted">
-        {customer?.name ?? "â€”"} Â· {returnRecord.orderNo ?? returnRecord.deliveryNo ?? "BaÄŸlantÄ± seÃ§ilecek"}
+        {customer?.name ?? "—"} · {returnRecord.orderNo ?? returnRecord.deliveryNo ?? "Bağlantı seçilecek"}
       </p>
       <span className="hz-badge hz-badge-info">{getReturnStatusLabel(returnRecord.status)}</span>
     </section>
@@ -30,23 +30,23 @@ export function ReturnActionsBar() {
 
   function handleSave() {
     setSaved(true);
-    pushToast("Taslak hazÄ±rlandÄ±: iade kaydÄ± oluÅŸturma onay akÄ±ÅŸÄ±na iletildi.");
+    pushToast("Taslak hazırlandı: iade kaydı oluşturma onay akışına iletildi.");
   }
 
   function handleReceive() {
     setReceived(true);
-    pushToast("Taslak hazÄ±rlandÄ±: teslim alÄ±ndÄ± kaydÄ± onay akÄ±ÅŸÄ±na iletildi.");
+    pushToast("Taslak hazırlandı: teslim alındı kaydı onay akışına iletildi.");
   }
 
   function handleFinish() {
     setFinished(true);
-    pushToast("Taslak hazÄ±rlandÄ±: iade tamamlama onay akÄ±ÅŸÄ±na iletildi.");
+    pushToast("Taslak hazırlandı: iade tamamlama onay akışına iletildi.");
   }
 
   return (
     <section className="hz-content-card hz-returns-detail-actions">
-      <h3>Ä°ÅŸlemler</h3>
-      <p className="muted">Ä°ade onay ve tamamlama adÄ±mlarÄ± mevcut iÅŸ akÄ±ÅŸÄ±yla ilerler.</p>
+      <h3>İşlemler</h3>
+      <p className="muted">İade onay ve tamamlama adımları mevcut iş akışıyla ilerler.</p>
       <div className="hz-inline-actions">
         <button
           className="hz-btn hz-btn-primary hz-toolbar-btn"
@@ -54,14 +54,14 @@ export function ReturnActionsBar() {
           onClick={handleSave}
           disabled={saved}
         >
-          {saved ? "Taslak hazÄ±rlandÄ±" : "Kaydet"}
+          {saved ? "Taslak hazırlandı" : "Kaydet"}
         </button>
         <button
           className="hz-btn hz-btn-secondary hz-toolbar-btn"
           type="button"
-          onClick={() => pushToast("Taslak hazÄ±rlandÄ±: iade onaya gÃ¶nderildi.")}
+          onClick={() => pushToast("Taslak hazırlandı: iade onaya gönderildi.")}
         >
-          Onaya gÃ¶nder
+          Onaya gönder
         </button>
         <button
           className="hz-btn hz-btn-secondary hz-toolbar-btn"
@@ -69,7 +69,7 @@ export function ReturnActionsBar() {
           onClick={handleReceive}
           disabled={received}
         >
-          {received ? "AlÄ±ndÄ± kaydedildi" : "Teslim alÄ±ndÄ±"}
+          {received ? "Alındı kaydedildi" : "Teslim alındı"}
         </button>
         <button
           className="hz-btn hz-btn-secondary hz-toolbar-btn"
@@ -77,14 +77,14 @@ export function ReturnActionsBar() {
           onClick={handleFinish}
           disabled={finished}
         >
-          {finished ? "TamamlandÄ±" : "Tamamla"}
+          {finished ? "Tamamlandı" : "Tamamla"}
         </button>
         <button
           className="hz-btn hz-btn-secondary hz-toolbar-btn"
           type="button"
-          onClick={() => pushToast("Taslak hazÄ±rlandÄ±: iptal iÅŸlemi onay akÄ±ÅŸÄ±na iletildi.")}
+          onClick={() => pushToast("Taslak hazırlandı: iptal işlemi onay akışına iletildi.")}
         >
-          Ä°ptal et
+          İptal et
         </button>
       </div>
     </section>
@@ -94,14 +94,14 @@ export function ReturnActionsBar() {
 export function ReturnLineEditor({ returnRecord }: { returnRecord: Return }) {
   return (
     <section className="hz-content-card">
-      <h3>Ä°ade satÄ±rlarÄ±</h3>
+      <h3>İade satırları</h3>
       <div className="hz-filter-grid hz-margin-top-sm">
         <label>
-          SipariÅŸ / teslim
+          Sipariş / teslim
           <input readOnly value={returnRecord.orderNo ?? returnRecord.deliveryNo ?? ""} />
         </label>
         <label>
-          ÃœrÃ¼n
+          Ürün
           <select defaultValue={returnRecord.lines[0]?.productCode ?? ""}>
             {returnRecord.lines.map((line) => (
               <option key={line.id}>{line.productCode}</option>
@@ -116,9 +116,9 @@ export function ReturnLineEditor({ returnRecord }: { returnRecord: Return }) {
           Sebep
           <select defaultValue={returnRecord.lines[0]?.reasonCategory ?? "damaged"}>
             <option value="damaged">Hasar</option>
-            <option value="wrong_product">YanlÄ±ÅŸ Ã¼rÃ¼n</option>
+            <option value="wrong_product">Yanlış ürün</option>
             <option value="quality">Kalite</option>
-            <option value="customer_request">MÃ¼ÅŸteri talebi</option>
+            <option value="customer_request">Müşteri talebi</option>
           </select>
         </label>
         <label>
@@ -134,7 +134,7 @@ export function ReturnImpactPanel({ returnRecord }: { returnRecord: Return }) {
   const impact = calculateReturnImpact(returnRecord);
   return (
     <section className="hz-content-card">
-      <h3>Ä°ade etkisi</h3>
+      <h3>İade etkisi</h3>
       <ul className="hz-side-list">
         {impact.messages.map((message) => (
           <li key={message}>{message}</li>
@@ -165,10 +165,10 @@ export function ReturnDetailPage({ returnId }: { returnId?: string }) {
   );
 
   if (loading) {
-    return <LoadingState title="Ä°ade yÃ¼kleniyor" message="SatÄ±rlar ve etki paneli hazÄ±rlanÄ±yor." />;
+    return <LoadingState title="İade yükleniyor" message="Satırlar ve etki paneli hazırlanıyor." />;
   }
   if (!returnRecord) {
-    return <EmptyState title="Ä°ade bulunamadÄ±" message="SeÃ§ilen iade kaydÄ± bulunamadÄ±." />;
+    return <EmptyState title="İade bulunamadı" message="Seçilen iade kaydı bulunamadı." />;
   }
 
   return (
@@ -176,8 +176,8 @@ export function ReturnDetailPage({ returnId }: { returnId?: string }) {
       className="hz-commercial-entity-detail-page hz-returns-detail-page"
       header={
         <PageHeader
-          title={returnId ? "Ä°ade detayÄ±" : "Yeni iade"}
-          description="SipariÅŸ veya teslim baÄŸlantÄ±sÄ±, satÄ±r seÃ§imi, neden ve etki paneli."
+          title={returnId ? "İade detayı" : "Yeni iade"}
+          description="Sipariş veya teslim bağlantısı, satır seçimi, neden ve etki paneli."
           breadcrumb={returnRecord.returnNo}
         />
       }
@@ -192,4 +192,5 @@ export function ReturnDetailPage({ returnId }: { returnId?: string }) {
     />
   );
 }
+
 

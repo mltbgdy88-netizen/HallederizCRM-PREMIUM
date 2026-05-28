@@ -1,4 +1,4 @@
-import { MetricCard } from "@hallederiz/ui";
+﻿import { MetricCard } from "@hallederiz/ui";
 import type { PaymentReceipt } from "@hallederiz/types";
 import { money } from "../utils";
 import { getPaymentSummary } from "../queries/payment-mock-data";
@@ -20,3 +20,4 @@ export function PaymentSummaryCards({ payment }: { payment: PaymentReceipt }) {
     </section>
   );
 }
+

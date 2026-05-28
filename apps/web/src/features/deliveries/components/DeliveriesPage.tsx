@@ -19,40 +19,40 @@ function DeliveryFilterBar() {
     <section className="hz-filter-card hz-deliveries-filter">
       <div className="hz-filter-grid">
         <label>
-          MÃ¼ÅŸteri / teslim no
+          Müşteri / teslim no
           <input placeholder="Teslim veya cari ara" />
         </label>
         <label>
           Durum
           <select defaultValue="">
-            <option value="">TÃ¼m durumlar</option>
-            <option>HazÄ±r</option>
+            <option value="">Tüm durumlar</option>
+            <option>Hazır</option>
             <option>Bekliyor</option>
             <option>Teslim edildi</option>
           </select>
         </label>
         <label className="hz-toggle">
           <input type="checkbox" />
-          HazÄ±r olanlar
+          Hazır olanlar
         </label>
         <label className="hz-toggle">
           <input type="checkbox" />
-          Eksik Ã¶demeliler
+          Eksik ödemeliler
         </label>
         <label>
           Belge durumu
           <select defaultValue="">
-            <option value="">TÃ¼m belgeler</option>
-            <option>HazÄ±r</option>
+            <option value="">Tüm belgeler</option>
+            <option>Hazır</option>
             <option>Eksik</option>
-            <option>GÃ¶nderildi</option>
+            <option>Gönderildi</option>
           </select>
         </label>
         <label>
           Tarih
           <select defaultValue="week">
             <option value="week">Bu hafta</option>
-            <option value="today">BugÃ¼n</option>
+            <option value="today">Bugün</option>
             <option value="month">Bu ay</option>
           </select>
         </label>
@@ -75,32 +75,32 @@ function DeliveryPreviewPanel({
   if (!delivery) {
     return (
       <aside className="hz-commercial-entity-side hz-deliveries-side">
-        <p className="hz-commercial-entity-side-empty">KayÄ±t seÃ§ilmedi.</p>
+        <p className="hz-commercial-entity-side-empty">Kayıt seçilmedi.</p>
       </aside>
     );
   }
 
   return (
     <aside className="hz-commercial-entity-side hz-deliveries-side">
-      <h3>Teslimat Ã¶nizleme</h3>
+      <h3>Teslimat önizleme</h3>
       <ul className="hz-commercial-entity-side-list">
         <li>
           <strong>Teslim:</strong> {delivery.deliveryNo}
         </li>
         <li>
-          <strong>SipariÅŸ:</strong> {delivery.orderNo}
+          <strong>Sipariş:</strong> {delivery.orderNo}
         </li>
         <li>
-          <strong>Cari:</strong> {customerName ?? "â€”"}
+          <strong>Cari:</strong> {customerName ?? "—"}
         </li>
         <li>
           <strong>Durum:</strong> {getDeliveryStatusLabel(delivery.status)}
         </li>
         <li>
-          <strong>Depo hazÄ±r:</strong> {delivery.validation.warehouseReady ? "Evet" : "HayÄ±r"}
+          <strong>Depo hazır:</strong> {delivery.validation.warehouseReady ? "Evet" : "Hayır"}
         </li>
         <li>
-          <strong>Eksik Ã¶deme:</strong> {delivery.validation.paymentMissing ? "Var" : "Yok"}
+          <strong>Eksik ödeme:</strong> {delivery.validation.paymentMissing ? "Var" : "Yok"}
         </li>
         <li>
           <strong>Belge:</strong> {delivery.documentStatus}
@@ -119,9 +119,9 @@ function DeliveryPreviewPanel({
           type="button"
           className="hz-btn hz-btn-secondary hz-toolbar-btn"
           style={{ flex: 1 }}
-          onClick={() => pushToast("Taslak hazÄ±rlandÄ±: doÄŸrulama onay akÄ±ÅŸÄ±na iletildi.")}
+          onClick={() => pushToast("Taslak hazırlandı: doğrulama onay akışına iletildi.")}
         >
-          DoÄŸrula
+          Doğrula
         </button>
       </div>
     </aside>
@@ -187,43 +187,43 @@ export function DeliveriesPage() {
       header={
         <>
           <CommercialOperasyonDeskIntro
-            title="Teslimat Operasyon MasasÄ±"
-            subtitle="Teslimat doÄŸrulama, mÃ¼ÅŸteri bilgilendirme ve belge akÄ±ÅŸlarÄ±nÄ± tek ekranda yÃ¶netin."
+            title="Teslimat Operasyon Masası"
+            subtitle="Teslimat doğrulama, müşteri bilgilendirme ve belge akışlarını tek ekranda yönetin."
             icon="truck"
             actions={
               <>
                 <Link href="/hizli-islem/teslim" className="hz-commercial-desk-btn hz-commercial-desk-btn--primary">
                   <LucideIcon name="plus" size={14} />
-                  HÄ±zlÄ± Teslim
+                  Hızlı Teslim
                 </Link>
                 <Link href="/teslimatlar/rota" className="hz-commercial-desk-btn hz-commercial-desk-btn--secondary">
                   <LucideIcon name="external-link" size={14} />
-                  Rota PlanÄ±
+                  Rota Planı
                 </Link>
                 <button
                   type="button"
                   className="hz-commercial-desk-btn hz-commercial-desk-btn--secondary"
-                  onClick={() => pushToast("DÄ±ÅŸa aktarma backend onay akÄ±ÅŸÄ±na baÄŸlÄ±dÄ±r; demo modunda simÃ¼le edildi.")}
+                  onClick={() => pushToast("Dışa aktarma backend onay akışına bağlıdır; demo modunda simüle edildi.")}
                 >
                   <LucideIcon name="download" size={14} />
-                  DÄ±ÅŸa Aktar
+                  Dışa Aktar
                 </button>
               </>
             }
           />
-          <div className="hz-commercial-entity-kpi-strip" aria-label="Teslimat Ã¶zeti">
+          <div className="hz-commercial-entity-kpi-strip" aria-label="Teslimat özeti">
             <div className="hz-commercial-entity-kpi">
-              <span className="hz-commercial-entity-kpi-label">KayÄ±t</span>
+              <span className="hz-commercial-entity-kpi-label">Kayıt</span>
               <span className="hz-commercial-entity-kpi-value">{deliveries.length}</span>
             </div>
             <div className="hz-commercial-entity-kpi">
-              <span className="hz-commercial-entity-kpi-label">HazÄ±r</span>
+              <span className="hz-commercial-entity-kpi-label">Hazır</span>
               <span className="hz-commercial-entity-kpi-value">
                 {deliveries.filter((item) => item.status === "ready").length}
               </span>
             </div>
             <div className="hz-commercial-entity-kpi">
-              <span className="hz-commercial-entity-kpi-label">Eksik Ã¶deme</span>
+              <span className="hz-commercial-entity-kpi-label">Eksik ödeme</span>
               <span className="hz-commercial-entity-kpi-value">
                 {deliveries.filter((item) => item.validation.paymentMissing).length}
               </span>
@@ -237,7 +237,7 @@ export function DeliveriesPage() {
           </div>
           {dataSourceConfig.useDemoData ? (
             <p className="hz-commercial-entity-preview-band" role="status">
-              Ã–rnek veri modu: liste kayÄ±tlarÄ± demo amaÃ§lÄ±dÄ±r; canlÄ± operasyon sonucu deÄŸildir.
+              Örnek veri modu: liste kayıtları demo amaçlıdır; canlı operasyon sonucu değildir.
             </p>
           ) : null}
         </>
@@ -246,25 +246,25 @@ export function DeliveriesPage() {
       list={
         <div className="hz-commercial-entity-list-wrap">
           {loading ? (
-            <LoadingState title="Teslimatlar yÃ¼kleniyor" message="DoÄŸrulama ve belge durumlarÄ± hazÄ±rlanÄ±yor." />
+            <LoadingState title="Teslimatlar yükleniyor" message="Doğrulama ve belge durumları hazırlanıyor." />
           ) : loadError ? (
-            <EmptyState title="Teslimat listesi alÄ±namadÄ±" message="BaÄŸlantÄ± kurulamadÄ±. LÃ¼tfen tekrar deneyin." />
+            <EmptyState title="Teslimat listesi alınamadı" message="Bağlantı kurulamadı. Lütfen tekrar deneyin." />
           ) : deliveries.length === 0 ? (
-            <EmptyState title="Teslimat bulunamadÄ±" message="KayÄ±t yok veya filtre sonucu boÅŸ." />
+            <EmptyState title="Teslimat bulunamadı" message="Kayıt yok veya filtre sonucu boş." />
           ) : (
             <>
               <div className="hz-commercial-entity-table-head hz-deliveries-table-head" role="row">
                 <span>Teslim no</span>
-                <span>SipariÅŸ</span>
+                <span>Sipariş</span>
                 <span>Cari</span>
                 <span>Durum</span>
                 <span>Tarih</span>
                 <span>Belge</span>
-                <span>AKSÄ°YON</span>
+                <span>AKSİYON</span>
               </div>
               <div className="hz-commercial-entity-table-body">
                 {pagedDeliveries.map((delivery) => {
-                  const customerName = customers.find((c) => c.id === delivery.customerId)?.name ?? "â€”";
+                  const customerName = customers.find((c) => c.id === delivery.customerId)?.name ?? "—";
                   return (
                     <div
                       key={delivery.id}
@@ -293,7 +293,7 @@ export function DeliveriesPage() {
                             router.push(`/teslimatlar/${delivery.id}`);
                           }}
                         >
-                          Ä°ncele
+                          İncele
                         </button>
                       </span>
                     </div>
@@ -315,4 +315,5 @@ export function DeliveriesPage() {
     />
   );
 }
+
 

@@ -1,4 +1,4 @@
-/** Stroke icons for dashboard — no extra dependencies (Lucide-style paths). */
+﻿/** Stroke icons for dashboard — no extra dependencies (Lucide-style paths). */
 
 type IcoProps = { size?: number; className?: string };
 
@@ -703,3 +703,4 @@ export function ActivityFeedIcon({ kind, size = 17 }: { kind: ActivityIconKind; 
       return <IconClipboardCheck size={size} className={c} />;
   }
 }
+

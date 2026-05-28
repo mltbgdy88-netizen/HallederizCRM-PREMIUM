@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import type { SiparisFulfillment } from "@/lib/siparis-fulfillment-links";
 import { fulfillmentFromDemoRow } from "@/lib/siparis-fulfillment-links";
 
@@ -107,7 +107,7 @@ export const SIP_TABLE_ROWS: SiparisTableRow[] = [
   {
     id: "1",
     orderNo: "SP-2025-01248",
-    customer: "ABC İnşaat San. ve Tic. A.Ş.",
+    customer: "ABC İnşaat San. ve Tic. A.�?.",
     amount: "₺125.430,00",
     status: "Açık",
     delivery: "15.05.2025"
@@ -115,7 +115,7 @@ export const SIP_TABLE_ROWS: SiparisTableRow[] = [
   {
     id: "2",
     orderNo: "SP-2025-01247",
-    customer: "Yılmaz Gıda Ltd. Şti.",
+    customer: "Yılmaz Gıda Ltd. �?ti.",
     amount: "₺86.200,00",
     status: "Bekleyen Onay",
     delivery: "14.05.2025"
@@ -131,7 +131,7 @@ export const SIP_TABLE_ROWS: SiparisTableRow[] = [
   {
     id: "4",
     orderNo: "SP-2025-01245",
-    customer: "Demiröz Elektrik Ltd. Şti.",
+    customer: "Demiröz Elektrik Ltd. �?ti.",
     amount: "₺42.180,00",
     status: "Kısmi Teslim",
     delivery: "12.05.2025"
@@ -139,7 +139,7 @@ export const SIP_TABLE_ROWS: SiparisTableRow[] = [
   {
     id: "5",
     orderNo: "SP-2025-01244",
-    customer: "Akdeniz Otomotiv A.Ş.",
+    customer: "Akdeniz Otomotiv A.�?.",
     amount: "₺98.640,00",
     status: "Teslim Edildi",
     delivery: "09.05.2025"
@@ -147,7 +147,7 @@ export const SIP_TABLE_ROWS: SiparisTableRow[] = [
   {
     id: "6",
     orderNo: "SP-2025-01243",
-    customer: "Mega Market Zinciri A.Ş.",
+    customer: "Mega Market Zinciri A.�?.",
     amount: "₺31.920,00",
     status: "İptal Edildi",
     delivery: "—"
@@ -179,7 +179,7 @@ export const SIP_CONTEXT_BY_ROW: Record<string, SiparisContextDetail> = {
     orderNo: "SP-2025-01248",
     fulfillment: SIP_DEMO_FULFILLMENT_BY_ROW["1"]!,
     status: "Açık",
-    customer: "ABC İnşaat San. ve Tic. A.Ş.",
+    customer: "ABC İnşaat San. ve Tic. A.�?.",
     contact: "Ahmet Yılmaz",
     phone: "(212) 555 45 67",
     email: "ahmet.yilmaz@abcinsaat.com",
@@ -239,4 +239,5 @@ export function sipStatusBadgeClass(status: SiparisStatus): string {
       return " sip-badge--open";
   }
 }
+
 

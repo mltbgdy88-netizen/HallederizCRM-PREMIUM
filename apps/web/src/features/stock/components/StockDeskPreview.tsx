@@ -22,7 +22,7 @@ function statusLabel(status: StockRow["displayStatus"]): string {
     case "kritik":
       return "Kritik";
     case "tukeniyor":
-      return "TÃ¼keniyor";
+      return "Tükeniyor";
     case "blokeli":
       return "Blokeli";
     default:
@@ -45,10 +45,10 @@ export function StockDeskPreview({
 }) {
   if (!row) {
     return (
-      <section className="hz-stock-context hz-stock-context-card--empty" aria-label="Stok baÄŸlamÄ±">
+      <section className="hz-stock-context hz-stock-context-card--empty" aria-label="Stok bağlamı">
         <article className="hz-stock-context-card">
-          <h4>Stok BaÄŸlamÄ±</h4>
-          <p>Tablodan bir Ã¼rÃ¼n seÃ§ildiÄŸinde stok, depo ve fiyat Ã¶zeti gÃ¶rÃ¼nÃ¼r.</p>
+          <h4>Stok Bağlamı</h4>
+          <p>Tablodan bir ürün seçildiğinde stok, depo ve fiyat özeti görünür.</p>
         </article>
       </section>
     );
@@ -57,9 +57,9 @@ export function StockDeskPreview({
   const rackFill = row.displayStatus === "kritik" ? 92 : row.displayStatus === "tukeniyor" ? 78 : 68;
 
   return (
-    <section className="hz-stock-context" aria-label="Stok baÄŸlamÄ±">
+    <section className="hz-stock-context" aria-label="Stok bağlamı">
       <header className="hz-stock-context__head">
-        <p className="hz-stock-context__eyebrow">Stok BaÄŸlamÄ±</p>
+        <p className="hz-stock-context__eyebrow">Stok Bağlamı</p>
         <div className="hz-stock-context__hero">
           <span className="hz-stock-context__thumb" aria-hidden>
             <LucideIcon name="package" size={22} />
@@ -91,8 +91,8 @@ export function StockDeskPreview({
           <article className="hz-stock-context-notice hz-stock-context-notice--warn">
             <LucideIcon name="alert-triangle" size={14} />
             <div>
-              <strong>Fabrika stok seviyesi dÃ¼ÅŸÃ¼k</strong>
-              <p>SipariÅŸ Ã¶ncesi fabrika stok teyidi Ã¶nerilir.</p>
+              <strong>Fabrika stok seviyesi düşük</strong>
+              <p>Sipariş öncesi fabrika stok teyidi önerilir.</p>
             </div>
           </article>
         ) : null}
@@ -101,13 +101,13 @@ export function StockDeskPreview({
           <div>
             <strong>Depo raf kapasitesi</strong>
             <p>
-              {row.depotDisplayName} â€” {row.rackDisplayLine}
+              {row.depotDisplayName} — {row.rackDisplayLine}
             </p>
           </div>
         </article>
 
         <article className="hz-stock-context-card">
-          <h4>Stok Ã–zeti</h4>
+          <h4>Stok Özeti</h4>
           <dl className="hz-stock-context-dl hz-stock-context-dl--compact">
             <div>
               <dt>Merkez</dt>
@@ -118,7 +118,7 @@ export function StockDeskPreview({
               <dd>{row.factoryStockTotal}</dd>
             </div>
             <div>
-              <dt>KullanÄ±labilir</dt>
+              <dt>Kullanılabilir</dt>
               <dd>{row.availableTotal}</dd>
             </div>
           </dl>
@@ -127,7 +127,7 @@ export function StockDeskPreview({
         <article className="hz-stock-context-card">
           <h4>Depo / Raf Bilgileri</h4>
           <p>
-            {row.depotDisplayName} Â· {row.rackDisplayLine}
+            {row.depotDisplayName} · {row.rackDisplayLine}
           </p>
           <div className="hz-stock-context-progress" aria-label={`Raf doluluk ${rackFill}%`}>
             <span style={{ width: `${rackFill}%` }} />
@@ -138,19 +138,20 @@ export function StockDeskPreview({
 
       <footer className="hz-stock-context__actions">
         <button type="button" className="hz-stock-context-btn hz-stock-context-btn--primary" onClick={() => onStockMovement(row)}>
-          Stok Hareketi OluÅŸtur
+          Stok Hareketi Oluştur
         </button>
         <button type="button" className="hz-stock-context-btn" onClick={() => onTransfer(row)}>
-          Transfer Talebi OluÅŸtur
+          Transfer Talebi Oluştur
         </button>
         <button type="button" className="hz-stock-context-btn" onClick={() => onLabelAction(row)}>
-          Etiket YazdÄ±r
+          Etiket Yazdır
         </button>
         <button type="button" className="hz-stock-context-btn hz-stock-context-btn--ghost" onClick={() => onOpenDetail(row)}>
-          Detay AÃ§
+          Detay Aç
         </button>
       </footer>
     </section>
   );
 }
+
 

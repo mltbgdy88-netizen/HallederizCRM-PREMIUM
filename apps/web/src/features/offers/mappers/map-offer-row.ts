@@ -53,7 +53,8 @@ export function mapOfferToRow(offer: Offer, customer?: Customer): OfferRow {
     validUntilLabel: new Date(offer.validUntil).toLocaleDateString("tr-TR"),
     priceGroupLabel: offer.priceSlotLabelSnapshot,
     createdAtLabel: new Date(offer.createdAt).toLocaleDateString("tr-TR"),
-    conversionLabel: offer.status === "converted" ? "TamamlandÄ±" : offer.status === "approved" ? "HazÄ±r" : "Bekliyor"
+    conversionLabel: offer.status === "converted" ? "Tamamlandı" : offer.status === "approved" ? "Hazır" : "Bekliyor"
   };
 }
+
 

@@ -5,7 +5,7 @@ import type { ApprovalInboxRecord } from "../components/inbox/types";
 
 export type ApprovalSourceKind = "ai" | "automation" | "message" | "unknown";
 export type ApprovalSourceFilter = "all" | ApprovalSourceKind | "high_risk";
-export type ApprovalRiskLabel = "YÃ¼ksek" | "Orta" | "DÃ¼ÅŸÃ¼k";
+export type ApprovalRiskLabel = "Yüksek" | "Orta" | "Düşük";
 
 const MESSAGE_HINT =
   /whatsapp|mesaj|message|omnichannel|kanal|sohbet|chat/i;
@@ -42,11 +42,11 @@ export function resolveApprovalSourceKind(approval: Approval): ApprovalSourceKin
 export function approvalSourceLabel(kind: ApprovalSourceKind): string {
   switch (kind) {
     case "ai":
-      return "AI Ã¶nerisi";
+      return "AI önerisi";
     case "automation":
       return "Otomasyon";
     case "message":
-      return "Mesaj kaynaklÄ±";
+      return "Mesaj kaynaklı";
     default:
       return "Kaynak belirtilmedi";
   }
@@ -58,35 +58,35 @@ export function approvalSourceFromRecord(record: ApprovalInboxRecord): ApprovalS
 
 export function approvalRiskLabel(record: ApprovalInboxRecord): ApprovalRiskLabel {
   if (record.riskLevel === "kritik" || record.riskLevel === "yuksek" || record.priority === "kritik" || record.priority === "yuksek") {
-    return "YÃ¼ksek";
+    return "Yüksek";
   }
   if (record.riskLevel === "orta" || record.priority === "orta") {
     return "Orta";
   }
-  return "DÃ¼ÅŸÃ¼k";
+  return "Düşük";
 }
 
 export function isHighRiskRecord(record: ApprovalInboxRecord): boolean {
-  return approvalRiskLabel(record) === "YÃ¼ksek";
+  return approvalRiskLabel(record) === "Yüksek";
 }
 
 export function approvalWhyRequiredText(kind: ApprovalSourceKind): string {
   switch (kind) {
     case "ai":
-      return "Bu iÅŸlem AI Ã¶nerisi olduÄŸu iÃ§in kullanÄ±cÄ± onayÄ± gerektirir.";
+      return "Bu işlem AI önerisi olduğu için kullanıcı onayı gerektirir.";
     case "automation":
-      return "Bu iÅŸlem otomasyon kaynaÄŸÄ±ndan geldiÄŸi iÃ§in kullanÄ±cÄ± onayÄ± gerektirir.";
+      return "Bu işlem otomasyon kaynağından geldiği için kullanıcı onayı gerektirir.";
     case "message":
-      return "Bu iÅŸlem mesaj kaynaklÄ± Ã¶neri olduÄŸu iÃ§in kullanÄ±cÄ± onayÄ± gerektirir.";
+      return "Bu işlem mesaj kaynaklı öneri olduğu için kullanıcı onayı gerektirir.";
     default:
-      return "Bu Ã¶neri kaynaÄŸÄ± doÄŸrulanana kadar kullanÄ±cÄ± onayÄ± gerektirir.";
+      return "Bu öneri kaynağı doğrulanana kadar kullanıcı onayı gerektirir.";
   }
 }
 
 export function approvalSourceEngineLabel(kind: ApprovalSourceKind): string {
   switch (kind) {
     case "ai":
-      return "AI Ã–neri Motoru";
+      return "AI Öneri Motoru";
     case "automation":
       return "Otomasyon";
     case "message":
@@ -98,14 +98,14 @@ export function approvalSourceEngineLabel(kind: ApprovalSourceKind): string {
 
 export function approvalOperationTypeLabel(type: ApprovalType): string {
   const labels: Record<ApprovalType, string> = {
-    order_high_value: "YÃ¼ksek tutarlÄ± sipariÅŸ",
-    delivery_payment_missing: "Eksik tahsilatlÄ± teslim",
-    return_approval: "Ä°ade onayÄ±",
-    price_override: "Fiyat deÄŸiÅŸikliÄŸi",
-    ai_action_proposal: "AI Ã¶nerisi",
-    manual_operation: "Operasyon Ã¶nerisi"
+    order_high_value: "Yüksek tutarlı sipariş",
+    delivery_payment_missing: "Eksik tahsilatlı teslim",
+    return_approval: "İade onayı",
+    price_override: "Fiyat değişikliği",
+    ai_action_proposal: "AI önerisi",
+    manual_operation: "Operasyon önerisi"
   };
-  return labels[type] ?? "Onay Ã¶nerisi";
+  return labels[type] ?? "Onay önerisi";
 }
 
 export function proposedActionBullets(record: ApprovalInboxRecord): string[] {
@@ -121,7 +121,7 @@ export function proposedActionBullets(record: ApprovalInboxRecord): string[] {
     }
   }
   if (!bullets.length) {
-    bullets.push(`${record.workflowLabel} iÃ§in Ã¶nerilen adÄ±mÄ± inceleyin ve onaylayÄ±n.`);
+    bullets.push(`${record.workflowLabel} için önerilen adımı inceleyin ve onaylayın.`);
   }
   return bullets.slice(0, 5);
 }
@@ -132,7 +132,7 @@ export function linkedRecordChips(record: ApprovalInboxRecord): { label: string;
   ];
 
   const entity = record.summary.relatedRecordLabel;
-  if (entity && entity !== "â€”") {
+  if (entity && entity !== "—") {
     chips.push({
       label: record.summary.relatedRecordLabel,
       href: record.summary.relatedRecordHref
@@ -144,10 +144,10 @@ export function linkedRecordChips(record: ApprovalInboxRecord): { label: string;
     chips.push({ label: "Tahsilat", href: "/tahsilatlar" });
   }
   if (type === "order_high_value") {
-    chips.push({ label: "SipariÅŸ", href: "/siparisler" });
+    chips.push({ label: "Sipariş", href: "/siparisler" });
   }
   if (type === "return_approval") {
-    chips.push({ label: "Ä°ade", href: "/iadeler" });
+    chips.push({ label: "İade", href: "/iadeler" });
   }
   if (type === "price_override") {
     chips.push({ label: "Teklif", href: "/teklifler" });
@@ -184,4 +184,5 @@ export function countCompletedToday(rows: ApprovalInboxRecord[]): number {
 export function formatQueueTime(record: ApprovalInboxRecord): string {
   return record.summary.requestedAt || record.meta.requestedAt || record.updatedAt;
 }
+
 

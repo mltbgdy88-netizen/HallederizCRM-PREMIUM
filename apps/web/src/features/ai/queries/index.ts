@@ -1,4 +1,4 @@
-import type { AiInsight, AiMessage, AiProposal, Approval, ApprovalExecution } from "@hallederiz/types";
+﻿import type { AiInsight, AiMessage, AiProposal, Approval, ApprovalExecution } from "@hallederiz/types";
 import type { SalesAiTrainingScope } from "@hallederiz/ai-contracts";
 import { dataSourceConfig, sdk } from "../../../lib/data-source";
 import { aiApprovals, aiInsights, aiMessages, aiProposals, approvalExecutions, getAiProposalById, getAiSettingsData } from "./ai-mock-data";
@@ -268,3 +268,4 @@ export async function removeSalesKnowledge(id: string) {
   }
   return sdk.ai.deleteSalesKnowledge(id);
 }
+

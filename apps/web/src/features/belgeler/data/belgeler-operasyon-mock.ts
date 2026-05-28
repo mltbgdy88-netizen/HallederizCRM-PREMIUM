@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type BomKpiTone = "green" | "orange" | "slate" | "teal";
 
 export type BomKpi = {
@@ -54,13 +54,13 @@ export const BOM_FILTERS = [
 ];
 
 export const BOM_TABLE_ROWS: BomTableRow[] = [
-  { id: "1", docNo: "BEL-2025-000124", type: "Fatura", customer: "ABC Otomotiv A.Ş.", date: "20.05.2025 14:35", status: "Yüklendi" },
-  { id: "2", docNo: "BLG-2025-0123", type: "İrsaliye", customer: "Demir Çelik Tic. Ltd. Şti.", date: "14.05.2025", status: "Bekliyor" },
-  { id: "3", docNo: "BLG-2025-0122", type: "Teklif", customer: "Akdeniz Gıda A.Ş.", date: "14.05.2025", status: "Yüklendi" },
-  { id: "4", docNo: "BLG-2025-0121", type: "Sözleşme", customer: "Ege Mobilya Sanayi Ltd. Şti.", date: "13.05.2025", status: "Arşivlendi" },
-  { id: "5", docNo: "BLG-2025-0120", type: "Sipariş", customer: "Marmara Lojistik A.Ş.", date: "13.05.2025", status: "Yüklendi" },
+  { id: "1", docNo: "BEL-2025-000124", type: "Fatura", customer: "ABC Otomotiv A.�?.", date: "20.05.2025 14:35", status: "Yüklendi" },
+  { id: "2", docNo: "BLG-2025-0123", type: "İrsaliye", customer: "Demir Çelik Tic. Ltd. �?ti.", date: "14.05.2025", status: "Bekliyor" },
+  { id: "3", docNo: "BLG-2025-0122", type: "Teklif", customer: "Akdeniz Gıda A.�?.", date: "14.05.2025", status: "Yüklendi" },
+  { id: "4", docNo: "BLG-2025-0121", type: "Sözleşme", customer: "Ege Mobilya Sanayi Ltd. �?ti.", date: "13.05.2025", status: "Arşivlendi" },
+  { id: "5", docNo: "BLG-2025-0120", type: "Sipariş", customer: "Marmara Lojistik A.�?.", date: "13.05.2025", status: "Yüklendi" },
   { id: "6", docNo: "BLG-2025-0119", type: "Fatura", customer: "Karadeniz Yapı Malz. Ltd.", date: "12.05.2025", status: "Bekliyor" },
-  { id: "7", docNo: "BLG-2025-0118", type: "İrsaliye", customer: "Anadolu Kimya San. A.Ş.", date: "12.05.2025", status: "Yüklendi" },
+  { id: "7", docNo: "BLG-2025-0118", type: "İrsaliye", customer: "Anadolu Kimya San. A.�?.", date: "12.05.2025", status: "Yüklendi" },
   { id: "8", docNo: "BLG-2025-0117", type: "Fatura", customer: "İstanbul Elektrik Tic. Ltd.", date: "11.05.2025", status: "Arşivlendi" }
 ];
 
@@ -75,14 +75,14 @@ const CONTEXTS: Record<string, BomContext> = {
     status: "Yüklendi",
     type: "Fatura",
     docNo: "BEL-2025-000124",
-    customer: "ABC Otomotiv A.Ş.",
+    customer: "ABC Otomotiv A.�?.",
     date: "20.05.2025 14:35",
     uploader: "Yusuf Kaya",
     description: "Mayıs 2025 faturası",
     tags: ["fatura", "mayıs", "2025"],
     history: [
       { text: "Yusuf Kaya tarafından yüklendi", time: "20.05.2025 14:35" },
-      { text: "Dilara Şen tarafından incelendi", time: "20.05.2025 15:10" }
+      { text: "Dilara �?en tarafından incelendi", time: "20.05.2025 15:10" }
     ]
   }
 };
@@ -90,3 +90,4 @@ const CONTEXTS: Record<string, BomContext> = {
 export function getBomContext(rowId: string): BomContext {
   return CONTEXTS[rowId] ?? CONTEXTS["1"];
 }
+

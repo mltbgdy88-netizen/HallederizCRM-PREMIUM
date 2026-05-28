@@ -1,4 +1,4 @@
-import type { Brand, CriticalStockStatus, CurrencyCode, Factory, Warehouse } from "@hallederiz/types";
+﻿import type { Brand, CriticalStockStatus, CurrencyCode, Factory, Warehouse } from "@hallederiz/types";
 import type { StockDisplayStatus, StockRow } from "../mappers/map-stock-row";
 import type { StockFilters } from "../schemas/stock-filter-schema";
 
@@ -291,3 +291,4 @@ export function computeStockKpisFromDisplayedRows(rows: StockRow[], priceSlotCou
     priceGroupCount: priceGroupKpi
   };
 }
+

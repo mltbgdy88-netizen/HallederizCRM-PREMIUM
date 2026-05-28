@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useFabrikalarSiparisDetayReferenceData } from "@/features/fabrikalar/hooks/use-fabrikalar-siparis-detay-reference-data";
 
@@ -216,3 +216,4 @@ export function FabrikalarSiparisDetayPage() {
     </div>
   );
 }
+

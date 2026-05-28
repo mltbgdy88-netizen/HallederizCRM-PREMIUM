@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -205,7 +205,7 @@ export function CarilerOperasyonPage() {
                   <tr>
                     <th>Cari Kodu</th>
                     <th>Müşteri</th>
-                    <th>Şehir</th>
+                    <th>�?ehir</th>
                     <th>Bakiye</th>
                     <th>Risk</th>
                     <th>Aksiyon</th>
@@ -294,7 +294,7 @@ export function CarilerOperasyonPage() {
               <dd>{context.taxOffice}</dd>
             </div>
             <div>
-              <dt>Şehir</dt>
+              <dt>�?ehir</dt>
               <dd>{context.city}</dd>
             </div>
             <div>
@@ -355,3 +355,4 @@ export function CarilerOperasyonPage() {
     </div>
   );
 }
+

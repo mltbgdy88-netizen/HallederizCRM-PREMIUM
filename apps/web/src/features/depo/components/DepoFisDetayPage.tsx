@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useDepoFisDetayReferenceData } from "@/features/depo/hooks/use-depo-fis-detay-reference-data";
 
@@ -177,7 +177,7 @@ export function DepoFisDetayPage() {
               <header>
                 <h3>Notlar</h3>
                 <button type="button" aria-label="Notu düzenle">
-                  ✎
+                  �?
                 </button>
               </header>
               <p>{DFD_NOTES}</p>
@@ -255,3 +255,4 @@ export function DepoFisDetayPage() {
     </div>
   );
 }
+

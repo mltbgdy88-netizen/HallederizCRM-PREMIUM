@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { AppShellNavItem, SidebarNavSection } from "@hallederiz/ui";
 import { CRMIcon, type CRMIconName } from "./icons";
@@ -50,6 +50,7 @@ export function buildProductSidebarNavSections(): SidebarNavSection[] {
 
   return [
     { title: "ÜRÜN MODÜLLERİ", items: modules },
-    { title: "KISA ERİŞİM", items: shortcuts }
+    { title: "KISA ERİ�?İM", items: shortcuts }
   ];
 }
+

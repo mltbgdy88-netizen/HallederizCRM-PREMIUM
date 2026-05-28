@@ -132,11 +132,11 @@ export function ApprovalCommandDeskPage() {
       const approval = selectedRecord.raw;
 
       if (kind === "approve" && !canInboxApprove(approval)) {
-        pushToast("Bu kayÄ±t onaylanamaz.");
+        pushToast("Bu kayıt onaylanamaz.");
         return;
       }
       if (kind === "reject" && !canInboxReject(approval)) {
-        pushToast("Bu kayÄ±t reddedilemez.");
+        pushToast("Bu kayıt reddedilemez.");
         return;
       }
 
@@ -177,7 +177,7 @@ export function ApprovalCommandDeskPage() {
       },
       {
         id: "risk",
-        label: "YÃ¼ksek Risk",
+        label: "Yüksek Risk",
         value: String(highRisk),
         subtitle: "",
         icon: "shield-alert",
@@ -185,7 +185,7 @@ export function ApprovalCommandDeskPage() {
       },
       {
         id: "ai",
-        label: "AI Ã–nerisi",
+        label: "AI Önerisi",
         value: String(aiCount),
         subtitle: "",
         icon: "sparkles",
@@ -193,7 +193,7 @@ export function ApprovalCommandDeskPage() {
       },
       {
         id: "message",
-        label: "Mesaj KaynaklÄ±",
+        label: "Mesaj Kaynaklı",
         value: String(messageCount),
         subtitle: "",
         icon: "message-circle",
@@ -201,7 +201,7 @@ export function ApprovalCommandDeskPage() {
       },
       {
         id: "done",
-        label: "BugÃ¼n Tamamlanan",
+        label: "Bugün Tamamlanan",
         value: String(completedToday),
         subtitle: "",
         icon: "check-circle-2",
@@ -220,10 +220,10 @@ export function ApprovalCommandDeskPage() {
         <ApprovalStatsStrip stats={stats} />
       </div>
 
-      {listPhase === "loading" ? <ApprovalInboxLoading label="Onay masasÄ± yÃ¼kleniyorâ€¦" /> : null}
+      {listPhase === "loading" ? <ApprovalInboxLoading label="Onay masası yükleniyor…" /> : null}
       {listPhase === "error" ? (
         <ApprovalInboxError
-          error={{ kind: "unknown", message: errorMessage ?? "Onay listesi ÅŸu an alÄ±namÄ±yor." }}
+          error={{ kind: "unknown", message: errorMessage ?? "Onay listesi şu an alınamıyor." }}
           onRetry={() => void bootstrap()}
         />
       ) : null}
@@ -265,4 +265,5 @@ export function ApprovalCommandDeskPage() {
     </main>
   );
 }
+
 

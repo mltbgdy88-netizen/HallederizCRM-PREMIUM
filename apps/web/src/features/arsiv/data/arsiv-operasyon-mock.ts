@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type ArsivKpi = {
   id: string;
   label: string;
@@ -87,7 +87,7 @@ export const AOM_TABLE_ROWS: ArsivTableRow[] = [
   {
     id: "1",
     recordId: "AR-2025-000987",
-    context: "ABC Ticaret A.Ş.",
+    context: "ABC Ticaret A.�?.",
     type: "Fatura",
     date: "16.05.2025 14:32",
     status: "Onaylı",
@@ -114,7 +114,7 @@ export const AOM_TABLE_ROWS: ArsivTableRow[] = [
   {
     id: "4",
     recordId: "AR-2025-000984",
-    context: "Nova İnşaat A.Ş.",
+    context: "Nova İnşaat A.�?.",
     type: "Teslimat",
     date: "15.05.2025 17:22",
     status: "Onaylı",
@@ -132,7 +132,7 @@ export const AOM_TABLE_ROWS: ArsivTableRow[] = [
   {
     id: "6",
     recordId: "AR-2025-000982",
-    context: "Omega Tekstil A.Ş.",
+    context: "Omega Tekstil A.�?.",
     type: "Belge",
     date: "15.05.2025 14:40",
     status: "Onaylı",
@@ -150,7 +150,7 @@ export const AOM_TABLE_ROWS: ArsivTableRow[] = [
   {
     id: "8",
     recordId: "AR-2025-000980",
-    context: "Atlas Enerji A.Ş.",
+    context: "Atlas Enerji A.�?.",
     type: "Sipariş",
     date: "14.05.2025 18:55",
     status: "Onaylı",
@@ -168,7 +168,7 @@ export const AOM_CONTEXT_BY_ROW: Record<string, ArsivContextDetail> = {
   "1": {
     recordId: "AR-2025-000987",
     type: "Fatura",
-    context: "ABC Ticaret A.Ş.",
+    context: "ABC Ticaret A.�?.",
     date: "16.05.2025 14:32",
     status: "Onaylı",
     responsible: "Yasin K.",
@@ -199,3 +199,4 @@ export function getAomContext(rowId: string): ArsivContextDetail {
     responsible: row.responsible
   };
 }
+

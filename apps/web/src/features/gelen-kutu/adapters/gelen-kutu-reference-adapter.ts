@@ -1,4 +1,4 @@
-import type { OmnichannelConversation, OmnichannelMessage } from "@hallederiz/sdk";
+﻿import type { OmnichannelConversation, OmnichannelMessage } from "@hallederiz/sdk";
 import { sdk } from "../../../lib/data-source";
 import { loadWhatsAppReferenceDemo, loadWhatsAppReferenceLive } from "../../whatsapp/adapters/whatsapp-reference-adapter";
 import { REFERENCE_DEMO_BANNER } from "../../../lib/reference/constants";
@@ -214,3 +214,4 @@ export async function loadGelenKutuReferenceLive(): Promise<GelenKutuReferenceSn
     );
   }
 }
+

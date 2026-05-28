@@ -30,10 +30,10 @@ function getCategoryValues(products: Product[], slotNumber: 1 | 2 | 3 | 4): stri
 }
 
 const STATUS_OPTIONS: { value: "" | StockDisplayStatus; label: string }[] = [
-  { value: "", label: "TÃ¼mÃ¼" },
-  { value: "saglikli", label: "SaÄŸlÄ±klÄ±" },
+  { value: "", label: "Tümü" },
+  { value: "saglikli", label: "Sağlıklı" },
   { value: "kritik", label: "Kritik" },
-  { value: "tukeniyor", label: "TÃ¼keniyor" },
+  { value: "tukeniyor", label: "Tükeniyor" },
   { value: "blokeli", label: "Blokeli" }
 ];
 
@@ -58,8 +58,8 @@ export function StockFilterBar({
           <input
             value={filters.searchText}
             onChange={(e) => onFilterChange("searchText", e.target.value)}
-            placeholder="ÃœrÃ¼n kodu, ad veya barkod ara"
-            aria-label="ÃœrÃ¼n kodu ad barkod arama"
+            placeholder="Ürün kodu, ad veya barkod ara"
+            aria-label="Ürün kodu ad barkod arama"
           />
         </span>
       </label>
@@ -67,7 +67,7 @@ export function StockFilterBar({
       <label className="hz-stock-filter-field">
         <span>Marka</span>
         <select value={filters.brandId} onChange={(e) => onFilterChange("brandId", e.target.value)} aria-label="Marka">
-          <option value="">TÃ¼mÃ¼</option>
+          <option value="">Tümü</option>
           {brands.map((brand) => (
             <option key={brand.id} value={brand.id}>
               {brand.name}
@@ -79,7 +79,7 @@ export function StockFilterBar({
       <label className="hz-stock-filter-field">
         <span>Fabrika</span>
         <select value={filters.factoryId} onChange={(e) => onFilterChange("factoryId", e.target.value)} aria-label="Fabrika">
-          <option value="">TÃ¼mÃ¼</option>
+          <option value="">Tümü</option>
           {factories.map((factory) => (
             <option key={factory.id} value={factory.id}>
               {factory.name}
@@ -91,7 +91,7 @@ export function StockFilterBar({
       <label className="hz-stock-filter-field">
         <span>Depo</span>
         <select value={filters.warehouseId} onChange={(e) => onFilterChange("warehouseId", e.target.value)} aria-label="Depo">
-          <option value="">TÃ¼mÃ¼</option>
+          <option value="">Tümü</option>
           {warehouses.map((w) => (
             <option key={w.id} value={w.id}>
               {w.name}
@@ -103,7 +103,7 @@ export function StockFilterBar({
       <label className="hz-stock-filter-field">
         <span>{categoryLabel}</span>
         <select value={filters.category1} onChange={(e) => onFilterChange("category1", e.target.value)} aria-label={categoryLabel}>
-          <option value="">TÃ¼mÃ¼</option>
+          <option value="">Tümü</option>
           {categoryValues1.map((value) => (
             <option key={value} value={value}>
               {value}
@@ -127,10 +127,11 @@ export function StockFilterBar({
         </select>
       </label>
 
-      <button type="button" className="hz-stock-filter-reset" onClick={onReset} title="Filtreleri sÄ±fÄ±rla" aria-label="Filtreleri sÄ±fÄ±rla">
+      <button type="button" className="hz-stock-filter-reset" onClick={onReset} title="Filtreleri sıfırla" aria-label="Filtreleri sıfırla">
         <LucideIcon name="x" size={13} />
       </button>
     </div>
   );
 }
+
 

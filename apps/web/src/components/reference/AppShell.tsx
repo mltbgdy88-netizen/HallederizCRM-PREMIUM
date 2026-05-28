@@ -79,7 +79,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
   return (
     <div className="ref-shell">
-      <aside className="ref-sidebar" aria-label="Ana menÃ¼">
+      <aside className="ref-sidebar" aria-label="Ana menü">
         <div className="ref-sidebar-brand">
           <div className="ref-sidebar-logo-row">
             <ShieldLogo>P</ShieldLogo>
@@ -110,25 +110,25 @@ export function AppShell({ children }: { children: ReactNode }) {
 
         <footer className="ref-sidebar-footer">
           <p>Premium CRM v2.6.1</p>
-          <p>Â© 2025 TÃ¼m haklarÄ± saklÄ±dÄ±r.</p>
+          <p>© 2025 Tüm hakları saklıdır.</p>
         </footer>
       </aside>
 
       <div className="ref-main">
         <header className="ref-header">
-          <button type="button" className="ref-header-menu" aria-label="MenÃ¼">
+          <button type="button" className="ref-header-menu" aria-label="Menü">
             <IconMenu className="ref-header-menu-icon" />
           </button>
 
           <div className="ref-header-search">
             <IconSearch className="ref-header-search-icon" />
-            <input type="search" placeholder="Arama yapÄ±n..." aria-label="Arama" readOnly />
+            <input type="search" placeholder="Arama yapın..." aria-label="Arama" readOnly />
           </div>
 
           <div className="ref-header-actions">
             <button type="button" className="ref-theme-toggle">
               <IconSun className="ref-theme-toggle-icon" />
-              <span>Tema: AÃ§Ä±k</span>
+              <span>Tema: Açık</span>
               <IconChevronDown className="ref-theme-toggle-chevron" />
             </button>
 
@@ -152,4 +152,5 @@ export function AppShell({ children }: { children: ReactNode }) {
     </div>
   );
 }
+
 

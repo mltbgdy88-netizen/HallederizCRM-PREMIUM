@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 
 export type ReportAnalyticsShellProps = {
   filters: ReactNode;
@@ -19,3 +19,4 @@ export function ReportAnalyticsShell({ filters, kpis, charts, table, className =
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import type { CustomerLayerKey } from "./cariler-subroute-command-center-data";
+﻿import type { CustomerLayerKey } from "./cariler-subroute-command-center-data";
 import type { OrderLayerKey } from "./siparisler-subroute-command-center-data";
 import type { OfferLayerKey } from "./teklifler-subroute-command-center-data";
 
@@ -110,3 +110,4 @@ export function resolveActiveEntityNav(pathname: string, items: EntityLayerNavIt
   }
   return best;
 }
+

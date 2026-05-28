@@ -20,10 +20,10 @@ function formatMoney(amount: number, currency: string): string {
 }
 
 function buildRiskNoteWithoutAccount(customer: Customer): string {
-  const parts: string[] = ["Finans Ã¶zeti henÃ¼z baÄŸlÄ± deÄŸil."];
-  if (customer.whatsappMatched) parts.push("WhatsApp eÅŸleÅŸmesi aktif.");
+  const parts: string[] = ["Finans özeti henüz bağlı değil."];
+  if (customer.whatsappMatched) parts.push("WhatsApp eşleşmesi aktif.");
   if (customer.riskLevel === "high" || customer.riskLevel === "blocked") {
-    parts.push("YÃ¼ksek risk; ek onay gerekebilir.");
+    parts.push("Yüksek risk; ek onay gerekebilir.");
   }
   return parts.join(" ");
 }
@@ -32,13 +32,13 @@ function buildRiskNote(customer: Customer, account: CustomerAccount): string {
   const risk = calculateCustomerRiskState(customer, account);
   const parts: string[] = [];
   if (account.balance > 50000) {
-    parts.push("AÃ§Ä±k bakiye yÃ¼ksek; tahsilat kontrolÃ¼ Ã¶nerilir.");
+    parts.push("Açık bakiye yüksek; tahsilat kontrolü önerilir.");
   } else if (account.overdueAmount > 0) {
-    parts.push("Vadesi geÃ§en tutar var; tahsilat planÄ± deÄŸerlendirin.");
+    parts.push("Vadesi geçen tutar var; tahsilat planı değerlendirin.");
   }
-  if (customer.whatsappMatched) parts.push("WhatsApp eÅŸleÅŸmesi aktif.");
+  if (customer.whatsappMatched) parts.push("WhatsApp eşleşmesi aktif.");
   if (risk.level === "high" || risk.level === "blocked") {
-    parts.push("Risk yÃ¼ksek; ek onay gerekebilir.");
+    parts.push("Risk yüksek; ek onay gerekebilir.");
   }
   if (parts.length === 0) {
     return "Profil stabil; rutin operasyona devam edilebilir.";
@@ -47,9 +47,9 @@ function buildRiskNote(customer: Customer, account: CustomerAccount): string {
 }
 
 function buildDemoRiskNote(row: CustomerRow): string {
-  if (row.riskTone === "danger") return "YÃ¼ksek risk; limit takibi Ã¶nerilir (Ã¶nizleme).";
-  if (row.riskTone === "warning") return "Orta risk; bakiye kontrolÃ¼ faydalÄ±dÄ±r (Ã¶nizleme).";
-  return "Risk dengeli; rutin akÄ±ÅŸ uygun (Ã¶nizleme).";
+  if (row.riskTone === "danger") return "Yüksek risk; limit takibi önerilir (önizleme).";
+  if (row.riskTone === "warning") return "Orta risk; bakiye kontrolü faydalıdır (önizleme).";
+  return "Risk dengeli; rutin akış uygun (önizleme).";
 }
 
 function opsFields(
@@ -59,22 +59,22 @@ function opsFields(
 ): CustomerSideRadarView["ops"] {
   if (preview) {
     return [
-      { label: "SipariÅŸ", value: "â€”" },
-      { label: "Teklif", value: "â€”" },
-      { label: "Tahsilat", value: "â€”" },
-      { label: "Son Ã¶deme", value: "â€”" },
-      { label: "WA", value: preview.whatsappMatched ? "EÅŸleÅŸti" : "HayÄ±r" }
+      { label: "Sipariş", value: "—" },
+      { label: "Teklif", value: "—" },
+      { label: "Tahsilat", value: "—" },
+      { label: "Son ödeme", value: "—" },
+      { label: "WA", value: preview.whatsappMatched ? "Eşleşti" : "Hayır" }
     ];
   }
   return [
-    { label: "SipariÅŸ", value: account ? String(account.openOrderCount) : "â€”" },
-    { label: "Teklif", value: account ? String(account.openOfferCount) : "â€”" },
-    { label: "Tahsilat", value: "â€”" },
+    { label: "Sipariş", value: account ? String(account.openOrderCount) : "—" },
+    { label: "Teklif", value: account ? String(account.openOfferCount) : "—" },
+    { label: "Tahsilat", value: "—" },
     {
-      label: "Son Ã¶deme",
-      value: account?.lastPaymentAt ? new Date(account.lastPaymentAt).toLocaleDateString("tr-TR") : "â€”"
+      label: "Son ödeme",
+      value: account?.lastPaymentAt ? new Date(account.lastPaymentAt).toLocaleDateString("tr-TR") : "—"
     },
-    { label: "WA", value: customer.whatsappMatched ? "EÅŸleÅŸti" : "HayÄ±r" }
+    { label: "WA", value: customer.whatsappMatched ? "Eşleşti" : "Hayır" }
   ];
 }
 
@@ -105,21 +105,21 @@ export function CustomerQuickPreviewPanel({
     const view: CustomerSideRadarView = {
       mode: "filled",
       name: previewRow.name,
-      statusLabel: "Ã–nizleme",
+      statusLabel: "Önizleme",
       statusTone: "preview",
       identity: [
         { label: "Kod", value: previewRow.code },
         { label: "Tip", value: previewRow.typeLabel },
-        { label: "Åehir", value: previewRow.city },
+        { label: "�?ehir", value: previewRow.city },
         { label: "Telefon", value: previewRow.phone },
-        { label: "Vergi", value: "â€”" },
+        { label: "Vergi", value: "—" },
         { label: "Fiyat", value: previewRow.priceGroupLabel }
       ],
       finance: [
         { label: "Alacak", value: previewRow.balanceCreditLine, tone: "pos" },
-        { label: "BorÃ§", value: previewRow.balanceDebitLine, tone: "neg" },
+        { label: "Borç", value: previewRow.balanceDebitLine, tone: "neg" },
         { label: "Net", value: previewRow.balanceLabel },
-        { label: "Limit", value: "â€”" }
+        { label: "Limit", value: "—" }
       ],
       riskBadge: previewRow.riskLabel,
       overdueHint: null,
@@ -137,11 +137,11 @@ export function CustomerQuickPreviewPanel({
   const identity = [
     { label: "Kod", value: customer.code },
     { label: "Tip", value: resolveCustomerDisplayType(customer.type) },
-    { label: "Åehir", value: customer.city },
+    { label: "�?ehir", value: customer.city },
     { label: "Telefon", value: customer.phone },
     {
       label: "Vergi",
-      value: `${customer.taxOffice ?? "â€”"}${customer.taxNumber ? ` Â· ${customer.taxNumber}` : ""}`
+      value: `${customer.taxOffice ?? "—"}${customer.taxNumber ? ` · ${customer.taxNumber}` : ""}`
     },
     {
       label: "Fiyat",
@@ -156,7 +156,7 @@ export function CustomerQuickPreviewPanel({
       statusLabel: customer.active ? "Aktif" : "Pasif",
       statusTone: customer.active ? "ok" : "off",
       identity,
-      finance: [{ label: "Durum", value: "Finans baÄŸlÄ± deÄŸil" }],
+      finance: [{ label: "Durum", value: "Finans bağlı değil" }],
       ops: opsFields(customer, null),
       actions: buildLiveSideActions(router, customer.id),
       riskNote: buildRiskNoteWithoutAccount(customer)
@@ -166,8 +166,8 @@ export function CustomerQuickPreviewPanel({
 
   const risk = calculateCustomerRiskState(customer, account);
   const bal = account.balance;
-  const rec = bal > 0 ? formatMoney(bal, account.currency) : "â€”";
-  const pay = bal < 0 ? formatMoney(-bal, account.currency) : "â€”";
+  const rec = bal > 0 ? formatMoney(bal, account.currency) : "—";
+  const pay = bal < 0 ? formatMoney(-bal, account.currency) : "—";
   const net = formatMoney(bal, account.currency);
 
   const view: CustomerSideRadarView = {
@@ -178,11 +178,11 @@ export function CustomerQuickPreviewPanel({
     identity,
     finance: [
       { label: "Alacak", value: rec, tone: "pos" },
-      { label: "BorÃ§", value: pay, tone: "neg" },
+      { label: "Borç", value: pay, tone: "neg" },
       { label: "Net", value: net },
       {
         label: "Limit",
-        value: account.creditLimit != null ? formatMoney(account.creditLimit, account.currency) : "â€”"
+        value: account.creditLimit != null ? formatMoney(account.creditLimit, account.currency) : "—"
       }
     ],
     riskBadge: risk.label,
@@ -197,4 +197,5 @@ export function CustomerQuickPreviewPanel({
 
   return <CustomerSideRadarCompact view={view} />;
 }
+
 

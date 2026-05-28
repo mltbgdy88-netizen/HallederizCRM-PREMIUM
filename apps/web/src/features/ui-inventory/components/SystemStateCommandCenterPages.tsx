@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { InventoryCommandCenterPage } from "./InventoryCommandCenterPage";
@@ -68,3 +68,4 @@ export function PrintExportCommandCenterLayer() {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type KatmanTabId =
   | "ozet"
   | "satirlar"
@@ -50,7 +50,7 @@ export const OZET_HEADER = {
   breadcrumb: ["Teklifler", "Teklif Detayı"],
   backLabel: "← Teklifler Listesine Dön",
   title: "Teklif TK-8821",
-  customer: "ABC Makina San. ve Tic. A.Ş.",
+  customer: "ABC Makina San. ve Tic. A.�?.",
   customerBadge: "Kurumsal",
   taxNo: "1234567890",
   contact: "Ahmet Yılmaz"
@@ -81,7 +81,7 @@ export const OZET_DETAILS_RIGHT = [
   { label: "İndirim Oranı", value: "%2,74" },
   { label: "Kampanya", value: "Bahar Kampanyası" },
   { label: "Fiyat Listesi", value: "Standart Fiyat Listesi" },
-  { label: "Sevkiyat Şekli", value: "Kara Yolu" },
+  { label: "Sevkiyat �?ekli", value: "Kara Yolu" },
   { label: "Teklif Kaynağı", value: "Web Sitesi" },
   { label: "Son Güncelleme", value: "29.05.2025 14:30" }
 ];
@@ -96,7 +96,7 @@ export const KATMAN_CONTEXT = {
     { label: "Toplam", value: "₺1.064.100,00" }
   ],
   musteri: [
-    { label: "Müşteri", value: "ABC Makina San. ve Tic. A.Ş." },
+    { label: "Müşteri", value: "ABC Makina San. ve Tic. A.�?." },
     { label: "Müşteri Kodu", value: "M-10015" },
     { label: "Yetkili", value: "Ahmet Yılmaz" },
     { label: "Telefon", value: "+90 212 555 12 34" },
@@ -116,7 +116,7 @@ export const SATIRLAR_HEADER = {
   title: "Teklifler",
   quoteId: "TEK-2025-00123",
   status: "Onay Bekliyor",
-  customer: "ABC İnşaat A.Ş.",
+  customer: "ABC İnşaat A.�?.",
   offerDate: "15.05.2025",
   validUntil: "30.05.2025",
   currency: "TRY — Türk Lirası",
@@ -185,7 +185,7 @@ export const MUSTERI_PAGE = {
   title: "Teklifler",
   subtitle: "Müşteri bazlı teklif performansı ve geçmiş kayıtları",
   hubTabs: ["Teklifler", "Ürünler", "Müşteri", "Ekip", "Finansal", "Aktivite"],
-  customer: "Koç Holding A.Ş.",
+  customer: "Koç Holding A.�?.",
   snapshot: [
     { label: "Toplam Teklif", value: "28" },
     { label: "Kazanılan", value: "15", sub: "%53,6", tone: "ok" as const },
@@ -213,7 +213,7 @@ export const MUSTERI_HISTORY = [
 ];
 
 export const MUSTERI_CONTEXT = {
-  name: "Koç Holding A.Ş.",
+  name: "Koç Holding A.�?.",
   code: "Müşteri • KUR-0001",
   badge: "Aktif",
   fields: [
@@ -241,7 +241,7 @@ export const TIMELINE_HEADER = {
   breadcrumb: ["Teklifler", "TEK-2025-000124"],
   quoteId: "TEK-2025-000124",
   status: "Teklif Oluşturuldu",
-  customer: "ABC Makine San. ve Tic. A.Ş.",
+  customer: "ABC Makine San. ve Tic. A.�?.",
   created: "20.05.2025 10:15",
   creator: "Yusuf Kaya"
 };
@@ -261,7 +261,7 @@ export const TIMELINE_EVENTS = [
 
 export const TIMELINE_CONTEXT = {
   teklifNo: "TEK-2025-000124",
-  musteri: "ABC Makine San. ve Tic. A.Ş.",
+  musteri: "ABC Makine San. ve Tic. A.�?.",
   durum: "Onayda",
   toplam: "₺125.430,00",
   olusturma: "20.05.2025 10:15",
@@ -275,7 +275,7 @@ export const BELGELER_HEADER = {
   breadcrumb: ["Teklifler", "Teklif Detayı"],
   quoteId: "TEK-2025-000124",
   status: "Gönderildi",
-  customer: "ABC Teknoloji A.Ş.",
+  customer: "ABC Teknoloji A.�?.",
   offerDate: "15.05.2025",
   validUntil: "15.06.2025",
   currency: "TRY",
@@ -318,7 +318,7 @@ export const BELGELER_DOCUMENTS = [
   {
     id: "3",
     name: "TEK-2025-000124_Teknik_Sartname.pdf",
-    type: "Teknik Şartname",
+    type: "Teknik �?artname",
     uploadedAt: "15.05.2025 14:37",
     uploader: "Yusuf Kaya",
     size: "380 KB",
@@ -400,7 +400,7 @@ export const DONUSUM_CONTEXT = {
   teklif: [
     { label: "Teklif No", value: "TKL-2025-00048" },
     { label: "Teklif Tarihi", value: "16.06.2025" },
-    { label: "Müşteri", value: "Rulman A.Ş." },
+    { label: "Müşteri", value: "Rulman A.�?." },
     { label: "Para Birimi", value: "TRY" },
     { label: "Toplam Tutar", value: "₺11.515,00" }
   ],
@@ -418,3 +418,4 @@ export const DONUSUM_CONTEXT = {
   ],
   footerNote: "Sipariş oluşturulduktan sonra teklifle ilişkilendirilecektir."
 };
+

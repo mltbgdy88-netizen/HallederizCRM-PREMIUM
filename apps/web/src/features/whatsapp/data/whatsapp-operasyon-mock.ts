@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type WopKpi = {
   id: string;
   label: string;
@@ -57,7 +57,7 @@ export const WOP_CONVERSATIONS: WopConversation[] = [
     id: "1",
     code: "WAP-1587",
     phone: "905*******34",
-    customer: "Demir Yapı A.Ş.",
+    customer: "Demir Yapı A.�?.",
     lastMessage: "Merhaba, teklifimiz hakkında bilgi alabilir miyim?",
     lastTime: "10:24",
     status: "Onay Bekliyor",
@@ -103,7 +103,7 @@ export const WOP_CONVERSATIONS: WopConversation[] = [
     code: "WAP-1561",
     phone: "+90 505 332 19 88",
     customer: "Ege Yapı Market",
-    lastMessage: "Şablon mesajı müşteriye iletildi.",
+    lastMessage: "�?ablon mesajı müşteriye iletildi.",
     lastTime: "12:47",
     status: "Aktif",
     sla: "45 dk",
@@ -153,7 +153,7 @@ export const WOP_PAGINATION = {
 export const WOP_DETAIL = {
   code: "WAP-1587",
   status: "Onay Bekliyor" as WopConversationStatus,
-  customer: "Demir Yapı A.Ş.",
+  customer: "Demir Yapı A.�?.",
   phone: "905*******34",
   agentInitials: "EA",
   agentName: "Emre Aydın",
@@ -167,7 +167,7 @@ export const WOP_DETAIL = {
   suggestedViewAll: "Tümünü Görüntüle",
   documentTitle: "Belge Gönder",
   selectFile: "Dosya Seç",
-  selectTemplate: "Şablondan Seç"
+  selectTemplate: "�?ablondan Seç"
 };
 
 export const WOP_SUGGESTED_REPLIES: WopSuggestedReply[] = [
@@ -175,3 +175,4 @@ export const WOP_SUGGESTED_REPLIES: WopSuggestedReply[] = [
   { id: "2", text: "Teslimat süresi ortalama 7-10 iş günüdür." },
   { id: "3", text: "Size nasıl yardımcı olabilirim?" }
 ];
+

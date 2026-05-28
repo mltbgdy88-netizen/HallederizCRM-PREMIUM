@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type TeslimatKpi = {
   id: string;
   label: string;
@@ -67,56 +67,56 @@ export const TSM_TABLE_ROWS: TeslimatTableRow[] = [
   {
     id: "1",
     deliveryNo: "TES-10001",
-    customer: "ABC İnşaat San. ve Tic. A.Ş.",
+    customer: "ABC İnşaat San. ve Tic. A.�?.",
     status: "Yolda",
     document: "IRS-2025-10001"
   },
   {
     id: "2",
     deliveryNo: "TES-10002",
-    customer: "Delta Makina Ltd. Şti.",
+    customer: "Delta Makina Ltd. �?ti.",
     status: "Planlanan",
     document: "IRS-2025-10002"
   },
   {
     id: "3",
     deliveryNo: "TES-10003",
-    customer: "Ege Yapı Malzemeleri A.Ş.",
+    customer: "Ege Yapı Malzemeleri A.�?.",
     status: "Tamamlandı",
     document: "IRS-2025-10003"
   },
   {
     id: "4",
     deliveryNo: "TES-10004",
-    customer: "Kuzey Gıda San. Tic. A.Ş.",
+    customer: "Kuzey Gıda San. Tic. A.�?.",
     status: "Geciken",
     document: "IRS-2025-10004"
   },
   {
     id: "5",
     deliveryNo: "TES-10005",
-    customer: "Marmara Lojistik A.Ş.",
+    customer: "Marmara Lojistik A.�?.",
     status: "Yolda",
     document: "IRS-2025-10005"
   },
   {
     id: "6",
     deliveryNo: "TES-10006",
-    customer: "Anadolu Tekstil Ltd. Şti.",
+    customer: "Anadolu Tekstil Ltd. �?ti.",
     status: "Tamamlandı",
     document: "IRS-2025-10006"
   },
   {
     id: "7",
     deliveryNo: "TES-10007",
-    customer: "Güney Otomotiv San. Tic. A.Ş.",
+    customer: "Güney Otomotiv San. Tic. A.�?.",
     status: "Planlanan",
     document: "IRS-2025-10007"
   },
   {
     id: "8",
     deliveryNo: "TES-10008",
-    customer: "Karadeniz İnşaat A.Ş.",
+    customer: "Karadeniz İnşaat A.�?.",
     status: "Yolda",
     document: "IRS-2025-10008"
   }
@@ -129,7 +129,7 @@ export const TSM_CONTEXT_BY_ROW: Record<string, TeslimatContextDetail> = {
   "1": {
     rowId: "1",
     deliveryNo: "TES-10001",
-    customer: "ABC İnşaat San. ve Tic. A.Ş.",
+    customer: "ABC İnşaat San. ve Tic. A.�?.",
     status: "Yolda",
     deliveryDate: "15.05.2025",
     plannedTime: "10:00",
@@ -151,3 +151,4 @@ export const TSM_CONTEXT_BY_ROW: Record<string, TeslimatContextDetail> = {
 export function getTsmContext(rowId: string): TeslimatContextDetail {
   return TSM_CONTEXT_BY_ROW[rowId] ?? TSM_CONTEXT_BY_ROW["1"]!;
 }
+

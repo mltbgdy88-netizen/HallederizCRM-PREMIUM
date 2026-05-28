@@ -1,4 +1,4 @@
-import type { Customer } from "@hallederiz/types";
+﻿import type { Customer } from "@hallederiz/types";
 
 export function customerRiskLabelFromProfile(customer: Customer): { label: string; description: string } {
   switch (customer.riskLevel) {
@@ -12,3 +12,4 @@ export function customerRiskLabelFromProfile(customer: Customer): { label: strin
       return { label: "Düşük", description: "Finans özeti bağlandığında detaylı risk hesaplanır." };
   }
 }
+

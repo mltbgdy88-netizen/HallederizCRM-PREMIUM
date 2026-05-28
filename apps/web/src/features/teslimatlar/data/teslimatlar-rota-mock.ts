@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const TSRM_TITLE = "Teslimat Rota Masası";
 export const TSRM_SUBTITLE = "Teslimat rotalarını planlayın, izleyin ve yönetin.";
 
@@ -77,3 +77,4 @@ export const TSRM_STOPS = [
   { id: "5", name: "Sevil Market", address: "Kartal / İstanbul", time: "10:10", state: "pending" as const },
   { id: "6", name: "Final Market", address: "Pendik / İstanbul", time: "10:35", state: "pending" as const }
 ] as const;
+

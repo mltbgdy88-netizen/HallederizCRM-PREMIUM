@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type FsdLineRow = {
   id: string;
   productCode: string;
@@ -128,3 +128,4 @@ export const FSD_CONTEXT = {
     { id: "3", text: "Sipariş onayı ERP'ye iletildi", time: "24.05.2025 14:22" }
   ]
 };
+

@@ -1,4 +1,4 @@
-/* Gösterge Paneli — dashboard-gosterge-paneli-acik-mod.png */
+﻿/* Gösterge Paneli — dashboard-gosterge-paneli-acik-mod.png */
 
 .dgp-home {
   --dgp-gap: clamp(7px, 0.85vh, 10px);
@@ -723,3 +723,4 @@
   width: 14px !important;
   height: 14px !important;
 }
+

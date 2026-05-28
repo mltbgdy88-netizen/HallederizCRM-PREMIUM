@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type GostergeKpi = {
   id: string;
   label: string;
@@ -198,3 +198,4 @@ export const DGP_AI_HIGHLIGHTS = [
 
 export const DGP_AI_GREETING =
   "Merhaba Yusuf Bey, Stok hareketlerinizi analiz ettim. Kritik stok ve transfer önerileri videoda özetlendi.";
+

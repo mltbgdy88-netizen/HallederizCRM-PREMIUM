@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useIadelerYeniFormReferenceData } from "@/features/iadeler/hooks/use-iadeler-yeni-form-reference-data";
@@ -158,3 +158,4 @@ export function IadelerYeniFormPage() {
     </div>
   );
 }
+

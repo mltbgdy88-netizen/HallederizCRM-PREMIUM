@@ -1,4 +1,4 @@
-/* fatarişler Operasyon Masası — fatarisler-operasyon-masasi-acik-mod.png */
+﻿/* fatarişler Operasyon Masası — fatarisler-operasyon-masasi-acik-mod.png */
 
 .fat-home {
   --fat-gap: clamp(6px, 0.75vh, 9px);
@@ -661,3 +661,4 @@
   margin-top: auto;
   padding-top: 4px;
 }
+

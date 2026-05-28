@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 import { PageHeader } from "./page-header";
 import { SplitContentLayout, type SplitSideWidth } from "./split-content-layout";
 
@@ -74,3 +74,4 @@ export function EntityListPageTemplate({
     </div>
   );
 }
+

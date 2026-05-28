@@ -1,4 +1,4 @@
-export function WarehouseActionsBar() {
+﻿export function WarehouseActionsBar() {
   return (
     <section className="hz-action-toolbar">
       <button type="button" className="hz-btn hz-btn-primary hz-toolbar-btn">Hazirliga Basla</button>
@@ -10,3 +10,4 @@ export function WarehouseActionsBar() {
     </section>
   );
 }
+

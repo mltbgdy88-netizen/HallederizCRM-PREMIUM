@@ -47,21 +47,21 @@ function PlanRow({ row }: { row: AohPlanRow }) {
         <p>{row.desc}</p>
         <div className="aoh-plan-meta">
           <span className="aoh-tag aoh-tag--module">{row.module}</span>
-          <span className={row.priority === "YÃ¼ksek" ? "aoh-tag aoh-tag--high" : "aoh-tag aoh-tag--mid"}>
+          <span className={row.priority === "Yüksek" ? "aoh-tag aoh-tag--high" : "aoh-tag aoh-tag--mid"}>
             {row.priority}
           </span>
           <span className="aoh-plan-date">
-            Ã–neri Tarihi {row.date} {row.time}
+            Öneri Tarihi {row.date} {row.time}
           </span>
         </div>
       </div>
       <div className="aoh-plan-side">
         <span className="aoh-local">
           <span className="aoh-local-dot" aria-hidden />
-          Yerel â€” Ä°nceleme Bekliyor
+          Yerel — İnceleme Bekliyor
         </span>
         <button type="button" className="aoh-review-btn">
-          Ã–neri Ä°ncele
+          Öneri İncele
         </button>
       </div>
     </article>
@@ -88,20 +88,20 @@ export function AiOperatorHubPage() {
           <h1>{AOH_PAGE.title}</h1>
           <p>{AOH_PAGE.subtitle}</p>
         </div>
-        <nav className="aoh-head-links" aria-label="Yapay zeka kapÄ±larÄ±">
+        <nav className="aoh-head-links" aria-label="Yapay zeka kapıları">
           <Link href="/ai/icgoruler" className="aoh-head-link">
-            Ä°Ã§gÃ¶rÃ¼ler
+            İçgörüler
           </Link>
           <Link href="/ai/onaylar" className="aoh-head-link">
-            AI OnaylarÄ±
+            AI Onayları
           </Link>
           <Link href="/onaylar" className="aoh-head-link">
-            Onay MasasÄ±
+            Onay Masası
           </Link>
         </nav>
       </header>
 
-      <section className="aoh-kpis" aria-label="Ã–zet kartlar">
+      <section className="aoh-kpis" aria-label="Özet kartlar">
         {AOH_KPIS.map((kpi) => (
           <article key={kpi.id} className="aoh-kpi">
             <span className="aoh-kpi-icon">
@@ -144,7 +144,7 @@ export function AiOperatorHubPage() {
             </button>
           ))}
           <button type="button" className="aoh-filter aoh-filter--sort">
-            Ã–neri Tarihi (Yeni)
+            Öneri Tarihi (Yeni)
           </button>
         </div>
 
@@ -165,4 +165,5 @@ export function AiOperatorHubPage() {
     </div>
   );
 }
+
 

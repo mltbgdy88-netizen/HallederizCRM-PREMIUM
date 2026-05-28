@@ -1,4 +1,4 @@
-/* Teklif Detayı — teklifler-detay-masasi-acik-mod.png */
+﻿/* Teklif Detayı — teklifler-detay-masasi-acik-mod.png */
 
 .tdm-home {
   --tdm-gap: clamp(6px, 0.7vh, 8px);
@@ -484,3 +484,4 @@
   font-weight: 800;
   cursor: pointer;
 }
+

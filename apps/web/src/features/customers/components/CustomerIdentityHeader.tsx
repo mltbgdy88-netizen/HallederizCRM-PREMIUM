@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { resolveCustomerDisplayType } from "@hallederiz/domain";
 import type { Customer } from "@hallederiz/types";
@@ -50,3 +50,4 @@ export function CustomerIdentityHeader({ customer, financeLinked }: { customer: 
     </section>
   );
 }
+

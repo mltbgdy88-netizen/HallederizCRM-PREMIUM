@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 import { IconRotateCcw } from "../../../dashboard/components/dashboard-inline-icons";
 import { ApprovalInboxViewIcon } from "./approval-inbox-view-icons";
 import type { ApprovalInboxRecord, ApprovalInboxViewId } from "./types";
@@ -118,7 +118,7 @@ export function ApprovalSidebar({
               <option value="merve">Merve Yılmaz</option>
             </FilterSelect>
           </FilterAccordion>
-          <FilterAccordion label="Tenant / Şube">
+          <FilterAccordion label="Tenant / �?ube">
             <FilterSelect value={filters.tenantBranch} onChange={(v) => onFilterChange("tenantBranch", v)}>
               <option value="tumu">Tümü</option>
               <option value="merkez">Merkez</option>

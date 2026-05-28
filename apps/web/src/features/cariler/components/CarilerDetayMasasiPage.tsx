@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import type { CdmTab } from "@/features/cariler/data/cariler-detay-mock";
@@ -391,3 +391,4 @@ export function CarilerDetayMasasiPage({ customerId }: { customerId?: string } =
     </div>
   );
 }
+

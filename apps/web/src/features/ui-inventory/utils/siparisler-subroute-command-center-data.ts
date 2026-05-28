@@ -1,4 +1,4 @@
-import {
+﻿import {
   buildConfig,
   type InventoryPageConfig,
   type InventoryScopeRow,
@@ -504,3 +504,4 @@ export function buildOrderLayerConfig(layer: OrderLayerKey, orderId: string): In
     listNav: { href: "/siparisler", label: "← Sipariş listesi" }
   });
 }
+

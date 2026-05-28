@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type OkmKpiTone = "green" | "gold";
 
 export type OkmKpi = {
@@ -60,7 +60,7 @@ export const OKM_PENDING: OkmPendingItem[] = [
   {
     id: "2",
     title: "Müşteri Limit Artışı",
-    ref: "CAR-8745 • ABC Makina A.Ş.",
+    ref: "CAR-8745 • ABC Makina A.�?.",
     requester: "Satış Temsilcisi",
     dateTime: "20.05.2025 09:15",
     status: "Bekliyor",
@@ -197,4 +197,5 @@ export function getOkmDetailForId(id: string) {
     requesterRole: item.requester.match(/\(([^)]+)\)/)?.[1] ?? item.requester
   };
 }
+
 

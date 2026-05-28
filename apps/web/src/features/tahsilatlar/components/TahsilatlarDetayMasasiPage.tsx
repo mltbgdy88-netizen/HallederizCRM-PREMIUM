@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import type { ThdmInvoiceStatus } from "@/features/tahsilatlar/data/tahsilatlar-detay-mock";
@@ -280,3 +280,4 @@ export function TahsilatlarDetayMasasiPage({ paymentId }: { paymentId?: string }
     </div>
   );
 }
+

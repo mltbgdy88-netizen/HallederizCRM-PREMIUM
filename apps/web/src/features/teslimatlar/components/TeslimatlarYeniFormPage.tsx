@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useTeslimatlarYeniFormReferenceData } from "@/features/teslimatlar/hooks/use-teslimatlar-yeni-form-reference-data";
@@ -148,3 +148,4 @@ export function TeslimatlarYeniFormPage() {
     </div>
   );
 }
+

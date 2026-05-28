@@ -19,37 +19,37 @@ function InvoiceFilterBar() {
     <section className="hz-filter-card hz-invoices-filter">
       <div className="hz-filter-grid">
         <label>
-          MÃ¼ÅŸteri / fatura
+          Müşteri / fatura
           <input placeholder="Fatura veya cari ara" />
         </label>
         <label>
           Durum
           <select defaultValue="">
-            <option value="">TÃ¼m durumlar</option>
+            <option value="">Tüm durumlar</option>
             <option>Taslak</option>
             <option>Kesildi</option>
-            <option>Ä°ptal</option>
+            <option>İptal</option>
           </select>
         </label>
         <label>
           Tarih
           <select defaultValue="month">
-            <option value="today">BugÃ¼n</option>
+            <option value="today">Bugün</option>
             <option value="week">Bu hafta</option>
             <option value="month">Bu ay</option>
           </select>
         </label>
         <label className="hz-toggle">
           <input type="checkbox" />
-          SipariÅŸ baÄŸlantÄ±lÄ±
+          Sipariş bağlantılı
         </label>
         <label>
-          Ã–deme
+          Ödeme
           <select defaultValue="">
-            <option value="">TÃ¼m Ã¶demeler</option>
-            <option>Ã–denmedi</option>
-            <option>KÄ±smi</option>
-            <option>Ã–dendi</option>
+            <option value="">Tüm ödemeler</option>
+            <option>Ödenmedi</option>
+            <option>Kısmi</option>
+            <option>Ödendi</option>
           </select>
         </label>
       </div>
@@ -71,20 +71,20 @@ function InvoicePreviewPanel({
   if (!invoice) {
     return (
       <aside className="hz-commercial-entity-side hz-invoices-side">
-        <p className="hz-commercial-entity-side-empty">KayÄ±t seÃ§ilmedi.</p>
+        <p className="hz-commercial-entity-side-empty">Kayıt seçilmedi.</p>
       </aside>
     );
   }
 
   return (
     <aside className="hz-commercial-entity-side hz-invoices-side">
-      <h3>Fatura Ã¶nizleme</h3>
+      <h3>Fatura önizleme</h3>
       <ul className="hz-commercial-entity-side-list">
         <li>
           <strong>Fatura:</strong> {invoice.invoiceNo}
         </li>
         <li>
-          <strong>Cari:</strong> {customerName ?? "â€”"}
+          <strong>Cari:</strong> {customerName ?? "—"}
         </li>
         <li>
           <strong>Toplam:</strong> {money(invoice.grandTotal, invoice.currency)}
@@ -93,10 +93,10 @@ function InvoicePreviewPanel({
           <strong>Durum:</strong> {getInvoiceStatusLabel(invoice.status)}
         </li>
         <li>
-          <strong>Ã–deme:</strong> {invoice.paymentStatus}
+          <strong>Ödeme:</strong> {invoice.paymentStatus}
         </li>
         <li>
-          <strong>Belge:</strong> {invoice.documentId ? "BaÄŸlÄ±" : "Ãœretilecek"}
+          <strong>Belge:</strong> {invoice.documentId ? "Bağlı" : "Üretilecek"}
         </li>
       </ul>
       <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
@@ -112,9 +112,9 @@ function InvoicePreviewPanel({
           type="button"
           className="hz-btn hz-btn-secondary hz-toolbar-btn"
           style={{ flex: 1 }}
-          onClick={() => pushToast("Taslak hazÄ±rlandÄ±: fatura gÃ¶nderim belge servisine yÃ¶nlendirildi.")}
+          onClick={() => pushToast("Taslak hazırlandı: fatura gönderim belge servisine yönlendirildi.")}
         >
-          GÃ¶nder
+          Gönder
         </button>
       </div>
     </aside>
@@ -177,8 +177,8 @@ export function InvoicesPage() {
       header={
         <>
           <CommercialOperasyonDeskIntro
-            title="Fatura Operasyon MasasÄ±"
-            subtitle="Fatura taslaklarÄ±, kesim ve belge daÄŸÄ±tÄ±m akÄ±ÅŸlarÄ±nÄ± tek ekranda yÃ¶netin."
+            title="Fatura Operasyon Masası"
+            subtitle="Fatura taslakları, kesim ve belge dağıtım akışlarını tek ekranda yönetin."
             icon="file-text"
             actions={
               <>
@@ -188,22 +188,22 @@ export function InvoicesPage() {
                 </Link>
                 <Link href="/hizli-islem" className="hz-commercial-desk-btn hz-commercial-desk-btn--secondary">
                   <LucideIcon name="zap" size={14} />
-                  HÄ±zlÄ± Ä°ÅŸlem
+                  Hızlı İşlem
                 </Link>
                 <button
                   type="button"
                   className="hz-commercial-desk-btn hz-commercial-desk-btn--secondary"
-                  onClick={() => pushToast("DÄ±ÅŸa aktarma backend onay akÄ±ÅŸÄ±na baÄŸlÄ±dÄ±r; demo modunda simÃ¼le edildi.")}
+                  onClick={() => pushToast("Dışa aktarma backend onay akışına bağlıdır; demo modunda simüle edildi.")}
                 >
                   <LucideIcon name="download" size={14} />
-                  DÄ±ÅŸa Aktar
+                  Dışa Aktar
                 </button>
               </>
             }
           />
-          <div className="hz-commercial-entity-kpi-strip" aria-label="Fatura Ã¶zeti">
+          <div className="hz-commercial-entity-kpi-strip" aria-label="Fatura özeti">
             <div className="hz-commercial-entity-kpi">
-              <span className="hz-commercial-entity-kpi-label">KayÄ±t</span>
+              <span className="hz-commercial-entity-kpi-label">Kayıt</span>
               <span className="hz-commercial-entity-kpi-value">{invoices.length}</span>
             </div>
             <div className="hz-commercial-entity-kpi">
@@ -219,7 +219,7 @@ export function InvoicesPage() {
               </span>
             </div>
             <div className="hz-commercial-entity-kpi">
-              <span className="hz-commercial-entity-kpi-label">Belge baÄŸlÄ±</span>
+              <span className="hz-commercial-entity-kpi-label">Belge bağlı</span>
               <span className="hz-commercial-entity-kpi-value">
                 {invoices.filter((item) => item.documentId).length}
               </span>
@@ -227,7 +227,7 @@ export function InvoicesPage() {
           </div>
           {dataSourceConfig.useDemoData ? (
             <p className="hz-commercial-entity-preview-band" role="status">
-              Ã–rnek veri modu: liste kayÄ±tlarÄ± demo amaÃ§lÄ±dÄ±r; canlÄ± operasyon sonucu deÄŸildir.
+              Örnek veri modu: liste kayıtları demo amaçlıdır; canlı operasyon sonucu değildir.
             </p>
           ) : null}
         </>
@@ -236,11 +236,11 @@ export function InvoicesPage() {
       list={
         <div className="hz-commercial-entity-list-wrap">
           {loading ? (
-            <LoadingState title="Faturalar yÃ¼kleniyor" message="SipariÅŸ baÄŸlantÄ±larÄ± ve belge durumlarÄ± hazÄ±rlanÄ±yor." />
+            <LoadingState title="Faturalar yükleniyor" message="Sipariş bağlantıları ve belge durumları hazırlanıyor." />
           ) : loadError ? (
-            <EmptyState title="Fatura listesi alÄ±namadÄ±" message="BaÄŸlantÄ± kurulamadÄ±. LÃ¼tfen tekrar deneyin." />
+            <EmptyState title="Fatura listesi alınamadı" message="Bağlantı kurulamadı. Lütfen tekrar deneyin." />
           ) : invoices.length === 0 ? (
-            <EmptyState title="Fatura bulunamadÄ±" message="KayÄ±t yok veya filtre sonucu boÅŸ." />
+            <EmptyState title="Fatura bulunamadı" message="Kayıt yok veya filtre sonucu boş." />
           ) : (
             <>
               <div className="hz-commercial-entity-table-head hz-invoices-table-head" role="row">
@@ -249,12 +249,12 @@ export function InvoicesPage() {
                 <span>Toplam</span>
                 <span>Durum</span>
                 <span>Tarih</span>
-                <span>SipariÅŸ</span>
-                <span>AKSÄ°YON</span>
+                <span>Sipariş</span>
+                <span>AKSİYON</span>
               </div>
               <div className="hz-commercial-entity-table-body">
                 {pagedInvoices.map((invoice) => {
-                  const customerName = customers.find((c) => c.id === invoice.customerId)?.name ?? "â€”";
+                  const customerName = customers.find((c) => c.id === invoice.customerId)?.name ?? "—";
                   return (
                     <div
                       key={invoice.id}
@@ -273,7 +273,7 @@ export function InvoicesPage() {
                         <span className={statusBadgeClass(invoice.status)}>{getInvoiceStatusLabel(invoice.status)}</span>
                       </span>
                       <span>{dateLabel(invoice.issueDate ?? invoice.createdAt)}</span>
-                      <span>{invoice.orderNo ?? "â€”"}</span>
+                      <span>{invoice.orderNo ?? "—"}</span>
                       <span>
                         <button
                           type="button"
@@ -283,7 +283,7 @@ export function InvoicesPage() {
                             router.push(`/faturalar/${invoice.id}`);
                           }}
                         >
-                          Ä°ncele
+                          İncele
                         </button>
                       </span>
                     </div>
@@ -305,4 +305,5 @@ export function InvoicesPage() {
     />
   );
 }
+
 

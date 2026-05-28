@@ -1,4 +1,4 @@
-import {
+﻿import {
   buildConfig,
   type InventoryPageConfig,
   type InventoryScopeRow,
@@ -401,3 +401,4 @@ export function buildOfferLayerConfig(layer: OfferLayerKey, offerId: string): In
     listNav: { href: "/teklifler", label: "← Teklif listesi" }
   });
 }
+

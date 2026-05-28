@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { EmptyState, PageHeader } from "@hallederiz/ui";
 import Link from "next/link";
@@ -266,3 +266,4 @@ export function OmnichannelInboxPage() {
     </div>
   );
 }
+

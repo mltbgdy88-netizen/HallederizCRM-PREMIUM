@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const TSDM_PAGE = {
   breadcrumb: ["Teslimatlar", "Teslimat Detay"],
   title: "Teslimat TSL-441",
@@ -11,7 +11,7 @@ export const TSDM_STATUS_CARDS = [
   { id: "vehicle", label: "Araç", value: "34 ABC 123" },
   { id: "depart", label: "Çıkış Tarihi", value: "22.05.2025 08:30" },
   { id: "delivered", label: "Teslim Tarihi", value: "22.05.2025 12:45" },
-  { id: "customer", label: "Müşteri", value: "ABC İnşaat A.Ş." }
+  { id: "customer", label: "Müşteri", value: "ABC İnşaat A.�?." }
 ] as const;
 
 export const TSDM_METRICS = [
@@ -45,7 +45,7 @@ export const TSDM_CONTEXT = {
   title: "Teslimat Bağlamı",
   rows: [
     { label: "Sipariş", value: "SP-705", link: true },
-    { label: "Cari", value: "ABC İnşaat A.Ş." },
+    { label: "Cari", value: "ABC İnşaat A.�?." },
     { label: "Adres", value: "Horozluhan Mah. Atatürk Bulvarı No:45 Karatay / Konya", full: true },
     { label: "Sevkiyat", value: "SVK-332" },
     { label: "Depo", value: "Merkez Depo" },
@@ -56,7 +56,7 @@ export const TSDM_CONTEXT = {
 
 export const TSDM_PROOF = {
   receiver: "Ahmet Demir",
-  receiverRole: "ABC İnşaat A.Ş. / Şantiye Şefi",
+  receiverRole: "ABC İnşaat A.�?. / �?antiye �?efi",
   signatureLabel: "İmza",
   photosLabel: "Teslimat Fotoğrafları",
   photoCount: "+2"
@@ -67,3 +67,4 @@ export const TSDM_ACTIONS = [
   "İrsaliye Yazdır",
   "Yeni Teslimat Oluştur"
 ] as const;
+

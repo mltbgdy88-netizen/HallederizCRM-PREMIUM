@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type TahsilatKpi = {
   id: string;
   label: string;
@@ -63,7 +63,7 @@ export const THM_TABLE_ROWS: TahsilatTableRow[] = [
   {
     id: "1",
     receiptNo: "MKB-2025-1204",
-    customer: "ABC Otomotiv San. ve Tic. Ltd. Şti.",
+    customer: "ABC Otomotiv San. ve Tic. Ltd. �?ti.",
     amount: "₺12.450,00",
     status: "Tahsil Edildi",
     date: "25.05.2025"
@@ -71,7 +71,7 @@ export const THM_TABLE_ROWS: TahsilatTableRow[] = [
   {
     id: "2",
     receiptNo: "MKB-2025-1203",
-    customer: "Delta Makina Ltd. Şti.",
+    customer: "Delta Makina Ltd. �?ti.",
     amount: "₺8.920,00",
     status: "Beklemede",
     date: "24.05.2025"
@@ -79,7 +79,7 @@ export const THM_TABLE_ROWS: TahsilatTableRow[] = [
   {
     id: "3",
     receiptNo: "MKB-2025-1202",
-    customer: "Ege Yapı Malzemeleri A.Ş.",
+    customer: "Ege Yapı Malzemeleri A.�?.",
     amount: "₺18.750,00",
     status: "Vadesi Geçti",
     date: "20.05.2025"
@@ -87,7 +87,7 @@ export const THM_TABLE_ROWS: TahsilatTableRow[] = [
   {
     id: "4",
     receiptNo: "MKB-2025-1201",
-    customer: "Kuzey Gıda San. Tic. A.Ş.",
+    customer: "Kuzey Gıda San. Tic. A.�?.",
     amount: "₺6.480,00",
     status: "Tahsil Edildi",
     date: "23.05.2025"
@@ -95,7 +95,7 @@ export const THM_TABLE_ROWS: TahsilatTableRow[] = [
   {
     id: "5",
     receiptNo: "MKB-2025-1200",
-    customer: "Marmara Lojistik A.Ş.",
+    customer: "Marmara Lojistik A.�?.",
     amount: "₺32.100,00",
     status: "Beklemede",
     date: "22.05.2025"
@@ -103,7 +103,7 @@ export const THM_TABLE_ROWS: TahsilatTableRow[] = [
   {
     id: "6",
     receiptNo: "MKB-2025-1199",
-    customer: "Anadolu Tekstil Ltd. Şti.",
+    customer: "Anadolu Tekstil Ltd. �?ti.",
     amount: "₺4.250,00",
     status: "Tahsil Edildi",
     date: "21.05.2025"
@@ -111,7 +111,7 @@ export const THM_TABLE_ROWS: TahsilatTableRow[] = [
   {
     id: "7",
     receiptNo: "MKB-2025-1198",
-    customer: "Güney Otomotiv San. Tic. A.Ş.",
+    customer: "Güney Otomotiv San. Tic. A.�?.",
     amount: "₺15.680,00",
     status: "Vadesi Geçti",
     date: "18.05.2025"
@@ -119,7 +119,7 @@ export const THM_TABLE_ROWS: TahsilatTableRow[] = [
   {
     id: "8",
     receiptNo: "MKB-2025-1197",
-    customer: "Karadeniz İnşaat A.Ş.",
+    customer: "Karadeniz İnşaat A.�?.",
     amount: "₺9.840,00",
     status: "Tahsil Edildi",
     date: "19.05.2025"
@@ -133,7 +133,7 @@ export const THM_CONTEXT_BY_ROW: Record<string, TahsilatContextDetail> = {
   "1": {
     rowId: "1",
     customerCode: "ABC001",
-    customerName: "ABC Otomotiv San. ve Tic. Ltd. Şti.",
+    customerName: "ABC Otomotiv San. ve Tic. Ltd. �?ti.",
     openBalance: "₺84.210,00",
     collected: "₺12.450,00",
     remaining: "₺71.760,00",
@@ -152,7 +152,7 @@ export const THM_CONTEXT_BY_ROW: Record<string, TahsilatContextDetail> = {
   "2": {
     rowId: "2",
     customerCode: "DLT014",
-    customerName: "Delta Makina Ltd. Şti.",
+    customerName: "Delta Makina Ltd. �?ti.",
     openBalance: "₺42.180,00",
     collected: "₺0,00",
     remaining: "₺42.180,00",
@@ -171,3 +171,4 @@ export const THM_CONTEXT_BY_ROW: Record<string, TahsilatContextDetail> = {
 export function getThmContext(rowId: string): TahsilatContextDetail {
   return THM_CONTEXT_BY_ROW[rowId] ?? THM_CONTEXT_BY_ROW["1"]!;
 }
+

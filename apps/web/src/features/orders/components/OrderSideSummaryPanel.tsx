@@ -1,4 +1,4 @@
-import { summarizeOrderOperationalImpact, validateDeliveryReadiness } from "@hallederiz/domain";
+﻿import { summarizeOrderOperationalImpact, validateDeliveryReadiness } from "@hallederiz/domain";
 import type { Customer, PaymentReceipt, SaleOrder, WarehouseOrder } from "@hallederiz/types";
 import { money } from "../utils";
 import { getDeliveryStatusLabel, getPaymentStatusLabel } from "../queries/order-mock-data";
@@ -57,3 +57,4 @@ export function OrderSideSummaryPanel({
     </div>
   );
 }
+

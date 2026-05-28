@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useBelgelerYeniFormReferenceData } from "@/features/belgeler/hooks/use-belgeler-yeni-form-reference-data";
@@ -27,7 +27,7 @@ export function BelgelerYeniFormPage() {
             ✕ İptal
           </Link>
           <button type="button" className="bym-btn bym-btn--primary">
-            💾 Kaydet
+            g��� Kaydet
           </button>
         </div>
       </header>
@@ -85,7 +85,7 @@ export function BelgelerYeniFormPage() {
             </button>
           </header>
           <div className="bym-empty">
-            <span aria-hidden>📄</span>
+            <span aria-hidden>g���</span>
             <p>Henüz dosya eklenmedi. Dosyalar buraya eklendiğinde listelenecektir.</p>
           </div>
 
@@ -102,7 +102,7 @@ export function BelgelerYeniFormPage() {
           </article>
 
           <article className="bym-secure">
-            <strong>🛡 Güvenli Yükleme</strong>
+            <strong>g��� Güvenli Yükleme</strong>
             <p>{BYM_SECURE}</p>
           </article>
         </aside>
@@ -110,3 +110,4 @@ export function BelgelerYeniFormPage() {
     </div>
   );
 }
+

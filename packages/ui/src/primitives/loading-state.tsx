@@ -1,4 +1,4 @@
-import { UiSkeleton } from "./skeleton";
+﻿import { UiSkeleton } from "./skeleton";
 
 export type LoadingStateProps = {
   title?: string;
@@ -16,3 +16,4 @@ export function LoadingState({ title = "Yükleniyor", message, className = "" }:
     </div>
   );
 }
+

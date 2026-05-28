@@ -1,4 +1,4 @@
-import type { Customer, SaleOrder } from "@hallederiz/types";
+﻿import type { Customer, SaleOrder } from "@hallederiz/types";
 import { fulfillmentFromSaleOrder } from "../../../lib/siparis-fulfillment-links";
 import { mapOrderRow } from "../../orders/mappers/map-order-row";
 import { getOrders } from "../../orders/queries/get-orders";
@@ -133,3 +133,4 @@ export async function loadSiparislerReferenceLive(): Promise<SiparislerReference
 }
 
 export const SIPARISLER_REFERENCE_INITIAL = loadSiparislerReferenceDemo();
+

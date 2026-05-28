@@ -28,9 +28,9 @@ import { metricMatchesChip, REPORTS_DEMO_METRICS, REPORTS_USE_DEMO_DATA } from "
 import type { ReportCategoryChip, ReportDiffTone } from "../types";
 
 const KPI = {
-  ciro: "â‚º1.284.500",
-  tahsilat: "â‚º642.300",
-  acik: "â‚º294.050",
+  ciro: "₺1.284.500",
+  tahsilat: "₺642.300",
+  acik: "₺294.050",
   kritikStok: "12",
   waDonusum: "%38",
   aiTasarruf: "14 saat"
@@ -103,17 +103,17 @@ function ReportsChartSlot({ useDemo }: { useDemo: boolean }) {
     return (
       <div className="hz-reports-chart-empty" role="status">
         <div>
-          <strong className="hz-reports-chart-empty-title">Grafik alanÄ±</strong>
-          <span className="hz-reports-chart-empty-text">CanlÄ± rapor verisi baÄŸlandÄ±ÄŸÄ±nda trend burada gÃ¶sterilir. Sahte grafik Ã§izilmez.</span>
+          <strong className="hz-reports-chart-empty-title">Grafik alanı</strong>
+          <span className="hz-reports-chart-empty-text">Canlı rapor verisi bağlandığında trend burada gösterilir. Sahte grafik çizilmez.</span>
         </div>
       </div>
     );
   }
   const bars = [12, 16, 14, 18, 15, 17, 13];
-  const labels = ["Pt", "Sa", "Ã‡a", "Pe", "Cu", "Ct", "Pz"];
+  const labels = ["Pt", "Sa", "Ça", "Pe", "Cu", "Ct", "Pz"];
   return (
-    <div className="hz-reports-mini-trend" role="img" aria-label="HaftalÄ±k indeks (Ã¶nizleme modu)">
-      <div className="hz-reports-mini-trend-cap">HaftalÄ±k indeks (Ã¶nizleme)</div>
+    <div className="hz-reports-mini-trend" role="img" aria-label="Haftalık indeks (önizleme modu)">
+      <div className="hz-reports-mini-trend-cap">Haftalık indeks (önizleme)</div>
       <div className="hz-reports-mini-trend-inner">
         {bars.map((h, i) => (
           <div key={labels[i]} className="hz-reports-mini-trend-col">
@@ -130,9 +130,9 @@ function ReportsKpiValue({ label, demoValue, useDemo }: { label: string; demoVal
   return (
     <span
       className={`hz-reports-kpi-value${useDemo ? "" : " hz-reports-kpi-value--pending"}`}
-      title={useDemo ? undefined : `${label}: canlÄ± veri bekleniyor`}
+      title={useDemo ? undefined : `${label}: canlı veri bekleniyor`}
     >
-      {useDemo ? demoValue : "â€”"}
+      {useDemo ? demoValue : "—"}
     </span>
   );
 }
@@ -226,12 +226,12 @@ export function ReportsPage() {
     setSegment("all");
     setChannel("all");
     setCompare("prev");
-    pushToast("Filtreler sÄ±fÄ±rlandÄ±.");
+    pushToast("Filtreler sıfırlandı.");
   }, [pushToast]);
 
   const navigateSafe = useCallback(
     (href: string) => {
-      pushToast("YÃ¶nlendiriliyorâ€¦");
+      pushToast("Yönlendiriliyor…");
       router.push(href);
     },
     [pushToast, router]
@@ -239,10 +239,10 @@ export function ReportsPage() {
 
   const chips: { id: ReportCategoryChip | "all"; label: string }[] = [
     { id: "all", label: "Genel" },
-    { id: "satis", label: "SatÄ±ÅŸ" },
+    { id: "satis", label: "Satış" },
     { id: "tahsilat", label: "Tahsilat" },
     { id: "stok", label: "Stok" },
-    { id: "iade", label: "Ä°ade" },
+    { id: "iade", label: "İade" },
     { id: "whatsapp", label: "WhatsApp" },
     { id: "ai", label: "AI" }
   ];
@@ -254,50 +254,50 @@ export function ReportsPage() {
           <header className="hz-reports-topbar">
             <div className="hz-reports-topbar-text">
               <h1 className="hz-reports-topbar-title">Rapor Operasyon Merkezi</h1>
-              <p className="hz-reports-topbar-sub">Operasyonel metrikler, hedef karÅŸÄ±laÅŸtÄ±rma ve karar destek raporlarÄ±.</p>
+              <p className="hz-reports-topbar-sub">Operasyonel metrikler, hedef karşılaştırma ve karar destek raporları.</p>
             </div>
             <div className="hz-reports-topbar-actions">
               <button
                 type="button"
                 className="hz-reports-toolbar-btn hz-reports-toolbar-btn--primary"
                 disabled={!!actionLocks.create}
-                onClick={() => lockAction("create", "Demo: rapor oluÅŸturma kuyruÄŸa alÄ±ndÄ±.")}
+                onClick={() => lockAction("create", "Demo: rapor oluşturma kuyruğa alındı.")}
               >
                 <IconBarChart3 size={13} />
-                Rapor OluÅŸtur
+                Rapor Oluştur
               </button>
               <button
                 type="button"
                 className="hz-reports-toolbar-btn hz-reports-toolbar-btn--outline"
                 disabled={!!actionLocks.pdf}
-                onClick={() => lockAction("pdf", "Demo: PDF indirme hazÄ±rlanÄ±yor.")}
+                onClick={() => lockAction("pdf", "Demo: PDF indirme hazırlanıyor.")}
               >
                 <IconPrinter size={13} />
-                PDF Ä°ndir
+                PDF İndir
               </button>
               <button
                 type="button"
                 className="hz-reports-toolbar-btn hz-reports-toolbar-btn--outline"
                 disabled={!!actionLocks.xls}
-                onClick={() => lockAction("xls", "Demo: Excel dÄ±ÅŸa aktarma hazÄ±rlanÄ±yor.")}
+                onClick={() => lockAction("xls", "Demo: Excel dışa aktarma hazırlanıyor.")}
               >
                 <IconDownload size={13} />
-                Excel Ä°ndir
+                Excel İndir
               </button>
               <button
                 type="button"
                 className="hz-reports-toolbar-btn hz-reports-toolbar-btn--outline"
                 disabled={!!actionLocks.mail}
-                onClick={() => lockAction("mail", "Demo: e-posta kuyruÄŸa alÄ±ndÄ±.")}
+                onClick={() => lockAction("mail", "Demo: e-posta kuyruğa alındı.")}
               >
                 <IconMail size={13} />
-                E-posta GÃ¶nder
+                E-posta Gönder
               </button>
             </div>
           </header>
 
           <div className="hz-reports-desk-card">
-            <div className="hz-reports-type-tabs hz-reports-type-tabs--desk-head" role="tablist" aria-label="Rapor tipi kÄ±sayollarÄ±">
+            <div className="hz-reports-type-tabs hz-reports-type-tabs--desk-head" role="tablist" aria-label="Rapor tipi kısayolları">
               {chips.map((c) => (
                 <button
                   key={c.id === "all" ? "all-chip" : c.id}
@@ -319,23 +319,23 @@ export function ReportsPage() {
                   <div className="hz-reports-filter-row hz-reports-filter-row--single hz-reports-filter-row--desk">
                     <div className="hz-reports-filter-field hz-reports-filter-field--dates">
                       <span className="hz-reports-filter-label" id="hz-rep-dates-lbl">
-                        DÃ¶nem
+                        Dönem
                       </span>
                       <div className="hz-reports-filter-date-pair" role="group" aria-labelledby="hz-rep-dates-lbl">
                         <input
                           type="date"
                           className="hz-reports-filter-input hz-reports-filter-input--date"
-                          aria-label="BaÅŸlangÄ±Ã§"
+                          aria-label="Başlangıç"
                           value={dateFrom}
                           onChange={(e) => setDateFrom(e.target.value)}
                         />
                         <span className="hz-reports-filter-date-sep" aria-hidden>
-                          â€“
+                          –
                         </span>
                         <input
                           type="date"
                           className="hz-reports-filter-input hz-reports-filter-input--date"
-                          aria-label="BitiÅŸ"
+                          aria-label="Bitiş"
                           value={dateTo}
                           onChange={(e) => setDateTo(e.target.value)}
                         />
@@ -343,13 +343,13 @@ export function ReportsPage() {
                     </div>
                     <div className="hz-reports-filter-field hz-reports-filter-field--select">
                       <label className="hz-reports-filter-label" htmlFor="hz-rep-cmp">
-                        KarÅŸÄ±laÅŸtÄ±rma
+                        Karşılaştırma
                       </label>
                       <select id="hz-rep-cmp" className="hz-reports-filter-select" value={compare} onChange={(e) => setCompare(e.target.value)}>
-                        <option value="prev">Ã–nceki dÃ¶nem</option>
-                        <option value="last-month">GeÃ§en ay</option>
-                        <option value="last-year">GeÃ§en yÄ±l</option>
-                        <option value="target">Hedefe gÃ¶re</option>
+                        <option value="prev">Önceki dönem</option>
+                        <option value="last-month">Geçen ay</option>
+                        <option value="last-year">Geçen yıl</option>
+                        <option value="target">Hedefe göre</option>
                       </select>
                     </div>
                     <div className="hz-reports-filter-field hz-reports-filter-field--select">
@@ -357,7 +357,7 @@ export function ReportsPage() {
                         Segment
                       </label>
                       <select id="hz-rep-seg" className="hz-reports-filter-select" value={segment} onChange={(e) => setSegment(e.target.value)}>
-                        <option value="all">TÃ¼mÃ¼</option>
+                        <option value="all">Tümü</option>
                         <option value="bayi">Bayi</option>
                         <option value="kurumsal">Kurumsal</option>
                         <option value="perakende">Perakende</option>
@@ -377,23 +377,23 @@ export function ReportsPage() {
 
                 {REPORTS_USE_DEMO_DATA ? (
                   <div className="hz-reports-preview-band" role="status">
-                    Ã–nizleme modu: Ã¶rnek rapor metrikleri gÃ¶steriliyor.
+                    Önizleme modu: örnek rapor metrikleri gösteriliyor.
                     {usageSummary
-                      ? ` KiracÄ± kullanÄ±m API'si baÄŸlÄ±: ${usageSummary.totalEvents} olay, limit aÅŸÄ±mÄ± ${usageSummary.limitExceeded ? "var" : "yok"}.`
-                      : " KiracÄ± kullanÄ±m API sonucu yok veya oturum bekleniyor."}
+                      ? ` Kiracı kullanım API'si bağlı: ${usageSummary.totalEvents} olay, limit aşımı ${usageSummary.limitExceeded ? "var" : "yok"}.`
+                      : " Kiracı kullanım API sonucu yok veya oturum bekleniyor."}
                   </div>
                 ) : (
                   <div className="hz-reports-live-band" role="status">
                     <div>
-                      <strong>CanlÄ± rapor verisi bekleniyor</strong>
-                      <span>Metrik listesi API baÄŸlandÄ±ÄŸÄ±nda dolar; sahte KPI veya grafik Ã¼retilmez.</span>
+                      <strong>Canlı rapor verisi bekleniyor</strong>
+                      <span>Metrik listesi API bağlandığında dolar; sahte KPI veya grafik üretilmez.</span>
                     </div>
                   </div>
                 )}
               </>
             }
             kpis={
-              <section className="hz-reports-kpi-strip" aria-label="Ã–zet KPI">
+              <section className="hz-reports-kpi-strip" aria-label="Özet KPI">
                 <div className="hz-reports-kpi hz-reports-kpi--primary">
                   <span className="hz-reports-kpi-ico" aria-hidden>
                     <IconTrendingUp size={12} />
@@ -417,8 +417,8 @@ export function ReportsPage() {
                     <IconBanknote size={12} />
                   </span>
                   <span className="hz-reports-kpi-text">
-                    <span className="hz-reports-kpi-label">AÃ§Ä±k Bakiye</span>
-                    <ReportsKpiValue label="AÃ§Ä±k Bakiye" demoValue={KPI.acik} useDemo={REPORTS_USE_DEMO_DATA} />
+                    <span className="hz-reports-kpi-label">Açık Bakiye</span>
+                    <ReportsKpiValue label="Açık Bakiye" demoValue={KPI.acik} useDemo={REPORTS_USE_DEMO_DATA} />
                   </span>
                 </div>
                 <div className="hz-reports-kpi hz-reports-kpi--danger">
@@ -435,8 +435,8 @@ export function ReportsPage() {
                     <IconMessageSquare size={12} />
                   </span>
                   <span className="hz-reports-kpi-text">
-                    <span className="hz-reports-kpi-label">WhatsApp DÃ¶nÃ¼ÅŸÃ¼m</span>
-                    <ReportsKpiValue label="WhatsApp DÃ¶nÃ¼ÅŸÃ¼m" demoValue={KPI.waDonusum} useDemo={REPORTS_USE_DEMO_DATA} />
+                    <span className="hz-reports-kpi-label">WhatsApp Dönüşüm</span>
+                    <ReportsKpiValue label="WhatsApp Dönüşüm" demoValue={KPI.waDonusum} useDemo={REPORTS_USE_DEMO_DATA} />
                   </span>
                 </div>
                 <div className="hz-reports-kpi hz-reports-kpi--ai">
@@ -456,8 +456,8 @@ export function ReportsPage() {
                 <div className="hz-reports-list-header" role="row">
                   <div role="columnheader">Metrik / Rapor</div>
                   <div role="columnheader">Segment</div>
-                  <div role="columnheader">DÃ¶nem</div>
-                  <div role="columnheader">GerÃ§ekleÅŸen</div>
+                  <div role="columnheader">Dönem</div>
+                  <div role="columnheader">Gerçekleşen</div>
                   <div role="columnheader">Hedef</div>
                   <div role="columnheader">Fark</div>
                   <div role="columnheader">Aksiyon</div>
@@ -465,11 +465,11 @@ export function ReportsPage() {
                 <div className="hz-reports-list-body">
                   {!filtered.length ? (
                     <div className="hz-reports-empty" role="status">
-                      <p className="hz-reports-empty-title">{REPORTS_USE_DEMO_DATA ? "KayÄ±t yok" : "CanlÄ± veri bekleniyor"}</p>
+                      <p className="hz-reports-empty-title">{REPORTS_USE_DEMO_DATA ? "Kayıt yok" : "Canlı veri bekleniyor"}</p>
                       <p className="hz-reports-empty-text">
                         {REPORTS_USE_DEMO_DATA
-                          ? "Filtre veya rapor tipini deÄŸiÅŸtirin."
-                          : "Rapor metrikleri API Ã¼zerinden yÃ¼klendiÄŸinde liste burada gÃ¶rÃ¼nÃ¼r."}
+                          ? "Filtre veya rapor tipini değiştirin."
+                          : "Rapor metrikleri API üzerinden yüklendiğinde liste burada görünür."}
                       </p>
                     </div>
                   ) : (
@@ -513,7 +513,7 @@ export function ReportsPage() {
                             aria-label="Detay"
                             onClick={() => {
                               setSelectedId(row.id);
-                              pushToast("Metrik seÃ§ildi; detay saÄŸ panelde.");
+                              pushToast("Metrik seçildi; detay sağ panelde.");
                             }}
                           >
                             Detay
@@ -525,7 +525,7 @@ export function ReportsPage() {
                             aria-label="PDF indir"
                             disabled={!!rowPdfLocks[row.id]}
                             onClick={() => {
-                              pushToast("Demo: PDF indirme kuyruÄŸa alÄ±ndÄ±.");
+                              pushToast("Demo: PDF indirme kuyruğa alındı.");
                               setRowPdfLocks((s) => ({ ...s, [row.id]: true }));
                             }}
                           >
@@ -538,7 +538,7 @@ export function ReportsPage() {
                             aria-label="Excel indir"
                             disabled={!!rowXlsLocks[row.id]}
                             onClick={() => {
-                              pushToast("Demo: Excel indirme kuyruÄŸa alÄ±ndÄ±.");
+                              pushToast("Demo: Excel indirme kuyruğa alındı.");
                               setRowXlsLocks((s) => ({ ...s, [row.id]: true }));
                             }}
                           >
@@ -555,20 +555,20 @@ export function ReportsPage() {
           </div>
         </div>
 
-        <aside className="hz-reports-side" aria-label="Rapor baÄŸlamÄ±">
+        <aside className="hz-reports-side" aria-label="Rapor bağlamı">
           <div className="hz-reports-side-inner">
             <header className="hz-reports-side-head">
-              <h2 className="hz-reports-side-title">Rapor BaÄŸlamÄ±</h2>
-              <p className="hz-reports-side-sub">SeÃ§ili metriÄŸin hedef, risk ve aksiyon baÄŸlamÄ±.</p>
+              <h2 className="hz-reports-side-title">Rapor Bağlamı</h2>
+              <p className="hz-reports-side-sub">Seçili metriğin hedef, risk ve aksiyon bağlamı.</p>
             </header>
             {!selected ? (
               <div className="hz-reports-empty hz-reports-empty--side" role="status">
-                <p className="hz-reports-empty-title">Listeden bir metrik seÃ§in.</p>
+                <p className="hz-reports-empty-title">Listeden bir metrik seçin.</p>
               </div>
             ) : (
               <div className="hz-reports-side-stack">
                 <article className="hz-reports-side-card">
-                  <h3 className="hz-reports-side-card-title">Metrik Ã–zeti</h3>
+                  <h3 className="hz-reports-side-card-title">Metrik Özeti</h3>
                   <p className="hz-reports-side-strong">{selected.title}</p>
                   <dl className="hz-reports-dl">
                     <div>
@@ -580,7 +580,7 @@ export function ReportsPage() {
                       <dd>{selected.segment}</dd>
                     </div>
                     <div>
-                      <dt>DÃ¶nem</dt>
+                      <dt>Dönem</dt>
                       <dd>{selected.periodLabel}</dd>
                     </div>
                   </dl>
@@ -590,10 +590,10 @@ export function ReportsPage() {
                 </article>
 
                 <article className="hz-reports-side-card">
-                  <h3 className="hz-reports-side-card-title">Hedef KarÅŸÄ±laÅŸtÄ±rmasÄ±</h3>
+                  <h3 className="hz-reports-side-card-title">Hedef Karşılaştırması</h3>
                   <dl className="hz-reports-dl">
                     <div>
-                      <dt>GerÃ§ekleÅŸen</dt>
+                      <dt>Gerçekleşen</dt>
                       <dd>{selected.actualDisplay}</dd>
                     </div>
                     <div>
@@ -605,7 +605,7 @@ export function ReportsPage() {
                       <dd>{selected.diffDisplay}</dd>
                     </div>
                   </dl>
-                  <div className="hz-reports-target-progress" aria-label="Hedef gerÃ§ekleÅŸme">
+                  <div className="hz-reports-target-progress" aria-label="Hedef gerçekleşme">
                     <span style={{ width: selected.diffTone === "negative" ? "72%" : "112%" }} />
                   </div>
                   <p className="hz-reports-target-progress-label">{selected.trendLabel}</p>
@@ -616,7 +616,7 @@ export function ReportsPage() {
                   <div className="hz-reports-side-links">
                     <button type="button" className="hz-reports-link-btn" onClick={() => navigateSafe("/siparisler")}>
                       <IconShoppingCart size={14} />
-                      SatÄ±ÅŸ
+                      Satış
                     </button>
                     <button type="button" className="hz-reports-link-btn" onClick={() => navigateSafe("/tahsilatlar")}>
                       <IconWallet size={14} />
@@ -640,31 +640,31 @@ export function ReportsPage() {
                     </button>
                     <button type="button" className="hz-reports-link-btn" onClick={() => navigateSafe("/archive")}>
                       <IconArchive size={14} />
-                      ArÅŸiv
+                      Arşiv
                     </button>
                   </div>
                 </article>
 
                 <article className="hz-reports-side-card">
-                  <h3 className="hz-reports-side-card-title">Ã–nerilen Aksiyonlar</h3>
+                  <h3 className="hz-reports-side-card-title">Önerilen Aksiyonlar</h3>
                   <ul className="hz-reports-ai-checklist">
-                    <li>YÃ¼ksek aÃ§Ä±k bakiye mÃ¼ÅŸteri aramalarÄ±nÄ± hÄ±zlandÄ±rÄ±n.</li>
-                    <li>Kritik stok kalemleri iÃ§in tedarik planÄ± oluÅŸturun.</li>
-                    <li>WhatsApp dÃ¶nÃ¼ÅŸÃ¼m dÃ¼ÅŸÃ¼k segmente ÅŸablon gÃ¶nderin.</li>
-                    <li>AI tasarruf raporunu operasyon toplantÄ±sÄ±nda paylaÅŸÄ±n.</li>
+                    <li>Yüksek açık bakiye müşteri aramalarını hızlandırın.</li>
+                    <li>Kritik stok kalemleri için tedarik planı oluşturun.</li>
+                    <li>WhatsApp dönüşüm düşük segmente şablon gönderin.</li>
+                    <li>AI tasarruf raporunu operasyon toplantısında paylaşın.</li>
                   </ul>
                   <div className="hz-reports-side-actions">
-                    <button type="button" className="hz-reports-side-btn hz-reports-side-btn--primary hz-reports-side-btn--plan" onClick={() => pushToast("Demo: aksiyon planÄ± taslaÄŸÄ± oluÅŸturuldu.")}>
-                      Aksiyon PlanÄ± OluÅŸtur
+                    <button type="button" className="hz-reports-side-btn hz-reports-side-btn--primary hz-reports-side-btn--plan" onClick={() => pushToast("Demo: aksiyon planı taslağı oluşturuldu.")}>
+                      Aksiyon Planı Oluştur
                     </button>
-                    <button type="button" className="hz-reports-side-btn" onClick={() => pushToast("Demo: detay gÃ¶rÃ¼nÃ¼mÃ¼.")}>
-                      Detay aÃ§
+                    <button type="button" className="hz-reports-side-btn" onClick={() => pushToast("Demo: detay görünümü.")}>
+                      Detay aç
                     </button>
                     <button
                       type="button"
                       className="hz-reports-side-btn"
                       disabled={!!actionLocks.sidePdf}
-                      onClick={() => lockAction("sidePdf", "Demo: PDF indirme kuyruÄŸa alÄ±ndÄ±.")}
+                      onClick={() => lockAction("sidePdf", "Demo: PDF indirme kuyruğa alındı.")}
                     >
                       <IconPrinter size={14} />
                       PDF indir
@@ -673,7 +673,7 @@ export function ReportsPage() {
                       type="button"
                       className="hz-reports-side-btn"
                       disabled={!!actionLocks.sideXls}
-                      onClick={() => lockAction("sideXls", "Demo: Excel indirme kuyruÄŸa alÄ±ndÄ±.")}
+                      onClick={() => lockAction("sideXls", "Demo: Excel indirme kuyruğa alındı.")}
                     >
                       <IconDownload size={14} />
                       Excel indir
@@ -682,14 +682,14 @@ export function ReportsPage() {
                       type="button"
                       className="hz-reports-side-btn"
                       disabled={!!actionLocks.sideMail}
-                      onClick={() => lockAction("sideMail", "Demo: e-posta kuyruÄŸa alÄ±ndÄ±.")}
+                      onClick={() => lockAction("sideMail", "Demo: e-posta kuyruğa alındı.")}
                     >
                       <IconMail size={14} />
-                      E-posta gÃ¶nder
+                      E-posta gönder
                     </button>
                     <button type="button" className="hz-reports-side-btn" onClick={() => navigateSafe("/cariler")}>
                       <IconExternalLink size={14} />
-                      Ä°lgili kayda git
+                      İlgili kayda git
                     </button>
                   </div>
                 </article>
@@ -697,17 +697,17 @@ export function ReportsPage() {
                 <article className="hz-reports-side-card hz-reports-risk-note">
                   <h3 className="hz-reports-side-card-title">
                     <IconSparkles size={14} />
-                    Risk / FÄ±rsat Notu
+                    Risk / Fırsat Notu
                   </h3>
-                  <p>Bu metrik karar destek amaÃ§lÄ± Ã¶zetlenir.</p>
-                  <p>AI raporu deÄŸiÅŸtirmez; yalnÄ±zca risk ve fÄ±rsat notu Ã¼retir.</p>
+                  <p>Bu metrik karar destek amaçlı özetlenir.</p>
+                  <p>AI raporu değiştirmez; yalnızca risk ve fırsat notu üretir.</p>
                 </article>
 
                 <article className="hz-reports-side-card">
-                  <h3 className="hz-reports-side-card-title">Son GÃ¼ncelleme</h3>
+                  <h3 className="hz-reports-side-card-title">Son Güncelleme</h3>
                   <dl className="hz-reports-dl">
                     <div>
-                      <dt>OluÅŸturan</dt>
+                      <dt>Oluşturan</dt>
                       <dd>{selected.updatedBy}</dd>
                     </div>
                     <div>
@@ -736,4 +736,5 @@ export function ReportsPage() {
     </div>
   );
 }
+
 

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useState } from "react";
@@ -317,7 +317,7 @@ export function GorevlerOperasyonPage() {
           <article className="gom-attach">
             <h4>Ek Dosyalar</h4>
             <div className="gom-attach-row">
-              <span aria-hidden>📎</span>
+              <span aria-hidden>g��?</span>
               <div>
                 <strong>{context.attachment.name}</strong>
                 <span>{context.attachment.size}</span>
@@ -341,3 +341,4 @@ export function GorevlerOperasyonPage() {
     </div>
   );
 }
+

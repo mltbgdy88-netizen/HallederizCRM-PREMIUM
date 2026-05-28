@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import type { Customer, Delivery, DeliveryStatus } from "@hallederiz/types";
 import { getDeliveries } from "../../deliveries/queries/get-deliveries";
 import { buildTableMeta } from "../../../lib/reference/formatters";
@@ -220,3 +220,4 @@ export async function loadTeslimatlarRotaReferenceLive(): Promise<TeslimatlarRot
 }
 
 export const TESLIMATLAR_ROTA_REFERENCE_INITIAL = loadTeslimatlarRotaReferenceDemo();
+

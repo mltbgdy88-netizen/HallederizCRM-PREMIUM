@@ -1,4 +1,4 @@
-import type { Customer, Offer } from "@hallederiz/types";
+﻿import type { Customer, Offer } from "@hallederiz/types";
 
 function money(amount: number, currency: string): string {
   return `${amount.toLocaleString("tr-TR", { maximumFractionDigits: 2 })} ${currency}`;
@@ -20,3 +20,4 @@ export function OfferTotalsPanel({ offer, customer }: { offer: Offer; customer: 
     </section>
   );
 }
+

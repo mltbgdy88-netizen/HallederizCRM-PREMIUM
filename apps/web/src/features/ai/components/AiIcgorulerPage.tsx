@@ -5,7 +5,7 @@ import type { AicInsightRow } from "@/features/ai/data/ai-icgoruler-mock";
 import { useAiIcgorulerReferenceData } from "@/features/ai/hooks/use-ai-icgoruler-reference-data";
 
 function priorityClass(p: AicInsightRow["priority"]): string {
-  if (p === "YÃ¼ksek") return "aic-pri aic-pri--high";
+  if (p === "Yüksek") return "aic-pri aic-pri--high";
   if (p === "Orta") return "aic-pri aic-pri--mid";
   return "aic-pri aic-pri--low";
 }
@@ -29,7 +29,7 @@ export function AiIcgorulerPage() {
         <p>{AIC_PAGE.subtitle}</p>
       </header>
 
-      <section className="aic-kpis" aria-label="Ã–zet">
+      <section className="aic-kpis" aria-label="Özet">
         {AIC_KPIS.map((kpi) =>
           kpi.tone === "chart" ? (
             <article key={kpi.id} className="aic-kpi aic-kpi--chart">
@@ -63,7 +63,7 @@ export function AiIcgorulerPage() {
               </button>
             ))}
             <button type="button" className="aic-priority-filter">
-              Ã–ncelik: YÃ¼ksek
+              Öncelik: Yüksek
             </button>
           </div>
 
@@ -91,9 +91,9 @@ export function AiIcgorulerPage() {
 
         <aside className="aic-detail">
           <header>
-            <h2>SeÃ§ili Ä°Ã§gÃ¶rÃ¼ DetayÄ±</h2>
+            <h2>Seçili İçgörü Detayı</h2>
             <button type="button" aria-label="Kapat">
-              Ã—
+              ×
             </button>
           </header>
           <div className="aic-detail-body">
@@ -101,7 +101,7 @@ export function AiIcgorulerPage() {
             <h3>{AIC_DETAIL.title}</h3>
             <time>{AIC_DETAIL.date}</time>
             <div className="aic-suggestion">
-              <strong>Ã–neri</strong>
+              <strong>Öneri</strong>
               <p>{AIC_DETAIL.suggestion}</p>
             </div>
             <ul>
@@ -115,4 +115,5 @@ export function AiIcgorulerPage() {
     </div>
   );
 }
+
 

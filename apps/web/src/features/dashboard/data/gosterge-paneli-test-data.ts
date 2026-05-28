@@ -1,5 +1,5 @@
 ﻿// @ts-nocheck
-/** /gosterge-paneli-test â€” demo veri (ASCII kaynak, \\u ka\u00e7\u0131\u015fl\u0131 metinler). */
+/** /gosterge-paneli-test — demo veri (ASCII kaynak, \\u ka\u00e7\u0131\u015fl\u0131 metinler). */
 import type { DashboardGostergeReferenceSnapshot } from "../adapters/dashboard-gosterge-reference-adapter";
 import type { WopConversation } from "@/features/whatsapp/data/whatsapp-operasyon-mock";
 import { DGP_ALERTS_VIEW_ALL_HREF } from "./dashboard-gosterge-paneli-mock";
@@ -271,4 +271,5 @@ export const GOSTERGE_PANELI_TEST_PAGINATION = {
   total: "120 konu\u015fma",
   page: 1
 };
+
 

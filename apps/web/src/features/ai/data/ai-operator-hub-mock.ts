@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const AOH_PAGE = {
   title: "Yapay Zeka",
   subtitle: "Sistemin ikinci beyni — önerileri inceleyin, içgörü alın, onay bekleyen planları yönetin."
@@ -116,3 +116,4 @@ export const AOH_FOOTER = {
     "Güvenli ve Yerel Öncelikli — Tüm AI önerileri öncelikle cihazınızda işlenir. Verileriniz size aittir ve kontrol sizdedir.",
   status: "Sistem Durumu — Tüm Sistemler Çevrimiçi"
 };
+

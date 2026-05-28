@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type DfdLine = {
   id: string;
   index: number;
@@ -31,7 +31,7 @@ export const DFD_META = [
   { label: "İşlem Türü", value: "Depodan Çıkış" },
   { label: "Kaynak", value: "Satış Siparişi" },
   { label: "İlgili Belge", value: "SS-5689" },
-  { label: "Açıklama", value: "Blue Com Bilgi İşlem A.Ş. sevkiyatı" }
+  { label: "Açıklama", value: "Blue Com Bilgi İşlem A.�?. sevkiyatı" }
 ];
 
 export const DFD_LINES: DfdLine[] = [
@@ -146,7 +146,7 @@ export const DFD_HISTORY = [
 ];
 
 export const DFD_NOTES =
-  "Blue Com Bilgi İşlem A.Ş. sevkiyatı için hazırlanan çıkış fişi. Tüm satırlar toplandı ve onaylandı.";
+  "Blue Com Bilgi İşlem A.�?. sevkiyatı için hazırlanan çıkış fişi. Tüm satırlar toplandı ve onaylandı.";
 
 export const DFD_CONTEXT = {
   title: "Depo Bağlamı",
@@ -167,3 +167,4 @@ export const DFD_CONTEXT = {
   quickActions: ["Transfer Talebi Oluştur", "İade Fişi Oluştur", "Etiket Yazdır"],
   barcodeActions: ["Toplama Barkodu", "Raf Barkodu"]
 };
+

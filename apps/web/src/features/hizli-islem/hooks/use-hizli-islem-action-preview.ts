@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useState } from "react";
 import type { QuickOperationPreviewResponse } from "@hallederiz/types";
@@ -66,3 +66,4 @@ export function useHizliIslemActionPreview() {
     clearPreview
   };
 }
+

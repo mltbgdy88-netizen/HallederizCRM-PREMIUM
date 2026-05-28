@@ -23,11 +23,11 @@ export function OfferTable({
               <th>Teklif No</th>
               <th>Cari</th>
               <th>Tarih</th>
-              <th>GeÃ§erlilik</th>
+              <th>Geçerlilik</th>
               <th>Durum</th>
               <th>Tutar</th>
               <th>Takip</th>
-              <th>DÃ¶nÃ¼ÅŸÃ¼m</th>
+              <th>Dönüşüm</th>
               <th>Aksiyon</th>
             </tr>
           </thead>
@@ -56,9 +56,9 @@ export function OfferTable({
                     <LucideIcon name="file-text" size={13} />
                     <span>Revize</span>
                   </Link>
-                  <Link href={`/teklifler/${row.offerId}/siparise-donusturme`} className="hz-offers-row-action" title="SipariÅŸe DÃ¶nÃ¼ÅŸtÃ¼r">
+                  <Link href={`/teklifler/${row.offerId}/siparise-donusturme`} className="hz-offers-row-action" title="Siparişe Dönüştür">
                     <LucideIcon name="shopping-cart" size={13} />
-                    <span>SipariÅŸe DÃ¶nÃ¼ÅŸtÃ¼r</span>
+                    <span>Siparişe Dönüştür</span>
                   </Link>
                 </td>
               </tr>
@@ -66,7 +66,7 @@ export function OfferTable({
 
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={9}><div className="table-empty">Filtrelere uygun teklif bulunamadÄ±.</div></td>
+                <td colSpan={9}><div className="table-empty">Filtrelere uygun teklif bulunamadı.</div></td>
               </tr>
             ) : null}
           </tbody>
@@ -75,4 +75,5 @@ export function OfferTable({
     </section>
   );
 }
+
 

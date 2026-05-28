@@ -129,8 +129,8 @@ export function DashboardGostergePaneliPage() {
 
   const previewMessage =
     demoBanner ??
-    (isDemo ? "Demo gÃ¶sterge verisi â€” canlÄ± mod iÃ§in NEXT_PUBLIC_USE_DEMO_DATA=false" : null) ??
-    (loadFailed ? "CanlÄ± veri yÃ¼klenemedi; Ã¶nizleme verisi gÃ¶steriliyor" : null);
+    (isDemo ? "Demo gösterge verisi — canlı mod için NEXT_PUBLIC_USE_DEMO_DATA=false" : null) ??
+    (loadFailed ? "Canlı veri yüklenemedi; önizleme verisi gösteriliyor" : null);
 
   return (
     <div className="dgp-home">
@@ -141,11 +141,11 @@ export function DashboardGostergePaneliPage() {
       ) : null}
 
       <header className="dgp-head">
-        <h1>GÃ¶sterge Paneli</h1>
-        <p>Ä°ÅŸ sÃ¼reÃ§lerinizi anlÄ±k olarak takip edin ve hÄ±zlÄ±ca aksiyon alÄ±n.</p>
+        <h1>Gösterge Paneli</h1>
+        <p>İş süreçlerinizi anlık olarak takip edin ve hızlıca aksiyon alın.</p>
       </header>
 
-      <section className="dgp-kpi-row" aria-label="Ã–zet gÃ¶stergeler">
+      <section className="dgp-kpi-row" aria-label="Özet göstergeler">
         {kpis.map((kpi) => (
           <article key={kpi.id} className={`dgp-kpi-card dgp-kpi-card--${kpi.tone}`}>
             <div className={`dgp-kpi-icon dgp-kpi-icon--${kpi.tone}`}>
@@ -157,7 +157,7 @@ export function DashboardGostergePaneliPage() {
               {kpi.trend ? (
                 <>
                   <span className={`dgp-kpi-trend${trendClass(kpi.trendTone)}`}>{kpi.trend}</span>
-                  <span className="dgp-kpi-compare">GeÃ§en aya gÃ¶re</span>
+                  <span className="dgp-kpi-compare">Geçen aya göre</span>
                 </>
               ) : null}
             </div>
@@ -168,11 +168,11 @@ export function DashboardGostergePaneliPage() {
         ))}
       </section>
 
-      <section className="dgp-grid" aria-label="Panel iÃ§eriÄŸi">
+      <section className="dgp-grid" aria-label="Panel içeriği">
         <div className="dgp-col dgp-col--left">
           <article className="dgp-panel dgp-panel--quick">
             <header className="dgp-panel-head">
-              <h2>HÄ±zlÄ± Ä°ÅŸlemler</h2>
+              <h2>Hızlı İşlemler</h2>
             </header>
             <div className="dgp-quick-actions">
               {quickActions.map((action) => (
@@ -190,7 +190,7 @@ export function DashboardGostergePaneliPage() {
             <header className="dgp-panel-head">
               <h2>Son Stok Hareketleri</h2>
               <button type="button" className="dgp-panel-link">
-                TÃ¼mÃ¼nÃ¼ GÃ¶r
+                Tümünü Gör
                 <IconArrowRight className="dgp-panel-link-icon" />
               </button>
             </header>
@@ -199,11 +199,11 @@ export function DashboardGostergePaneliPage() {
                 <thead>
                   <tr>
                     <th>Tarih</th>
-                    <th>ÃœrÃ¼n</th>
+                    <th>Ürün</th>
                     <th>Hareket Tipi</th>
                     <th>Miktar</th>
                     <th>Depo</th>
-                    <th>KullanÄ±cÄ±</th>
+                    <th>Kullanıcı</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -212,13 +212,13 @@ export function DashboardGostergePaneliPage() {
                       <td>{row.date}</td>
                       <td className="dgp-table-product">{row.product}</td>
                       <td>
-                        <span className={`dgp-badge dgp-badge--${row.type === "GiriÅŸ" ? "in" : "out"}`}>
+                        <span className={`dgp-badge dgp-badge--${row.type === "Giriş" ? "in" : "out"}`}>
                           {row.type}
                         </span>
                       </td>
                       <td
                         className={
-                          row.qty.startsWith("+") || row.type === "GiriÅŸ"
+                          row.qty.startsWith("+") || row.type === "Giriş"
                             ? "dgp-qty--in"
                             : "dgp-qty--out"
                         }
@@ -238,9 +238,9 @@ export function DashboardGostergePaneliPage() {
         <div className="dgp-col dgp-col--mid">
           <article className="dgp-panel dgp-panel--alerts">
             <header className="dgp-panel-head">
-              <h2>Kritik UyarÄ±lar</h2>
+              <h2>Kritik Uyarılar</h2>
               <button type="button" className="dgp-panel-link">
-                TÃ¼mÃ¼nÃ¼ GÃ¶r
+                Tümünü Gör
                 <IconArrowRight className="dgp-panel-link-icon" />
               </button>
             </header>
@@ -258,7 +258,7 @@ export function DashboardGostergePaneliPage() {
 
           <article className="dgp-panel dgp-panel--summary">
             <header className="dgp-panel-head">
-              <h2>Stok Ã–zeti</h2>
+              <h2>Stok Özeti</h2>
             </header>
             <ul className="dgp-summary-list">
               {summary.map((row) => (
@@ -272,7 +272,7 @@ export function DashboardGostergePaneliPage() {
 
           <article className="dgp-panel dgp-panel--donut">
             <header className="dgp-panel-head">
-              <h2>Depo DaÄŸÄ±lÄ±mÄ±</h2>
+              <h2>Depo Dağılımı</h2>
             </header>
             <div className="dgp-donut-wrap">
               <div className="dgp-donut" style={{ background: donutGradient(donut) }}>
@@ -316,10 +316,10 @@ export function DashboardGostergePaneliPage() {
               </div>
               <span>03:15</span>
               <span className="dgp-ai-vol" aria-hidden>
-                â™ª
+                ♪
               </span>
               <span className="dgp-ai-fs" aria-hidden>
-                â›¶
+                ⛶
               </span>
             </div>
           </div>
@@ -327,12 +327,12 @@ export function DashboardGostergePaneliPage() {
           <p className="dgp-ai-greeting">{aiGreeting}</p>
 
           <div className="dgp-ai-highlights">
-            <h3>Ã–ne Ã‡Ä±kanlar</h3>
+            <h3>Öne Çıkanlar</h3>
             <ul>
               {aiHighlights.map((item) => (
                 <li key={item}>
                   <span className="dgp-ai-check" aria-hidden>
-                    âœ“
+                    ✓
                   </span>
                   {item}
                 </li>
@@ -342,11 +342,12 @@ export function DashboardGostergePaneliPage() {
 
           <button type="button" className="dgp-ai-cta">
             <IconSparkle className="dgp-ai-cta-icon" />
-            Yeni Analiz OluÅŸtur
+            Yeni Analiz Oluştur
           </button>
         </article>
       </section>
     </div>
   );
 }
+
 

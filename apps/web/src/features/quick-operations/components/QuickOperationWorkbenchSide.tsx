@@ -34,7 +34,7 @@ export function QuickOperationWorkbenchSide({
     <aside className="hz-qop-wb-side" aria-label="Operasyon etkisi">
       <div className="hz-qop-wb-side-scroll">
         <section className="hz-qop-wb-block">
-          <h3 className="hz-qop-wb-block-h">Toplam Ã–zeti</h3>
+          <h3 className="hz-qop-wb-block-h">Toplam Özeti</h3>
           {selectedCustomer.financeLinked === false && !dataSourceConfig.useDemoData ? (
             <p className="hz-qop-wb-muted">{MSG_FINANCE_NOT_LINKED}</p>
           ) : null}
@@ -55,10 +55,10 @@ export function QuickOperationWorkbenchSide({
           <h3 className="hz-qop-wb-block-h">Belge &amp; Kanal</h3>
           <div className="hz-qop-wb-document-actions">
             <button type="button" className="hz-qop-wb-doc-btn" disabled={!pdfReady}>
-              Belge Ã–nizle
+              Belge Önizle
             </button>
             <button type="button" className="hz-qop-wb-doc-btn" disabled={!waReady}>
-              WhatsApp ile GÃ¶nder
+              WhatsApp ile Gönder
             </button>
           </div>
         </section>
@@ -66,4 +66,5 @@ export function QuickOperationWorkbenchSide({
     </aside>
   );
 }
+
 

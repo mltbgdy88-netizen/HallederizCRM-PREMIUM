@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { IconArrowRight } from "@/components/reference/icons";
 import type { SiparisYeniCard } from "@/features/siparisler/data/siparisler-yeni-hub-mock";
@@ -93,3 +93,4 @@ export function SiparislerYeniHubPage() {
     </div>
   );
 }
+

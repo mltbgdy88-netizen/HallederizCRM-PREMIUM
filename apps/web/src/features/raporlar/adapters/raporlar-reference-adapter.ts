@@ -1,4 +1,4 @@
-import { REPORTS_DEMO_METRICS } from "../../reports/data/reports-demo-data";
+﻿import { REPORTS_DEMO_METRICS } from "../../reports/data/reports-demo-data";
 import type { ReportCategoryChip, ReportDiffTone, ReportMetricRow } from "../../reports/types";
 import { REFERENCE_DEMO_BANNER } from "../../../lib/reference/constants";
 import { formatTrDateTime } from "../../../lib/reference/formatters";
@@ -226,3 +226,4 @@ export async function loadRaporlarReferenceLive(): Promise<RaporlarReferenceSnap
   // Canlı rapor API henüz yok; PREMIUM demo metrikleri referans şablona bağlanır.
   return buildSnapshot(REPORTS_DEMO_METRICS, REFERENCE_DEMO_BANNER);
 }
+

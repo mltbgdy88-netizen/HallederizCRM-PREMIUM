@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const ODK_BREADCRUMB = "Onaylar > Onay Detayı";
 export const ODK_TITLE = "Onay Karar Masası";
 export const ODK_APPROVAL_NO = "ONY-2025-000124";
@@ -63,3 +63,4 @@ export const ODK_HISTORY = [
   { id: "2", actor: "Ali Yılmaz", action: "Düzenlendi", time: "14:45" },
   { id: "3", actor: "Yusuf Kaya", action: "Onaya gönderildi", time: "15:02" }
 ];
+

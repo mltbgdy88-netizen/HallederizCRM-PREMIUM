@@ -41,10 +41,10 @@ export function OrdersDeskList({
   onSelectOrder
 }: OrdersDeskListProps) {
   return (
-    <section className="hz-orders-card hz-orders-list" aria-label="SipariÅŸ listesi">
+    <section className="hz-orders-card hz-orders-list" aria-label="Sipariş listesi">
       <header className="hz-orders-card__head">
-        <h2 className="hz-orders-card__title">SipariÅŸ Listesi</h2>
-        <span className="hz-orders-card__meta">{totalCount} kayÄ±t</span>
+        <h2 className="hz-orders-card__title">Sipariş Listesi</h2>
+        <span className="hz-orders-card__meta">{totalCount} kayıt</span>
       </header>
 
       <div className="hz-orders-toolbar" role="toolbar" aria-label="Liste filtreleri">
@@ -53,10 +53,10 @@ export function OrdersDeskList({
           <input
             type="search"
             className="hz-orders-search"
-            placeholder="SipariÅŸ no veya cari ara..."
+            placeholder="Sipariş no veya cari ara..."
             value={searchQuery}
             onChange={(event) => onSearchChange(event.target.value)}
-            aria-label="SipariÅŸ ara"
+            aria-label="Sipariş ara"
           />
         </label>
         <div className="hz-orders-toolbar__chips">
@@ -75,8 +75,8 @@ export function OrdersDeskList({
           type="button"
           className="hz-orders-toolbar__clear"
           onClick={onResetFilters}
-          title="Filtreleri sÄ±fÄ±rla"
-          aria-label="Filtreleri sÄ±fÄ±rla"
+          title="Filtreleri sıfırla"
+          aria-label="Filtreleri sıfırla"
         >
           <LucideIcon name="x" size={13} />
         </button>
@@ -84,17 +84,17 @@ export function OrdersDeskList({
 
       <div className="hz-orders-table-wrap">
         {loading ? (
-          <p className="hz-orders-list__loading">SipariÅŸler yÃ¼kleniyorâ€¦</p>
+          <p className="hz-orders-list__loading">Siparişler yükleniyor…</p>
         ) : (
           <table className="hz-orders-table">
             <thead>
               <tr>
-                <th>SipariÅŸ No</th>
+                <th>Sipariş No</th>
                 <th>Cari</th>
                 <th>Tarih</th>
                 <th>Durum</th>
                 <th>Tutar</th>
-                <th>Ã–deme</th>
+                <th>Ödeme</th>
                 <th>Teslimat</th>
                 <th>Fatura</th>
                 <th>Aksiyon</th>
@@ -133,7 +133,7 @@ export function OrdersDeskList({
                     </Link>
                     <Link href={`/hizli-islem?order=${encodeURIComponent(row.orderId)}`} className="hz-orders-link-action">
                       <LucideIcon name="zap" size={13} />
-                      HÄ±zlÄ± Ä°ÅŸlem
+                      Hızlı İşlem
                     </Link>
                     <Link href={`/belgeler?order=${encodeURIComponent(row.orderId)}`} className="hz-orders-link-action">
                       <LucideIcon name="file-text" size={13} />
@@ -145,7 +145,7 @@ export function OrdersDeskList({
               {rows.length === 0 ? (
                 <tr>
                   <td colSpan={9}>
-                    <p className="hz-orders-list__empty">Filtreye uygun sipariÅŸ bulunamadÄ±.</p>
+                    <p className="hz-orders-list__empty">Filtreye uygun sipariş bulunamadı.</p>
                   </td>
                 </tr>
               ) : null}
@@ -156,10 +156,11 @@ export function OrdersDeskList({
 
       {!loading && totalCount > 0 ? (
         <footer className="hz-orders-list__footer" aria-live="polite">
-          Toplam {totalCount} kayÄ±ttan 1â€“{totalCount} arasÄ± gÃ¶steriliyor
+          Toplam {totalCount} kayıttan 1–{totalCount} arası gösteriliyor
         </footer>
       ) : null}
     </section>
   );
 }
+
 

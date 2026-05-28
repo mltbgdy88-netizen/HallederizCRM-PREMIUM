@@ -1,4 +1,4 @@
-/* Teklifler katman — 01-teklifler/katmanlar/* */
+﻿/* Teklifler katman — 01-teklifler/katmanlar/* */
 
 .tkm-home {
   --tkm-gap: clamp(6px, 0.75vh, 9px);
@@ -1538,3 +1538,4 @@
   line-height: 1.35;
   text-align: center;
 }
+

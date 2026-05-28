@@ -1,4 +1,4 @@
-import type { Customer, SaleOrder } from "@hallederiz/types";
+﻿import type { Customer, SaleOrder } from "@hallederiz/types";
 import { money } from "../utils";
 import { getOrderStatusLabel } from "../queries/order-mock-data";
 
@@ -19,3 +19,4 @@ export function OrderHeaderInfo({ order, customer }: { order: SaleOrder; custome
     </section>
   );
 }
+

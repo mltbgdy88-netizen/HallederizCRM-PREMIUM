@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import test from "node:test";
 import {
   MSG_WA_CHANNEL_WAITING,
@@ -41,3 +41,4 @@ test("mapWhatsAppChannelHealthView falls back when health missing", () => {
   assert.equal(view.statusLine, MSG_WA_LIVE_WAITING);
   assert.equal(view.note, MSG_WA_CHANNEL_WAITING);
 });
+

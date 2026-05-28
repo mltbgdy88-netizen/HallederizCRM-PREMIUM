@@ -1,4 +1,4 @@
-/* Cari Detay — cariler-detay-masasi-acik-mod.png */
+﻿/* Cari Detay — cariler-detay-masasi-acik-mod.png */
 
 .cdm-home {
   --cdm-gap: clamp(6px, 0.7vh, 8px);
@@ -570,3 +570,4 @@
 .cdm-panel--commercial .cdm-fields {
   overflow: auto;
 }
+

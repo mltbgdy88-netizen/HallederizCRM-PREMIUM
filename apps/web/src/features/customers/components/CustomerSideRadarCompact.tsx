@@ -44,22 +44,22 @@ export type CustomerSideRadarView = {
 export function CustomerSideRadarCompact({ view }: { view: CustomerSideRadarView }) {
   if (view.mode === "empty") {
     return (
-      <div className="hz-customers-side-radar" aria-label="Cari radarÄ±">
+      <div className="hz-customers-side-radar" aria-label="Cari radarı">
         <header className="hz-customers-side-radar-head">
-          <h2 className="hz-customers-side-radar-title">Cari RadarÄ±</h2>
+          <h2 className="hz-customers-side-radar-title">Cari Radarı</h2>
         </header>
         <div className="hz-customers-side-radar-body hz-customers-side-radar-body--empty">
-          <p className="hz-customers-side-radar-empty-title">Listeden bir cari seÃ§in</p>
-          <p className="hz-customers-side-radar-empty-lead">Ã–zet, soldaki listeden satÄ±r seÃ§ildiÄŸinde gÃ¶rÃ¼nÃ¼r.</p>
+          <p className="hz-customers-side-radar-empty-title">Listeden bir cari seçin</p>
+          <p className="hz-customers-side-radar-empty-lead">Özet, soldaki listeden satır seçildiğinde görünür.</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="hz-customers-side-radar" aria-label="Cari radarÄ±">
+    <div className="hz-customers-side-radar" aria-label="Cari radarı">
       <header className="hz-customers-side-radar-head">
-        <h2 className="hz-customers-side-radar-title">Cari RadarÄ±</h2>
+        <h2 className="hz-customers-side-radar-title">Cari Radarı</h2>
         {view.statusLabel ? (
           <span className={`hz-customers-side-radar-status hz-customers-side-radar-status--${view.statusTone ?? "ok"}`}>
             {view.statusLabel}
@@ -175,42 +175,42 @@ export function buildDemoSideActions(
       icon: <IconExternalLink size={14} />,
       primary: true,
       disabled: Boolean(demoDone.open),
-      onClick: () => fireDemo("open", "Ã–nizleme kaydÄ±: cari detayÄ± aÃ§Ä±lmaz.")
+      onClick: () => fireDemo("open", "Önizleme kaydı: cari detayı açılmaz.")
     },
     {
       id: "offer",
       label: "Teklif",
       icon: <IconTag size={14} />,
       disabled: Boolean(demoDone.offer),
-      onClick: () => fireDemo("offer", "Ã–nizleme kaydÄ±: teklif oluÅŸturulmaz.")
+      onClick: () => fireDemo("offer", "Önizleme kaydı: teklif oluşturulmaz.")
     },
     {
       id: "order",
-      label: "SipariÅŸ",
+      label: "Sipariş",
       icon: <QuickActionIcon kind="order" size={14} />,
       disabled: Boolean(demoDone.order),
-      onClick: () => fireDemo("order", "Ã–nizleme kaydÄ±: sipariÅŸ oluÅŸturulmaz.")
+      onClick: () => fireDemo("order", "Önizleme kaydı: sipariş oluşturulmaz.")
     },
     {
       id: "pay",
       label: "Tahsilat",
       icon: <QuickActionIcon kind="pay" size={14} />,
       disabled: Boolean(demoDone.pay),
-      onClick: () => fireDemo("pay", "Ã–nizleme kaydÄ±: tahsilat kaydÄ± oluÅŸturulmaz.")
+      onClick: () => fireDemo("pay", "Önizleme kaydı: tahsilat kaydı oluşturulmaz.")
     },
     {
       id: "stmt",
       label: "Ekstre",
       icon: <IconSend size={14} />,
       disabled: Boolean(demoDone.stmt),
-      onClick: () => fireDemo("stmt", "Ã–nizleme kaydÄ±: ekstre taslaÄŸÄ± oluÅŸturulmaz.")
+      onClick: () => fireDemo("stmt", "Önizleme kaydı: ekstre taslağı oluşturulmaz.")
     },
     {
       id: "wa",
       label: "WhatsApp",
       icon: <IconMessageCircle size={14} />,
       disabled: Boolean(demoDone.wa),
-      onClick: () => fireDemo("wa", "Ã–nizleme kaydÄ±: WhatsApp geÃ§miÅŸi aÃ§Ä±lmaz.")
+      onClick: () => fireDemo("wa", "Önizleme kaydı: WhatsApp geçmişi açılmaz.")
     }
   ];
 }
@@ -232,7 +232,7 @@ export function buildLiveSideActions(router: ReturnType<typeof useRouter>, custo
     },
     {
       id: "order",
-      label: "SipariÅŸ",
+      label: "Sipariş",
       icon: <QuickActionIcon kind="order" size={14} />,
       onClick: () => router.push(`/siparisler/yeni?customer=${customerId}`)
     },
@@ -256,4 +256,5 @@ export function buildLiveSideActions(router: ReturnType<typeof useRouter>, custo
     }
   ];
 }
+
 

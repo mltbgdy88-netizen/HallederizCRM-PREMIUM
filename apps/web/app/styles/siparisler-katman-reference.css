@@ -1,4 +1,4 @@
-/* Siparişler katman — 02-siparisler/katmanlar/* */
+﻿/* Siparişler katman — 02-siparisler/katmanlar/* */
 
 .skm-home {
   --skm-gap: clamp(6px, 0.75vh, 9px);
@@ -1317,3 +1317,4 @@
   color: #dc2626;
   border-color: #fecaca;
 }
+

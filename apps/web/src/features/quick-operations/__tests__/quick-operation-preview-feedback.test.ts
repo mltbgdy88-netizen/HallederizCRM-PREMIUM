@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import test from "node:test";
 import {
   mapPreviewActionError,
@@ -37,3 +37,4 @@ test("invalid line validation", () => {
   assert.ok(issues.some((issue) => issue.code === "customer_required"));
   assert.ok(issues.some((issue) => issue.code === "quantity_invalid"));
 });
+

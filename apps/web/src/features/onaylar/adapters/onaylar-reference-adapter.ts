@@ -1,4 +1,4 @@
-import type { Approval } from "@hallederiz/types";
+﻿import type { Approval } from "@hallederiz/types";
 import { listApprovalsQuery } from "../../approvals/queries/index";
 import { formatTrDateTime } from "../../../lib/reference/formatters";
 import {
@@ -122,3 +122,4 @@ export async function loadOnaylarReferenceLive(): Promise<OnaylarReferenceSnapsh
 }
 
 export const ONAYLAR_REFERENCE_INITIAL = loadOnaylarReferenceDemo();
+

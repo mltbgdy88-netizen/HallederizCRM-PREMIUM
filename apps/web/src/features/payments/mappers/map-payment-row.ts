@@ -12,7 +12,7 @@ function formatDateOnly(isoString: string): string {
 }
 
 function formatTryCompact(amount: number): string {
-  return `â‚º${amount.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
+  return `₺${amount.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`;
 }
 
 export interface PaymentRow {
@@ -49,7 +49,8 @@ export function mapPaymentRow(payment: PaymentReceipt, customers: Customer[]): P
     statusLabel: getPaymentStatusLabel(payment.status),
     statusTone: resolveTone(payment),
     dateOnlyLabel: formatDateOnly(payment.receivedAt),
-    documentCountLabel: payment.documentCount > 0 ? String(payment.documentCount) : "â€”"
+    documentCountLabel: payment.documentCount > 0 ? String(payment.documentCount) : "—"
   };
 }
+
 

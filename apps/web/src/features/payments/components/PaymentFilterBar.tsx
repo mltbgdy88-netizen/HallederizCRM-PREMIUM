@@ -21,7 +21,7 @@ export function PaymentFilterBar({
           type="search"
           value={filters.customer}
           onChange={(e) => onFilterChange("customer", e.target.value)}
-          placeholder="Cari, tahsilat no veya aÃ§Ä±klama ara..."
+          placeholder="Cari, tahsilat no veya açıklama ara..."
           aria-label="Ara"
         />
       </div>
@@ -30,13 +30,13 @@ export function PaymentFilterBar({
         className="hz-tahsilatlar-filter-select"
         value={filters.method}
         onChange={(e) => onFilterChange("method", e.target.value as "all" | PaymentMethod)}
-        aria-label="YÃ¶ntem"
+        aria-label="Yöntem"
       >
-        <option value="all">YÃ¶ntem (TÃ¼mÃ¼)</option>
+        <option value="all">Yöntem (Tümü)</option>
         <option value="cash">Nakit</option>
-        <option value="card">Kredi KartÄ±</option>
+        <option value="card">Kredi Kartı</option>
         <option value="transfer">Havale</option>
-        <option value="check">Ã‡ek</option>
+        <option value="check">Çek</option>
         <option value="mixed">Karma</option>
       </select>
 
@@ -44,11 +44,11 @@ export function PaymentFilterBar({
         className="hz-tahsilatlar-filter-select"
         value={filters.dateRange}
         onChange={(e) => onFilterChange("dateRange", e.target.value as PaymentFilters["dateRange"])}
-        aria-label="Tarih AralÄ±ÄŸÄ±"
+        aria-label="Tarih Aralığı"
       >
-        <option value="all">Tarih (TÃ¼mÃ¼)</option>
-        <option value="today">BugÃ¼n</option>
-        <option value="week">Son 7 GÃ¼n</option>
+        <option value="all">Tarih (Tümü)</option>
+        <option value="today">Bugün</option>
+        <option value="week">Son 7 Gün</option>
         <option value="month">Bu Ay</option>
       </select>
 
@@ -58,7 +58,7 @@ export function PaymentFilterBar({
         onChange={(e) => onFilterChange("customerGroup", e.target.value as CustomerGroupFilter)}
         aria-label="Cari Grubu"
       >
-        <option value="all">Cari Grubu (TÃ¼mÃ¼)</option>
+        <option value="all">Cari Grubu (Tümü)</option>
         <option value="bayi">Bayi</option>
         <option value="kurumsal">Kurumsal</option>
         <option value="mimar">Mimar</option>
@@ -71,24 +71,25 @@ export function PaymentFilterBar({
         onChange={(e) => onFilterChange("status", e.target.value as "all" | PaymentStatus)}
         aria-label="Durum"
       >
-        <option value="all">Durum (TÃ¼mÃ¼)</option>
+        <option value="all">Durum (Tümü)</option>
         <option value="allocated">Tahsil Edildi</option>
-        <option value="partially_allocated">KÄ±smi</option>
+        <option value="partially_allocated">Kısmi</option>
         <option value="confirmed">Bekliyor</option>
         <option value="draft">Taslak</option>
-        <option value="reversed">Ters KayÄ±t</option>
+        <option value="reversed">Ters Kayıt</option>
       </select>
 
       <button
         type="button"
         className="hz-tahsilatlar-filter-reset"
         onClick={onReset}
-        title="Filtreleri sÄ±fÄ±rla"
-        aria-label="Filtreleri sÄ±fÄ±rla"
+        title="Filtreleri sıfırla"
+        aria-label="Filtreleri sıfırla"
       >
         <LucideIcon name="rotate-ccw" size={14} />
       </button>
     </div>
   );
 }
+
 

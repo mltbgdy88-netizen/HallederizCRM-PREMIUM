@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { ErpConnection } from "@hallederiz/types";
 import { MetricCard, PageHeader, Pagination, PrimaryActionToolbar, TabSwitcher } from "@hallederiz/ui";
@@ -282,7 +282,7 @@ export function ErpPage() {
         <button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button" disabled title="Senkron API ve onay ile yapılır">
           Senkron başlat
         </button>
-        <button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button" disabled title="Şablon API ile sunulur">
+        <button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button" disabled title="�?ablon API ile sunulur">
           Excel şablonu
         </button>
       </PrimaryActionToolbar>
@@ -376,3 +376,4 @@ export function ErpPage() {
     </div>
   );
 }
+

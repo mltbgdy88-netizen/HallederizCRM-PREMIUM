@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 
 export type StickyActionFooterProps = {
   children: ReactNode;
@@ -13,3 +13,4 @@ export function StickyActionFooter({ children, className = "" }: StickyActionFoo
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import type { Customer, Offer, PaymentReceipt, SaleOrder } from "@hallederiz/types";
+﻿import type { Customer, Offer, PaymentReceipt, SaleOrder } from "@hallederiz/types";
 import { mapOfferToRow } from "../../offers/mappers/map-offer-row";
 import { getOffers } from "../../offers/queries/get-offers";
 import { mapOrderRow } from "../../orders/mappers/map-order-row";
@@ -190,3 +190,4 @@ export async function loadHizliIslemMerkeziLive(): Promise<HizliIslemMerkeziSnap
 }
 
 export const HIZLI_ISLEM_MERKEZI_INITIAL = loadHizliIslemMerkeziDemo();
+

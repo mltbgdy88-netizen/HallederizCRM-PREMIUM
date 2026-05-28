@@ -60,7 +60,7 @@ function overlayLiveKpis(base: GostergeKpi[], cardValues: Record<string, string 
 
   return base.map((kpi) => {
     const liveValue = byId[kpi.id];
-    if (!liveValue || liveValue === "â€”") return kpi;
+    if (!liveValue || liveValue === "—") return kpi;
     return { ...kpi, value: liveValue };
   });
 }
@@ -82,4 +82,5 @@ export async function loadDashboardGostergeReferenceLive(): Promise<DashboardGos
     demoBanner: null
   };
 }
+
 

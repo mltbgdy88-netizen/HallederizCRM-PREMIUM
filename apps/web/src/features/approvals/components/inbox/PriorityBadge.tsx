@@ -1,10 +1,10 @@
-import type { ApprovalInboxPriority } from "./types";
+﻿import type { ApprovalInboxPriority } from "./types";
 
 const LABELS: Record<ApprovalInboxPriority, string> = {
   kritik: "KRİTİK",
   yuksek: "YÜKSEK",
   orta: "ORTA",
-  dusuk: "DÜŞÜK",
+  dusuk: "DÜ�?ÜK",
   ai: "AI ÖNERİSİ"
 };
 
@@ -15,3 +15,4 @@ export function PriorityBadge({ priority }: { priority: ApprovalInboxPriority })
     </span>
   );
 }
+

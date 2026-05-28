@@ -1,4 +1,4 @@
-import type { ApprovalActionResponse, ApprovalClientError, ApprovalInboxItem, ApprovalSandboxAvailabilityResponse, WorkerHealthResponse } from "../types";
+﻿import type { ApprovalActionResponse, ApprovalClientError, ApprovalInboxItem, ApprovalSandboxAvailabilityResponse, WorkerHealthResponse } from "../types";
 
 export type OperatorSmokeStepId =
   | "routeAvailable"
@@ -291,3 +291,4 @@ export function summarizeOperatorSmokeResult(steps: OperatorSmokeStep[]): Operat
   else if (warningCount > 0) overall = "partial";
   return { overall, steps, okCount, warningCount, failCount, skippedCount, neutralCount };
 }
+

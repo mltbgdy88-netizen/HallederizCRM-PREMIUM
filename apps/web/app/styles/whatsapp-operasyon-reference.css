@@ -1,4 +1,4 @@
-/* WhatsApp Operasyon Paneli — whatsapp-operasyon-paneli-acik-mod.png */
+﻿/* WhatsApp Operasyon Paneli — whatsapp-operasyon-paneli-acik-mod.png */
 
 .wop-home {
   --wop-gap: clamp(6px, 0.75vh, 9px);
@@ -848,3 +848,4 @@
   grid-template-columns: 1fr 1fr;
   gap: 6px;
 }
+

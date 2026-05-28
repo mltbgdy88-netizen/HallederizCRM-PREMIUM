@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import test from "node:test";
 import {
   MSG_SUBMIT_DRAFT_READY,
@@ -97,3 +97,4 @@ test("resolveSubmitFeedback links entity detail when executed", () => {
   assert.equal(feedback.detailHref, "/tahsilatlar/pay_99");
   assert.equal(feedback.detailLabel, "Tahsilat detayına git");
 });
+

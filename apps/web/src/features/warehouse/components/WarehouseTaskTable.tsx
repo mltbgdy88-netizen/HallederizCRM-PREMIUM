@@ -1,4 +1,4 @@
-import type { WarehouseTaskRow } from "../mappers/map-warehouse-task-row";
+﻿import type { WarehouseTaskRow } from "../mappers/map-warehouse-task-row";
 
 export function WarehouseTaskTable({
   rows,
@@ -50,3 +50,4 @@ export function WarehouseTaskTable({
     </section>
   );
 }
+

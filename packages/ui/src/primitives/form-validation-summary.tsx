@@ -1,4 +1,4 @@
-export type FormValidationSummaryProps = {
+﻿export type FormValidationSummaryProps = {
   /** Boşsa hiçbir şey çizilmez. */
   messages: string[];
   title?: string;
@@ -28,3 +28,4 @@ export function FormValidationSummary({
     </div>
   );
 }
+

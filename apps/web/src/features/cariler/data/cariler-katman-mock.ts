@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type CkmTabId =
   | "ozet"
   | "iletisim"
@@ -32,7 +32,7 @@ export type CkmHeaderData = {
 export const CKM_HEADER: CkmHeaderData = {
   breadcrumb: ["Cariler", "Cari Özet Masası"],
   initials: "ABC",
-  title: "ABC Duvar Kağıdı San. ve Tic. A.Ş.",
+  title: "ABC Duvar Kağıdı San. ve Tic. A.�?.",
   status: "Aktif",
   meta: [
     { label: "Cari Kodu", value: "ABC001" },
@@ -50,9 +50,9 @@ export const CKM_HEADER: CkmHeaderData = {
 export const CKM_HEADERS: Record<CkmTabId, CkmHeaderData> = {
   ozet: CKM_HEADER,
   iletisim: {
-    breadcrumb: ["Cariler", "ABC A.Ş."],
+    breadcrumb: ["Cariler", "ABC A.�?."],
     initials: "ABC",
-    title: "ABC A.Ş.",
+    title: "ABC A.�?.",
     status: "Aktif",
     meta: [
       { label: "Cari Kodu", value: "C-000125" },
@@ -68,7 +68,7 @@ export const CKM_HEADERS: Record<CkmTabId, CkmHeaderData> = {
   finans: {
     breadcrumb: ["Cariler", "Katman: Finans", "Layer: C"],
     initials: "YG",
-    title: "Yıldız Grup A.Ş.",
+    title: "Yıldız Grup A.�?.",
     status: "Aktif",
     meta: [
       { label: "ID", value: "C-12590" },
@@ -84,7 +84,7 @@ export const CKM_HEADERS: Record<CkmTabId, CkmHeaderData> = {
   teklifler: {
     breadcrumb: ["Cariler", "Katman C", "Teklifler"],
     initials: "KC",
-    title: "Katman C Ltd. Şti.",
+    title: "Katman C Ltd. �?ti.",
     status: "Aktif",
     meta: [
       { label: "Cari Kodu", value: "C-000345" },
@@ -97,7 +97,7 @@ export const CKM_HEADERS: Record<CkmTabId, CkmHeaderData> = {
   siparisler: {
     breadcrumb: ["Cariler", "Katman", "Siparişler"],
     initials: "AK",
-    title: "AKSİYON DIŞ TİCARET A.Ş.",
+    title: "AKSİYON DI�? TİCARET A.�?.",
     status: "Aktif",
     meta: [
       { label: "Cari Kodu", value: "C-000102" },
@@ -113,7 +113,7 @@ export const CKM_HEADERS: Record<CkmTabId, CkmHeaderData> = {
   tahsilatlar: {
     breadcrumb: ["Cariler", "Katman: C", "Tahsilatlar"],
     initials: "ÖS",
-    title: "ÖRNEK SANAYİ VE TİCARET A.Ş.",
+    title: "ÖRNEK SANAYİ VE TİCARET A.�?.",
     status: "Aktif",
     meta: [
       { label: "Cari No", value: "C-000125" },
@@ -129,7 +129,7 @@ export const CKM_HEADERS: Record<CkmTabId, CkmHeaderData> = {
   timeline: {
     breadcrumb: ["Cariler", "Müşteri Detayı"],
     initials: "ABC",
-    title: "ABC Teknoloji A.Ş.",
+    title: "ABC Teknoloji A.�?.",
     status: "Aktif",
     meta: [
       { label: "Cari Kodu", value: "CAR-000123" },
@@ -169,7 +169,7 @@ export const CKM_CONTEXT = {
   title: "Cari Katman Bağlamı",
   cari: [
     { label: "Cari Kodu", value: "ABC001" },
-    { label: "Cari Adı", value: "ABC Duvar Kağıdı San. ve Tic. A.Ş." },
+    { label: "Cari Adı", value: "ABC Duvar Kağıdı San. ve Tic. A.�?." },
     { label: "Cari Grubu", value: "A Bayi" },
     { label: "Fiyat Grubu", value: "Bayi Fiyat Listesi" },
     { label: "Para Birimi", value: "TRY" },
@@ -342,7 +342,7 @@ export const ILETISIM_CONTEXT = {
     "Dosya Gönder",
     "Konum Gönder",
     "Hızlı Not Gönder",
-    "Şablon Gönder"
+    "�?ablon Gönder"
   ],
   preferred: "WhatsApp"
 } as const;
@@ -545,7 +545,7 @@ export const TIMELINE_EVENTS = [
 export const TIMELINE_CONTEXT = {
   title: "Timeline Bağlamı",
   related: [
-    { label: "Müşteri", value: "ABC Teknoloji A.Ş." },
+    { label: "Müşteri", value: "ABC Teknoloji A.�?." },
     { label: "Yetkili Kişi", value: "Ahmet Yılmaz" }
   ],
   opportunities: [
@@ -563,3 +563,4 @@ export const TIMELINE_CONTEXT = {
     { date: "15.05.2025", amount: "₺62.500,00", status: "Ödendi" }
   ]
 } as const;
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { ReactNode } from "react";
 import { LucideIcon, type LucideIconName } from "../../../components/icons/lucide-icons";
@@ -31,3 +31,4 @@ export function CommercialOperasyonDeskIntro({
     </div>
   );
 }
+

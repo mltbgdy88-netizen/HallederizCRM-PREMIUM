@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const CYF_FORM = {
   title: "Yeni Cari Kaydı",
   subtitle: "Yeni cari bilgilerini girin"
@@ -63,3 +63,4 @@ export const CYF_ACTIONS = {
   save: "Kaydet",
   cancel: "Vazgeç"
 } as const;
+

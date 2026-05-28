@@ -1,4 +1,4 @@
-import type { Customer, PaymentReceipt } from "@hallederiz/types";
+﻿import type { Customer, PaymentReceipt } from "@hallederiz/types";
 import { mapPaymentRow } from "../../payments/mappers/map-payment-row";
 import { getPayments } from "../../payments/queries/get-payments";
 import { buildTableMeta, formatTryMoney } from "../../../lib/reference/formatters";
@@ -115,3 +115,4 @@ export async function loadTahsilatlarReferenceLive(): Promise<TahsilatlarReferen
 }
 
 export const TAHSILATLAR_REFERENCE_INITIAL = loadTahsilatlarReferenceDemo();
+

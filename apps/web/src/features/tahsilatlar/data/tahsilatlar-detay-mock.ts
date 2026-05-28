@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const THDM_PAGE = {
   breadcrumb: ["Tahsilatlar", "Tahsilat TH-1192"],
   title: "Tahsilat Detay Masası"
@@ -7,7 +7,7 @@ export const THDM_PAGE = {
 export const THDM_SUMMARY = {
   number: "TH-1192",
   date: "24.05.2025 14:32",
-  customer: "ABC İnşaat San. ve Tic. A.Ş.",
+  customer: "ABC İnşaat San. ve Tic. A.�?.",
   customerCode: "CAR-00078",
   amount: "₺68.750,00",
   method: "Havale / EFT",
@@ -26,7 +26,7 @@ export const THDM_STEPS = [
 export const THDM_INFO = [
   { label: "Tahsilat No", value: "TH-1192" },
   { label: "Tarih", value: "24.05.2025 14:32" },
-  { label: "Cari Ünvan", value: "ABC İnşaat San. ve Tic. A.Ş." },
+  { label: "Cari Ünvan", value: "ABC İnşaat San. ve Tic. A.�?." },
   { label: "Cari Kodu", value: "CAR-00078" },
   { label: "Ödeme Yöntemi", value: "Havale / EFT" },
   { label: "Banka Hesabı", value: "Ziraat Bankası · TR12 0001 0000 0000 0000 0000 01" },
@@ -82,7 +82,7 @@ export const THDM_DIST_FOOTER = {
 
 export const THDM_CONTEXT = {
   title: "Tahsilat Bağlamı",
-  customer: "ABC İnşaat San. ve Tic. A.Ş.",
+  customer: "ABC İnşaat San. ve Tic. A.�?.",
   status: "Aktif",
   taxId: "1234567890",
   phone: "+90 212 555 12 34",
@@ -110,3 +110,4 @@ export const THDM_NOTES = {
   systemNote:
     "Tahsilat otomatik eşleştirme ile ilişkilendirildi. 24.05.2025 14:33 — Sistem"
 } as const;
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { PageHeader } from "@hallederiz/ui";
 import Link from "next/link";
@@ -155,3 +155,4 @@ export function OmnichannelConversationDetailPage({ conversationId }: Props) {
     </div>
   );
 }
+

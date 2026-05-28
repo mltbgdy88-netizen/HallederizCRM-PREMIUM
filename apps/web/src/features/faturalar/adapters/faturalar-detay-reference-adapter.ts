@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import type { Customer, Invoice } from "@hallederiz/types";
 import { REFERENCE_DEMO_BANNER } from "../../../lib/reference/constants";
 import { REFERENCE_ROUTE_IDS } from "../../../lib/reference/reference-route-ids";
@@ -112,7 +112,7 @@ function buildSnapshot(invoice: Invoice, customers: Customer[], demoBanner: stri
         { label: "Vade Tarihi", value: formatTrDate(dueDate) },
         { label: "Belge No", value: invoice.documentId ?? "—" },
         { label: "Senaryo", value: "TICARIFATURA" },
-        { label: "Fatura Tipi", value: "SATIŞ" },
+        { label: "Fatura Tipi", value: "SATI�?" },
         { label: "Oluşturan", value: customer?.name ?? "—" },
         { label: "Oluşturma Zamanı", value: formatTrDateTime(invoice.createdAt) },
         { label: "Son Güncelleme", value: formatTrDateTime(invoice.updatedAt) }
@@ -146,4 +146,5 @@ export async function loadFaturalarDetayReferenceLive(invoiceId?: string): Promi
 }
 
 export const FATURALAR_DETAY_REFERENCE_INITIAL = loadFaturalarDetayReferenceDemo();
+
 

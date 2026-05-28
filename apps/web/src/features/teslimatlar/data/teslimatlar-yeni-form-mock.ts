@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const TSYF_FORM = {
   title: "Yeni Teslimat Oluştur",
   subtitle: "Teslimat bilgilerini girin ve ürünlerinizi müşteriye ulaştırın."
@@ -7,7 +7,7 @@ export const TSYF_FORM = {
 export const TSYF_TOP_FIELDS = [
   { id: "address", label: "Teslimat Adresi", placeholder: "Adres seçin...", addLabel: "+ Yeni Adres Ekle" },
   { id: "date", label: "Teslimat Tarihi", value: "20.05.2025" },
-  { id: "driver", label: "Şoför", placeholder: "Şoför seçin...", addLabel: "+ Yeni Şoför Ekle" },
+  { id: "driver", label: "�?oför", placeholder: "�?oför seçin...", addLabel: "+ Yeni �?oför Ekle" },
   { id: "vehicle", label: "Araç", placeholder: "Araç seçin...", addLabel: "+ Yeni Araç Ekle" }
 ] as const;
 
@@ -36,3 +36,4 @@ export const TSYF_ACTIONS = {
   cancel: "İptal",
   submit: "Teslimatı Oluştur"
 } as const;
+

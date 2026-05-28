@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const BDM_PAGE = {
   title: "Belge Detay",
   subtitle: "Belge bilgilerini görüntüleyin ve işlemlerinizi gerçekleştirin.",
@@ -9,7 +9,7 @@ export const BDM_FIELDS = [
   { label: "Belge No", value: "BLG-88" },
   { label: "Belge Türü", value: "Fatura" },
   { label: "Belge Tarihi", value: "15.05.2025" },
-  { label: "Cari", value: "ABC Elektronik Ltd. Şti." },
+  { label: "Cari", value: "ABC Elektronik Ltd. �?ti." },
   { label: "Vergi No", value: "1234567890" },
   { label: "Vergi Dairesi", value: "Mecidiyeköy" },
   { label: "Tutar", value: "₺18.750,00" },
@@ -23,8 +23,8 @@ export const BDM_FIELDS = [
 
 export const BDM_PREVIEW = {
   title: "e-Arşiv Fatura",
-  seller: "ABC ELEKTRONİK LTD. ŞTİ.",
-  buyer: "Premium CRM Yazılım A.Ş.",
+  seller: "ABC ELEKTRONİK LTD. �?Tİ.",
+  buyer: "Premium CRM Yazılım A.�?.",
   lines: [
     { name: "Endüstriyel Sensör", qty: "10", price: "₺4.500,00" },
     { name: "Kontrol Paneli", qty: "2", price: "₺6.250,00" },
@@ -47,3 +47,4 @@ export const BDM_EXTRA = [
   { label: "Dosya Türü", value: "PDF" },
   { label: "Yükleme Tarihi", value: "15.05.2025 10:30" }
 ];
+

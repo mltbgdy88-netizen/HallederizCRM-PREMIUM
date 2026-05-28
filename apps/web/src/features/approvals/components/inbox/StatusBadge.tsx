@@ -1,10 +1,10 @@
-import type { ApprovalInboxStatus } from "./types";
+﻿import type { ApprovalInboxStatus } from "./types";
 
 const LABELS: Record<ApprovalInboxStatus, string> = {
   bekliyor: "BEKLİYOR",
   incelemede: "İNCELEMEDE",
   onay_bekliyor: "ONAY BEKLİYOR",
-  sure_asildi: "SÜRE AŞILDI"
+  sure_asildi: "SÜRE A�?ILDI"
 };
 
 export function StatusBadge({ status }: { status: ApprovalInboxStatus }) {
@@ -14,3 +14,4 @@ export function StatusBadge({ status }: { status: ApprovalInboxStatus }) {
     </span>
   );
 }
+

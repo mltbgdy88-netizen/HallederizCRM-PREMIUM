@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { Task } from "@hallederiz/types";
 import {
@@ -439,3 +439,4 @@ export function TaskDetailPage({ task }: { task: Task }) {
     />
   );
 }
+

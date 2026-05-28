@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type EemKpiTone = "green" | "red" | "gold" | "teal" | "blue" | "slate";
 
 export type EemKpi = { id: string; label: string; value: string; sub?: string; tone: EemKpiTone };
@@ -128,3 +128,4 @@ export function eemStatusClass(status: EemEventStatus): string {
   if (status === "Hata") return " eem-badge--err";
   return " eem-badge--wait";
 }
+

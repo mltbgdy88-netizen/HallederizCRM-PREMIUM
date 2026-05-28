@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type FstKpiTone = "green" | "gold" | "teal" | "blue" | "slate" | "orange";
 
 export type FstKpi = { id: string; label: string; value: string; tone: FstKpiTone };
@@ -133,3 +133,4 @@ export function fstIntegrationClass(status: FstIntegrationStatus): string {
   if (status === "Uyarı") return " fst-badge--warn";
   return " fst-badge--err";
 }
+

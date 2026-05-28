@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { EntityListPageTemplate, EmptyState, LoadingState, Pagination } from "@hallederiz/ui";
 import type { Customer, Document, DocumentType } from "@hallederiz/types";
@@ -99,7 +99,7 @@ export function DocumentTable({
     <>
       <div className="hz-documents-table-head" role="row">
         <span>Belge tipi</span>
-        <span>Şablon</span>
+        <span>�?ablon</span>
         <span>Bağlı kayıt</span>
         <span>Müşteri</span>
         <span>Oluşturma</span>
@@ -167,7 +167,7 @@ export function DocumentPreviewPanel({ document }: { document: Document | null }
       <ul className="hz-side-list hz-doc-preview-list">
         <li>Belge no: {document.documentNo}</li>
         <li>Tip: {getDocumentTypeLabel(document.type)}</li>
-        <li>Şablon sürümü: {formatDocumentTemplateVersion(document)}</li>
+        <li>�?ablon sürümü: {formatDocumentTemplateVersion(document)}</li>
         <li>
           Bağlı kayıt: {formatDocumentEntityType(document.entityType)} / {document.entityNo}
         </li>
@@ -530,3 +530,4 @@ export function DocumentsPage() {
     />
   );
 }
+

@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type DhmKpiTone = "orange" | "green" | "red" | "teal" | "gold";
 
 export type DhmKpi = {
@@ -65,7 +65,7 @@ export const DHM_TABLE_ROWS: DhmTableRow[] = [
     id: "1",
     docNo: "HZR-2025-00036",
     docDate: "15.05.2025",
-    customer: "ABC Tekstil A.Ş.",
+    customer: "ABC Tekstil A.�?.",
     customerCode: "120.001",
     status: "Bekleyen",
     shelf: "A-01-01",
@@ -75,7 +75,7 @@ export const DHM_TABLE_ROWS: DhmTableRow[] = [
     id: "2",
     docNo: "HZR-2025-00035",
     docDate: "15.05.2025",
-    customer: "Demir Çelik Tic. Ltd. Şti.",
+    customer: "Demir Çelik Tic. Ltd. �?ti.",
     customerCode: "120.015",
     status: "Eksik",
     shelf: "B-02-04",
@@ -85,7 +85,7 @@ export const DHM_TABLE_ROWS: DhmTableRow[] = [
     id: "3",
     docNo: "HZR-2025-00034",
     docDate: "14.05.2025",
-    customer: "Akdeniz Gıda A.Ş.",
+    customer: "Akdeniz Gıda A.�?.",
     customerCode: "120.028",
     status: "Hazırlanan",
     shelf: "C-01-08",
@@ -95,7 +95,7 @@ export const DHM_TABLE_ROWS: DhmTableRow[] = [
     id: "4",
     docNo: "HZR-2025-00033",
     docDate: "14.05.2025",
-    customer: "Ege Mobilya Sanayi Ltd. Şti.",
+    customer: "Ege Mobilya Sanayi Ltd. �?ti.",
     customerCode: "120.042",
     status: "Bekleyen",
     shelf: "A-03-02",
@@ -105,7 +105,7 @@ export const DHM_TABLE_ROWS: DhmTableRow[] = [
     id: "5",
     docNo: "HZR-2025-00032",
     docDate: "13.05.2025",
-    customer: "Marmara Lojistik A.Ş.",
+    customer: "Marmara Lojistik A.�?.",
     customerCode: "120.056",
     status: "Hazırlanan",
     shelf: "D-04-01",
@@ -125,7 +125,7 @@ export const DHM_TABLE_ROWS: DhmTableRow[] = [
     id: "7",
     docNo: "HZR-2025-00030",
     docDate: "12.05.2025",
-    customer: "Anadolu Kimya San. A.Ş.",
+    customer: "Anadolu Kimya San. A.�?.",
     customerCode: "120.073",
     status: "Bekleyen",
     shelf: "A-02-11",
@@ -152,7 +152,7 @@ const CONTEXTS: Record<string, DhmContext> = {
     docNo: "HZR-2025-00036",
     docMeta: "15.05.2025 · 09:24",
     status: "Bekleyen",
-    customer: "ABC Tekstil A.Ş.",
+    customer: "ABC Tekstil A.�?.",
     customerCode: "120.001",
     warehouse: "Merkez Depo",
     shipDate: "15.05.2025",
@@ -167,3 +167,4 @@ const CONTEXTS: Record<string, DhmContext> = {
 export function getDhmContext(rowId: string): DhmContext {
   return CONTEXTS[rowId] ?? CONTEXTS["1"];
 }
+

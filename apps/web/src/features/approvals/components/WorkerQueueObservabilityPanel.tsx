@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { ApprovalClientError, WorkerHealthResponse, WorkerJobListResponse } from "../types";
 import { mapApprovalUiErrorMessage, summarizeWorkerHealth } from "../utils/inbox-helpers";
@@ -121,3 +121,4 @@ export function WorkerQueueObservabilityPanel({
     </details>
   );
 }
+

@@ -1,4 +1,4 @@
-export const MSG_DOC_PREVIEW_ONLY = "Belge önizlemesi hazırlanır; gönderim yapılmaz.";
+﻿export const MSG_DOC_PREVIEW_ONLY = "Belge önizlemesi hazırlanır; gönderim yapılmaz.";
 
 export const MSG_DOC_PDF_NOT_LIVE = "PDF üretimi henüz canlı kullanıma bağlı değil.";
 
@@ -42,3 +42,4 @@ export const MSG_DOC_LIST_UNAVAILABLE = "Canlı veri şu anda alınamıyor.";
 export const MSG_DOC_CUSTOMER_PREVIEW_MISSING = "Bu cari için belge önizlemesi henüz hazırlanmadı.";
 
 export const MSG_DOC_REFRESH_STATUS = "Sayfayı yenileyerek durumu kontrol edebilirsiniz.";
+

@@ -24,8 +24,8 @@ type ApprovalCommandDeskDetailProps = {
 export function ApprovalCommandDeskDetail({ record, detailLoading, detailError }: ApprovalCommandDeskDetailProps) {
   if (!record) {
     return (
-      <section className="hz-approval-detail hz-approval-panel hz-approval-panel--empty" aria-label="Onay detayÄ±">
-        <p className="hz-approval-panel__empty">Listeden bir kayÄ±t seÃ§in.</p>
+      <section className="hz-approval-detail hz-approval-panel hz-approval-panel--empty" aria-label="Onay detayı">
+        <p className="hz-approval-panel__empty">Listeden bir kayıt seçin.</p>
       </section>
     );
   }
@@ -39,10 +39,10 @@ export function ApprovalCommandDeskDetail({ record, detailLoading, detailError }
   );
 
   return (
-    <section className="hz-approval-detail hz-approval-panel" aria-label="Onay detayÄ±">
+    <section className="hz-approval-detail hz-approval-panel" aria-label="Onay detayı">
       <header className="hz-approval-panel__head">
         <div>
-          <h2 className="hz-approval-panel__title">Onay DetayÄ±</h2>
+          <h2 className="hz-approval-panel__title">Onay Detayı</h2>
           <span className={`hz-approval-source-badge hz-approval-source-badge--${source}`}>
             <LucideIcon name={source === "ai" ? "sparkles" : source === "message" ? "message-circle" : "settings"} size={13} />
             {approvalSourceLabel(source)}
@@ -51,14 +51,14 @@ export function ApprovalCommandDeskDetail({ record, detailLoading, detailError }
       </header>
 
       <div className="hz-approval-detail__scroll">
-        {detailLoading ? <p className="hz-approval-detail__hint">Detay gÃ¼ncelleniyorâ€¦</p> : null}
+        {detailLoading ? <p className="hz-approval-detail__hint">Detay güncelleniyor…</p> : null}
         {detailError ? <p className="hz-approval-detail__hint hz-approval-detail__hint--error">{detailError}</p> : null}
 
         <h3 className="hz-approval-detail__title">{record.title}</h3>
         <p className="hz-approval-detail__desc">{description || "Bilgi bekleniyor"}</p>
 
         <section className="hz-approval-detail__section">
-          <h4>BaÄŸlÄ± KayÄ±tlar</h4>
+          <h4>Bağlı Kayıtlar</h4>
           <div className="hz-approval-chip-row">
             {chips.map((chip) =>
               chip.href ? (
@@ -75,7 +75,7 @@ export function ApprovalCommandDeskDetail({ record, detailLoading, detailError }
         </section>
 
         <section className="hz-approval-detail__section">
-          <h4>Ã–nerilen Ä°ÅŸlem</h4>
+          <h4>Önerilen İşlem</h4>
           <ul className="hz-approval-detail__bullets">
             {bullets.map((line) => (
               <li key={line}>{line}</li>
@@ -87,12 +87,12 @@ export function ApprovalCommandDeskDetail({ record, detailLoading, detailError }
           <h4>Etkiler</h4>
           <div className="hz-approval-impact-grid">
             <article className="hz-approval-impact">
-              <p className="hz-approval-impact__label">Nakit AkÄ±ÅŸÄ±</p>
-              <p className="hz-approval-impact__value">{record.amountLabel || "â€”"}</p>
+              <p className="hz-approval-impact__label">Nakit Akışı</p>
+              <p className="hz-approval-impact__value">{record.amountLabel || "—"}</p>
             </article>
             <article className="hz-approval-impact">
               <p className="hz-approval-impact__label">Gecikme</p>
-              <p className="hz-approval-impact__value">{record.slaLabel || "â€”"}</p>
+              <p className="hz-approval-impact__value">{record.slaLabel || "—"}</p>
             </article>
             <article className="hz-approval-impact">
               <p className="hz-approval-impact__label">Risk</p>
@@ -102,19 +102,20 @@ export function ApprovalCommandDeskDetail({ record, detailLoading, detailError }
         </section>
 
         <section className="hz-approval-detail__section">
-          <h4>AÃ§Ä±klama</h4>
+          <h4>Açıklama</h4>
           <p className="hz-approval-detail__note">
-            {sanitizeUserFacingText(record.internalNote.body) || "CanlÄ± veri geldiÄŸinde burada gÃ¶rÃ¼nÃ¼r."}
+            {sanitizeUserFacingText(record.internalNote.body) || "Canlı veri geldiğinde burada görünür."}
           </p>
         </section>
 
         <footer className="hz-approval-detail__meta">
-          <span>OluÅŸturulma: {record.meta.requestedAt}</span>
+          <span>Oluşturulma: {record.meta.requestedAt}</span>
           <span>Kaynak: {approvalSourceEngineLabel(source)}</span>
-          <span>Ä°ÅŸlem: {approvalOperationTypeLabel(record.raw.type)}</span>
+          <span>İşlem: {approvalOperationTypeLabel(record.raw.type)}</span>
         </footer>
       </div>
     </section>
   );
 }
+
 

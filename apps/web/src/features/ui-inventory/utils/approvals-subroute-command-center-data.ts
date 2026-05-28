@@ -1,4 +1,4 @@
-import {
+﻿import {
   buildConfig,
   type InventoryScopeRow,
   type InventoryScopeStatus
@@ -220,3 +220,4 @@ export const LIMITLER_CONFIG = buildConfig({
   rows: LIMITLER_ROWS,
   alertCopy: "Limit yazımı kapalıdır; politika matrisi ve RBAC guard bağlanınca düzenleme açılır."
 });
+

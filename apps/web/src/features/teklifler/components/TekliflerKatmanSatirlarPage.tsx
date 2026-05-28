@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { TeklifBadge, TeklifDetailTabs, TeklifKatmanContextPanel } from "./TekliflerKatmanShared";
 import { useTekliflerKatmanReferenceData } from "@/features/teklifler/hooks/use-teklifler-katman-reference-data";
@@ -202,3 +202,4 @@ export function TekliflerKatmanSatirlarPage() {
     </div>
   );
 }
+

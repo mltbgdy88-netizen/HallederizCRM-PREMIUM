@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type AhbCard = {
   id: string;
   title: string;
@@ -61,3 +61,4 @@ export const AHB_CARDS: AhbCard[] = [
     icon: "print"
   }
 ];
+

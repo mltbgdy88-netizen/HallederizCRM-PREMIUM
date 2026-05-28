@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import type { Customer, SaleOrder } from "@hallederiz/types";
 import { REFERENCE_DEMO_BANNER } from "../../../lib/reference/constants";
 import { REFERENCE_ROUTE_IDS } from "../../../lib/reference/reference-route-ids";
@@ -224,3 +224,4 @@ export async function loadSiparislerDetayReferenceLive(
   }
   return buildLiveSnapshot(order, customers, null);
 }
+

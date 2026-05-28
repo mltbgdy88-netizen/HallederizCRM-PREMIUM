@@ -1,4 +1,4 @@
-import { IconRotateCcw } from "../../../dashboard/components/dashboard-inline-icons";
+﻿import { IconRotateCcw } from "../../../dashboard/components/dashboard-inline-icons";
 
 type ApprovalInboxHeaderProps = {
   pendingCount: number;
@@ -56,3 +56,4 @@ export function ApprovalInboxHeader({
     </header>
   );
 }
+

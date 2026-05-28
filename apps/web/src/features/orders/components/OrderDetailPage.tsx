@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { EmptyState, EntityDetailLayout, FormPageShell, LoadingState, PageHeader, TabSwitcher } from "@hallederiz/ui";
 import type { Customer, Delivery, Invoice, PaymentReceipt, SaleOrder, WarehouseOrder } from "@hallederiz/types";
@@ -180,3 +180,4 @@ function DocumentsInline({ order, invoice }: { order: SaleOrder; invoice: Invoic
     </div>
   );
 }
+

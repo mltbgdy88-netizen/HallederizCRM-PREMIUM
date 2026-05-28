@@ -15,7 +15,7 @@ export async function getPaymentMockData(): Promise<PaymentReceipt[]> {
       currency: "TRY",
       method: "transfer",
       status: "partially_allocated",
-      description: "KÄ±smi havale tahsilatÄ±, bakiye devam ediyor.",
+      description: "Kısmi havale tahsilatı, bakiye devam ediyor.",
       referenceNo: "ZRT-20260526-001",
       documentCount: 2,
       receivedAt: "2026-05-26T09:10:00.000Z",
@@ -81,7 +81,7 @@ export async function getPaymentMockData(): Promise<PaymentReceipt[]> {
       currency: "TRY",
       method: "card",
       status: "allocated",
-      description: "Kredi kartÄ± tam tahsilat.",
+      description: "Kredi kartı tam tahsilat.",
       referenceNo: "POS-9912",
       documentCount: 1,
       receivedAt: "2026-05-25T14:20:00.000Z",
@@ -114,7 +114,7 @@ export async function getPaymentMockData(): Promise<PaymentReceipt[]> {
       currency: "TRY",
       method: "transfer",
       status: "partially_allocated",
-      description: "KÄ±smi havale, kalan borÃ§ takipte.",
+      description: "Kısmi havale, kalan borç takipte.",
       referenceNo: "ZRT-20260524-003",
       documentCount: 1,
       receivedAt: "2026-05-24T11:00:00.000Z",
@@ -147,7 +147,7 @@ export async function getPaymentMockData(): Promise<PaymentReceipt[]> {
       currency: "TRY",
       method: "check",
       status: "allocated",
-      description: "Ã‡ek ile tam tahsilat.",
+      description: "Çek ile tam tahsilat.",
       referenceNo: "CEK-44120",
       documentCount: 2,
       receivedAt: "2026-05-23T09:45:00.000Z",
@@ -180,7 +180,7 @@ export async function getPaymentMockData(): Promise<PaymentReceipt[]> {
       currency: "TRY",
       method: "transfer",
       status: "confirmed",
-      description: "Havale alÄ±ndÄ±, tahsis bekliyor.",
+      description: "Havale alındı, tahsis bekliyor.",
       referenceNo: "ZRT-20260522-007",
       documentCount: 0,
       receivedAt: "2026-05-22T16:00:00.000Z",
@@ -231,7 +231,7 @@ export async function getPaymentMockData(): Promise<PaymentReceipt[]> {
       currency: "TRY",
       method: "transfer",
       status: "partially_allocated",
-      description: "KÄ±smi Ã¶deme, kalan kÄ±sÄ±m ay sonuna ertelendi.",
+      description: "Kısmi ödeme, kalan kısım ay sonuna ertelendi.",
       referenceNo: "ZRT-20260520-009",
       documentCount: 1,
       receivedAt: "2026-05-20T13:30:00.000Z",
@@ -264,7 +264,7 @@ export async function getPaymentMockData(): Promise<PaymentReceipt[]> {
       currency: "TRY",
       method: "transfer",
       status: "confirmed",
-      description: "Havale alÄ±ndÄ±, belge eÅŸleÅŸmesi bekleniyor.",
+      description: "Havale alındı, belge eşleşmesi bekleniyor.",
       referenceNo: "ZRT-20260519-002",
       documentCount: 0,
       receivedAt: "2026-05-19T08:50:00.000Z",
@@ -315,7 +315,7 @@ export async function getPaymentMockData(): Promise<PaymentReceipt[]> {
       currency: "TRY",
       method: "transfer",
       status: "allocated",
-      description: "Proje Ã¶demesi tam tahsilat.",
+      description: "Proje ödemesi tam tahsilat.",
       referenceNo: "ZRT-20260517-005",
       documentCount: 2,
       receivedAt: "2026-05-17T10:00:00.000Z",
@@ -348,7 +348,7 @@ export async function getPaymentMockData(): Promise<PaymentReceipt[]> {
       currency: "TRY",
       method: "cash",
       status: "allocated",
-      description: "Nakit Ã¶n Ã¶deme.",
+      description: "Nakit ön ödeme.",
       referenceNo: "KASA-71",
       documentCount: 1,
       receivedAt: "2026-05-16T12:00:00.000Z",
@@ -389,9 +389,9 @@ export async function getPaymentById(paymentId?: string): Promise<PaymentReceipt
 export function getPaymentMethodLabel(method: PaymentMethod): string {
   const labels: Record<PaymentMethod, string> = {
     cash: "Nakit",
-    card: "Kredi KartÄ±",
+    card: "Kredi Kartı",
     transfer: "Havale",
-    check: "Ã‡ek",
+    check: "Çek",
     mixed: "Karma"
   };
   return labels[method];
@@ -401,8 +401,8 @@ export function getPaymentStatusLabel(status: PaymentStatus): string {
   const labels: Record<PaymentStatus, string> = {
     draft: "Taslak",
     confirmed: "Bekliyor",
-    reversed: "Ters KayÄ±t",
-    partially_allocated: "KÄ±smi",
+    reversed: "Ters Kayıt",
+    partially_allocated: "Kısmi",
     allocated: "Tahsil Edildi"
   };
   return labels[status];
@@ -411,13 +411,13 @@ export function getPaymentStatusLabel(status: PaymentStatus): string {
 export function getPaymentBankLabel(method: PaymentMethod, referenceNo?: string): string {
   if (method === "transfer") {
     if (referenceNo?.startsWith("ZRT")) return "Banka: Ziraat";
-    if (referenceNo?.startsWith("ISB")) return "Banka: Ä°ÅŸ BankasÄ±";
+    if (referenceNo?.startsWith("ISB")) return "Banka: İş Bankası";
     return "Banka: EFT";
   }
   if (method === "card") return "POS terminali";
   if (method === "cash") return "Kasa";
-  if (method === "check") return "Ã‡ek â€” Merkez BankasÄ±";
-  return "â€”";
+  if (method === "check") return "Çek — Merkez Bankası";
+  return "—";
 }
 
 export function getPaymentSummary(payment: PaymentReceipt) {
@@ -436,4 +436,5 @@ export function getDaysOverdue(payment: PaymentReceipt): number {
   const diff = Math.floor((now.getTime() - received.getTime()) / (1000 * 60 * 60 * 24));
   return Math.max(diff, 0);
 }
+
 

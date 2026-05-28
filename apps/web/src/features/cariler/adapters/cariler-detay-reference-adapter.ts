@@ -1,4 +1,4 @@
-import { resolveCustomerDisplayType } from "@hallederiz/domain";
+﻿import { resolveCustomerDisplayType } from "@hallederiz/domain";
 import type { Customer, CustomerAccount, CustomerContact, CustomerLedgerEntry, Offer, PaymentReceipt, SaleOrder } from "@hallederiz/types";
 import { REFERENCE_DEMO_BANNER } from "../../../lib/reference/constants";
 import { getCustomerDetail } from "../../customers/queries/get-customers";
@@ -391,3 +391,4 @@ export async function loadCarilerDetayReferenceLive(
 }
 
 export const CARILER_DETAY_REFERENCE_INITIAL = loadCarilerDetayReferenceDemo();
+

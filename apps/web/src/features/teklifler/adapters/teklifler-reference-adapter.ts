@@ -1,4 +1,4 @@
-import type { Customer, Offer } from "@hallederiz/types";
+﻿import type { Customer, Offer } from "@hallederiz/types";
 import { mapOfferToRow } from "../../offers/mappers/map-offer-row";
 import { getOffers } from "../../offers/queries/get-offers";
 import { REFERENCE_DEMO_BANNER } from "../../../lib/reference/constants";
@@ -132,3 +132,4 @@ export async function loadTekliflerReferenceLive(): Promise<TekliflerReferenceSn
 }
 
 export const TEKLIFLER_REFERENCE_INITIAL = loadTekliflerReferenceDemo();
+

@@ -1,7 +1,7 @@
 ﻿// @ts-nocheck
 import { demoScenario } from "../../demo/scenario";
 
-/** Demo entity IDs for PREMIUM dynamic routes â†” Final static mock aliases */
+/** Demo entity IDs for PREMIUM dynamic routes ↔ Final static mock aliases */
 export const REFERENCE_ROUTE_IDS = {
   customerId: demoScenario.primaryCustomerId,
   offerId: demoScenario.primaryOfferId,
@@ -17,4 +17,5 @@ export const REFERENCE_ROUTE_IDS = {
   warehouseOrderId: demoScenario.warehouseOrderId,
   conversationId: "conv_1"
 } as const;
+
 

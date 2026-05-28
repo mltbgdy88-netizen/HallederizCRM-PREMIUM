@@ -1,4 +1,4 @@
-import type { PriceSlotConfig } from "@hallederiz/types";
+﻿import type { PriceSlotConfig } from "@hallederiz/types";
 import type { CustomerFilters, CustomerWhatsappFilter } from "../schemas/customer-filter-schema";
 import { IconRotateCcw } from "../../dashboard/components/dashboard-inline-icons";
 
@@ -24,7 +24,7 @@ export function CustomerFilterBar({ filters, cities, priceSlots, onFilterChange,
           />
         </label>
         <label className="hz-customers-filter-field">
-          <span className="hz-customers-filter-label">Şehir</span>
+          <span className="hz-customers-filter-label">�?ehir</span>
           <select className="hz-customers-filter-select" value={filters.city} onChange={(event) => onFilterChange("city", event.target.value)}>
             <option value="">Tümü</option>
             {cities.map((city) => (
@@ -88,3 +88,4 @@ export function CustomerFilterBar({ filters, cities, priceSlots, onFilterChange,
     </div>
   );
 }
+

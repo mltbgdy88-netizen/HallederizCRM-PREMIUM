@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   ApprovalActionResponse,
   ApprovalClientError,
   ApprovalClientErrorKind,
@@ -233,3 +233,4 @@ export function createApprovalClient(config: ApprovalClientConfig) {
 }
 
 export type ApprovalClient = ReturnType<typeof createApprovalClient>;
+

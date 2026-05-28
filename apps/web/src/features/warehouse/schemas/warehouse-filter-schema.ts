@@ -1,4 +1,4 @@
-import type { WarehouseOrderStatus, WarehouseTaskStatus } from "@hallederiz/types";
+﻿import type { WarehouseOrderStatus, WarehouseTaskStatus } from "@hallederiz/types";
 
 export type WarehousePrepListTab = "bekleyenler" | "hazirlananlar" | "eksikler" | "tumu";
 
@@ -31,3 +31,4 @@ export const defaultWarehouseTaskFilters: WarehouseTaskFilters = {
   prepDisplayFilter: "all",
   datePreset: "all"
 };
+

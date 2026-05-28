@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type HizliActionCard = {
   id: string;
   title: string;
@@ -67,7 +67,7 @@ export const HI_RECENT: HizliRecentItem[] = [
     id: "1",
     type: "Sipariş",
     ref: "SO-2025-0248",
-    customer: "ABC A.Ş.",
+    customer: "ABC A.�?.",
     timeAgo: "2 dk önce",
     status: "Tamamlandı",
     icon: "order",
@@ -77,7 +77,7 @@ export const HI_RECENT: HizliRecentItem[] = [
     id: "2",
     type: "Tahsilat",
     ref: "TAH-2025-0187",
-    customer: "XYZ Ltd. Şti.",
+    customer: "XYZ Ltd. �?ti.",
     timeAgo: "15 dk önce",
     status: "Tamamlandı",
     icon: "collection",
@@ -114,3 +114,4 @@ export const HI_RECENT: HizliRecentItem[] = [
     iconTone: "gold"
   }
 ];
+

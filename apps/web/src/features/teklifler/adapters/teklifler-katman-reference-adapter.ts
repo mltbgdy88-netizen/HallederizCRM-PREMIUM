@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import type { Customer, Offer } from "@hallederiz/types";
 import { REFERENCE_DEMO_BANNER } from "../../../lib/reference/constants";
 import { REFERENCE_ROUTE_IDS } from "../../../lib/reference/reference-route-ids";
@@ -127,4 +127,5 @@ export async function loadTekliflerKatmanReferenceLive(offerId?: string): Promis
   const customer = customers.find((c) => c.id === selected.customerId);
   return buildSnapshot(selected, customer);
 }
+
 

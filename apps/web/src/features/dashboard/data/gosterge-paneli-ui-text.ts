@@ -1,7 +1,7 @@
 ﻿// @ts-nocheck
 /**
- * GÃ¶sterge paneli UI metinleri â€” ASCII kaynak + \u kaÃ§Ä±ÅŸlarÄ±.
- * Windows / charset uyumsuzluÄŸunda TÃ¼rkÃ§e karakterlerin bozulmamasÄ± iÃ§in.
+ * Gösterge paneli UI metinleri — ASCII kaynak + \u kaçışları.
+ * Windows / charset uyumsuzluğunda Türkçe karakterlerin bozulmaması için.
  */
 export const GOSTERGE_PANELI_UI = {
   kpiAria: "\u00d6zet g\u00f6stergeler",
@@ -44,4 +44,5 @@ export const GOSTERGE_PANELI_UI = {
 } as const;
 
 export type GostergePaneliUiText = typeof GOSTERGE_PANELI_UI;
+
 

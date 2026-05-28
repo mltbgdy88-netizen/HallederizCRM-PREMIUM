@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 import { formatTryMoney } from "../../../lib/reference/formatters";
 import { REFERENCE_DEMO_BANNER } from "../../../lib/reference/constants";
 import { REFERENCE_ROUTE_IDS } from "../../../lib/reference/reference-route-ids";
@@ -140,4 +140,5 @@ export function buildSiparisSatirlarTotalsFromLines(
     { label: "Genel Toplam", value: formatTryMoney(sum, currency), strong: true }
   ];
 }
+
 

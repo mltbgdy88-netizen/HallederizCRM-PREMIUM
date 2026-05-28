@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useGelenKutuReferenceData } from "@/features/gelen-kutu/hooks/use-gelen-kutu-reference-data";
 
@@ -159,3 +159,4 @@ export function GelenKutuUcPanelPage() {
     </div>
   );
 }
+

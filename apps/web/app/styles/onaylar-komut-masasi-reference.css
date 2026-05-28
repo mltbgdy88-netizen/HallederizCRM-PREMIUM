@@ -1,4 +1,4 @@
-/* Onaylar Komut Masası — onaylar-komut-masasi-acik-mod.png */
+﻿/* Onaylar Komut Masası — onaylar-komut-masasi-acik-mod.png */
 
 .okm-home {
   --okm-gap: clamp(6px, 0.75vh, 9px);
@@ -666,3 +666,4 @@
 .okm-notify input {
   accent-color: #047857;
 }
+

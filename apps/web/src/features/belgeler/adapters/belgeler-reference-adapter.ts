@@ -1,4 +1,4 @@
-import type { Customer, Document } from "@hallederiz/types";
+﻿import type { Customer, Document } from "@hallederiz/types";
 import { getDocuments } from "../../documents/queries/get-documents";
 import { buildTableMeta, formatTrDateTime } from "../../../lib/reference/formatters";
 import {
@@ -112,3 +112,4 @@ export async function loadBelgelerReferenceLive(): Promise<BelgelerReferenceSnap
 }
 
 export const BELGELER_REFERENCE_INITIAL = loadBelgelerReferenceDemo();
+

@@ -1,4 +1,4 @@
-/* Sistem state pages — demo / empty / offline / unauthorized */
+﻿/* Sistem state pages — demo / empty / offline / unauthorized */
 
 .sys-state {
   position: relative;
@@ -442,3 +442,4 @@
   color: #854d0e;
   cursor: pointer;
 }
+

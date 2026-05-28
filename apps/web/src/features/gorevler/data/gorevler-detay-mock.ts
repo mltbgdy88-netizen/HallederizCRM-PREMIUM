@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type GdmTab = "Genel Bakış" | "Checklist" | "Yorumlar (2)" | "Zaman Çizelgesi";
 
 export const GDM_PAGE = {
@@ -63,3 +63,4 @@ export const GDM_INFO = [
 
 export const GDM_TAGS = ["stok", "sayım", "depo"];
 export const GDM_REMINDER = "24 May 2025 09:00";
+

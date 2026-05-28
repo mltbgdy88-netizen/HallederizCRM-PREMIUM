@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type StokKpi = {
   id: string;
   label: string;
@@ -265,3 +265,4 @@ export const SOM_CONTEXT_BY_ROW: Record<string, StokContextDetail> = {
 export function getSomContext(rowId: string): StokContextDetail {
   return SOM_CONTEXT_BY_ROW[rowId] ?? SOM_CONTEXT_BY_ROW["1"]!;
 }
+

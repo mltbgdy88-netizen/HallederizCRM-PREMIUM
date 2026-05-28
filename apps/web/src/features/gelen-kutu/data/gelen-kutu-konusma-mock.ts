@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const GKK_PAGE = {
   title: "Gelen Kutu",
   subtitle: "Ürün bağlamlı konuşmaları yönetin."
@@ -106,7 +106,7 @@ export const GKK_MESSAGES = [
   {
     id: "7",
     dir: "out" as const,
-    text: "Siparişiniz alınmıştır. En kısa sürede sizinle iletişime geçeceğiz. 😊",
+    text: "Siparişiniz alınmıştır. En kısa sürede sizinle iletişime geçeceğiz. g���",
     time: "10:24",
     read: true
   }
@@ -128,3 +128,4 @@ export const GKK_INTERACTIONS = [
 ];
 
 export const GKK_NOTE = "Toplu alım hedefi var. İndirim oranlarına duyarlı.";
+

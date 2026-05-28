@@ -19,10 +19,10 @@ export function WhatsAppDeskPreview({
 }) {
   if (!conversation) {
     return (
-      <section className="hz-wa-desk-context hz-wa-desk-context--empty" aria-label="KonuÅŸma baÄŸlamÄ±">
+      <section className="hz-wa-desk-context hz-wa-desk-context--empty" aria-label="Konuşma bağlamı">
         <article className="hz-wa-desk-context-card">
-          <h4>KonuÅŸma BaÄŸlamÄ±</h4>
-          <p>Tablodan bir konuÅŸma seÃ§ildiÄŸinde Ã¶zet, uyarÄ± ve Ã¶nerilen yanÄ±tlar gÃ¶rÃ¼nÃ¼r.</p>
+          <h4>Konuşma Bağlamı</h4>
+          <p>Tablodan bir konuşma seçildiğinde özet, uyarı ve önerilen yanıtlar görünür.</p>
         </article>
       </section>
     );
@@ -36,11 +36,11 @@ export function WhatsAppDeskPreview({
     conversation.pendingActionCount > 0 ? "approval" : conversation.unreadCount > 0 ? "pending" : "ok";
 
   return (
-    <section className="hz-wa-desk-context" aria-label="KonuÅŸma baÄŸlamÄ±">
+    <section className="hz-wa-desk-context" aria-label="Konuşma bağlamı">
       <header className="hz-wa-desk-context__head">
-        <p className="hz-wa-desk-context__eyebrow">KonuÅŸma BaÄŸlamÄ±</p>
+        <p className="hz-wa-desk-context__eyebrow">Konuşma Bağlamı</p>
         <h3>{conversation.title}</h3>
-        <p>{customer?.name ?? "Cari eÅŸleÅŸmedi"}</p>
+        <p>{customer?.name ?? "Cari eşleşmedi"}</p>
         <span className={`hz-wa-desk-badge hz-wa-desk-badge--${statusTone}`}>{statusLabel}</span>
         <p className="hz-wa-desk-context__meta">{meta?.subtitle ?? conversation.lastMessagePreview}</p>
       </header>
@@ -51,36 +51,36 @@ export function WhatsAppDeskPreview({
             <LucideIcon name="alert-triangle" size={16} />
             <div>
               <strong>{conversation.pendingActionCount} mesaj onay bekliyor</strong>
-              <p>GÃ¶nderim Ã¶ncesi insan onayÄ± zorunludur.</p>
+              <p>Gönderim öncesi insan onayı zorunludur.</p>
             </div>
             <button type="button" className="hz-wa-desk-alert-btn" onClick={onOpenApprovals}>
-              OnaylarÄ± GÃ¶rÃ¼ntÃ¼le
+              Onayları Görüntüle
             </button>
           </article>
         ) : null}
 
         <article className="hz-wa-desk-context-card">
           <h4>
-            <LucideIcon name="message-circle" size={14} /> Son Mesaj Ã–zeti
+            <LucideIcon name="message-circle" size={14} /> Son Mesaj Özeti
           </h4>
-          <p>{conversation.lastMessagePreview || meta?.subtitle || "Ã–nizleme metni yok."}</p>
-          <p>Temsilci: Emre AydÄ±n Â· {meta?.timeLabel ?? "â€”"}</p>
+          <p>{conversation.lastMessagePreview || meta?.subtitle || "Önizleme metni yok."}</p>
+          <p>Temsilci: Emre Aydın · {meta?.timeLabel ?? "—"}</p>
         </article>
 
         <article className="hz-wa-desk-context-card">
-          <h4>Ã–nerilen YanÄ±tlar</h4>
+          <h4>Önerilen Yanıtlar</h4>
           <ul className="hz-wa-desk-replies">
-            <li>Stok durumunu kontrol edip 15 dk iÃ§inde dÃ¶nÃ¼ÅŸ yapacaÄŸÄ±m.</li>
-            <li>Teklif PDF taslaÄŸÄ±nÄ± onay sonrasÄ± paylaÅŸacaÄŸÄ±m.</li>
-            <li>Tahsilat planÄ± iÃ§in finans ekibine iletiyorum.</li>
+            <li>Stok durumunu kontrol edip 15 dk içinde dönüş yapacağım.</li>
+            <li>Teklif PDF taslağını onay sonrası paylaşacağım.</li>
+            <li>Tahsilat planı için finans ekibine iletiyorum.</li>
           </ul>
         </article>
 
         <article className="hz-wa-desk-context-card">
-          <h4>Ä°lgili KayÄ±tlar</h4>
+          <h4>İlgili Kayıtlar</h4>
           <div className="hz-wa-desk-links">
             <a href="/cariler/">Cari</a>
-            <a href="/siparisler/">SipariÅŸ</a>
+            <a href="/siparisler/">Sipariş</a>
             <a href="/tahsilatlar/">Tahsilat</a>
             <a href="/belgeler?document=demo">Belge</a>
           </div>
@@ -88,15 +88,16 @@ export function WhatsAppDeskPreview({
       </div>
 
       <footer className="hz-wa-desk-context__actions">
-        <p className="hz-wa-desk-context__actions-title">Belge GÃ¶nder</p>
+        <p className="hz-wa-desk-context__actions-title">Belge Gönder</p>
         <button type="button" className="hz-wa-desk-context-btn hz-wa-desk-context-btn--primary" onClick={onSelectFile}>
-          Dosya SeÃ§
+          Dosya Seç
         </button>
         <button type="button" className="hz-wa-desk-context-btn" onClick={onSelectTemplate}>
-          Åablondan SeÃ§
+          �?ablondan Seç
         </button>
       </footer>
     </section>
   );
 }
+
 

@@ -1,15 +1,15 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const HISM_PAGE = {
   title: "Hızlı İşlem Satış Masası",
   subtitle: "Hızlı satış oluşturun, kaydedin veya onaya gönderin."
 };
 
 export const HISM_RECENT = [
-  { id: "SF-2025-0245", amount: "₺18.750,00", customer: "ABC İnşaat A.Ş.", status: "Taslak", time: "2 dk önce" },
-  { id: "SF-2025-0244", amount: "₺8.250,00", customer: "Mavi Yapı Ltd. Şti.", status: "Taslak", time: "15 dk önce" },
+  { id: "SF-2025-0245", amount: "₺18.750,00", customer: "ABC İnşaat A.�?.", status: "Taslak", time: "2 dk önce" },
+  { id: "SF-2025-0244", amount: "₺8.250,00", customer: "Mavi Yapı Ltd. �?ti.", status: "Taslak", time: "15 dk önce" },
   { id: "SF-2025-0243", amount: "₺12.600,00", customer: "Delta Mimarlık", status: "Onayda", time: "1 saat önce" },
   { id: "SF-2025-0242", amount: "₺5.400,00", customer: "Karadeniz Nakliye", status: "Taslak", time: "2 saat önce" },
-  { id: "SF-2025-0241", amount: "₺22.800,00", customer: "Ege Elektrik A.Ş.", status: "Onaylandı", time: "3 saat önce" }
+  { id: "SF-2025-0241", amount: "₺22.800,00", customer: "Ege Elektrik A.�?.", status: "Onaylandı", time: "3 saat önce" }
 ];
 
 export const HISM_FORM = {
@@ -38,3 +38,4 @@ export const HISM_SUMMARY = {
   products: "5 ürün",
   totalQty: "Toplam Miktar: 6,000"
 };
+

@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type FaturalarKpi = {
   id: string;
   label: string;
@@ -64,7 +64,7 @@ export const FAT_TABLE_ROWS: FaturalarTableRow[] = [
     id: "1",
     invoiceNo: "INV-2025-0256",
     invoiceMeta: "17.05.2025 14:32",
-    customer: "ABC Otomasyon San. ve Tic. Ltd. Şti.",
+    customer: "ABC Otomasyon San. ve Tic. Ltd. �?ti.",
     amount: "₺85.000,00",
     status: "Kesildi",
     payment: "Bekliyor"
@@ -73,7 +73,7 @@ export const FAT_TABLE_ROWS: FaturalarTableRow[] = [
     id: "2",
     invoiceNo: "INV-2025-0255",
     invoiceMeta: "16.05.2025 11:20",
-    customer: "Delta Makina Ltd. Şti.",
+    customer: "Delta Makina Ltd. �?ti.",
     amount: "₺42.500,00",
     status: "Taslak",
     payment: "Bekliyor"
@@ -82,7 +82,7 @@ export const FAT_TABLE_ROWS: FaturalarTableRow[] = [
     id: "3",
     invoiceNo: "INV-2025-0254",
     invoiceMeta: "15.05.2025 09:45",
-    customer: "Ege Yapı Malzemeleri A.Ş.",
+    customer: "Ege Yapı Malzemeleri A.�?.",
     amount: "₺128.750,00",
     status: "Kesildi",
     payment: "Kısmi Ödeme"
@@ -91,7 +91,7 @@ export const FAT_TABLE_ROWS: FaturalarTableRow[] = [
     id: "4",
     invoiceNo: "INV-2025-0253",
     invoiceMeta: "14.05.2025 16:10",
-    customer: "Kuzey Gıda San. Tic. A.Ş.",
+    customer: "Kuzey Gıda San. Tic. A.�?.",
     amount: "₺18.920,00",
     status: "Kesildi",
     payment: "Ödendi"
@@ -100,7 +100,7 @@ export const FAT_TABLE_ROWS: FaturalarTableRow[] = [
     id: "5",
     invoiceNo: "INV-2025-0252",
     invoiceMeta: "13.05.2025 10:05",
-    customer: "Marmara Lojistik A.Ş.",
+    customer: "Marmara Lojistik A.�?.",
     amount: "₺56.300,00",
     status: "İptal",
     payment: "Bekliyor"
@@ -109,7 +109,7 @@ export const FAT_TABLE_ROWS: FaturalarTableRow[] = [
     id: "6",
     invoiceNo: "INV-2025-0251",
     invoiceMeta: "12.05.2025 15:22",
-    customer: "Nova Elektrik Ltd. Şti.",
+    customer: "Nova Elektrik Ltd. �?ti.",
     amount: "₺31.480,00",
     status: "Kesildi",
     payment: "Ödendi"
@@ -118,7 +118,7 @@ export const FAT_TABLE_ROWS: FaturalarTableRow[] = [
     id: "7",
     invoiceNo: "INV-2025-0250",
     invoiceMeta: "11.05.2025 08:40",
-    customer: "Penta Teknoloji A.Ş.",
+    customer: "Penta Teknoloji A.�?.",
     amount: "₺94.200,00",
     status: "Taslak",
     payment: "Bekliyor"
@@ -142,7 +142,7 @@ export const FAT_CONTEXT_BY_ROW: Record<string, FaturalarContextDetail> = {
     invoiceNo: "INV-2025-0256",
     status: "Kesildi",
     createdAt: "17.05.2025 14:32",
-    customer: "ABC Otomasyon San. ve Tic. Ltd. Şti.",
+    customer: "ABC Otomasyon San. ve Tic. Ltd. �?ti.",
     accountCode: "CAR-1001",
     amount: "₺85.000,00",
     currency: "TRY",
@@ -168,3 +168,4 @@ export function fatPaymentBadgeClass(payment: FaturalarPayment): string {
   if (payment === "Kısmi Ödeme") return " fat-badge--partial";
   return " fat-badge--waiting";
 }
+

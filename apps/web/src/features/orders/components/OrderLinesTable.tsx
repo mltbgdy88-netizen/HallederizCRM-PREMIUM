@@ -1,4 +1,4 @@
-import type { SaleOrderLine } from "@hallederiz/types";
+﻿import type { SaleOrderLine } from "@hallederiz/types";
 import { money } from "../utils";
 
 export function OrderLinesTable({ lines }: { lines: SaleOrderLine[] }) {
@@ -44,3 +44,4 @@ export function OrderLinesTable({ lines }: { lines: SaleOrderLine[] }) {
     </div>
   );
 }
+

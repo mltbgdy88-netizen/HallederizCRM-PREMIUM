@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export const AIC_PAGE = {
   title: "AI İçgörüler",
   subtitle: "Verilerinizden elde edilen yapay zeka destekli özetler ve öneriler."
@@ -119,3 +119,4 @@ export const AIC_LIST_FOOTER = {
   page: "1 / 1",
   rows: "10 satır"
 };
+

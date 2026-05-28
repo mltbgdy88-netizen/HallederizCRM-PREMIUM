@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type GkopChannelTab = "all" | "whatsapp" | "mail" | "sms";
 
 export type GkopConversation = {
@@ -221,3 +221,4 @@ export const GKOP_COMPOSER = {
   placeholder: "Mesajınızı yazın...",
   hint: "Enter ile gönder, Shift + Enter ile yeni satır"
 };
+

@@ -1,4 +1,4 @@
-import type { PaymentReceipt, SaleOrder, WarehouseOrder } from "@hallederiz/types";
+﻿import type { PaymentReceipt, SaleOrder, WarehouseOrder } from "@hallederiz/types";
 import { dateLabel } from "../utils";
 
 export function OrderTimelinePanel({ order, payments, warehouseOrders }: { order: SaleOrder; payments: PaymentReceipt[]; warehouseOrders: WarehouseOrder[] }) {
@@ -22,3 +22,4 @@ export function OrderTimelinePanel({ order, payments, warehouseOrders }: { order
     </div>
   );
 }
+

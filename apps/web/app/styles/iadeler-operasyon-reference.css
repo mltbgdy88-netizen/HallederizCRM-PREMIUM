@@ -1,4 +1,4 @@
-/* iadarişler Operasyon Masası — iadarisler-operasyon-masasi-acik-mod.png */
+﻿/* iadarişler Operasyon Masası — iadarisler-operasyon-masasi-acik-mod.png */
 
 .iad-home {
   --iad-gap: clamp(6px, 0.75vh, 9px);
@@ -657,3 +657,4 @@
   cursor: pointer;
   text-decoration: none;
 }
+

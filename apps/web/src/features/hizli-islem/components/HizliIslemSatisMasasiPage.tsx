@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useHizliIslemSatisMasasiReferenceData } from "@/features/hizli-islem/hooks/use-hizli-islem-satis-masasi-reference-data";
 
@@ -142,7 +142,7 @@ export function HizliIslemSatisMasasiPage() {
           </dl>
           <p className="hism-grand">{summary.grand}</p>
           <label>
-            <span>Ödeme Şekli</span>
+            <span>Ödeme �?ekli</span>
             <input type="text" readOnly />
           </label>
           <label>
@@ -169,3 +169,4 @@ export function HizliIslemSatisMasasiPage() {
     </div>
   );
 }
+

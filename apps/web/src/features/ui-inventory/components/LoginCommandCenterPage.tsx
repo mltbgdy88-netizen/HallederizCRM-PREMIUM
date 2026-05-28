@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -77,7 +77,7 @@ function LoginCommandCenterInner() {
     const nextErrors: { email?: string; password?: string; tenant?: string } = {};
     if (!tenantSlug.trim()) nextErrors.tenant = "Kiracı kodu gerekli.";
     if (!email.trim()) nextErrors.email = "E-posta gerekli.";
-    if (!password.trim()) nextErrors.password = "Şifre gerekli.";
+    if (!password.trim()) nextErrors.password = "�?ifre gerekli.";
     if (Object.keys(nextErrors).length > 0) {
       setFieldErrors(nextErrors);
       return;
@@ -197,7 +197,7 @@ function LoginCommandCenterInner() {
                   ) : null}
                 </label>
                 <label className="hz-login-center__field" htmlFor="login-password">
-                  <span className="hz-login-center__field-label">Şifre</span>
+                  <span className="hz-login-center__field-label">�?ifre</span>
                   <input
                     id="login-password"
                     name="password"
@@ -394,3 +394,4 @@ export function LoginCommandCenterPage() {
     </Suspense>
   );
 }
+

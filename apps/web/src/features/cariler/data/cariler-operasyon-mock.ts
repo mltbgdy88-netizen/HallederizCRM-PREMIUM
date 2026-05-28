@@ -1,4 +1,4 @@
-// @ts-nocheck
+﻿// @ts-nocheck
 export type CarilerKpi = {
   id: string;
   label: string;
@@ -60,7 +60,7 @@ export const COM_KPIS: CarilerKpi[] = [
 export const COM_FILTER_SEARCH_PLACEHOLDER = "Cari ara (kod, unvan, vergi no...)";
 
 export const COM_FILTERS: { id: string; label: string; options: CarilerFilterOption[] }[] = [
-  { id: "city", label: "Şehir", options: [{ label: "Tümü", value: "all" }] },
+  { id: "city", label: "�?ehir", options: [{ label: "Tümü", value: "all" }] },
   { id: "risk", label: "Risk", options: [{ label: "Tümü", value: "all" }] },
   { id: "balance", label: "Bakiye", options: [{ label: "Tümü", value: "all" }] }
 ];
@@ -72,7 +72,7 @@ export const COM_TABLE_ROWS: CarilerTableRow[] = [
   {
     id: "1",
     code: "CR-10001",
-    customer: "Yılmazlar İnşaat San. ve Tic. A.Ş.",
+    customer: "Yılmazlar İnşaat San. ve Tic. A.�?.",
     city: "İstanbul",
     balance: "₺125.430,00",
     risk: "Orta"
@@ -80,7 +80,7 @@ export const COM_TABLE_ROWS: CarilerTableRow[] = [
   {
     id: "2",
     code: "CR-10015",
-    customer: "Demir Çelik Tic. Ltd. Şti.",
+    customer: "Demir Çelik Tic. Ltd. �?ti.",
     city: "Ankara",
     balance: "₺84.210,50",
     risk: "Düşük"
@@ -88,7 +88,7 @@ export const COM_TABLE_ROWS: CarilerTableRow[] = [
   {
     id: "3",
     code: "CR-10028",
-    customer: "Akdeniz Gıda A.Ş.",
+    customer: "Akdeniz Gıda A.�?.",
     city: "Antalya",
     balance: "₺198.750,00",
     risk: "Yüksek"
@@ -96,7 +96,7 @@ export const COM_TABLE_ROWS: CarilerTableRow[] = [
   {
     id: "4",
     code: "CR-10042",
-    customer: "Ege Mobilya Sanayi Ltd. Şti.",
+    customer: "Ege Mobilya Sanayi Ltd. �?ti.",
     city: "İzmir",
     balance: "₺56.890,00",
     risk: "Düşük"
@@ -104,7 +104,7 @@ export const COM_TABLE_ROWS: CarilerTableRow[] = [
   {
     id: "5",
     code: "CR-10055",
-    customer: "Karadeniz Lojistik A.Ş.",
+    customer: "Karadeniz Lojistik A.�?.",
     city: "Samsun",
     balance: "₺312.400,00",
     risk: "Yüksek"
@@ -112,7 +112,7 @@ export const COM_TABLE_ROWS: CarilerTableRow[] = [
   {
     id: "6",
     code: "CR-10068",
-    customer: "Marmara Tekstil Tic. Ltd. Şti.",
+    customer: "Marmara Tekstil Tic. Ltd. �?ti.",
     city: "Bursa",
     balance: "₺42.180,00",
     risk: "Orta"
@@ -120,7 +120,7 @@ export const COM_TABLE_ROWS: CarilerTableRow[] = [
   {
     id: "7",
     code: "CR-10081",
-    customer: "Anadolu Yapı Malzemeleri A.Ş.",
+    customer: "Anadolu Yapı Malzemeleri A.�?.",
     city: "Konya",
     balance: "₺91.650,00",
     risk: "Düşük"
@@ -128,7 +128,7 @@ export const COM_TABLE_ROWS: CarilerTableRow[] = [
   {
     id: "8",
     code: "CR-10094",
-    customer: "Güney Otomotiv San. Tic. A.Ş.",
+    customer: "Güney Otomotiv San. Tic. A.�?.",
     city: "Adana",
     balance: "₺167.320,00",
     risk: "Orta"
@@ -150,7 +150,7 @@ export const COM_CONTEXT_BY_ROW: Record<string, CarilerContextDetail> = {
   "1": {
     rowId: "1",
     code: "CR-10001",
-    name: "Yılmazlar İnşaat San. ve Tic. A.Ş.",
+    name: "Yılmazlar İnşaat San. ve Tic. A.�?.",
     status: "Aktif",
     taxNo: "1234567890",
     taxOffice: "Kadıköy",
@@ -168,7 +168,7 @@ export const COM_CONTEXT_BY_ROW: Record<string, CarilerContextDetail> = {
   "2": {
     rowId: "2",
     code: "CR-10015",
-    name: "Demir Çelik Tic. Ltd. Şti.",
+    name: "Demir Çelik Tic. Ltd. �?ti.",
     status: "Aktif",
     taxNo: "9876543210",
     taxOffice: "Çankaya",
@@ -185,7 +185,7 @@ export const COM_CONTEXT_BY_ROW: Record<string, CarilerContextDetail> = {
   "3": {
     rowId: "3",
     code: "CR-10028",
-    name: "Akdeniz Gıda A.Ş.",
+    name: "Akdeniz Gıda A.�?.",
     status: "Aktif",
     taxNo: "4567891230",
     taxOffice: "Muratpaşa",
@@ -205,3 +205,4 @@ export const COM_CONTEXT_BY_ROW: Record<string, CarilerContextDetail> = {
 export function getComContext(rowId: string): CarilerContextDetail {
   return COM_CONTEXT_BY_ROW[rowId] ?? COM_CONTEXT_BY_ROW["1"]!;
 }
+

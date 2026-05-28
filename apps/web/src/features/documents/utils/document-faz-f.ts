@@ -1,4 +1,4 @@
-import type { Document, DocumentDelivery } from "@hallederiz/types";
+﻿import type { Document, DocumentDelivery } from "@hallederiz/types";
 import { getDocumentDeliveryStatusLabel } from "../queries/document-mock-data";
 
 const TEMPLATE_VERSION_BY_TYPE: Partial<Record<Document["type"], string>> = {
@@ -58,3 +58,4 @@ export function summarizeDocumentDeliveries(deliveries: DocumentDelivery[]): str
   const status = getDocumentDeliveryStatusLabel(d.status);
   return `${ch}: ${status}${d.sentAt ? ` · ${new Date(d.sentAt).toLocaleString("tr-TR")}` : ""}`;
 }
+

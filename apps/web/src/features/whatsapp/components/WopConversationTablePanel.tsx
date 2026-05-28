@@ -54,12 +54,12 @@ function ConversationRow({ row }: { row: WopConversation }) {
               <path d="M21 11.5a8.5 8.5 0 0 1-8.5 8.5H7l-4 3V11.5A8.5 8.5 0 0 1 11.5 3h1A8.5 8.5 0 0 1 21 11.5z" />
             </svg>
           </button>
-          <button type="button" className="wop-icon-btn" aria-label="Yeni sekmede aÃ§">
+          <button type="button" className="wop-icon-btn" aria-label="Yeni sekmede aç">
             <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} aria-hidden>
               <path d="M14 3h7v7M10 14 21 3M21 14v7h-7M3 10V3h7" />
             </svg>
           </button>
-          <button type="button" className="wop-icon-btn" aria-label="DiÄŸer">
+          <button type="button" className="wop-icon-btn" aria-label="Diğer">
             <svg width={14} height={14} viewBox="0 0 24 24" fill="currentColor" aria-hidden>
               <circle cx="12" cy="5" r="1.5" />
               <circle cx="12" cy="12" r="1.5" />
@@ -87,7 +87,7 @@ export function WopConversationTablePanel({
         <table className="wop-table">
           <thead>
             <tr>
-              <th>KonuÅŸma</th>
+              <th>Konuşma</th>
               <th>Cari</th>
               <th>Son Mesaj</th>
               <th>Durum</th>
@@ -107,8 +107,8 @@ export function WopConversationTablePanel({
           {pagination.range} / {pagination.total}
         </span>
         <nav className="wop-pager" aria-label="Sayfalama">
-          <button type="button" className="wop-pager-btn" aria-label="Ã–nceki">
-            â€¹
+          <button type="button" className="wop-pager-btn" aria-label="Önceki">
+            ‹
           </button>
           <button type="button" className="wop-pager-num wop-pager-num--active">
             {pagination.page}
@@ -119,16 +119,17 @@ export function WopConversationTablePanel({
           <button type="button" className="wop-pager-num">
             3
           </button>
-          <span className="wop-pager-ellipsis">â€¦</span>
+          <span className="wop-pager-ellipsis">…</span>
           <button type="button" className="wop-pager-num">
             15
           </button>
           <button type="button" className="wop-pager-btn" aria-label="Sonraki">
-            â€º
+            ›
           </button>
         </nav>
       </footer>
     </article>
   );
 }
+
 

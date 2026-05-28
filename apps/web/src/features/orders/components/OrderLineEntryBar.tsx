@@ -1,4 +1,4 @@
-import type { SaleOrder } from "@hallederiz/types";
+﻿import type { SaleOrder } from "@hallederiz/types";
 
 export function OrderLineEntryBar({ order }: { order: SaleOrder }) {
   return (
@@ -44,3 +44,4 @@ export function OrderLineEntryBar({ order }: { order: SaleOrder }) {
     </section>
   );
 }
+

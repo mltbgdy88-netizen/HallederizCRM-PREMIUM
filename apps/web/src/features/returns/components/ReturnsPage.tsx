@@ -20,26 +20,26 @@ function ReturnFilterBar() {
     <section className="hz-filter-card hz-returns-filter">
       <div className="hz-filter-grid">
         <label>
-          MÃ¼ÅŸteri
+          Müşteri
           <input placeholder="Cari veya iade no ara" />
         </label>
         <label>
           Durum
           <select defaultValue="">
-            <option value="">TÃ¼m durumlar</option>
+            <option value="">Tüm durumlar</option>
             <option>Taslak</option>
-            <option>OnaylandÄ±</option>
-            <option>TamamlandÄ±</option>
+            <option>Onaylandı</option>
+            <option>Tamamlandı</option>
           </select>
         </label>
         <label>
-          BaÄŸlÄ± sipariÅŸ
-          <input placeholder="SipariÅŸ no" />
+          Bağlı sipariş
+          <input placeholder="Sipariş no" />
         </label>
         <label>
           Tarih
           <select defaultValue="month">
-            <option value="today">BugÃ¼n</option>
+            <option value="today">Bugün</option>
             <option value="week">Bu hafta</option>
             <option value="month">Bu ay</option>
           </select>
@@ -63,7 +63,7 @@ function ReturnPreviewPanel({
   if (!returnRecord) {
     return (
       <aside className="hz-commercial-entity-side hz-returns-side">
-        <p className="hz-commercial-entity-side-empty">KayÄ±t seÃ§ilmedi.</p>
+        <p className="hz-commercial-entity-side-empty">Kayıt seçilmedi.</p>
       </aside>
     );
   }
@@ -72,16 +72,16 @@ function ReturnPreviewPanel({
 
   return (
     <aside className="hz-commercial-entity-side hz-returns-side">
-      <h3>Ä°ade Ã¶nizleme</h3>
+      <h3>İade önizleme</h3>
       <ul className="hz-commercial-entity-side-list">
         <li>
-          <strong>Ä°ade:</strong> {returnRecord.returnNo}
+          <strong>İade:</strong> {returnRecord.returnNo}
         </li>
         <li>
-          <strong>SipariÅŸ:</strong> {returnRecord.orderNo ?? "â€”"}
+          <strong>Sipariş:</strong> {returnRecord.orderNo ?? "—"}
         </li>
         <li>
-          <strong>Cari:</strong> {customerName ?? "â€”"}
+          <strong>Cari:</strong> {customerName ?? "—"}
         </li>
         <li>
           <strong>Durum:</strong> {getReturnStatusLabel(returnRecord.status)}
@@ -106,9 +106,9 @@ function ReturnPreviewPanel({
           type="button"
           className="hz-btn hz-btn-secondary hz-toolbar-btn"
           style={{ flex: 1 }}
-          onClick={() => pushToast("Taslak hazÄ±rlandÄ±: iade onaya gÃ¶nderildi.")}
+          onClick={() => pushToast("Taslak hazırlandı: iade onaya gönderildi.")}
         >
-          Onaya gÃ¶nder
+          Onaya gönder
         </button>
       </div>
     </aside>
@@ -171,33 +171,33 @@ export function ReturnsPage() {
       header={
         <>
           <CommercialOperasyonDeskIntro
-            title="Ä°ade Operasyon MasasÄ±"
-            subtitle="Ä°ade sÃ¼recini stok, onay ve belge etkisiyle tek ekranda yÃ¶netin."
+            title="İade Operasyon Masası"
+            subtitle="İade sürecini stok, onay ve belge etkisiyle tek ekranda yönetin."
             icon="rotate-ccw"
             actions={
               <>
                 <Link href="/iadeler/yeni" className="hz-commercial-desk-btn hz-commercial-desk-btn--primary">
                   <LucideIcon name="plus" size={14} />
-                  Yeni Ä°ade
+                  Yeni İade
                 </Link>
                 <Link href="/hizli-islem/iade" className="hz-commercial-desk-btn hz-commercial-desk-btn--secondary">
                   <LucideIcon name="zap" size={14} />
-                  HÄ±zlÄ± Ä°ade
+                  Hızlı İade
                 </Link>
                 <button
                   type="button"
                   className="hz-commercial-desk-btn hz-commercial-desk-btn--secondary"
-                  onClick={() => pushToast("DÄ±ÅŸa aktarma backend onay akÄ±ÅŸÄ±na baÄŸlÄ±dÄ±r; demo modunda simÃ¼le edildi.")}
+                  onClick={() => pushToast("Dışa aktarma backend onay akışına bağlıdır; demo modunda simüle edildi.")}
                 >
                   <LucideIcon name="download" size={14} />
-                  DÄ±ÅŸa Aktar
+                  Dışa Aktar
                 </button>
               </>
             }
           />
-          <div className="hz-commercial-entity-kpi-strip" aria-label="Ä°ade Ã¶zeti">
+          <div className="hz-commercial-entity-kpi-strip" aria-label="İade özeti">
             <div className="hz-commercial-entity-kpi">
-              <span className="hz-commercial-entity-kpi-label">KayÄ±t</span>
+              <span className="hz-commercial-entity-kpi-label">Kayıt</span>
               <span className="hz-commercial-entity-kpi-value">{returns.length}</span>
             </div>
             <div className="hz-commercial-entity-kpi">
@@ -214,12 +214,12 @@ export function ReturnsPage() {
             </div>
             <div className="hz-commercial-entity-kpi">
               <span className="hz-commercial-entity-kpi-label">Belge notu</span>
-              <span className="hz-commercial-entity-kpi-value">{returns.length > 0 ? "Var" : "â€”"}</span>
+              <span className="hz-commercial-entity-kpi-value">{returns.length > 0 ? "Var" : "—"}</span>
             </div>
           </div>
           {dataSourceConfig.useDemoData ? (
             <p className="hz-commercial-entity-preview-band" role="status">
-              Ã–rnek veri modu: liste kayÄ±tlarÄ± demo amaÃ§lÄ±dÄ±r; canlÄ± operasyon sonucu deÄŸildir.
+              Örnek veri modu: liste kayıtları demo amaçlıdır; canlı operasyon sonucu değildir.
             </p>
           ) : null}
         </>
@@ -228,26 +228,26 @@ export function ReturnsPage() {
       list={
         <div className="hz-commercial-entity-list-wrap">
           {loading ? (
-            <LoadingState title="Ä°adeler yÃ¼kleniyor" message="Ä°ade etkileri ve belge durumlarÄ± hazÄ±rlanÄ±yor." />
+            <LoadingState title="İadeler yükleniyor" message="İade etkileri ve belge durumları hazırlanıyor." />
           ) : loadError ? (
-            <EmptyState title="Ä°ade listesi alÄ±namadÄ±" message="BaÄŸlantÄ± kurulamadÄ±. LÃ¼tfen tekrar deneyin." />
+            <EmptyState title="İade listesi alınamadı" message="Bağlantı kurulamadı. Lütfen tekrar deneyin." />
           ) : returns.length === 0 ? (
-            <EmptyState title="Ä°ade bulunamadÄ±" message="KayÄ±t yok veya filtre sonucu boÅŸ." />
+            <EmptyState title="İade bulunamadı" message="Kayıt yok veya filtre sonucu boş." />
           ) : (
             <>
               <div className="hz-commercial-entity-table-head hz-returns-table-head" role="row">
-                <span>Ä°ade no</span>
+                <span>İade no</span>
                 <span>Cari</span>
-                <span>SipariÅŸ</span>
+                <span>Sipariş</span>
                 <span>Durum</span>
                 <span>Tarih</span>
                 <span>Etki</span>
-                <span>AKSÄ°YON</span>
+                <span>AKSİYON</span>
               </div>
               <div className="hz-commercial-entity-table-body">
                 {pagedReturns.map((returnRecord) => {
                   const impact = calculateReturnImpact(returnRecord);
-                  const customerName = customers.find((c) => c.id === returnRecord.customerId)?.name ?? "â€”";
+                  const customerName = customers.find((c) => c.id === returnRecord.customerId)?.name ?? "—";
                   return (
                     <div
                       key={returnRecord.id}
@@ -261,7 +261,7 @@ export function ReturnsPage() {
                     >
                       <span>{returnRecord.returnNo}</span>
                       <span>{customerName}</span>
-                      <span>{returnRecord.orderNo ?? "â€”"}</span>
+                      <span>{returnRecord.orderNo ?? "—"}</span>
                       <span>
                         <span className={statusBadgeClass(returnRecord.status)}>
                           {getReturnStatusLabel(returnRecord.status)}
@@ -278,7 +278,7 @@ export function ReturnsPage() {
                             router.push(`/iadeler/${returnRecord.id}`);
                           }}
                         >
-                          Ä°ncele
+                          İncele
                         </button>
                       </span>
                     </div>
@@ -300,4 +300,5 @@ export function ReturnsPage() {
     />
   );
 }
+
 

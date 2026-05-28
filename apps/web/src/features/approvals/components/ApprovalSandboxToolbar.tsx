@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useCallback, useState } from "react";
 import type { ApprovalClient } from "../api/approval-client";
@@ -69,3 +69,4 @@ export function ApprovalSandboxToolbar({
     </section>
   );
 }
+

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { User } from "@hallederiz/types";
 import { EntityListPageTemplate, LoadingState } from "@hallederiz/ui";
@@ -257,3 +257,4 @@ export function UsersManagementPage() {
     />
   );
 }
+

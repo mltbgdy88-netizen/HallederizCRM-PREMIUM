@@ -1,4 +1,4 @@
-import { buildOfferLineFromProduct, calculateOfferTotals } from "@hallederiz/domain";
+﻿import { buildOfferLineFromProduct, calculateOfferTotals } from "@hallederiz/domain";
 import type { Offer, OfferFollowUp, OfferStatus } from "@hallederiz/types";
 import { getCustomerById } from "../../customers/queries/customer-mock-data";
 import { getStockCatalog } from "../../stock/queries/get-stock-catalog";
@@ -259,3 +259,4 @@ export function getOfferStatusLabel(status: OfferStatus): string {
 
   return labels[status];
 }
+
