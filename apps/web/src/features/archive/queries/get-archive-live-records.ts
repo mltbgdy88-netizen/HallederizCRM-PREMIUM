@@ -1,4 +1,4 @@
-import type { ArchiveRecord as ApiArchiveRecord } from "@hallederiz/types";
+﻿import type { ArchiveRecord as ApiArchiveRecord } from "@hallederiz/types";
 import { isOfflineLikeError } from "../../../lib/user-facing-data-error";
 import { mapApiArchiveRecordToUi } from "../utils/map-api-archive-record";
 import type { ArchiveRecord } from "../types";
@@ -41,3 +41,4 @@ export async function getArchiveLiveRecords(): Promise<ArchiveLiveLoadResult> {
     };
   }
 }
+

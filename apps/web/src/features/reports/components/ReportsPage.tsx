@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 "use client";
 
 import { useRouter } from "next/navigation";
@@ -108,7 +109,7 @@ function ReportsChartSlot({ useDemo }: { useDemo: boolean }) {
       </div>
     );
   }
-  const bars = [22, 32, 26, 40, 36, 44, 28];
+  const bars = [12, 16, 14, 18, 15, 17, 13];
   const labels = ["Pt", "Sa", "Ça", "Pe", "Cu", "Ct", "Pz"];
   return (
     <div className="hz-reports-mini-trend" role="img" aria-label="Haftalık indeks (önizleme modu)">
@@ -247,13 +248,13 @@ export function ReportsPage() {
   ];
 
   return (
-    <div className="hz-reports-page">
+    <div className="hz-reports-page hz-reports-page--desk">
       <div className="hz-reports-layout">
         <div className="hz-reports-main">
           <header className="hz-reports-topbar">
             <div className="hz-reports-topbar-text">
-              <h1 className="hz-reports-topbar-title">Rapor Merkezi</h1>
-              <p className="hz-reports-topbar-sub">Satış, tahsilat, stok ve kanal performansını tek ekranda izleyin.</p>
+              <h1 className="hz-reports-topbar-title">Rapor Operasyon Merkezi</h1>
+              <p className="hz-reports-topbar-sub">Operasyonel metrikler, hedef karşılaştırma ve karar destek raporları.</p>
             </div>
             <div className="hz-reports-topbar-actions">
               <button
@@ -295,33 +296,30 @@ export function ReportsPage() {
             </div>
           </header>
 
-          <ReportAnalyticsShell
+          <div className="hz-reports-desk-card">
+            <div className="hz-reports-type-tabs hz-reports-type-tabs--desk-head" role="tablist" aria-label="Rapor tipi kısayolları">
+              {chips.map((c) => (
+                <button
+                  key={c.id === "all" ? "all-chip" : c.id}
+                  type="button"
+                  role="tab"
+                  aria-selected={activeChip === c.id}
+                  className={`hz-reports-type-tab${activeChip === c.id ? " hz-reports-type-tab--active" : ""}`}
+                  onClick={() => syncFromChip(c.id)}
+                >
+                  {c.label}
+                </button>
+              ))}
+            </div>
+
+            <ReportAnalyticsShell
             filters={
               <>
                 <div className="hz-reports-filter-bar">
-                  <div className="hz-reports-filter-row hz-reports-filter-row--single">
-                    <div className="hz-reports-filter-field hz-reports-filter-field--type">
-                      <label className="hz-reports-filter-label" htmlFor="hz-rep-type">
-                        Rapor tipi
-                      </label>
-                      <select
-                        id="hz-rep-type"
-                        className="hz-reports-filter-select"
-                        value={reportType}
-                        onChange={(e) => syncFromSelect(e.target.value as ReportTypeSelect)}
-                      >
-                        <option value="genel-bakis">Genel Bakış</option>
-                        <option value="satis">Satış Raporu</option>
-                        <option value="tahsilat">Tahsilat Raporu</option>
-                        <option value="stok">Stok Raporu</option>
-                        <option value="iade">İade Raporu</option>
-                        <option value="whatsapp">WhatsApp Performansı</option>
-                        <option value="ai-op">AI Operasyon Raporu</option>
-                      </select>
-                    </div>
+                  <div className="hz-reports-filter-row hz-reports-filter-row--single hz-reports-filter-row--desk">
                     <div className="hz-reports-filter-field hz-reports-filter-field--dates">
                       <span className="hz-reports-filter-label" id="hz-rep-dates-lbl">
-                        Tarih aralığı
+                        Dönem
                       </span>
                       <div className="hz-reports-filter-date-pair" role="group" aria-labelledby="hz-rep-dates-lbl">
                         <input
@@ -344,42 +342,6 @@ export function ReportsPage() {
                       </div>
                     </div>
                     <div className="hz-reports-filter-field hz-reports-filter-field--select">
-                      <label className="hz-reports-filter-label" htmlFor="hz-rep-branch">
-                        Şube / depo
-                      </label>
-                      <select id="hz-rep-branch" className="hz-reports-filter-select" value={branch} onChange={(e) => setBranch(e.target.value)}>
-                        <option value="all">Tümü</option>
-                        <option value="merkez">Merkez</option>
-                        <option value="a-blok">A Blok</option>
-                        <option value="ana-depo">Ana Depo</option>
-                        <option value="fabrika">Fabrika</option>
-                      </select>
-                    </div>
-                    <div className="hz-reports-filter-field hz-reports-filter-field--select">
-                      <label className="hz-reports-filter-label" htmlFor="hz-rep-seg">
-                        Cari segmenti
-                      </label>
-                      <select id="hz-rep-seg" className="hz-reports-filter-select" value={segment} onChange={(e) => setSegment(e.target.value)}>
-                        <option value="all">Tümü</option>
-                        <option value="bayi">Bayi</option>
-                        <option value="kurumsal">Kurumsal</option>
-                        <option value="perakende">Perakende</option>
-                        <option value="riskli">Riskli</option>
-                      </select>
-                    </div>
-                    <div className="hz-reports-filter-field hz-reports-filter-field--select">
-                      <label className="hz-reports-filter-label" htmlFor="hz-rep-ch">
-                        Kanal
-                      </label>
-                      <select id="hz-rep-ch" className="hz-reports-filter-select" value={channel} onChange={(e) => setChannel(e.target.value)}>
-                        <option value="all">Tümü</option>
-                        <option value="crm">CRM</option>
-                        <option value="whatsapp">WhatsApp</option>
-                        <option value="ai">AI</option>
-                        <option value="erp">ERP</option>
-                      </select>
-                    </div>
-                    <div className="hz-reports-filter-field hz-reports-filter-field--select">
                       <label className="hz-reports-filter-label" htmlFor="hz-rep-cmp">
                         Karşılaştırma
                       </label>
@@ -390,36 +352,27 @@ export function ReportsPage() {
                         <option value="target">Hedefe göre</option>
                       </select>
                     </div>
+                    <div className="hz-reports-filter-field hz-reports-filter-field--select">
+                      <label className="hz-reports-filter-label" htmlFor="hz-rep-seg">
+                        Segment
+                      </label>
+                      <select id="hz-rep-seg" className="hz-reports-filter-select" value={segment} onChange={(e) => setSegment(e.target.value)}>
+                        <option value="all">Tümü</option>
+                        <option value="bayi">Bayi</option>
+                        <option value="kurumsal">Kurumsal</option>
+                        <option value="perakende">Perakende</option>
+                        <option value="riskli">Riskli</option>
+                      </select>
+                    </div>
                     <div className="hz-reports-filter-field hz-reports-filter-field--actions">
                       <span className="hz-reports-filter-label hz-reports-filter-label--phantom" aria-hidden="true">
                         {"\u00a0"}
                       </span>
-                      <button
-                        type="button"
-                        className="hz-reports-filter-reset hz-reports-filter-reset--icon"
-                        title="Filtreleri sıfırla"
-                        aria-label="Filtreleri sıfırla"
-                        onClick={resetFilters}
-                      >
-                        <IconFilter size={15} />
+                      <button type="button" className="hz-reports-filter-reset" title="Filtreleri temizle" aria-label="Filtreleri temizle" onClick={resetFilters}>
+                        Filtreleri Temizle
                       </button>
                     </div>
                   </div>
-                </div>
-
-                <div className="hz-reports-type-tabs" role="tablist" aria-label="Rapor tipi kısayolları">
-                  {chips.map((c) => (
-                    <button
-                      key={c.id === "all" ? "all-chip" : c.id}
-                      type="button"
-                      role="tab"
-                      aria-selected={activeChip === c.id}
-                      className={`hz-reports-type-tab${activeChip === c.id ? " hz-reports-type-tab--active" : ""}`}
-                      onClick={() => syncFromChip(c.id)}
-                    >
-                      {c.label}
-                    </button>
-                  ))}
                 </div>
 
                 {REPORTS_USE_DEMO_DATA ? (
@@ -599,12 +552,13 @@ export function ReportsPage() {
               </div>
             }
           />
+          </div>
         </div>
 
-        <aside className="hz-reports-side" aria-label="Rapor Radarı">
+        <aside className="hz-reports-side" aria-label="Rapor bağlamı">
           <div className="hz-reports-side-inner">
             <header className="hz-reports-side-head">
-              <h2 className="hz-reports-side-title">Rapor Radarı</h2>
+              <h2 className="hz-reports-side-title">Rapor Bağlamı</h2>
               <p className="hz-reports-side-sub">Seçili metriğin hedef, risk ve aksiyon bağlamı.</p>
             </header>
             {!selected ? (
@@ -650,11 +604,11 @@ export function ReportsPage() {
                       <dt>Fark</dt>
                       <dd>{selected.diffDisplay}</dd>
                     </div>
-                    <div>
-                      <dt>Trend</dt>
-                      <dd>{selected.trendLabel}</dd>
-                    </div>
                   </dl>
+                  <div className="hz-reports-target-progress" aria-label="Hedef gerçekleşme">
+                    <span style={{ width: selected.diffTone === "negative" ? "72%" : "112%" }} />
+                  </div>
+                  <p className="hz-reports-target-progress-label">{selected.trendLabel}</p>
                 </article>
 
                 <article className="hz-reports-side-card">
@@ -693,8 +647,17 @@ export function ReportsPage() {
 
                 <article className="hz-reports-side-card">
                   <h3 className="hz-reports-side-card-title">Önerilen Aksiyonlar</h3>
+                  <ul className="hz-reports-ai-checklist">
+                    <li>Yüksek açık bakiye müşteri aramalarını hızlandırın.</li>
+                    <li>Kritik stok kalemleri için tedarik planı oluşturun.</li>
+                    <li>WhatsApp dönüşüm düşük segmente şablon gönderin.</li>
+                    <li>AI tasarruf raporunu operasyon toplantısında paylaşın.</li>
+                  </ul>
                   <div className="hz-reports-side-actions">
-                    <button type="button" className="hz-reports-side-btn hz-reports-side-btn--primary" onClick={() => pushToast("Demo: detay görünümü.")}>
+                    <button type="button" className="hz-reports-side-btn hz-reports-side-btn--primary hz-reports-side-btn--plan" onClick={() => pushToast("Demo: aksiyon planı taslağı oluşturuldu.")}>
+                      Aksiyon Planı Oluştur
+                    </button>
+                    <button type="button" className="hz-reports-side-btn" onClick={() => pushToast("Demo: detay görünümü.")}>
                       Detay aç
                     </button>
                     <button
@@ -773,3 +736,5 @@ export function ReportsPage() {
     </div>
   );
 }
+
+

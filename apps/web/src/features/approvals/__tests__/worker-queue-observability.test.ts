@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import test from "node:test";
 import type { WorkerHealthResponse } from "../types";
 import { formatJobAttempts, formatWorkerQueueHeadline, takeJobsPreview } from "../utils/worker-queue-observability";
@@ -29,3 +29,4 @@ test("formatJobAttempts shows ratio or dash", () => {
   assert.equal(formatJobAttempts({ jobId: "x", jobType: "t", status: "pending", attempts: 1 }), "1");
   assert.equal(formatJobAttempts({ jobId: "x", jobType: "t", status: "pending" }), "—");
 });
+

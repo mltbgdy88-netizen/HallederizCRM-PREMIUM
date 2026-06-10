@@ -1,4 +1,4 @@
-export type RouteStatus = "implemented" | "shell" | "needs-api" | "planned";
+﻿export type RouteStatus = "implemented" | "shell" | "needs-api" | "planned";
 
 export type OwnerAgent = "cursor" | "codex" | "both";
 
@@ -36,3 +36,4 @@ export interface ProductRouteNode {
   suppressHeader?: boolean;
   children?: ProductRouteNode[];
 }
+

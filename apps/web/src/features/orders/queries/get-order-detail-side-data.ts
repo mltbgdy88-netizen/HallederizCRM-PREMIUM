@@ -1,4 +1,4 @@
-import type { Delivery, Invoice, PaymentReceipt, WarehouseOrder } from "@hallederiz/types";
+﻿import type { Delivery, Invoice, PaymentReceipt, WarehouseOrder } from "@hallederiz/types";
 import { dataSourceConfig, sdk } from "../../../lib/data-source";
 import { getDeliveryMockData } from "../../deliveries/queries/delivery-mock-data";
 import { getInvoiceMockData } from "../../invoices/queries/invoice-mock-data";
@@ -48,3 +48,4 @@ export async function getOrderDetailSideData(orderId: string | undefined): Promi
     return { payments: [], warehouseOrders: [], deliveries: [], invoices: [] };
   }
 }
+

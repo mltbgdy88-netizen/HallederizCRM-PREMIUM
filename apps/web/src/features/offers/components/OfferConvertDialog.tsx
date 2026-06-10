@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { convertOfferToOrderDraft } from "@hallederiz/domain";
 import type { Customer, Offer } from "@hallederiz/types";
@@ -68,3 +68,4 @@ export function OfferConvertDialog({
     </div>
   );
 }
+

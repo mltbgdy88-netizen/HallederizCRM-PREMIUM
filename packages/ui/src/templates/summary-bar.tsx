@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 
 export type SummaryBarProps = {
   children: ReactNode;
@@ -14,3 +14,4 @@ export function SummaryBar({ children, className = "", "aria-label": ariaLabel =
     </div>
   );
 }
+

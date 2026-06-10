@@ -1,4 +1,4 @@
-export type ReportDiffTone = "positive" | "negative" | "warning" | "neutral" | "risk";
+﻿export type ReportDiffTone = "positive" | "negative" | "warning" | "neutral" | "risk";
 
 /** Filtre chip / rapor tipi gruplaması */
 export type ReportCategoryChip =
@@ -28,3 +28,4 @@ export interface ReportMetricRow {
   updatedBy: string;
   updatedAtIso: string;
 }
+

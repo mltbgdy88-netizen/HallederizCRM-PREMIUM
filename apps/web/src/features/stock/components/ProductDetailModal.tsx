@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { resolveProductAvailability } from "@hallederiz/domain";
 import { TabSwitcher } from "@hallederiz/ui";
@@ -345,3 +345,4 @@ export function ProductDetailModal({
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-import type { OwnerAgent, ProductModuleGroup, ProductRouteNode, RouteStatus } from "./product-route-types";
+﻿import type { OwnerAgent, ProductModuleGroup, ProductRouteNode, RouteStatus } from "./product-route-types";
 
 function n(
   id: string,
@@ -81,7 +81,7 @@ export const PRODUCT_ROUTE_FOREST: ProductRouteNode[] = [
         ["atamalar", "Atamalar", "needs-api", "Konuşma atama kuralları."],
         ["etiketler", "Etiketler", "needs-api", "Etiket yönetimi."],
         ["sla-kurallari", "SLA kuralları", "needs-api", "SLA politikaları."],
-        ["sablonlar", "Şablonlar", "needs-api", "Yanıt şablonları."],
+        ["sablonlar", "�?ablonlar", "needs-api", "Yanıt şablonları."],
         ["handoff-kuyrugu", "Handoff kuyruğu", "needs-api", "Devretme kuyruğu."]
       ]),
       n("gelen-kutu-konusma", "konusma", "/gelen-kutu", "Konuşma", "Omnichannel", "inbox", "shell", OWNER, "Tekil konuşma görünümü; backend bağlantısı bekleniyor.", {
@@ -192,7 +192,7 @@ export const PRODUCT_ROUTE_FOREST: ProductRouteNode[] = [
   n("belgeler", "", "/belgeler", "Belgeler", "Operations", "documents", "implemented", OWNER, "Belge merkezi.", {
     children: ch("/belgeler", "Operations", "documents", OWNER, [
       ["liste", "Liste", "implemented", "Liste görünümü.", undefined, "redirect:/belgeler"],
-      ["sablonlar", "Şablonlar", "needs-api", "Belge şablonları."],
+      ["sablonlar", "�?ablonlar", "needs-api", "Belge şablonları."],
       ["arsiv", "Arşiv", "needs-api", "Arşiv görünümü."],
       ["yeni", "Yeni belge", "needs-api", "Belge oluşturma."]
     ])
@@ -266,8 +266,8 @@ export const PRODUCT_ROUTE_FOREST: ProductRouteNode[] = [
   }),
   n("kurulum", "", "/kurulum", "Kurulum", "Setup", "setup", "implemented", OWNER, "Kurulum ve veri hazırlığı.", {
     children: ch("/kurulum", "Setup", "setup", OWNER, [
-      ["sirket", "Şirket", "needs-api", "Şirket profili."],
-      ["subeler", "Şubeler", "needs-api", "Şube yönetimi."],
+      ["sirket", "�?irket", "needs-api", "�?irket profili."],
+      ["subeler", "�?ubeler", "needs-api", "�?ube yönetimi."],
       ["depolar", "Depolar", "needs-api", "Depo tanımları."],
       ["kullanicilar", "Kullanıcılar", "needs-api", "Kullanıcı davet ve roller."],
       ["roller-ve-izinler", "Roller ve izinler", "needs-api", "RBAC yapılandırması."],
@@ -351,3 +351,4 @@ export function shouldSuppressShellPageMeta(pathname: string): boolean {
 }
 
 export const PRODUCT_MODULE_ROOT_HREFS = PRODUCT_ROUTE_FOREST.map((m) => m.href);
+

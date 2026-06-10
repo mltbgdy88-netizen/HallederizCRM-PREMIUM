@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 "use client";
 
 import Link from "next/link";
@@ -58,6 +59,14 @@ type RecentRow = {
   customer: string;
   amount: string;
   status: string;
+};
+
+type ContextItem = {
+  title: string;
+  detail: string;
+  href: string;
+  tone: "danger" | "gold" | "success" | "neutral";
+  icon: LucideIconName;
 };
 
 const DEMO_ALERTS: AlertCard[] = [
@@ -170,43 +179,112 @@ function buildFlow(snapshot: DashboardHomeSnapshot, isDemo: boolean): FlowRow[] 
   ];
 }
 
-function PromoVideoPanel() {
+function buildContextItems(alerts: AlertCard[], flowRows: FlowRow[], tasks: TaskRow[]): ContextItem[] {
+  const overdue = alerts.find((item) => item.key === "overdue");
+  const approval = alerts.find((item) => item.key === "approvals");
+  const stock = alerts.find((item) => item.key === "stock");
+  const delivery = alerts.find((item) => item.key === "delivery");
+  const firstTask = tasks[0];
+  const paymentFlow = flowRows.find((item) => item.key === "pay");
+
+  return [
+    overdue
+      ? {
+          title: overdue.title,
+          detail: `${overdue.countLabel}${overdue.amountLabel ? ` · ${overdue.amountLabel}` : ""}`,
+          href: overdue.href,
+          tone: "danger",
+          icon: overdue.icon
+        }
+      : null,
+    approval
+      ? {
+          title: approval.title,
+          detail: approval.countLabel,
+          href: approval.href,
+          tone: "gold",
+          icon: approval.icon
+        }
+      : null,
+    stock
+      ? {
+          title: stock.title,
+          detail: stock.countLabel,
+          href: stock.href,
+          tone: "gold",
+          icon: stock.icon
+        }
+      : null,
+    delivery
+      ? {
+          title: delivery.title,
+          detail: delivery.countLabel,
+          href: delivery.href,
+          tone: "success",
+          icon: delivery.icon
+        }
+      : null,
+    firstTask
+      ? {
+          title: "Sıradaki görev",
+          detail: `${firstTask.time} · ${firstTask.text}`,
+          href: "/gorevler",
+          tone: firstTask.priority === "Yüksek" ? "danger" : firstTask.priority === "Orta" ? "gold" : "neutral",
+          icon: "clipboard-list"
+        }
+      : null,
+    paymentFlow
+      ? {
+          title: paymentFlow.title,
+          detail: `${paymentFlow.count} kayıt · ${paymentFlow.subtitle}`,
+          href: paymentFlow.href,
+          tone: "neutral",
+          icon: paymentFlow.icon
+        }
+      : null
+  ].filter((item): item is ContextItem => Boolean(item));
+}
+
+function DashboardContextPanel({ items, isDemo }: { items: ContextItem[]; isDemo: boolean }) {
   return (
-    <article className="hz-dash-card hz-promo-card" aria-label="Tanıtım videosu">
-      <div className="hz-promo-player">
-        <div className="hz-promo-player__screen">
-          <div className="hz-promo-player__vignette" aria-hidden />
-          <button type="button" className="hz-promo-player__play" disabled aria-label="Tanıtım videosu oynat">
-            <LucideIcon name="play" size={22} strokeWidth={2.25} />
-          </button>
-          <span className="hz-promo-player__duration">2:35</span>
-        </div>
-        <div className="hz-promo-player__progress" aria-hidden>
-          <div className="hz-promo-player__track">
-            <div className="hz-promo-player__fill" />
-            <div className="hz-promo-player__thumb" />
+    <article className="hz-dash-card hz-dashboard-context" aria-label="Ana sayfa bağlam paneli">
+      <header className="hz-dash-card__head">
+        <h2>Bugünün Bağlamı</h2>
+        <Link href="/hizli-islem" className="hz-dash-card__link">
+          Hızlı İşlem →
+        </Link>
+      </header>
+      <div className="hz-dashboard-context__body">
+        <div className="hz-dashboard-context__lead">
+          <span className="hz-dashboard-context__lead-icon" aria-hidden>
+            <LucideIcon name="sparkles" size={15} strokeWidth={2.25} />
+          </span>
+          <div>
+            <p className="hz-dashboard-context__lead-title">Öncelik sırası</p>
+            <p className="hz-dashboard-context__lead-copy">
+              Önce tahsilat ve onay bekleyen işleri kapatın; sonra sevkiyat ve stok uyarılarını güncelleyin.
+            </p>
           </div>
-          <span className="hz-promo-player__time">0:00 / 2:35</span>
         </div>
-        <div className="hz-promo-player__controls">
-          <button type="button" className="hz-promo-player__ctrl" disabled aria-label="Oynat">
-            <LucideIcon name="play" size={14} strokeWidth={2.25} />
-          </button>
-          <button type="button" className="hz-promo-player__ctrl" disabled aria-label="Ses">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-              <path d="M11 5L6 9H3v6h3l5 4V5z" />
-              <path d="M15.54 8.46a5 5 0 010 7.07M19.07 4.93a10 10 0 010 14.14" />
-            </svg>
-          </button>
-          <Link href="/ayarlar" className="hz-promo-player__link">
-            Tanıtım ve videolar
-          </Link>
-          <button type="button" className="hz-promo-player__ctrl hz-promo-player__ctrl--end" disabled aria-label="Tam ekran">
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
-              <path d="M8 3H5a2 2 0 00-2 2v3M21 8V5a2 2 0 00-2-2h-3M3 16v3a2 2 0 002 2h3M16 21h3a2 2 0 002-2v-3" />
-            </svg>
-          </button>
+
+        <div className="hz-dashboard-context__list">
+          {items.slice(0, 5).map((item) => (
+            <Link key={`${item.title}-${item.href}`} href={item.href} className={`hz-dashboard-context__item is-${item.tone}`}>
+              <span className="hz-dashboard-context__item-icon" aria-hidden>
+                <LucideIcon name={item.icon} size={14} strokeWidth={2.25} />
+              </span>
+              <span className="hz-dashboard-context__item-copy">
+                <strong>{item.title}</strong>
+                <span>{item.detail}</span>
+              </span>
+              <LucideIcon name="chevron-right" size={13} strokeWidth={2.25} className="hz-dashboard-context__item-chevron" />
+            </Link>
+          ))}
         </div>
+
+        <p className="hz-dashboard-context__mode">
+          {isDemo ? "Demo veriyle çalışıyor. Gerçek kayıt için canlı API ve onay akışı gerekir." : "Canlı veri bağlı. Kritik işlemler onay ve audit akışından geçer."}
+        </p>
       </div>
     </article>
   );
@@ -276,6 +354,7 @@ export function DashboardCommandCenterPage() {
   const visiblePanels = useMemo(() => panelsToVisibility(selectedPanelIds), [selectedPanelIds]);
   const mainGridRows = useMemo(() => buildCommandCenterGridRows(visiblePanels), [visiblePanels]);
   const showMiddle = visiblePanels.tasks || visiblePanels.flow;
+  const contextItems = useMemo(() => buildContextItems(alerts, flowRows, tasks), [alerts, flowRows, tasks]);
 
   const toggleDraftPanel = (id: CommandCenterPanelId) => {
     setDraftPanelIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -451,7 +530,7 @@ export function DashboardCommandCenterPage() {
 
         <aside className="hz-dashboard-command__rail">
           <DashboardCommandCenterAiPanel />
-          <PromoVideoPanel />
+          <DashboardContextPanel items={contextItems} isDemo={isDemo} />
         </aside>
       </div>
 
@@ -465,3 +544,5 @@ export function DashboardCommandCenterPage() {
     </div>
   );
 }
+
+

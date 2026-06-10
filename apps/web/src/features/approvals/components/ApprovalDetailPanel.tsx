@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { DetailPanel } from "@hallederiz/ui";
 import { useState } from "react";
@@ -227,3 +227,4 @@ export function ApprovalDetailPanel({
     </DetailPanel>
   );
 }
+

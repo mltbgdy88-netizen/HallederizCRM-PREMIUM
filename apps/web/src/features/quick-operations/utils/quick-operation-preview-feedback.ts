@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   QuickOperationPreviewResponse,
   QuickOperationSubmitRequest,
   QuickOperationValidationIssue,
@@ -112,3 +112,4 @@ export function mapPreviewActionError(error: unknown): string {
   }
   return "Önizleme şu anda alınamıyor.";
 }
+

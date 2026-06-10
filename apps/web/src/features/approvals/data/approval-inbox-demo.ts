@@ -1,4 +1,4 @@
-export type ApprovalInboxPriority = "kritik" | "yuksek" | "orta" | "dusuk" | "ai";
+﻿export type ApprovalInboxPriority = "kritik" | "yuksek" | "orta" | "dusuk" | "ai";
 export type ApprovalInboxStatus = "bekliyor" | "incelemede" | "onay_bekliyor" | "sure_asildi";
 export type ApprovalInboxViewId =
   | "kritik"
@@ -138,7 +138,7 @@ export const APPROVAL_INBOX_DEMO_ROWS: ApprovalInboxRecord[] = [
       at: "16.05.2026 08:40"
     },
     meta: {
-      tenant: "Hallederiz A.Ş.",
+      tenant: "Hallederiz A.�?.",
       branch: "Merkez",
       requester: "Ayşe Kaya",
       requestedAt: "14.05.2026 11:20"
@@ -156,7 +156,7 @@ export const APPROVAL_INBOX_DEMO_ROWS: ApprovalInboxRecord[] = [
     recentlyResolved: false,
     entityLabel: "Tahsilat planı #TP-2026-0044",
     workflowLabel: "Tahsilat → Vade uzatımı",
-    customerName: "Global Teknoloji A.Ş.",
+    customerName: "Global Teknoloji A.�?.",
     typeLabel: "Tahsilat",
     amountLabel: "₺128.400,00",
     slaLabel: "1g 6sa kaldı",
@@ -176,7 +176,7 @@ export const APPROVAL_INBOX_DEMO_ROWS: ApprovalInboxRecord[] = [
     },
     riskBullets: ["Vade uzatımı 45 gün; açık bakiye limitinin %72'si kullanılacak."],
     contextLinks: [
-      { label: "Cari: Delta A.Ş.", href: "/cariler" },
+      { label: "Cari: Delta A.�?.", href: "/cariler" },
       { label: "Açık siparişler", href: "/siparisler" }
     ],
     timeline: [
@@ -190,7 +190,7 @@ export const APPROVAL_INBOX_DEMO_ROWS: ApprovalInboxRecord[] = [
       at: "16.05.2026 08:12"
     },
     meta: {
-      tenant: "Hallederiz A.Ş.",
+      tenant: "Hallederiz A.�?.",
       branch: "Merkez",
       requester: "Mehmet Yılmaz",
       requestedAt: "15.05.2026 16:30"
@@ -208,7 +208,7 @@ export const APPROVAL_INBOX_DEMO_ROWS: ApprovalInboxRecord[] = [
     recentlyResolved: false,
     entityLabel: "Teklif #TK-2026-0188",
     workflowLabel: "Teklif → Sipariş",
-    customerName: "Global Teknoloji A.Ş.",
+    customerName: "Global Teknoloji A.�?.",
     typeLabel: "Fiyat İndirimi",
     amountLabel: "₺43.250,00 (%12,5)",
     slaLabel: "3g 20sa kaldı",
@@ -248,7 +248,7 @@ export const APPROVAL_INBOX_DEMO_ROWS: ApprovalInboxRecord[] = [
       at: "15.05.2026 17:22"
     },
     meta: {
-      tenant: "Hallederiz A.Ş.",
+      tenant: "Hallederiz A.�?.",
       branch: "İzmir",
       requester: "Ahmet Yıldız",
       requestedAt: "15.05.2026 10:05"
@@ -266,7 +266,7 @@ export const APPROVAL_INBOX_DEMO_ROWS: ApprovalInboxRecord[] = [
     recentlyResolved: false,
     entityLabel: "Fatura #FA-TED-2026-0091",
     workflowLabel: "Satın alma → Ödeme",
-    customerName: "Anadolu Otomotiv A.Ş.",
+    customerName: "Anadolu Otomotiv A.�?.",
     typeLabel: "Finans",
     amountLabel: "₺312.800,00",
     slaLabel: "18sa kaldı",
@@ -296,7 +296,7 @@ export const APPROVAL_INBOX_DEMO_ROWS: ApprovalInboxRecord[] = [
       at: "15.05.2026 15:40"
     },
     meta: {
-      tenant: "Hallederiz A.Ş.",
+      tenant: "Hallederiz A.�?.",
       branch: "Merkez",
       requester: "Zeynep Ak",
       requestedAt: "14.05.2026 09:15"
@@ -314,7 +314,7 @@ export const APPROVAL_INBOX_DEMO_ROWS: ApprovalInboxRecord[] = [
     recentlyResolved: false,
     entityLabel: "Cari limit #CL-8842",
     workflowLabel: "Cari → Risk limiti",
-    customerName: "Akdeniz Tekstil A.Ş.",
+    customerName: "Akdeniz Tekstil A.�?.",
     typeLabel: "Finans",
     amountLabel: "₺500.000,00",
     slaLabel: "6sa kaldı",
@@ -334,7 +334,7 @@ export const APPROVAL_INBOX_DEMO_ROWS: ApprovalInboxRecord[] = [
     },
     riskBullets: ["Son 6 ay gecikme günü ortalaması 11; limit artışı %40."],
     contextLinks: [
-      { label: "Cari: Ege Un A.Ş.", href: "/cariler" },
+      { label: "Cari: Ege Un A.�?.", href: "/cariler" },
       { label: "Açık bakiye özeti", href: "/tahsilatlar" }
     ],
     timeline: [
@@ -347,7 +347,7 @@ export const APPROVAL_INBOX_DEMO_ROWS: ApprovalInboxRecord[] = [
       at: "14.05.2026 10:00"
     },
     meta: {
-      tenant: "Hallederiz A.Ş.",
+      tenant: "Hallederiz A.�?.",
       branch: "Bursa",
       requester: "Ayşe Kaya",
       requestedAt: "13.05.2026 14:00"
@@ -395,7 +395,7 @@ export const APPROVAL_INBOX_DEMO_ROWS: ApprovalInboxRecord[] = [
       at: "15.05.2026 18:42"
     },
     meta: {
-      tenant: "Hallederiz A.Ş.",
+      tenant: "Hallederiz A.�?.",
       branch: "Merkez",
       requester: "Ayşe Kaya",
       requestedAt: "15.05.2026 18:40"
@@ -413,7 +413,7 @@ export const APPROVAL_INBOX_DEMO_ROWS: ApprovalInboxRecord[] = [
     recentlyResolved: false,
     entityLabel: "Sipariş #SO-2026-0148",
     workflowLabel: "Sipariş → Fabrika",
-    customerName: "Global Teknoloji A.Ş.",
+    customerName: "Global Teknoloji A.�?.",
     typeLabel: "Operasyon",
     amountLabel: "₺485.750,00",
     slaLabel: "2g 4sa kaldı",
@@ -446,7 +446,7 @@ export const APPROVAL_INBOX_DEMO_ROWS: ApprovalInboxRecord[] = [
       at: "15.05.2026 14:20"
     },
     meta: {
-      tenant: "Hallederiz A.Ş.",
+      tenant: "Hallederiz A.�?.",
       branch: "Merkez",
       requester: "Ayşe Kaya",
       requestedAt: "15.05.2026 09:30"
@@ -500,7 +500,7 @@ export const APPROVAL_INBOX_DEMO_ROWS: ApprovalInboxRecord[] = [
       at: "15.05.2026 13:05"
     },
     meta: {
-      tenant: "Hallederiz A.Ş.",
+      tenant: "Hallederiz A.�?.",
       branch: "Merkez",
       requester: "Sistem (AI)",
       requestedAt: "15.05.2026 13:00"
@@ -548,7 +548,7 @@ export const APPROVAL_INBOX_DEMO_ROWS: ApprovalInboxRecord[] = [
       at: "15.05.2026 16:50"
     },
     meta: {
-      tenant: "Hallederiz A.Ş.",
+      tenant: "Hallederiz A.�?.",
       branch: "Merkez",
       requester: "Mehmet Yılmaz",
       requestedAt: "12.05.2026 10:00"
@@ -593,10 +593,11 @@ export const APPROVAL_INBOX_DEMO_ROWS: ApprovalInboxRecord[] = [
       at: "15.05.2026 11:28"
     },
     meta: {
-      tenant: "Hallederiz A.Ş.",
+      tenant: "Hallederiz A.�?.",
       branch: "Ankara",
       requester: "Ayşe Kaya",
       requestedAt: "11.05.2026 08:20"
     }
   }
 ];
+

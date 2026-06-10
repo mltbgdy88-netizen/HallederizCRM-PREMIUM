@@ -1,0 +1,631 @@
+﻿/*
+ * Desk koyu mod — tam tarama (Sprint 1 + Restore)
+ * globals.css içindeki #fff / slate metin sızıntılarını masa kökü altında kapatır.
+ * layout: desk-dark-mode.css sonrası import.
+ */
+
+html:root[data-theme="dark"] :is(
+    .hz-stock-page--desk,
+    .hz-archive-page--desk,
+    .hz-reports-page--desk,
+    .hz-wa-page--desk,
+    .hz-dashboard-page--fit,
+    .hz-qop-page,
+    .hz-qop-page--wb,
+    .hz-approvals-command,
+    .hz-customers-page--desk,
+    .hz-orders-desk,
+    .hz-offers-page--desk,
+    .hz-entity-layer-desk,
+    .hz-tahsilatlar-desk,
+    .hz-teslimatlar-desk,
+    .hz-faturalar-desk,
+    .hz-iadeler-desk,
+    .hz-depo-desk,
+    .hz-fabrikalar-desk
+  ) {
+  --desk-input-bg: rgba(3, 12, 9, 0.55);
+  --desk-elevated: rgba(12, 32, 25, 0.9);
+  --hz-text-strong: var(--desk-text);
+  --hz-text-muted: var(--desk-muted);
+  --hz-text-subtle: var(--desk-muted);
+  --hz-surface: var(--desk-surface);
+  --hz-surface-soft: var(--desk-elevated);
+  --hz-border: var(--desk-border);
+  --hz-primary: var(--desk-green);
+  color: var(--desk-text);
+}
+
+/* Modül token köprüleri */
+html:root[data-theme="dark"] .hz-stock-page--desk {
+  --hz-stock-primary: var(--desk-green);
+  --hz-stock-surface: var(--desk-surface);
+  --hz-stock-bg: var(--desk-canvas);
+  --hz-stock-text: var(--desk-text);
+  --hz-stock-muted: var(--desk-muted);
+  --hz-stock-border: var(--desk-border);
+  --stock-paper: var(--desk-surface);
+  --stock-border: var(--desk-border);
+  --stock-text: var(--desk-text);
+  --stock-muted: var(--desk-muted);
+}
+
+html:root[data-theme="dark"] .hz-wa-page--desk {
+  --hz-wa-primary: var(--desk-green);
+  --hz-wa-text: var(--desk-text);
+  --hz-wa-muted: var(--desk-muted);
+  --hz-wa-border: var(--desk-border);
+  --wa-paper: var(--desk-surface);
+  --wa-border: var(--desk-border);
+  --wa-text: var(--desk-text);
+  --wa-muted: var(--desk-muted);
+}
+
+html:root[data-theme="dark"] .hz-orders-desk {
+  --orders-bg: var(--desk-canvas);
+  --orders-paper: var(--desk-surface);
+  --orders-surface: var(--desk-elevated);
+  --orders-text: var(--desk-text);
+  --orders-muted: var(--desk-muted);
+  --orders-border: var(--desk-border);
+  --orders-emerald-700: var(--desk-green);
+  --orders-emerald-950: var(--desk-text);
+  background: var(--desk-canvas) !important;
+}
+
+html:root[data-theme="dark"] .hz-offers-page--desk {
+  --offers-bg: var(--desk-canvas);
+  --offers-paper: var(--desk-surface);
+  --offers-surface: var(--desk-elevated);
+  --offers-text: var(--desk-text);
+  --offers-muted: var(--desk-muted);
+  --offers-border: var(--desk-border);
+  --offers-emerald: var(--desk-green);
+  --offers-emerald-strong: var(--desk-green);
+}
+
+/* ── Başlık / alt başlık / etiket metni ── */
+html:root[data-theme="dark"] :is(.hz-stock-page--desk, .hz-archive-page--desk, .hz-reports-page--desk, .hz-wa-page--desk)
+  :is(
+    [class*="topbar-sub"],
+    [class*="filter-label"],
+    [class*="list-header"],
+    [class*="side-sub"],
+    [class*="kpi-label"],
+    [class*="preview-band"],
+    [class*="dl"] dt,
+    [class*="context-label"]
+  ) {
+  color: var(--desk-muted) !important;
+}
+
+html:root[data-theme="dark"] :is(.hz-stock-page--desk, .hz-archive-page--desk, .hz-reports-page--desk, .hz-wa-page--desk)
+  :is(
+    [class*="topbar-title"],
+    [class*="desk-head"] h1,
+    [class*="side-title"],
+    [class*="side-card-title"],
+    [class*="kpi-value"],
+    [class*="cell--strong"],
+    [class*="dl"] dd
+  ) {
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] :is(.hz-stock-page--desk, .hz-archive-page--desk, .hz-reports-page--desk, .hz-wa-page--desk)
+  :is([class*="cell--muted"], [class*="ellipsis"]) {
+  color: var(--desk-muted) !important;
+}
+
+/* ── KPI / stat kartları ── */
+html:root[data-theme="dark"] :is(.hz-stock-page--desk, .hz-archive-page--desk, .hz-reports-page--desk, .hz-wa-page--desk, .hz-customers-page--desk, .hz-orders-desk, .hz-offers-page--desk)
+  :is(
+    [class*="kpi"]:not([class*="kpi-strip"]),
+    [class*="-stat"]:not([class*="stats"]):not([class*="status"])
+  ) {
+  background: var(--desk-surface) !important;
+  border-color: var(--desk-border) !important;
+  box-shadow: none !important;
+}
+
+html:root[data-theme="dark"] :is(.hz-stock-page--desk, .hz-archive-page--desk, .hz-reports-page--desk, .hz-wa-page--desk, .hz-customers-page--desk, .hz-orders-desk, .hz-offers-page--desk)
+  [class*="kpi-ico"] {
+  background: rgba(44, 255, 154, 0.1) !important;
+  border-color: var(--desk-border-soft) !important;
+  color: var(--desk-green) !important;
+}
+
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-list-header,
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-side-card,
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-filter-bar,
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-side-card,
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-report-analytics-kpis article,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-side-card,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-category-chips,
+html:root[data-theme="dark"] .hz-stock-page--desk .hz-stock-context-card,
+html:root[data-theme="dark"] .hz-wa-page--desk .hz-wa-desk-context-card {
+  background: var(--desk-surface) !important;
+  border-color: var(--desk-border) !important;
+  color: var(--desk-text);
+}
+
+/* ── Outline / ikincil butonlar ── */
+html:root[data-theme="dark"] :is(.hz-stock-page--desk, .hz-archive-page--desk, .hz-reports-page--desk, .hz-wa-page--desk, .hz-customers-page--desk, .hz-orders-desk, .hz-offers-page--desk)
+  :is(
+    [class*="toolbar-btn--outline"],
+    [class*="toolbar-btn"]:not([class*="--primary"]),
+    [class*="desk-btn"]:not([class*="--primary"]),
+    [class*="context-btn"]:not([class*="--primary"]),
+    [class*="side-btn"]:not([class*="--primary"]),
+    [class*="intro-btn--secondary"],
+    [class*="button-secondary"],
+    [class*="filter-reset"],
+    [class*="toolbar__clear"],
+    [class*="act-icon"]
+  ) {
+  background: var(--desk-input-bg) !important;
+  border-color: var(--desk-border) !important;
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] :is(.hz-stock-page--desk, .hz-archive-page--desk, .hz-reports-page--desk, .hz-wa-page--desk, .hz-customers-page--desk, .hz-orders-desk, .hz-offers-page--desk)
+  :is(
+    [class*="toolbar-btn--outline"]:hover,
+    [class*="desk-btn"]:not([class*="--primary"]):hover,
+    [class*="filter-reset"]:hover
+  ) {
+  border-color: var(--desk-green) !important;
+  color: var(--desk-green) !important;
+}
+
+/* ── Chip (pasif) ── */
+html:root[data-theme="dark"] :is(.hz-archive-page--desk, .hz-reports-page--desk, .hz-orders-desk)
+  [class*="chip"]:not(.is-active):not([class*="--active"]) {
+  background: var(--desk-input-bg) !important;
+  border-color: var(--desk-border-soft) !important;
+  color: var(--desk-muted) !important;
+}
+
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-type-tab:not(.hz-reports-type-tab--active) {
+  background: var(--desk-input-bg) !important;
+  color: var(--desk-muted) !important;
+  border-color: var(--desk-border-soft) !important;
+}
+
+/* ── Rozetler ── */
+html:root[data-theme="dark"] :is(.hz-stock-page--desk, .hz-archive-page--desk, .hz-reports-page--desk, .hz-wa-page--desk, .hz-customers-page--desk, .hz-orders-desk, .hz-offers-page--desk)
+  [class*="badge"] {
+  border-color: var(--desk-border-soft) !important;
+}
+
+html:root[data-theme="dark"] :is(.hz-stock-page--desk, .hz-wa-page--desk, .hz-customers-page--desk, .hz-orders-desk, .hz-reports-page--desk)
+  :is(
+    [class*="badge--ok"],
+    [class*="badge--success"],
+    [class*="badge--risk-success"],
+    [class*="badge--wa-yes"]
+  ) {
+  background: rgba(44, 255, 154, 0.12) !important;
+  color: #2cff9a !important;
+}
+
+html:root[data-theme="dark"] :is(.hz-stock-page--desk, .hz-wa-page--desk, .hz-customers-page--desk, .hz-orders-desk, .hz-reports-page--desk)
+  :is(
+    [class*="badge--warn"],
+    [class*="badge--warning"],
+    [class*="badge--risk-warning"],
+    [class*="badge--gold"]
+  ) {
+  background: var(--desk-warn-soft) !important;
+  color: #fcd34d !important;
+}
+
+html:root[data-theme="dark"] :is(.hz-stock-page--desk, .hz-wa-page--desk, .hz-customers-page--desk, .hz-orders-desk, .hz-reports-page--desk)
+  :is([class*="badge--danger"], [class*="badge--risk-danger"]) {
+  background: rgba(255, 107, 107, 0.12) !important;
+  color: #ff8a8a !important;
+}
+
+html:root[data-theme="dark"] :is(.hz-stock-page--desk, .hz-wa-page--desk, .hz-customers-page--desk, .hz-reports-page--desk)
+  :is([class*="badge--neutral"], [class*="badge--wa-no"], [class*="badge--muted"]) {
+  background: var(--desk-input-bg) !important;
+  color: var(--desk-muted) !important;
+}
+
+/* Stok / WA desk özel rozetler */
+html:root[data-theme="dark"] .hz-stock-page--desk .hz-stock-context-badge,
+html:root[data-theme="dark"] .hz-wa-page--desk .hz-wa-desk-status-pill,
+html:root[data-theme="dark"] .hz-wa-page--desk .hz-wa-desk-priority {
+  border-color: var(--desk-border-soft) !important;
+}
+
+html:root[data-theme="dark"] .hz-wa-page--desk .hz-wa-desk-row,
+html:root[data-theme="dark"] .hz-wa-page--desk .hz-wa-desk-table tbody tr {
+  background: var(--desk-surface) !important;
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-wa-page--desk .hz-wa-desk-sla-note,
+html:root[data-theme="dark"] .hz-wa-page--desk .hz-wa-desk-context-notice {
+  background: var(--desk-warn-soft) !important;
+  border-color: var(--desk-warn-border) !important;
+  color: #fcd34d !important;
+}
+
+html:root[data-theme="dark"] .hz-stock-page--desk .hz-stock-context-notice {
+  color: #93c5fd !important;
+}
+
+/* ── Cariler finans satırları ── */
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-bal-line--recv {
+  color: #2cff9a !important;
+}
+
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-bal-line--pay {
+  color: #ff8a8a !important;
+}
+
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-side-radar-title,
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-side-radar-name,
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-side-radar-kv dd {
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-side-radar-kv dt,
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-side-radar-label,
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-side-radar-metric-k {
+  color: var(--desk-muted) !important;
+}
+
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-side-radar-act,
+html:root[data-theme="dark"] .hz-customers-page--desk .hz-customers-side-btn:not(.hz-customers-side-btn--primary) {
+  background: var(--desk-input-bg) !important;
+  border-color: var(--desk-border) !important;
+  color: var(--desk-text) !important;
+}
+
+/* ── Raporlar yan panel / tablo hücreleri ── */
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-cell,
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-dl dt,
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-side-sub {
+  color: var(--desk-muted) !important;
+}
+
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-dl dd,
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-side-strong,
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-topbar-sub {
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-toolbar-btn--outline {
+  background: var(--desk-input-bg) !important;
+  color: var(--desk-text) !important;
+}
+
+/* ── Arşiv ── */
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-toolbar-btn--outline,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-category-chip:not(.is-active) {
+  background: var(--desk-input-bg) !important;
+  color: var(--desk-muted) !important;
+  border-color: var(--desk-border-soft) !important;
+}
+
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-cell--muted {
+  color: var(--desk-muted) !important;
+}
+
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-preview-band {
+  color: #93c5fd !important;
+}
+
+/* ── Siparişler ── */
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-row,
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-table td {
+  background: var(--desk-surface) !important;
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-intro__sub,
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-list__footer,
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-toolbar__chip:not(.is-active) {
+  color: var(--desk-muted) !important;
+}
+
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-toolbar__chip.is-active {
+  background: var(--desk-green-soft) !important;
+  color: var(--desk-green) !important;
+  border-color: var(--desk-green) !important;
+}
+
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-intro-btn--secondary,
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-button-secondary,
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-button-tertiary {
+  background: var(--desk-input-bg) !important;
+  border-color: var(--desk-border) !important;
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-badge--success {
+  background: rgba(44, 255, 154, 0.12) !important;
+  color: #2cff9a !important;
+}
+
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-badge--warning,
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-badge--gold {
+  background: var(--desk-warn-soft) !important;
+  color: #fcd34d !important;
+}
+
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-badge--danger {
+  background: rgba(255, 107, 107, 0.12) !important;
+  color: #ff8a8a !important;
+}
+
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-badge--info {
+  background: var(--desk-info-soft) !important;
+  color: #93c5fd !important;
+}
+
+html:root[data-theme="dark"] .hz-orders-desk .hz-orders-badge--muted {
+  background: var(--desk-input-bg) !important;
+  color: var(--desk-muted) !important;
+}
+
+/* ── Teklifler ── */
+html:root[data-theme="dark"] .hz-offers-page--desk .hz-offers-row,
+html:root[data-theme="dark"] .hz-offers-page--desk .hz-offers-table td {
+  background: var(--desk-surface) !important;
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-offers-page--desk .hz-offers-context-card,
+html:root[data-theme="dark"] .hz-offers-page--desk .hz-offers-filter-bar {
+  background: var(--desk-surface) !important;
+  border-color: var(--desk-border) !important;
+}
+
+html:root[data-theme="dark"] .hz-offers-page--desk .hz-offers-desk-btn--outline {
+  background: var(--desk-input-bg) !important;
+  color: var(--desk-text) !important;
+  border-color: var(--desk-border) !important;
+}
+
+/* ── Dashboard v2 ── */
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-dash-module-chip {
+  background: var(--desk-surface) !important;
+  border-color: var(--desk-border) !important;
+}
+
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-dash-module-chip:hover {
+  background: var(--desk-elevated) !important;
+  border-color: var(--desk-green) !important;
+}
+
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-dash-module-chip-label {
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-dash-module-chip-note,
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-dash-empty-copy,
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-dash-activity-tag,
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-dash-selected-cards-hint {
+  color: var(--desk-muted) !important;
+}
+
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-dashboard-ops-kpi-card strong,
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-dash-kpi-card strong,
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-dash-card__title {
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-dashboard-ops-kpi-card span,
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-dash-kpi-card span {
+  color: var(--desk-muted) !important;
+}
+
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-dash-work-link-btn,
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-quick-action {
+  background: var(--desk-input-bg) !important;
+  border-color: var(--desk-border) !important;
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-dashboard-page--fit .hz-alert-tile {
+  background: var(--desk-elevated) !important;
+  border-color: var(--desk-border) !important;
+  color: var(--desk-text) !important;
+}
+
+/* ── Hızlı işlem WB ── */
+html:root[data-theme="dark"] .hz-qop-page--wb {
+  background: var(--desk-canvas) !important;
+}
+
+html:root[data-theme="dark"] .hz-qop-page--wb .hz-qop-wb-block,
+html:root[data-theme="dark"] .hz-qop-page--wb .hz-qop-wb-context,
+html:root[data-theme="dark"] .hz-qop-page--wb .hz-qop-wb-side-head,
+html:root[data-theme="dark"] .hz-qop-page--wb .hz-qop-table-scroll--wb {
+  background: var(--desk-elevated) !important;
+  border-color: var(--desk-border) !important;
+  color: var(--desk-text);
+}
+
+html:root[data-theme="dark"] .hz-qop-page--wb .hz-qop-field label,
+html:root[data-theme="dark"] .hz-qop-page--wb .hz-qop-wb-side-sub {
+  color: var(--desk-muted) !important;
+}
+
+html:root[data-theme="dark"] .hz-qop-page--wb .hz-qop-sales-rule-strip {
+  background: var(--desk-warn-soft) !important;
+  border-color: var(--desk-warn-border) !important;
+  color: #fcd34d !important;
+}
+
+html:root[data-theme="dark"] .hz-qop-page--wb .hz-qop-action-offer,
+html:root[data-theme="dark"] .hz-qop-page--wb .hz-qop-action-payment {
+  background: var(--desk-input-bg) !important;
+  border-color: var(--desk-border) !important;
+  color: var(--desk-text) !important;
+}
+
+/* ── Onaylar ── */
+html:root[data-theme="dark"] .hz-approvals-command .hz-approval-queue__chip:not(.is-active),
+html:root[data-theme="dark"] .hz-approvals-command .hz-approval-queue-item:not(.is-active) {
+  background: var(--desk-surface) !important;
+  border-color: var(--desk-border-soft) !important;
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-approvals-command .hz-approval-queue-item__meta,
+html:root[data-theme="dark"] .hz-approvals-command .hz-approval-muted {
+  color: var(--desk-muted) !important;
+}
+
+html:root[data-theme="dark"] .hz-approvals-command .hz-approval-impact,
+html:root[data-theme="dark"] .hz-approvals-command .hz-approval-panel__head {
+  background: var(--desk-elevated) !important;
+  border-color: var(--desk-border-soft) !important;
+}
+
+html:root[data-theme="dark"] .hz-approvals-command .hz-approval-button-secondary,
+html:root[data-theme="dark"] .hz-approvals-command .hz-approval-button-ghost {
+  background: var(--desk-input-bg) !important;
+  border-color: var(--desk-border) !important;
+  color: var(--desk-text) !important;
+}
+
+/* Tarih input (tüm masalar) */
+html:root[data-theme="dark"] :is(.hz-stock-page--desk, .hz-archive-page--desk, .hz-reports-page--desk, .hz-wa-page--desk, .hz-customers-page--desk, .hz-orders-desk, .hz-offers-page--desk)
+  input[type="date"],
+html:root[data-theme="dark"] :is(.hz-stock-page--desk, .hz-archive-page--desk, .hz-reports-page--desk, .hz-wa-page--desk, .hz-customers-page--desk, .hz-orders-desk, .hz-offers-page--desk)
+  input[type="datetime-local"] {
+  color-scheme: dark;
+}
+
+/* operasyon-desk-reference açık metin rengi (preview bant) */
+html:root[data-theme="dark"] :is(.hz-stock-page--desk, .hz-archive-page--desk, .hz-reports-page--desk, .hz-wa-page--desk)
+  :is([class*="preview-band"], [class*="live-band"]) {
+  color: #93c5fd !important;
+}
+
+/* ── Sprint 3: CRM katman masaları (.hz-entity-layer-desk) ── */
+html:root[data-theme="dark"] .hz-entity-layer-desk
+  :is(
+    [class$="__summary-card"],
+    article[class*="__card"],
+    section[class*="__main"],
+    aside[class*="__insight"],
+    aside[class*="__side"],
+    [class$="__scope-card"]
+  ) {
+  background: var(--desk-surface) !important;
+  border-color: var(--desk-border) !important;
+  box-shadow: none !important;
+}
+
+html:root[data-theme="dark"] .hz-entity-layer-desk [class$="__row"] {
+  background: var(--desk-surface) !important;
+  border-color: var(--desk-border-soft) !important;
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-entity-layer-desk [class$="__row--selected"] {
+  background: var(--desk-green-soft) !important;
+  border-color: var(--desk-green) !important;
+}
+
+html:root[data-theme="dark"] .hz-entity-layer-desk
+  :is(
+    [class$="__page-title"],
+    [class$="__card-title"],
+    [class$="__summary-value"]
+  ) {
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-entity-layer-desk
+  :is(
+    [class$="__page-sub"],
+    [class$="__summary-label"],
+    [class$="__field-label"],
+    [class$="__scope-label"],
+    [class$="__muted-line"],
+    [class$="__scope-hint"],
+    [class$="__policy-copy"],
+    [class$="__alert-copy"]
+  ) {
+  color: var(--desk-muted) !important;
+}
+
+html:root[data-theme="dark"] .hz-entity-layer-desk [class$="__icon"] {
+  background: rgba(44, 255, 154, 0.1) !important;
+  border-color: var(--desk-border-soft) !important;
+  color: var(--desk-green) !important;
+}
+
+html:root[data-theme="dark"] .hz-entity-layer-desk
+  :is(
+    [class$="__button-secondary"],
+    [class$="__row-link"]
+  ) {
+  background: var(--desk-input-bg) !important;
+  border-color: var(--desk-border) !important;
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-entity-layer-desk input,
+html:root[data-theme="dark"] .hz-entity-layer-desk select {
+  background: var(--desk-input-bg) !important;
+  border-color: var(--desk-border) !important;
+  color: var(--desk-text) !important;
+}
+
+html:root[data-theme="dark"] .hz-entity-layer-desk input[type="date"],
+html:root[data-theme="dark"] .hz-entity-layer-desk input[type="datetime-local"] {
+  color-scheme: dark;
+}
+
+html:root[data-theme="dark"] .hz-entity-layer-desk [class*="__badge"] {
+  border-color: var(--desk-border-soft) !important;
+}
+
+html:root[data-theme="dark"] .hz-entity-layer-desk [class*="__badge--success"] {
+  background: rgba(44, 255, 154, 0.12) !important;
+  color: #2cff9a !important;
+}
+
+html:root[data-theme="dark"] .hz-entity-layer-desk [class*="__badge--warning"] {
+  background: var(--desk-warn-soft) !important;
+  color: #fcd34d !important;
+}
+
+html:root[data-theme="dark"] .hz-entity-layer-desk [class*="__badge--danger"] {
+  background: rgba(255, 107, 107, 0.12) !important;
+  color: #ff8a8a !important;
+}
+
+html:root[data-theme="dark"] .hz-entity-layer-desk [class*="__badge--muted"],
+html:root[data-theme="dark"] .hz-entity-layer-desk [class*="__badge--disabled"] {
+  background: var(--desk-input-bg) !important;
+  color: var(--desk-muted) !important;
+}
+
+html:root[data-theme="dark"] .hz-entity-layer-nav__back,
+html:root[data-theme="dark"] .hz-entity-layer-nav__tab {
+  background: var(--desk-input-bg) !important;
+  border-color: var(--desk-border-soft) !important;
+  color: var(--desk-muted) !important;
+}
+
+html:root[data-theme="dark"] .hz-entity-layer-nav__tab--active {
+  background: var(--desk-green-soft) !important;
+  border-color: var(--desk-green) !important;
+  color: var(--desk-green) !important;
+}
+
+html:root[data-theme="dark"] .hz-entity-layer-nav__tab:hover,
+html:root[data-theme="dark"] .hz-entity-layer-nav__back:hover {
+  border-color: var(--desk-green) !important;
+  color: var(--desk-green) !important;
+}
+

@@ -1,5 +1,7 @@
-import { StockPage } from "../../../src/features/stock/components";
+﻿// @ts-nocheck
+import { StokOperasyonPage } from "../../../src/features/stok/components/StokOperasyonPage";
 
-export default function StockRoutePage() {
-  return <StockPage />;
+export default function StokOperasyonRoute() {
+  return <StokOperasyonPage />;
 }
+

@@ -1,4 +1,4 @@
-import type { ArchiveRecord as ApiArchiveRecord } from "@hallederiz/types";
+﻿import type { ArchiveRecord as ApiArchiveRecord } from "@hallederiz/types";
 import type { ArchiveCategoryFilter, ArchiveRecord, ArchiveRecordStatus, ArchiveSourceKind } from "../types";
 
 function mapSource(sourceType: ApiArchiveRecord["sourceType"]): ArchiveSourceKind {
@@ -81,3 +81,4 @@ export function mapApiArchiveRecordToUi(record: ApiArchiveRecord): ArchiveRecord
     relatedLinks: links
   };
 }
+

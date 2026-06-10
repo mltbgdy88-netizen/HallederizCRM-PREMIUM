@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { MetricCard, PageHeader, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
 import { SettingsAreaShell } from "./SettingsAreaShell";
@@ -227,3 +227,4 @@ export function StagingValidationPage() {
     </SettingsAreaShell>
   );
 }
+

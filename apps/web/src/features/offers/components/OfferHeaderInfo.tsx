@@ -1,4 +1,4 @@
-import type { Customer, Offer } from "@hallederiz/types";
+﻿import type { Customer, Offer } from "@hallederiz/types";
 import { getOfferStatusLabel } from "../queries/offer-mock-data";
 
 export function OfferHeaderInfo({ offer, customers }: { offer: Offer; customers: Customer[] }) {
@@ -31,3 +31,4 @@ export function OfferHeaderInfo({ offer, customers }: { offer: Offer; customers:
     </section>
   );
 }
+

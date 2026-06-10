@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import Link from "next/link";
 import { MetricCard, SplitContentLayout, UiButton, UiModal } from "@hallederiz/ui";
@@ -533,3 +533,4 @@ export function DashboardHomePage() {
     </div>
   );
 }
+

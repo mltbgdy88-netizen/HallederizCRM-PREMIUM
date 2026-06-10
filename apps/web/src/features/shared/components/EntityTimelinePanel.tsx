@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { EntityTimelineItem } from "@hallederiz/types";
 import { useEffect, useState } from "react";
@@ -89,3 +89,4 @@ export function EntityTimelinePanel({
     </section>
   );
 }
+

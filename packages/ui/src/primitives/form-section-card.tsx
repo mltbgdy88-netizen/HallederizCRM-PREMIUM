@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 import { useId } from "react";
 
 export type FormSectionCardProps = {
@@ -25,3 +25,4 @@ export function FormSectionCard({ title, description, helperText, children, clas
     </section>
   );
 }
+

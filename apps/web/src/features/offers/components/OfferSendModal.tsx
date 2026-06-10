@@ -1,4 +1,4 @@
-import type { Customer, Offer } from "@hallederiz/types";
+﻿import type { Customer, Offer } from "@hallederiz/types";
 
 export function OfferSendModal({
   open,
@@ -37,3 +37,4 @@ export function OfferSendModal({
     </div>
   );
 }
+

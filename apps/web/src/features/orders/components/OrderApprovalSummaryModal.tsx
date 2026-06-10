@@ -1,4 +1,4 @@
-import { summarizeOrderOperationalImpact } from "@hallederiz/domain";
+﻿import { summarizeOrderOperationalImpact } from "@hallederiz/domain";
 import type { SaleOrder } from "@hallederiz/types";
 
 export function OrderApprovalSummaryModal({ open, order, onClose }: { open: boolean; order: SaleOrder; onClose: () => void }) {
@@ -33,3 +33,4 @@ export function OrderApprovalSummaryModal({ open, order, onClose }: { open: bool
     </div>
   );
 }
+

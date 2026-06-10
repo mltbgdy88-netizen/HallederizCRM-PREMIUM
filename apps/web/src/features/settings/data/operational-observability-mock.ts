@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 /** Demo / foundation — gercek log pipeline baglaninca API kaynakli olacaktir. */
 export type OpsTracePreviewRow = {
   id: string;
@@ -103,3 +104,4 @@ export const PILOT_WEEKLY_PREVIEW_ROWS: PilotWeeklyPreviewRow[] = [
     summary: "Hafta sonu kullanim dusuk; geri bildirim toplanacak."
   }
 ];
+

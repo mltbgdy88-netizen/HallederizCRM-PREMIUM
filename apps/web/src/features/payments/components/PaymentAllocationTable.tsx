@@ -1,4 +1,4 @@
-import type { PaymentAllocation } from "@hallederiz/types";
+﻿import type { PaymentAllocation } from "@hallederiz/types";
 import { money } from "../utils";
 
 function allocationTargetLabel(targetType: PaymentAllocation["targetType"]): string {
@@ -52,3 +52,4 @@ export function PaymentAllocationTable({ allocations }: { allocations: PaymentAl
     </section>
   );
 }
+

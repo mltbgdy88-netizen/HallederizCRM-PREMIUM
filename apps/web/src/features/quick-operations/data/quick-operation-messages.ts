@@ -1,4 +1,4 @@
-export const MSG_NOT_LIVE =
+﻿export const MSG_NOT_LIVE =
   "Bu işlem henüz canlı kullanıma bağlı değil. Onay ve işlem kuyruğu bağlantısı tamamlandığında uygulanır.";
 
 export const MSG_PREVIEW_CUSTOMER =
@@ -68,3 +68,4 @@ export const MSG_SUBMIT_APPROVALS_HINT =
 export const MSG_SUBMIT_TASLAK_REF_PREFIX = "Referans:";
 
 export const MSG_REFRESH_STATUS = "Sayfayı yenileyerek durumu kontrol edebilirsiniz.";
+

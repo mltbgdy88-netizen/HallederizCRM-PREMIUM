@@ -1,0 +1,262 @@
+﻿/* Login split — login-split-acik-mod.png */
+
+.lgn-split {
+  display: grid;
+  grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  height: 100dvh;
+  max-height: 100dvh;
+  overflow: hidden;
+  background: #fff;
+}
+
+.lgn-split-brand {
+  position: relative;
+  display: grid;
+  place-items: center;
+  padding: clamp(20px, 3vh, 40px);
+  background:
+    radial-gradient(120% 80% at 20% 0%, rgba(250, 204, 21, 0.12), transparent 55%),
+    linear-gradient(160deg, #022c22 0%, #064e3b 42%, #022f25 100%);
+  color: #ecfdf5;
+  clip-path: polygon(0 0, 100% 0, 92% 100%, 0 100%);
+}
+
+.lgn-split-brand::after {
+  content: "";
+  position: absolute;
+  inset: 0 0 0 auto;
+  width: 3px;
+  background: linear-gradient(180deg, #fde68a, #ca8a04);
+}
+
+.lgn-split-brand-inner {
+  max-width: 34ch;
+  text-align: center;
+}
+
+.lgn-shield {
+  display: inline-flex;
+  margin-bottom: 12px;
+}
+
+.lgn-brand-title {
+  margin: 0;
+  font-size: clamp(28px, 4vh, 40px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.lgn-brand-title span {
+  color: #facc15;
+}
+
+.lgn-brand-slogan {
+  margin: 10px 0 28px;
+  font-size: clamp(12px, 1.4vh, 14px);
+  color: rgba(236, 253, 245, 0.82);
+  line-height: 1.45;
+}
+
+.lgn-features {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 16px;
+  text-align: left;
+}
+
+.lgn-features li {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  align-items: start;
+}
+
+.lgn-feature-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: rgba(250, 204, 21, 0.14);
+  color: #fde68a;
+}
+
+.lgn-features strong {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.lgn-features li > span > span {
+  display: block;
+  margin-top: 2px;
+  font-size: 11px;
+  color: rgba(236, 253, 245, 0.72);
+  line-height: 1.35;
+}
+
+.lgn-split-form-wrap {
+  display: grid;
+  place-items: center;
+  padding: clamp(16px, 2vh, 32px);
+  overflow: hidden;
+}
+
+.lgn-form-card {
+  width: min(100%, 420px);
+}
+
+.lgn-form-head h2 {
+  margin: 0;
+  font-size: clamp(22px, 2.6vh, 28px);
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.lgn-form-head p {
+  margin: 6px 0 20px;
+  font-size: 13px;
+  color: #64748b;
+}
+
+.lgn-form {
+  display: grid;
+  gap: 14px;
+}
+
+.lgn-field {
+  display: grid;
+  gap: 6px;
+}
+
+.lgn-field > span:first-child {
+  font-size: 12px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.lgn-input-wrap {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  min-height: 44px;
+  padding: 0 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  color: #94a3b8;
+}
+
+.lgn-input-wrap input {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  color: #0f172a;
+  font-size: 13px;
+  width: 100%;
+}
+
+.lgn-eye {
+  border: 0;
+  background: transparent;
+  color: #94a3b8;
+  cursor: pointer;
+  padding: 0;
+}
+
+.lgn-form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.lgn-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: #475569;
+  cursor: pointer;
+}
+
+.lgn-forgot {
+  font-size: 12px;
+  font-weight: 700;
+  color: #ca8a04;
+}
+
+.lgn-submit {
+  min-height: 46px;
+  border: 0;
+  border-radius: 10px;
+  background: linear-gradient(180deg, #facc15, #ca8a04);
+  color: #fff;
+  font-size: 14px;
+  font-weight: 800;
+  cursor: pointer;
+  box-shadow: 0 8px 20px rgba(202, 138, 4, 0.28);
+}
+
+.lgn-divider {
+  margin: 18px 0 14px;
+  text-align: center;
+  font-size: 11px;
+  color: #94a3b8;
+}
+
+.lgn-divider span {
+  position: relative;
+  padding: 0 10px;
+  background: #fff;
+}
+
+.lgn-divider span::before,
+.lgn-divider span::after {
+  content: "";
+  position: absolute;
+  top: 50%;
+  width: 80px;
+  height: 1px;
+  background: #e2e8f0;
+}
+
+.lgn-divider span::before {
+  right: 100%;
+}
+
+.lgn-divider span::after {
+  left: 100%;
+}
+
+.lgn-demo {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 10px;
+  padding: 12px 14px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #f8fafc;
+  color: #64748b;
+}
+
+.lgn-demo strong {
+  display: block;
+  font-size: 12px;
+  color: #0f172a;
+  margin-bottom: 4px;
+}
+
+.lgn-demo p {
+  margin: 0;
+  font-size: 11px;
+}
+
+.lgn-demo span {
+  color: #0f172a;
+  font-weight: 650;
+}
+

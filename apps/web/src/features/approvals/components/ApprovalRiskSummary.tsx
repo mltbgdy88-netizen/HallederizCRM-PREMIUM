@@ -1,4 +1,4 @@
-import type { ApprovalInboxItem } from "../types";
+﻿import type { ApprovalInboxItem } from "../types";
 
 export function ApprovalRiskSummary({ item }: { item: ApprovalInboxItem }) {
   return (
@@ -34,3 +34,4 @@ export function ApprovalRiskSummary({ item }: { item: ApprovalInboxItem }) {
     </section>
   );
 }
+

@@ -1,0 +1,241 @@
+﻿/* Belgeler Detay — belgeler-detay-masasi-acik-mod.png */
+
+.bdm-home {
+  --bdm-green: #047857;
+  --bdm-gap: clamp(8px, 0.9vh, 10px);
+  --bdm-pad: clamp(10px, 1.1vw, 14px);
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--bdm-gap);
+  height: 100%;
+  padding: var(--bdm-pad);
+  overflow: hidden;
+  background: #f4f6f8;
+}
+
+.bdm-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.bdm-back {
+  display: inline-block;
+  margin-bottom: 4px;
+  font-size: 10px;
+  font-weight: 750;
+  color: var(--bdm-green);
+}
+
+.bdm-head h1 {
+  margin: 0;
+  font-size: clamp(17px, 2vh, 22px);
+  font-weight: 900;
+  color: #065f46;
+}
+
+.bdm-head p {
+  margin: 4px 0 0;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.bdm-doc-badge {
+  padding: 6px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #fff;
+  font-size: 10px;
+  font-weight: 800;
+  color: #0f172a;
+  white-space: nowrap;
+}
+
+.bdm-workspace {
+  display: grid;
+  grid-template-columns: minmax(200px, 240px) minmax(0, 1fr) minmax(200px, 220px);
+  gap: var(--bdm-gap);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.bdm-info-card,
+.bdm-preview-card,
+.bdm-actions-card,
+.bdm-extra-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.bdm-info-card {
+  padding: 10px;
+  overflow: auto;
+}
+
+.bdm-info-card h2,
+.bdm-actions-card h2,
+.bdm-extra-card h2 {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.bdm-info-card dl {
+  margin: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.bdm-info-card div {
+  display: grid;
+  gap: 1px;
+  font-size: 9px;
+}
+
+.bdm-info-card dt {
+  color: #64748b;
+  font-weight: 650;
+}
+
+.bdm-info-card dd {
+  margin: 0;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.bdm-preview-card {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  min-height: 0;
+}
+
+.bdm-viewer-bar {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 10px;
+  background: var(--bdm-green);
+  color: #fff;
+}
+
+.bdm-viewer-bar button {
+  min-width: 24px;
+  min-height: 24px;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  background: transparent;
+  color: #fff;
+  cursor: pointer;
+}
+
+.bdm-viewer-bar span {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.bdm-invoice {
+  padding: 12px;
+  overflow: auto;
+  font-size: 9px;
+}
+
+.bdm-invoice h3 {
+  margin: 0 0 4px;
+  font-size: 11px;
+}
+
+.bdm-invoice-seller,
+.bdm-invoice-buyer {
+  margin: 0 0 8px;
+  color: #64748b;
+}
+
+.bdm-invoice table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-bottom: 8px;
+}
+
+.bdm-invoice th,
+.bdm-invoice td {
+  padding: 4px 6px;
+  border-bottom: 1px solid #f1f5f9;
+  text-align: left;
+}
+
+.bdm-side {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--bdm-gap);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.bdm-actions-card {
+  padding: 10px;
+}
+
+.bdm-actions-card ul {
+  list-style: none;
+  margin: 0 0 8px;
+  padding: 0;
+  display: grid;
+  gap: 4px;
+}
+
+.bdm-action-btn {
+  width: 100%;
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 10px;
+  font-weight: 750;
+  text-align: left;
+  cursor: pointer;
+}
+
+.bdm-delete-btn {
+  width: 100%;
+  min-height: 30px;
+  border: 1px solid #fecaca;
+  border-radius: 8px;
+  background: #fff;
+  color: #b91c1c;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.bdm-extra-card {
+  padding: 10px;
+  overflow: auto;
+}
+
+.bdm-extra-card dl {
+  margin: 0;
+  display: grid;
+  gap: 5px;
+}
+
+.bdm-extra-card div {
+  display: flex;
+  justify-content: space-between;
+  font-size: 9px;
+}
+
+.bdm-extra-card dt {
+  color: #64748b;
+}
+
+.bdm-extra-card dd {
+  margin: 0;
+  font-weight: 800;
+}
+

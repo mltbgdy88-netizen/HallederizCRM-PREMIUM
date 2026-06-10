@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 
 export type SuccessStateProps = {
   title?: string;
@@ -17,3 +17,4 @@ export function SuccessState({ title = "İşlem tamamlandı", message, actions, 
     </div>
   );
 }
+

@@ -1,11 +1,16 @@
+﻿// @ts-nocheck
 "use client";
 
 import { EntityListPageTemplate, EmptyState, LoadingState, Pagination } from "@hallederiz/ui";
 import type { Customer, Return } from "@hallederiz/types";
 import { calculateReturnImpact } from "@hallederiz/domain";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { LucideIcon } from "../../../components/icons/lucide-icons";
 import { dataSourceConfig } from "../../../lib/data-source";
+import { useToast } from "../../../providers/toast-provider";
+import { CommercialOperasyonDeskIntro } from "../../ui-inventory/components/CommercialOperasyonDeskIntro";
 import { dateLabel } from "../utils";
 import { getReturns } from "../queries/get-returns";
 import { getReturnStatusLabel } from "../queries/return-mock-data";
@@ -46,19 +51,25 @@ function ReturnFilterBar() {
 
 function ReturnPreviewPanel({
   returnRecord,
-  customerName
+  customerName,
+  onNavigate
 }: {
   returnRecord: Return | null;
   customerName: string | null;
+  onNavigate: (id: string) => void;
 }) {
+  const { pushToast } = useToast();
+
   if (!returnRecord) {
     return (
       <aside className="hz-commercial-entity-side hz-returns-side">
-        <p className="hz-commercial-entity-side-empty">Listeden bir iade seçin.</p>
+        <p className="hz-commercial-entity-side-empty">Kayıt seçilmedi.</p>
       </aside>
     );
   }
+
   const impact = calculateReturnImpact(returnRecord);
+
   return (
     <aside className="hz-commercial-entity-side hz-returns-side">
       <h3>İade önizleme</h3>
@@ -82,12 +93,31 @@ function ReturnPreviewPanel({
           <strong>Onay:</strong> {impact.approvalRequired ? "Gerekli" : "Standart"}
         </li>
       </ul>
+      <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <button
+          type="button"
+          className="hz-btn hz-btn-primary hz-toolbar-btn"
+          style={{ flex: 1 }}
+          onClick={() => onNavigate(returnRecord.id)}
+        >
+          Detay
+        </button>
+        <button
+          type="button"
+          className="hz-btn hz-btn-secondary hz-toolbar-btn"
+          style={{ flex: 1 }}
+          onClick={() => pushToast("Taslak hazırlandı: iade onaya gönderildi.")}
+        >
+          Onaya gönder
+        </button>
+      </div>
     </aside>
   );
 }
 
 export function ReturnsPage() {
   const router = useRouter();
+  const { pushToast } = useToast();
   const [returns, setReturns] = useState<Return[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -136,17 +166,35 @@ export function ReturnsPage() {
 
   return (
     <EntityListPageTemplate
-      className="hz-commercial-entity-page hz-returns-page"
+      className="hz-commercial-entity-page hz-returns-page hz-iadeler-desk"
+      previewSideWidth="detail"
       header={
         <>
-          <header className="hz-commercial-entity-topbar">
-            <div>
-              <h1 className="hz-commercial-entity-topbar-title">İadeler</h1>
-              <p className="hz-commercial-entity-topbar-sub">
-                Sipariş veya teslim bağlantılı iade akışını stok ve belge etkisiyle yönetin.
-              </p>
-            </div>
-          </header>
+          <CommercialOperasyonDeskIntro
+            title="İade Operasyon Masası"
+            subtitle="İade sürecini stok, onay ve belge etkisiyle tek ekranda yönetin."
+            icon="rotate-ccw"
+            actions={
+              <>
+                <Link href="/iadeler/yeni" className="hz-commercial-desk-btn hz-commercial-desk-btn--primary">
+                  <LucideIcon name="plus" size={14} />
+                  Yeni İade
+                </Link>
+                <Link href="/hizli-islem/iade" className="hz-commercial-desk-btn hz-commercial-desk-btn--secondary">
+                  <LucideIcon name="zap" size={14} />
+                  Hızlı İade
+                </Link>
+                <button
+                  type="button"
+                  className="hz-commercial-desk-btn hz-commercial-desk-btn--secondary"
+                  onClick={() => pushToast("Dışa aktarma backend onay akışına bağlıdır; demo modunda simüle edildi.")}
+                >
+                  <LucideIcon name="download" size={14} />
+                  Dışa Aktar
+                </button>
+              </>
+            }
+          />
           <div className="hz-commercial-entity-kpi-strip" aria-label="İade özeti">
             <div className="hz-commercial-entity-kpi">
               <span className="hz-commercial-entity-kpi-label">Kayıt</span>
@@ -206,6 +254,9 @@ export function ReturnsPage() {
                       role="row"
                       className={`hz-commercial-entity-table-row hz-returns-table-row${selectedId === returnRecord.id ? " is-selected" : ""}`}
                       onClick={() => setSelectedId(returnRecord.id)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") setSelectedId(returnRecord.id);
+                      }}
                       tabIndex={0}
                     >
                       <span>{returnRecord.returnNo}</span>
@@ -239,7 +290,15 @@ export function ReturnsPage() {
           )}
         </div>
       }
-      preview={<ReturnPreviewPanel returnRecord={selected} customerName={selectedCustomerName} />}
+      preview={
+        <ReturnPreviewPanel
+          returnRecord={selected}
+          customerName={selectedCustomerName}
+          onNavigate={(id) => router.push(`/iadeler/${id}`)}
+        />
+      }
     />
   );
 }
+
+

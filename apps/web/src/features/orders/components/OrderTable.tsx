@@ -1,4 +1,4 @@
-import type { OrderRow } from "../mappers/map-order-row";
+﻿import type { OrderRow } from "../mappers/map-order-row";
 
 export function OrderTable({
   rows,
@@ -56,3 +56,4 @@ export function OrderTable({
     </section>
   );
 }
+

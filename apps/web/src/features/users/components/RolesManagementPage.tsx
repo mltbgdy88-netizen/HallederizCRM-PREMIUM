@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { RolePresetItem } from "@hallederiz/types";
 import Link from "next/link";
@@ -62,7 +62,7 @@ export function RolesManagementPage() {
 
       <section className="hz-roles-kpi-strip" aria-label="Özet">
         <div className="hz-roles-kpi">
-          <span className="hz-roles-kpi-label">Şablon</span>
+          <span className="hz-roles-kpi-label">�?ablon</span>
           <span className="hz-roles-kpi-value">{loading ? "—" : String(presets.length)}</span>
         </div>
         <div className="hz-roles-kpi">
@@ -125,3 +125,4 @@ export function RolesManagementPage() {
     </div>
   );
 }
+

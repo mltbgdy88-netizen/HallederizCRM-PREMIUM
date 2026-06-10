@@ -1,4 +1,4 @@
-import type {
+﻿import type {
   QuickOperationPreviewResponse,
   QuickOperationSubmitRequest,
   QuickOperationSubmitResponse
@@ -130,3 +130,4 @@ export async function submitQuickOperationRecord(payload: QuickOperationSubmitRe
   const response = await sdk.quickOperations.submitQuickOperation(payload);
   return response.item;
 }
+

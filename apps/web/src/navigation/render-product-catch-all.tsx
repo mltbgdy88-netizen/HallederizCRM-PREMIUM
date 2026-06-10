@@ -1,4 +1,4 @@
-import { notFound, redirect } from "next/navigation";
+﻿import { notFound, redirect } from "next/navigation";
 import type { ReactNode } from "react";
 import { ProductModuleLanding } from "../components/product-module-landing";
 import { ProductPageShell } from "../components/product-page-shell";
@@ -79,3 +79,4 @@ export function renderProductCatchAll(slug: string[]): ReactNode {
 
   notFound();
 }
+

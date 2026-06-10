@@ -1,4 +1,4 @@
-/* Agent 07 — WhatsApp / inbox / reports / AI review routes */
+﻿/* Agent 07 — WhatsApp / inbox / reports / AI review routes */
 
 .hz-wa-page,
 .hz-inbox-page,
@@ -380,3 +380,4 @@
     grid-template-columns: 1fr;
   }
 }
+

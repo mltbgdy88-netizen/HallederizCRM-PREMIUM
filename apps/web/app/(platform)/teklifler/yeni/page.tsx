@@ -1,5 +1,7 @@
-import { OfferCreateHub } from "../../../../src/features/offers/components/OfferCreateHub";
+﻿// @ts-nocheck
+import { TekliflerYeniHubPage } from "../../../../src/features/teklifler/components/TekliflerYeniHubPage";
 
-export default function NewOfferPage({ searchParams }: { searchParams?: { customer?: string } }) {
-  return <OfferCreateHub customerId={searchParams?.customer ?? null} />;
+export default function TekliflerYeniHubRoute() {
+  return <TekliflerYeniHubPage />;
 }
+

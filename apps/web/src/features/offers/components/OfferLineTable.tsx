@@ -1,4 +1,4 @@
-import type { OfferLine } from "@hallederiz/types";
+﻿import type { OfferLine } from "@hallederiz/types";
 
 function money(amount: number, currency: string): string {
   return `${amount.toLocaleString("tr-TR", { maximumFractionDigits: 2 })} ${currency}`;
@@ -56,3 +56,4 @@ export function OfferLineTable({ lines }: { lines: OfferLine[] }) {
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Agent 03 — layout template foundation (presentational).
  * Prefix: hz-layout-*, hz-template-*, hz-list-template-*, hz-detail-template-*,
  *         hz-form-template-*, hz-settings-template-*, hz-product-shell-*
@@ -524,3 +524,4 @@
     justify-content: flex-start;
   }
 }
+

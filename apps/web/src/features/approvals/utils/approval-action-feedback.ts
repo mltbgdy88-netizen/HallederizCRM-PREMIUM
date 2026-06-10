@@ -1,4 +1,4 @@
-import type { Approval, ApprovalExecution } from "@hallederiz/types";
+﻿import type { Approval, ApprovalExecution } from "@hallederiz/types";
 import { containsTechnicalUserText, isOfflineLikeError } from "../../../lib/user-facing-data-error";
 import { resolveOperationEntityHref } from "../../../lib/operation-entity-links";
 import {
@@ -202,3 +202,4 @@ export function inboxProcessDisabledReason(record: Approval): string | null {
   }
   return null;
 }
+

@@ -1,4 +1,4 @@
-import type { SaleOrder } from "@hallederiz/types";
+﻿import type { SaleOrder } from "@hallederiz/types";
 import { money } from "../utils";
 
 export function PaymentCreateModal({ open, order, onClose }: { open: boolean; order: SaleOrder; onClose: () => void }) {
@@ -52,3 +52,4 @@ export function PaymentCreateModal({ open, order, onClose }: { open: boolean; or
     </div>
   );
 }
+

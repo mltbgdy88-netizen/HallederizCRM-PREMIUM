@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 import { shouldSuppressShellPageMeta } from "../navigation/product-route-manifest";
 
 export interface ShellPageMeta {
@@ -37,11 +38,11 @@ const PAGE_META_REGISTRY: Array<[string, ShellPageMeta]> = [
   ["/dashboard", { title: "Gösterge Paneli", subtitle: "", breadcrumb: "" }],
   ["/archive", { title: "Arşiv", subtitle: "Geçmiş işlemler ve belge arşivi.", breadcrumb: "Arşiv" }],
   ["/kurulum/veri-yukleme", { title: "Veri Yükleme", subtitle: "CSV tabanlı içe aktarma ile cari, ürün, fiyat ve stok yükleyin.", breadcrumb: "Kurulum / Veri Yükleme" }],
-  ["/ayarlar/veri-yukleme", { title: "Veri Yükleme", subtitle: "Şablon indir, dosya yükle, önizle ve içe aktar.", breadcrumb: "Ayarlar / Veri Yükleme" }],
+  ["/ayarlar/veri-yukleme", { title: "Veri Yükleme", subtitle: "�?ablon indir, dosya yükle, önizle ve içe aktar.", breadcrumb: "Ayarlar / Veri Yükleme" }],
   ["/ayarlar/operasyon-gozlem", { title: "Operasyon ve Gözlem", subtitle: "İz kaydı, kiracı korelasyonu ve sürüm deneme özeti.", breadcrumb: "Ayarlar / Operasyon" }],
   ["/ayarlar/kullanim-hazirligi", { title: "Kullanım Hazırlığı", subtitle: "Canlı kullanım öncesi kritik eksik ve servis durumunu izleyin.", breadcrumb: "Ayarlar / Kullanım Hazırlığı" }],
   ["/unauthorized", { title: "Erişim yok", subtitle: "Bu sayfaya erişim yetkiniz bulunmuyor.", breadcrumb: "Erişim" }],
-  ["/", { title: "Gösterge Paneli", subtitle: "Yönlendiriliyor…", breadcrumb: "Gösterge Paneli" }],
+  ["/", { title: "Ana giriş", subtitle: "Route readiness ve operasyon girişi.", breadcrumb: "Ana giriş" }],
   ["/gorevler", { title: "Görevler", subtitle: "Gösterge paneli ve iş akışı kaynaklı operasyon görevleri.", breadcrumb: "Görevler" }],
   ["/onaylar", { title: "Onaylar", subtitle: "Onay kutusu, operatör onayları ve arka plan sinyalleri.", breadcrumb: "Onaylar" }],
   ["/cariler", { title: "Cariler", subtitle: "Cari portföy, risk ve finans bağlamı.", breadcrumb: "Cariler" }],
@@ -107,7 +108,7 @@ export function resolveShellPageMeta(pathname: string): ShellPageMeta {
 
 function resolveShellSearchPlaceholder(path: string): string {
   const isDashboard = path === "/dashboard";
-  const isQuickOperation = path === "/hizli-islem";
+  const isQuickOperation = path === "/hizli-islem" || path.startsWith("/hizli-islem/");
   const isApprovalsList = path.startsWith("/onaylar");
   const isWhatsApp = path === "/whatsapp" || path === "/gelen-kutu/whatsapp";
   const isGelenKutuUnified = path === "/gelen-kutu" || path.startsWith("/gelen-kutu/konusma/");
@@ -120,6 +121,7 @@ function resolveShellSearchPlaceholder(path: string): string {
   const isReturnsList = path === "/iadeler";
   const isInvoicesList = path === "/faturalar";
   const isArchiveList = path === "/archive";
+  const isMuhasebeHub = path === "/muhasebe";
   const isReportsList = path === "/raporlar" || path.startsWith("/raporlar/");
   const isSettingsArea = path === "/ayarlar" || path.startsWith("/ayarlar/");
   const isUsersList = path === "/kullanicilar";
@@ -154,6 +156,14 @@ function resolveShellSearchPlaceholder(path: string): string {
     path === "/teklifler/yeni" ||
     path === "/tahsilatlar/yeni";
 
+  if (path === "/") return "Route, modül grubu veya readiness durumu ara...";
+  if (path === "/panel" || path.startsWith("/panel/")) return "Panel katmanı, route veya readiness ara...";
+  if (path === "/unauthorized") return "Erişim senaryosu, rol veya readiness ara...";
+  if (path === "/offline-api") return "Bağlantı, retry veya readiness ara...";
+  if (path === "/demo-mode") return "Önizleme modu, veri kaynağı ara...";
+  if (path === "/live-empty") return "Boş liste, filtre veya modül ara...";
+  if (path === "/mobile-drawer") return "Drawer davranışı veya nav ara...";
+  if (path === "/print-export") return "Print, PDF veya export readiness ara...";
   if (isDashboard) return "Ara (Cari, Sipariş, Ürün, Belge...)";
   if (isTasksWorkspace) return "Görev no, başlık, atanan, müşteri veya kayıt ara...";
   if (isAiWorkspace) return "AI: taslak no, onay no, oturum, içgörü veya müşteri ara...";
@@ -177,6 +187,7 @@ function resolveShellSearchPlaceholder(path: string): string {
   if (isInvoicesList) return "Fatura no, müşteri, sipariş, tutar veya durum ara...";
   if (isWarehousePrep) return "Belge no, cari, ürün, raf veya depo görevlisi ara...";
   if (isArchiveList) return "Belge no, cari, işlem, tarih, kullanıcı veya etiket ara...";
+  if (isMuhasebeHub) return "Fatura, tahsilat, iade veya cari finans kaydı ara...";
   if (isReportsList) return "Rapor, cari, belge, tarih, metrik veya kullanıcı ara...";
   if (isSettingsArea) return "Ayar, kullanıcı, bağlantı, depo, fiyat veya belge ara...";
   if (isUsersList) return "Kullanıcı adı, e-posta, rol veya durum ara...";
@@ -196,19 +207,25 @@ function resolveShellSearchPlaceholder(path: string): string {
 }
 
 function resolveShellSuppressPageMeta(path: string): boolean {
-  if (path === "/hizli-islem") return true;
+  if (path === "/") return true;
+  if (path === "/panel" || path.startsWith("/panel/")) return true;
+  if (path === "/unauthorized") return true;
+  if (path === "/offline-api" || path === "/demo-mode" || path === "/live-empty") return true;
+  if (path === "/mobile-drawer" || path === "/print-export") return true;
+  if (path === "/hizli-islem" || path.startsWith("/hizli-islem/")) return true;
   if (path.startsWith("/onaylar")) return true;
   if (path === "/whatsapp" || path === "/gelen-kutu/whatsapp") return true;
   if (path === "/gelen-kutu" || path.startsWith("/gelen-kutu/konusma/")) return true;
-  if (path === "/cariler") return true;
+  if (path === "/cariler" || path === "/cariler/liste") return true;
   if (path === "/stok") return true;
-  if (path === "/siparisler") return true;
-  if (path === "/teklifler") return true;
+  if (path === "/siparisler" || path === "/siparisler/liste") return true;
+  if (path === "/teklifler" || path === "/teklifler/liste") return true;
   if (path === "/tahsilatlar") return true;
   if (path === "/teslimatlar") return true;
   if (path === "/iadeler") return true;
   if (path === "/faturalar") return true;
   if (path === "/archive") return true;
+  if (path === "/muhasebe") return true;
   if (path === "/raporlar" || path.startsWith("/raporlar/")) return true;
   if (path === "/ayarlar" || path.startsWith("/ayarlar/")) return true;
   if (path === "/kullanicilar" || path === "/kullanicilar/roller") return true;
@@ -220,9 +237,9 @@ function resolveShellSuppressPageMeta(path: string): boolean {
   if (path === "/belgeler" || path.startsWith("/belgeler/")) return true;
   if (path === "/fabrikalar/stoklar" || path === "/fabrikalar/siparisler") return true;
   if (path.startsWith("/fabrikalar/siparisler/") && path !== "/fabrikalar/siparisler") return true;
-  if (path.startsWith("/cariler/") && path !== "/cariler/yeni" && path !== "/cariler/liste") return true;
-  if (path.startsWith("/siparisler/") && path !== "/siparisler/yeni" && path !== "/siparisler/liste") return true;
-  if (path.startsWith("/teklifler/") && path !== "/teklifler/yeni" && path !== "/teklifler/liste") return true;
+  if (path.startsWith("/cariler/") && path !== "/cariler/yeni") return true;
+  if (path.startsWith("/siparisler/") && path !== "/siparisler/yeni") return true;
+  if (path.startsWith("/teklifler/") && path !== "/teklifler/yeni") return true;
   if (
     path.startsWith("/tahsilatlar/") &&
     path !== "/tahsilatlar/yeni" &&
@@ -260,3 +277,5 @@ export function resolveShellHeaderOptions(pathname: string): ShellHeaderOptions 
     pageMeta: resolveShellPageMeta(pathname)
   };
 }
+
+

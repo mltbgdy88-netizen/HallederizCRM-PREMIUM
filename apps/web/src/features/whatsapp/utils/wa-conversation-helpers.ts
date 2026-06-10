@@ -1,4 +1,4 @@
-import type { WhatsAppContact, WhatsAppConversation } from "@hallederiz/types";
+﻿import type { WhatsAppContact, WhatsAppConversation } from "@hallederiz/types";
 
 const INTENT_LABEL: Record<WhatsAppConversation["intent"], string> = {
   stok: "Stok",
@@ -48,3 +48,4 @@ export function waSyntheticContact(conversation: WhatsAppConversation): WhatsApp
     active: true
   };
 }
+

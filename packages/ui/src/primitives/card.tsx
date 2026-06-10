@@ -1,4 +1,4 @@
-import type { HTMLAttributes, ReactNode } from "react";
+﻿import type { HTMLAttributes, ReactNode } from "react";
 
 export type UiCardPadding = "none" | "sm" | "md";
 
@@ -33,3 +33,4 @@ export function UiCardHeader({ title, action }: UiCardHeaderProps) {
     </div>
   );
 }
+

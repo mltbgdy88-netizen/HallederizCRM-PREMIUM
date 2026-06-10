@@ -1,4 +1,4 @@
-export type ArchiveCategoryFilter =
+﻿export type ArchiveCategoryFilter =
   | "all"
   | "siparis"
   | "tahsilat"
@@ -43,3 +43,4 @@ export interface ArchiveRecord {
   auditIpDevice?: string;
   relatedLinks: ArchiveRelatedLink[];
 }
+

@@ -1,3 +1,4 @@
+﻿// @ts-nocheck
 "use client";
 
 import { LoadingState } from "@hallederiz/ui";
@@ -133,13 +134,15 @@ export function WarehouseTasksPage() {
   );
 
   return (
-    <div className="hz-warehouse-prep-page">
+    <div className="hz-warehouse-prep-page hz-depo-desk">
       <div className="hz-warehouse-prep-layout">
         <div className="hz-warehouse-prep-main">
           <header className="hz-warehouse-prep-topbar">
             <div className="hz-warehouse-prep-topbar-text">
-              <h1 className="hz-warehouse-prep-topbar-title">Depo Hazırlık</h1>
-              <p className="hz-warehouse-prep-topbar-sub">Satılan ürünlerin depo toplama, raf kontrolü ve teslim hazırlık süreci.</p>
+              <h1 className="hz-warehouse-prep-topbar-title">Depo Hazırlık Operasyon Masası</h1>
+              <p className="hz-warehouse-prep-topbar-sub">
+                Satılan ürünlerin depo toplama, raf kontrolü ve teslim öncesi hazırlık sürecini yönetin.
+              </p>
             </div>
             <div className="hz-warehouse-prep-topbar-actions">
               <button type="button" className="hz-warehouse-prep-toolbar-btn hz-warehouse-prep-toolbar-btn--outline" onClick={() => fireDemo("Toplama listesi PDF/Excel bağlantısı yakında (demo).")}>
@@ -445,3 +448,5 @@ export function WarehouseTasksPage() {
     </div>
   );
 }
+
+

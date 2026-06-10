@@ -1,4 +1,4 @@
-import type { WarehouseOrderStatus, WarehouseTaskStatus } from "@hallederiz/types";
+﻿import type { WarehouseOrderStatus, WarehouseTaskStatus } from "@hallederiz/types";
 import { FilterActions, FilterBar, FilterGrid, FilterResetButton } from "@hallederiz/ui";
 import type { WarehouseTaskFilters } from "../schemas/warehouse-filter-schema";
 
@@ -41,3 +41,4 @@ export function WarehouseTaskFilterBar({
     </FilterBar>
   );
 }
+

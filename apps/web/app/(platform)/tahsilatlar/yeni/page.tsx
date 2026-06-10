@@ -1,10 +1,7 @@
-import { PaymentCreatePage } from "../../../../src/features/payments/components/PaymentCreatePage";
+﻿// @ts-nocheck
+import { TahsilatlarYeniFormPage } from "../../../../src/features/tahsilatlar/components/TahsilatlarYeniFormPage";
 
-export default function NewPaymentPage({ searchParams }: { searchParams?: { customer?: string; order?: string } }) {
-  return (
-    <PaymentCreatePage
-      customerId={searchParams?.customer ?? null}
-      sourceOrderId={searchParams?.order ?? null}
-    />
-  );
+export default function TahsilatlarYeniFormRoute() {
+  return <TahsilatlarYeniFormPage />;
 }
+

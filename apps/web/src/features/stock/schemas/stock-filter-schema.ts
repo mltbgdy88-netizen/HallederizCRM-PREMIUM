@@ -1,4 +1,4 @@
-import type { StockDisplayStatus } from "../mappers/map-stock-row";
+﻿import type { StockDisplayStatus } from "../mappers/map-stock-row";
 
 export interface StockFilters {
   searchText: string;
@@ -30,3 +30,4 @@ export const defaultStockFilters: StockFilters = {
   criticalOnly: false,
   inStockOnly: false
 };
+

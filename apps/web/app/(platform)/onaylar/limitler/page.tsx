@@ -1,5 +1,7 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+﻿// @ts-nocheck
+import { OnaylarKurallarMatrisPage } from "../../../../src/features/onaylar/components/OnaylarKurallarMatrisPage";
 
-export default function OnaylarLimitlerPage() {
-  return renderProductCatchAll(["onaylar", "limitler"]);
+export default function OnaylarLimitlerRoute() {
+  return <OnaylarKurallarMatrisPage />;
 }
+

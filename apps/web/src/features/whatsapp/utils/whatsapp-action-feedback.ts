@@ -1,4 +1,4 @@
-import { containsTechnicalUserText, isOfflineLikeError } from "../../../lib/user-facing-data-error";
+﻿import { containsTechnicalUserText, isOfflineLikeError } from "../../../lib/user-facing-data-error";
 import {
   MSG_WA_CONNECTION_NOT_LIVE,
   MSG_WA_CONVERSATION_NOT_FOUND,
@@ -111,3 +111,4 @@ export function resolveCustomerEmptyMessage(hasCustomerFilter: boolean): string 
   }
   return MSG_WA_CONVERSATION_NOT_FOUND;
 }
+

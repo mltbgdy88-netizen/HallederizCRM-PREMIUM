@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { MetricCard, PageHeader } from "@hallederiz/ui";
 import { dataSourceConfig } from "../../../lib/data-source";
@@ -141,3 +141,4 @@ export function OperationalObservabilityPage() {
     </SettingsAreaShell>
   );
 }
+

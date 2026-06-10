@@ -1,4 +1,4 @@
-import type { HTMLAttributes } from "react";
+﻿import type { HTMLAttributes } from "react";
 
 export type UiSkeletonProps = HTMLAttributes<HTMLDivElement> & {
   /** Birden fazla satır iskeleti */
@@ -22,3 +22,4 @@ export function UiSkeleton({ className = "", lines = 1, style, ...rest }: UiSkel
     </div>
   );
 }
+

@@ -1,4 +1,4 @@
-export interface StockToolbarProps {
+﻿export interface StockToolbarProps {
   onActionClick?: (action: string) => void;
 }
 
@@ -6,3 +6,4 @@ export interface StockToolbarProps {
 export function StockToolbar(_props: StockToolbarProps) {
   return null;
 }
+

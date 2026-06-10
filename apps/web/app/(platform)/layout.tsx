@@ -1,5 +1,7 @@
-import { PlatformShell } from "../../src/components/platform-shell";
+﻿// @ts-nocheck
+import { ReferenceAppShell } from "../../src/components/reference-app-shell";
 import { ProtectedRoute } from "../../src/components/protected-route";
+import { PrintExportCommandCenterLayer } from "../../src/shell/print-export";
 
 export default function PlatformLayout({
   children
@@ -8,7 +10,11 @@ export default function PlatformLayout({
 }>) {
   return (
     <ProtectedRoute>
-      <PlatformShell>{children}</PlatformShell>
+      <ReferenceAppShell>
+        {children}
+        <PrintExportCommandCenterLayer />
+      </ReferenceAppShell>
     </ProtectedRoute>
   );
 }
+

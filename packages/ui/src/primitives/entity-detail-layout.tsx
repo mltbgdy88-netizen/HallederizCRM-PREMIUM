@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 
 export type EntityDetailLayoutProps = {
   /** Üst: geri / aksiyonlar */
@@ -58,3 +58,4 @@ export function EntityDetailLayout({
     </div>
   );
 }
+

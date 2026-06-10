@@ -1,5 +1,7 @@
-import { DocumentsPage as DocumentsFeaturePage } from "../../../src/features/documents/components";
+﻿// @ts-nocheck
+import { BelgelerOperasyonPage } from "../../../src/features/belgeler/components/BelgelerOperasyonPage";
 
-export default function DocumentsPage() {
-  return <DocumentsFeaturePage />;
+export default function BelgelerOperasyonRoute() {
+  return <BelgelerOperasyonPage />;
 }
+

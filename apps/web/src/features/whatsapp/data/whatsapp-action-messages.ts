@@ -1,4 +1,4 @@
-export const MSG_WA_PREVIEW_SEND =
+﻿export const MSG_WA_PREVIEW_SEND =
   "Mesaj taslağı hazırlandı; gönderim yapılmadı.";
 
 export const MSG_WA_CONNECTION_NOT_LIVE =
@@ -43,7 +43,7 @@ export const MSG_WA_AI_DRAFT_ONLY =
   "AI yalnızca taslak üretir; otomatik gönderim yapılmaz.";
 
 export const MSG_WA_TEMPLATE_REQUIRES_LINK =
-  "Şablon seçimi canlı bağlantı gerektirir.";
+  "�?ablon seçimi canlı bağlantı gerektirir.";
 
 export const MSG_WA_DOC_ATTACH_NOT_LIVE =
   "Belge ekleme henüz canlı kullanıma bağlı değil.";
@@ -54,3 +54,4 @@ export const MSG_WA_EDIT_NOT_LIVE = "Düzenleme henüz canlı kullanıma bağlı
 
 export const MSG_WA_DOCUMENT_PREVIEW =
   "Belge önizlemesi hazırlanır; gönderim yapılmaz.";
+

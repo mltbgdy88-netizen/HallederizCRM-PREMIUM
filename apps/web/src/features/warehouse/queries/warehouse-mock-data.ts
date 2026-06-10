@@ -1,4 +1,4 @@
-import { buildWarehouseOrderFromSale, buildWarehouseTaskList } from "@hallederiz/domain";
+﻿import { buildWarehouseOrderFromSale, buildWarehouseTaskList } from "@hallederiz/domain";
 import type { WarehouseOrder, WarehouseOrderLine, WarehouseOrderStatus, WarehouseTaskStatus } from "@hallederiz/types";
 import { customers } from "../../customers/queries/customer-mock-data";
 import { getOrderMockData } from "../../orders/queries/order-mock-data";
@@ -336,3 +336,4 @@ export function getWarehouseTaskStatusLabel(status: WarehouseTaskStatus): string
 }
 
 export { customers };
+

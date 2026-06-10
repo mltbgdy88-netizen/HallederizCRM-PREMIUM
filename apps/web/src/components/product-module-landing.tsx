@@ -1,4 +1,4 @@
-import Link from "next/link";
+﻿import Link from "next/link";
 import { PRODUCT_ROUTE_FOREST } from "../navigation/product-route-manifest";
 import type { ProductRouteNode, RouteStatus } from "../navigation/product-route-types";
 
@@ -44,3 +44,4 @@ export function ProductModuleLanding({ moduleHref }: { moduleHref: string }) {
     </div>
   );
 }
+

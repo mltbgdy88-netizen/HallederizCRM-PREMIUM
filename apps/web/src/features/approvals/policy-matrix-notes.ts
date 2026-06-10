@@ -1,4 +1,4 @@
-import { listPolicyActions } from "@hallederiz/domain";
+﻿import { listPolicyActions } from "@hallederiz/domain";
 
 export type PolicyRegistryRow = ReturnType<typeof listPolicyActions>[number];
 
@@ -76,3 +76,4 @@ export function mapPolicyCriticalityTr(c: PolicyRegistryRow["criticality"]): str
       return String(c);
   }
 }
+

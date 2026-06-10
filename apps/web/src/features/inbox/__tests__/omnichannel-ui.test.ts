@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import test from "node:test";
 import { channelLabel, mapProviderHealthLabel, sanitizeUserErrorMessage } from "../lib/omnichannel-ui";
 
@@ -26,3 +26,4 @@ test("AI suggestion panel copy does not claim auto-send", () => {
   assert.ok(disclaimer.includes("insan onayı"));
   assert.ok(!disclaimer.toLowerCase().includes("otomatik gönder"));
 });
+

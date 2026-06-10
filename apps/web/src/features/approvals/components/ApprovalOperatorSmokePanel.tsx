@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { LastApprovalActionSummary, OperatorSmokeSummary } from "../utils/operator-smoke";
 
@@ -111,3 +111,4 @@ export function ApprovalOperatorSmokePanel({
     </section>
   );
 }
+

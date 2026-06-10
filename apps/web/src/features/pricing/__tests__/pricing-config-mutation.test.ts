@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import test from "node:test";
 import type { PriceSlotConfig } from "@hallederiz/types";
 import { updatePricingConfig } from "../mutations/update-pricing-config";
@@ -50,3 +50,4 @@ test("pricing config API fail", async () => {
   assert.equal(result.success, false);
   assert.match(result.message ?? "", /güncellenemiyor/i);
 });
+

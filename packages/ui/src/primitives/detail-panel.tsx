@@ -1,4 +1,4 @@
-import type { HTMLAttributes, ReactNode } from "react";
+﻿import type { HTMLAttributes, ReactNode } from "react";
 
 export type DetailPanelState = "default" | "loading" | "empty" | "error";
 
@@ -88,3 +88,4 @@ export function DetailPanel({
     </aside>
   );
 }
+

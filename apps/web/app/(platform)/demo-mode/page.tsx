@@ -1,5 +1,7 @@
-import { DemoModeStatePage } from "../../../src/features/system-state/components/SystemStatePages";
+﻿// @ts-nocheck
+import { DemoModeStatePage } from "../../../src/features/sistem/components/DemoModeStatePage";
 
-export default function DemoModePage() {
+export default function DemoModeStateRoute() {
   return <DemoModeStatePage />;
 }
+

@@ -1,4 +1,4 @@
-import type { Document } from "@hallederiz/types";
+﻿import type { Document } from "@hallederiz/types";
 import { containsTechnicalUserText, isOfflineLikeError } from "../../../lib/user-facing-data-error";
 import {
   MSG_DOC_ACTION_FAILED,
@@ -283,3 +283,4 @@ export function resolveDocumentsEmptyMessage(options: {
   }
   return MSG_DOC_NOT_FOUND;
 }
+

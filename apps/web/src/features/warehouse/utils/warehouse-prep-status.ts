@@ -1,4 +1,4 @@
-import type { WarehouseOrder, WarehouseOrderLine } from "@hallederiz/types";
+﻿import type { WarehouseOrder, WarehouseOrderLine } from "@hallederiz/types";
 
 export type PrepDisplayStatus = "beklemede" | "hazirlandi" | "eksik" | "iptal" | "teslim_edildi";
 
@@ -73,3 +73,4 @@ export function getWarehouseOrderPrepLabel(order: WarehouseOrder): string {
 export function getWarehouseOrderPrepPillClass(order: WarehouseOrder): string {
   return prepPillClass(getPrepDisplayStatus(order));
 }
+

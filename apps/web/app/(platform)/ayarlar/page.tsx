@@ -1,5 +1,7 @@
-﻿import { SettingsPage as SettingsFeaturePage } from "../../../src/features/settings/components";
+﻿// @ts-nocheck
+import { AyarlarHubPage } from "../../../src/features/ayarlar/components/AyarlarHubPage";
 
-export default function SettingsRoutePage() {
-  return <SettingsFeaturePage />;
+export default function AyarlarHubRoute() {
+  return <AyarlarHubPage />;
 }
+

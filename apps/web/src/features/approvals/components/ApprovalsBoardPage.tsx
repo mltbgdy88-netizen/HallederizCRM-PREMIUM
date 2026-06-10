@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import {
   IconAlertTriangle,
@@ -40,9 +40,9 @@ const RISK_LABEL: Record<ApprovalsBoardRiskKey, string> = {
 const DEMO_CARDS: ApprovalsBoardCard[] = [
   {
     id: "1",
-    categoryLabel: "SATIŞ",
+    categoryLabel: "SATI�?",
     risk: "high",
-    customer: "Delta A.Ş.",
+    customer: "Delta A.�?.",
     docLine: "Sipariş #SO-2026-0148",
     summaryLine: nfTry.format(485750),
     description: "Yüksek tutarlı sipariş",
@@ -81,7 +81,7 @@ const DEMO_CARDS: ApprovalsBoardCard[] = [
     id: "4",
     categoryLabel: "FATURA",
     risk: "normal",
-    customer: "Ege Un A.Ş.",
+    customer: "Ege Un A.�?.",
     docLine: "Fatura #FA-2026-0112",
     summaryLine: nfTry.format(120000),
     description: "Fatura kesimi",
@@ -172,7 +172,7 @@ const DEMO_CARDS: ApprovalsBoardCard[] = [
     id: "11",
     categoryLabel: "BELGE GÖNDERİMİ",
     risk: "normal",
-    customer: "Delta A.Ş.",
+    customer: "Delta A.�?.",
     docLine: "BG-2026-021",
     summaryLine: "Sevk belgesi",
     description: "Belge çıkışı",
@@ -206,7 +206,7 @@ function riskClass(r: ApprovalsBoardRiskKey): string {
 
 function matchesFilter(card: ApprovalsBoardCard, f: FilterKey): boolean {
   if (f === "all") return true;
-  if (f === "sales") return card.categoryLabel === "SATIŞ";
+  if (f === "sales") return card.categoryLabel === "SATI�?";
   if (f === "collection") return card.categoryLabel === "TAHSİLAT" || card.categoryLabel === "TAHSİLAT PLANI";
   if (f === "delivery") return card.categoryLabel === "TESLİMAT";
   if (f === "return") return card.categoryLabel === "İADE";
@@ -658,3 +658,4 @@ export function ApprovalsBoardPage() {
     </div>
   );
 }
+

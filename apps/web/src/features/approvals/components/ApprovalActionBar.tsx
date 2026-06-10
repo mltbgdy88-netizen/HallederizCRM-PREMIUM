@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import type { ApprovalInboxItem } from "../types";
@@ -79,3 +79,4 @@ export function ApprovalActionBar({
     </section>
   );
 }
+

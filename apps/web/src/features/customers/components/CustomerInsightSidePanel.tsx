@@ -1,4 +1,4 @@
-import { calculateCustomerRiskState } from "@hallederiz/domain";
+﻿import { calculateCustomerRiskState } from "@hallederiz/domain";
 import type { Customer, CustomerAccount } from "@hallederiz/types";
 import { customerRiskLabelFromProfile } from "../utils/customer-detail-helpers";
 import { EntityTimelinePanel } from "../../shared/components/EntityTimelinePanel";
@@ -43,3 +43,4 @@ export function CustomerInsightSidePanel({ customer, account }: { customer: Cust
     </>
   );
 }
+

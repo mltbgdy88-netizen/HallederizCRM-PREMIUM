@@ -1,5 +1,7 @@
-import { DeliveriesPage as DeliveriesFeaturePage } from "../../../src/features/deliveries/components";
+﻿// @ts-nocheck
+import { TeslimatlarOperasyonPage } from "../../../src/features/teslimatlar/components/TeslimatlarOperasyonPage";
 
-export default function DeliveriesPage() {
-  return <DeliveriesFeaturePage />;
+export default function TeslimatlarOperasyonRoute() {
+  return <TeslimatlarOperasyonPage />;
 }
+

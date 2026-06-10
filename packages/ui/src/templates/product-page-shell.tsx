@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 
 export type ProductPageShellAction = {
   label: string;
@@ -63,3 +63,4 @@ export function ProductPageShell({
     </div>
   );
 }
+

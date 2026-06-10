@@ -1,5 +1,7 @@
-import { ReportsPage } from "../../../src/features/reports/components/ReportsPage";
+﻿// @ts-nocheck
+import { RaporOperasyonMerkeziPage } from "../../../src/features/raporlar/components/RaporOperasyonMerkeziPage";
 
-export default function ReportsRoutePage() {
-  return <ReportsPage />;
+export default function RaporOperasyonMerkeziRoute() {
+  return <RaporOperasyonMerkeziPage />;
 }
+

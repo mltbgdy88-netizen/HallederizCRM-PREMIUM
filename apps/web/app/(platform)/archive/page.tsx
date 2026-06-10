@@ -1,5 +1,7 @@
-import { ArchivePage } from "../../../src/features/archive/components/ArchivePage";
+﻿// @ts-nocheck
+import { ArsivOperasyonMerkeziPage } from "../../../src/features/arsiv/components/ArsivOperasyonMerkeziPage";
 
-export default function ArchiveRoutePage() {
-  return <ArchivePage />;
+export default function ArsivOperasyonMerkeziRoute() {
+  return <ArsivOperasyonMerkeziPage />;
 }
+

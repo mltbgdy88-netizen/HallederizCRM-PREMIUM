@@ -1,4 +1,4 @@
-const PROVIDER_LABELS: Record<string, string> = {
+﻿const PROVIDER_LABELS: Record<string, string> = {
   whatsapp: "WhatsApp",
   instagram: "Instagram",
   facebook: "Facebook",
@@ -41,3 +41,4 @@ export function sanitizeProviderReasons(reasons: string[] | undefined): string {
   if (!safe.length) return "";
   return safe.join(", ");
 }
+

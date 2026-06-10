@@ -1,4 +1,4 @@
-import { calculateCustomerRiskState } from "@hallederiz/domain";
+﻿import { calculateCustomerRiskState } from "@hallederiz/domain";
 import { MetricCard } from "@hallederiz/ui";
 import type { Customer, CustomerAccount } from "@hallederiz/types";
 import { customerRiskLabelFromProfile } from "../utils/customer-detail-helpers";
@@ -35,3 +35,4 @@ export function CustomerSummaryCards({ customer, account }: { customer: Customer
     </section>
   );
 }
+

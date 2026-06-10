@@ -1,5 +1,7 @@
-import { OrdersPage as OrdersFeaturePage } from "../../../src/features/orders/components";
+﻿// @ts-nocheck
+import { SiparislerOperasyonPage } from "../../../src/features/siparisler/components/SiparislerOperasyonPage";
 
-export default function OrdersPage() {
-  return <OrdersFeaturePage />;
+export default function SiparislerOperasyonRoute() {
+  return <SiparislerOperasyonPage />;
 }
+

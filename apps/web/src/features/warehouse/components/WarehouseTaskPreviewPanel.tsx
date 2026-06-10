@@ -1,4 +1,4 @@
-import type { Customer, WarehouseOrder } from "@hallederiz/types";
+﻿import type { Customer, WarehouseOrder } from "@hallederiz/types";
 import { getWarehouseOrderPrepLabel } from "../utils/warehouse-prep-status";
 
 export function WarehouseTaskPreviewPanel({ warehouseOrder, customer }: { warehouseOrder: WarehouseOrder | null; customer: Customer | null }) {
@@ -28,3 +28,4 @@ export function WarehouseTaskPreviewPanel({ warehouseOrder, customer }: { wareho
     </section>
   );
 }
+

@@ -1,4 +1,4 @@
-import type { OfferContactChannel, OfferFollowUp, OfferResponseState } from "@hallederiz/types";
+﻿import type { OfferContactChannel, OfferFollowUp, OfferResponseState } from "@hallederiz/types";
 
 const channelLabels: Record<OfferContactChannel, string> = {
   whatsapp: "WhatsApp",
@@ -75,3 +75,4 @@ export function OfferFollowupPanel({ followUps }: { followUps: OfferFollowUp[] }
     </div>
   );
 }
+

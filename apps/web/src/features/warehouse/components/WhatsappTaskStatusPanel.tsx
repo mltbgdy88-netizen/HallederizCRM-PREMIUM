@@ -1,4 +1,4 @@
-import type { WarehouseOrder } from "@hallederiz/types";
+﻿import type { WarehouseOrder } from "@hallederiz/types";
 
 export function WhatsappTaskStatusPanel({ warehouseOrder }: { warehouseOrder: WarehouseOrder }) {
   return (
@@ -13,3 +13,4 @@ export function WhatsappTaskStatusPanel({ warehouseOrder }: { warehouseOrder: Wa
     </section>
   );
 }
+

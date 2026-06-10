@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { EmptyState, EntityDetailLayout, FormPageShell, LoadingState, PageHeader, TabSwitcher } from "@hallederiz/ui";
 import { useEffect, useMemo, useState } from "react";
@@ -102,3 +102,4 @@ export function OfferDetailPage({ offerId, customerId }: { offerId?: string; cus
     </div>
   );
 }
+

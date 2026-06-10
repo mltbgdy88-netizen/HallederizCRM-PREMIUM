@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { Task } from "@hallederiz/types";
 import { DetailPanel, UiButton } from "@hallederiz/ui";
@@ -160,3 +160,4 @@ export function OperatorWorkspaceContextPanel({
     </DetailPanel>
   );
 }
+

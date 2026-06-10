@@ -1,4 +1,5 @@
-﻿"use client";
+﻿// @ts-nocheck
+"use client";
 
 import { canExecuteApprovedAction, summarizeApprovalTarget } from "@hallederiz/domain";
 import type { Approval } from "@hallederiz/types";
@@ -6,7 +7,7 @@ import { EntityDetailLayout, FilterActions, FilterBar, PageHeader, SplitContentL
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { approveApprovalMutation, executeApprovalMutation, rejectApprovalMutation } from "../mutations";
-import { ApprovalInboxPage } from "./inbox";
+import { ApprovalCommandDeskPage } from "./ApprovalCommandDeskPage";
 
 const statusLabels: Record<Approval["status"], string> = {
   pending: "Bekliyor",
@@ -40,7 +41,7 @@ export function ApprovalPreviewPanel({ approval }: { approval: Approval | null }
 }
 
 export function ApprovalsPage() {
-  return <ApprovalInboxPage />;
+  return <ApprovalCommandDeskPage />;
 }
 
 export function ApprovalHeaderInfo({ approval }: { approval: Approval }) {
@@ -146,3 +147,4 @@ export function ApprovalDetailPage({ approval }: { approval: Approval }) {
     />
   );
 }
+

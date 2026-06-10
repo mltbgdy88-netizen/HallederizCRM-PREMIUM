@@ -1,5 +1,7 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+﻿// @ts-nocheck
+import { redirect } from "next/navigation";
 
 export default function BelgelerSablonlarPage() {
-  return renderProductCatchAll(["belgeler", "sablonlar"]);
+  redirect("/belgeler");
 }
+

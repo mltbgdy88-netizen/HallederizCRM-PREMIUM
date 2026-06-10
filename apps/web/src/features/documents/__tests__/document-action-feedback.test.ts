@@ -1,4 +1,4 @@
-import assert from "node:assert/strict";
+﻿import assert from "node:assert/strict";
 import test from "node:test";
 import {
   MSG_DOC_DOWNLOAD_NOT_LIVE,
@@ -54,3 +54,4 @@ test("resolveDemoActionToasts for download", () => {
   const toasts = resolveDemoActionToasts("download");
   assert.equal(toasts[0], MSG_DOC_DOWNLOAD_NOT_LIVE);
 });
+

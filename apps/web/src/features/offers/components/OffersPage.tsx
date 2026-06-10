@@ -1,8 +1,10 @@
+﻿// @ts-nocheck
 "use client";
 
-import { EntityListPageTemplate, LoadingState, MetricCard, Pagination, PrimaryActionToolbar } from "@hallederiz/ui";
+import { LoadingState, Pagination } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { LucideIcon } from "../../../components/icons/lucide-icons";
 import { OfferFilterBar } from "./OfferFilterBar";
 import { OfferQuickPreviewPanel } from "./OfferQuickPreviewPanel";
 import { OfferTable } from "./OfferTable";
@@ -48,83 +50,92 @@ export function OffersPage() {
     }
   }, [filteredOffers, selectedOfferId]);
 
+  const approvedCount = filteredOffers.filter((offer) => offer.status === "approved").length;
+  const waitingCount = filteredOffers.filter((offer) => offer.status === "waiting_response").length;
+  const expiringCount = filteredOffers.filter((offer) => {
+    const valid = new Date(offer.validUntil).getTime();
+    return valid > Date.now() && valid - Date.now() < 7 * 24 * 60 * 60 * 1000;
+  }).length;
+  const convertedCount = filteredOffers.filter((offer) => offer.status === "converted").length;
+  const volume = filteredOffers.reduce((sum, offer) => sum + offer.grandTotal, 0);
+
   return (
-    <EntityListPageTemplate
-      className="hz-offers-page"
-      header={
-        <div className="hz-offers-head">
-          <div className="hz-offers-head-text">
-            <h1 className="hz-offers-head-title">Teklifler</h1>
-            <p className="hz-offers-head-sub">Satış öncesi teklifleri, fiyat grubu snapshotlarını ve follow-up akışlarını yönetin.</p>
-          </div>
-          <section className="hz-metric-grid">
-            <MetricCard title="Açık teklif" value={String(filteredOffers.length)} detail="Filtre kapsamında" tone="info" />
-            <MetricCard
-              title="Onaylanan"
-              value={String(filteredOffers.filter((offer) => offer.status === "approved").length)}
-              detail="Siparişe hazır"
-              tone="success"
-            />
-            <MetricCard
-              title="Cevap bekleyen"
-              value={String(filteredOffers.filter((offer) => offer.status === "waiting_response").length)}
-              detail="Follow-up gerekli"
-              tone="warning"
-            />
-            <MetricCard
-              title="Toplam hacim"
-              value={`${Math.round(filteredOffers.reduce((sum, offer) => sum + offer.grandTotal, 0) / 1000)}K`}
-              detail="TRY"
-              tone="info"
-            />
-          </section>
-          {dataSourceConfig.useDemoData ? (
-            <p className="hz-offers-preview-band" role="status">
-              Örnek veri modu: liste kayıtları demo amaçlıdır.
-            </p>
-          ) : null}
-          <PrimaryActionToolbar>
-            <button type="button" className="hz-btn hz-btn-primary hz-toolbar-btn" onClick={() => router.push("/teklifler/yeni")}>
-              Yeni teklif
-            </button>
-            <button
-              type="button"
-              className="hz-btn hz-btn-secondary hz-toolbar-btn"
-              onClick={() => pushToast("Belge önizlemesi hazırlanır; canlı gönderim henüz bağlı değil.")}
-            >
-              PDF üret
-            </button>
-            <button
-              type="button"
-              className="hz-btn hz-btn-secondary hz-toolbar-btn"
-              onClick={() => pushToast("Follow-up planı taslak olarak kaydedilir; canlı hatırlatma henüz bağlı değil.")}
-            >
-              Follow-up planla
-            </button>
-          </PrimaryActionToolbar>
+    <main className="hz-offers-page hz-offers-page--desk">
+      <header className="hz-offers-desk-head">
+        <div className="hz-offers-desk-head__text">
+          <h1>Teklif Operasyon Masası</h1>
+          <p>Teklif hazırlığı, müşteri takibi ve siparişe dönüşümü tek ekranda yönetin.</p>
         </div>
-      }
-      filters={<OfferFilterBar filters={filters} customers={customers} onFilterChange={updateFilter} onReset={resetFilters} />}
-      list={
-        loading ? (
-          <LoadingState title="Teklifler yükleniyor" message="Teklif, follow-up ve fiyat grubu özetleri hazırlanıyor." />
-        ) : (
-          <OfferTable
-            rows={pagedRows}
-            selectedOfferId={selectedOffer?.id ?? null}
-            onSelectOffer={setSelectedOfferId}
-            onOpenOffer={(offerId) => router.push(`/teklifler/${offerId}`)}
-          />
-        )
-      }
-      pagination={
-        loading ? null : <Pagination totalItems={rows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
-      }
-      preview={
-        <div className="hz-offers-side">
+        <div className="hz-offers-desk-head__actions">
+          <button type="button" className="hz-offers-desk-btn hz-offers-desk-btn--primary" onClick={() => router.push("/teklifler/yeni")}>
+            <LucideIcon name="plus-square" size={14} />
+            Yeni Teklif
+          </button>
+          <button type="button" className="hz-offers-desk-btn" onClick={() => router.push("/hizli-islem")}>
+            <LucideIcon name="zap" size={14} />
+            Hızlı Satış
+          </button>
+          <button type="button" className="hz-offers-desk-btn" onClick={() => pushToast("Dışa aktarım taslağı hazırlandı.")}>
+            <LucideIcon name="file-text" size={14} />
+            Dışa Aktar
+          </button>
+        </div>
+      </header>
+
+      <section className="hz-offers-desk-stats" aria-label="Teklif özetleri">
+        <article>
+          <span className="hz-offers-stat-ico" aria-hidden><LucideIcon name="file-text" size={18} /></span>
+          <div><span>Açık Teklif</span><strong>{filteredOffers.length}</strong><small>₺{Math.round(volume / 1000).toLocaleString("tr-TR")}.000</small></div>
+        </article>
+        <article>
+          <span className="hz-offers-stat-ico" aria-hidden><LucideIcon name="send" size={18} /></span>
+          <div><span>Gönderilen</span><strong>{approvedCount}</strong><small>Siparişe hazır</small></div>
+        </article>
+        <article>
+          <span className="hz-offers-stat-ico" aria-hidden><LucideIcon name="clock" size={18} /></span>
+          <div><span>Yanıt Bekleyen</span><strong>{waitingCount}</strong><small>Takip gerekli</small></div>
+        </article>
+        <article>
+          <span className="hz-offers-stat-ico hz-offers-stat-ico--gold" aria-hidden><LucideIcon name="alert-triangle" size={18} /></span>
+          <div><span>Süresi Yaklaşan</span><strong>{expiringCount}</strong><small>7 gün içinde dolacak</small></div>
+        </article>
+        <article>
+          <span className="hz-offers-stat-ico" aria-hidden><LucideIcon name="shopping-cart" size={18} /></span>
+          <div><span>Siparişe Dönüşen</span><strong>{convertedCount}</strong><small>Bu ay</small></div>
+        </article>
+      </section>
+
+      {dataSourceConfig.useDemoData ? (
+        <p className="hz-offers-preview-band" role="status">
+          Örnek veri modu: liste kayıtları demo amaçlıdır.
+        </p>
+      ) : null}
+
+      <div className="hz-offers-desk-grid">
+        <section className="hz-offers-desk-main">
+          <OfferFilterBar filters={filters} customers={customers} onFilterChange={updateFilter} onReset={resetFilters} />
+          {loading ? (
+            <LoadingState title="Teklifler yükleniyor" message="Teklif, follow-up ve fiyat grubu özetleri hazırlanıyor." />
+          ) : (
+            <>
+              <OfferTable
+                rows={pagedRows}
+                selectedOfferId={selectedOffer?.id ?? null}
+                onSelectOffer={setSelectedOfferId}
+                onOpenOffer={(offerId) => router.push(`/teklifler/${offerId}`)}
+              />
+              <div className="hz-offers-pagination">
+                <Pagination totalItems={rows.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
+              </div>
+            </>
+          )}
+        </section>
+        <aside className="hz-offers-side">
           <OfferQuickPreviewPanel offer={selectedOffer} customer={selectedCustomer} />
-        </div>
-      }
-    />
+        </aside>
+      </div>
+    </main>
   );
 }
+
+

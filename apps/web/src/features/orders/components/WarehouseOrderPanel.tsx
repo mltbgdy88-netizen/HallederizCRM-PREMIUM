@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import type { SaleOrder, WarehouseOrder } from "@hallederiz/types";
 import { useMemo } from "react";
@@ -38,3 +38,4 @@ export function WarehouseOrderPanel({ order, warehouseOrders }: { order: SaleOrd
     </div>
   );
 }
+

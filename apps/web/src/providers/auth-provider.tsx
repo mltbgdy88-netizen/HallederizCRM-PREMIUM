@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { createMockLoginResponse, isSessionActive } from "@hallederiz/domain";
 import type { AuthState, LoginInput, SessionModel } from "@hallederiz/types";
@@ -164,3 +164,4 @@ export function useAuth() {
   }
   return context;
 }
+

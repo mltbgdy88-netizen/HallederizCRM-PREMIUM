@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 
 export type DisabledNoticeProps = {
   title?: string;
@@ -22,3 +22,4 @@ export function DisabledNotice({ title = DEFAULT_DISABLED_TITLE, message, icon, 
     </div>
   );
 }
+

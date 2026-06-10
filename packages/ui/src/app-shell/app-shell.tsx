@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, type ReactNode } from "react";
 
@@ -91,3 +91,4 @@ export function AppShell({
     </div>
   );
 }
+

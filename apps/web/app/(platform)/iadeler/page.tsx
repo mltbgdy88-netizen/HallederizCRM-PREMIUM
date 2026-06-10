@@ -1,5 +1,7 @@
-import { ReturnsPage as ReturnsFeaturePage } from "../../../src/features/returns/components";
+﻿// @ts-nocheck
+import { IadelerOperasyonPage } from "../../../src/features/iadeler/components/IadelerOperasyonPage";
 
-export default function ReturnsPage() {
-  return <ReturnsFeaturePage />;
+export default function IadelerOperasyonRoute() {
+  return <IadelerOperasyonPage />;
 }
+

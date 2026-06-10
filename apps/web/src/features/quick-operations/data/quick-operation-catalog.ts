@@ -1,4 +1,4 @@
-import type { Customer, CustomerAccount, Product } from "@hallederiz/types";
+﻿import type { Customer, CustomerAccount, Product } from "@hallederiz/types";
 import { customers as demoCatalogCustomers, getCustomerAccount } from "../../../demo/customers";
 import { stockCatalog } from "../../../demo";
 import { dataSourceConfig } from "../../../lib/data-source";
@@ -150,3 +150,4 @@ export function productToQuickOperationLine(product: Product): QuickOperationLin
     locationCode: loc?.locationCode ?? "—"
   };
 }
+

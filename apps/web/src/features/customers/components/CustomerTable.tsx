@@ -1,4 +1,4 @@
-import type { CustomerRow } from "../mappers/map-customer-row";
+﻿import type { CustomerRow } from "../mappers/map-customer-row";
 import {
   IconExternalLink,
   IconMessageCircle,
@@ -173,3 +173,4 @@ export function CustomerTable({
     </div>
   );
 }
+

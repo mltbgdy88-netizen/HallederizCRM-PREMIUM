@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 export type QuickOperationStepId = "customer" | "lines" | "preview" | "approval";
 
@@ -33,3 +33,4 @@ export function QuickOperationStepper({ activeStep }: { activeStep: QuickOperati
     </nav>
   );
 }
+

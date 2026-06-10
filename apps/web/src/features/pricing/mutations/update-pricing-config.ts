@@ -1,4 +1,4 @@
-import type { PriceSlotConfig } from "@hallederiz/types";
+﻿import type { PriceSlotConfig } from "@hallederiz/types";
 import type { HallederizSdk } from "@hallederiz/sdk";
 import { sdk } from "../../../lib/data-source";
 import { isOfflineLikeError } from "../../../lib/user-facing-data-error";
@@ -44,3 +44,4 @@ export async function updatePricingConfig(
     return { success: false, updatedCount: 0, message: mapPricingConfigError(error) };
   }
 }
+

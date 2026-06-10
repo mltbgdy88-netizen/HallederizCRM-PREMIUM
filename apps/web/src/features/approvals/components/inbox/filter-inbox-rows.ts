@@ -1,4 +1,4 @@
-import type { ApprovalInboxRecord, ApprovalInboxViewId } from "./types";
+﻿import type { ApprovalInboxRecord, ApprovalInboxViewId } from "./types";
 import type { ApprovalInboxFilterState } from "./ApprovalSidebar";
 
 const ASSIGNEE_LABELS: Record<string, string> = {
@@ -100,3 +100,4 @@ function matchesApprovalType(row: ApprovalInboxRecord, filterType: string): bool
       return true;
   }
 }
+

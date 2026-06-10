@@ -1,4 +1,4 @@
-import type { OrderChannel, OrderDeliveryStatus, OrderPaymentStatus, OrderSourcePreference, SaleOrderStatus } from "@hallederiz/types";
+﻿import type { OrderChannel, OrderDeliveryStatus, OrderPaymentStatus, OrderSourcePreference, SaleOrderStatus } from "@hallederiz/types";
 import { FilterActions, FilterBar, FilterGrid, FilterResetButton } from "@hallederiz/ui";
 import type { OrderFilters } from "../schemas/order-filter-schema";
 
@@ -89,3 +89,4 @@ export function OrderFilterBar({
     </FilterBar>
   );
 }
+

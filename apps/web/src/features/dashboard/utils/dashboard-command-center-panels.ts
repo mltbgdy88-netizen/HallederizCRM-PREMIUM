@@ -1,4 +1,4 @@
-export type CommandCenterPanelId = "alerts" | "tasks" | "flow" | "recent" | "quick";
+﻿export type CommandCenterPanelId = "alerts" | "tasks" | "flow" | "recent" | "quick";
 
 export type CommandCenterPanelDef = {
   id: CommandCenterPanelId;
@@ -95,3 +95,4 @@ export function panelsToVisibility(ids: CommandCenterPanelId[]): Record<CommandC
     quick: set.has("quick")
   };
 }
+

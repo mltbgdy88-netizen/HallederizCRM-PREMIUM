@@ -1,4 +1,4 @@
-import type { DashboardCard, Task } from "@hallederiz/types";
+﻿import type { DashboardCard, Task } from "@hallederiz/types";
 import { isOfflineLikeError } from "../../../lib/user-facing-data-error";
 import {
   EMPTY_DASHBOARD_HOME_SNAPSHOT,
@@ -106,3 +106,4 @@ export async function getDashboardLiveSnapshot(): Promise<DashboardHomeSnapshot>
     return EMPTY_DASHBOARD_HOME_SNAPSHOT;
   }
 }
+

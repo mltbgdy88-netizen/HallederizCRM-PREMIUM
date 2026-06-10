@@ -1,0 +1,289 @@
+.aoh-home {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  gap: clamp(6px, 0.75vh, 9px);
+  height: 100%;
+  padding: clamp(8px, 0.9vh, 12px) clamp(12px, 1.2vw, 16px);
+  overflow: hidden;
+  background: #f4f6f8;
+}
+
+.aoh-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.aoh-head h1 {
+  margin: 0;
+  font-size: clamp(17px, 2vh, 22px);
+  font-weight: 900;
+  color: #065f46;
+}
+
+.aoh-head p {
+  margin: 3px 0 0;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.aoh-head-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.aoh-head-link {
+  display: inline-flex;
+  align-items: center;
+  padding: 6px 10px;
+  border: 1px solid #cbd5e1;
+  border-radius: 8px;
+  background: #fff;
+  color: #065f46;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.aoh-head-link:hover {
+  border-color: #047857;
+  background: #ecfdf5;
+}
+
+.aoh-kpis {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.aoh-kpi {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 8px;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.aoh-kpi-icon {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.aoh-kpi strong {
+  display: block;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.aoh-kpi span {
+  display: block;
+  font-size: 10px;
+  font-weight: 700;
+  color: #334155;
+}
+
+.aoh-kpi small {
+  display: block;
+  font-size: 9px;
+  color: #94a3b8;
+}
+
+.aoh-panel {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 8px;
+  min-height: 0;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.aoh-tabs-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.aoh-tabs {
+  display: flex;
+  gap: 6px;
+}
+
+.aoh-tab {
+  min-height: 30px;
+  padding: 0 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #f8fafc;
+  font-size: 11px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+}
+
+.aoh-tab--active {
+  border-color: #047857;
+  background: #ecfdf5;
+  color: #065f46;
+}
+
+.aoh-sync {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  font-size: 10px;
+  color: #64748b;
+}
+
+.aoh-sync-dot,
+.aoh-local-dot {
+  display: inline-block;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: #22c55e;
+  margin-right: 4px;
+}
+
+.aoh-filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.aoh-filter {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 10px;
+  font-weight: 650;
+  color: #475569;
+  cursor: pointer;
+}
+
+.aoh-filter--sort {
+  margin-left: auto;
+}
+
+.aoh-list {
+  display: grid;
+  gap: 8px;
+  overflow: auto;
+  min-height: 0;
+}
+
+.aoh-plan {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 12px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fafafa;
+}
+
+.aoh-plan strong {
+  display: block;
+  font-size: 12px;
+  color: #0f172a;
+}
+
+.aoh-plan p {
+  margin: 3px 0 6px;
+  font-size: 10px;
+  color: #64748b;
+}
+
+.aoh-plan-meta {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: center;
+}
+
+.aoh-tag {
+  padding: 2px 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.aoh-tag--module {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.aoh-tag--high {
+  background: #fee2e2;
+  color: #b91c1c;
+}
+
+.aoh-tag--mid {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.aoh-plan-date {
+  font-size: 9px;
+  color: #94a3b8;
+}
+
+.aoh-plan-side {
+  display: grid;
+  gap: 8px;
+  justify-items: end;
+}
+
+.aoh-local {
+  font-size: 9px;
+  font-weight: 700;
+  color: #047857;
+}
+
+.aoh-review-btn {
+  min-height: 30px;
+  padding: 0 12px;
+  border: 1px solid #047857;
+  border-radius: 8px;
+  background: #fff;
+  color: #065f46;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.aoh-foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 10px;
+  color: #475569;
+}
+
+.aoh-foot p {
+  margin: 0;
+}

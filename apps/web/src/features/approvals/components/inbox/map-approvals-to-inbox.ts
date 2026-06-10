@@ -1,4 +1,4 @@
-import type { Approval, ApprovalStatus, ApprovalType } from "@hallederiz/types";
+﻿import type { Approval, ApprovalStatus, ApprovalType } from "@hallederiz/types";
 import { resolveApprovalEntityLink, sanitizeUserFacingText } from "../../utils/approval-action-feedback";
 import type {
   ApprovalInboxCategory,

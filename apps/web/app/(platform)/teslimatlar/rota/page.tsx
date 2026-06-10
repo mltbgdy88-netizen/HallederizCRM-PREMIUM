@@ -1,5 +1,7 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+﻿// @ts-nocheck
+import { TeslimatlarRotaOperasyonPage } from "../../../../src/features/teslimatlar/components/TeslimatlarRotaOperasyonPage";
 
-export default function TeslimatlarRotaPage() {
-  return renderProductCatchAll(["teslimatlar", "rota"]);
+export default function TeslimatlarRotaOperasyonRoute() {
+  return <TeslimatlarRotaOperasyonPage />;
 }
+

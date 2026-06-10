@@ -1,4 +1,4 @@
-export const MSG_DATA_UNAVAILABLE = "Canlı veri şu anda alınamıyor.";
+﻿export const MSG_DATA_UNAVAILABLE = "Canlı veri şu anda alınamıyor.";
 export const MSG_DATA_WHEN_RECONNECTED = "Bağlantı tekrar kurulduğunda bilgiler yenilenecek.";
 export const MSG_DATA_NOT_FOUND_OR_UNAVAILABLE = "Kayıt bulunamadı veya veri kaynağına ulaşılamıyor.";
 export const MSG_LIVE_CONNECTION_REQUIRED = "Bu işlem için canlı bağlantı gerekir.";
@@ -55,3 +55,4 @@ export function mapUserFacingLoginError(options: {
   }
   return "Giriş yapılamadı. Bilgilerinizi kontrol edip tekrar deneyin.";
 }
+

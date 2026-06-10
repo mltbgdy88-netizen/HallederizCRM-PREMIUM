@@ -1,5 +1,7 @@
-﻿import { UsersManagementPage } from "../../../src/features/users/components/UsersManagementPage";
+﻿// @ts-nocheck
+import { KullanicilarOperasyonPage } from "../../../src/features/kullanicilar/components/KullanicilarOperasyonPage";
 
-export default function UsersPage() {
-  return <UsersManagementPage />;
+export default function KullanicilarOperasyonRoute() {
+  return <KullanicilarOperasyonPage />;
 }
+

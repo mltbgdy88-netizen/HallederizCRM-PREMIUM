@@ -1,0 +1,76 @@
+﻿@import url("https://fonts.googleapis.com/css2?family=Inter:wght@500;600;700;800;900&display=swap");
+@import "./styles/auth-root.css";
+@import "./styles/login-split-reference.css";
+@import "./styles/sistem-state-reference.css";
+@import "./styles/ai-operator-hub-reference.css";
+@import "./styles/ai-icgoruler-reference.css";
+@import "./styles/gelen-kutu-konusma-reference.css";
+@import "./styles/gelen-kutu-uc-panel-reference.css";
+@import "./styles/workflow-timeline-reference.css";
+@import "./styles/hizli-islem-satis-masasi-reference.css";
+@import "./styles/dashboard-reference-poc.css";
+@import "./styles/dashboard-gosterge-paneli.css";
+@import "./styles/stok-operasyon-reference.css";
+@import "./styles/cariler-operasyon-reference.css";
+@import "./styles/cariler-detay-reference.css";
+@import "./styles/cariler-yeni-form-reference.css";
+@import "./styles/cariler-katman-reference.css";
+@import "./styles/whatsapp-operasyon-reference.css";
+@import "./styles/hizli-islem-reference.css";
+@import "./styles/teklifler-katman-reference.css";
+@import "./styles/gelen-kutu-operasyon-reference.css";
+@import "./styles/siparisler-operasyon-reference.css";
+@import "./styles/siparisler-yeni-hub-reference.css";
+@import "./styles/siparisler-detay-reference.css";
+@import "./styles/siparisler-katman-reference.css";
+@import "./styles/teklifler-detay-reference.css";
+@import "./styles/teklifler-yeni-reference.css";
+@import "./styles/onaylar-komut-masasi-reference.css";
+@import "./styles/hizli-satis-masasi-reference.css";
+@import "./styles/teklifler-operasyon-reference.css";
+@import "./styles/rapor-operasyon-reference.css";
+@import "./styles/arsiv-operasyon-reference.css";
+@import "./styles/fabrikalar-siparis-operasyon-reference.css";
+@import "./styles/fabrikalar-siparis-detay-reference.css";
+@import "./styles/fabrikalar-stok-operasyon-reference.css";
+@import "./styles/kullanicilar-operasyon-reference.css";
+@import "./styles/kullanicilar-roller-matris-reference.css";
+@import "./styles/erp-entegrasyon-reference.css";
+@import "./styles/ayarlar-hub-reference.css";
+@import "./styles/onaylar-detay-karar-reference.css";
+@import "./styles/onaylar-kurallar-matris-reference.css";
+@import "./styles/faturalar-operasyon-reference.css";
+@import "./styles/faturalar-detay-reference.css";
+@import "./styles/faturalar-yeni-form-reference.css";
+@import "./styles/iadeler-operasyon-reference.css";
+@import "./styles/iadeler-detay-reference.css";
+@import "./styles/iadeler-yeni-form-reference.css";
+@import "./styles/tahsilatlar-operasyon-reference.css";
+@import "./styles/tahsilatlar-yeni-form-reference.css";
+@import "./styles/tahsilatlar-detay-reference.css";
+@import "./styles/teslimatlar-operasyon-reference.css";
+@import "./styles/teslimatlar-yeni-form-reference.css";
+@import "./styles/teslimatlar-detay-reference.css";
+@import "./styles/teslimatlar-rota-reference.css";
+@import "./styles/depo-hazirlik-reference.css";
+@import "./styles/depo-fis-detay-reference.css";
+@import "./styles/belgeler-operasyon-reference.css";
+@import "./styles/belgeler-detay-reference.css";
+@import "./styles/belgeler-yeni-form-reference.css";
+@import "./styles/gorevler-operasyon-reference.css";
+@import "./styles/gorevler-detay-reference.css";
+
+/* Reference UI: fixed viewport, no page scroll */
+html.ref-ui-root,
+html.ref-ui-root body {
+  height: 100%;
+  overflow: hidden;
+}
+
+html.ref-ui-root body {
+  font-family: Inter, "Segoe UI", system-ui, sans-serif;
+  background: var(--ref-canvas, #f8f5ec);
+  color: var(--ref-text, #102a24);
+}
+
+

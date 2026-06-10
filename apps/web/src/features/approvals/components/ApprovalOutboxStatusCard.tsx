@@ -1,4 +1,4 @@
-import type { ApprovalInboxItem } from "../types";
+﻿import type { ApprovalInboxItem } from "../types";
 
 export function ApprovalOutboxStatusCard({ item }: { item: ApprovalInboxItem }) {
   return (
@@ -25,3 +25,4 @@ export function ApprovalOutboxStatusCard({ item }: { item: ApprovalInboxItem }) 
     </section>
   );
 }
+

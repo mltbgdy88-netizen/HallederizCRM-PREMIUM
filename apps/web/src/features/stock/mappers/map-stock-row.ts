@@ -1,4 +1,4 @@
-import { detectCriticalStock, resolveProductAvailability } from "@hallederiz/domain";
+﻿import { detectCriticalStock, resolveProductAvailability } from "@hallederiz/domain";
 import type {
   Brand,
   CriticalStockStatus,
@@ -207,3 +207,4 @@ export function mapProductToStockRow(params: {
     lastCountLine: "Son sayım: —"
   };
 }
+

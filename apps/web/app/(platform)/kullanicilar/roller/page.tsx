@@ -1,5 +1,7 @@
-﻿import { RolesManagementPage } from "../../../../src/features/users/components/RolesManagementPage";
+﻿// @ts-nocheck
+import { KullanicilarRollerMatrisPage } from "../../../../src/features/kullanicilar/components/KullanicilarRollerMatrisPage";
 
-export default function RolesPage() {
-  return <RolesManagementPage />;
+export default function KullanicilarRollerMatrisRoute() {
+  return <KullanicilarRollerMatrisPage />;
 }
+

@@ -1,4 +1,4 @@
-import type { CustomerAccount } from "@hallederiz/types";
+﻿import type { CustomerAccount } from "@hallederiz/types";
 
 /** Gerçek hesap özeti yanıtı var mı (sahte sıfır üretilmez). */
 export function isCustomerFinanceLinked(account: CustomerAccount | null | undefined): account is CustomerAccount {
@@ -11,3 +11,4 @@ export function isCustomerFinanceLinked(account: CustomerAccount | null | undefi
     typeof account.creditLimit === "number"
   );
 }
+

@@ -1,4 +1,4 @@
-/**
+﻿/**
  * Emerald / gold / ivory design system utilities (UI-first PR).
  * Scoped classes only — no global element resets.
  */
@@ -416,3 +416,4 @@ button.hz-btn-readiness:disabled {
 .hz-header-icon-button--bell {
   position: relative;
 }
+

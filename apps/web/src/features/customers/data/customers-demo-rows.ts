@@ -1,4 +1,4 @@
-import type { CustomerRow } from "../mappers/map-customer-row";
+﻿import type { CustomerRow } from "../mappers/map-customer-row";
 
 /** UI-only fallback when API returns zero customers; never mixed with real IDs. */
 export const HZ_CUSTOMERS_DEMO_PREFIX = "hz_demo_" as const;
@@ -7,7 +7,7 @@ export const CUSTOMERS_PORTFOLIO_DEMO_ROWS: CustomerRow[] = [
   {
     customerId: `${HZ_CUSTOMERS_DEMO_PREFIX}delta`,
     code: "CUS-001",
-    name: "Delta A.Ş.",
+    name: "Delta A.�?.",
     typeLabel: "Bayi",
     phone: "+90 312 000 00 01",
     city: "Ankara",
@@ -41,7 +41,7 @@ export const CUSTOMERS_PORTFOLIO_DEMO_ROWS: CustomerRow[] = [
   {
     customerId: `${HZ_CUSTOMERS_DEMO_PREFIX}ege`,
     code: "CUS-003",
-    name: "Ege Un A.Ş.",
+    name: "Ege Un A.�?.",
     typeLabel: "Toptan",
     phone: "+90 236 000 00 03",
     city: "Manisa",
@@ -154,3 +154,4 @@ export function computeKpiMetricsFromCustomerRows(rows: CustomerRow[]): {
     uniquePriceGroupCount
   };
 }
+

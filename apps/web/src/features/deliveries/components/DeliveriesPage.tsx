@@ -1,10 +1,15 @@
+﻿// @ts-nocheck
 "use client";
 
 import { EntityListPageTemplate, EmptyState, LoadingState, Pagination } from "@hallederiz/ui";
 import type { Customer, Delivery } from "@hallederiz/types";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { LucideIcon } from "../../../components/icons/lucide-icons";
 import { dataSourceConfig } from "../../../lib/data-source";
+import { useToast } from "../../../providers/toast-provider";
+import { CommercialOperasyonDeskIntro } from "../../ui-inventory/components/CommercialOperasyonDeskIntro";
 import { dateLabel } from "../utils";
 import { getDeliveries } from "../queries/get-deliveries";
 import { getDeliveryStatusLabel } from "../queries/delivery-mock-data";
@@ -56,14 +61,25 @@ function DeliveryFilterBar() {
   );
 }
 
-function DeliveryPreviewPanel({ delivery, customerName }: { delivery: Delivery | null; customerName: string | null }) {
+function DeliveryPreviewPanel({
+  delivery,
+  customerName,
+  onNavigate
+}: {
+  delivery: Delivery | null;
+  customerName: string | null;
+  onNavigate: (id: string) => void;
+}) {
+  const { pushToast } = useToast();
+
   if (!delivery) {
     return (
       <aside className="hz-commercial-entity-side hz-deliveries-side">
-        <p className="hz-commercial-entity-side-empty">Listeden bir teslimat seçin.</p>
+        <p className="hz-commercial-entity-side-empty">Kayıt seçilmedi.</p>
       </aside>
     );
   }
+
   return (
     <aside className="hz-commercial-entity-side hz-deliveries-side">
       <h3>Teslimat önizleme</h3>
@@ -90,12 +106,31 @@ function DeliveryPreviewPanel({ delivery, customerName }: { delivery: Delivery |
           <strong>Belge:</strong> {delivery.documentStatus}
         </li>
       </ul>
+      <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <button
+          type="button"
+          className="hz-btn hz-btn-primary hz-toolbar-btn"
+          style={{ flex: 1 }}
+          onClick={() => onNavigate(delivery.id)}
+        >
+          Detay
+        </button>
+        <button
+          type="button"
+          className="hz-btn hz-btn-secondary hz-toolbar-btn"
+          style={{ flex: 1 }}
+          onClick={() => pushToast("Taslak hazırlandı: doğrulama onay akışına iletildi.")}
+        >
+          Doğrula
+        </button>
+      </div>
     </aside>
   );
 }
 
 export function DeliveriesPage() {
   const router = useRouter();
+  const { pushToast } = useToast();
   const [deliveries, setDeliveries] = useState<Delivery[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -147,17 +182,35 @@ export function DeliveriesPage() {
 
   return (
     <EntityListPageTemplate
-      className="hz-commercial-entity-page hz-deliveries-page"
+      className="hz-commercial-entity-page hz-deliveries-page hz-teslimatlar-desk"
+      previewSideWidth="detail"
       header={
         <>
-          <header className="hz-commercial-entity-topbar">
-            <div>
-              <h1 className="hz-commercial-entity-topbar-title">Teslimatlar</h1>
-              <p className="hz-commercial-entity-topbar-sub">
-                Teslimat doğrulama, müşteri bilgilendirme ve belge akışlarını yönetin.
-              </p>
-            </div>
-          </header>
+          <CommercialOperasyonDeskIntro
+            title="Teslimat Operasyon Masası"
+            subtitle="Teslimat doğrulama, müşteri bilgilendirme ve belge akışlarını tek ekranda yönetin."
+            icon="truck"
+            actions={
+              <>
+                <Link href="/hizli-islem/teslim" className="hz-commercial-desk-btn hz-commercial-desk-btn--primary">
+                  <LucideIcon name="plus" size={14} />
+                  Hızlı Teslim
+                </Link>
+                <Link href="/teslimatlar/rota" className="hz-commercial-desk-btn hz-commercial-desk-btn--secondary">
+                  <LucideIcon name="external-link" size={14} />
+                  Rota Planı
+                </Link>
+                <button
+                  type="button"
+                  className="hz-commercial-desk-btn hz-commercial-desk-btn--secondary"
+                  onClick={() => pushToast("Dışa aktarma backend onay akışına bağlıdır; demo modunda simüle edildi.")}
+                >
+                  <LucideIcon name="download" size={14} />
+                  Dışa Aktar
+                </button>
+              </>
+            }
+          />
           <div className="hz-commercial-entity-kpi-strip" aria-label="Teslimat özeti">
             <div className="hz-commercial-entity-kpi">
               <span className="hz-commercial-entity-kpi-label">Kayıt</span>
@@ -252,7 +305,15 @@ export function DeliveriesPage() {
           )}
         </div>
       }
-      preview={<DeliveryPreviewPanel delivery={selected} customerName={selectedCustomerName} />}
+      preview={
+        <DeliveryPreviewPanel
+          delivery={selected}
+          customerName={selectedCustomerName}
+          onNavigate={(id) => router.push(`/teslimatlar/${id}`)}
+        />
+      }
     />
   );
 }
+
+

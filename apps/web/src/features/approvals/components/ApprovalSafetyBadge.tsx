@@ -1,4 +1,4 @@
-import type { WorkerHealthResponse } from "../types";
+﻿import type { WorkerHealthResponse } from "../types";
 
 const READINESS_LABELS = [
   "Güvenli önizleme",
@@ -61,3 +61,4 @@ export function ApprovalSafetyBadge({
     </div>
   );
 }
+

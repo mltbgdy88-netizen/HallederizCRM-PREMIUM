@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 
 export type SplitSideWidth = "default" | "detail";
 
@@ -18,3 +18,4 @@ export function SplitContentLayout({ main, side, sideWidth = "default" }: SplitC
     </section>
   );
 }
+

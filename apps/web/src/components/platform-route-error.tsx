@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 type PlatformRouteErrorProps = {
   error: Error & { digest?: string };
@@ -17,3 +17,4 @@ export function PlatformRouteError({ reset, classPrefix = "hz-route-error" }: Pl
     </div>
   );
 }
+

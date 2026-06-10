@@ -1,4 +1,4 @@
-import type { ReportCategoryChip, ReportMetricRow } from "../types";
+﻿import type { ReportCategoryChip, ReportMetricRow } from "../types";
 import { dataSourceConfig } from "../../../lib/data-source";
 
 /** `NEXT_PUBLIC_USE_DEMO_DATA` ile uyumlu; API modunda `false` iken örnek satırlar kullanılmaz. */
@@ -191,3 +191,4 @@ export function metricMatchesChip(row: ReportMetricRow, chip: ReportCategoryChip
   if (chip === "all") return true;
   return row.chip === chip;
 }
+

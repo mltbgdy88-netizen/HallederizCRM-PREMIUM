@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 import { UiButton } from "./button";
 import { UiModal } from "./modal";
 
@@ -55,3 +55,4 @@ export function DestructiveConfirmModal({
     </UiModal>
   );
 }
+

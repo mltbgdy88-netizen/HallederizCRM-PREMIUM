@@ -1,4 +1,4 @@
-import type { ApprovalClientError } from "../types";
+﻿import type { ApprovalClientError } from "../types";
 import { mapApprovalUiErrorMessage } from "../utils/inbox-helpers";
 import { EmptyState as UiEmptyState, ErrorState as UiErrorState, LoadingState as UiLoadingState, UiButton } from "@hallederiz/ui";
 
@@ -44,3 +44,4 @@ export function ApprovalInboxEmpty({ title = "Bekleyen onay bulunamadı", descri
     />
   );
 }
+

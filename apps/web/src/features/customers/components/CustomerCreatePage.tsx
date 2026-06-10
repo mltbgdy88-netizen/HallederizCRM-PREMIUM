@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState } from "react";
 import Link from "next/link";
@@ -121,7 +121,7 @@ export function CustomerCreatePage() {
           <input value={addressLine} onChange={(e) => setAddressLine(e.target.value)} />
         </label>
         <label className="hz-customers-create-field">
-          <span>Şehir</span>
+          <span>�?ehir</span>
           <input value={city} onChange={(e) => setCity(e.target.value)} />
         </label>
         <label className="hz-customers-create-field">
@@ -144,3 +144,4 @@ export function CustomerCreatePage() {
     </div>
   );
 }
+

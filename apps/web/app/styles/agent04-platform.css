@@ -1,4 +1,4 @@
-/* Agent 04 — platform/operations routes (hz-login, hz-dashboard-ops, hz-panel, hz-qop, hz-approvals-detail, hz-workflow) */
+﻿/* Agent 04 — platform/operations routes (hz-login, hz-dashboard-ops, hz-panel, hz-qop, hz-approvals-detail, hz-workflow) */
 
 /* —— Login split —— */
 .hz-login-page {
@@ -459,3 +459,4 @@
   background: color-mix(in srgb, var(--hz-color-bg, var(--hz-bg)) 70%, var(--hz-surface));
   border: 1px solid var(--hz-border);
 }
+

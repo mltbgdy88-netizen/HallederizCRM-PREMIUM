@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+﻿import type { ReactNode } from "react";
 
 export type PageSectionProps = {
   title?: string;
@@ -25,3 +25,4 @@ export function PageSection({ title, description, actions, children, className =
     </section>
   );
 }
+

@@ -1,4 +1,4 @@
-import type { QuickOperationDocumentPreview, QuickOperationWhatsappDraft } from "../types";
+﻿import type { QuickOperationDocumentPreview, QuickOperationWhatsappDraft } from "../types";
 
 interface Props {
   documentPreview?: QuickOperationDocumentPreview;
@@ -78,3 +78,4 @@ export function QuickOperationSideActionsPanel({
     </section>
   );
 }
+

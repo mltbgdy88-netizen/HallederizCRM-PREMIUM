@@ -1,4 +1,4 @@
-/** Canonical CSS custom property names (foundation). */
+﻿/** Canonical CSS custom property names (foundation). */
 export const hzCssVariables = {
   colorEmerald: "--hz-color-emerald",
   colorSidebar: "--hz-color-sidebar",
@@ -24,3 +24,4 @@ export type HzCssVariableKey = keyof typeof hzCssVariables;
 export function hzVar(key: HzCssVariableKey): string {
   return `var(${hzCssVariables[key]})`;
 }
+

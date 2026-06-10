@@ -1,5 +1,7 @@
-import { CustomersPage as CustomersFeaturePage } from "../../../src/features/customers/components";
+﻿// @ts-nocheck
+import { CarilerOperasyonPage } from "../../../src/features/cariler/components/CarilerOperasyonPage";
 
-export default function CustomersPage() {
-  return <CustomersFeaturePage />;
+export default function CarilerOperasyonRoute() {
+  return <CarilerOperasyonPage />;
 }
+

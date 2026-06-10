@@ -1,4 +1,4 @@
-import type { WhatsAppSessionSnapshot } from "@hallederiz/types";
+﻿import type { WhatsAppSessionSnapshot } from "@hallederiz/types";
 import { containsTechnicalUserText } from "../../../lib/user-facing-data-error";
 import {
   MSG_WA_CHANNEL_READY,
@@ -110,3 +110,4 @@ export function mapWhatsAppChannelHealthView(
     qrDataUrl
   };
 }
+

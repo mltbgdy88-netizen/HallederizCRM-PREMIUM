@@ -1,4 +1,4 @@
-import type { QuickOperationSubmitResponse, QuickOperationType, QuickOperationWorkflowImpact } from "@hallederiz/types";
+﻿import type { QuickOperationSubmitResponse, QuickOperationType, QuickOperationWorkflowImpact } from "@hallederiz/types";
 import { containsTechnicalUserText, isOfflineLikeError } from "../../../lib/user-facing-data-error";
 import { resolveOperationEntityHref } from "../../../lib/operation-entity-links";
 import {
@@ -262,3 +262,4 @@ export function mapSubmitActionError(error: unknown): string {
 
   return MSG_SUBMIT_FAILED;
 }
+
