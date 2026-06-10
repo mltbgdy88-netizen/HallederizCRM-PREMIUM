@@ -4,6 +4,7 @@ import { useMemo } from 'react';
 import { activePilotPattern } from '../../data/pilotPatterns';
 import { useShowroomStore } from '../../stores/showroomStore';
 import { ColorSwatchBar } from './ColorSwatchBar';
+import { StockBadge } from './StockBadge';
 
 export function ProductPanel() {
   const activeVariantId = useShowroomStore((state) => state.activeVariantId);
@@ -21,8 +22,10 @@ export function ProductPanel() {
       <div className="mt-5 space-y-3 rounded-2xl bg-black/25 p-4 text-sm">
         <div className="flex justify-between gap-4"><span className="text-[#d8cdbd]">Seçili renk</span><strong>{activeVariant.colorName}</strong></div>
         <div className="flex justify-between gap-4"><span className="text-[#d8cdbd]">SKU</span><strong className="text-right text-xs">{activeVariant.sku}</strong></div>
-        <div className="flex justify-between gap-4"><span className="text-[#d8cdbd]">Bayi stoğu</span><strong>{activeVariant.stock.dealerStock}</strong></div>
-        <div className="flex justify-between gap-4"><span className="text-[#d8cdbd]">Fabrika stoğu</span><strong>{activeVariant.stock.factoryStock}</strong></div>
+        <div className="grid grid-cols-2 gap-3 pt-1">
+          <StockBadge label="Bayi stoğu" value={activeVariant.stock.dealerStock} tone="dealer" />
+          <StockBadge label="Fabrika stoğu" value={activeVariant.stock.factoryStock} tone="factory" />
+        </div>
         <div className="flex justify-between gap-4"><span className="text-[#d8cdbd]">Termin</span><strong>{activeVariant.stock.leadTimeDays} gün</strong></div>
       </div>
       <div className="mt-5 grid grid-cols-2 gap-3">
