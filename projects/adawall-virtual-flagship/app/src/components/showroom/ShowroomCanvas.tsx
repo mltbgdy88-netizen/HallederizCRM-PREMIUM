@@ -1,8 +1,10 @@
 'use client';
 
+import { Environment } from '@react-three/drei';
 import { Canvas } from '@react-three/fiber';
-import { Environment, OrbitControls } from '@react-three/drei';
 import { Suspense } from 'react';
+import { LoadingScreen } from '../ui/LoadingScreen';
+import { CameraRig } from './CameraRig';
 import { ShowroomScene } from './ShowroomScene';
 
 export function ShowroomCanvas() {
@@ -16,8 +18,11 @@ export function ShowroomCanvas() {
           <ShowroomScene />
           <Environment preset="city" />
         </Suspense>
-        <OrbitControls enablePan={false} minDistance={6} maxDistance={18} maxPolarAngle={Math.PI / 2.15} />
+        <CameraRig />
       </Canvas>
+      <noscript>
+        <LoadingScreen />
+      </noscript>
     </div>
   );
 }
