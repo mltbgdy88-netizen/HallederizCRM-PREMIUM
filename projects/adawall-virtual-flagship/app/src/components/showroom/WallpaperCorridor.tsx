@@ -1,3 +1,4 @@
+import { Hotspot } from './Hotspot';
 import { WallpaperBooth } from './WallpaperBooth';
 
 export function WallpaperCorridor() {
@@ -24,6 +25,7 @@ export function WallpaperCorridor() {
         <meshStandardMaterial color="#3b3028" roughness={0.65} />
       </mesh>
       <WallpaperBooth position={[0, 0, 1.4]} />
+      <Hotspot position={[0, 1.45, -0.3]} label="Loca 01" />
     </group>
   );
 }
