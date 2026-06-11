@@ -34,10 +34,15 @@ import { recordAuditEvent } from "../shared/audit-timeline";
 import { withMutationPolicy } from "../shared/mutation-policy";
 import { readPermissions, requireReadAccess } from "../shared/read-guards";
 import { enforcePolicyForRoute } from "../shared/policy-route-enforcement";
+import { withStoredIdempotency } from "../shared/idempotency-mutation";
+import { resolveIdempotencyKeyFromHeader } from "../shared/idempotency-store";
+import { validatePaymentAmount } from "../shared/payment-validation";
+
+const PAYMENT_CREATE_SCOPE = "payments.create";
+const PAYMENT_ALLOCATE_SCOPE = "payments.allocate";
 
 function resolveIdempotencyFromRequest(request: FastifyRequest): string | undefined {
-  const header = request.headers["idempotency-key"];
-  return typeof header === "string" && header.trim() ? header.trim() : undefined;
+  return resolveIdempotencyKeyFromHeader(request.headers["idempotency-key"]);
 }
 
 export async function registerCommercialOperationsRoutes(server: FastifyInstance) {
@@ -233,52 +238,93 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
 
   server.post<{ Body: Partial<PaymentReceipt> }>("/payments", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["payments.write", "payments.manage"])], async (context) => {
-      const policyResult = await enforcePolicyForRoute(context, {
-        actionKey: "platform.payments.create",
-        requiredPermissions: ["payments.write", "payments.manage"],
-        productionActionType: "commercial_write",
-        tenantId: request.body?.tenantId,
-        payload: { amount: request.body?.amount }
-      });
-      if (policyResult.handled) {
-        return reply.status(policyResult.statusCode).send(policyResult.body);
-      }
+      const idempotencyKey = resolveIdempotencyFromRequest(request);
+      return withStoredIdempotency(
+        context,
+        reply,
+        {
+          scope: PAYMENT_CREATE_SCOPE,
+          idempotencyKey,
+          requestBody: request.body,
+          required: true,
+          entityType: "payment"
+        },
+        async () => {
+          const amountValidation = validatePaymentAmount(request.body?.amount);
+          if (!amountValidation.ok) {
+            return {
+              statusCode: 400,
+              body: {
+                message: "Gecersiz tahsilat tutari.",
+                reason: amountValidation.reason
+              }
+            };
+          }
 
-      const service = new CommercialCoreService(context);
-      const item = await service.createPayment(request.body);
-      recordAuditEvent(context, {
-        entityType: "payment",
-        entityId: item.id,
-        eventType: "payment.created",
-        title: "Tahsilat olusturuldu",
-        description: `${item.receiptNo} tahsilat kaydi olusturuldu.`
-      });
-      return reply.status(201).send({ item });
+          const policyResult = await enforcePolicyForRoute(context, {
+            actionKey: "platform.payments.create",
+            requiredPermissions: ["payments.write", "payments.manage"],
+            productionActionType: "commercial_write",
+            tenantId: request.body?.tenantId,
+            payload: { amount: amountValidation.value }
+          });
+          if (policyResult.handled) {
+            return { statusCode: policyResult.statusCode, body: policyResult.body };
+          }
+
+          const service = new CommercialCoreService(context);
+          const item = await service.createPayment({ ...request.body, amount: amountValidation.value });
+          recordAuditEvent(context, {
+            entityType: "payment",
+            entityId: item.id,
+            eventType: "payment.created",
+            title: "Tahsilat olusturuldu",
+            description: `${item.receiptNo} tahsilat kaydi olusturuldu.`
+          });
+          return { statusCode: 201, body: { item } };
+        }
+      );
     });
   });
 
   server.post<{ Params: { id: string } }>("/payments/:id/confirm", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["payments.write", "payments.confirm"])], async (context) => {
-      const wrapped = await withMutationPolicy({
-        request,
-        reply,
+      const requestBody = { paymentId: request.params.id };
+      const idempotencyKey = resolveIdempotencyFromRequest(request);
+      return withStoredIdempotency(
         context,
-        actionKey: "platform.payments.confirm",
-        entityType: "payment",
-        entityId: request.params.id,
-        payload: { paymentId: request.params.id },
-        handler: async () => {
-          const service = new CommercialCoreService(context);
-          return service.confirmPayment(request.params.id);
+        reply,
+        {
+          scope: PAYMENT_ALLOCATE_SCOPE,
+          idempotencyKey,
+          requestBody,
+          required: true,
+          entityType: "payment",
+          entityId: request.params.id
+        },
+        async () => {
+          const wrapped = await withMutationPolicy({
+            request,
+            reply,
+            context,
+            actionKey: "platform.payments.confirm",
+            entityType: "payment",
+            entityId: request.params.id,
+            payload: requestBody,
+            handler: async () => {
+              const service = new CommercialCoreService(context);
+              return service.confirmPayment(request.params.id);
+            }
+          });
+          if (wrapped.handled) {
+            return { statusCode: wrapped.statusCode, body: wrapped.body };
+          }
+          if (!wrapped.value) {
+            return { statusCode: 404, body: { message: "Payment not found" } };
+          }
+          return { statusCode: 200, body: { item: wrapped.value } };
         }
-      });
-      if (wrapped.handled) {
-        return reply.status(wrapped.statusCode).send(wrapped.body);
-      }
-      if (!wrapped.value) {
-        return reply.status(404).send({ message: "Payment not found" });
-      }
-      return { item: wrapped.value };
+      );
     });
   });
 

@@ -17,8 +17,20 @@ export class PaymentsClient {
     return this.api.get<{ items: PaymentAllocation[] }>(`/payments/${id}/allocations`);
   }
 
-  create(payload: Partial<PaymentReceipt>) {
-    return this.api.post<ItemResponse<PaymentReceipt>>("/payments", payload);
+  create(payload: Partial<PaymentReceipt>, options?: { idempotencyKey?: string }) {
+    const headers: Record<string, string> = {};
+    if (options?.idempotencyKey?.trim()) {
+      headers["idempotency-key"] = options.idempotencyKey.trim();
+    }
+    return this.api.post<ItemResponse<PaymentReceipt>>("/payments", payload, { headers });
+  }
+
+  confirm(paymentId: string, options?: { idempotencyKey?: string }) {
+    const headers: Record<string, string> = {};
+    if (options?.idempotencyKey?.trim()) {
+      headers["idempotency-key"] = options.idempotencyKey.trim();
+    }
+    return this.api.post<ItemResponse<PaymentReceipt>>(`/payments/${paymentId}/confirm`, undefined, { headers });
   }
 
   listReversals(paymentId: string) {

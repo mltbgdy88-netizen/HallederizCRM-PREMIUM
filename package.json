@@ -33,6 +33,8 @@
     "security:secret-scan": "node scripts/security/secret-scan.cjs",
     "security:audit": "pnpm audit --audit-level high",
     "security:audit:report": "pnpm audit --audit-level moderate",
+    "ops:idempotency-cleanup:dry-run": "node scripts/ops/idempotency-cleanup.cjs --dry-run",
+    "ops:idempotency-cleanup": "node scripts/ops/idempotency-cleanup.cjs --execute",
     "local-ai:smoke": "node scripts/local-ai/health.cjs --degraded-ok",
     "dev:clean:windows": "powershell -ExecutionPolicy Bypass -File scripts/windows-clean-dev.ps1 -Reinstall"
   },
