@@ -1,9 +1,10 @@
 import { ReportDetailPage } from "../../../../src/features/reports/components/ReportDetailPage";
 
 type PageProps = {
-  params: { raporSlug: string[] };
+  params: Promise<{ raporSlug: string[] }>;
 };
 
-export default function RaporlarDeepPage({ params }: PageProps) {
-  return <ReportDetailPage slugSegments={params.raporSlug ?? []} />;
+export default async function RaporlarDeepPage({ params }: PageProps) {
+  const resolvedParams = await params;
+  return <ReportDetailPage slugSegments={resolvedParams.raporSlug ?? []} />;
 }

@@ -12,6 +12,8 @@ import { registerProductStockPricingRoutes } from "./product-stock-pricing/route
 import { registerQuickOperationsRoutes } from "./quick-operations/routes";
 import { registerSalesCrmRoutes } from "./sales-crm/routes";
 import { buildApiCorsOptions } from "./shared/cors-config";
+import { registerApiRateLimits } from "./shared/rate-limit";
+import { registerOriginGuard } from "./shared/origin-guard";
 import { bootstrapRuntimeEnvValidation } from "./shared/runtime-env-bootstrap";
 import { bootstrapApprovalCommercialActionHandlers } from "./shared/approval-commercial-action-handlers";
 import { bootstrapWorkerDomainExecutionPort } from "./shared/worker-domain-execution-port";
@@ -42,6 +44,8 @@ server.get("/", async () => {
 });
 
 async function bootstrap() {
+  registerApiRateLimits(server);
+  registerOriginGuard(server);
   await server.register(cors, buildApiCorsOptions());
   await registerPlatformCoreRoutes(server);
   await registerProductStockPricingRoutes(server);

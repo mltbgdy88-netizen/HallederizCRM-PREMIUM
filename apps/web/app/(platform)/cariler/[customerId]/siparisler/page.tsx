@@ -1,5 +1,6 @@
 import { CustomerLayerReferenceLayout } from "../../../../../src/features/customers/components/CustomerLayerReferenceLayout";
 
-export default function CarilerCustomerSiparislerPage({ params }: { params: { customerId: string } }) {
-  return <CustomerLayerReferenceLayout customerId={params.customerId} layer="siparisler" />;
+export default async function CarilerCustomerSiparislerPage({ params }: { params: Promise<{ customerId: string }> }) {
+  const resolvedParams = await params;
+  return <CustomerLayerReferenceLayout customerId={resolvedParams.customerId} layer="siparisler" />;
 }

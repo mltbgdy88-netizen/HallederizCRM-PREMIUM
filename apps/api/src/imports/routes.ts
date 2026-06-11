@@ -1,7 +1,6 @@
 import type { FastifyInstance } from "fastify";
 import type { ImportFilePayload, ImportType } from "@hallederiz/types";
 import { ImportsService } from "../modules/imports/service";
-import { buildRequestContext } from "../shared/request-context";
 import { assertAnyPermission, assertAuthenticated, withGuards } from "../shared/auth-guards";
 import { recordAuditEvent } from "../shared/audit-timeline";
 
@@ -10,9 +9,16 @@ interface ImportParams {
 }
 
 export async function registerImportRoutes(server: FastifyInstance) {
-  server.get("/imports/templates", async (request) => {
-    const service = new ImportsService(buildRequestContext(request));
-    return { items: service.listTemplates() };
+  server.get("/imports/templates", async (request, reply) => {
+    return withGuards(
+      request,
+      reply,
+      [assertAuthenticated, (context) => assertAnyPermission(context, ["settings.manage", "customers.read", "products.read"])],
+      async (context) => {
+        const service = new ImportsService(context);
+        return { items: service.listTemplates() };
+      }
+    );
   });
 
   server.get<{ Params: ImportParams }>("/imports/templates/:type", async (request, reply) => {

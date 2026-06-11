@@ -20,3 +20,19 @@ export function verifyHmacSha256Signature(rawBody: string, providedSignature: st
   if (provided.length !== expected.length) return false;
   return timingSafeEqual(provided, expected);
 }
+
+export function verifyWebhookTimestamp(
+  timestampHeader: string | undefined | null,
+  toleranceSeconds = 300,
+  nowMs = Date.now()
+): boolean {
+  if (!timestampHeader?.trim()) {
+    return false;
+  }
+  const parsed = Number(timestampHeader.trim());
+  if (!Number.isFinite(parsed)) {
+    return false;
+  }
+  const headerMs = parsed > 1_000_000_000_000 ? parsed : parsed * 1000;
+  return Math.abs(nowMs - headerMs) <= toleranceSeconds * 1000;
+}

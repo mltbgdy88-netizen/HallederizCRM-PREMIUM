@@ -1,5 +1,6 @@
 import { ReturnCreatePage } from "../../../../src/features/returns/components/ReturnCreatePage";
 
-export default function IadelerYeniPage({ searchParams }: { searchParams?: { order?: string } }) {
-  return <ReturnCreatePage sourceOrderId={searchParams?.order ?? null} />;
+export default async function IadelerYeniPage({ searchParams }: { searchParams?: Promise<{ order?: string }> }) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  return <ReturnCreatePage sourceOrderId={resolvedSearchParams?.order ?? null} />;
 }

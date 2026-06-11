@@ -9,7 +9,9 @@ export class QuickOperationsClient {
     return this.api.post<ItemResponse<QuickOperationPreviewResponse>>("/quick-operations/preview", payload);
   }
 
-  submitQuickOperation(payload: QuickOperationSubmitRequest) {
-    return this.api.post<ItemResponse<QuickOperationSubmitResponse>>("/quick-operations/submit", payload);
+  submitQuickOperation(payload: QuickOperationSubmitRequest, options?: { idempotencyKey?: string }) {
+    return this.api.post<ItemResponse<QuickOperationSubmitResponse>>("/quick-operations/submit", payload, {
+      headers: options?.idempotencyKey ? { "idempotency-key": options.idempotencyKey } : undefined
+    });
   }
 }

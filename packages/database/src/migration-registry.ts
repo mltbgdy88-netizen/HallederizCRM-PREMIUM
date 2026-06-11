@@ -35,7 +35,8 @@ export const ORDERED_SQL_MIGRATION_FILES = [
   "0011_payment_allocations.sql",
   "0012_warehouse_order_lines_tasks.sql",
   "0013_omnichannel_provider_accounts_ai.sql",
-  "0014_commercial_line_tables.sql"
+  "0014_commercial_line_tables.sql",
+  "0015_idempotency_records.sql"
 ] as const;
 
 /** Tables that must appear in the ordered migration SQL corpus (Sprint 1 foundation). */

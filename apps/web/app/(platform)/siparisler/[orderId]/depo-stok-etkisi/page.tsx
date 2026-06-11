@@ -1,5 +1,6 @@
 import { SiparislerOrderidDepoStokEtkisiCommandCenterPage } from "../../../../../src/features/ui-inventory/components/SiparislerSubRoutePages";
 
-export default function SiparislerOrderDepoStokEtkisiPage({ params }: { params: { orderId: string } }) {
-  return <SiparislerOrderidDepoStokEtkisiCommandCenterPage orderId={params.orderId} />;
+export default async function SiparislerOrderDepoStokEtkisiPage({ params }: { params: Promise<{ orderId: string }> }) {
+  const resolvedParams = await params;
+  return <SiparislerOrderidDepoStokEtkisiCommandCenterPage orderId={resolvedParams.orderId} />;
 }

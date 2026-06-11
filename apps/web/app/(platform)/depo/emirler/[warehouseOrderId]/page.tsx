@@ -1,5 +1,6 @@
 import { WarehouseOrderDetailPage as WarehouseOrderDetailFeaturePage } from "../../../../../src/features/warehouse/components";
 
-export default function WarehouseOrderDetailPage({ params }: { params: { warehouseOrderId: string } }) {
-  return <WarehouseOrderDetailFeaturePage warehouseOrderId={params.warehouseOrderId} />;
+export default async function WarehouseOrderDetailPage({ params }: { params: Promise<{ warehouseOrderId: string }> }) {
+  const resolvedParams = await params;
+  return <WarehouseOrderDetailFeaturePage warehouseOrderId={resolvedParams.warehouseOrderId} />;
 }

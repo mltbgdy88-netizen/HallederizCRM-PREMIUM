@@ -63,6 +63,24 @@ test("resolveSubmitFeedback points to approvals when production foundation", () 
   assert.match(feedback.notice, new RegExp(MSG_SUBMIT_QUEUED));
 });
 
+test("resolveSubmitFeedback treats demoPreviewOnly as preview-only", () => {
+  const feedback = resolveSubmitFeedback(
+    {
+      ok: false,
+      demoPreviewOnly: true,
+      operationType: "offer",
+      draftId: "draft_demo",
+      workflowImpacts: [],
+      documentIds: [],
+      auditEventIds: [],
+      mode: "foundation_blocked"
+    },
+    { useDemoData: false, operationType: "offer" }
+  );
+  assert.match(feedback.notice, new RegExp(MSG_SUBMIT_DRAFT_READY));
+  assert.equal(feedback.showApprovalsLink, false);
+});
+
 test("resolveSubmitFeedback links approval detail when approvalId present", () => {
   const feedback = resolveSubmitFeedback(
     {
@@ -72,7 +90,7 @@ test("resolveSubmitFeedback links approval detail when approvalId present", () =
       workflowImpacts: [],
       documentIds: [],
       auditEventIds: [],
-      mode: "foundation"
+      mode: "queued_for_approval"
     },
     { useDemoData: false, operationType: "offer" }
   );

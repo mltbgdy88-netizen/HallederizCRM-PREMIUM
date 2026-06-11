@@ -1,5 +1,6 @@
 import { TekliflerOfferidOzetCommandCenterPage } from "../../../../../src/features/ui-inventory/components/TekliflerSubRoutePages";
 
-export default function TekliflerOfferOzetPage({ params }: { params: { offerId: string } }) {
-  return <TekliflerOfferidOzetCommandCenterPage offerId={params.offerId} />;
+export default async function TekliflerOfferOzetPage({ params }: { params: Promise<{ offerId: string }> }) {
+  const resolvedParams = await params;
+  return <TekliflerOfferidOzetCommandCenterPage offerId={resolvedParams.offerId} />;
 }

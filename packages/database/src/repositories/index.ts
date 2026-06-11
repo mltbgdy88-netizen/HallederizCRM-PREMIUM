@@ -20,3 +20,4 @@ export * from "./ai-reply-job-repository";
 export * from "./provider-message-receipt-repository";
 export * from "./channel-template-repository";
 export * from "./sales-ai-knowledge-repository";
+export * from "./idempotency-record-repository";

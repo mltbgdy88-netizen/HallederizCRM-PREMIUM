@@ -5,10 +5,17 @@ const createNextConfig = (phase) => {
 
   return {
     reactStrictMode: true,
-    // Keep production build artifacts under .runtime-next while isolating dev cache
-    // to avoid Windows file-lock contention between build/dev traces.
     distDir: isDevServer ? ".runtime-next-dev" : ".runtime-next",
-    transpilePackages: ["@hallederiz/ui", "@hallederiz/domain", "@hallederiz/sdk", "@hallederiz/types"]
+    transpilePackages: ["@hallederiz/ui", "@hallederiz/domain", "@hallederiz/sdk", "@hallederiz/types"],
+    async headers() {
+      const securityHeaders = [
+        { key: "X-Content-Type-Options", value: "nosniff" },
+        { key: "X-Frame-Options", value: "DENY" },
+        { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
+        { key: "Permissions-Policy", value: "camera=(), microphone=(), geolocation=()" }
+      ];
+      return [{ source: "/:path*", headers: securityHeaders }];
+    }
   };
 };
 

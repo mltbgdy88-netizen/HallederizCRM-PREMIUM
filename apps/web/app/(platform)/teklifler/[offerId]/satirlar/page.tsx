@@ -1,5 +1,6 @@
 import { TekliflerOfferidSatirlarCommandCenterPage } from "../../../../../src/features/ui-inventory/components/TekliflerSubRoutePages";
 
-export default function TekliflerOfferSatirlarPage({ params }: { params: { offerId: string } }) {
-  return <TekliflerOfferidSatirlarCommandCenterPage offerId={params.offerId} />;
+export default async function TekliflerOfferSatirlarPage({ params }: { params: Promise<{ offerId: string }> }) {
+  const resolvedParams = await params;
+  return <TekliflerOfferidSatirlarCommandCenterPage offerId={resolvedParams.offerId} />;
 }

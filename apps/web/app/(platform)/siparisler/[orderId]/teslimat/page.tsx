@@ -1,5 +1,6 @@
 import { SiparislerOrderidTeslimatCommandCenterPage } from "../../../../../src/features/ui-inventory/components/SiparislerSubRoutePages";
 
-export default function SiparislerOrderTeslimatPage({ params }: { params: { orderId: string } }) {
-  return <SiparislerOrderidTeslimatCommandCenterPage orderId={params.orderId} />;
+export default async function SiparislerOrderTeslimatPage({ params }: { params: Promise<{ orderId: string }> }) {
+  const resolvedParams = await params;
+  return <SiparislerOrderidTeslimatCommandCenterPage orderId={resolvedParams.orderId} />;
 }

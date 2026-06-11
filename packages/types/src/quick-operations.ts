@@ -175,5 +175,7 @@ export interface QuickOperationSubmitResponse {
   auditEventIds: string[];
   validationIssues?: QuickOperationValidationIssue[];
   sideActions?: QuickOperationSideActions;
-  mode: "foundation" | "executed";
+  /** Demo modda yalnızca önizleme; canlı kayıt oluşturulmadı. */
+  demoPreviewOnly?: boolean;
+  mode: "foundation" | "executed" | "queued_for_approval" | "foundation_blocked" | "failed";
 }

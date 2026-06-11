@@ -16,11 +16,16 @@ async function buildServer() {
   return server;
 }
 
-function authHeaders(token: string) {
+function authHeaders(token: string, idempotencyKey?: string) {
   return {
     "x-session-token": token,
-    authorization: `Bearer ${token}`
+    authorization: `Bearer ${token}`,
+    ...(idempotencyKey ? { "idempotency-key": idempotencyKey } : {})
   };
+}
+
+function submitHeaders(token: string, idempotencyKey = `idem_qop_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`) {
+  return authHeaders(token, idempotencyKey);
 }
 
 const baseSaleOrderPayload: QuickOperationSubmitRequest = {
@@ -67,7 +72,7 @@ test("sale_order valid submit returns executed mode", async () => {
       method: "POST",
       url: "/quick-operations/submit",
       payload: baseSaleOrderPayload,
-      headers: authHeaders(login.accessToken)
+      headers: submitHeaders(login.accessToken)
     });
 
     assert.equal(response.statusCode, 200);
@@ -84,8 +89,8 @@ test("sale_order valid submit returns executed mode", async () => {
         };
       };
     };
-    assert.ok(["foundation", "executed"].includes(body.item.mode));
-    if (body.item.mode === "foundation") {
+    assert.ok(["foundation", "executed", "queued_for_approval"].includes(body.item.mode));
+    if (body.item.mode === "foundation" || body.item.mode === "queued_for_approval") {
       assert.ok(body.item.approvalId);
       assert.equal(body.item.createdEntityId, undefined);
     } else {
@@ -110,7 +115,7 @@ test("sale_order factory source produces factory impact", async () => {
       method: "POST",
       url: "/quick-operations/submit",
       payload,
-      headers: authHeaders(login.accessToken)
+      headers: submitHeaders(login.accessToken)
     });
 
     assert.equal(response.statusCode, 200);
@@ -132,7 +137,7 @@ test("offer valid submit runs controlled execution", async () => {
       method: "POST",
       url: "/quick-operations/submit",
       payload,
-      headers: authHeaders(login.accessToken)
+      headers: submitHeaders(login.accessToken)
     });
 
     assert.equal(response.statusCode, 200);
@@ -144,7 +149,7 @@ test("offer valid submit runs controlled execution", async () => {
         sideActions?: { documentPreview?: { title: string } };
       };
     };
-    assert.ok(["executed", "foundation"].includes(body.item.mode));
+    assert.ok(["executed", "foundation", "queued_for_approval"].includes(body.item.mode));
     assert.equal(body.item.sideActions?.documentPreview?.title, "Teklif Onizleme");
     if (body.item.mode === "executed") {
       assert.equal(body.item.createdEntityType, "offer");
@@ -167,12 +172,12 @@ test("payment missing amount returns validation issue", async () => {
       method: "POST",
       url: "/quick-operations/submit",
       payload,
-      headers: authHeaders(login.accessToken)
+      headers: submitHeaders(login.accessToken)
     });
 
     assert.equal(response.statusCode, 200);
     const body = response.json() as { item: { mode: string; validationIssues?: Array<{ code: string }> } };
-    assert.equal(body.item.mode, "foundation");
+    assert.equal(body.item.mode, "failed");
     assert.ok((body.item.validationIssues ?? []).some((issue) => issue.code === "line_required"));
     await server.close();
   });
@@ -186,7 +191,7 @@ test("sale_order with full payment creates order and payment when executed", asy
       method: "POST",
       url: "/quick-operations/preview",
       payload: baseSaleOrderPayload,
-      headers: authHeaders(login.accessToken)
+      headers: submitHeaders(login.accessToken)
     });
     const grandTotal = (preview.json() as { item: { totals: { grandTotal: number } } }).item.totals.grandTotal;
     const payload: QuickOperationSubmitRequest = {
@@ -203,7 +208,7 @@ test("sale_order with full payment creates order and payment when executed", asy
       method: "POST",
       url: "/quick-operations/submit",
       payload,
-      headers: authHeaders(login.accessToken)
+      headers: submitHeaders(login.accessToken)
     });
     assert.equal(response.statusCode, 200);
     const body = response.json() as {
@@ -237,7 +242,7 @@ test("sale_order with overpayment returns validation error", async () => {
       method: "POST",
       url: "/quick-operations/preview",
       payload,
-      headers: authHeaders(login.accessToken)
+      headers: submitHeaders(login.accessToken)
     });
     assert.equal(preview.statusCode, 200);
     const body = preview.json() as { item: { ok: boolean; validationIssues?: Array<{ code: string }> } };
@@ -272,7 +277,7 @@ test("payment valid submit executed or controlled foundation", async () => {
       method: "POST",
       url: "/quick-operations/submit",
       payload,
-      headers: authHeaders(login.accessToken)
+      headers: submitHeaders(login.accessToken)
     });
 
     assert.equal(response.statusCode, 200);
@@ -285,7 +290,7 @@ test("payment valid submit executed or controlled foundation", async () => {
         sideActions?: { whatsappDraft?: { message: string }; aiInsight?: { recommendations: string[]; warnings: string[] } };
       };
     };
-    assert.ok(["executed", "foundation"].includes(body.item.mode));
+    assert.ok(["executed", "foundation", "queued_for_approval"].includes(body.item.mode));
     assert.match(body.item.sideActions?.whatsappDraft?.message ?? "", /tahsilat/i);
     assert.ok((body.item.sideActions?.aiInsight?.recommendations ?? []).length > 0);
     assert.ok(Array.isArray(body.item.sideActions?.aiInsight?.warnings ?? []));
@@ -295,7 +300,7 @@ test("payment valid submit executed or controlled foundation", async () => {
       const paymentDetail = await server.inject({
         method: "GET",
         url: `/payments/${body.item.createdEntityId}`,
-        headers: authHeaders(login.accessToken)
+        headers: submitHeaders(login.accessToken)
       });
       assert.equal(paymentDetail.statusCode, 200);
       const paymentBody = paymentDetail.json() as { item?: { currency?: string } };
@@ -314,13 +319,13 @@ test("delivery and return stay in foundation mode", async () => {
       method: "POST",
       url: "/quick-operations/submit",
       payload: { ...baseSaleOrderPayload, operationType: "delivery" as const },
-      headers: authHeaders(login.accessToken)
+      headers: submitHeaders(login.accessToken)
     });
     const returnResponse = await server.inject({
       method: "POST",
       url: "/quick-operations/submit",
       payload: { ...baseSaleOrderPayload, operationType: "return" as const },
-      headers: authHeaders(login.accessToken)
+      headers: submitHeaders(login.accessToken)
     });
 
     assert.equal(deliveryResponse.statusCode, 200);
@@ -328,7 +333,7 @@ test("delivery and return stay in foundation mode", async () => {
     const deliveryItem = (deliveryResponse.json() as { item: { mode: string; workflowImpacts: Array<{ key: string }> } }).item;
     const returnItem = (returnResponse.json() as { item: { mode: string; workflowImpacts: Array<{ key: string }> } }).item;
     assert.equal(deliveryItem.mode, "foundation");
-    assert.ok(["foundation", "executed"].includes(returnItem.mode));
+    assert.ok(["failed", "foundation", "executed", "foundation_blocked"].includes(returnItem.mode));
     assert.ok(deliveryItem.workflowImpacts.some((impact) => impact.key === "delivery_execution_pending"));
     if (returnItem.mode === "foundation") {
       assert.ok(returnItem.workflowImpacts.some((impact) => impact.key === "return_approval_may_be_required"));
@@ -345,11 +350,11 @@ test("delivery without reference and lines returns validation issue", async () =
       method: "POST",
       url: "/quick-operations/submit",
       payload: { operationType: "delivery", customerId: "customer_1", lines: [] },
-      headers: authHeaders(login.accessToken)
+      headers: submitHeaders(login.accessToken)
     });
     assert.equal(response.statusCode, 200);
     const body = response.json() as { item: { mode: string; validationIssues?: Array<{ code: string }> } };
-    assert.equal(body.item.mode, "foundation");
+    assert.equal(body.item.mode, "failed");
     assert.ok((body.item.validationIssues ?? []).some((issue) => issue.code === "line_required"));
     await server.close();
   });
@@ -382,7 +387,7 @@ test("valid delivery submit returns executed or controlled foundation and delive
       method: "POST",
       url: "/quick-operations/submit",
       payload,
-      headers: authHeaders(login.accessToken)
+      headers: submitHeaders(login.accessToken)
     });
     assert.equal(response.statusCode, 200);
     const body = response.json() as {
@@ -393,7 +398,7 @@ test("valid delivery submit returns executed or controlled foundation and delive
         sideActions?: { documentPreview?: { title: string } };
       };
     };
-    assert.ok(["executed", "foundation"].includes(body.item.mode));
+    assert.ok(["executed", "foundation", "queued_for_approval"].includes(body.item.mode));
     assert.equal(body.item.sideActions?.documentPreview?.title, "Teslim Fisi Onizleme");
     if (body.item.mode === "executed") {
       assert.equal(body.item.createdEntityType, "delivery");
@@ -416,11 +421,11 @@ test("return missing reason returns validation issue", async () => {
         customerId: "customer_1",
         lines: [{ ...baseSaleOrderPayload.lines[0]!, id: "ret_line_1" }]
       } satisfies QuickOperationSubmitRequest,
-      headers: authHeaders(login.accessToken)
+      headers: submitHeaders(login.accessToken)
     });
     assert.equal(response.statusCode, 200);
     const body = response.json() as { item: { mode: string; validationIssues?: Array<{ code: string }> } };
-    assert.equal(body.item.mode, "foundation");
+    assert.equal(body.item.mode, "failed");
     assert.ok((body.item.validationIssues ?? []).some((issue) => issue.code === "return_reason_required"));
     await server.close();
   });
@@ -442,7 +447,7 @@ test("valid return submit includes review/approval impact and return side action
       method: "POST",
       url: "/quick-operations/submit",
       payload,
-      headers: authHeaders(login.accessToken)
+      headers: submitHeaders(login.accessToken)
     });
     assert.equal(response.statusCode, 200);
     const body = response.json() as {
@@ -452,7 +457,7 @@ test("valid return submit includes review/approval impact and return side action
         sideActions?: { documentPreview?: { title: string } };
       };
     };
-    assert.ok(["executed", "foundation"].includes(body.item.mode));
+    assert.ok(["executed", "foundation", "queued_for_approval"].includes(body.item.mode));
     assert.ok(body.item.workflowImpacts.some((impact) => impact.key === "return_approval_may_be_required"));
     assert.equal(body.item.sideActions?.documentPreview?.title, "Iade Talebi Onizleme");
     await server.close();
@@ -470,13 +475,70 @@ test("invalid quantity prevents execution", async () => {
         ...baseSaleOrderPayload,
         lines: [{ ...baseSaleOrderPayload.lines[0]!, id: "bad_qty", quantity: 0, lineTotal: 0 }]
       },
-      headers: authHeaders(login.accessToken)
+      headers: submitHeaders(login.accessToken)
     });
 
     assert.equal(response.statusCode, 200);
     const body = response.json() as { item: { mode: string; validationIssues?: Array<{ code: string }> } };
-    assert.equal(body.item.mode, "foundation");
+    assert.equal(body.item.mode, "failed");
     assert.ok((body.item.validationIssues ?? []).some((issue) => issue.code === "quantity_invalid"));
+    await server.close();
+  });
+});
+
+test("quick-operations submit requires idempotency-key header", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const response = await server.inject({
+      method: "POST",
+      url: "/quick-operations/submit",
+      payload: baseSaleOrderPayload,
+      headers: authHeaders(login.accessToken)
+    });
+    assert.equal(response.statusCode, 400);
+    assert.equal(response.json().reason, "idempotency_key_required");
+    await server.close();
+  });
+});
+
+test("quick-operations submit replays same idempotency key", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const idempotencyKey = "idem_qop_replay_1";
+    const headers = submitHeaders(login.accessToken, idempotencyKey);
+    const first = await server.inject({ method: "POST", url: "/quick-operations/submit", payload: baseSaleOrderPayload, headers });
+    const second = await server.inject({ method: "POST", url: "/quick-operations/submit", payload: baseSaleOrderPayload, headers });
+    assert.equal(first.statusCode, 200);
+    assert.equal(second.statusCode, 200);
+    assert.deepEqual(first.json(), second.json());
+    const body = first.json() as { item: { auditEventIds?: string[] } };
+    assert.ok((body.item.auditEventIds ?? []).length > 0);
+    await server.close();
+  });
+});
+
+test("quick-operations submit rejects idempotency key conflict", async () => {
+  await withDemoAuth(async () => {
+    const server = await buildServer();
+    const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
+    const idempotencyKey = "idem_qop_conflict_1";
+    const first = await server.inject({
+      method: "POST",
+      url: "/quick-operations/submit",
+      payload: baseSaleOrderPayload,
+      headers: submitHeaders(login.accessToken, idempotencyKey)
+    });
+    const second = await server.inject({
+      method: "POST",
+      url: "/quick-operations/submit",
+      payload: { ...baseSaleOrderPayload, note: "farkli payload" },
+      headers: submitHeaders(login.accessToken, idempotencyKey)
+    });
+    assert.equal(first.statusCode, 200);
+    assert.equal(second.statusCode, 409);
+    assert.equal(second.json().reason, "idempotency_key_conflict");
     await server.close();
   });
 });

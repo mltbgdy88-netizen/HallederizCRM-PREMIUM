@@ -1,5 +1,6 @@
 import { InvoiceCreatePage } from "../../../../src/features/invoices/components/InvoiceCreatePage";
 
-export default function FaturalarYeniPage({ searchParams }: { searchParams?: { order?: string } }) {
-  return <InvoiceCreatePage sourceOrderId={searchParams?.order ?? null} />;
+export default async function FaturalarYeniPage({ searchParams }: { searchParams?: Promise<{ order?: string }> }) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  return <InvoiceCreatePage sourceOrderId={resolvedSearchParams?.order ?? null} />;
 }

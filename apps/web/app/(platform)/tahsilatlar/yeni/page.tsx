@@ -1,10 +1,11 @@
 import { PaymentCreatePage } from "../../../../src/features/payments/components/PaymentCreatePage";
 
-export default function NewPaymentPage({ searchParams }: { searchParams?: { customer?: string; order?: string } }) {
+export default async function NewPaymentPage({ searchParams }: { searchParams?: Promise<{ customer?: string; order?: string }> }) {
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
   return (
     <PaymentCreatePage
-      customerId={searchParams?.customer ?? null}
-      sourceOrderId={searchParams?.order ?? null}
+      customerId={resolvedSearchParams?.customer ?? null}
+      sourceOrderId={resolvedSearchParams?.order ?? null}
     />
   );
 }
