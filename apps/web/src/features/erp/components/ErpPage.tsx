@@ -1,8 +1,9 @@
 "use client";
 
-import type { ErpConnection } from "@hallederiz/types";
-import { MetricCard, PageHeader, Pagination, PrimaryActionToolbar, TabSwitcher } from "@hallederiz/ui";
+import type { ErpConnection, ErpMapping, ErpSyncLog } from "@hallederiz/types";
 import { useMemo, useState } from "react";
+import { formatUserFacingStatus } from "../../../lib/user-facing-labels";
+import { useToast } from "../../../providers/toast-provider";
 import { getErpIntegrationData } from "../queries";
 
 const typeLabel = { api: "API", excel: "Excel" } as const;
@@ -10,133 +11,250 @@ const modeLabel = { import_only: "İçe aktarım", export_only: "Dışa aktarım
 const statusLabel: Record<string, string> = {
   healthy: "Sağlıklı",
   warning: "Uyarı",
-  error: "Hata"
+  error: "Hata",
+  passive: "Pasif"
 };
 
-function paginate<T>(items: T[], page: number, pageSize: number): T[] {
-  return items.slice((page - 1) * pageSize, page * pageSize);
+function statusBadgeClass(status: string): string {
+  if (status === "healthy") return "erpf-badge--success";
+  if (status === "warning") return "erpf-badge--warn";
+  if (status === "error" || status === "failed") return "erpf-badge--danger";
+  return "";
 }
 
-export function ErpHealthPanel({ health }: { health: ReturnType<typeof getErpIntegrationData>["health"] }) {
+function formatDate(iso: string | null | undefined): string {
+  if (!iso) return "—";
+  try {
+    return new Date(iso).toLocaleString("tr-TR");
+  } catch {
+    return "—";
+  }
+}
+
+export function ErpHealthPanel({
+  health,
+  connection
+}: {
+  health: ReturnType<typeof getErpIntegrationData>["health"];
+  connection?: ErpConnection;
+}) {
   return (
-    <section className="hz-content-card">
-      <p className="drawer-eyebrow">Bağlantı özeti</p>
-      <h3>{health.status}</h3>
-      <p className="muted">{health.message}</p>
-      <div className="detail-list">
-        <span>Aktif bağlantı</span>
-        <strong>{health.activeConnectionCount}</strong>
-        <span>Uyarı</span>
-        <strong>{health.warningCount}</strong>
-        <span>Hata</span>
-        <strong>{health.errorCount}</strong>
-        <span>Son senkron</span>
-        <strong>{health.lastSyncedAt ? new Date(health.lastSyncedAt).toLocaleString("tr-TR") : "—"}</strong>
-      </div>
+    <section className="erpf-card erpf-side-card">
+      <h3>Bağlantı sağlığı</h3>
+      <p className="erpf-side-note">{health.message}</p>
+      <ul className="erpf-side-list">
+        <li>
+          <span>Genel durum</span>
+          <strong>{formatUserFacingStatus(health.status)}</strong>
+        </li>
+        <li>
+          <span>Aktif bağlantı</span>
+          <strong>{health.activeConnectionCount}</strong>
+        </li>
+        <li>
+          <span>Uyarı</span>
+          <strong>{health.warningCount}</strong>
+        </li>
+        <li>
+          <span>Hata</span>
+          <strong>{health.errorCount}</strong>
+        </li>
+        <li>
+          <span>Son senkron</span>
+          <strong>{formatDate(health.lastSyncedAt)}</strong>
+        </li>
+      </ul>
+      {connection ? (
+        <>
+          <h3 style={{ marginTop: 12 }}>Seçili bağlantı</h3>
+          <ul className="erpf-side-list">
+            <li>
+              <span>Ad</span>
+              <strong>{connection.name}</strong>
+            </li>
+            <li>
+              <span>Tür / mod</span>
+              <strong>
+                {typeLabel[connection.type]} · {modeLabel[connection.mode]}
+              </strong>
+            </li>
+            <li>
+              <span>Test</span>
+              <strong>{formatUserFacingStatus(connection.lastTestResult)}</strong>
+            </li>
+            <li>
+              <span>Son senkron</span>
+              <strong>{formatDate(connection.lastSyncedAt)}</strong>
+            </li>
+          </ul>
+        </>
+      ) : null}
+      <p className="erpf-side-note">Kritik yazım işlemleri onay ve denetim zincirinden geçer; bu panel salt okunurdur.</p>
     </section>
   );
 }
 
-export function ErpConnectionCard({ connection }: { connection: ErpConnection }) {
+export function ErpConnectionCard({
+  connection,
+  selected,
+  onSelect
+}: {
+  connection: ErpConnection;
+  selected?: boolean;
+  onSelect?: () => void;
+}) {
+  const { pushToast } = useToast();
+
   return (
-    <article className="hz-content-card">
-      <div className="hz-card-header">
+    <article
+      className={`erpf-card erpf-conn-card${selected ? " is-selected" : ""}`}
+      onClick={onSelect}
+      onKeyDown={(event) => {
+        if (event.key === "Enter" || event.key === " ") onSelect?.();
+      }}
+      role="button"
+      tabIndex={0}
+      aria-pressed={selected}
+    >
+      <div className="erpf-conn-card__head">
         <div>
-          <p className="drawer-eyebrow">
+          <p className="erpf-topbar__eyebrow">
             {typeLabel[connection.type]} / {modeLabel[connection.mode]}
           </p>
-          <h3>{connection.name}</h3>
+          <h3 className="erpf-conn-card__name">{connection.name}</h3>
         </div>
-        <span
-          className={`hz-badge ${
-            connection.status === "healthy"
-              ? "hz-badge-success"
-              : connection.status === "warning"
-                ? "hz-badge-warning"
-                : "hz-badge-danger"
-          }`}
-        >
-          {statusLabel[connection.status] ?? connection.status}
+        <span className={`erpf-badge ${statusBadgeClass(connection.status)}`}>
+          {statusLabel[connection.status] ?? formatUserFacingStatus(connection.status)}
         </span>
       </div>
-      <p className="muted">
-        Test: {connection.lastTestResult} · Son senkron:{" "}
-        {connection.lastSyncedAt ? new Date(connection.lastSyncedAt).toLocaleString("tr-TR") : "—"}
+      <p className="erpf-conn-card__meta">
+        Test: {formatUserFacingStatus(connection.lastTestResult)} · Son senkron: {formatDate(connection.lastSyncedAt)}
       </p>
-      <div className="hz-inline-actions">
-        <button className="hz-btn hz-btn-secondary" type="button" disabled title="Bağlantı düzenleme API ile yapılır">
+      <div className="erpf-conn-card__actions">
+        <button
+          className="erpf-btn erpf-btn--ghost"
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            pushToast("Bağlantı düzenleme sonraki fazda API ile yapılacaktır.");
+          }}
+        >
           Düzenle
         </button>
-        <button className="hz-btn hz-btn-secondary" type="button" disabled title="Test işlemi API ile yapılır">
+        <button
+          className="erpf-btn erpf-btn--ghost"
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            pushToast("Bağlantı testi demo modda toast-only çalışır.");
+          }}
+        >
           Test et
         </button>
-        <button className="hz-btn hz-btn-secondary" type="button" disabled title="Senkron API ve onay ile yapılır">
-          Senkron başlat
-        </button>
-        <button className="hz-btn hz-btn-secondary" type="button" disabled title="Pasifleştirme API ile yapılır">
-          Pasifleştir
+        <button
+          className="erpf-btn erpf-btn--primary"
+          type="button"
+          onClick={(event) => {
+            event.stopPropagation();
+            pushToast("Senkron başlatma onay zinciri bağlandığında aktif olacaktır.");
+          }}
+        >
+          Senkron
         </button>
       </div>
     </article>
   );
 }
 
-export function ErpConnectionModal() {
+function ErpSyncStatusTable({ logs }: { logs: ErpSyncLog[] }) {
   return (
-    <section className="hz-content-card">
-      <p className="drawer-eyebrow">Yeni bağlantı</p>
-      <h3>API veya Excel bağlantısı</h3>
-      <p className="muted">
-        Bağlantı tanımı ve gizli anahtarlar adapter katmanında yönetilir; bu form yalnızca görünüm şablonudur ve canlı
-        kayıt üretmez.
-      </p>
-      <div className="task-center-filter-grid">
-        <label>
-          Bağlantı adı
-          <input placeholder="Bağlantı adı" disabled />
-        </label>
-        <label>
-          Tür
-          <select defaultValue="api" disabled>
-            <option value="api">API</option>
-            <option value="excel">Excel</option>
-          </select>
-        </label>
-        <label>
-          Mod
-          <select defaultValue="bidirectional" disabled>
-            <option value="import_only">İçe aktarım</option>
-            <option value="export_only">Dışa aktarım</option>
-            <option value="bidirectional">Çift yönlü</option>
-          </select>
-        </label>
-        <label>
-          Uç nokta / dosya yolu
-          <input placeholder="API adresi veya dosya klasörü" disabled />
-        </label>
-      </div>
-      <div className="hz-inline-actions">
-        <button className="hz-btn hz-btn-primary" type="button" disabled title="Kayıt API üzerinden oluşturulur">
-          Kaydet
-        </button>
-        <button className="hz-btn hz-btn-secondary" type="button" disabled title="Test API üzerinden yapılır">
-          Test et
-        </button>
+    <section className="erpf-card">
+      <header className="erpf-section-head">
+        <h2>Senkron durumu</h2>
+      </header>
+      <div className="erpf-table-wrap">
+        <table className="erpf-table">
+          <thead>
+            <tr>
+              <th>Tarih</th>
+              <th>Yön</th>
+              <th>Varlık</th>
+              <th>Durum</th>
+              <th>Kayıt</th>
+            </tr>
+          </thead>
+          <tbody>
+            {logs.slice(0, 6).map((log) => (
+              <tr key={log.id} className={log.status !== "success" ? "is-error" : undefined}>
+                <td>{formatDate(log.startedAt)}</td>
+                <td>{log.direction}</td>
+                <td>{log.entityType}</td>
+                <td>{formatUserFacingStatus(log.status)}</td>
+                <td>{log.recordCount}</td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
       </div>
     </section>
   );
 }
 
-export function ErpMappingTable({ mappings }: { mappings: ReturnType<typeof getErpIntegrationData>["mappings"] }) {
-  const [page, setPage] = useState(1);
-  const pageSize = 10;
-  const paged = useMemo(() => paginate(mappings, page, pageSize), [mappings, page]);
-
+function ErpErrorQueue({ logs }: { logs: ErpSyncLog[] }) {
+  const errors = logs.filter((log) => log.status !== "success");
   return (
-    <section className="hz-content-card">
-      <h3>Eşlemeler</h3>
-      <div className="table-wrap hz-table-wrap">
-        <table className="table hz-table">
+    <section className="erpf-card">
+      <header className="erpf-section-head">
+        <h2>Hata kuyruğu</h2>
+        <span className="erpf-badge erpf-badge--danger">{errors.length} kayıt</span>
+      </header>
+      <div className="erpf-table-wrap">
+        <table className="erpf-table">
+          <thead>
+            <tr>
+              <th>Tarih</th>
+              <th>Varlık</th>
+              <th>Mesaj</th>
+            </tr>
+          </thead>
+          <tbody>
+            {errors.length === 0 ? (
+              <tr>
+                <td colSpan={3}>Açık hata kaydı yok.</td>
+              </tr>
+            ) : (
+              errors.map((log) => (
+                <tr key={log.id} className="is-error">
+                  <td>{formatDate(log.startedAt)}</td>
+                  <td>{log.entityType}</td>
+                  <td>{log.message}</td>
+                </tr>
+              ))
+            )}
+          </tbody>
+        </table>
+      </div>
+    </section>
+  );
+}
+
+function ErpMappingPanel({
+  mappings,
+  selectedId,
+  onSelect
+}: {
+  mappings: ErpMapping[];
+  selectedId: string | null;
+  onSelect: (id: string) => void;
+}) {
+  return (
+    <section className="erpf-card">
+      <header className="erpf-section-head">
+        <h2>Modül eşlemeleri</h2>
+        <span className="erpf-badge erpf-badge--info">{mappings.filter((m) => m.active).length} aktif</span>
+      </header>
+      <div className="erpf-table-wrap">
+        <table className="erpf-table">
           <thead>
             <tr>
               <th>Varlık</th>
@@ -146,8 +264,12 @@ export function ErpMappingTable({ mappings }: { mappings: ReturnType<typeof getE
             </tr>
           </thead>
           <tbody>
-            {paged.map((mapping) => (
-              <tr key={mapping.id}>
+            {mappings.map((mapping) => (
+              <tr
+                key={mapping.id}
+                className={mapping.id === selectedId ? "is-selected" : undefined}
+                onClick={() => onSelect(mapping.id)}
+              >
                 <td>{mapping.entityType}</td>
                 <td>{mapping.localField}</td>
                 <td>{mapping.remoteField}</td>
@@ -157,222 +279,175 @@ export function ErpMappingTable({ mappings }: { mappings: ReturnType<typeof getE
           </tbody>
         </table>
       </div>
-      <Pagination totalItems={mappings.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
     </section>
-  );
-}
-
-export function ErpSyncLogTable({ logs }: { logs: ReturnType<typeof getErpIntegrationData>["logs"] }) {
-  const [page, setPage] = useState(1);
-  const pageSize = 10;
-  const paged = useMemo(() => paginate(logs, page, pageSize), [logs, page]);
-
-  return (
-    <section className="hz-content-card">
-      <h3>Senkron geçmişi</h3>
-      <div className="table-wrap hz-table-wrap">
-        <table className="table hz-table">
-          <thead>
-            <tr>
-              <th>Tarih</th>
-              <th>Yön</th>
-              <th>Varlık</th>
-              <th>Durum</th>
-              <th>Kayıt</th>
-              <th>Mesaj</th>
-            </tr>
-          </thead>
-          <tbody>
-            {paged.map((log) => (
-              <tr key={log.id}>
-                <td>{new Date(log.startedAt).toLocaleString("tr-TR")}</td>
-                <td>{log.direction}</td>
-                <td>{log.entityType}</td>
-                <td>{log.status}</td>
-                <td>{log.recordCount}</td>
-                <td>{log.message}</td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-      <Pagination totalItems={logs.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
-    </section>
-  );
-}
-
-export function ErpTemplatePanel({ templates }: { templates: ReturnType<typeof getErpIntegrationData>["templates"] }) {
-  const [page, setPage] = useState(1);
-  const pageSize = 6;
-  const paged = useMemo(() => paginate(templates, page, pageSize), [templates, page]);
-
-  return (
-    <>
-      <section className="hz-grid-two">
-        {paged.map((template) => (
-          <article key={template.key} className="hz-content-card">
-            <p className="drawer-eyebrow">{template.entityType}</p>
-            <h3>{template.title}</h3>
-            <p className="muted">Son kullanım: {template.lastUsedAt}</p>
-            <div className="hz-inline-actions">
-              <button className="hz-btn hz-btn-secondary" type="button" disabled title="İndirme API ile yapılır">
-                İndir
-              </button>
-              <button className="hz-btn hz-btn-secondary" type="button" disabled title="Örnek görüntüleme API ile yapılır">
-                Örnek gör
-              </button>
-            </div>
-          </article>
-        ))}
-      </section>
-      <Pagination totalItems={templates.length} pageSize={pageSize} currentPage={page} onPageChange={setPage} />
-    </>
   );
 }
 
 export function ErpPage() {
   const data = getErpIntegrationData();
-  const [tab, setTab] = useState("connections");
-  const [connectionsPage, setConnectionsPage] = useState(1);
-  const connectionsPageSize = 4;
-  const pagedConnections = useMemo(
-    () => paginate(data.connections, connectionsPage, connectionsPageSize),
-    [connectionsPage, data.connections]
+  const { pushToast } = useToast();
+  const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(data.connections[0]?.id ?? null);
+  const [selectedMappingId, setSelectedMappingId] = useState<string | null>(data.mappings[0]?.id ?? null);
+
+  const selectedConnection = useMemo(
+    () => data.connections.find((connection) => connection.id === selectedConnectionId) ?? data.connections[0],
+    [data.connections, selectedConnectionId]
   );
 
+  const activeMappings = useMemo(() => data.mappings.filter((mapping) => mapping.active).length, [data.mappings]);
+
   return (
-    <div className="hz-erp-page hz-page-stack">
-      <header className="hz-erp-topbar">
-        <div>
-          <h1 className="hz-erp-topbar-title">ERP entegrasyonu</h1>
-          <p className="hz-erp-topbar-sub">
-            Bağlantı ve senkron durumu mevcut entegrasyon verisine göre gösterilir; sahte bağlı veya başarı durumu
-            üretilmez.
-          </p>
-        </div>
-      </header>
-      <p className="hz-erp-preview-band" role="status">
-        ERP bağlantısı tamamlandığında durum burada gösterilecek. Kritik yazım işlemleri onay zincirinden geçer.
+    <div className="erpf-page">
+      <p className="erpf-demo-band" role="status">
+        Entegrasyon operasyon masası: senkron ve bağlantı mutationları sonraki fazda bağlanacaktır.
       </p>
-      <section className="hz-content-card hz-erp-write-policy">
-        <p className="drawer-eyebrow">Entegrasyon politikası</p>
-        <h3>Salt okunur senkron, kontrollü yazım</h3>
-        <p className="muted">
-          Varsayılan güvenli mod: okuma ve log izleme. ERP tarafına yazım yalnız politika, onay ve denetim kaydı
-          sonrasında yürütülür; bu ekran canlı execute üretmez.
-        </p>
-      </section>
 
-      <section className="hz-metric-grid">
-        <MetricCard title="Aktif bağlantı" value={String(data.health.activeConnectionCount)} detail="API + Excel" tone="info" />
-        <MetricCard title="Uyarı" value={String(data.health.warningCount)} detail="Güncellenmeli" tone="warning" />
-        <MetricCard title="Hata" value={String(data.health.errorCount)} detail="Müdahale" tone="danger" />
-        <MetricCard
-          title="Eşleme"
-          value={String(data.mappings.filter((mapping) => mapping.active).length)}
-          detail="Aktif eşleme"
-          tone="success"
-        />
-      </section>
-
-      <PrimaryActionToolbar>
-        <button className="hz-btn hz-toolbar-btn hz-btn-primary" type="button" disabled title="Yeni bağlantı API ile tanımlanır">
-          Yeni bağlantı
-        </button>
-        <button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button" disabled title="Senkron API ve onay ile yapılır">
-          Senkron başlat
-        </button>
-        <button className="hz-btn hz-toolbar-btn hz-btn-secondary" type="button" disabled title="Şablon API ile sunulur">
-          Excel şablonu
-        </button>
-      </PrimaryActionToolbar>
-
-      <section className="hz-content-card">
-        <p className="muted">
-          Araç çubuğu işlemleri yetki ve canlı provider yapılandırmasına bağlıdır; bağlantı yoksa düğmeler pasif kalır.
-        </p>
-      </section>
-
-      <TabSwitcher
-        activeKey={tab}
-        onChange={setTab}
-        items={[
-          { key: "connections", label: "Bağlantılar" },
-          { key: "mappings", label: "Eşlemeler" },
-          { key: "logs", label: "Senkron geçmişi" },
-          { key: "templates", label: "Excel şablonları" },
-          { key: "errors", label: "Hatalar" }
-        ]}
-      />
-
-      <section className="hz-filter-card">
-        <div className="hz-filter-grid">
-          <label>
-            Ara
-            <input placeholder="Bağlantı, modül veya kayıt no" disabled />
-          </label>
-          <label>
-            Tür
-            <select defaultValue="" disabled>
-              <option value="">Tüm türler</option>
-              <option value="api">API</option>
-              <option value="excel">Excel</option>
-            </select>
-          </label>
-          <label>
-            Durum
-            <select defaultValue="" disabled>
-              <option value="">Tüm durumlar</option>
-              <option value="healthy">Sağlıklı</option>
-              <option value="warning">Uyarı</option>
-              <option value="error">Hata</option>
-            </select>
-          </label>
-          <label>
-            Yön
-            <select defaultValue="" disabled>
-              <option value="">Tüm yönler</option>
-              <option value="import">İçe aktarım</option>
-              <option value="export">Dışa aktarım</option>
-            </select>
-          </label>
-        </div>
-        <div className="hz-filter-actions">
-          <button type="button" className="hz-btn hz-btn-secondary" disabled title="Filtre API sorgusuna bağlanacak">
-            Filtrele
-          </button>
-          <button type="button" className="reset-btn" disabled>
-            Temizle
-          </button>
-        </div>
-        <p className="muted">Filtreler canlı API sorgusuna bağlandığında listeyi daraltır; şu an yalnızca görünüm şablonudur.</p>
-      </section>
-
-      {tab === "connections" ? (
-        <>
-          <ErpHealthPanel health={data.health} />
-          <ErpConnectionModal />
-          <section className="hz-grid-two">
-            {pagedConnections.length === 0 ? (
-              <p className="muted" role="status">
-                Canlı veri bekleniyor veya tanımlı bağlantı yok.
+      <div className="erpf-layout">
+        <div className="erpf-main">
+          <header className="erpf-card erpf-topbar">
+            <div>
+              <p className="erpf-topbar__eyebrow">ERP entegrasyonu</p>
+              <h1 className="erpf-topbar__title">Entegrasyon Operasyon Masası</h1>
+              <p className="erpf-topbar__sub">
+                Bağlantı, senkron ve eşleme durumu mevcut entegrasyon verisine göre gösterilir.
               </p>
-            ) : (
-              pagedConnections.map((connection) => <ErpConnectionCard key={connection.id} connection={connection} />)
-            )}
+            </div>
+            <div className="erpf-topbar__actions">
+              <button
+                className="erpf-btn erpf-btn--primary"
+                type="button"
+                onClick={() => pushToast("Yeni bağlantı tanımı sonraki fazda API ile yapılacaktır.")}
+              >
+                Yeni bağlantı
+              </button>
+              <button
+                className="erpf-btn erpf-btn--ghost"
+                type="button"
+                onClick={() => pushToast("Senkron başlatma onay zinciri bağlandığında aktif olacaktır.")}
+              >
+                Senkron başlat
+              </button>
+              <button
+                className="erpf-btn erpf-btn--ghost"
+                type="button"
+                onClick={() => pushToast("Excel şablonu indirme sonraki fazda bağlanacaktır.")}
+              >
+                Excel şablonu
+              </button>
+            </div>
+          </header>
+
+          <div className="erpf-kpi-strip" aria-label="Entegrasyon özetleri">
+            <article className="erpf-card erpf-kpi erpf-kpi--success">
+              <span className="erpf-kpi__label">Aktif bağlantı</span>
+              <span className="erpf-kpi__value">{data.health.activeConnectionCount}</span>
+            </article>
+            <article className="erpf-card erpf-kpi erpf-kpi--warn">
+              <span className="erpf-kpi__label">Uyarı</span>
+              <span className="erpf-kpi__value">{data.health.warningCount}</span>
+            </article>
+            <article className="erpf-card erpf-kpi erpf-kpi--danger">
+              <span className="erpf-kpi__label">Hata</span>
+              <span className="erpf-kpi__value">{data.health.errorCount}</span>
+            </article>
+            <article className="erpf-card erpf-kpi">
+              <span className="erpf-kpi__label">Aktif eşleme</span>
+              <span className="erpf-kpi__value">{activeMappings}</span>
+            </article>
+          </div>
+
+          <div className="erpf-card erpf-filter">
+            <label className="erpf-field">
+              <span>Ara</span>
+              <input placeholder="Bağlantı, modül veya kayıt no" readOnly aria-readonly="true" />
+            </label>
+            <label className="erpf-field">
+              <span>Tür</span>
+              <select defaultValue="" disabled aria-disabled="true">
+                <option value="">Tüm türler</option>
+                <option value="api">API</option>
+                <option value="excel">Excel</option>
+              </select>
+            </label>
+            <label className="erpf-field">
+              <span>Durum</span>
+              <select defaultValue="" disabled aria-disabled="true">
+                <option value="">Tüm durumlar</option>
+                <option value="healthy">Sağlıklı</option>
+                <option value="warning">Uyarı</option>
+                <option value="error">Hata</option>
+              </select>
+            </label>
+            <label className="erpf-field">
+              <span>Yön</span>
+              <select defaultValue="" disabled aria-disabled="true">
+                <option value="">Tüm yönler</option>
+                <option value="import">İçe aktarım</option>
+                <option value="export">Dışa aktarım</option>
+              </select>
+            </label>
+            <div className="erpf-filter__actions">
+              <button
+                className="erpf-btn erpf-btn--ghost"
+                type="button"
+                title="Filtreleri sıfırla"
+                aria-label="Filtreleri sıfırla"
+                onClick={() => pushToast("Filtreler canlı API sorgusuna bağlandığında aktif olacaktır.")}
+              >
+                Sıfırla
+              </button>
+            </div>
+          </div>
+
+          <div className="erpf-body">
+            <div className="erpf-scroll">
+              <div className="erpf-conn-grid">
+                {data.connections.length === 0 ? (
+                  <p className="erpf-side-note" role="status">
+                    Tanımlı bağlantı yok.
+                  </p>
+                ) : (
+                  data.connections.map((connection) => (
+                    <ErpConnectionCard
+                      key={connection.id}
+                      connection={connection}
+                      selected={connection.id === selectedConnection?.id}
+                      onSelect={() => setSelectedConnectionId(connection.id)}
+                    />
+                  ))
+                )}
+              </div>
+              <ErpSyncStatusTable logs={data.logs} />
+              <ErpErrorQueue logs={data.logs} />
+              <ErpMappingPanel
+                mappings={data.mappings}
+                selectedId={selectedMappingId}
+                onSelect={setSelectedMappingId}
+              />
+            </div>
+          </div>
+        </div>
+
+        <aside className="erpf-side">
+          <ErpHealthPanel health={data.health} connection={selectedConnection} />
+          <section className="erpf-card erpf-side-card">
+            <h3>Entegrasyon politikası</h3>
+            <p className="erpf-side-note">
+              Varsayılan güvenli mod: okuma ve log izleme. ERP tarafına yazım yalnız politika, onay ve denetim kaydı
+              sonrasında yürütülür.
+            </p>
+            <div className="erpf-conn-card__actions">
+              <button
+                className="erpf-btn erpf-btn--ghost"
+                type="button"
+                onClick={() => pushToast("Politika detayı salt okunur gösterilir.")}
+              >
+                Politikayı gör
+              </button>
+            </div>
           </section>
-          <Pagination
-            totalItems={data.connections.length}
-            pageSize={connectionsPageSize}
-            currentPage={connectionsPage}
-            onPageChange={setConnectionsPage}
-          />
-        </>
-      ) : null}
-      {tab === "mappings" ? <ErpMappingTable mappings={data.mappings} /> : null}
-      {tab === "logs" ? <ErpSyncLogTable logs={data.logs} /> : null}
-      {tab === "templates" ? <ErpTemplatePanel templates={data.templates} /> : null}
-      {tab === "errors" ? <ErpSyncLogTable logs={data.logs.filter((log) => log.status !== "success")} /> : null}
+        </aside>
+      </div>
     </div>
   );
 }

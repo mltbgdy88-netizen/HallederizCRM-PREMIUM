@@ -2,6 +2,7 @@
 
 import { DetailPanel } from "@hallederiz/ui";
 import { useState } from "react";
+import { formatUserFacingMode } from "../../../lib/user-facing-labels";
 import type { ApprovalInboxItem } from "../types";
 import type { LastApprovalActionSummary } from "../utils/operator-smoke";
 import { ApprovalActionBar } from "./ApprovalActionBar";
@@ -101,7 +102,7 @@ export function ApprovalDetailPanel({
             <dd>{item.rejectedBy ?? "-"}</dd>
           </div>
           <div>
-            <dt>Idempotency</dt>
+            <dt>Tekrar güvenliği anahtarı</dt>
             <dd>{item.idempotencyKey}</dd>
           </div>
           <div>
@@ -109,12 +110,12 @@ export function ApprovalDetailPanel({
             <dd>{item.rejectReason ?? "-"}</dd>
           </div>
           <div>
-            <dt>Tenant</dt>
+            <dt>Kiracı</dt>
             <dd>{item.tenantId}</dd>
           </div>
         </dl>
         <details className="hz-approvals-inbox-payload-details">
-          <summary>Payload özeti</summary>
+          <summary>İşlem özeti</summary>
           <pre className="hz-approvals-inbox-payload">{payloadPreview}</pre>
         </details>
       </section>
@@ -132,11 +133,11 @@ export function ApprovalDetailPanel({
           </div>
           <div>
             <dt>İşlem modu</dt>
-            <dd>{item.bridgeTransactionMode ?? "-"}</dd>
+            <dd>{formatUserFacingMode(item.bridgeTransactionMode)}</dd>
           </div>
           <div>
             <dt>Kalıcılık modu</dt>
-            <dd>{item.bridgePersistenceMode ?? "-"}</dd>
+            <dd>{formatUserFacingMode(item.bridgePersistenceMode)}</dd>
           </div>
           <div>
             <dt>Denetim zaman çizelgesi</dt>

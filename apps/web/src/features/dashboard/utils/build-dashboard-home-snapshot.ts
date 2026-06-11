@@ -231,6 +231,16 @@ export function buildDashboardHomeSnapshot(
 
   const overduePaymentsApprox = orders.filter((o) => o.paymentStatus === "unpaid" || o.paymentStatus === "partial").length;
 
+  const collectionFocusCount = tasks.filter(
+    (t) =>
+      t.entityType === "payment" ||
+      t.type === "payment_followup" ||
+      t.type === "high_debt" ||
+      t.type === "ai_payment_priority"
+  ).length;
+
+  const returnsFocusCount = tasks.filter((t) => t.entityType === "return").length;
+
   const cardValues: Partial<Record<DashboardCardId, string>> = {
     approvals: String(pendingApprovals),
     "today-priority": String(Math.min(9, Math.max(highPriorityOpen, pendingApprovals))),
@@ -245,7 +255,9 @@ export function buildDashboardHomeSnapshot(
     deliveries: String(deliveryFocusCount),
     "ai-suggestions": String(aiOpenTasks),
     "ai-approval": String(pendingAiApprovalCount),
-    overdue: String(overduePaymentsApprox)
+    overdue: String(overduePaymentsApprox),
+    collections: String(collectionFocusCount),
+    returns: String(returnsFocusCount)
   };
 
   const cardNotes: Partial<Record<DashboardCardId, string>> = {
@@ -253,9 +265,9 @@ export function buildDashboardHomeSnapshot(
     "critical-tasks": criticalOrOverdueTasks ? "Risk / gecikme" : "Kritik yok",
     "stock-risk": stockRiskCount ? "Stok sinyali" : "Uyarı yok",
     wa: "Kanal gelen kutusu",
-    collections: "Operasyon özeti",
+    collections: collectionFocusCount ? "Tahsilat / ödeme takibi" : "Bekleyen yok",
     invoices: "Belge akışı",
-    returns: "İade takibi"
+    returns: returnsFocusCount ? "İade takibi" : "Bekleyen yok"
   };
 
   return {

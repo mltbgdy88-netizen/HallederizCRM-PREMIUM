@@ -2,8 +2,9 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import type { PaymentMethod } from "@hallederiz/types";
+import { LucideIcon } from "../../../components/icons/lucide-icons";
 import { dataSourceConfig, sdk } from "../../../lib/data-source";
 import { useToast } from "../../../providers/toast-provider";
 import { submitQuickOperationRecord } from "../../../services/api/quick-operations.service";
@@ -18,8 +19,31 @@ const METHODS: Array<{ value: PaymentMethod; label: string }> = [
   { value: "mixed", label: "Diğer" }
 ];
 
+type DeskOrderRow = {
+  id: string;
+  orderNo: string;
+  customerId: string;
+  grandTotal: number;
+  paidTotal: number;
+};
+
 function money(value: number): string {
   return value.toLocaleString("tr-TR", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function resolveOrderOpenBalance(order: DeskOrderRow): number {
+  return Math.max(0, order.grandTotal - order.paidTotal);
+}
+
+function buildHizliIslemHref(customerId: string, orderId: string): string {
+  const params = new URLSearchParams({ tab: "payment" });
+  if (customerId) {
+    params.set("customer", customerId);
+  }
+  if (orderId) {
+    params.set("order", orderId);
+  }
+  return `/hizli-islem/satis-masasi?${params.toString()}`;
 }
 
 export function PaymentCreatePage({
@@ -31,8 +55,9 @@ export function PaymentCreatePage({
 }) {
   const router = useRouter();
   const { pushToast } = useToast();
+  const initialSyncRef = useRef(false);
   const [customers, setCustomers] = useState<Array<{ id: string; name: string }>>([]);
-  const [orders, setOrders] = useState<Array<{ id: string; orderNo: string; customerId: string; grandTotal: number; paidTotal: number }>>([]);
+  const [orders, setOrders] = useState<DeskOrderRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [savedPaymentId, setSavedPaymentId] = useState<string | null>(null);
@@ -69,22 +94,61 @@ export function PaymentCreatePage({
     };
   }, []);
 
+  useEffect(() => {
+    if (initialSyncRef.current) return;
+    if (loading) return;
+
+    if (sourceOrderId) {
+      const matchedOrder = orders.find((order) => order.id === sourceOrderId);
+      if (matchedOrder) {
+        setOrderId(matchedOrder.id);
+        setCustomerId(matchedOrder.customerId);
+        const open = resolveOrderOpenBalance(matchedOrder);
+        if (open > 0) {
+          setAmount((current) => (current <= 0 ? open : current));
+        }
+        initialSyncRef.current = true;
+        return;
+      }
+    }
+
+    if (initialCustomerId) {
+      setCustomerId(initialCustomerId);
+      initialSyncRef.current = true;
+    }
+  }, [sourceOrderId, initialCustomerId, orders, loading]);
+
   const customerOrders = useMemo(
     () => orders.filter((order) => !customerId || order.customerId === customerId),
     [customerId, orders]
   );
 
-  const selectedOrder = useMemo(() => orders.find((o) => o.id === orderId), [orderId, orders]);
+  const selectedOrder = useMemo(() => orders.find((o) => o.id === orderId) ?? null, [orderId, orders]);
+
+  const selectedCustomerName = useMemo(
+    () => customers.find((customer) => customer.id === customerId)?.name ?? "—",
+    [customers, customerId]
+  );
 
   useEffect(() => {
     if (!selectedOrder) return;
-    const open = Math.max(0, selectedOrder.grandTotal - selectedOrder.paidTotal);
+    const open = resolveOrderOpenBalance(selectedOrder);
     if (open > 0 && amount <= 0) {
       setAmount(open);
     }
   }, [selectedOrder, amount]);
 
-  const openAmount = selectedOrder ? Math.max(0, selectedOrder.grandTotal - selectedOrder.paidTotal) : null;
+  const openAmount = selectedOrder ? resolveOrderOpenBalance(selectedOrder) : null;
+  const remainingBalance = openAmount !== null ? Math.max(0, openAmount - amount) : null;
+
+  function handleCustomerChange(nextCustomerId: string) {
+    setCustomerId(nextCustomerId);
+    if (!orderId) return;
+    const linkedOrder = orders.find((order) => order.id === orderId);
+    if (linkedOrder && linkedOrder.customerId !== nextCustomerId) {
+      setOrderId("");
+    }
+  }
 
   const handleSave = async () => {
     if (!customerId) {
@@ -156,147 +220,248 @@ export function PaymentCreatePage({
 
   if (savedPaymentId && savedPaymentId !== "demo_blocked") {
     return (
-      <div className="hz-commercial-create-hub hz-payments-create-page">
-        <div className="hz-commercial-create-hub-card">
-          <p className="hz-commercial-create-hub-eyebrow">Tahsilatlar</p>
-          <h1 className="hz-commercial-create-hub-title">Tahsilat hazırlandı</h1>
-          <p className="hz-commercial-create-hub-lead">Kayıt işlendi. Detayı inceleyebilir veya listeye dönebilirsiniz.</p>
-          <div className="hz-commercial-create-hub-actions">
-            <Link className="hz-btn hz-btn-primary hz-toolbar-btn" href={`/tahsilatlar/${encodeURIComponent(savedPaymentId)}`}>
-              Tahsilat detayına git
-            </Link>
-            {orderId ? (
-              <Link className="hz-btn hz-btn-secondary hz-toolbar-btn" href={`/siparisler/${encodeURIComponent(orderId)}`}>
-                Kaynak siparişe git
+      <section className="thf-page thf-page--success" aria-live="polite">
+        <div className="thf-shell">
+          <header className="thf-header">
+            <div className="thf-header__main">
+              <span className="thf-header__icon" aria-hidden>
+                <LucideIcon name="check-circle-2" size={20} />
+              </span>
+              <div>
+                <p className="thf-header__eyebrow">Tahsilatlar</p>
+                <h1>Tahsilat hazırlandı</h1>
+                <p className="thf-header__lead">Kayıt işlendi. Detayı inceleyebilir veya listeye dönebilirsiniz.</p>
+              </div>
+            </div>
+          </header>
+
+          <div className="thf-card">
+            <div className="thf-card__body">
+              <p className="thf-success-lead">Tahsilat kaydı oluşturuldu. Sonraki adımı seçin.</p>
+            </div>
+            <footer className="thf-actions">
+              <Link className="thf-btn thf-btn--primary" href={`/tahsilatlar/${encodeURIComponent(savedPaymentId)}`}>
+                Tahsilat detayına git
               </Link>
-            ) : null}
-            <Link className="hz-btn hz-btn-secondary hz-toolbar-btn" href="/tahsilatlar">
-              Tahsilat listesine dön
-            </Link>
+              {orderId ? (
+                <Link className="thf-btn" href={`/siparisler/${encodeURIComponent(orderId)}`}>
+                  Kaynak siparişe git
+                </Link>
+              ) : null}
+              <Link className="thf-btn" href="/tahsilatlar">
+                Tahsilat listesine dön
+              </Link>
+            </footer>
           </div>
         </div>
-      </div>
+      </section>
     );
   }
 
   return (
-    <div className="hz-commercial-create-hub hz-payments-create-page">
-      <div className="hz-commercial-create-hub-card">
-        <p className="hz-commercial-create-hub-eyebrow">Tahsilatlar</p>
-        <h1 className="hz-commercial-create-hub-title">Yeni tahsilat</h1>
-        <p className="hz-commercial-create-hub-lead">
-          Cari ve isteğe bağlı sipariş seçerek tahsilat kaydı oluşturun. Sipariş bağlantısı açık bakiyeyi günceller.
-        </p>
+    <section className="thf-page" aria-live="polite">
+      <div className="thf-shell">
+        <header className="thf-header">
+          <div className="thf-header__main">
+            <span className="thf-header__icon" aria-hidden>
+              <LucideIcon name="circle-dollar-sign" size={20} />
+            </span>
+            <div>
+              <p className="thf-header__eyebrow">Tahsilatlar</p>
+              <h1>Yeni Tahsilat</h1>
+              <p className="thf-header__lead">Cari veya siparişe bağlı tahsilat kaydı oluşturun.</p>
+            </div>
+          </div>
+          <Link className="thf-header__back" href="/tahsilatlar">
+            Tahsilatlara dön
+          </Link>
+        </header>
 
         {dataSourceConfig.useDemoData ? (
-          <p className="hz-payments-preview-band" role="status">
+          <p className="thf-preview-band" role="status">
             Demo mod: form doldurulabilir; canlı kayıt oluşturulmaz.
           </p>
         ) : null}
 
         {loading ? (
-          <p role="status">Yükleniyor…</p>
+          <p className="thf-loading" role="status">
+            Yükleniyor…
+          </p>
         ) : (
           <form
-            className="hz-payments-create-form"
-            onSubmit={(e) => {
-              e.preventDefault();
+            className="thf-card"
+            onSubmit={(event) => {
+              event.preventDefault();
               void handleSave();
             }}
           >
-            <label className="hz-qop-field">
-              <span className="hz-qop-label">Cari</span>
-              <select className="hz-qop-input" value={customerId} onChange={(e) => setCustomerId(e.target.value)} required>
-                <option value="">Seçin…</option>
-                {customers.map((c) => (
-                  <option key={c.id} value={c.id}>
-                    {c.name}
-                  </option>
-                ))}
-              </select>
-            </label>
+            <div className="thf-card__body">
+              <div className="thf-form-grid">
+                <label className="thf-field thf-field--span-12">
+                  <span className="thf-field__label thf-field__label-required">Cari</span>
+                  <span className="thf-field__control">
+                    <select value={customerId} onChange={(event) => handleCustomerChange(event.target.value)} required>
+                      <option value="">Cari seçiniz…</option>
+                      {customers.map((customer) => (
+                        <option key={customer.id} value={customer.id}>
+                          {customer.name}
+                        </option>
+                      ))}
+                    </select>
+                    <button
+                      type="button"
+                      className="thf-field__addon"
+                      disabled
+                      title="Cari oluşturma ayrı ekranda yapılacak"
+                      aria-label="Cari oluşturma ayrı ekranda yapılacak"
+                    >
+                      <LucideIcon name="plus" size={14} />
+                    </button>
+                  </span>
+                </label>
 
-            <label className="hz-qop-field">
-              <span className="hz-qop-label">Bağlı sipariş (isteğe bağlı)</span>
-              <select className="hz-qop-input" value={orderId} onChange={(e) => setOrderId(e.target.value)}>
-                <option value="">Sipariş seçmeyin</option>
-                {customerOrders.map((o) => (
-                  <option key={o.id} value={o.id}>
-                    {o.orderNo} · Açık: ₺{money(Math.max(0, o.grandTotal - o.paidTotal))}
-                  </option>
-                ))}
-              </select>
-            </label>
+                <label className="thf-field thf-field--span-12">
+                  <span className="thf-field__label">Bağlı sipariş (isteğe bağlı)</span>
+                  <span className="thf-field__control">
+                    <select value={orderId} onChange={(event) => setOrderId(event.target.value)}>
+                      <option value="">Sipariş seçmeyin</option>
+                      {customerOrders.map((order) => (
+                        <option key={order.id} value={order.id}>
+                          {order.orderNo} · Açık: ₺{money(resolveOrderOpenBalance(order))}
+                        </option>
+                      ))}
+                    </select>
+                  </span>
+                </label>
 
-            {openAmount !== null ? (
-              <p className="hz-qop-payment-hint" role="status">
-                Sipariş açık bakiye: <strong>₺{money(openAmount)}</strong>
-              </p>
-            ) : null}
+                {openAmount !== null ? (
+                  <p className="thf-hint" role="status">
+                    Sipariş açık bakiye: <strong>₺{money(openAmount)}</strong>
+                  </p>
+                ) : null}
 
-            <label className="hz-qop-field">
-              <span className="hz-qop-label">Tahsilat tutarı (₺)</span>
-              <input
-                className="hz-qop-input"
-                type="number"
-                min={0.01}
-                step={0.01}
-                value={amount || ""}
-                onChange={(e) => setAmount(Math.max(0, Number(e.target.value || 0)))}
-                required
-              />
-            </label>
+                <label className="thf-field thf-field--span-4">
+                  <span className="thf-field__label thf-field__label-required">Tahsilat tutarı (₺)</span>
+                  <span className="thf-field__control">
+                    <input
+                      type="number"
+                      min={0.01}
+                      step={0.01}
+                      value={amount || ""}
+                      onChange={(event) => setAmount(Math.max(0, Number(event.target.value || 0)))}
+                      required
+                    />
+                  </span>
+                </label>
 
-            <label className="hz-qop-field">
-              <span className="hz-qop-label">Ödeme yöntemi</span>
-              <select className="hz-qop-input" value={method} onChange={(e) => setMethod(e.target.value as PaymentMethod)}>
-                {METHODS.map((item) => (
-                  <option key={item.value} value={item.value}>
-                    {item.label}
-                  </option>
-                ))}
-              </select>
-            </label>
+                <label className="thf-field thf-field--span-4">
+                  <span className="thf-field__label thf-field__label-required">Yöntem</span>
+                  <span className="thf-field__control">
+                    <select value={method} onChange={(event) => setMethod(event.target.value as PaymentMethod)}>
+                      {METHODS.map((item) => (
+                        <option key={item.value} value={item.value}>
+                          {item.label}
+                        </option>
+                      ))}
+                    </select>
+                  </span>
+                </label>
 
-            <label className="hz-qop-field">
-              <span className="hz-qop-label">Tahsilat tarihi</span>
-              <input className="hz-qop-input" type="date" value={receivedAt} onChange={(e) => setReceivedAt(e.target.value)} />
-            </label>
+                <label className="thf-field thf-field--span-4">
+                  <span className="thf-field__label thf-field__label-required">Tarih</span>
+                  <span className="thf-field__control">
+                    <input type="date" value={receivedAt} onChange={(event) => setReceivedAt(event.target.value)} required />
+                  </span>
+                </label>
 
-            <label className="hz-qop-field">
-              <span className="hz-qop-label">Referans no</span>
-              <input className="hz-qop-input" value={referenceNo} onChange={(e) => setReferenceNo(e.target.value)} />
-            </label>
+                <label className="thf-field thf-field--span-6">
+                  <span className="thf-field__label">Referans no</span>
+                  <span className="thf-field__control">
+                    <input value={referenceNo} onChange={(event) => setReferenceNo(event.target.value)} />
+                  </span>
+                </label>
 
-            <label className="hz-qop-field">
-              <span className="hz-qop-label">Açıklama</span>
-              <input className="hz-qop-input" value={note} onChange={(e) => setNote(e.target.value)} />
-            </label>
+                <label className="thf-field thf-field--span-6">
+                  <span className="thf-field__label">Açıklama</span>
+                  <span className="thf-field__control">
+                    <input value={note} onChange={(event) => setNote(event.target.value)} placeholder="Tahsilat açıklaması giriniz…" />
+                  </span>
+                </label>
+              </div>
 
-            <div className="hz-commercial-create-hub-actions">
-              <button type="submit" className="hz-btn hz-btn-primary hz-toolbar-btn" disabled={saving}>
-                {saving ? "Kaydediliyor…" : "Tahsilatı kaydet"}
-              </button>
-              <button
-                type="button"
-                className="hz-btn hz-btn-secondary hz-toolbar-btn"
-                onClick={() =>
-                  router.push(
-                    customerId
-                      ? `/hizli-islem?customer=${encodeURIComponent(customerId)}${orderId ? `&order=${encodeURIComponent(orderId)}` : ""}`
-                      : "/hizli-islem"
-                  )
-                }
-              >
+              <section className="thf-allocation" aria-label="Tahsilat dağılımı">
+                <h2 className="thf-section-title">Tahsilat Dağılımı</h2>
+                {selectedOrder ? (
+                  <div className="thf-allocation-table-wrap">
+                    <table className="thf-allocation-table">
+                      <thead>
+                        <tr>
+                          <th>Belge türü</th>
+                          <th>Belge no</th>
+                          <th>Cari</th>
+                          <th>Açık bakiye</th>
+                          <th>Tahsis tutarı</th>
+                          <th>Durum</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        <tr>
+                          <td>Sipariş</td>
+                          <td>{selectedOrder.orderNo}</td>
+                          <td>{selectedCustomerName}</td>
+                          <td>₺{money(openAmount ?? 0)}</td>
+                          <td>₺{money(amount)}</td>
+                          <td>
+                            <span className="thf-badge">Bağlı</span>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <p className="thf-allocation-empty">
+                    Bağımsız tahsilat olarak kaydedilecek. Belge tahsisi yapılmadı.
+                  </p>
+                )}
+              </section>
+
+              <section className="thf-summary" aria-label="Tahsilat özeti">
+                <article className="thf-summary__item">
+                  <p className="thf-summary__label">Toplam bakiye</p>
+                  <p className="thf-summary__value">₺{money(openAmount ?? 0)}</p>
+                </article>
+                <article className="thf-summary__item">
+                  <p className="thf-summary__label">Tahsilat toplamı</p>
+                  <p className="thf-summary__value">₺{money(amount)}</p>
+                </article>
+                <article className="thf-summary__item">
+                  <p className="thf-summary__label">Kalan bakiye</p>
+                  <p className={`thf-summary__value${remainingBalance !== null && remainingBalance > 0 ? " thf-summary__value--warn" : ""}`}>
+                    ₺{money(remainingBalance ?? 0)}
+                  </p>
+                </article>
+              </section>
+            </div>
+
+            <footer className="thf-actions">
+              <Link className="thf-btn" href="/tahsilatlar">
+                İptal
+              </Link>
+              <button type="button" className="thf-btn" onClick={() => router.push(buildHizliIslemHref(customerId, orderId))}>
                 Hızlı İşlem&apos;e git
               </button>
-              <Link className="hz-btn hz-btn-secondary hz-toolbar-btn" href="/tahsilatlar">
-                Listeye dön
-              </Link>
-            </div>
+              <button type="submit" className="thf-btn thf-btn--primary" disabled={saving}>
+                <LucideIcon name="receipt" size={14} />
+                {saving ? "Kaydediliyor…" : "Kaydet"}
+              </button>
+              <button type="button" className="thf-btn thf-btn--gold" disabled title="Onay akışı sonraki fazda bağlanacak">
+                <LucideIcon name="send" size={14} />
+                Onaya Gönder
+              </button>
+            </footer>
           </form>
         )}
       </div>
-    </div>
+    </section>
   );
 }

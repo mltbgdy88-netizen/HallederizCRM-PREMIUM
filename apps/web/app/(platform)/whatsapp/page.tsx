@@ -1,5 +1,5 @@
-import { WhatsAppPage } from "../../../src/features/whatsapp/components";
+import { WhatsAppReferenceLayout } from "../../../src/features/whatsapp/components/WhatsAppReferenceLayout";
 
 export default function WhatsAppRoutePage({ searchParams }: { searchParams?: { customer?: string } }) {
-  return <WhatsAppPage initialCustomerId={searchParams?.customer ?? null} />;
+  return <WhatsAppReferenceLayout initialCustomerId={searchParams?.customer ?? null} />;
 }

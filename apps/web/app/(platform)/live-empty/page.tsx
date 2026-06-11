@@ -1,5 +1,5 @@
-import { LiveEmptyStatePage } from "../../../src/features/system-state/components/SystemStatePages";
+import { LiveEmptyCommandCenterPage } from "../../../src/features/ui-inventory/components/SystemStateCommandCenterPages";
 
 export default function LiveEmptyPage() {
-  return <LiveEmptyStatePage />;
+  return <LiveEmptyCommandCenterPage />;
 }

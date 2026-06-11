@@ -1,0 +1,141 @@
+/* Onay limit matrisi — apvf-* */
+
+.hz-shell-content:has(.apvf-page),
+.platform-content:has(.apvf-page) {
+  padding: 0 !important;
+  background: #fdfcf9 !important;
+  overflow: hidden;
+}
+
+.apvf-page {
+  max-width: 1604px;
+  height: calc(100dvh - 56px);
+  margin: 0 auto;
+  padding: 12px 16px;
+  overflow: hidden;
+  background: #fdfcf9;
+  color: #0f172a;
+}
+
+.apvf-shell {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 10px;
+  overflow: hidden;
+}
+
+.apvf-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.apvf-header__eyebrow {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.apvf-header h1 {
+  margin: 4px 0 0;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.apvf-header__meta {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #64748b;
+}
+
+.apvf-header__back {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid #dfe7e3;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  color: #064e3b;
+}
+
+.apvf-demo-band {
+  margin: 0;
+  padding: 5px 10px;
+  min-height: 22px;
+  max-height: 24px;
+  border-radius: 10px;
+  border: 1px solid #f59e0b44;
+  background: #fffbeb;
+  font-size: 11px;
+  color: #92400e;
+}
+
+.apvf-main {
+  min-height: 0;
+  overflow: auto;
+  border-radius: 14px;
+  border: 1px solid #dfe7e3;
+  background: #fff;
+  padding: 12px;
+}
+
+.apvf-table-wrap {
+  overflow: auto;
+}
+
+.apvf-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.apvf-table th,
+.apvf-table td {
+  padding: 4px 8px;
+  border-bottom: 1px solid #e8eeeb;
+  text-align: left;
+}
+
+.apvf-table th {
+  height: 26px;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.apvf-table td {
+  height: 44px;
+}
+
+.apvf-btn {
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid #dfe7e3;
+  background: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.apvf-btn:disabled {
+  opacity: 0.65;
+}
+
+.apvf-note {
+  margin: 10px 0 0;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.apvf-note a {
+  color: #064e3b;
+  font-weight: 700;
+}

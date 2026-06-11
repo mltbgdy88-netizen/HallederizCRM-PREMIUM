@@ -1,5 +1,6 @@
 "use client";
 
+import { formatUserFacingStatus } from "../../../lib/user-facing-labels";
 import type { ApprovalClientError, WorkerHealthResponse, WorkerJobListResponse } from "../types";
 import { mapApprovalUiErrorMessage, summarizeWorkerHealth } from "../utils/inbox-helpers";
 import { formatJobAttempts, formatWorkerQueueHeadline, takeJobsPreview } from "../utils/worker-queue-observability";
@@ -47,7 +48,7 @@ export function WorkerQueueObservabilityPanel({
         </p>
 
         <p className="hz-approvals-worker-observe-summary" role="status">
-          {loading ? "Kuyruk verileri yukleniyor..." : summarizeWorkerHealth(workerHealth)}
+          {loading ? "Kuyruk verileri yükleniyor…" : summarizeWorkerHealth(workerHealth)}
         </p>
 
         {(oErr || dErr) && (
@@ -60,23 +61,23 @@ export function WorkerQueueObservabilityPanel({
           <div className="hz-approvals-worker-observe-card">
             <h5 className="hz-approvals-worker-observe-card-title">Bekleyen işler ({outbox?.total ?? "—"})</h5>
             {outboxRows.length === 0 ? (
-              <p className="hz-approvals-inbox-muted">Gosterilecek is yok veya liste alinamadi.</p>
+              <p className="hz-approvals-inbox-muted">Gösterilecek iş yok veya liste alınamadı.</p>
             ) : (
               <div className="hz-approvals-worker-observe-table-wrap">
                 <table className="hz-approvals-worker-observe-table">
                   <thead>
                     <tr>
-                      <th scope="col">Is</th>
+                      <th scope="col">İş</th>
                       <th scope="col">Durum</th>
                       <th scope="col">Deneme</th>
-                      <th scope="col">Idempotency</th>
+                      <th scope="col">Tekrar güvenliği anahtarı</th>
                     </tr>
                   </thead>
                   <tbody>
                     {outboxRows.map((job) => (
                       <tr key={job.jobId}>
                         <td className="hz-approvals-worker-observe-mono">{job.jobId}</td>
-                        <td>{job.status}</td>
+                        <td>{formatUserFacingStatus(job.status)}</td>
                         <td>{formatJobAttempts(job)}</td>
                         <td className="hz-approvals-worker-observe-mono">{job.idempotencyKey ?? "—"}</td>
                       </tr>
@@ -90,15 +91,15 @@ export function WorkerQueueObservabilityPanel({
           <div className="hz-approvals-worker-observe-card hz-approvals-worker-observe-card--dlq">
             <h5 className="hz-approvals-worker-observe-card-title">Başarısız işler ({deadLetter?.total ?? "—"})</h5>
             {dlqRows.length === 0 ? (
-              <p className="hz-approvals-inbox-muted">DLQ kaydi yok veya liste alinamadi.</p>
+              <p className="hz-approvals-inbox-muted">Başarısız kuyruk kaydı yok veya liste alınamadı.</p>
             ) : (
               <div className="hz-approvals-worker-observe-table-wrap">
                 <table className="hz-approvals-worker-observe-table">
                   <thead>
                     <tr>
-                      <th scope="col">Is</th>
+                      <th scope="col">İş</th>
                       <th scope="col">Deneme</th>
-                      <th scope="col">Idempotency</th>
+                      <th scope="col">Tekrar güvenliği anahtarı</th>
                       <th scope="col">Neden</th>
                     </tr>
                   </thead>

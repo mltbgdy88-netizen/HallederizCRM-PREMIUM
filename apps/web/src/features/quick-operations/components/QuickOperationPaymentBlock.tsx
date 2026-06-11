@@ -34,31 +34,23 @@ function money(value: number): string {
 
 export function QuickOperationPaymentBlock({ state, onChange, grandTotal, showAllocateToggle, disabled }: Props) {
   const paymentHint =
-    state.enabled && grandTotal > 0
+    grandTotal > 0
       ? state.amount >= grandTotal
         ? "Tam tahsilat"
         : state.amount > 0
           ? "Kısmi tahsilat"
           : "Tutar girin"
-      : null;
+      : state.amount > 0
+        ? "Tutar girildi"
+        : null;
 
   return (
     <section className="hz-qop-payment-block" aria-label="Ödeme bilgileri">
       <div className="hz-qop-payment-block-head">
         <h2 className="hz-qop-wb-conditions-title">Ödeme / tahsilat</h2>
-        <label className="hz-qop-payment-toggle">
-          <input
-            type="checkbox"
-            checked={state.enabled}
-            disabled={disabled}
-            onChange={(e) => onChange({ enabled: e.target.checked })}
-          />
-          <span>Ödeme alındı</span>
-        </label>
       </div>
 
-      {state.enabled ? (
-        <div className="hz-qop-payment-fields">
+      <div className="hz-qop-payment-fields">
           <label className="hz-qop-field">
             <span className="hz-qop-label">Tahsilat tutarı (₺)</span>
             <input
@@ -134,10 +126,7 @@ export function QuickOperationPaymentBlock({ state, onChange, grandTotal, showAl
               {grandTotal > 0 ? ` · Sipariş toplamı: ₺${money(grandTotal)}` : null}
             </p>
           ) : null}
-        </div>
-      ) : (
-        <p className="hz-qop-payment-hint hz-qop-payment-hint--muted">Ödeme alınmadıysa sipariş ödeme durumu açık kalır.</p>
-      )}
+      </div>
     </section>
   );
 }

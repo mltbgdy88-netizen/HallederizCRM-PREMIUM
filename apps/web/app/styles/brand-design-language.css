@@ -1,0 +1,171 @@
+/*
+ * HallederizCRM brand design language.
+ * Emerald + gold + ivory light mode, black glass + neon dark mode.
+ *
+ * Imported before app globals; selectors intentionally use html:root specificity
+ * so these brand tokens remain the canonical product palette.
+ */
+
+html:root,
+html:root[data-theme="light"] {
+  --hz-color-emerald: #047857;
+  --hz-color-sidebar: #063f32;
+  --hz-color-gold: #d4af37;
+  --hz-color-gold-soft: #f2c94c;
+  --hz-color-bg: #f8f1df;
+  --hz-color-surface: #fffaf0;
+  --hz-color-text: #102a24;
+  --hz-color-muted: #42564c;
+  --hz-color-danger: #b42318;
+  --hz-color-info: #2563eb;
+
+  --hz-bg: #f8f1df;
+  --hz-surface: #fffaf0;
+  --hz-surface-soft: #fbf3df;
+  --hz-surface-muted: #f1e5c9;
+  --hz-border: #d8cdb5;
+  --hz-border-strong: #bca970;
+  --hz-shadow-card: 0 10px 24px rgba(34, 28, 13, 0.08);
+  --hz-shadow-hover: 0 16px 34px rgba(34, 28, 13, 0.12);
+
+  --hz-text-strong: #071f19;
+  --hz-text-default: #102a24;
+  --hz-text-muted: #42564c;
+  --hz-text-subtle: #66786f;
+
+  --hz-primary: #047857;
+  --hz-primary-strong: #065f46;
+  --hz-primary-soft: #dff4ea;
+  --hz-info: #2563eb;
+  --hz-success: #047857;
+  --hz-warning: #a16207;
+  --hz-danger: #b42318;
+
+  --hz-info-soft: #e8f0ff;
+  --hz-success-soft: #dff4ea;
+  --hz-warning-soft: #fff2bf;
+  --hz-danger-soft: #fde8e6;
+
+  --hz-accent: #047857;
+  --hz-accent-strong: #065f46;
+  --hz-accent-soft: #dff4ea;
+  --hz-on-accent: #ffffff;
+  --hz-focus-ring-color: color-mix(in srgb, #047857 68%, #d4af37 32%);
+
+  --hz-brand-glass: rgba(255, 250, 240, 0.92);
+  --hz-brand-glass-strong: rgba(255, 250, 240, 0.98);
+  --hz-brand-line: rgba(212, 175, 55, 0.35);
+  --hz-brand-light-beam: radial-gradient(circle at 12% 0%, rgba(212, 175, 55, 0.16), transparent 28%),
+    radial-gradient(circle at 90% 8%, rgba(4, 120, 87, 0.14), transparent 32%);
+}
+
+html:root[data-theme="dark"] {
+  --hz-color-emerald: #2cff9a;
+  --hz-color-sidebar: #020604;
+  --hz-color-gold: #ffd166;
+  --hz-color-gold-soft: #ffe08a;
+  --hz-color-bg: #020604;
+  --hz-color-surface: rgba(8, 24, 19, 0.78);
+  --hz-color-text: #f5fff8;
+  --hz-color-muted: #b8c8bf;
+  --hz-color-danger: #ff6b6b;
+  --hz-color-info: #77c8ff;
+
+  --hz-bg: #020604;
+  --hz-surface: rgba(8, 24, 19, 0.82);
+  --hz-surface-soft: rgba(10, 35, 27, 0.76);
+  --hz-surface-muted: rgba(17, 47, 37, 0.72);
+  --hz-border: rgba(44, 255, 154, 0.18);
+  --hz-border-strong: rgba(255, 209, 102, 0.38);
+  --hz-shadow-card: 0 18px 44px rgba(0, 0, 0, 0.48), inset 0 1px 0 rgba(255, 255, 255, 0.05);
+  --hz-shadow-hover: 0 22px 58px rgba(0, 0, 0, 0.58), 0 0 28px rgba(44, 255, 154, 0.12);
+
+  --hz-text-strong: #f5fff8;
+  --hz-text-default: #e3f4ec;
+  --hz-text-muted: #b8c8bf;
+  --hz-text-subtle: #8fa399;
+
+  --hz-primary: #2cff9a;
+  --hz-primary-strong: #8cffc4;
+  --hz-primary-soft: rgba(44, 255, 154, 0.12);
+  --hz-info: #77c8ff;
+  --hz-success: #2cff9a;
+  --hz-warning: #ffd166;
+  --hz-danger: #ff6b6b;
+
+  --hz-info-soft: rgba(119, 200, 255, 0.12);
+  --hz-success-soft: rgba(44, 255, 154, 0.12);
+  --hz-warning-soft: rgba(255, 209, 102, 0.13);
+  --hz-danger-soft: rgba(255, 107, 107, 0.12);
+
+  --hz-accent: #2cff9a;
+  --hz-accent-strong: #8cffc4;
+  --hz-accent-soft: rgba(44, 255, 154, 0.14);
+  --hz-on-accent: #02100b;
+  --hz-focus-ring-color: color-mix(in srgb, #2cff9a 64%, #ffd166 36%);
+
+  --hz-brand-glass: rgba(8, 24, 19, 0.72);
+  --hz-brand-glass-strong: rgba(8, 24, 19, 0.9);
+  --hz-brand-line: rgba(44, 255, 154, 0.2);
+  --hz-brand-light-beam: radial-gradient(circle at 14% 4%, rgba(44, 255, 154, 0.18), transparent 28%),
+    radial-gradient(circle at 82% 8%, rgba(255, 209, 102, 0.14), transparent 30%),
+    linear-gradient(135deg, rgba(44, 255, 154, 0.08), transparent 36%, rgba(255, 209, 102, 0.07));
+}
+
+.hz-shell,
+.hz-page-content,
+.platform-content.hz-page-content {
+  min-height: 0;
+}
+
+html:root[data-theme="dark"] body {
+  background:
+    var(--hz-brand-light-beam),
+    linear-gradient(135deg, #020604 0%, #06110d 48%, #020604 100%);
+}
+
+html:root[data-theme="light"] body,
+html:root:not([data-theme]) body {
+  background:
+    var(--hz-brand-light-beam),
+    linear-gradient(180deg, #fff8e7 0%, #f8f1df 100%);
+}
+
+.hz-toast {
+  border: 1px solid var(--hz-border-strong);
+  background: var(--hz-brand-glass-strong);
+  color: var(--hz-text-strong);
+  box-shadow: var(--hz-shadow-hover);
+  font-weight: 800;
+}
+
+html:root[data-theme="dark"] .hz-toast {
+  border-color: rgba(44, 255, 154, 0.28);
+  background: rgba(4, 16, 12, 0.94);
+  box-shadow: 0 18px 44px rgba(0, 0, 0, 0.55), 0 0 22px rgba(44, 255, 154, 0.14);
+}
+
+.hz-btn:disabled,
+.hz-ui-btn:disabled,
+.hz-ui-btn.is-disabled,
+.hz-qop-btn:disabled {
+  opacity: 0.56;
+  cursor: not-allowed;
+  filter: grayscale(0.12);
+  box-shadow: none;
+}
+
+html:root[data-theme="dark"] .hz-btn,
+html:root[data-theme="dark"] .hz-ui-btn,
+html:root[data-theme="dark"] .hz-qop-btn {
+  text-shadow: none;
+}
+
+html:root[data-theme="dark"] .hz-card,
+html:root[data-theme="dark"] .hz-ui-card,
+html:root[data-theme="dark"] .hz-shell-content-frame {
+  background: var(--hz-brand-glass);
+  border-color: var(--hz-brand-line);
+  box-shadow: var(--hz-shadow-card);
+  backdrop-filter: blur(18px) saturate(1.18);
+}

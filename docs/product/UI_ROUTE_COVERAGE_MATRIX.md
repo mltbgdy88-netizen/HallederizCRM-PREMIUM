@@ -35,7 +35,7 @@
 | 15 | `/teklifler` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, mobile | — | 05 | **Agent 05 tamam** — `OffersPage` |
 | 16 | `/teklifler/[id]` | Entity detail + timeline | MISSING | **Var** `[offerId]` | REAL | detail, audit timeline | `EntityDetailLayout` | 05 | **Agent 05 tamam**; canlı timeline feed sonraki |
 | 17 | `/teklifler/yeni` | Hub → Hızlı İşlem | MISSING | **Var** | HUB | default, mobile | **Form değil**; CTA Hızlı İşlem | 05 | **Agent 05 tamam** — `OfferCreateHub` |
-| 18 | `/siparisler` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, mobile | — | 05 | **Agent 05 tamam** — `OrdersPage` |
+| 18 | `/siparisler` | Orders operations desk (list + preview) | MISSING | **Var** | REAL | default, empty, loading, mobile | Policy band; payment badges; no approval wording | 05+ | **Orders desk redesign** — `ORDERS_DESK_REDESIGN.md` |
 | 19 | `/siparisler/[id]` | Entity detail + timeline | MISSING | **Var** `[orderId]` | REAL | detail, audit timeline | `EntityDetailLayout` | 05 | **Agent 05 tamam** |
 | 20 | `/siparisler/yeni` | Hub → Hızlı İşlem | MISSING | **Var** | HUB | default | Form değil | 05 | **Agent 05 tamam** — `OrderCreateHub` |
 | 21 | `/tahsilatlar` | Entity list + right preview | MISSING | **Var** | REAL | default, empty, mobile | — | 05 | **Agent 05 tamam** — `PaymentsPage` |

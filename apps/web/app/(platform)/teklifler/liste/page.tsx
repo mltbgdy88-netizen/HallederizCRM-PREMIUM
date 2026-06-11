@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { OffersPage } from "../../../../src/features/offers/components";
 
-export default function TekliflerListeAliasPage() {
-  redirect("/teklifler");
+export default function TekliflerListePage() {
+  return <OffersPage />;
 }

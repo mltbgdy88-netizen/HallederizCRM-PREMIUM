@@ -1,10 +1,5 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+import { DataImportReferenceLayout } from "../../../../src/features/imports/components/DataImportReferenceLayout";
 
-type PageProps = {
-  params: { kurulumSlug: string[] };
-};
-
-export default function KurulumDeepPage({ params }: PageProps) {
-  const rest = params.kurulumSlug ?? [];
-  return renderProductCatchAll(["kurulum", ...rest]);
+export default function KurulumDeepPage() {
+  return <DataImportReferenceLayout />;
 }

@@ -1,5 +1,5 @@
-﻿import { RolesManagementPage } from "../../../../src/features/users/components/RolesManagementPage";
+﻿import { RolesMatrixReferenceLayout } from "../../../../src/features/users/components/RolesMatrixReferenceLayout";
 
 export default function RolesPage() {
-  return <RolesManagementPage />;
+  return <RolesMatrixReferenceLayout />;
 }

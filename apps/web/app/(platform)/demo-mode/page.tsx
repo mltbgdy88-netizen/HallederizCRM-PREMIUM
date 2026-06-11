@@ -1,5 +1,5 @@
-import { DemoModeStatePage } from "../../../src/features/system-state/components/SystemStatePages";
+import { DemoModeCommandCenterPage } from "../../../src/features/ui-inventory/components/SystemStateCommandCenterPages";
 
 export default function DemoModePage() {
-  return <DemoModeStatePage />;
+  return <DemoModeCommandCenterPage />;
 }

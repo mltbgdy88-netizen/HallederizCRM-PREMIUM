@@ -1,9 +1,11 @@
 "use client";
 
-import { EntityListPageTemplate, EmptyState, LoadingState, Pagination } from "@hallederiz/ui";
+import { EmptyState, LoadingState, Pagination } from "@hallederiz/ui";
 import type { Customer, Document, DocumentType } from "@hallederiz/types";
+import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { LucideIcon } from "../../../components/icons/lucide-icons";
 import { dataSourceConfig } from "../../../lib/data-source";
 import { MSG_DATA_WHEN_RECONNECTED, MSG_REFRESH_RETRY } from "../../../lib/user-facing-data-error";
 import { useToast } from "../../../providers/toast-provider";
@@ -15,71 +17,63 @@ import {
   formatDocumentTemplateVersion,
   summarizeDocumentDeliveries
 } from "../utils/document-faz-f";
-import {
-  MSG_DOC_DOWNLOAD_NOT_LIVE,
-  MSG_DOC_DOWNLOAD_PENDING,
-  MSG_DOC_LIST_UNAVAILABLE,
-  MSG_DOC_PREVIEW_ONLY
-} from "../data/document-action-messages";
+import { MSG_DOC_DOWNLOAD_PENDING, MSG_DOC_LIST_UNAVAILABLE } from "../data/document-action-messages";
 import {
   extractDownloadUrlFromDocument,
   hasDownloadablePdf,
   resolveDocumentsEmptyMessage,
   fetchDocumentDownloadLink,
   resolveDemoActionToasts,
-  runDocumentLiveAction,
-  sanitizeDocumentUserText
+  runDocumentLiveAction
 } from "../utils/document-action-feedback";
 import { getDocuments } from "../queries/get-documents";
 import { getDocumentDeliveryStatusLabel, getDocumentTypeLabel } from "../queries/document-mock-data";
 
 export function DocumentFilterBar() {
   return (
-    <section className="hz-filter-card">
-      <div className="hz-filter-grid">
-        <label>
-          Belge tipi
-          <select defaultValue="">
-            <option value="">Tüm tipler</option>
-            <option>Teklif PDF</option>
-            <option>Teslim fişi</option>
-            <option>İade notu</option>
-          </select>
-        </label>
-        <label>
-          Kayıt türü
-          <select defaultValue="">
-            <option value="">Tüm kayıtlar</option>
-            <option>Sipariş</option>
-            <option>Teslimat</option>
-            <option>Fatura</option>
-            <option>İade</option>
-          </select>
-        </label>
-        <label>
-          Müşteri
-          <input placeholder="Cari adı" />
-        </label>
-        <label>
-          İletim durumu
-          <select defaultValue="">
-            <option value="">Tüm durumlar</option>
-            <option>Kuyrukta</option>
-            <option>İletim kaydı</option>
-            <option>Başarısız</option>
-          </select>
-        </label>
-        <label>
-          Tarih
-          <select defaultValue="month">
-            <option>Bugün</option>
-            <option>Bu hafta</option>
-            <option>Bu ay</option>
-          </select>
-        </label>
-      </div>
-      <p className="muted">Filtreler önizleme amaçlıdır; canlı gönderim ve arşiv bağlantısı henüz tamamlanmadı.</p>
-    </section>
+    <div className="docf-desk-filters" aria-label="Belge filtreleri">
+      <label className="docf-desk-filter">
+        Belge tipi
+        <select defaultValue="">
+          <option value="">Tüm tipler</option>
+          <option>Teklif PDF</option>
+          <option>Teslim fişi</option>
+          <option>İade notu</option>
+        </select>
+      </label>
+      <label className="docf-desk-filter">
+        Kayıt türü
+        <select defaultValue="">
+          <option value="">Tüm kayıtlar</option>
+          <option>Sipariş</option>
+          <option>Teslimat</option>
+          <option>Fatura</option>
+          <option>İade</option>
+        </select>
+      </label>
+      <label className="docf-desk-filter">
+        Müşteri
+        <input placeholder="Cari adı" />
+      </label>
+      <label className="docf-desk-filter">
+        İletim durumu
+        <select defaultValue="">
+          <option value="">Tüm durumlar</option>
+          <option>Kuyrukta</option>
+          <option>İletim kaydı</option>
+          <option>Başarısız</option>
+        </select>
+      </label>
+      <label className="docf-desk-filter">
+        Tarih
+        <select defaultValue="month">
+          <option>Bugün</option>
+          <option>Bu hafta</option>
+          <option>Bu ay</option>
+        </select>
+      </label>
+      <p className="docf-desk-filter-hint">Filtreler önizleme amaçlıdır; canlı gönderim ve arşiv bağlantısı henüz tamamlanmadı.</p>
+    </div>
   );
 }
 
@@ -96,8 +90,8 @@ export function DocumentTable({
 }) {
   const router = useRouter();
   return (
-    <>
-      <div className="hz-documents-table-head" role="row">
+    <div className="docf-desk-list-wrap">
+      <div className="docf-desk-list-head" role="row">
         <span>Belge tipi</span>
         <span>Şablon</span>
         <span>Bağlı kayıt</span>
@@ -106,20 +100,20 @@ export function DocumentTable({
         <span>İletim</span>
         <span>AKSİYON</span>
       </div>
-      <div className="hz-documents-table-body">
+      <div className="docf-desk-list-body">
         {documents.map((document) => {
           const latestDelivery = document.deliveries[0];
           const deliveryClass =
             latestDelivery?.status === "sent" || latestDelivery?.status === "delivered"
-              ? "hz-badge hz-badge-success"
+              ? "docf-desk-badge docf-desk-badge--ok"
               : latestDelivery?.status === "failed"
-                ? "hz-badge hz-badge-danger"
-                : "hz-badge hz-badge-warning";
+                ? "docf-desk-badge docf-desk-badge--danger"
+                : "docf-desk-badge docf-desk-badge--warn";
           return (
             <div
               key={document.id}
               role="row"
-              className={`hz-documents-table-row${selectedId === document.id ? " is-selected" : ""}`}
+              className={`docf-desk-list-row${selectedId === document.id ? " docf-desk-list-row--selected" : ""}`}
               onClick={() => onSelect(document.id)}
               onDoubleClick={() => router.push(`/belgeler/${document.id}`)}
               tabIndex={0}
@@ -135,7 +129,7 @@ export function DocumentTable({
               <span>
                 <button
                   type="button"
-                  className="hz-documents-action-btn"
+                  className="docf-desk-act-btn"
                   onClick={(event) => {
                     event.stopPropagation();
                     router.push(`/belgeler/${document.id}`);
@@ -148,23 +142,23 @@ export function DocumentTable({
           );
         })}
       </div>
-    </>
+    </div>
   );
 }
 
 export function DocumentPreviewPanel({ document }: { document: Document | null }) {
   if (!document) {
     return (
-      <aside className="hz-documents-side">
-        <p className="hz-documents-side-empty">Listeden bir belge seçin.</p>
-      </aside>
+      <div className="docf-desk-side-card">
+        <p className="docf-desk-side-empty">Liste yüklendiğinde ilk belge seçilir.</p>
+      </div>
     );
   }
   const deliveries = document.deliveries;
   return (
-    <aside className="hz-documents-side">
+    <div className="docf-desk-side-card">
       <h3>Belge önizleme</h3>
-      <ul className="hz-side-list hz-doc-preview-list">
+      <ul className="docf-desk-side-list">
         <li>Belge no: {document.documentNo}</li>
         <li>Tip: {getDocumentTypeLabel(document.type)}</li>
         <li>Şablon sürümü: {formatDocumentTemplateVersion(document)}</li>
@@ -181,33 +175,31 @@ export function DocumentPreviewPanel({ document }: { document: Document | null }
         </li>
       </ul>
       {deliveries.length > 0 ? (
-        <div className="hz-doc-delivery-table-wrap">
-          <p className="hz-doc-preview-subcap">İletim satırları (önizleme)</p>
-          <div className="table-wrap hz-table-wrap">
-            <table className="table hz-table hz-doc-delivery-table">
-              <thead>
-                <tr>
-                  <th>Kanal</th>
-                  <th>Durum</th>
-                  <th>İstenen</th>
-                  <th>İletim zamanı</th>
+        <div className="docf-table-wrap" style={{ marginTop: 8 }}>
+          <p className="docf-desk-filter-hint">İletim satırları (önizleme)</p>
+          <table className="docf-table">
+            <thead>
+              <tr>
+                <th>Kanal</th>
+                <th>Durum</th>
+                <th>İstenen</th>
+                <th>İletim zamanı</th>
+              </tr>
+            </thead>
+            <tbody>
+              {deliveries.map((d) => (
+                <tr key={d.id}>
+                  <td>{formatDocumentDeliveryChannel(d.channel)}</td>
+                  <td>{getDocumentDeliveryStatusLabel(d.status)}</td>
+                  <td>{dateLabel(d.requestedAt)}</td>
+                  <td>{d.sentAt ? dateLabel(d.sentAt) : "—"}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {deliveries.map((d) => (
-                  <tr key={d.id}>
-                    <td>{formatDocumentDeliveryChannel(d.channel)}</td>
-                    <td>{getDocumentDeliveryStatusLabel(d.status)}</td>
-                    <td>{dateLabel(d.requestedAt)}</td>
-                    <td>{d.sentAt ? dateLabel(d.sentAt) : "—"}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
+              ))}
+            </tbody>
+          </table>
         </div>
       ) : null}
-    </aside>
+    </div>
   );
 }
 
@@ -271,52 +263,51 @@ export function DocumentActionsBar({ document }: { document: Document | null }) 
   };
 
   return (
-    <section className="hz-action-toolbar">
+    <div className="docf-desk-actions" aria-label="Belge işlemleri">
       <button
-        className="hz-btn hz-btn-primary hz-toolbar-btn"
+        className="docf-desk-btn docf-desk-btn--primary"
         type="button"
+        disabled={!document}
         onClick={() => document && router.push(`/belgeler/${document.id}`)}
       >
         Önizle
       </button>
-      <button
-        className="hz-btn hz-btn-secondary hz-toolbar-btn"
-        type="button"
-        onClick={() => void runAction("sendWhatsApp")}
-      >
-        WhatsApp&apos;tan gönder
+      <button className="docf-desk-btn" type="button" disabled={!document} onClick={() => void runAction("sendWhatsApp")}>
+        WhatsApp
       </button>
-      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void runAction("sendEmail")}>
+      <button className="docf-desk-btn" type="button" disabled={!document} onClick={() => void runAction("sendEmail")}>
         E-posta
       </button>
       <button
-        className="hz-btn hz-btn-secondary hz-toolbar-btn"
+        className="docf-desk-btn"
         type="button"
+        disabled={!document}
         onClick={() => void runDownload()}
         title={canDownload ? "Belge dosyasını indir" : MSG_DOC_DOWNLOAD_PENDING}
       >
         {canDownload ? "İndir" : "İndirme bekleniyor"}
       </button>
-      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void runAction("queueSave")}>
+      <button className="docf-desk-btn" type="button" disabled={!document} onClick={() => void runAction("queueSave")}>
         Arşive al
       </button>
-      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void runAction("queuePrint")}>
+      <button className="docf-desk-btn" type="button" disabled={!document} onClick={() => void runAction("queuePrint")}>
         Yazdırma kuyruğu
       </button>
-      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => void runAction("regenerate")}>
+      <button className="docf-desk-btn" type="button" disabled={!document} onClick={() => void runAction("regenerate")}>
         PDF yenile
       </button>
-      <button
-        className="hz-btn hz-btn-secondary hz-toolbar-btn"
-        type="button"
-        onClick={() => router.push("/archive")}
-      >
+      <button className="docf-desk-btn" type="button" onClick={() => router.push("/archive")}>
         Arşivde gör
       </button>
-      <button className="hz-btn hz-btn-secondary hz-toolbar-btn" type="button" onClick={() => router.push(resolveDocumentEntityHref(document))}>
+      <button
+        className="docf-desk-btn"
+        type="button"
+        disabled={!document}
+        onClick={() => router.push(resolveDocumentEntityHref(document))}
+      >
         İlgili kayda git
       </button>
-    </section>
+    </div>
   );
 }
 
@@ -385,6 +376,11 @@ export function DocumentsPage() {
           null;
         setSelectedId(initialDocument?.id ?? null);
       })
+      .catch(() => {
+        if (mounted) {
+          setLoadError(MSG_DOC_LIST_UNAVAILABLE);
+        }
+      })
       .finally(() => {
         if (mounted) {
           setLoading(false);
@@ -444,89 +440,106 @@ export function DocumentsPage() {
   ).length;
 
   return (
-    <EntityListPageTemplate
-      className="hz-documents-page"
-      header={
-        <>
-          <header className="hz-documents-topbar">
+    <section className="docf-page docf-page--desk hz-documents-page" data-page="belgeler-reference-desk">
+      <div className="docf-shell docf-shell--desk">
+        <header className="docf-desk-head">
+          <div className="docf-header__main">
+            <span className="docf-header__icon" aria-hidden>
+              <LucideIcon name="file-text" size={20} />
+            </span>
             <div>
-              <h1 className="hz-documents-topbar-title">Belgeler</h1>
-              <p className="hz-documents-topbar-sub">
+              <p className="docf-header__eyebrow">Belgeler</p>
+              <h1>Belge Operasyon Masası</h1>
+              <p className="docf-header__meta">
                 Teklif, sipariş, tahsilat, depo, teslim, fatura ve iade belgelerini kayıt bağlamıyla yönetin.
               </p>
             </div>
-          </header>
-          <div className="hz-documents-kpi-strip" aria-label="Belge özeti">
-            <div className="hz-documents-kpi">
-              <span className="hz-documents-kpi-label">Belge</span>
-              <span className="hz-documents-kpi-value">{filteredDocuments.length}</span>
-            </div>
-            <div className="hz-documents-kpi">
-              <span className="hz-documents-kpi-label">İletim kaydı</span>
-              <span className="hz-documents-kpi-value">{sentCount}</span>
-            </div>
-            <div className="hz-documents-kpi">
-              <span className="hz-documents-kpi-label">Bekleyen</span>
-              <span className="hz-documents-kpi-value">
-                {filteredDocuments.filter((item) => item.deliveries.length === 0).length}
-              </span>
-            </div>
-            <div className="hz-documents-kpi">
-              <span className="hz-documents-kpi-label">Belge tipi</span>
-              <span className="hz-documents-kpi-value">
-                {new Set(filteredDocuments.map((item) => item.type)).size}
-              </span>
-            </div>
           </div>
-          {dataSourceConfig.useDemoData ? (
-            <p className="hz-documents-preview-band" role="status">
-              Örnek veri modu: belge listesi demo amaçlıdır; canlı PDF üretimi veya gönderim yapılmaz.
-            </p>
-          ) : null}
-          {contextBanner ? (
-            <p className="hz-documents-context-band hz-doc-context-band" role="status">
-              {contextBanner}
-            </p>
-          ) : null}
-          {loadError ? (
-            <p className="hz-documents-context-band hz-doc-context-band" role="alert">
-              {loadError} {MSG_DATA_WHEN_RECONNECTED} {MSG_REFRESH_RETRY}
-            </p>
-          ) : null}
-          <div className="hz-documents-toolbar">
+          <div className="docf-desk-head__actions">
+            <Link href="/belgeler/yeni" className="docf-desk-btn docf-desk-btn--primary">
+              Yeni Belge
+            </Link>
+            <Link href="/belgeler/sablonlar" className="docf-desk-btn">
+              Şablonlar
+            </Link>
+            <Link href="/belgeler/arsiv" className="docf-desk-btn">
+              Arşiv
+            </Link>
+          </div>
+        </header>
+
+        {dataSourceConfig.useDemoData ? (
+          <p className="docf-demo-band" role="status">
+            Örnek veri modu: belge listesi demo amaçlıdır; canlı PDF üretimi veya gönderim yapılmaz.
+          </p>
+        ) : null}
+        {contextBanner ? (
+          <p className="docf-order-band hz-doc-context-band" role="status">
+            {contextBanner}
+          </p>
+        ) : null}
+        {loadError ? (
+          <p className="docf-demo-band docf-demo-band--info hz-doc-context-band" role="alert">
+            {loadError} {MSG_DATA_WHEN_RECONNECTED} {MSG_REFRESH_RETRY}
+          </p>
+        ) : null}
+
+        <section className="docf-kpi-strip" aria-label="Belge özeti">
+          <div className="docf-kpi">
+            <span className="docf-kpi__label">Belge</span>
+            <span className="docf-kpi__value">{filteredDocuments.length}</span>
+          </div>
+          <div className="docf-kpi docf-kpi--success">
+            <span className="docf-kpi__label">İletim kaydı</span>
+            <span className="docf-kpi__value">{sentCount}</span>
+          </div>
+          <div className="docf-kpi docf-kpi--warning">
+            <span className="docf-kpi__label">Bekleyen</span>
+            <span className="docf-kpi__value">
+              {filteredDocuments.filter((item) => item.deliveries.length === 0).length}
+            </span>
+          </div>
+          <div className="docf-kpi">
+            <span className="docf-kpi__label">Belge tipi</span>
+            <span className="docf-kpi__value">{new Set(filteredDocuments.map((item) => item.type)).size}</span>
+          </div>
+        </section>
+
+        <div className="docf-desk-body">
+          <section className="docf-desk-main" aria-label="Belge listesi">
+            <DocumentFilterBar />
+            {loading ? (
+              <div className="docf-desk-state" role="status">
+                <LoadingState title="Belgeler yükleniyor" message="Kayıt bağlantıları ve iletim durumları hazırlanıyor." />
+              </div>
+            ) : loadError || filteredDocuments.length === 0 ? (
+              <EmptyState title={loadError ? "Belge listesi alınamadı" : "Belge bulunamadı"} message={emptyMessage} />
+            ) : (
+              <>
+                <DocumentTable
+                  documents={pagedDocuments}
+                  customers={customers}
+                  selectedId={selected?.id ?? null}
+                  onSelect={setSelectedId}
+                />
+                <div className="docf-desk-pagination">
+                  <Pagination
+                    totalItems={filteredDocuments.length}
+                    pageSize={pageSize}
+                    currentPage={page}
+                    onPageChange={setPage}
+                  />
+                </div>
+              </>
+            )}
+          </section>
+
+          <aside className="docf-desk-side" aria-label="Belge bağlam paneli">
+            <DocumentPreviewPanel document={selected} />
             <DocumentActionsBar document={selected} />
-          </div>
-        </>
-      }
-      filters={<DocumentFilterBar />}
-      list={
-        <div className="hz-documents-list-wrap">
-          {loading ? (
-            <LoadingState title="Belgeler yükleniyor" message="Kayıt bağlantıları ve iletim durumları hazırlanıyor." />
-          ) : loadError || filteredDocuments.length === 0 ? (
-            <EmptyState
-              title={loadError ? "Belge listesi alınamadı" : "Belge bulunamadı"}
-              message={emptyMessage}
-            />
-          ) : (
-            <>
-              <DocumentTable
-                documents={pagedDocuments}
-                customers={customers}
-                selectedId={selected?.id ?? null}
-                onSelect={setSelectedId}
-              />
-              <Pagination
-                totalItems={filteredDocuments.length}
-                pageSize={pageSize}
-                currentPage={page}
-                onPageChange={setPage}
-              />
-            </>
-          )}
+          </aside>
         </div>
-      }
-      preview={<DocumentPreviewPanel document={selected} />}
-    />
+      </div>
+    </section>
   );
 }

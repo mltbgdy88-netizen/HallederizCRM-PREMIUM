@@ -1,5 +1,5 @@
-import { DataImportPage } from "../../../../src/features/imports/components";
+import { DataImportReferenceLayout } from "../../../../src/features/imports/components/DataImportReferenceLayout";
 
 export default function DataImportRoutePage() {
-  return <DataImportPage />;
+  return <DataImportReferenceLayout />;
 }

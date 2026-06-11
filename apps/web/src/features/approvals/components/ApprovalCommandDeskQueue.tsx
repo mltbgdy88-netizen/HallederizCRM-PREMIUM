@@ -51,7 +51,7 @@ export function ApprovalCommandDeskQueue({
           <p className="hz-approval-panel__meta">{rows.length} kayıt</p>
         </div>
         <button type="button" className="hz-approval-icon-btn" aria-label="Filtreler" title="Filtreler">
-          <LucideIcon name="filter" size={15} />
+          <LucideIcon name="filter" size={14} />
         </button>
       </header>
 
@@ -93,16 +93,21 @@ export function ApprovalCommandDeskQueue({
             >
               <div className="hz-approval-queue-item__top">
                 <span className={`hz-approval-source-badge hz-approval-source-badge--${source}`}>
-                  <LucideIcon name={sourceIcon(source)} size={14} />
+                  <LucideIcon name={sourceIcon(source)} size={13} />
                   {approvalSourceLabel(source)}
                 </span>
                 <time className="hz-approval-queue-item__time">{formatQueueTime(row)}</time>
               </div>
               <strong className="hz-approval-queue-item__title">{row.title}</strong>
-              <span className="hz-approval-queue-item__customer">Cari: {row.customerName}</span>
+              <span className="hz-approval-queue-item__customer">
+                <span className="hz-approval-queue-item__customer-label">Cari</span>
+                {row.customerName}
+              </span>
               <div className="hz-approval-queue-item__foot">
-                <span>{row.amountLabel}</span>
-                <span className={`hz-approval-risk-pill hz-approval-risk-pill--${risk === "Yüksek" ? "high" : risk === "Orta" ? "mid" : "low"}`}>
+                <span className="hz-approval-queue-item__amount">{row.amountLabel}</span>
+                <span
+                  className={`hz-approval-risk-pill hz-approval-risk-pill--${risk === "Yüksek" ? "high" : risk === "Orta" ? "mid" : "low"}`}
+                >
                   {risk}
                 </span>
               </div>

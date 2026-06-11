@@ -29,22 +29,22 @@ const checks = [
   },
   {
     file: "apps/web/src/features/offers/components/OfferConvertDialog.tsx",
-    patterns: ["router.push(`/hizli-islem", "Hızlı İşlem"],
+    patterns: ["buildQuickOrderFromOfferHref", "router.push(quickHref)"],
     description: "Tekliften siparişe Hızlı İşlem yönlendirmesi"
   },
   {
     file: "apps/web/src/features/offers/components/OfferCreateHub.tsx",
-    patterns: ["onaya gönderin", "buildQuickOpHref"],
+    patterns: ["Yeni Teklif", "Hızlı Teklif", "Detaylı Teklif", "buildQuickOfferHref"],
     description: "Yeni teklif Hızlı İşlem hub"
   },
   {
     file: "apps/web/src/features/orders/components/OrderCreateHub.tsx",
-    patterns: ["onaya gönderin", "buildQuickOpHref"],
+    patterns: ["Yeni Sipariş", "Hızlı Sipariş", "Tekliften Aktar", "buildQuickOrderHref"],
     description: "Yeni sipariş Hızlı İşlem hub"
   },
   {
     file: "apps/web/src/features/payments/components/PaymentCreatePage.tsx",
-    patterns: ["Tahsilatı kaydet", "Yeni tahsilat", "Hızlı İşlem"],
+    patterns: ["Kaydet", "Yeni Tahsilat", "Hızlı İşlem"],
     description: "Yeni tahsilat formu"
   },
   {
@@ -133,8 +133,8 @@ const checks = [
   },
   {
     file: "apps/web/app/(platform)/panel/page.tsx",
-    patterns: ['redirect("/dashboard")'],
-    description: "Panel rotasi dashboard yonlendirmesi"
+    patterns: ["PanelReferenceLayout"],
+    description: "Panel reference readiness hub"
   },
   {
     file: "apps/web/src/features/dashboard/components/DashboardHomePage.tsx",

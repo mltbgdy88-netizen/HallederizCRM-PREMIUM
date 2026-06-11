@@ -1,0 +1,320 @@
+/* Kurulum veri yükleme — setupf-* */
+
+.platform-content:has(.setupf-home),
+.hz-shell-content:has(.setupf-home) {
+  padding: 0 !important;
+  background: #fdfcf9 !important;
+  overflow: hidden;
+}
+
+.setupf-home {
+  --setupf-gap: clamp(6px, 0.75vh, 10px);
+  --setupf-pad: clamp(10px, 1vw, 14px);
+  --setupf-green: #047857;
+  --setupf-green-strong: #065f46;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1604px;
+  margin: 0 auto;
+  height: calc(100dvh - 56px);
+  max-height: calc(100dvh - 56px);
+  padding: var(--setupf-pad);
+  overflow: hidden;
+  background: #fdfcf9;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  gap: var(--setupf-gap);
+  color: #0f172a;
+}
+
+.setupf-crumb {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 700;
+  color: #64748b;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.setupf-crumb-link {
+  color: var(--setupf-green);
+  text-decoration: none;
+}
+
+.setupf-crumb-link:hover {
+  text-decoration: underline;
+}
+
+.setupf-crumb-sep {
+  color: #94a3b8;
+}
+
+.setupf-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.setupf-head-text h1 {
+  margin: 0;
+  font-size: clamp(17px, 2vh, 22px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: var(--setupf-green-strong);
+}
+
+.setupf-head-text p {
+  margin: 3px 0 0;
+  max-width: 58ch;
+  font-size: clamp(10px, 1.1vh, 12px);
+  color: #64748b;
+  line-height: 1.35;
+}
+
+.setupf-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.setupf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+  white-space: nowrap;
+  appearance: none;
+  font: inherit;
+}
+
+.setupf-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.setupf-btn--primary {
+  border: 1px solid var(--setupf-green);
+  background: var(--setupf-green);
+  color: #fff;
+}
+
+.setupf-btn--outline {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+}
+
+.setupf-demo-band {
+  margin: 0;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid #fde68a;
+  background: #fffbeb;
+  font-size: 10px;
+  font-weight: 650;
+  color: #92400e;
+  flex-shrink: 0;
+}
+
+.setupf-import-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  flex-shrink: 0;
+}
+
+.setupf-tab {
+  min-height: 28px;
+  padding: 0 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 10px;
+  font-weight: 700;
+  color: #475569;
+  cursor: pointer;
+  appearance: none;
+  font: inherit;
+}
+
+.setupf-tab--active {
+  border-color: #bbf7d0;
+  background: #ecfdf5;
+  color: var(--setupf-green);
+}
+
+.setupf-workspace {
+  min-height: 0;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 332px;
+  gap: var(--setupf-gap);
+  overflow: hidden;
+}
+
+.setupf-main {
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.setupf-main-scroll {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px;
+}
+
+.setupf-section-head h2 {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.setupf-section-head p {
+  margin: 3px 0 0;
+  font-size: 10px;
+  color: #64748b;
+}
+
+.setupf-upload-zone {
+  margin-top: 8px;
+  padding: 10px;
+  min-height: 88px;
+  border: 1px dashed #cbd5e1;
+  border-radius: 10px;
+  background: #f8fafc;
+}
+
+.setupf-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  font-size: 10px;
+  font-weight: 650;
+  color: #475569;
+}
+
+.setupf-field--full {
+  grid-column: 1 / -1;
+}
+
+.setupf-list-header,
+.setupf-list-row {
+  display: grid;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  font-size: 10px;
+}
+
+.setupf-list-header {
+  min-height: 26px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.setupf-list-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.setupf-list-row {
+  min-height: 46px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.setupf-state {
+  margin: 0;
+  padding: 12px;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.setupf-side {
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: auto;
+}
+
+.setupf-side-card {
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.setupf-side-card h3 {
+  margin: 0 0 6px;
+  font-size: 11px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.setupf-side-card p {
+  margin: 0;
+  font-size: 10px;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.setupf-side-list {
+  margin: 8px 0 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 4px;
+}
+
+.setupf-side-list li {
+  font-size: 10px;
+  color: #475569;
+}
+
+.setupf-side-link {
+  display: block;
+  margin-top: 8px;
+  font-size: 10px;
+  font-weight: 700;
+  color: var(--setupf-green);
+  text-decoration: none;
+}
+
+.setupf-side-link:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 1100px) {
+  .setupf-workspace {
+    grid-template-columns: 1fr;
+  }
+
+  .setupf-side {
+    display: none;
+  }
+}

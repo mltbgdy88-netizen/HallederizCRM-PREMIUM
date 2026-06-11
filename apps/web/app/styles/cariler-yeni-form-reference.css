@@ -1,0 +1,242 @@
+/* Cari Yeni Form — cariler-yeni-form-acik-mod.png */
+
+.cyf-page {
+  --cyf-bg: #fdfcf9;
+  --cyf-surface: #ffffff;
+  --cyf-border: #e2e8f0;
+  --cyf-text: #0f172a;
+  --cyf-muted: #64748b;
+  --cyf-green: #047857;
+  --cyf-green-strong: #064e3b;
+  --cyf-gold: #d4af37;
+  --cyf-radius: 16px;
+  --cyf-shadow: 0 8px 28px rgba(15, 23, 42, 0.08);
+
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1604px;
+  height: 100%;
+  min-height: 0;
+  margin: 0 auto;
+  padding: clamp(12px, 2vh, 24px) clamp(12px, 1.5vw, 20px);
+  display: grid;
+  place-items: center;
+  overflow: auto;
+  background: var(--cyf-bg);
+  color: var(--cyf-text);
+}
+
+.cyf-card {
+  width: min(100%, 460px);
+  border: 1px solid var(--cyf-border);
+  border-radius: var(--cyf-radius);
+  background: var(--cyf-surface);
+  box-shadow: var(--cyf-shadow);
+  overflow: hidden;
+}
+
+.cyf-card__head {
+  padding: 14px 18px 12px;
+  display: grid;
+  grid-template-columns: auto 1fr;
+  gap: 14px;
+  align-items: center;
+  border-bottom: 1px solid rgba(226, 232, 240, 0.72);
+}
+
+.cyf-card__icon {
+  width: 46px;
+  height: 46px;
+  border-radius: 999px;
+  display: grid;
+  place-items: center;
+  border: 1px solid rgba(4, 120, 87, 0.18);
+  background: linear-gradient(180deg, #ecfdf5 0%, #d1fae5 100%);
+  color: var(--cyf-green-strong);
+}
+
+.cyf-card__head h1 {
+  margin: 0;
+  color: var(--cyf-text);
+  font-size: clamp(17px, 1.8vh, 20px);
+  font-weight: 950;
+  letter-spacing: -0.02em;
+}
+
+.cyf-card__head p {
+  margin: 3px 0 0;
+  color: var(--cyf-muted);
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.cyf-form {
+  padding: 12px 18px 16px;
+  display: grid;
+  gap: 8px;
+}
+
+.cyf-field {
+  display: grid;
+  gap: 5px;
+}
+
+.cyf-field__label {
+  color: var(--cyf-muted);
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.cyf-field__control {
+  position: relative;
+  display: block;
+}
+
+.cyf-field__control input,
+.cyf-field__control select,
+.cyf-field__control textarea {
+  box-sizing: border-box;
+  width: 100%;
+  min-height: 32px;
+  padding: 0 38px 0 10px;
+  border: 1px solid var(--cyf-border);
+  border-radius: 10px;
+  background: #fff;
+  color: var(--cyf-text);
+  font-size: 11px;
+  font-weight: 650;
+  outline: none;
+}
+
+.cyf-field__control textarea {
+  min-height: 78px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  resize: vertical;
+}
+
+.cyf-field__control input:focus,
+.cyf-field__control select:focus,
+.cyf-field__control textarea:focus {
+  border-color: rgba(4, 120, 87, 0.45);
+  box-shadow: 0 0 0 3px rgba(4, 120, 87, 0.08);
+}
+
+.cyf-field__control input::placeholder,
+.cyf-field__control textarea::placeholder {
+  color: #94a3b8;
+}
+
+.cyf-field__control--select select,
+.cyf-field__control--select input {
+  padding-right: 12px;
+}
+
+.cyf-field__control--textarea textarea {
+  padding-right: 42px;
+}
+
+.cyf-field__icon {
+  position: absolute;
+  top: 50%;
+  right: 8px;
+  width: 28px;
+  height: 28px;
+  display: grid;
+  place-items: center;
+  border-radius: 8px;
+  background: #f8fafc;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  color: #64748b;
+  transform: translateY(-50%);
+  pointer-events: none;
+}
+
+.cyf-field__control--textarea .cyf-field__icon {
+  top: 14px;
+  transform: none;
+}
+
+.cyf-field-row {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cyf-notice {
+  margin: 0;
+  padding: 8px 10px;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 10px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.cyf-actions {
+  margin-top: 4px;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.cyf-btn {
+  min-height: 38px;
+  padding: 0 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 7px;
+  border-radius: 10px;
+  border: 1px solid transparent;
+  font-size: 11px;
+  font-weight: 900;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.cyf-btn--primary {
+  border-color: var(--cyf-green);
+  background: linear-gradient(180deg, #059669 0%, var(--cyf-green) 100%);
+  color: #fff;
+}
+
+.cyf-btn--primary:disabled {
+  opacity: 0.72;
+  cursor: not-allowed;
+}
+
+.cyf-btn--ghost {
+  border-color: rgba(4, 120, 87, 0.28);
+  background: #fff;
+  color: var(--cyf-green-strong);
+}
+
+.cyf-btn--ghost:hover {
+  background: #f0fdf8;
+}
+
+.hz-cariler-yeni-center .cyf-page {
+  max-width: 1604px;
+  margin: 0 auto;
+}
+
+@media (max-width: 640px) {
+  .cyf-card {
+    width: 100%;
+  }
+
+  .cyf-card__head,
+  .cyf-form {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+
+  .cyf-field-row,
+  .cyf-actions {
+    grid-template-columns: 1fr;
+  }
+}

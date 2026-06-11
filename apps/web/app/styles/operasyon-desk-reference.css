@@ -1,0 +1,329 @@
+/*
+ * Operasyon masası — referans zemin sistemi (stok, arşiv, raporlar, whatsapp)
+ * Tek canvas rengi; kartlar beyaz + net border + hafif gölge.
+ * Kaynak: docs/design/reference/*-acik-mod.png
+ */
+
+html:root[data-theme="light"] .hz-stock-page--desk,
+html:root:not([data-theme="dark"]) .hz-stock-page--desk,
+html:root[data-theme="light"] .hz-archive-page--desk,
+html:root:not([data-theme="dark"]) .hz-archive-page--desk,
+html:root[data-theme="light"] .hz-reports-page--desk,
+html:root:not([data-theme="dark"]) .hz-reports-page--desk,
+html:root[data-theme="light"] .hz-wa-page--desk,
+html:root:not([data-theme="dark"]) .hz-wa-page--desk {
+  --desk-canvas: #fdfcf9;
+  --desk-surface: #ffffff;
+  --desk-border: #d1d5db;
+  --desk-border-soft: #e5e7eb;
+  --desk-text: #0f172a;
+  --desk-muted: #64748b;
+  --desk-green: #0d6b4f;
+  --desk-green-strong: #064e3b;
+  --desk-green-soft: #ecfdf5;
+  --desk-gold: #c9a227;
+  --desk-gold-soft: #fffbeb;
+  --desk-info-soft: #eff6ff;
+  --desk-info-border: #bfdbfe;
+  --desk-warn-soft: #fffbeb;
+  --desk-warn-border: #fde68a;
+  --desk-table-head: #f5f6f8;
+  --desk-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --desk-radius: 12px;
+  --desk-gap: 8px;
+
+  box-sizing: border-box;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: var(--desk-gap);
+  gap: var(--desk-gap);
+  background: var(--desk-canvas) !important;
+  color: var(--desk-text);
+}
+
+/* ── Shell: tek zemin (workspace → sayfa arası ton farkı yok) ── */
+.hz-shell-workspace:has(.hz-stock-page--desk),
+.hz-shell-workspace:has(.hz-archive-page--desk),
+.hz-shell-workspace:has(.hz-reports-page--desk),
+.hz-shell-workspace:has(.hz-wa-page--desk) {
+  --hz-color-bg: var(--desk-canvas);
+  --hz-color-surface: var(--desk-surface);
+  --hz-bg: var(--desk-canvas);
+  --hz-surface: var(--desk-surface);
+  background: var(--desk-canvas) !important;
+}
+
+.hz-shell-workspace:has(.hz-stock-page--desk) .hz-shell-header,
+.hz-shell-workspace:has(.hz-archive-page--desk) .hz-shell-header,
+.hz-shell-workspace:has(.hz-reports-page--desk) .hz-shell-header,
+.hz-shell-workspace:has(.hz-wa-page--desk) .hz-shell-header {
+  background: var(--desk-canvas) !important;
+  border-bottom: 1px solid var(--desk-border-soft) !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+.hz-shell-workspace:has(.hz-stock-page--desk) .hz-shell-content,
+.hz-shell-workspace:has(.hz-archive-page--desk) .hz-shell-content,
+.hz-shell-workspace:has(.hz-reports-page--desk) .hz-shell-content,
+.hz-shell-workspace:has(.hz-wa-page--desk) .hz-shell-content {
+  padding: 0 !important;
+  background: var(--desk-canvas) !important;
+}
+
+.hz-shell-content-frame:has(.hz-stock-page--desk),
+.hz-shell-content-frame:has(.hz-archive-page--desk),
+.hz-shell-content-frame:has(.hz-reports-page--desk),
+.hz-shell-content-frame:has(.hz-wa-page--desk) {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: none !important;
+  background: var(--desk-canvas) !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.platform-content:has(.hz-stock-page--desk),
+.platform-content:has(.hz-archive-page--desk),
+.platform-content:has(.hz-reports-page--desk),
+.platform-content:has(.hz-wa-page--desk) {
+  padding: 0 !important;
+  background: var(--desk-canvas) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* Legacy page token override */
+.hz-stock-page--desk.hz-stock-page {
+  --hz-stock-primary: var(--desk-green);
+  --hz-stock-surface: var(--desk-surface);
+  --hz-stock-bg: var(--desk-canvas);
+  --hz-stock-border: var(--desk-border);
+  --hz-stock-text: var(--desk-text);
+  --hz-stock-muted: var(--desk-muted);
+  --stock-bg: var(--desk-canvas);
+  --stock-paper: var(--desk-surface);
+  --stock-border: var(--desk-border);
+}
+
+.hz-archive-page--desk.hz-archive-page {
+  --hz-archive-primary: var(--desk-green);
+  --hz-archive-surface: var(--desk-surface);
+  --hz-archive-bg: var(--desk-canvas);
+  --hz-archive-border: var(--desk-border);
+  --hz-archive-text: var(--desk-text);
+  --hz-archive-muted: var(--desk-muted);
+  --archive-bg: var(--desk-canvas);
+  --archive-paper: var(--desk-surface);
+  --archive-border: var(--desk-border);
+}
+
+.hz-reports-page--desk.hz-reports-page {
+  --hz-reports-primary: var(--desk-green);
+  --hz-reports-surface: var(--desk-surface);
+  --hz-reports-bg: var(--desk-canvas);
+  --hz-reports-border: var(--desk-border);
+  --hz-reports-text: var(--desk-text);
+  --hz-reports-muted: var(--desk-muted);
+  --reports-bg: var(--desk-canvas);
+  --reports-paper: var(--desk-surface);
+  --reports-border: var(--desk-border);
+}
+
+.hz-wa-page--desk.hz-wa-page {
+  --hz-wa-primary: var(--desk-green);
+  --wa-bg: var(--desk-canvas);
+  --wa-paper: var(--desk-surface);
+  --wa-border: var(--desk-border);
+}
+
+/* ── Kart / panel yüzeyleri (beyaz + net çizgi) ── */
+.hz-stock-page--desk .hz-stock-desk-head,
+.hz-stock-page--desk .hz-stock-desk-stats > article,
+.hz-stock-page--desk .hz-stock-desk-main,
+.hz-stock-page--desk .hz-stock-context,
+.hz-archive-page--desk .hz-archive-topbar,
+.hz-archive-page--desk .hz-archive-kpi,
+.hz-archive-page--desk .hz-archive-filter-bar,
+.hz-archive-page--desk .hz-archive-list-wrap,
+.hz-archive-page--desk .hz-archive-side,
+.hz-reports-page--desk .hz-reports-topbar,
+.hz-reports-page--desk .hz-reports-desk-card,
+.hz-reports-page--desk .hz-reports-side,
+.hz-wa-page--desk .hz-wa-desk-head,
+.hz-wa-page--desk .hz-wa-desk-stats > article,
+.hz-wa-page--desk .hz-wa-desk-main,
+.hz-wa-page--desk .hz-wa-desk-context {
+  border: 1px solid var(--desk-border) !important;
+  background: var(--desk-surface) !important;
+  box-shadow: var(--desk-shadow) !important;
+  border-radius: var(--desk-radius) !important;
+}
+
+.hz-archive-page--desk .hz-archive-kpi-strip {
+  border: none !important;
+  background: transparent !important;
+  box-shadow: none !important;
+}
+
+.hz-archive-page--desk .hz-archive-filter-bar {
+  border-radius: var(--desk-radius) var(--desk-radius) 0 0 !important;
+  border-bottom: none !important;
+}
+
+.hz-archive-page--desk .hz-archive-list-wrap {
+  border-radius: 0 0 var(--desk-radius) var(--desk-radius) !important;
+  border-top: 1px solid var(--desk-border-soft) !important;
+}
+
+.hz-reports-page--desk .hz-reports-desk-card .hz-report-analytics-shell,
+.hz-reports-page--desk .hz-reports-desk-card .hz-reports-list-wrap,
+.hz-wa-page--desk .hz-wa-desk-main .hz-wa-desk-table-card {
+  border: none !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+  background: transparent !important;
+}
+
+/* İç kartlar — ekstra bej katman yok */
+.hz-stock-page--desk .hz-stock-context-card,
+.hz-archive-page--desk .hz-archive-side-card,
+.hz-reports-page--desk .hz-reports-side-card {
+  border: 1px solid var(--desk-border-soft) !important;
+  background: var(--desk-surface) !important;
+  box-shadow: none !important;
+}
+
+/* Form alanları — beyaz zemin (krem input yok) */
+.hz-stock-page--desk .hz-stock-filter-field input,
+.hz-stock-page--desk .hz-stock-filter-field select,
+.hz-stock-page--desk .hz-stock-filter-search-shell,
+.hz-wa-page--desk .hz-wa-desk-filter-field input,
+.hz-wa-page--desk .hz-wa-desk-filter-field select,
+.hz-wa-page--desk .hz-wa-desk-filter-search,
+.hz-archive-page--desk .hz-archive-filter-input,
+.hz-archive-page--desk .hz-archive-filter-select,
+.hz-reports-page--desk .hz-reports-filter-input,
+.hz-reports-page--desk .hz-reports-filter-select {
+  background: var(--desk-surface) !important;
+  border: 1px solid var(--desk-border) !important;
+  color: var(--desk-text) !important;
+}
+
+.hz-stock-page--desk .hz-stock-filter-bar,
+.hz-wa-page--desk .hz-wa-desk-filter-bar {
+  border-bottom: 1px solid var(--desk-border-soft) !important;
+  background: var(--desk-surface) !important;
+}
+
+/* Başlık / birincil aksiyon */
+.hz-stock-page--desk .hz-stock-desk-btn--primary,
+.hz-archive-page--desk .hz-archive-toolbar-btn--primary,
+.hz-reports-page--desk .hz-reports-toolbar-btn--primary,
+.hz-wa-page--desk .hz-wa-desk-btn--primary,
+.hz-stock-page--desk .hz-stock-context-btn--primary,
+.hz-wa-page--desk .hz-wa-desk-context-btn--primary {
+  border-color: var(--desk-green) !important;
+  background: var(--desk-green) !important;
+  color: #fff !important;
+}
+
+.hz-stock-page--desk .hz-stock-desk-head__text h1,
+.hz-archive-page--desk .hz-archive-topbar-title,
+.hz-reports-page--desk .hz-reports-topbar-title,
+.hz-wa-page--desk .hz-wa-desk-head__text h1 {
+  color: var(--desk-green-strong) !important;
+}
+
+/* Tablo */
+.hz-stock-page--desk .hz-stock-table th,
+.hz-wa-page--desk .hz-wa-desk-table th,
+.hz-archive-page--desk .hz-archive-list-header,
+.hz-reports-page--desk .hz-reports-list-header {
+  background: var(--desk-table-head) !important;
+  color: var(--desk-muted) !important;
+  border-bottom: 1px solid var(--desk-border) !important;
+}
+
+.hz-stock-page--desk .hz-stock-table td,
+.hz-wa-page--desk .hz-wa-desk-table td,
+.hz-archive-page--desk .hz-archive-row,
+.hz-reports-page--desk .hz-reports-row {
+  background: var(--desk-surface) !important;
+  border-bottom: 1px solid var(--desk-border-soft) !important;
+}
+
+.hz-stock-page--desk .hz-stock-row.is-selected,
+.hz-wa-page--desk .hz-wa-desk-row.is-selected,
+.hz-archive-page--desk .hz-archive-row--selected,
+.hz-reports-page--desk .hz-reports-row--selected {
+  background: var(--desk-green-soft) !important;
+  box-shadow: inset 3px 0 0 var(--desk-green) !important;
+}
+
+/* Demo bant */
+.hz-stock-page--desk .hz-stock-preview-band,
+.hz-archive-page--desk .hz-archive-preview-band,
+.hz-reports-page--desk .hz-reports-preview-band,
+.hz-wa-page--desk .hz-wa-desk-preview-band {
+  border: 1px solid var(--desk-info-border) !important;
+  background: var(--desk-info-soft) !important;
+  color: #1e40af !important;
+}
+
+html:root[data-theme="dark"] .hz-stock-page--desk .hz-stock-preview-band,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-preview-band,
+html:root[data-theme="dark"] .hz-reports-page--desk .hz-reports-preview-band,
+html:root[data-theme="dark"] .hz-wa-page--desk .hz-wa-desk-preview-band {
+  color: #93c5fd !important;
+}
+
+/* Raporlar sıra */
+.hz-reports-page--desk .hz-reports-desk-card .hz-report-analytics-kpis {
+  order: 1 !important;
+}
+
+.hz-reports-page--desk .hz-reports-desk-card .hz-report-analytics-filters {
+  order: 2 !important;
+}
+
+.hz-reports-page--desk .hz-reports-desk-card .hz-report-analytics-table {
+  order: 3 !important;
+  flex: 1 1 auto !important;
+  min-height: 0 !important;
+}
+
+.hz-reports-page--desk .hz-reports-desk-card .hz-report-analytics-charts {
+  order: 4 !important;
+  display: none !important;
+}
+
+.hz-reports-page--desk .hz-reports-type-tab--active,
+.hz-archive-page--desk .hz-archive-category-chip.is-active {
+  border-color: var(--desk-green) !important;
+  background: var(--desk-green-soft) !important;
+  color: var(--desk-green-strong) !important;
+}
+
+.hz-reports-page--desk .hz-reports-kpi {
+  border-color: var(--desk-border) !important;
+  background: var(--desk-surface) !important;
+}
+
+.hz-stock-page--desk .hz-stock-context-notice--warn {
+  border-color: var(--desk-warn-border) !important;
+  background: var(--desk-warn-soft) !important;
+  color: #92400e !important;
+}
+
+.hz-stock-page--desk .hz-stock-context-notice--info {
+  border-color: var(--desk-info-border) !important;
+  background: var(--desk-info-soft) !important;
+  color: #1e40af !important;
+}
+
+/* Koyu mod: desk-dark-mode.css (globals sonunda) */

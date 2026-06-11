@@ -1,5 +1,6 @@
 "use client";
 
+import { formatUserFacingStatus } from "../../../lib/user-facing-labels";
 import type { LastApprovalActionSummary, OperatorSmokeSummary } from "../utils/operator-smoke";
 
 function stepClass(status: string): string {
@@ -20,13 +21,13 @@ function stepClass(status: string): string {
 function overallLabel(overall: OperatorSmokeSummary["overall"]): string {
   switch (overall) {
     case "success":
-      return "Hazir";
+      return "Hazır";
     case "partial":
-      return "Kismi / bekleyen adimlar";
+      return "Kısmi / bekleyen adımlar";
     case "blocked":
-      return "Engelli";
+      return "Engellendi";
     default:
-      return overall;
+      return formatUserFacingStatus(overall);
   }
 }
 
@@ -43,11 +44,11 @@ export function ApprovalOperatorSmokePanel({
 }) {
   if (production) {
     return (
-      <section className="hz-approvals-operator-smoke-panel hz-approvals-operator-smoke-panel--prod" aria-label="Operator smoke">
+      <section className="hz-approvals-operator-smoke-panel hz-approvals-operator-smoke-panel--prod" aria-label="Operatör doğrulama">
         <header className="hz-approvals-operator-smoke-head">
-          <h3 className="hz-approvals-operator-smoke-title">Operatör dogrulama</h3>
+          <h3 className="hz-approvals-operator-smoke-title">Operatör doğrulama</h3>
           <p className="hz-approvals-inbox-muted">
-            Production ortaminda sandbox smoke checklist gosterilmez; canli veri uzerinde sahte basari uretilmez.
+            Canlı ortamda test ortamı doğrulama listesi gösterilmez; canlı veri üzerinde sahte başarı üretilmez.
           </p>
         </header>
       </section>
@@ -55,42 +56,42 @@ export function ApprovalOperatorSmokePanel({
   }
 
   return (
-    <section className="hz-approvals-operator-smoke-panel" aria-label="Sandbox smoke checklist">
+    <section className="hz-approvals-operator-smoke-panel" aria-label="Test ortamı doğrulama listesi">
       <header className="hz-approvals-operator-smoke-head">
-        <h3 className="hz-approvals-operator-smoke-title">Operatör dogrulama (local/demo)</h3>
+        <h3 className="hz-approvals-operator-smoke-title">Operatör doğrulama (yerel/örnek veri)</h3>
         <p className="hz-approvals-operator-smoke-overall" data-overall={summary.overall}>
           Durum: <strong>{overallLabel(summary.overall)}</strong>
           <span className="hz-approvals-operator-smoke-counts">
             {" "}
-            · OK {summary.okCount} · Uyari {summary.warningCount} · Hata {summary.failCount} · Atlandi {summary.skippedCount} · Bekleyen{" "}
+            · Tamam {summary.okCount} · Uyarı {summary.warningCount} · Hata {summary.failCount} · Atlandı {summary.skippedCount} · Bekleyen{" "}
             {summary.neutralCount}
           </span>
         </p>
         <p className="hz-approvals-inbox-muted">
-          Guvenlik: sandbox yalnizca gelistirme; provider writes ve gercek execution sinyalleri worker safety yanitindan okunur. Basari uydurulmaz.
+          Güvenlik: test ortamı yalnızca geliştirme içindir; sağlayıcı yazımları ve gerçek çalıştırma sinyalleri çalışan servis güvenlik yanıtından okunur. Başarı uydurulmaz.
         </p>
       </header>
 
       {lastSeedLine ? (
         <p className="hz-approvals-operator-smoke-meta" role="status">
-          <strong>Son seed:</strong> {lastSeedLine}
+          <strong>Son örnek veri:</strong> {lastSeedLine}
         </p>
       ) : null}
 
       {lastApprovalSummary ? (
-        <div className="hz-approvals-operator-smoke-last" role="region" aria-label="Son onay islemi">
-          <p className="hz-approvals-operator-smoke-last-title">Son islem ozeti (onay)</p>
+        <div className="hz-approvals-operator-smoke-last" role="region" aria-label="Son onay işlemi">
+          <p className="hz-approvals-operator-smoke-last-title">Son işlem özeti (onay)</p>
           <ul className="hz-approvals-operator-smoke-last-list">
-            <li>{lastApprovalSummary.duplicate ? "Idempotent: kayit zaten islenmis." : "Onay API basarili."}</li>
-            {lastApprovalSummary.executionId ? <li>executionId: {lastApprovalSummary.executionId}</li> : null}
+            <li>{lastApprovalSummary.duplicate ? "Tekrar güvenli: kayıt zaten işlenmiş." : "Onay API başarılı."}</li>
+            {lastApprovalSummary.executionId ? <li>Çalıştırma no: {lastApprovalSummary.executionId}</li> : null}
             {lastApprovalSummary.outboxJobId ? <li>İş kuyruğu no: {lastApprovalSummary.outboxJobId}</li> : null}
-            <li>Bridge: {lastApprovalSummary.bridgeLine}</li>
+            <li>Köprü: {lastApprovalSummary.bridgeLine}</li>
             <li>
-              Audit/timeline writeback:{" "}
+              Denetim izi / zaman akışı geri yazımı:{" "}
               {lastApprovalSummary.auditTimelineWritebackQueued === true
-                ? "kuyrukta / yanitta true"
+                ? "kuyrukta / yanıtta evet"
                 : lastApprovalSummary.auditTimelineWritebackQueued === false
-                  ? "false"
+                  ? "hayır"
                   : "(alan yok)"}
             </li>
             <li>{lastApprovalSummary.gateLine}</li>
@@ -103,7 +104,7 @@ export function ApprovalOperatorSmokePanel({
         {summary.steps.map((step) => (
           <li key={step.id} className={stepClass(step.status)}>
             <span className="hz-approvals-operator-smoke-step-label">{step.label}</span>
-            <span className="hz-approvals-operator-smoke-step-status">{step.status}</span>
+            <span className="hz-approvals-operator-smoke-step-status">{formatUserFacingStatus(step.status)}</span>
             {step.detail ? <span className="hz-approvals-operator-smoke-step-detail">{step.detail}</span> : null}
           </li>
         ))}

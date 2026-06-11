@@ -1,6 +1,5 @@
-import { ProductionReadinessPage } from "../../../../src/features/settings/components";
+import { SettingsProductionReadinessReferenceLayout } from "../../../../src/features/settings/components/SettingsProductionReadinessReferenceLayout";
 
 export default function ProductionReadinessRoutePage() {
-  return <ProductionReadinessPage />;
+  return <SettingsProductionReadinessReferenceLayout />;
 }
-

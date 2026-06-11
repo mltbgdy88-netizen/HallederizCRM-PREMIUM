@@ -129,13 +129,20 @@ export const PRODUCT_ROUTE_FOREST: ProductRouteNode[] = [
   }),
   n("hizli-islem", "", "/hizli-islem", "Hızlı İşlem", "Operations", "quick", "implemented", OWNER, "Hızlı işlem merkezi.", {
     children: ch("/hizli-islem", "Operations", "quick", OWNER, [
-      ["teklif", "Teklif", "implemented", "Hızlı teklif.", undefined, "redirect:/hizli-islem"],
-      ["siparis", "Sipariş", "implemented", "Hızlı sipariş.", undefined, "redirect:/hizli-islem"],
-      ["teslim", "Teslim", "implemented", "Hızlı teslim.", undefined, "redirect:/hizli-islem"],
-      ["tahsilat", "Tahsilat", "implemented", "Hızlı tahsilat.", undefined, "redirect:/hizli-islem"],
-      ["iade", "İade", "implemented", "Hızlı iade.", undefined, "redirect:/hizli-islem"],
-      ["sonuc", "Sonuç", "needs-api", "İşlem sonuç özeti."],
-      ["etki-analizi", "Etki analizi", "needs-api", "Operasyon etkisi."]
+      ["teklif", "Teklif", "implemented", "Hızlı teklif.", undefined, "redirect:/hizli-islem/satis-masasi?tab=offer"],
+      ["siparis", "Sipariş", "implemented", "Hızlı sipariş.", undefined, "redirect:/hizli-islem/satis-masasi?tab=order"],
+      ["teslim", "Teslim", "implemented", "Hızlı teslim.", undefined, "redirect:/hizli-islem/satis-masasi?tab=delivery"],
+      ["tahsilat", "Tahsilat", "implemented", "Hızlı tahsilat.", undefined, "redirect:/hizli-islem/satis-masasi?tab=payment"],
+      ["iade", "İade", "implemented", "Hızlı iade.", undefined, "redirect:/hizli-islem/satis-masasi?tab=return"],
+      ["sonuc", "Sonuç", "implemented", "Hızlı işlem sonuç merkezi.", undefined, "redirect:/hizli-islem/sonuc"],
+      [
+        "etki-analizi",
+        "Etki analizi",
+        "implemented",
+        "Hızlı işlem etki analizi.",
+        undefined,
+        "redirect:/hizli-islem/etki-analizi"
+      ]
     ])
   }),
   n("tahsilatlar", "", "/tahsilatlar", "Tahsilatlar", "Operations", "payments", "implemented", OWNER, "Tahsilat yönetimi.", {
@@ -172,7 +179,10 @@ export const PRODUCT_ROUTE_FOREST: ProductRouteNode[] = [
       ["sayim", "Sayım", "needs-api", "Sayım ve sayım fişleri; detay rotası dinamik id ile genişletilecek."]
     ])
   }),
-  n("depo-hazirlik", "", "/depo-hazirlik", "Depo hazırlık", "Field & WMS", "wms", "shell", OWNER, "Depo hazırlık süreçleri.", {
+  n("depo", "", "/depo", "Depo", "Field & WMS", "wms", "implemented", OWNER, "Depo hazırlık operasyon masası.", {
+    suppressHeader: true
+  }),
+  n("depo-hazirlik", "", "/depo-hazirlik", "Depo hazırlık", "Field & WMS", "wms", "shell", OWNER, "Depo hazırlık süreçleri (eski rota).", {
     children: ch("/depo-hazirlik", "Field & WMS", "wms", OWNER, [
       ["is-listesi", "İş listesi", "implemented", "Depo iş listesi.", undefined, "redirect:/depo"],
       ["toplama", "Toplama", "needs-api", "Toplama görevleri."],
@@ -185,34 +195,41 @@ export const PRODUCT_ROUTE_FOREST: ProductRouteNode[] = [
   n("teslimatlar", "", "/teslimatlar", "Teslimatlar", "Operations", "delivery", "implemented", OWNER, "Teslimat yönetimi.", {
     children: ch("/teslimatlar", "Operations", "delivery", OWNER, [
       ["liste", "Liste", "implemented", "Liste görünümü.", undefined, "redirect:/teslimatlar"],
-      ["rota", "Rota", "needs-api", "Rota planlama."],
+      ["rota", "Rota Planlama", "implemented", "Teslimat rota operasyon masası."],
       ["yeni", "Yeni teslimat", "needs-api", "Teslimat oluşturma."]
     ])
   }),
   n("belgeler", "", "/belgeler", "Belgeler", "Operations", "documents", "implemented", OWNER, "Belge merkezi.", {
     children: ch("/belgeler", "Operations", "documents", OWNER, [
       ["liste", "Liste", "implemented", "Liste görünümü.", undefined, "redirect:/belgeler"],
-      ["sablonlar", "Şablonlar", "needs-api", "Belge şablonları."],
-      ["arsiv", "Arşiv", "needs-api", "Arşiv görünümü."],
+      ["sablonlar", "Şablonlar", "implemented", "Belge şablonları.", undefined, "redirect:/belgeler/sablonlar"],
+      ["arsiv", "Arşiv", "implemented", "Arşiv görünümü.", undefined, "redirect:/belgeler/arsiv"],
       ["yeni", "Yeni belge", "needs-api", "Belge oluşturma."]
     ])
   }),
   n("onaylar", "", "/onaylar", "Onaylar", "Approvals", "approvals", "implemented", OWNER, "Onay inbox ve operatör ekranı.", {
     children: ch("/onaylar", "Approvals", "approvals", OWNER, [
       ["bekleyenler", "Bekleyenler", "implemented", "Bekleyen onaylar.", undefined, "redirect:/onaylar"],
-      ["inceleme", "İnceleme", "shell", "İnceleme kuyruğu; API bağlantısı bekleniyor."],
-      ["tamamlananlar", "Tamamlananlar", "shell", "Tamamlanan onaylar; API bağlantısı bekleniyor."],
+      ["inceleme", "İnceleme", "implemented", "İnceleme kuyruğu.", undefined, "redirect:/onaylar/inceleme"],
+      ["tamamlananlar", "Tamamlananlar", "implemented", "Tamamlanan onaylar.", undefined, "redirect:/onaylar/tamamlananlar"],
       ["kurallar", "Kurallar", "implemented", "Politika matrisi; domain kayitlarindan onay gerektiren aksiyonlar."],
-      ["limitler", "Limitler", "needs-api", "Limit ve eşikler."]
+      ["limitler", "Limitler", "implemented", "Limit ve eşikler.", undefined, "redirect:/onaylar/limitler"]
     ])
   }),
   n("gorevler", "", "/gorevler", "Görevler", "Tasks", "tasks", "implemented", OWNER, "Görev merkezi.", {
     children: ch("/gorevler", "Tasks", "tasks", OWNER, [
       ["merkez", "Merkez", "implemented", "Görev listesi.", undefined, "redirect:/gorevler"],
-      ["benim-gorevlerim", "Benim görevlerim", "needs-api", "Kişisel görevler."],
-      ["ekip-gorevleri", "Ekip görevleri", "needs-api", "Ekip görünümü."],
-      ["gecikenler", "Gecikenler", "needs-api", "Geciken işler."],
-      ["otomatik-gorevler", "Otomatik görevler", "needs-api", "Otomasyon görevleri."]
+      ["benim-gorevlerim", "Benim görevlerim", "implemented", "Kişisel görevler.", undefined, "redirect:/gorevler/benim-gorevlerim"],
+      ["ekip-gorevleri", "Ekip görevleri", "implemented", "Ekip görünümü.", undefined, "redirect:/gorevler/ekip-gorevleri"],
+      ["gecikenler", "Gecikenler", "implemented", "Geciken işler.", undefined, "redirect:/gorevler/gecikenler"],
+      [
+        "otomatik-gorevler",
+        "Otomatik görevler",
+        "implemented",
+        "Otomasyon görevleri.",
+        undefined,
+        "redirect:/gorevler/otomatik-gorevler"
+      ]
     ])
   }),
   n("is-akislari", "", "/is-akislari", "İş akışları", "Workflows", "workflows", "shell", OWNER, "İş akışı yönetimi.", {

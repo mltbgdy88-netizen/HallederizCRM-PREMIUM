@@ -1,0 +1,234 @@
+/* Onay kuralları matrisi — apvf-policy-* */
+
+.hz-shell-content:has(.apvf-policy-page),
+.platform-content:has(.apvf-policy-page) {
+  padding: 0 !important;
+  background: #fdfcf9 !important;
+  overflow: hidden;
+}
+
+.apvf-policy-page {
+  max-width: 1604px;
+  height: calc(100dvh - 56px);
+  margin: 0 auto;
+  padding: 12px 16px;
+  overflow: hidden;
+  background: #fdfcf9;
+  color: #0f172a;
+}
+
+.apvf-policy-shell {
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 10px;
+  overflow: hidden;
+}
+
+.apvf-policy-header {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.apvf-policy-header__eyebrow {
+  margin: 0;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.apvf-policy-header h1 {
+  margin: 4px 0 0;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.apvf-policy-header__meta {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: #64748b;
+  max-width: 70ch;
+}
+
+.apvf-policy-header__back {
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid #dfe7e3;
+  background: #fff;
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  color: #064e3b;
+  flex-shrink: 0;
+}
+
+.apvf-policy-demo-band {
+  margin: 0;
+  padding: 6px 12px;
+  border-radius: 10px;
+  border: 1px solid #f59e0b44;
+  background: #fffbeb;
+  font-size: 11px;
+  color: #92400e;
+}
+
+.apvf-policy-layout {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 332px;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.apvf-policy-table-card {
+  min-height: 0;
+  border-radius: 14px;
+  border: 1px solid #dfe7e3;
+  background: #fff;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.apvf-policy-table-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.apvf-policy-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 11px;
+}
+
+.apvf-policy-table th,
+.apvf-policy-table td {
+  padding: 4px 8px;
+  border-bottom: 1px solid #e8eeeb;
+  text-align: left;
+}
+
+.apvf-policy-table th {
+  position: sticky;
+  top: 0;
+  z-index: 1;
+  height: 26px;
+  background: #f8fafc;
+  font-size: 10px;
+  text-transform: uppercase;
+  color: #64748b;
+}
+
+.apvf-policy-table td {
+  height: 44px;
+}
+
+.apvf-policy-table tbody tr {
+  cursor: pointer;
+}
+
+.apvf-policy-table tbody tr.is-selected {
+  background: #ecfdf5;
+}
+
+.apvf-policy-mono {
+  font-family: ui-monospace, monospace;
+  font-size: 10px;
+}
+
+.apvf-policy-edit {
+  min-height: 0;
+  border-radius: 14px;
+  border: 1px solid #dfe7e3;
+  background: #fff;
+  padding: 12px;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.apvf-policy-edit h2 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.apvf-policy-detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+  font-size: 10px;
+}
+
+.apvf-policy-detail-grid span {
+  color: #64748b;
+}
+
+.apvf-policy-detail-grid strong {
+  display: block;
+  color: #0f172a;
+}
+
+.apvf-policy-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 650;
+  color: #475569;
+}
+
+.apvf-policy-field textarea {
+  min-height: 88px;
+  padding: 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  font-size: 11px;
+  resize: vertical;
+}
+
+.apvf-policy-validation {
+  margin: 0;
+  font-size: 10px;
+  color: #b91c1c;
+}
+
+.apvf-policy-status {
+  margin: 0;
+  font-size: 10px;
+  color: #64748b;
+}
+
+.apvf-policy-btn {
+  height: 32px;
+  padding: 0 12px;
+  border-radius: 9px;
+  border: 1px solid #047857;
+  background: #047857;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  appearance: none;
+  font: inherit;
+}
+
+.apvf-policy-edit-empty {
+  margin: 0;
+  font-size: 11px;
+  color: #64748b;
+}
+
+@media (max-width: 1100px) {
+  .apvf-policy-layout {
+    grid-template-columns: 1fr;
+    overflow: auto;
+  }
+}

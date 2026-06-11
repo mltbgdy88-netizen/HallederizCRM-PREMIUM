@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState, type MutableRefObject } from "react";
 import type { PaymentMethod, QuickOperationSubmitRequest } from "@hallederiz/types";
 import type { QuickOperationPaymentFormState } from "../components/QuickOperationPaymentBlock";
 import type {
@@ -303,7 +303,7 @@ export function defaultQuickOperationLinesForTab(tab: QuickOperationWorkflowTabI
 
 function defaultPaymentFormState(): QuickOperationPaymentFormState {
   return {
-    enabled: false,
+    enabled: true,
     amount: 0,
     method: "transfer",
     receivedAt: new Date().toISOString(),
@@ -317,6 +317,7 @@ export function useQuickOperationState(options?: {
   initialCustomerId?: string | null;
   initialProductId?: string | null;
   initialOrderId?: string | null;
+  userEditedRef?: MutableRefObject<boolean>;
 }) {
   const [catalogCustomers, setCatalogCustomers] = useState<QuickOperationCustomer[]>(() =>
     dataSourceConfig.useDemoData ? buildQuickOperationCustomers() : []
@@ -361,22 +362,38 @@ export function useQuickOperationState(options?: {
 
   const [operationType, setOperationTypeState] = useState<QuickOperationType>("sale_order");
   const [customerId, setCustomerId] = useState(fallbackCustomer.id);
+  const defaultCustomerAppliedRef = useRef(false);
+  const customerPrefillAppliedRef = useRef(false);
 
   useEffect(() => {
     if (customersLoading) {
       return;
     }
-    const requested = options?.initialCustomerId?.trim();
-    if (requested && catalogCustomers.some((c) => c.id === requested)) {
-      setCustomerId(requested);
+    if (options?.userEditedRef?.current) {
       return;
     }
+    const requested = options?.initialCustomerId?.trim();
+    if (requested) {
+      if (customerPrefillAppliedRef.current) {
+        return;
+      }
+      customerPrefillAppliedRef.current = true;
+      const match = catalogCustomers.find((customer) => customer.id === requested);
+      if (match) {
+        setCustomerId(match.id);
+      }
+      return;
+    }
+    if (defaultCustomerAppliedRef.current) {
+      return;
+    }
+    defaultCustomerAppliedRef.current = true;
     if (catalogCustomers[0]) {
       setCustomerId(catalogCustomers[0].id);
       return;
     }
     setCustomerId(fallbackCustomer.id);
-  }, [catalogCustomers, customersLoading, options?.initialCustomerId]);
+  }, [catalogCustomers, customersLoading, options?.initialCustomerId, options?.userEditedRef]);
   const [lines, setLines] = useState<QuickOperationLine[]>(() => seedQuickOperationLines());
   const [expandedLineId, setExpandedLineId] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -511,10 +528,11 @@ export function useQuickOperationState(options?: {
   const patchPaymentForm = (patch: Partial<QuickOperationPaymentFormState>) => {
     setSubmittedImpacts(null);
     setSideActions(null);
-    setPaymentForm((current) => ({ ...current, ...patch }));
+    setPaymentForm((current) => ({ ...current, ...patch, enabled: true }));
   };
 
-  const buildSubmitPayload = (): QuickOperationSubmitRequest => {
+  const buildSubmitPayload = (operationTypeOverride?: QuickOperationType): QuickOperationSubmitRequest => {
+    const effectiveOperationType = operationTypeOverride ?? operationType;
     const paymentPayload =
       paymentForm.enabled && paymentForm.amount > 0
         ? {
@@ -529,11 +547,11 @@ export function useQuickOperationState(options?: {
         : undefined;
 
     return {
-      operationType,
+      operationType: effectiveOperationType,
       customerId: selectedCustomer.id,
       customerName: selectedCustomer.name,
       orderId: linkedOrderId ?? undefined,
-      reason: operationType === "return" ? operationNote : undefined,
+      reason: effectiveOperationType === "return" ? operationNote : undefined,
       note: operationNote,
       paidAmount: paymentForm.enabled ? paymentForm.amount : undefined,
       paymentMethod: paymentForm.enabled ? paymentForm.method : undefined,
@@ -606,7 +624,8 @@ export function useQuickOperationState(options?: {
     }
   };
 
-  const submitOperation = async (): Promise<QuickOperationSubmitOutcome> => {
+  const submitOperation = async (operationTypeOverride?: QuickOperationType): Promise<QuickOperationSubmitOutcome> => {
+    const effectiveOperationType = operationTypeOverride ?? operationType;
     if (previewBlockingSubmit) {
       setNotice("Önizleme doğrulaması tamamlanamadı. Eksik alanları kontrol edin.");
       return { ok: false };
@@ -622,7 +641,7 @@ export function useQuickOperationState(options?: {
 
     setIsSubmitting(true);
     try {
-      const result = await submitQuickOperationRecord(buildSubmitPayload());
+      const result = await submitQuickOperationRecord(buildSubmitPayload(effectiveOperationType));
       const sanitizedImpacts = sanitizeSubmitImpacts(result.workflowImpacts);
       setSubmittedImpacts(
         sanitizedImpacts.map((impact) => ({
@@ -635,7 +654,7 @@ export function useQuickOperationState(options?: {
       setSideActions(result.sideActions ?? null);
       const feedback = resolveSubmitFeedback(result, {
         useDemoData: dataSourceConfig.useDemoData,
-        operationType
+        operationType: effectiveOperationType
       });
       setNotice(feedback.notice);
       setSubmitLinks({

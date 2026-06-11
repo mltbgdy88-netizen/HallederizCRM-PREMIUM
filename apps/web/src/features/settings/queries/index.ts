@@ -126,9 +126,9 @@ export async function getPilotReadinessData(): Promise<PilotReadinessSummary> {
           roleCode: "yonetici",
           roleName: "Yonetici",
           summary: "Genel kullanim durumunu ve kritik eksikleri yonetir.",
-          mustCheck: ["Kritik eksikler", "Servis health", "Onaylar"],
+          mustCheck: ["Kritik eksikler", "Servis sağlığı", "Onaylar"],
           firstScreens: [
-            { label: "Kullanim Hazirligi", href: "/ayarlar/kullanim-hazirligi" },
+            { label: "Kullanım hazırlığı", href: "/ayarlar/kullanim-hazirligi" },
             { label: "Hazırlık kontrolü", href: "/ayarlar/staging-kontrol" }
           ],
           ownGaps: ["Cariler import edildi"]

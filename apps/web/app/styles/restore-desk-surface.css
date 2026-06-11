@@ -1,0 +1,268 @@
+/*
+ * Restore paketi — P0–P4 sayfaları (Dashboard, Hızlı İşlem, Onaylar, Cariler, Siparişler, Teklifler)
+ * Sprint 1 ile aynı zemin sistemi: tek canvas #fdfcf9, beyaz kart, net border.
+ * Sprint 1 dersleri: globals #f1f5f9 frame, shell/header ton farkı, sayfa gradient, cam katman.
+ */
+
+/* Ortak token (operasyon masaları ile aynı) */
+html:root[data-theme="light"] .hz-dashboard-page--fit,
+html:root:not([data-theme="dark"]) .hz-dashboard-page--fit,
+html:root[data-theme="light"] .hz-dashboard-page--v2,
+html:root:not([data-theme="dark"]) .hz-dashboard-page--v2,
+html:root[data-theme="light"] .hz-qop-page,
+html:root:not([data-theme="dark"]) .hz-qop-page,
+html:root[data-theme="light"] .hz-approvals-command,
+html:root:not([data-theme="dark"]) .hz-approvals-command,
+html:root[data-theme="light"] .hz-customers-page--desk,
+html:root:not([data-theme="dark"]) .hz-customers-page--desk,
+html:root[data-theme="light"] .hz-orders-desk,
+html:root:not([data-theme="dark"]) .hz-orders-desk,
+html:root[data-theme="light"] .hz-offers-page--desk,
+html:root:not([data-theme="dark"]) .hz-offers-page--desk {
+  --desk-canvas: #fdfcf9;
+  --desk-surface: #ffffff;
+  --desk-border: #d1d5db;
+  --desk-border-soft: #e5e7eb;
+  --desk-text: #0f172a;
+  --desk-muted: #64748b;
+  --desk-green: #0d6b4f;
+  --desk-green-strong: #064e3b;
+  --desk-green-soft: #ecfdf5;
+  --desk-table-head: #f5f6f8;
+  --desk-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --desk-radius: 12px;
+  --desk-gap: 8px;
+}
+
+/* ── Shell zinciri: tek canvas ── */
+.hz-shell-workspace:has(.hz-dashboard-page--fit),
+.hz-shell-workspace:has(.hz-qop-page),
+.hz-shell-workspace:has(.hz-approvals-command),
+.hz-shell-workspace:has(.hz-customers-page--desk),
+.hz-shell-workspace:has(.hz-orders-desk),
+.hz-shell-workspace:has(.hz-offers-page--desk) {
+  --hz-color-bg: var(--desk-canvas);
+  --hz-color-surface: var(--desk-surface);
+  --hz-bg: var(--desk-canvas);
+  --hz-surface: var(--desk-surface);
+  background: var(--desk-canvas) !important;
+}
+
+.hz-shell-workspace:has(.hz-dashboard-page--fit) .hz-shell-header,
+.hz-shell-workspace:has(.hz-qop-page) .hz-shell-header,
+.hz-shell-workspace:has(.hz-approvals-command) .hz-shell-header,
+.hz-shell-workspace:has(.hz-customers-page--desk) .hz-shell-header,
+.hz-shell-workspace:has(.hz-orders-desk) .hz-shell-header,
+.hz-shell-workspace:has(.hz-offers-page--desk) .hz-shell-header {
+  background: var(--desk-canvas) !important;
+  border-bottom: 1px solid var(--desk-border-soft) !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+.hz-shell-content:has(.hz-dashboard-page--fit),
+.hz-shell-content:has(.hz-qop-page),
+.hz-shell-content:has(.hz-approvals-command),
+.hz-shell-content:has(.hz-customers-page--desk),
+.hz-shell-content:has(.hz-orders-desk),
+.hz-shell-content:has(.hz-offers-page--desk) {
+  padding: 0 !important;
+  background: var(--desk-canvas) !important;
+}
+
+.hz-shell-content-frame:has(.hz-dashboard-page--fit),
+.hz-shell-content-frame:has(.hz-qop-page),
+.hz-shell-content-frame:has(.hz-approvals-command),
+.hz-shell-content-frame:has(.hz-customers-page--desk),
+.hz-shell-content-frame:has(.hz-orders-desk),
+.hz-shell-content-frame:has(.hz-offers-page--desk) {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  border: none !important;
+  background: var(--desk-canvas) !important;
+  padding: 0 !important;
+  box-shadow: none !important;
+  border-radius: 0 !important;
+}
+
+.platform-content:has(.hz-dashboard-page--fit),
+.platform-content:has(.hz-qop-page),
+.platform-content:has(.hz-approvals-command),
+.platform-content:has(.hz-customers-page--desk),
+.hz-shell-frame:has(.hz-offers-page--desk) {
+  --hz-header-height: 56px;
+}
+
+.platform-content:has(.hz-offers-page--desk) {
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.platform-content:has(.hz-offers-page--desk) > .hz-offers-page {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  max-width: none;
+  width: 100%;
+}
+
+.platform-content:has(.hz-orders-desk),
+.platform-content:has(.hz-offers-page--desk) {
+  padding: 0 !important;
+  background: var(--desk-canvas) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+/* ── Sayfa kökü: gradient / morumsu zemin kapalı ── */
+.hz-dashboard-page--fit,
+.hz-dashboard-page--v2.hz-dashboard-page--fit {
+  background: var(--desk-canvas) !important;
+  border-radius: 0 !important;
+  padding: var(--desk-gap) !important;
+  box-shadow: none !important;
+}
+
+.hz-qop-page.hz-qop-page--wb,
+.hz-qop-page.hz-qop-page--v2 {
+  max-width: none;
+  background: var(--desk-canvas) !important;
+}
+
+.hz-approvals-command {
+  background: var(--desk-canvas) !important;
+}
+
+.hz-customers-page--desk {
+  background: var(--desk-canvas) !important;
+}
+
+.hz-orders-page.hz-orders-desk {
+  background: var(--desk-canvas) !important;
+}
+
+.hz-offers-page--desk {
+  background: var(--desk-canvas) !important;
+}
+
+/* ── Dashboard kart / bantlar ── */
+.hz-dashboard-page--fit .hz-dashboard-ops-kpi-card,
+.hz-dashboard-page--fit .hz-dash-surface-card,
+.hz-dashboard-page--fit .hz-dash-module-chip,
+.hz-dashboard-page--fit .hz-dash-card,
+.hz-dashboard-page--fit .hz-dash-quick-section,
+.hz-dashboard-page--fit .hz-split-side > aside {
+  border: 1px solid var(--desk-border) !important;
+  background: var(--desk-surface) !important;
+  box-shadow: var(--desk-shadow) !important;
+}
+
+.hz-dashboard-page--fit .hz-dash-preview-band,
+.hz-dashboard-page--fit .hz-dash-live-band {
+  border: 1px solid var(--desk-info-border, #bfdbfe) !important;
+  background: var(--desk-info-soft, #eff6ff) !important;
+}
+
+/* ── Hızlı işlem ana yüzey ── */
+.hz-qop-page--wb .hz-qop-main-surface,
+.hz-qop-page--wb .hz-qop-wb-side {
+  border: 1px solid var(--desk-border) !important;
+  background: var(--desk-surface) !important;
+  box-shadow: var(--desk-shadow) !important;
+}
+
+.hz-qop-page--wb .hz-qop-field input,
+.hz-qop-page--wb .hz-qop-field select,
+.hz-qop-page--wb .hz-qop-input {
+  background: var(--desk-surface) !important;
+  border-color: var(--desk-border) !important;
+}
+
+/* ── Onaylar komuta masası ── */
+.hz-approvals-command .hz-approval-stat,
+.hz-approvals-command .hz-approval-panel {
+  border: 1px solid var(--desk-border) !important;
+  background: var(--desk-surface) !important;
+  box-shadow: var(--desk-shadow) !important;
+}
+
+/* ── Cariler ── */
+.hz-customers-page--desk .hz-customers-topbar,
+.hz-customers-page--desk .hz-customers-kpi,
+.hz-customers-page--desk .hz-customers-filter-bar,
+.hz-customers-page--desk .hz-customers-list,
+.hz-customers-page--desk .hz-customers-side {
+  border: 1px solid var(--desk-border) !important;
+  background: var(--desk-surface) !important;
+  box-shadow: var(--desk-shadow) !important;
+  border-radius: var(--desk-radius) !important;
+}
+
+.hz-customers-page--desk .hz-customers-filter-input,
+.hz-customers-page--desk .hz-customers-filter-select {
+  background: var(--desk-surface) !important;
+  border-color: var(--desk-border) !important;
+}
+
+/* ── Siparişler ── */
+.hz-orders-desk .hz-orders-intro,
+.hz-orders-desk .hz-orders-card,
+.hz-orders-desk .hz-orders-stat,
+.hz-orders-desk .hz-orders-preview {
+  border: 1px solid var(--desk-border) !important;
+  background: var(--desk-surface) !important;
+  box-shadow: var(--desk-shadow) !important;
+  border-radius: var(--desk-radius) !important;
+}
+
+.hz-orders-desk .hz-orders-filter-input,
+.hz-orders-desk .hz-orders-filter-select {
+  background: var(--desk-surface) !important;
+  border-color: var(--desk-border) !important;
+}
+
+.hz-orders-desk .hz-orders-list-header,
+.hz-orders-desk .hz-orders-table th {
+  background: var(--desk-table-head) !important;
+}
+
+.hz-orders-desk .hz-orders-row--selected {
+  background: var(--desk-green-soft) !important;
+  box-shadow: inset 3px 0 0 var(--desk-green) !important;
+}
+
+/* ── Teklifler ── */
+.hz-offers-page--desk .hz-offers-desk-head,
+.hz-offers-page--desk .hz-offers-desk-stats > article,
+.hz-offers-page--desk .hz-offers-desk-main,
+.hz-offers-page--desk .hz-offers-context {
+  border: 1px solid var(--desk-border) !important;
+  background: var(--desk-surface) !important;
+  box-shadow: var(--desk-shadow) !important;
+  border-radius: var(--desk-radius) !important;
+}
+
+.hz-offers-page--desk .hz-offers-filter-field input,
+.hz-offers-page--desk .hz-offers-filter-field select {
+  background: var(--desk-surface) !important;
+  border-color: var(--desk-border) !important;
+}
+
+.hz-offers-page--desk .hz-offers-table th {
+  background: var(--desk-table-head) !important;
+}
+
+/* Birincil aksiyon — düz yeşil */
+.hz-customers-page--desk .hz-customers-toolbar-btn--primary,
+.hz-customers-page--desk .hz-customers-side-btn--primary,
+.hz-orders-desk .hz-orders-btn--primary,
+.hz-offers-page--desk .hz-offers-desk-btn--primary,
+.hz-approvals-command .hz-approval-button-primary {
+  background: var(--desk-green) !important;
+  border-color: var(--desk-green) !important;
+  color: #fff !important;
+}

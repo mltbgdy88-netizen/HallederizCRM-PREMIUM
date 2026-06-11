@@ -1,3 +1,4 @@
+import { formatUserFacingMode } from "../../../lib/user-facing-labels";
 import type { ApprovalInboxItem } from "../types";
 
 export function ApprovalRiskSummary({ item }: { item: ApprovalInboxItem }) {
@@ -6,20 +7,20 @@ export function ApprovalRiskSummary({ item }: { item: ApprovalInboxItem }) {
       <h3 className="hz-approvals-inbox-card-title">Risk ve politika</h3>
       <dl className="hz-approvals-inbox-meta">
         <div>
-          <dt>Action key</dt>
+          <dt>Aksiyon anahtarı</dt>
           <dd>{item.actionKey}</dd>
         </div>
         <div>
-          <dt>Audit gerekli</dt>
-          <dd>{item.auditRequired ? "Evet" : "Hayir"}</dd>
+          <dt>Denetim izi gerekli</dt>
+          <dd>{item.auditRequired ? "Evet" : "Hayır"}</dd>
         </div>
         <div>
-          <dt>Timeline gerekli</dt>
-          <dd>{item.timelineRequired ? "Evet" : "Hayir"}</dd>
+          <dt>Zaman akışı gerekli</dt>
+          <dd>{item.timelineRequired ? "Evet" : "Hayır"}</dd>
         </div>
         <div>
-          <dt>Persistence mode</dt>
-          <dd>{item.bridgePersistenceMode ?? "foundation"}</dd>
+          <dt>Kalıcılık modu</dt>
+          <dd>{formatUserFacingMode(item.bridgePersistenceMode ?? "foundation")}</dd>
         </div>
       </dl>
       {item.reasons.length ? (

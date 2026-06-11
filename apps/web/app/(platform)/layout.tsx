@@ -1,5 +1,6 @@
 import { PlatformShell } from "../../src/components/platform-shell";
 import { ProtectedRoute } from "../../src/components/protected-route";
+import { PrintExportCommandCenterLayer } from "../../src/shell/print-export";
 
 export default function PlatformLayout({
   children
@@ -8,7 +9,10 @@ export default function PlatformLayout({
 }>) {
   return (
     <ProtectedRoute>
-      <PlatformShell>{children}</PlatformShell>
+      <PlatformShell>
+        {children}
+        <PrintExportCommandCenterLayer />
+      </PlatformShell>
     </ProtectedRoute>
   );
 }

@@ -1,0 +1,1455 @@
+.hism-home {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 8px;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: 8px 12px;
+  background: #f4f6f8;
+  color: #0f172a;
+}
+
+.hism-home--embedded {
+  height: 100%;
+  min-height: 0;
+}
+
+.platform-content:has(.hism-home--embedded),
+.hz-shell-content:has(.hism-home--embedded),
+.hz-shell-content-frame:has(.hism-home--embedded) {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.platform-content:has(.hism-home--embedded) > .hism-home--embedded {
+  height: 100%;
+  min-height: 0;
+}
+
+.hism-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  min-height: 42px;
+  margin: 0;
+  padding: 4px 0 6px;
+}
+
+.hism-head h1 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 24px;
+  font-weight: 950;
+  line-height: 1.08;
+  letter-spacing: -0.025em;
+}
+
+.hism-head p {
+  margin: 4px 0 0;
+  color: #475569;
+  font-size: 11px;
+  font-weight: 650;
+}
+
+.hism-notice {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border: 1px solid #fde68a;
+  border-radius: 10px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 11px;
+}
+
+.hism-notice-link {
+  color: #047857;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.hism-notice-dismiss {
+  margin-left: auto;
+  border: 0;
+  background: transparent;
+  color: #64748b;
+  font-size: 11px;
+  cursor: pointer;
+}
+
+.hism-recent {
+  min-height: 86px;
+  max-height: 98px;
+  overflow: hidden;
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.hism-recent-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 7px;
+}
+
+.hism-recent-head strong {
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.hism-recent-head a {
+  color: #047857;
+  font-size: 10px;
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.hism-recent-row {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.hism-recent-card {
+  min-height: 58px;
+  padding: 8px 9px;
+  border: 1px solid #e2e8f0;
+  border-radius: 11px;
+  background: #fff;
+  color: inherit;
+  text-decoration: none;
+}
+
+.hism-recent-card > strong {
+  display: block;
+  color: #0f172a;
+  font-size: 11px;
+  font-weight: 950;
+}
+
+.hism-recent-card > span {
+  float: right;
+  color: #0f172a;
+  font-size: 11px;
+  font-weight: 900;
+}
+
+.hism-recent-card p {
+  margin: 2px 0 0;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 650;
+}
+
+.hism-recent-card footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 6px;
+  margin-top: 5px;
+}
+
+.hism-recent-card time {
+  color: #64748b;
+  font-size: 9px;
+}
+
+.hism-recent-card--placeholder {
+  opacity: 0.8;
+}
+
+.hism-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 18px;
+  padding: 0 7px;
+  border-radius: 999px;
+  background: #f1f5f9;
+  color: #475569;
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.hism-badge--pending {
+  background: #ffedd5;
+  color: #c2410c;
+}
+
+.hism-badge--ok {
+  background: #d1fae5;
+  color: #065f46;
+}
+
+.hism-badge--info {
+  background: #dbeafe;
+  color: #1d4ed8;
+}
+
+.hism-badge--purple {
+  background: #f3e8ff;
+  color: #7e22ce;
+}
+
+.hism-workspace {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(340px, 390px);
+  gap: 12px;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.hism-main {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: 10px;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.hism-form,
+.hism-table-wrap,
+.hism-operation-panel,
+.hism-find-sale-panel {
+  border: 1px solid #dfe7e3;
+  border-radius: 14px;
+  background: #fff;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.hism-form {
+  min-height: 76px;
+  max-height: 112px;
+  overflow: hidden;
+  padding: 8px 10px;
+}
+
+.hism-form h2,
+.hism-table-wrap h2 {
+  margin: 0;
+  color: #064e3b;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.hism-form-grid {
+  display: grid;
+  grid-template-columns: minmax(210px, 1.4fr) minmax(150px, 0.8fr) minmax(150px, 0.8fr) minmax(110px, 0.65fr) minmax(120px, 0.75fr) minmax(220px, 1.4fr);
+  gap: 7px;
+  align-items: end;
+  margin-top: 7px;
+}
+
+.hism-form label span,
+.hism-delivery-band label span,
+.hism-payment-notes label span {
+  display: block;
+  margin-bottom: 3px;
+  color: #64748b;
+  font-size: 9px;
+  font-weight: 800;
+}
+
+.hism-form input,
+.hism-form select,
+.hism-delivery-band select,
+.hism-payment-notes input,
+.hism-payment-notes textarea {
+  width: 100%;
+  min-height: 28px;
+  padding: 0 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #0f172a;
+  font-size: 10px;
+}
+
+.hism-payment-notes textarea {
+  min-height: 46px;
+  padding-top: 7px;
+  resize: none;
+}
+
+.hism-delivery-band {
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  font-size: 11px;
+}
+
+.hism-delivery-band p,
+.hism-linked-order {
+  margin: 0;
+  color: #64748b;
+  font-size: 10px;
+}
+
+.hism-table-wrap {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 0;
+  overflow: hidden;
+  padding: 10px;
+}
+
+.hism-table-wrap > header {
+  display: grid;
+  grid-template-columns: auto minmax(180px, 1fr) auto auto auto auto;
+  gap: 8px;
+  align-items: center;
+  padding-bottom: 8px;
+}
+
+.hism-table-wrap > header input {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  font-size: 11px;
+}
+
+.hism-table-wrap > header button,
+.hism-table-wrap footer button {
+  min-height: 34px;
+  padding: 0 12px;
+  border: 1px solid #bbf7d0;
+  border-radius: 10px;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 10px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.hism-table-wrap > header span {
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.hism-table-wrap > header strong {
+  min-height: 34px;
+  padding: 0 12px;
+  display: inline-flex;
+  align-items: center;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  font-size: 10px;
+}
+
+.hism-find-sale-trigger--toolbar {
+  border-color: #c7e7dd !important;
+  background: #fff !important;
+}
+
+.hism-table-scroll {
+  min-height: 0;
+  overflow: auto;
+}
+
+.hism-table {
+  width: 100%;
+  min-width: 980px;
+  border-collapse: collapse;
+  font-size: 10px;
+}
+
+.hism-table th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 7px 8px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  color: #475569;
+  text-align: left;
+  font-size: 9px;
+  font-weight: 900;
+}
+
+.hism-table td {
+  padding: 7px 8px;
+  border-bottom: 1px solid #f1f5f9;
+  color: #0f172a;
+  vertical-align: middle;
+}
+
+.hism-table select,
+.hism-table input {
+  width: 100%;
+  min-height: 28px;
+  padding: 0 7px;
+  border: 1px solid #e2e8f0;
+  border-radius: 7px;
+  background: #fff;
+  font-size: 10px;
+}
+
+.hism-source-inline {
+  min-height: 28px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 0 8px;
+  border: 0;
+  border-radius: 8px;
+  background: transparent;
+  color: #0f172a;
+  font-size: 10px;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.hism-source-dot {
+  width: 7px;
+  height: 7px;
+  border-radius: 999px;
+  background: #047857;
+}
+
+.hism-source-dot--factory {
+  background: #f97316;
+}
+
+.hism-source-dot--supplier {
+  background: #8b5cf6;
+}
+
+.hism-source-dot--split {
+  background: #2563eb;
+}
+
+.hism-line-readonly-preview {
+  background: #f8fafc;
+}
+
+.hism-table-wrap footer {
+  min-height: 42px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding-top: 8px;
+  border-top: 1px solid #f1f5f9;
+  color: #0f172a;
+  font-size: 10px;
+}
+
+.hism-table-wrap footer span {
+  margin-left: auto;
+}
+
+.hism-operation-panel {
+  display: grid;
+  grid-template-rows: auto auto auto auto;
+  gap: 10px;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  padding: 10px;
+}
+
+.hism-source-plan-block,
+.hism-operation-summary,
+.hism-payment-notes {
+  min-height: 0;
+  padding: 9px 10px;
+  border: 1px solid #eef2f6;
+  border-radius: 12px;
+  background: #fafbfc;
+}
+
+.hism-source-plan-block h2,
+.hism-operation-summary h2,
+.hism-payment-notes h2 {
+  margin: 0 0 7px;
+  color: #064e3b;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.hism-source-plan-dl,
+.hism-operation-summary dl {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  font-size: 10px;
+}
+
+.hism-source-plan-dl {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.hism-source-plan-dl div,
+.hism-operation-summary dl div {
+  min-width: 0;
+}
+
+.hism-source-plan-dl dt,
+.hism-operation-summary dt {
+  color: #64748b;
+  font-weight: 750;
+}
+
+.hism-source-plan-dl dd,
+.hism-operation-summary dd {
+  margin: 2px 0 0;
+  color: #0f172a;
+  font-weight: 900;
+}
+
+.hism-source-type-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  margin-top: 9px;
+}
+
+.hism-source-type-row button {
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  color: #475569;
+  font-size: 9px;
+  font-weight: 850;
+}
+
+.hism-source-type-row button.is-active {
+  border-color: #047857;
+  background: #047857;
+  color: #fff;
+}
+
+.hism-source-plan-note,
+.hism-source-plan-empty {
+  margin: 8px 0 0;
+  padding: 7px 8px;
+  border-radius: 8px;
+  background: #ecfdf5;
+  color: #047857;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.hism-operation-summary-grid {
+  display: grid;
+  grid-template-columns: 0.82fr 1fr;
+  gap: 12px;
+}
+
+.hism-operation-summary ul {
+  display: grid;
+  gap: 5px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  font-size: 10px;
+}
+
+.hism-operation-summary li {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  justify-content: space-between;
+  color: #475569;
+}
+
+.hism-operation-summary li span {
+  width: 6px;
+  height: 6px;
+  margin-right: 2px;
+  border-radius: 999px;
+  background: #047857;
+}
+
+.hism-operation-summary li strong {
+  margin-left: auto;
+  color: #0f172a;
+}
+
+.hism-grand {
+  margin: 9px 0 0;
+  color: #047857;
+  font-size: 20px;
+  font-weight: 950;
+  text-align: left;
+}
+
+.hism-payment-notes {
+  overflow: hidden;
+}
+
+.hism-summary-payment .hz-qop-payment-block {
+  border: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.hism-selected-sale-band {
+  display: grid;
+  gap: 3px;
+  padding: 8px 10px;
+  border: 1px solid #bfdbfe;
+  border-radius: 10px;
+  background: #eff6ff;
+  color: #1e3a8a;
+  font-size: 10px;
+}
+
+.hism-selected-sale-band strong {
+  font-size: 11px;
+}
+
+.hism-actions {
+  display: grid;
+  grid-template-columns: 1fr 1.4fr 1fr;
+  gap: 8px;
+  align-items: center;
+}
+
+.hism-actions button {
+  min-height: 36px;
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.hism-draft,
+.hism-collection {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #064e3b;
+}
+
+.hism-save {
+  border: 1px solid #064e3b;
+  background: #064e3b;
+  color: #fff;
+}
+
+.hism-actions button:disabled,
+.hism-table-wrap button:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.hism-find-sale-panel {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: 10px;
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+  padding: 12px;
+}
+
+.hism-find-sale-head {
+  display: grid;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 10px;
+  align-items: start;
+}
+
+.hism-find-sale-head h2 {
+  margin: 0;
+  color: #0f172a;
+  font-size: 17px;
+  font-weight: 950;
+}
+
+.hism-find-sale-head p {
+  margin: 3px 0 0;
+  color: #64748b;
+  font-size: 10px;
+}
+
+.hism-find-sale-head button {
+  min-height: 29px;
+  padding: 0 9px;
+  border: 1px solid #e2e8f0;
+  border-radius: 9px;
+  background: #fff;
+  color: #0f172a;
+  font-size: 10px;
+  font-weight: 850;
+  cursor: pointer;
+}
+
+.hism-find-sale-fields {
+  display: grid;
+  gap: 9px;
+}
+
+.hism-find-sale-fields label {
+  display: grid;
+  gap: 4px;
+}
+
+.hism-find-sale-fields span {
+  color: #475569;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.hism-find-sale-fields input {
+  min-height: 34px;
+  padding: 0 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+  color: #0f172a;
+  font-size: 11px;
+}
+
+.hism-find-sale-date-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+}
+
+.hism-find-sale-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.hism-find-sale-chips button {
+  min-height: 28px;
+  padding: 0 9px;
+  border: 1px solid #e2e8f0;
+  border-radius: 999px;
+  background: #fff;
+  color: #475569;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.hism-find-sale-chips button.is-active {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1d4ed8;
+}
+
+.hism-find-sale-results {
+  min-height: 0;
+  display: grid;
+  align-content: start;
+  gap: 8px;
+  overflow-y: auto;
+  padding-right: 2px;
+}
+
+.hism-find-sale-results > strong {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  padding: 3px 0 2px;
+  background: #fff;
+  color: #0f172a;
+  font-size: 11px;
+}
+
+.hism-find-sale-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 4px 8px;
+  padding: 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 13px;
+  background: #fff;
+}
+
+.hism-find-sale-card strong {
+  display: block;
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.hism-find-sale-card span,
+.hism-find-sale-card small {
+  display: block;
+  color: #64748b;
+  font-size: 10px;
+}
+
+.hism-find-sale-card b {
+  color: #0f172a;
+  font-size: 12px;
+  font-weight: 950;
+}
+
+.hism-find-sale-card p {
+  grid-column: 1 / -1;
+  margin: 0;
+  color: #2563eb;
+  font-size: 10px;
+  font-weight: 850;
+}
+
+.hism-find-sale-card button {
+  justify-self: end;
+  min-height: 28px;
+  padding: 0 12px;
+  border: 1px solid #047857;
+  border-radius: 9px;
+  background: #fff;
+  color: #047857;
+  font-size: 10px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.hism-find-sale-card button:hover,
+.hism-find-sale-trigger:hover,
+.hism-table-wrap > header button:hover,
+.hism-table-wrap footer button:hover {
+  background: #d1fae5;
+}
+
+.hism-find-sale-empty {
+  min-height: 120px;
+  display: grid;
+  place-items: center;
+  text-align: center;
+  color: #64748b;
+}
+
+.hism-mode {
+  display: none;
+}
+
+@media (max-width: 1366px) {
+  .hism-home {
+    padding: 6px 10px;
+    gap: 7px;
+  }
+
+  .hism-recent {
+    min-height: 76px;
+    max-height: 88px;
+  }
+
+  .hism-recent-card {
+    min-height: 52px;
+    padding: 7px 8px;
+  }
+
+  .hism-form {
+    min-height: 70px;
+    max-height: 98px;
+  }
+
+  .hism-form-grid {
+    gap: 6px;
+  }
+
+  .hism-workspace {
+    grid-template-columns: minmax(0, 1fr) minmax(320px, 365px);
+    gap: 9px;
+  }
+
+  .hism-source-plan-block,
+  .hism-operation-summary,
+  .hism-payment-notes {
+    padding: 8px;
+  }
+
+  .hism-table th,
+  .hism-table td {
+    padding: 6px 7px;
+  }
+}
+
+@media (max-width: 1180px) {
+  .hism-recent-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .hism-form-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .hism-workspace {
+    grid-template-columns: 1fr;
+    overflow: auto;
+  }
+
+  .hism-operation-panel,
+  .hism-find-sale-panel {
+    min-height: 560px;
+  }
+}
+
+/* HIZLI ISLEM V3 — FINAL VIEWPORT + RIGHT PANEL COMPRESSION */
+
+/* Shell içinde hızlı işlem sayfası genel scroll üretmesin */
+.platform-content:has(.hism-home),
+.hz-shell-content:has(.hism-home),
+.hz-shell-content-frame:has(.hism-home) {
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+/* Ana hızlı işlem yüzeyi */
+.hism-home {
+  height: calc(100vh - 132px) !important;
+  min-height: 0 !important;
+  max-height: calc(100vh - 132px) !important;
+  overflow: hidden !important;
+  padding: 6px 10px !important;
+  gap: 7px !important;
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+}
+
+/* Başlık daha kompakt */
+.hism-head {
+  min-height: 34px !important;
+  padding: 0 !important;
+  margin: 0 !important;
+}
+
+.hism-head h1 {
+  font-size: 20px !important;
+  line-height: 1.05 !important;
+  margin: 0 !important;
+}
+
+.hism-head p {
+  font-size: 10px !important;
+  margin: 2px 0 0 !important;
+  line-height: 1.2 !important;
+}
+
+/* Son işlemler şeridi kompakt */
+.hism-recent {
+  min-height: 72px !important;
+  max-height: 78px !important;
+  padding: 6px 8px !important;
+  overflow: hidden !important;
+}
+
+.hism-recent-head {
+  margin-bottom: 4px !important;
+}
+
+.hism-recent-row {
+  gap: 7px !important;
+}
+
+.hism-recent-card {
+  min-height: 48px !important;
+  padding: 6px 8px !important;
+  font-size: 9px !important;
+}
+
+.hism-recent-card footer {
+  margin-top: 3px !important;
+}
+
+/* Orta + sağ kolon yerleşimi */
+.hism-workspace {
+  min-height: 0 !important;
+  height: 100% !important;
+  grid-template-columns: minmax(0, 1fr) 372px !important;
+  gap: 8px !important;
+  overflow: hidden !important;
+}
+
+/* Sol/orta alan */
+.hism-main {
+  min-height: 0 !important;
+  height: 100% !important;
+  grid-template-rows: auto minmax(0, 1fr) !important;
+  gap: 7px !important;
+  overflow: hidden !important;
+}
+
+/* Cari alan kompakt */
+.hism-form.hism-customer--compact,
+.hism-form {
+  min-height: 58px !important;
+  max-height: 76px !important;
+  padding: 6px 8px !important;
+  overflow: hidden !important;
+}
+
+.hism-form h2 {
+  margin: 0 0 4px !important;
+  font-size: 11px !important;
+}
+
+.hism-form-grid {
+  grid-template-columns: 1.2fr 0.9fr 0.9fr 0.7fr 0.8fr 1.6fr !important;
+  gap: 6px !important;
+}
+
+.hism-span-2 {
+  grid-column: auto !important;
+}
+
+.hism-form label span {
+  margin-bottom: 2px !important;
+  font-size: 9px !important;
+}
+
+.hism-form input,
+.hism-form select {
+  min-height: 25px !important;
+  height: 25px !important;
+  padding: 0 7px !important;
+  font-size: 10px !important;
+}
+
+/* Ürün tablosu — sabit satır limiti yok */
+.hism-table-wrap {
+  min-height: 0 !important;
+  height: 100% !important;
+  padding: 7px 8px !important;
+  overflow: hidden !important;
+  grid-template-rows: auto minmax(0, 1fr) auto !important;
+}
+
+/* Ürün toolbar */
+.hism-table-wrap header {
+  min-height: 32px !important;
+  gap: 5px !important;
+  margin-bottom: 4px !important;
+}
+
+.hism-table-wrap header h2 {
+  font-size: 11px !important;
+  margin: 0 !important;
+}
+
+.hism-table-wrap header input,
+.hism-table-wrap header select,
+.hism-table-wrap header button {
+  min-height: 28px !important;
+  height: 28px !important;
+  font-size: 10px !important;
+}
+
+/* Ürün tablosu alanı scroll yapabilir, sayfa değil */
+.hism-table-scroll,
+.hism-table-wrap .hism-table-scroll,
+.hism-table-wrap > div:has(.hism-table) {
+  min-height: 0 !important;
+  overflow-y: auto !important;
+}
+
+/* Tablo satırları mevcut kompakt boyutta kalsın */
+.hism-table {
+  width: 100% !important;
+  table-layout: fixed !important;
+  font-size: 9px !important;
+}
+
+.hism-table th,
+.hism-table td {
+  padding: 4px 6px !important;
+  line-height: 1.15 !important;
+}
+
+.hism-table select,
+.hism-table input {
+  min-height: 24px !important;
+  height: 24px !important;
+  font-size: 9px !important;
+}
+
+/* Ürün tablo footer */
+.hism-table-wrap footer {
+  min-height: 30px !important;
+  padding-top: 5px !important;
+  font-size: 10px !important;
+}
+
+.hism-table-wrap footer button {
+  min-height: 28px !important;
+  height: 28px !important;
+  font-size: 10px !important;
+}
+
+/* Sağ panel genel */
+.hism-side,
+.hism-operation-panel,
+.hism-find-sale-panel {
+  height: 100% !important;
+  min-height: 0 !important;
+  max-height: 100% !important;
+  overflow: hidden !important;
+}
+
+/* Normal operasyon paneli */
+.hism-side--operation,
+.hism-operation-panel {
+  padding: 7px !important;
+  gap: 6px !important;
+}
+
+/* Sağ panel üst aksiyon */
+.hism-side-action-row,
+.hism-operation-panel-proof {
+  padding: 0 0 4px !important;
+  min-height: 30px !important;
+  display: flex !important;
+  justify-content: flex-end !important;
+  align-items: center !important;
+}
+
+.hism-find-sale-trigger {
+  min-height: 28px !important;
+  height: 28px !important;
+  padding: 0 9px !important;
+  font-size: 10px !important;
+  border-radius: 9px !important;
+  white-space: nowrap !important;
+}
+
+/* Sağ panel iç gövde */
+.hism-summary-inner {
+  gap: 6px !important;
+  overflow: hidden !important;
+  min-height: 0 !important;
+}
+
+/* Sağ panel kartları */
+.hism-source-plan-block,
+.hism-operation-summary,
+.hism-payment-notes {
+  padding: 7px 8px !important;
+  border-radius: 9px !important;
+}
+
+.hism-source-plan-block h2,
+.hism-operation-summary h2,
+.hism-payment-notes h2,
+.hism-summary-inner h2 {
+  font-size: 10px !important;
+  margin: 0 0 4px !important;
+}
+
+.hism-source-plan-dl,
+.hism-operation-summary dl,
+.hism-summary-inner dl {
+  gap: 3px !important;
+  font-size: 9px !important;
+}
+
+/* Genel toplam */
+.hism-grand {
+  font-size: 18px !important;
+  line-height: 1.1 !important;
+}
+
+/* Sağ panel form alanları */
+.hism-payment-notes label span,
+.hism-summary-inner label span {
+  font-size: 9px !important;
+}
+
+.hism-payment-notes input,
+.hism-payment-notes textarea,
+.hism-summary-inner input,
+.hism-summary-inner textarea {
+  min-height: 24px !important;
+  padding: 4px 6px !important;
+  font-size: 9px !important;
+}
+
+/* Ödeme bloğu sağ paneli taşırmasın */
+.hism-summary-payment .hz-qop-payment-block {
+  max-height: 154px !important;
+  overflow: hidden !important;
+}
+
+/* Aksiyon butonu */
+.hism-actions {
+  gap: 4px !important;
+}
+
+.hism-save {
+  min-height: 30px !important;
+  height: 30px !important;
+  font-size: 10px !important;
+}
+
+/* Satış bul paneli */
+.hism-find-sale-panel {
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+  padding: 9px !important;
+  gap: 8px !important;
+}
+
+.hism-find-sale-head h2 {
+  font-size: 15px !important;
+}
+
+.hism-find-sale-fields {
+  gap: 7px !important;
+}
+
+.hism-find-sale-fields input {
+  min-height: 30px !important;
+  height: 30px !important;
+}
+
+/* Sadece satış bul sonuçları scroll yapabilir */
+.hism-find-sale-results {
+  overflow-y: auto !important;
+  min-height: 0 !important;
+}
+
+.hism-find-sale-card {
+  padding: 8px !important;
+}
+
+/* Alt bilgi modu ana ekranı büyütmesin */
+.hism-home--compact .hism-mode,
+.hism-mode {
+  display: none !important;
+}
+
+/* HIZLI ISLEM V4 — RIGHT PANEL RELIEF + KPI FIX + ACTION CLEANUP */
+
+.hism-recent {
+  min-height: 88px !important;
+  max-height: 96px !important;
+  padding: 7px 9px !important;
+  overflow: hidden !important;
+}
+
+.hism-recent-row {
+  gap: 7px !important;
+  align-items: stretch !important;
+}
+
+.hism-recent-card {
+  min-height: 58px !important;
+  max-height: 64px !important;
+  padding: 7px 9px !important;
+  overflow: hidden !important;
+}
+
+.hism-recent-card footer {
+  margin-top: 4px !important;
+}
+
+.hism-home {
+  grid-template-rows: auto auto minmax(0, 1fr) !important;
+}
+
+.hism-operation-panel,
+.hism-side--operation {
+  padding: 8px !important;
+  gap: 7px !important;
+  overflow: hidden !important;
+}
+
+.hism-summary-inner {
+  display: grid !important;
+  grid-template-rows: auto minmax(0, auto) auto !important;
+  gap: 7px !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  align-content: start !important;
+}
+
+.hism-source-plan-block {
+  display: none !important;
+}
+
+.hism-operation-summary {
+  padding: 8px 9px !important;
+  border-radius: 10px !important;
+}
+
+.hism-operation-summary h2,
+.hism-payment-notes h2 {
+  font-size: 11px !important;
+  margin: 0 0 5px !important;
+}
+
+.hism-operation-summary dl,
+.hism-summary-inner dl {
+  gap: 3px !important;
+  font-size: 9px !important;
+}
+
+.hism-grand {
+  font-size: 18px !important;
+  line-height: 1.05 !important;
+}
+
+.hism-payment-notes {
+  padding: 8px 9px !important;
+  border-radius: 10px !important;
+}
+
+.hism-summary-payment .hz-qop-payment-block {
+  max-height: 188px !important;
+  overflow: hidden !important;
+}
+
+.hism-payment-notes input,
+.hism-payment-notes textarea,
+.hism-summary-inner input,
+.hism-summary-inner textarea {
+  min-height: 24px !important;
+  height: 24px !important;
+  padding: 3px 6px !important;
+  font-size: 9px !important;
+}
+
+.hism-payment-notes textarea,
+.hism-summary-inner textarea {
+  height: 40px !important;
+  min-height: 40px !important;
+  resize: none !important;
+}
+
+.hism-actions {
+  display: grid !important;
+  grid-template-columns: 1fr 1.15fr 1fr !important;
+  gap: 5px !important;
+}
+
+.hism-save,
+.hism-actions button {
+  min-height: 30px !important;
+  height: 30px !important;
+  font-size: 10px !important;
+  white-space: nowrap !important;
+}
+
+.hism-side-action-row,
+.hism-operation-panel-proof {
+  display: flex !important;
+  justify-content: flex-end !important;
+  min-height: 30px !important;
+  padding: 0 0 4px !important;
+}
+
+.hism-find-sale-trigger {
+  min-height: 29px !important;
+  height: 29px !important;
+  padding: 0 10px !important;
+  border: 1px solid #047857 !important;
+  border-radius: 9px !important;
+  background: #ecfdf5 !important;
+  color: #047857 !important;
+  font-size: 10px !important;
+  font-weight: 900 !important;
+  cursor: pointer !important;
+}
+
+.hism-table-wrap footer {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  min-height: 30px !important;
+  padding-top: 5px !important;
+}
+
+.hism-table-wrap {
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.hism-table-scroll,
+.hism-table-wrap .hism-table-scroll,
+.hism-table-wrap > div:has(.hism-table) {
+  min-height: 0 !important;
+  overflow-y: auto !important;
+}
+
+.hism-find-sale-panel {
+  overflow: hidden !important;
+}
+
+.hism-find-sale-results {
+  overflow-y: auto !important;
+  min-height: 0 !important;
+}
+
+.hism-return-warning {
+  display: grid;
+  gap: 10px;
+  padding: 12px;
+  border: 1px solid #fed7aa;
+  border-radius: 12px;
+  background: #fff7ed;
+  color: #7c2d12;
+}
+
+.hism-return-warning strong {
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.hism-return-warning p {
+  margin: 0;
+  font-size: 10px;
+  line-height: 1.45;
+}
+
+.hism-return-warning-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.hism-return-warning-actions button {
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 9px;
+  font-size: 10px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.hism-return-warning-actions button:first-child {
+  border: 1px solid #fed7aa;
+  background: #fff;
+  color: #9a3412;
+}
+
+.hism-return-warning-actions button:last-child {
+  border: 1px solid #ea580c;
+  background: #ea580c;
+  color: #fff;
+}
+
+.hism-workspace {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) minmax(320px, 390px) !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.hism-operation-panel {
+  display: flex !important;
+  flex-direction: column !important;
+  min-height: 0 !important;
+}
+
+.hism-operation-summary,
+.hism-payment-notes {
+  flex-shrink: 0;
+}
+
+.hism-selected-sale-band {
+  flex-shrink: 0;
+}

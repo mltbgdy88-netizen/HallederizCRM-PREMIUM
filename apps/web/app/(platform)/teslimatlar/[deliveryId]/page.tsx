@@ -1,5 +1,5 @@
-import { DeliveryDetailPage as DeliveryDetailFeaturePage } from "../../../../src/features/deliveries/components";
+import { DeliveryDetailPage } from "../../../../src/features/deliveries/components";
 
-export default function DeliveryDetailPage({ params }: { params: { deliveryId: string } }) {
-  return <DeliveryDetailFeaturePage deliveryId={params.deliveryId} />;
+export default function DeliveryDetailRoute({ params }: { params: { deliveryId: string } }) {
+  return <DeliveryDetailPage deliveryId={params.deliveryId} />;
 }

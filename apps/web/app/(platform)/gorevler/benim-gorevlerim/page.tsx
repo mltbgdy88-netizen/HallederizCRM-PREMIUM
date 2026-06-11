@@ -1,5 +1,5 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+import { TasksPage } from "../../../../src/features/tasks/components";
 
 export default function GorevlerBenimPage() {
-  return renderProductCatchAll(["gorevler", "benim-gorevlerim"]);
+  return <TasksPage intent="mine" />;
 }

@@ -1,5 +1,7 @@
 export * from "./OrdersPage";
+export * from "./OrdersDeskPage";
 export * from "./OrderDetailPage";
+export * from "./OrderReferenceLayerPage";
 export * from "./OrderCreateHub";
 export * from "./OrderFilterBar";
 export * from "./OrderTable";

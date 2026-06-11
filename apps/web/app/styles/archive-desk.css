@@ -1,0 +1,337 @@
+/* Arşiv Operasyon Merkezi — referans: docs/design/reference/arsiv-operasyon-merkezi-acik-mod.png */
+
+.platform-content:has(.hz-archive-page--desk) {
+  padding: 0;
+  background: transparent;
+  height: 100%;
+  min-height: 0;
+}
+
+.platform-content:has(.hz-archive-page--desk) > .hz-archive-page--desk {
+  flex: 1;
+  min-height: 0;
+  max-width: none;
+  width: 100%;
+}
+
+.hz-archive-page--desk {
+  --archive-bg: var(--hz-color-bg, #f8f1df);
+  --archive-paper: var(--hz-color-surface, #fffaf0);
+  --archive-emerald: var(--hz-color-emerald, #047857);
+  --archive-emerald-strong: #065f46;
+  --archive-gold: var(--hz-color-gold, #d4af37);
+  --archive-gold-soft: var(--hz-warning-soft, #fff2bf);
+  --archive-text: var(--hz-text-default, #102a24);
+  --archive-muted: var(--hz-text-muted, #42564c);
+  --archive-border: var(--hz-border, #d8cdb5);
+
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: var(--desk-gap, 8px);
+  box-sizing: border-box;
+  background: var(--desk-canvas, #fdfcf9);
+  color: var(--archive-text);
+}
+
+.hz-archive-page--desk .hz-archive-layout {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 10px;
+  padding: 0;
+}
+
+.hz-archive-page--desk .hz-archive-main {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto auto auto auto auto minmax(0, 1fr);
+  gap: 10px;
+  overflow: hidden;
+}
+
+.hz-archive-page--desk .hz-archive-topbar,
+.hz-archive-page--desk .hz-archive-kpi-strip > .hz-archive-kpi,
+.hz-archive-page--desk .hz-archive-filter-bar,
+.hz-archive-page--desk .hz-archive-list-wrap,
+.hz-archive-page--desk .hz-archive-side {
+  border: 1px solid var(--desk-border, var(--archive-border));
+  border-radius: var(--desk-radius, 12px);
+  background: var(--desk-surface, #ffffff);
+  box-shadow: var(--desk-shadow, 0 1px 2px rgba(15, 23, 42, 0.06));
+}
+
+.hz-archive-page--desk .hz-archive-topbar {
+  min-height: 60px;
+  max-height: 64px;
+  padding: 10px 16px;
+  margin: 0;
+}
+
+.hz-archive-page--desk .hz-archive-topbar-title {
+  font-size: 20px;
+  font-weight: 950;
+  color: var(--archive-emerald-strong);
+}
+
+.hz-archive-page--desk .hz-archive-topbar-sub {
+  font-size: 11px;
+  color: var(--archive-muted);
+}
+
+.hz-archive-page--desk .hz-archive-toolbar-btn--primary {
+  border-color: var(--archive-emerald);
+  background: linear-gradient(135deg, var(--archive-emerald), var(--archive-emerald-strong));
+  color: #fff;
+}
+
+.hz-archive-page--desk .hz-archive-toolbar-btn--outline {
+  border-color: color-mix(in srgb, var(--archive-emerald) 24%, var(--archive-border));
+  color: var(--archive-emerald-strong);
+  background: var(--archive-paper);
+}
+
+.hz-archive-page--desk .hz-archive-kpi-strip {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+  gap: 10px;
+  min-height: 72px;
+  max-height: 78px;
+  padding: 0;
+  border: none;
+  background: transparent;
+  box-shadow: none;
+}
+
+.hz-archive-page--desk .hz-archive-kpi {
+  padding: 10px 12px;
+  border-radius: 16px;
+  border: 1px solid color-mix(in srgb, var(--archive-border) 78%, var(--archive-gold) 22%);
+  background: var(--archive-paper);
+  box-shadow: var(--hz-shadow-card);
+  min-width: 0;
+}
+
+.hz-archive-page--desk .hz-archive-kpi-ico {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  color: var(--archive-emerald);
+  border: 1px solid color-mix(in srgb, var(--archive-emerald) 25%, var(--archive-border));
+  background: color-mix(in srgb, var(--hz-success-soft) 65%, var(--archive-paper));
+}
+
+.hz-archive-page--desk .hz-archive-kpi-label {
+  font-size: 9.5px;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+
+.hz-archive-page--desk .hz-archive-kpi-value {
+  font-size: 18px;
+  font-weight: 950;
+  color: var(--archive-emerald-strong);
+}
+
+.hz-archive-category-chips {
+  min-height: 30px;
+  max-height: 32px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-wrap: nowrap;
+  overflow: hidden;
+  padding: 0 2px;
+}
+
+.hz-archive-category-chip {
+  height: 28px;
+  padding: 0 12px;
+  border-radius: 999px;
+  border: 1px solid var(--archive-border);
+  background: var(--archive-paper);
+  color: var(--archive-muted);
+  font-size: 10.5px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.hz-archive-category-chip.is-active {
+  border-color: var(--archive-emerald);
+  background: color-mix(in srgb, var(--hz-success-soft) 70%, var(--archive-paper));
+  color: var(--archive-emerald-strong);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--archive-emerald) 18%, transparent);
+}
+
+.hz-archive-page--desk .hz-archive-filter-bar {
+  min-height: 50px;
+  padding: 8px 12px;
+}
+
+.hz-archive-page--desk .hz-archive-filter-row--single {
+  display: grid;
+  grid-template-columns: minmax(180px, 1.2fr) repeat(4, minmax(88px, 0.5fr)) 34px;
+  gap: 8px;
+  align-items: end;
+}
+
+.hz-archive-page--desk .hz-archive-filter-field--select:has(#hz-archive-cat) {
+  display: none;
+}
+
+.hz-archive-page--desk .hz-archive-preview-band {
+  min-height: 22px;
+  padding: 4px 10px;
+  border-radius: 9px;
+  border: 1px solid color-mix(in srgb, var(--archive-gold) 34%, var(--archive-border));
+  background: color-mix(in srgb, var(--archive-gold-soft) 70%, var(--archive-paper));
+  font-size: 10px;
+  font-weight: 800;
+  color: #854d0e;
+}
+
+.hz-archive-page--desk .hz-archive-list-wrap {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.hz-archive-page--desk .hz-archive-list-header {
+  min-height: 30px;
+  font-size: 10px;
+  font-weight: 900;
+  color: var(--archive-muted);
+}
+
+.hz-archive-page--desk .hz-archive-row {
+  min-height: 42px;
+  max-height: 44px;
+}
+
+.hz-archive-page--desk .hz-archive-row--selected {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--hz-success-soft) 55%, var(--archive-paper)), var(--archive-paper));
+  box-shadow: inset 4px 0 0 var(--archive-emerald);
+}
+
+.hz-archive-page--desk .hz-archive-side {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.hz-archive-page--desk .hz-archive-side-title {
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--archive-muted);
+}
+
+.hz-archive-page--desk .hz-archive-side-sub {
+  font-size: 10.5px;
+}
+
+.hz-archive-page--desk .hz-archive-side-card {
+  padding: 8px 10px;
+  border-radius: 12px;
+}
+
+/* Koyu zemin: desk-dark-mode.css */
+
+.hz-archive-page--desk .hz-archive-filter-row--single {
+  display: grid !important;
+  grid-template-columns: minmax(180px, 1.2fr) repeat(4, minmax(88px, 0.5fr)) 34px !important;
+  flex-wrap: nowrap !important;
+  align-items: end !important;
+}
+
+.hz-archive-page--desk .hz-archive-category-chips {
+  flex-shrink: 0;
+}
+
+.hz-archive-audit-timeline {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 10px;
+}
+
+.hz-archive-audit-timeline li {
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr);
+  gap: 8px;
+  align-items: flex-start;
+  position: relative;
+}
+
+.hz-archive-audit-timeline li:not(:last-child)::after {
+  content: "";
+  position: absolute;
+  left: 5px;
+  top: 14px;
+  bottom: -10px;
+  width: 2px;
+  background: color-mix(in srgb, var(--archive-emerald) 30%, var(--archive-border));
+}
+
+.hz-archive-audit-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 999px;
+  margin-top: 3px;
+  background: var(--archive-border);
+  border: 2px solid var(--archive-paper);
+  box-shadow: 0 0 0 1px var(--archive-border);
+}
+
+.hz-archive-audit-dot--ok {
+  background: var(--archive-emerald);
+  box-shadow: 0 0 0 1px var(--archive-emerald);
+}
+
+.hz-archive-audit-dot--warn {
+  background: #f59e0b;
+  box-shadow: 0 0 0 1px #f59e0b;
+}
+
+.hz-archive-audit-timeline strong {
+  display: block;
+  font-size: 10px;
+  color: var(--archive-emerald-strong);
+}
+
+.hz-archive-audit-timeline p {
+  margin: 2px 0 0;
+  font-size: 9.5px;
+  color: var(--archive-muted);
+}
+
+.hz-archive-side-actions--grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px;
+}
+
+.hz-archive-side-actions--grid .hz-archive-side-btn {
+  min-height: 32px;
+  font-size: 9.5px;
+}
+
+.hz-archive-retention-note {
+  margin: 8px 0 0;
+  font-size: 9px;
+  color: var(--archive-muted);
+  text-align: center;
+}
+
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-topbar,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-kpi,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-filter-bar,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-list-wrap,
+html:root[data-theme="dark"] .hz-archive-page--desk .hz-archive-side {
+  background: rgba(6, 17, 13, 0.88);
+  border-color: rgba(44, 255, 154, 0.2);
+}

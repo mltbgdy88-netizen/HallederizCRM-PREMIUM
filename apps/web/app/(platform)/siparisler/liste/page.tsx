@@ -1,5 +1,5 @@
 import { redirect } from "next/navigation";
 
-export default function SiparislerListeAliasPage() {
+export default function SiparislerListeRoutePage() {
   redirect("/siparisler");
 }

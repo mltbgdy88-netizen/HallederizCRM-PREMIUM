@@ -1,5 +1,5 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+import { ApprovalInboxPage } from "../../../../src/features/approvals/components/inbox/ApprovalInboxPage";
 
 export default function OnaylarTamamlananlarPage() {
-  return renderProductCatchAll(["onaylar", "tamamlananlar"]);
+  return <ApprovalInboxPage routePreset="completed" />;
 }

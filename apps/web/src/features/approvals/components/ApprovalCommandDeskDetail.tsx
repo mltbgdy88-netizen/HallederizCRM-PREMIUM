@@ -24,7 +24,7 @@ export function ApprovalCommandDeskDetail({ record, detailLoading, detailError }
   if (!record) {
     return (
       <section className="hz-approval-detail hz-approval-panel hz-approval-panel--empty" aria-label="Onay detayı">
-        <p className="hz-approval-panel__empty">Liste yüklendiğinde ilk kayıt burada görünür.</p>
+        <p className="hz-approval-panel__empty">Listeden bir kayıt seçin.</p>
       </section>
     );
   }
@@ -43,7 +43,7 @@ export function ApprovalCommandDeskDetail({ record, detailLoading, detailError }
         <div>
           <h2 className="hz-approval-panel__title">Onay Detayı</h2>
           <span className={`hz-approval-source-badge hz-approval-source-badge--${source}`}>
-            <LucideIcon name={source === "ai" ? "sparkles" : source === "message" ? "message-circle" : "settings"} size={14} />
+            <LucideIcon name={source === "ai" ? "sparkles" : source === "message" ? "message-circle" : "settings"} size={13} />
             {approvalSourceLabel(source)}
           </span>
         </div>
@@ -86,15 +86,15 @@ export function ApprovalCommandDeskDetail({ record, detailLoading, detailError }
           <h4>Etkiler</h4>
           <div className="hz-approval-impact-grid">
             <article className="hz-approval-impact">
-              <p className="hz-approval-impact__label">Nakit Akışı Etkisi</p>
-              <p className="hz-approval-impact__value">{record.amountLabel || "Bilgi bekleniyor"}</p>
+              <p className="hz-approval-impact__label">Nakit Akışı</p>
+              <p className="hz-approval-impact__value">{record.amountLabel || "—"}</p>
             </article>
             <article className="hz-approval-impact">
-              <p className="hz-approval-impact__label">Gecikme Süresi</p>
-              <p className="hz-approval-impact__value">{record.slaLabel || "Bilgi bekleniyor"}</p>
+              <p className="hz-approval-impact__label">Gecikme</p>
+              <p className="hz-approval-impact__value">{record.slaLabel || "—"}</p>
             </article>
             <article className="hz-approval-impact">
-              <p className="hz-approval-impact__label">Risk Seviyesi</p>
+              <p className="hz-approval-impact__label">Risk</p>
               <p className="hz-approval-impact__value">{risk}</p>
             </article>
           </div>
@@ -110,7 +110,7 @@ export function ApprovalCommandDeskDetail({ record, detailLoading, detailError }
         <footer className="hz-approval-detail__meta">
           <span>Oluşturulma: {record.meta.requestedAt}</span>
           <span>Kaynak: {approvalSourceEngineLabel(source)}</span>
-          <span>İşlem türü: {approvalOperationTypeLabel(record.raw.type)}</span>
+          <span>İşlem: {approvalOperationTypeLabel(record.raw.type)}</span>
         </footer>
       </div>
     </section>

@@ -8,7 +8,8 @@ export function OrderActionButtons({
   onPayment,
   onWarehouse,
   onDelivery,
-  onInvoice
+  onInvoice,
+  layout = "default"
 }: {
   onSourcing: () => void;
   onApproval: () => void;
@@ -16,8 +17,51 @@ export function OrderActionButtons({
   onWarehouse: () => void;
   onDelivery: () => void;
   onInvoice: () => void;
+  layout?: "default" | "reference";
 }) {
   const { pushToast } = useToast();
+
+  if (layout === "reference") {
+    return (
+      <section className="spd-actions" aria-label="Sipariş hızlı aksiyonları">
+        <h3 className="spd-actions__title">Operasyon aksiyonları</h3>
+        <div className="spd-actions__grid">
+          <button
+            type="button"
+            className="spd-actions__btn spd-actions__btn--primary"
+            onClick={() => pushToast("Kayıt canlıda onay zincirine bağlıdır; bu adım henüz bağlı değil.")}
+          >
+            Kaydet
+          </button>
+          <button
+            type="button"
+            className="spd-actions__btn"
+            onClick={() => pushToast("Onay canlıda politika ve onay kuyruğuna bağlıdır; bu adım henüz bağlı değil.")}
+          >
+            Onayla
+          </button>
+          <button type="button" className="spd-actions__btn" onClick={onSourcing}>
+            Kaynak planla
+          </button>
+          <button type="button" className="spd-actions__btn" onClick={onPayment}>
+            Tahsilat ekle
+          </button>
+          <button type="button" className="spd-actions__btn" onClick={onWarehouse}>
+            Depo emri
+          </button>
+          <button type="button" className="spd-actions__btn" onClick={onDelivery}>
+            Teslim
+          </button>
+          <button type="button" className="spd-actions__btn" onClick={onInvoice}>
+            Fatura
+          </button>
+          <button type="button" className="spd-actions__btn" onClick={onApproval}>
+            Onay özeti
+          </button>
+        </div>
+      </section>
+    );
+  }
 
   return (
     <section className="hz-action-toolbar">

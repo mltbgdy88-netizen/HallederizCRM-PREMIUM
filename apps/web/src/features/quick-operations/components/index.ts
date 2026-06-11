@@ -6,3 +6,5 @@ export * from "./QuickOperationSourceAccordion";
 export * from "./QuickOperationTotalsPanel";
 export * from "./QuickOperationImpactPanel";
 export * from "./QuickOperationSideActionsPanel";
+export * from "./QuickOperationResultReferenceLayout";
+export * from "./QuickOperationImpactReferenceLayout";

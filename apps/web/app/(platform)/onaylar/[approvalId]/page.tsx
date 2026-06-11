@@ -1,5 +1,5 @@
-﻿import { notFound } from "next/navigation";
-import { ApprovalDetailPage } from "../../../../src/features/approvals/components";
+import { notFound } from "next/navigation";
+import { ApprovalDetailReferenceLayout } from "../../../../src/features/approvals/components/ApprovalDetailReferenceLayout";
 import { getApprovalById } from "../../../../src/features/dashboard/queries";
 
 export default async function ApprovalDetailRoutePage({ params }: { params: { approvalId: string } }) {
@@ -9,5 +9,5 @@ export default async function ApprovalDetailRoutePage({ params }: { params: { ap
     notFound();
   }
 
-  return <ApprovalDetailPage approval={approval} />;
+  return <ApprovalDetailReferenceLayout approval={approval} />;
 }

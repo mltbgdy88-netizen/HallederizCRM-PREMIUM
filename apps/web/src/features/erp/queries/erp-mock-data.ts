@@ -24,12 +24,12 @@ export const erpSyncLogs: ErpSyncLog[] = [
 ];
 
 export const erpTemplates = [
-  { key: "customer_import", title: "Cari Import", entityType: "customer", lastUsedAt: "2026-04-20" },
-  { key: "product_import", title: "Urun Import", entityType: "product", lastUsedAt: "2026-04-21" },
-  { key: "stock_import", title: "Stok Import", entityType: "stock", lastUsedAt: "2026-04-28" },
-  { key: "price_import", title: "Fiyat Import", entityType: "price", lastUsedAt: "2026-04-25" },
-  { key: "payment_export", title: "Tahsilat Export", entityType: "payment", lastUsedAt: "2026-04-27" },
-  { key: "order_export", title: "Siparis Export", entityType: "order", lastUsedAt: "2026-04-26" }
+  { key: "customer_import", title: "Cari İçe Aktarma", entityType: "customer", lastUsedAt: "2026-04-20" },
+  { key: "product_import", title: "Ürün İçe Aktarma", entityType: "product", lastUsedAt: "2026-04-21" },
+  { key: "stock_import", title: "Stok İçe Aktarma", entityType: "stock", lastUsedAt: "2026-04-28" },
+  { key: "price_import", title: "Fiyat İçe Aktarma", entityType: "price", lastUsedAt: "2026-04-25" },
+  { key: "payment_export", title: "Tahsilat Dışa Aktarma", entityType: "payment", lastUsedAt: "2026-04-27" },
+  { key: "order_export", title: "Sipariş Dışa Aktarma", entityType: "order", lastUsedAt: "2026-04-26" }
 ];
 
 export function getErpIntegrationData() {

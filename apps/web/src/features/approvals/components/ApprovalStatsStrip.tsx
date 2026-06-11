@@ -22,7 +22,7 @@ export function ApprovalStatsStrip({ stats }: { stats: ApprovalDeskStat[] }) {
           <div className="hz-approval-stat__body">
             <p className="hz-approval-stat__label">{stat.label}</p>
             <p className="hz-approval-stat__value">{stat.value}</p>
-            <p className="hz-approval-stat__subtitle">{stat.subtitle}</p>
+            {stat.subtitle ? <p className="hz-approval-stat__subtitle">{stat.subtitle}</p> : null}
           </div>
         </article>
       ))}

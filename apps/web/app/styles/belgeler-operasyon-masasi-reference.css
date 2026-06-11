@@ -1,0 +1,334 @@
+/* Belgeler Operasyon Masası — belgeler-operasyon-masasi-acik-mod (docf-page--desk) */
+
+.platform-content:has(.docf-page--desk) > .hz-documents-page {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.hz-documents-page:has(.docf-page--desk) {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.docf-page--desk {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.docf-shell--desk {
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+}
+
+.docf-desk-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.docf-desk-head__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.docf-desk-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid var(--docf-border);
+  background: var(--docf-surface);
+  color: var(--docf-text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.docf-desk-btn:hover {
+  border-color: color-mix(in srgb, var(--docf-green) 30%, var(--docf-border));
+  background: var(--docf-green-soft);
+}
+
+.docf-desk-btn--primary {
+  border-color: color-mix(in srgb, var(--docf-green) 40%, var(--docf-border));
+  background: var(--docf-green);
+  color: #fff;
+}
+
+.docf-desk-btn--primary:hover {
+  background: var(--docf-green-strong);
+}
+
+.docf-desk-body {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 332px;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.docf-desk-main {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  gap: 8px;
+  overflow: hidden;
+  border-radius: var(--docf-radius);
+  border: 1px solid var(--docf-border);
+  background: var(--docf-surface);
+  padding: 10px 12px;
+}
+
+.docf-desk-side {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: hidden;
+}
+
+.docf-desk-filters {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 6px;
+  align-items: end;
+  flex-shrink: 0;
+}
+
+.docf-desk-filter {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 0;
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--docf-muted);
+}
+
+.docf-desk-filter input,
+.docf-desk-filter select {
+  width: 100%;
+  min-height: 32px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--docf-border);
+  background: var(--docf-surface);
+  color: var(--docf-text);
+  font-size: 11px;
+  font-family: inherit;
+}
+
+.docf-desk-filter-hint {
+  margin: 0;
+  grid-column: 1 / -1;
+  font-size: 10px;
+  line-height: 1.35;
+  color: var(--docf-muted);
+}
+
+.docf-desk-list-wrap {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border-radius: 10px;
+  border: 1px solid var(--docf-border-soft);
+}
+
+.docf-desk-list-head,
+.docf-desk-list-row {
+  display: grid;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  min-height: 44px;
+  height: 44px;
+  grid-template-columns:
+    minmax(88px, 0.9fr)
+    minmax(72px, 0.7fr)
+    minmax(88px, 0.8fr)
+    minmax(0, 1.2fr)
+    minmax(72px, 0.7fr)
+    minmax(72px, 0.7fr)
+    76px;
+}
+
+.docf-desk-list-head {
+  min-height: 26px;
+  height: 26px;
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--docf-muted);
+  border-bottom: 1px solid var(--docf-border-soft);
+  background: #f8faf9;
+  flex-shrink: 0;
+}
+
+.docf-desk-list-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.docf-desk-list-row {
+  border-bottom: 1px solid var(--docf-border-soft);
+  font-size: 11px;
+  color: var(--docf-text);
+  cursor: pointer;
+}
+
+.docf-desk-list-row:hover {
+  background: color-mix(in srgb, var(--docf-green-soft) 45%, #fff);
+}
+
+.docf-desk-list-row--selected {
+  background: var(--docf-green-soft);
+  box-shadow: inset 3px 0 0 var(--docf-green);
+}
+
+.docf-desk-list-row span {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.docf-desk-act-btn {
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid var(--docf-border);
+  background: var(--docf-surface);
+  color: var(--docf-green-strong);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.docf-desk-act-btn:hover {
+  background: var(--docf-green-soft);
+}
+
+.docf-desk-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+.docf-desk-badge--ok {
+  background: var(--docf-green-soft);
+  color: var(--docf-green-strong);
+}
+
+.docf-desk-badge--warn {
+  background: var(--docf-warning-soft);
+  color: var(--docf-warning);
+}
+
+.docf-desk-badge--danger {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.docf-desk-pagination {
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.docf-desk-side-card {
+  border-radius: var(--docf-radius);
+  border: 1px solid var(--docf-border);
+  background: var(--docf-surface);
+  padding: 12px 14px;
+  min-height: 0;
+  overflow: auto;
+}
+
+.docf-desk-side-card h3 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--docf-text);
+}
+
+.docf-desk-side-empty {
+  margin: 0;
+  font-size: 11px;
+  color: var(--docf-muted);
+}
+
+.docf-desk-side-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: var(--docf-text);
+}
+
+.docf-desk-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.docf-desk-actions .docf-desk-btn {
+  flex: 1 1 calc(50% - 3px);
+  min-width: 0;
+  font-size: 10px;
+  padding: 0 8px;
+}
+
+.docf-desk-state {
+  min-height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 20px;
+  text-align: center;
+  color: var(--docf-muted);
+  font-size: 12px;
+}
+
+@media (max-width: 1200px) {
+  .docf-desk-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .docf-desk-filters {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 768px) {
+  .docf-desk-filters {
+    grid-template-columns: 1fr 1fr;
+  }
+}

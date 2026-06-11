@@ -1,9 +1,9 @@
 "use client";
 
 import type { AiInsight, AiProposal, Approval } from "@hallederiz/types";
-import { FilterActions, FilterBar, MetricCard, PageHeader, SplitContentLayout } from "@hallederiz/ui";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { useToast } from "../../../providers/toast-provider";
 import { getAiAssistantData } from "../queries";
 import { buildAiProposalSnapshotJson } from "../utils/ai-proposal-snapshot";
 
@@ -16,361 +16,445 @@ const proposalStatusLabel: Record<AiProposal["status"], string> = {
   failed: "Hata"
 };
 
-export function AiApprovalFilterBar() {
-  return (
-    <FilterBar>
-      <div className="task-center-filter-grid">
-        <label>
-          Öneri no
-          <input placeholder="AI-0001" readOnly aria-readonly="true" />
-        </label>
-        <label>
-          Durum
-          <select defaultValue="" disabled aria-disabled="true">
-            <option value="">Tüm durumlar</option>
-            <option>Bekliyor</option>
-            <option>Onaylandı</option>
-          </select>
-        </label>
-        <label>
-          Aksiyon tipi
-          <select defaultValue="" disabled aria-disabled="true">
-            <option value="">Tüm aksiyonlar</option>
-            <option>create_offer</option>
-            <option>send_document_whatsapp</option>
-          </select>
-        </label>
-      </div>
-      <FilterActions>
-        <button type="button" className="hz-btn hz-btn-secondary" disabled title="Filtreler inceleme amaçlıdır">
-          Filtreler (salt okunur)
-        </button>
-        <button type="button" className="reset-btn" disabled title="Temizle">
-          Temizle
-        </button>
-      </FilterActions>
-      <p className="muted">AI önerileri yalnız inceleme içindir; canlı işlem merkezi onay ekranından yürütülür.</p>
-    </FilterBar>
-  );
-}
-
-export function AiApprovalTable({ proposals, approvals }: { proposals: AiProposal[]; approvals: Approval[] }) {
-  const router = useRouter();
-  return (
-    <section className="hz-content-card hz-ai-approval-table-wrap">
-      <div className="table-wrap hz-table-wrap">
-        <table className="table hz-table">
-          <thead>
-            <tr>
-              <th>Öneri no</th>
-              <th>Aksiyon</th>
-              <th>Durum</th>
-              <th>Onay gerekli</th>
-              <th>İsteyen</th>
-              <th>Hedef</th>
-              <th>Tarih</th>
-              <th>Aksiyon</th>
-            </tr>
-          </thead>
-          <tbody>
-            {proposals.length === 0 ? (
-              <tr>
-                <td colSpan={8}>Canlı AI önerisi bekleniyor. Öneri kaydı API bağlandığında listelenir.</td>
-              </tr>
-            ) : (
-              proposals.map((proposal) => (
-                <tr key={proposal.id}>
-                  <td>{proposal.proposalNo}</td>
-                  <td>{proposal.actionType}</td>
-                  <td>{proposalStatusLabel[proposal.status] ?? proposal.status}</td>
-                  <td>{proposal.requiresApproval ? "Evet" : "Hayır"}</td>
-                  <td>{proposal.requestedByName}</td>
-                  <td>{proposal.targetNo}</td>
-                  <td>{new Date(proposal.createdAt).toLocaleDateString("tr-TR")}</td>
-                  <td>
-                    <button
-                      className="hz-btn hz-btn-secondary"
-                      type="button"
-                      onClick={() =>
-                        router.push(
-                          proposal.approvalId
-                            ? `/onaylar/${encodeURIComponent(proposal.approvalId)}`
-                            : "/onaylar"
-                        )
-                      }
-                    >
-                      Onay ekranına git
-                    </button>
-                  </td>
-                </tr>
-              ))
-            )}
-          </tbody>
-        </table>
-      </div>
-      {approvals.length > 0 ? (
-        <p className="muted">Bağlı onay kayıtları: {approvals.map((approval) => approval.approvalNo).join(", ")}</p>
-      ) : null}
-    </section>
-  );
-}
-
-export function AiApprovalDetailDrawer({
-  approval,
-  proposal
-}: {
-  approval: Approval | undefined;
-  proposal: AiProposal | undefined;
-}) {
-  const router = useRouter();
-  return (
-    <aside className="hz-side-panel hz-ai-approval-drawer">
-      <p className="drawer-eyebrow">AI öneri detayı</p>
-      <h3>{approval?.approvalNo ?? "Seçim yok"}</h3>
-      <p className="muted">{approval?.payloadSummary ?? "Onay seçildiğinde özet burada görünür."}</p>
-      {proposal ? (
-        <>
-          <p className="drawer-eyebrow">Bağlı öneri</p>
-          <p className="muted">
-            {proposal.proposalNo} —{" "}
-            <span className={proposal.requiresApproval ? "hz-badge hz-badge-warning" : "hz-badge hz-badge-success"}>
-              Onay gerekli: {proposal.requiresApproval ? "Evet" : "Hayır"}
-            </span>
-          </p>
-          <details className="hz-ai-proposal-snapshot">
-            <summary>Öneri özeti (salt okunur)</summary>
-            <pre className="hz-ai-proposal-snapshot-pre">{buildAiProposalSnapshotJson(proposal)}</pre>
-          </details>
-        </>
-      ) : (
-        <p className="muted">Bağlı öneri bulunamadı.</p>
-      )}
-      <p className="hz-ai-review-note">Bu öneri uygulanmadan önce kullanıcı onayı gerektirir.</p>
-      <div className="hz-inline-actions">
-        <button
-          className="hz-btn hz-btn-primary"
-          type="button"
-          onClick={() =>
-            router.push(approval?.id ? `/onaylar/${encodeURIComponent(approval.id)}` : "/onaylar")
-          }
-        >
-          Onay ekranına git
-        </button>
-        <button
-          className="hz-btn hz-btn-secondary"
-          type="button"
-          onClick={() => router.push(proposal ? `/ai` : "/ai")}
-        >
-          Öneriyi incele
-        </button>
-      </div>
-      <p className="muted">Canlı onay ve icra akışları merkezi onay ekranı ve API tarafında yönetilir.</p>
-    </aside>
-  );
-}
-
-function ApprovalCoveragePanel() {
-  const rows = [
-    { action: "create_offer", approval: "Evet", state: "Bağlı" },
-    { action: "create_order", approval: "Evet", state: "Bağlı" },
-    { action: "create_payment", approval: "Evet", state: "Bağlı" },
-    { action: "mark_warehouse_ready", approval: "Evet", state: "Bağlı" },
-    { action: "complete_delivery", approval: "Evet", state: "Bağlı" },
-    { action: "create_invoice", approval: "Evet", state: "Bağlı" },
-    { action: "create_return", approval: "Evet", state: "Bağlı" },
-    { action: "send_document_whatsapp", approval: "Evet", state: "Bağlı" },
-    { action: "queue_document_save", approval: "Evet", state: "Bağlı" },
-    { action: "queue_document_print", approval: "Evet", state: "Bağlı" }
-  ];
-
-  return (
-    <section className="hz-content-card">
-      <h3>Onay kapsamı</h3>
-      <p className="muted">Operatör modu aksiyonları onay zorunluluğu ile çalışır. Salt okunur yanıtlar onay gerektirmez.</p>
-      <div className="table-wrap hz-table-wrap">
-        <table className="table hz-table">
-          <thead>
-            <tr>
-              <th>Aksiyon</th>
-              <th>Onay</th>
-              <th>İcra</th>
-            </tr>
-          </thead>
-          <tbody>
-            {rows.map((row) => (
-              <tr key={row.action}>
-                <td>{row.action}</td>
-                <td>
-                  <span className="hz-badge hz-badge-warning">{row.approval}</span>
-                </td>
-                <td>
-                  <span className="hz-badge hz-badge-success">{row.state}</span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
-    </section>
-  );
+function severityBadge(severity: AiInsight["severity"]): string {
+  return severity === "critical" ? "aif-badge--danger" : "aif-badge--warn";
 }
 
 export function AiApprovalsPage() {
+  const router = useRouter();
+  const { pushToast } = useToast();
   const [data, setData] = useState<{ proposals: AiProposal[]; approvals: Approval[]; executions: unknown[] }>({
     proposals: [],
     approvals: [],
     executions: []
   });
+  const [selectedProposalId, setSelectedProposalId] = useState<string | null>(null);
 
   useEffect(() => {
-    void getAiAssistantData().then((next) =>
+    void getAiAssistantData().then((next) => {
       setData({
         proposals: next.proposals,
         approvals: next.approvals,
         executions: next.executions
-      })
-    );
+      });
+      setSelectedProposalId(next.proposals[0]?.id ?? null);
+    });
   }, []);
 
-  const activeApproval = data.approvals[0];
-  const linkedProposal = useMemo(() => {
-    if (!activeApproval) return data.proposals[0];
-    return data.proposals.find((p) => p.approvalId === activeApproval.id) ?? data.proposals[0];
-  }, [activeApproval, data.proposals]);
+  const selectedProposal = useMemo(
+    () => data.proposals.find((proposal) => proposal.id === selectedProposalId) ?? data.proposals[0],
+    [data.proposals, selectedProposalId]
+  );
+
+  const linkedApproval = useMemo(() => {
+    if (!selectedProposal?.approvalId) return data.approvals[0];
+    return data.approvals.find((approval) => approval.id === selectedProposal.approvalId) ?? data.approvals[0];
+  }, [selectedProposal, data.approvals]);
+
+  const waitingCount = data.proposals.filter((proposal) => proposal.status === "waiting_approval").length;
 
   return (
-    <div className="hz-page-stack hz-ai-approvals-page">
-      <PageHeader
-        title="AI Onay Önerileri"
-        description="Local-first AI operatör modu: mutation talepleri öneri + onay zinciriyle yönetilir; bu ekran yalnız inceleme içindir."
-      />
-      <p className="hz-ai-review-note">AI doğrudan kayıt değiştirmez. Onay ve icra merkezi onay ekranından yapılır.</p>
-      <section className="hz-metric-grid">
-        <MetricCard title="Öneri" value={String(data.proposals.length)} detail="Toplam" tone="info" />
-        <MetricCard title="Onay bekleyen" value={String(data.approvals.length)} detail="Bekleyen" tone="warning" />
-        <MetricCard title="İcra" value={String(data.executions.length)} detail="Yetkili" tone="success" />
-        <MetricCard title="Red" value="0" detail="Bugün" tone="danger" />
-      </section>
-      <AiApprovalFilterBar />
-      <SplitContentLayout
-        main={
-          <>
-            <AiApprovalTable proposals={data.proposals} approvals={data.approvals} />
-            <ApprovalCoveragePanel />
-          </>
-        }
-        side={<AiApprovalDetailDrawer approval={activeApproval} proposal={linkedProposal} />}
-      />
+    <div className="aif-page aif-page--approvals">
+      <p className="aif-demo-band" role="status">
+        Yapay zekâ onay kuyruğu: onay ve icra merkezi onay ekranından yürütülür; bu ekran inceleme ve yalnızca bilgi aksiyonu içindir.
+      </p>
+
+      <div className="aif-layout">
+        <div className="aif-main">
+          <header className="aif-card aif-topbar">
+            <div>
+              <p className="aif-topbar__eyebrow">Yapay zekâ onayı</p>
+              <h1 className="aif-topbar__title">Yapay Zekâ Onay Kuyruğu</h1>
+              <p className="aif-topbar__sub">Değişiklik önerileri onay zincirine yönlendirilir; doğrudan icra yok.</p>
+            </div>
+            <div className="aif-topbar__actions">
+              <button className="aif-btn aif-btn--ghost" type="button" onClick={() => router.push("/ai")}>
+                Yapay zekâ merkezine dön
+              </button>
+              <button
+                className="aif-btn aif-btn--primary"
+                type="button"
+                onClick={() => router.push(linkedApproval?.id ? `/onaylar/${encodeURIComponent(linkedApproval.id)}` : "/onaylar")}
+              >
+                Merkezi onaya git
+              </button>
+            </div>
+          </header>
+
+          <div className="aif-kpi-strip" aria-label="Onay özetleri">
+            <article className="aif-card aif-kpi">
+              <span className="aif-kpi__label">Toplam öneri</span>
+              <span className="aif-kpi__value">{data.proposals.length}</span>
+            </article>
+            <article className="aif-card aif-kpi aif-kpi--warn">
+              <span className="aif-kpi__label">Onay bekleyen</span>
+              <span className="aif-kpi__value">{waitingCount}</span>
+            </article>
+            <article className="aif-card aif-kpi aif-kpi--success">
+              <span className="aif-kpi__label">Bağlı onay</span>
+              <span className="aif-kpi__value">{data.approvals.length}</span>
+            </article>
+            <article className="aif-card aif-kpi">
+              <span className="aif-kpi__label">Yetkili icra</span>
+              <span className="aif-kpi__value">{data.executions.length}</span>
+            </article>
+          </div>
+
+          <div className="aif-card aif-filter">
+            <label className="aif-field">
+              <span>Öneri no</span>
+              <input placeholder="AI-0001" readOnly aria-readonly="true" />
+            </label>
+            <label className="aif-field">
+              <span>Durum</span>
+              <select defaultValue="" disabled aria-disabled="true">
+                <option value="">Tüm durumlar</option>
+                <option>Bekliyor</option>
+                <option>Onaylandı</option>
+              </select>
+            </label>
+            <label className="aif-field">
+              <span>Aksiyon tipi</span>
+              <select defaultValue="" disabled aria-disabled="true">
+                <option value="">Tüm aksiyonlar</option>
+                <option>create_offer</option>
+                <option>send_document_whatsapp</option>
+              </select>
+            </label>
+            <label className="aif-field">
+              <span>İsteyen</span>
+              <input placeholder="Operatör" readOnly aria-readonly="true" />
+            </label>
+            <div className="aif-filter__actions">
+              <button
+                className="aif-btn aif-btn--ghost"
+                type="button"
+                title="Filtreleri sıfırla"
+                aria-label="Filtreleri sıfırla"
+                onClick={() => pushToast("Filtreler canlı API sorgusuna bağlandığında aktif olacaktır.")}
+              >
+                Sıfırla
+              </button>
+            </div>
+          </div>
+
+          <div className="aif-body">
+            <div className="aif-scroll">
+              <section className="aif-card">
+                <header className="erpf-section-head">
+                  <h2>Öneri kartları</h2>
+                </header>
+                <div className="aif-queue">
+                  {data.proposals.length === 0 ? (
+                    <p className="erpf-side-note" style={{ padding: "8px 12px" }}>
+                      Canlı yapay zekâ önerisi bekleniyor.
+                    </p>
+                  ) : (
+                    data.proposals.map((proposal) => (
+                      <article
+                        key={proposal.id}
+                        className={`aif-card aif-proposal-card${proposal.id === selectedProposal?.id ? " is-selected" : ""}`}
+                        onClick={() => setSelectedProposalId(proposal.id)}
+                        onKeyDown={(event) => {
+                          if (event.key === "Enter" || event.key === " ") setSelectedProposalId(proposal.id);
+                        }}
+                        role="button"
+                        tabIndex={0}
+                      >
+                        <div className="aif-proposal-card__head">
+                          <h3 className="aif-proposal-card__title">
+                            {proposal.proposalNo} · {proposal.actionType}
+                          </h3>
+                          <span className={`aif-badge ${proposal.requiresApproval ? "aif-badge--warn" : "aif-badge--success"}`}>
+                            {proposalStatusLabel[proposal.status]}
+                          </span>
+                        </div>
+                        <p className="aif-proposal-card__summary">{proposal.summary}</p>
+                        <p className="erpf-side-note">
+                          {proposal.requestedByName} · {proposal.targetNo} ·{" "}
+                          {new Date(proposal.createdAt).toLocaleDateString("tr-TR")}
+                        </p>
+                        <div className="aif-proposal-card__actions">
+                          <button
+                            className="aif-btn aif-btn--primary"
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              pushToast(`${proposal.proposalNo} onay talebi demo modda toast-only kaydedildi.`);
+                            }}
+                          >
+                            Onayla
+                          </button>
+                          <button
+                            className="aif-btn aif-btn--danger"
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              pushToast(`${proposal.proposalNo} reddi demo modda toast-only kaydedildi.`);
+                            }}
+                          >
+                            Reddet
+                          </button>
+                          <button
+                            className="aif-btn aif-btn--ghost"
+                            type="button"
+                            onClick={(event) => {
+                              event.stopPropagation();
+                              router.push(
+                                proposal.approvalId
+                                  ? `/onaylar/${encodeURIComponent(proposal.approvalId)}`
+                                  : "/onaylar"
+                              );
+                            }}
+                          >
+                            Onay ekranı
+                          </button>
+                        </div>
+                      </article>
+                    ))
+                  )}
+                </div>
+              </section>
+            </div>
+          </div>
+        </div>
+
+        <aside className="aif-side">
+          <section className="aif-card aif-side-card">
+            <h3>Seçili öneri</h3>
+            <p className="erpf-side-note">{selectedProposal?.summary ?? "Öneri seçildiğinde özet burada görünür."}</p>
+            {selectedProposal ? (
+              <>
+                <ul className="aif-settings-list">
+                  <li>
+                    <span>Öneri no</span>
+                    <strong>{selectedProposal.proposalNo}</strong>
+                  </li>
+                  <li>
+                    <span>Aksiyon</span>
+                    <strong>{selectedProposal.actionType}</strong>
+                  </li>
+                  <li>
+                    <span>Onay gerekli</span>
+                    <strong>{selectedProposal.requiresApproval ? "Evet" : "Hayır"}</strong>
+                  </li>
+                </ul>
+                <details style={{ marginTop: 8 }}>
+                  <summary>Öneri özeti (salt okunur)</summary>
+                  <pre style={{ fontSize: 10, overflow: "auto", maxHeight: 140 }}>{buildAiProposalSnapshotJson(selectedProposal)}</pre>
+                </details>
+              </>
+            ) : null}
+          </section>
+          <section className="aif-card aif-side-card">
+            <h3>Bağlı onay</h3>
+            <p className="erpf-side-note">{linkedApproval?.payloadSummary ?? "Bağlı onay kaydı yok."}</p>
+            {linkedApproval ? (
+              <button
+                className="aif-btn aif-btn--primary"
+                type="button"
+                onClick={() => router.push(`/onaylar/${encodeURIComponent(linkedApproval.id)}`)}
+              >
+                {linkedApproval.approvalNo}
+              </button>
+            ) : null}
+          </section>
+        </aside>
+      </div>
     </div>
   );
 }
 
-export function AiInsightFilterBar() {
-  return (
-    <FilterBar>
-      <div className="task-center-filter-grid">
-        <label>
-          Modül
-          <select defaultValue="" disabled aria-disabled="true">
-            <option value="">Tüm modüller</option>
-            <option>Risk</option>
-            <option>Stok</option>
-            <option>Fabrika</option>
-          </select>
-        </label>
-        <label>
-          Dönem
-          <select defaultValue="today" disabled aria-disabled="true">
-            <option value="today">Bugün</option>
-            <option value="week">Bu hafta</option>
-          </select>
-        </label>
-        <label className="hz-toggle">
-          <input type="checkbox" disabled aria-disabled="true" />
-          Kritikler
-        </label>
-      </div>
-      <FilterActions>
-        <button type="button" className="hz-btn hz-btn-secondary" disabled>
-          Filtreler (salt okunur)
-        </button>
-        <button type="button" className="reset-btn" disabled>
-          Temizle
-        </button>
-      </FilterActions>
-      <p className="muted">AI içgörüler yalnız öneri üretir; canlı mutation bu ekrandan yapılmaz.</p>
-    </FilterBar>
-  );
-}
-
-export function AiInsightGrid({ insights }: { insights: AiInsight[] }) {
-  const router = useRouter();
-  if (insights.length === 0) {
-    return (
-      <section className="hz-content-card" role="status">
-        <p className="muted">Lokal AI yapılandırıldığında içgörüler burada görünecek.</p>
-      </section>
-    );
-  }
-  return (
-    <section className="hz-task-card-grid">
-      {insights.map((insight) => (
-        <article key={insight.id} className="hz-task-card">
-          <div className="hz-task-card-header">
-            <span
-              className={`hz-badge ${insight.severity === "critical" ? "hz-badge-danger" : "hz-badge-warning"}`}
-            >
-              {insight.category}
-            </span>
-            <strong>%{Math.round(insight.confidence * 100)}</strong>
-          </div>
-          <h3 className="hz-card-title">{insight.title}</h3>
-          <p className="hz-task-card-sub">{insight.summary}</p>
-          <button type="button" className="hz-btn hz-btn-secondary" onClick={() => router.push("/ai")}>
-            Detayı aç
-          </button>
-        </article>
-      ))}
-    </section>
-  );
-}
-
-export function AiInsightDetailPanel({ insight }: { insight: AiInsight | undefined }) {
-  const router = useRouter();
-  return (
-    <aside className="hz-side-panel">
-      <p className="drawer-eyebrow">İçgörü detayı</p>
-      <h3>{insight?.title ?? "İçgörü"}</h3>
-      <p className="muted">{insight?.summary ?? "Seçili içgörü özeti burada görünür."}</p>
-      <div className="detail-list">
-        <span>Hedef</span>
-        <strong>{insight?.targetNo ?? "—"}</strong>
-        <span>Önerilen aksiyon</span>
-        <strong>{insight?.suggestedAction ?? "—"}</strong>
-      </div>
-      <p className="hz-ai-review-note">Öneri uygulanmadan önce operatör incelemesi gerekir.</p>
-      <button type="button" className="hz-btn hz-btn-primary" onClick={() => router.push("/onaylar")}>
-        İlgili kaydı aç
-      </button>
-    </aside>
-  );
-}
-
 export function AiInsightsPage() {
+  const router = useRouter();
+  const { pushToast } = useToast();
   const [insights, setInsights] = useState<AiInsight[]>([]);
+  const [selectedInsightId, setSelectedInsightId] = useState<string | null>(null);
 
   useEffect(() => {
-    void getAiAssistantData().then((next) => setInsights(next.insights));
+    void getAiAssistantData().then((next) => {
+      setInsights(next.insights);
+      setSelectedInsightId(next.insights[0]?.id ?? null);
+    });
   }, []);
 
+  const selectedInsight = useMemo(
+    () => insights.find((insight) => insight.id === selectedInsightId) ?? insights[0],
+    [insights, selectedInsightId]
+  );
+
+  const criticalCount = insights.filter((insight) => insight.severity === "critical").length;
+
   return (
-    <div className="hz-page-stack hz-ai-insights-page">
-      <PageHeader
-        title="AI İçgörüler"
-        description="Local-first AI analiz katmanı: salt okunur içgörülerle risk, fırsat ve operasyon sinyallerini izleyin."
-      />
-      <AiInsightFilterBar />
-      <SplitContentLayout main={<AiInsightGrid insights={insights} />} side={<AiInsightDetailPanel insight={insights[0]} />} />
+    <div className="aif-page aif-page--insights">
+      <p className="aif-demo-band" role="status">
+        Yapay zekâ içgörüleri salt okunur öneri üretir; canlı değişiklik bu ekrandan yapılmaz.
+      </p>
+
+      <div className="aif-layout">
+        <div className="aif-main">
+          <header className="aif-card aif-topbar">
+            <div>
+              <p className="aif-topbar__eyebrow">Yapay zekâ içgörüsü</p>
+              <h1 className="aif-topbar__title">Yapay Zekâ İçgörü Paneli</h1>
+              <p className="aif-topbar__sub">Risk, fırsat ve operasyon sinyalleri yerel öncelikli analiz katmanından gelir.</p>
+            </div>
+            <div className="aif-topbar__actions">
+              <button className="aif-btn aif-btn--ghost" type="button" onClick={() => router.push("/ai")}>
+                Yapay zekâ merkezine dön
+              </button>
+              <button
+                className="aif-btn aif-btn--primary"
+                type="button"
+                onClick={() => pushToast("İçgörü yenileme sonraki fazda API ile bağlanacaktır.")}
+              >
+                İçgörüleri yenile
+              </button>
+            </div>
+          </header>
+
+          <div className="aif-kpi-strip" aria-label="İçgörü özetleri">
+            <article className="aif-card aif-kpi">
+              <span className="aif-kpi__label">Toplam</span>
+              <span className="aif-kpi__value">{insights.length}</span>
+            </article>
+            <article className="aif-card aif-kpi aif-kpi--danger">
+              <span className="aif-kpi__label">Kritik</span>
+              <span className="aif-kpi__value">{criticalCount}</span>
+            </article>
+            <article className="aif-card aif-kpi aif-kpi--warn">
+              <span className="aif-kpi__label">Uyarı</span>
+              <span className="aif-kpi__value">{insights.length - criticalCount}</span>
+            </article>
+            <article className="aif-card aif-kpi aif-kpi--success">
+              <span className="aif-kpi__label">Güven ort.</span>
+              <span className="aif-kpi__value">
+                {insights.length
+                  ? `%${Math.round((insights.reduce((sum, item) => sum + item.confidence, 0) / insights.length) * 100)}`
+                  : "—"}
+              </span>
+            </article>
+          </div>
+
+          <div className="aif-card aif-filter">
+            <label className="aif-field">
+              <span>Modül</span>
+              <select defaultValue="" disabled aria-disabled="true">
+                <option value="">Tüm modüller</option>
+                <option>Risk</option>
+                <option>Stok</option>
+                <option>Fabrika</option>
+              </select>
+            </label>
+            <label className="aif-field">
+              <span>Dönem</span>
+              <select defaultValue="today" disabled aria-disabled="true">
+                <option value="today">Bugün</option>
+                <option value="week">Bu hafta</option>
+              </select>
+            </label>
+            <label className="aif-field">
+              <span>Önem</span>
+              <select defaultValue="" disabled aria-disabled="true">
+                <option value="">Tümü</option>
+                <option value="critical">Kritik</option>
+              </select>
+            </label>
+            <label className="aif-field aif-field">
+              <span>Kritikler</span>
+              <input type="checkbox" disabled aria-disabled="true" />
+            </label>
+            <div className="aif-filter__actions">
+              <button
+                className="aif-btn aif-btn--ghost"
+                type="button"
+                title="Filtreleri sıfırla"
+                aria-label="Filtreleri sıfırla"
+                onClick={() => pushToast("Filtreler canlı API sorgusuna bağlandığında aktif olacaktır.")}
+              >
+                Sıfırla
+              </button>
+            </div>
+          </div>
+
+          <div className="aif-body">
+            <div className="aif-insight-grid">
+              {insights.length === 0 ? (
+                <section className="aif-card aif-side-card" role="status">
+                  <p className="erpf-side-note">Yerel yapay zekâ yapılandırıldığında içgörüler burada görünecek.</p>
+                </section>
+              ) : (
+                insights.map((insight) => (
+                  <article
+                    key={insight.id}
+                    className={`aif-card aif-insight-card${insight.id === selectedInsight?.id ? " is-selected" : ""}`}
+                    onClick={() => setSelectedInsightId(insight.id)}
+                    onKeyDown={(event) => {
+                      if (event.key === "Enter" || event.key === " ") setSelectedInsightId(insight.id);
+                    }}
+                    role="button"
+                    tabIndex={0}
+                  >
+                    <span className={`aif-badge ${severityBadge(insight.severity)}`}>{insight.category}</span>
+                    <strong style={{ float: "right", fontSize: 11 }}>%{Math.round(insight.confidence * 100)}</strong>
+                    <h3>{insight.title}</h3>
+                    <p>{insight.summary}</p>
+                    <button
+                      className="aif-btn aif-btn--ghost"
+                      type="button"
+                      onClick={(event) => {
+                        event.stopPropagation();
+                        pushToast(`${insight.title} detayı salt okunur gösterilir.`);
+                      }}
+                    >
+                      Detayı aç
+                    </button>
+                  </article>
+                ))
+              )}
+            </div>
+          </div>
+        </div>
+
+        <aside className="aif-side">
+          <section className="aif-card aif-side-card">
+            <h3>İçgörü detayı</h3>
+            <p className="erpf-side-note">{selectedInsight?.summary ?? "Seçili içgörü özeti burada görünür."}</p>
+            {selectedInsight ? (
+              <ul className="aif-settings-list">
+                <li>
+                  <span>Hedef</span>
+                  <strong>{selectedInsight.targetNo}</strong>
+                </li>
+                <li>
+                  <span>Önerilen aksiyon</span>
+                  <strong>{selectedInsight.suggestedAction}</strong>
+                </li>
+                <li>
+                  <span>Güven</span>
+                  <strong>%{Math.round(selectedInsight.confidence * 100)}</strong>
+                </li>
+              </ul>
+            ) : null}
+            <p className="erpf-side-note">Öneri uygulanmadan önce operatör incelemesi gerekir.</p>
+            <button
+              className="aif-btn aif-btn--primary"
+              type="button"
+              onClick={() =>
+                router.push(
+                  selectedInsight?.targetType === "customer"
+                    ? `/cariler/${selectedInsight.targetId}`
+                    : selectedInsight?.targetType === "product"
+                      ? "/stok"
+                      : "/onaylar"
+                )
+              }
+            >
+              İlgili kaydı aç
+            </button>
+          </section>
+        </aside>
+      </div>
     </div>
   );
 }

@@ -125,6 +125,8 @@ Hedef token seti: `UI_SCOPE_GUARD.md` §8 (emerald/gold).
 
 **Approvals Command Desk (2026-05-22):** `/onaylar` — 3 kolon onay masası (kuyruk, detay, karar); policy band; AI/otomasyon/mesaj rozetleri; `approvals-command-desk.css`. Detay: `APPROVALS_COMMAND_DESK_REDESIGN.md`. `/onaylar/[id]` ve `/onaylar/kurallar` kapsam dışı.
 
+**Orders Operations Desk (2026-05-22):** `/siparisler` — intro + policy + KPI + liste/önizleme (330px); ödeme/sevkiyat rozetleri; tahsilat linki `?order=`; onaya gönder dili yok; `orders-desk.css`. Detay: `ORDERS_DESK_REDESIGN.md`. `/siparisler/[id]` ve `/siparisler/yeni` kapsam dışı.
+
 **Agent 04 (2026-05-21):** Platform/operations route adoption tamam — `ui/04-platform-operations` @ `3fa7c74`. `/login` split, `/dashboard` 5 KPI + AI «İncele», `/panel` loading redirect, `/hizli-islem` stepper, `/onaylar` + detay + kurallar, `/workflow` timeline. `loading.tsx`: login, panel, dashboard, hizli-islem, onaylar. Detay: `UI_AGENT_04_REPORT.md`.
 
 ---

@@ -1,5 +1,5 @@
-import { ArchivePage } from "../../../src/features/archive/components/ArchivePage";
+import { ArchiveReferenceLayout } from "../../../src/features/archive/components/ArchiveReferenceLayout";
 
 export default function ArchiveRoutePage() {
-  return <ArchivePage />;
+  return <ArchiveReferenceLayout />;
 }

@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { EmptyState, EntityDetailLayout, LoadingState, PageHeader } from "@hallederiz/ui";
+import { EmptyState, LoadingState } from "@hallederiz/ui";
 import type { Customer, Document } from "@hallederiz/types";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -21,6 +21,11 @@ import {
 } from "../utils/document-action-feedback";
 import { dateLabel } from "../utils";
 import { EntityTimelinePanel } from "../../shared/components/EntityTimelinePanel";
+import {
+  buildDocumentHeaderMeta,
+  buildDocumentInfoFields,
+  buildDocumentReferenceKpis
+} from "../utils/map-document-detail-to-reference";
 
 function DocumentActions({ document, onReload }: { document: Document | null; onReload: () => Promise<void> }) {
   const router = useRouter();
@@ -262,51 +267,102 @@ export function DocumentDetailPage() {
     [customers, document?.customerId]
   );
 
+  const kpis = useMemo(() => (document ? buildDocumentReferenceKpis(document) : []), [document]);
+  const infoFields = useMemo(
+    () => (document ? buildDocumentInfoFields(document, customer) : []),
+    [document, customer]
+  );
+
   if (loading) {
-    return <LoadingState title="Belge yükleniyor" message="Belge detayı ve iletim geçmişi getiriliyor." />;
+    return (
+      <section className="docf-page hz-documents-detail-page">
+        <div className="docf-state" role="status" aria-live="polite">
+          <div className="docf-state__spinner" aria-hidden />
+          <h2>Belge yükleniyor</h2>
+          <p>Belge detayı ve iletim geçmişi getiriliyor.</p>
+        </div>
+      </section>
+    );
   }
 
   if (!document) {
     return (
-      <EmptyState
-        title="Belge bulunamadı"
-        message="İstenen belge kaydı bulunamadı veya erişim kapsamında değil."
-        actions={<Link href="/belgeler">Belge listesine dön</Link>}
-      />
+      <section className="docf-page hz-documents-detail-page">
+        <div className="docf-state" role="alert">
+          <h2>Belge bulunamadı</h2>
+          <p>İstenen belge kaydı bulunamadı veya erişim kapsamında değil.</p>
+          <Link href="/belgeler" className="docf-state__link">
+            Belge listesine dön
+          </Link>
+        </div>
+      </section>
     );
   }
 
   return (
-    <EntityDetailLayout
-      className="hz-documents-detail-page"
-      header={
-        <>
-          {dataSourceConfig.useDemoData ? (
-            <p className="hz-documents-preview-band" role="status">
-              Örnek veri modu: bu belge demo amaçlıdır; PDF üretimi ve gönderim canlıda bağlı değildir.
-            </p>
-          ) : null}
-          <PageHeader
-            title={`Belge ${document.documentNo}`}
-            description="Belge önizlemesi, kuyruk ve iletim işlemleri bu ekrandan yönetilir."
-            breadcrumb={document.documentNo}
-          />
-        </>
-      }
-      summary={<DocumentSummary document={document} customer={customer} />}
-      sections={
-        <>
-          <DocumentActions document={document} onReload={load} />
-          <DocumentPreview document={document} />
-          <DocumentDeliveryHistory document={document} />
-          <DocumentOutputJobs
-            printJobs={printJobs}
-            fileSaveJobs={fileSaveJobs}
-            localAgentHealth={localAgentHealth}
-          />
-        </>
-      }
-      sidebar={<EntityTimelinePanel entityType="document" entityId={document.id} />}
-    />
+    <section className="docf-page hz-documents-detail-page">
+      <div className="docf-shell">
+        <header className="docf-header">
+          <div className="docf-header__main">
+            <p className="docf-header__eyebrow">Belgeler</p>
+            <h1>Belge Detayı</h1>
+            <p className="docf-header__meta">{buildDocumentHeaderMeta(document, customer)}</p>
+          </div>
+          <Link href="/belgeler" className="docf-header__back">
+            ← Listeye dön
+          </Link>
+        </header>
+
+        {dataSourceConfig.useDemoData ? (
+          <p className="docf-demo-band" role="status">
+            Örnek veri modu: bu belge demo amaçlıdır; PDF üretimi ve gönderim canlıda bağlı değildir.
+          </p>
+        ) : null}
+
+        <section className="docf-kpi-strip" aria-label="Belge özeti">
+          {kpis.map((kpi) => (
+            <div
+              key={kpi.id}
+              className={`docf-kpi${kpi.tone === "success" ? " docf-kpi--success" : kpi.tone === "warning" ? " docf-kpi--warning" : ""}`}
+            >
+              <span className="docf-kpi__label">{kpi.label}</span>
+              <span className="docf-kpi__value">{kpi.value}</span>
+            </div>
+          ))}
+        </section>
+
+        <main className="docf-layout">
+          <section className="docf-main">
+            <section className="docf-section" aria-label="Belge bilgileri">
+              <header className="docf-section__head">
+                <h2>Belge bilgileri</h2>
+              </header>
+              <div className="docf-field-grid">
+                {infoFields.map((field) => (
+                  <label key={field.label} className={`docf-field${field.full ? " docf-field--full" : ""}`}>
+                    <span>{field.label}</span>
+                    <strong>{field.value}</strong>
+                  </label>
+                ))}
+              </div>
+            </section>
+            <DocumentActions document={document} onReload={load} />
+            <DocumentPreview document={document} />
+            <DocumentDeliveryHistory document={document} />
+            <DocumentOutputJobs printJobs={printJobs} fileSaveJobs={fileSaveJobs} localAgentHealth={localAgentHealth} />
+          </section>
+          <aside className="docf-side">
+            <DocumentSummary document={document} customer={customer} />
+            <section className="docf-side-card" aria-label="Paylaşım ve gönderim">
+              <header className="docf-side-card__head">
+                <h3>Paylaşım</h3>
+              </header>
+              <p className="docf-section__desc">WhatsApp ve e-posta gönderimi onay zincirinden geçer; bu ekranda toast-only çalışır.</p>
+            </section>
+            <EntityTimelinePanel entityType="document" entityId={document.id} />
+          </aside>
+        </main>
+      </div>
+    </section>
   );
 }

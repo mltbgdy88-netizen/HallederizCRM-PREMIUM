@@ -36,7 +36,7 @@ export function ApprovalTable({ approvals, selectedId, onSelect, onOpen }: { app
 
 export function ApprovalPreviewPanel({ approval }: { approval: Approval | null }) {
   if (!approval) return <aside className="hz-side-panel"><p className="muted">Onay kaydi secimi bekleniyor.</p></aside>;
-  return <aside className="hz-side-panel"><p className="drawer-eyebrow">Approval Onizleme</p><h3>{approval.approvalNo}</h3><p className="muted">{summarizeApprovalTarget(approval)}</p><div className="detail-list"><span>Durum</span><strong>{statusLabels[approval.status]}</strong><span>Istenen rol</span><strong>{approval.requestedRole}</strong><span>Server action</span><strong>{approval.policySnapshot.serverActionKey ?? "-"}</strong><span>Executable</span><strong>{canExecuteApprovedAction(approval) ? "Evet" : "Hayir"}</strong></div></aside>;
+  return <aside className="hz-side-panel"><p className="drawer-eyebrow">Onay Önizleme</p><h3>{approval.approvalNo}</h3><p className="muted">{summarizeApprovalTarget(approval)}</p><div className="detail-list"><span>Durum</span><strong>{statusLabels[approval.status]}</strong><span>İstenen rol</span><strong>{approval.requestedRole}</strong><span>Sunucu işlemi</span><strong>{approval.policySnapshot.serverActionKey ?? "-"}</strong><span>Çalıştırılabilir</span><strong>{canExecuteApprovedAction(approval) ? "Evet" : "Hayır"}</strong></div></aside>;
 }
 
 export function ApprovalsPage() {
@@ -48,7 +48,7 @@ export function ApprovalHeaderInfo({ approval }: { approval: Approval }) {
 }
 
 export function ApprovalSummaryPanel({ approval }: { approval: Approval }) {
-  return <section className="hz-content-card"><h3>Islem Ozeti</h3><div className="detail-list"><span>Hedef entity</span><strong>{approval.entityType} / {approval.entityNo}</strong><span>Risk notu</span><strong>{approval.riskNote ?? "-"}</strong><span>Policy</span><strong>{approval.policySnapshot.reason}</strong><span>Execution</span><strong>{canExecuteApprovedAction(approval) ? "Onay sonrasi icra edilebilir" : "Beklemede"}</strong></div></section>;
+  return <section className="hz-content-card"><h3>İşlem Özeti</h3><div className="detail-list"><span>Hedef kayıt</span><strong>{approval.entityType} / {approval.entityNo}</strong><span>Risk notu</span><strong>{approval.riskNote ?? "-"}</strong><span>Kural</span><strong>{approval.policySnapshot.reason}</strong><span>Çalıştırma</span><strong>{canExecuteApprovedAction(approval) ? "Onay sonrası icra edilebilir" : "Beklemede"}</strong></div></section>;
 }
 
 export function ApprovalPayloadViewer({ approval }: { approval: Approval }) {

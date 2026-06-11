@@ -3,19 +3,24 @@
 import Link from "next/link";
 import { useEffect, useMemo, useState } from "react";
 import { MetricCard, PageHeader, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
+import {
+  formatUserFacingHealthStatus,
+  formatUserFacingReadinessState,
+  formatUserFacingStatus
+} from "../../../lib/user-facing-labels";
 import { SettingsAreaShell } from "./SettingsAreaShell";
 import type { PilotReadinessItem, PilotReadinessSummary } from "../../../services/api";
 import { getPilotReadinessData } from "../queries";
 
 const GROUP_LABELS: Record<PilotReadinessItem["group"], string> = {
-  company_tenant: "Sirket ve Tenant",
-  pricing_category_currency: "Fiyat / Kategori / Doviz",
+  company_tenant: "Şirket ve kiracı",
+  pricing_category_currency: "Fiyat / Kategori / Döviz",
   warehouses_stock: "Depolar ve Stok",
-  users_roles: "Kullanicilar ve Roller",
-  data_import: "Veri Yukleme",
-  documents_print: "Belge / Yazdirma",
+  users_roles: "Kullanıcılar ve Roller",
+  data_import: "Veri Yükleme",
+  documents_print: "Belge / Yazdırma",
   integrations: "Entegrasyonlar",
-  ai_operations: "AI ve Operasyon"
+  ai_operations: "Yapay Zekâ ve Operasyon"
 };
 
 function priorityBadgeClass(priority: PilotReadinessItem["priority"]) {
@@ -25,12 +30,7 @@ function priorityBadgeClass(priority: PilotReadinessItem["priority"]) {
   return "hz-badge hz-badge-info";
 }
 
-function priorityLabel(priority: PilotReadinessItem["priority"]) {
-  if (priority === "critical") return "Kritik";
-  if (priority === "warning") return "Uyari";
-  if (priority === "ready") return "Hazir";
-  return "Bilgi";
-}
+const priorityLabel = (priority: PilotReadinessItem["priority"]) => formatUserFacingStatus(priority);
 
 function statusBadgeClass(status: PilotReadinessItem["status"]) {
   if (status === "tamam") return "hz-badge hz-badge-success";
@@ -38,29 +38,19 @@ function statusBadgeClass(status: PilotReadinessItem["status"]) {
   return "hz-badge hz-badge-danger";
 }
 
-function statusLabel(status: PilotReadinessItem["status"]) {
-  if (status === "tamam") return "Tamam";
-  if (status === "uyari") return "Uyari";
-  return "Eksik";
-}
-
-function readinessStateLabel(state: PilotReadinessItem["readinessState"]) {
-  if (state === "go_live_blocker") return "Go-Live Bloklayici";
-  if (state === "demo_gap") return "Ornek Veri Boslugu";
-  if (state === "warning") return "Uyari";
-  return "Hazir";
-}
+const statusLabel = (status: PilotReadinessItem["status"]) => formatUserFacingStatus(status);
+const readinessStateLabel = (state: PilotReadinessItem["readinessState"]) => formatUserFacingReadinessState(state);
 
 const QUICK_ACTIONS = [
-  { label: "Sirket ayarlarini tamamla", href: "/ayarlar" },
-  { label: "Fiyat slotlarini kontrol et", href: "/ayarlar" },
-  { label: "Kategori alanlarini kontrol et", href: "/ayarlar" },
-  { label: "Depolari kontrol et", href: "/ayarlar" },
-  { label: "Kullanici ekle", href: "/kullanicilar" },
-  { label: "Veri yukleme merkezine git", href: "/kurulum/veri-yukleme" },
+  { label: "Şirket ayarlarını tamamla", href: "/ayarlar" },
+  { label: "Fiyat slotlarını kontrol et", href: "/ayarlar" },
+  { label: "Kategori alanlarını kontrol et", href: "/ayarlar" },
+  { label: "Depoları kontrol et", href: "/ayarlar" },
+  { label: "Kullanıcı ekle", href: "/kullanicilar" },
+  { label: "Veri yükleme merkezine git", href: "/kurulum/veri-yukleme" },
   { label: "Hazırlık kontrolünü aç", href: "/ayarlar/staging-kontrol" },
-  { label: "Belge sablonlarini ac", href: "/belgeler" },
-  { label: "Yerel arac bağlantısını doğrula", href: "/ayarlar/staging-kontrol" }
+  { label: "Belge şablonlarını aç", href: "/belgeler" },
+  { label: "Yerel araç bağlantısını doğrula", href: "/ayarlar/staging-kontrol" }
 ] as const;
 
 type TaskTone = "kritik" | "oneri" | "hazir";
@@ -73,29 +63,29 @@ interface RoleTaskDefinition {
 
 const ONBOARDING_TASKS: Record<"yonetici" | "satis" | "muhasebe" | "depo" | "pazarlama", RoleTaskDefinition[]> = {
   yonetici: [
-    { title: "Kullanim blokajlarini kontrol et", href: "/ayarlar/kullanim-hazirligi", relatedItemIds: ["company-profile", "import-customers", "import-products"] },
-    { title: "Onay bekleyen islemleri ac", href: "/onaylar", relatedItemIds: ["service-ai"] },
+    { title: "Kullanım blokajlarını kontrol et", href: "/ayarlar/kullanim-hazirligi", relatedItemIds: ["company-profile", "import-customers", "import-products"] },
+    { title: "Onay bekleyen işlemleri aç", href: "/onaylar", relatedItemIds: ["service-ai"] },
     { title: "Entegrasyon sağlığını doğrula (hazırlık)", href: "/ayarlar/staging-kontrol", relatedItemIds: ["service-erp", "service-whatsapp", "service-factory", "service-local-agent"] }
   ],
   satis: [
-    { title: "Fiyat slotlarini kontrol et", href: "/ayarlar", relatedItemIds: ["price-slots"] },
-    { title: "Carilerde fiyat gruplarini gozden gecir", href: "/cariler", relatedItemIds: ["import-customers", "import-pricing"] },
-    { title: "Teklif olusturma akisini test et", href: "/teklifler", relatedItemIds: ["import-products", "import-pricing"] }
+    { title: "Fiyat slotlarını kontrol et", href: "/ayarlar", relatedItemIds: ["price-slots"] },
+    { title: "Carilerde fiyat gruplarını gözden geçir", href: "/cariler", relatedItemIds: ["import-customers", "import-pricing"] },
+    { title: "Teklif oluşturma akışını test et", href: "/teklifler", relatedItemIds: ["import-products", "import-pricing"] }
   ],
   muhasebe: [
-    { title: "Tahsilat ekranini kontrol et", href: "/tahsilatlar", relatedItemIds: ["import-customers"] },
-    { title: "Ekstre ve belge akisini gozden gecir", href: "/belgeler", relatedItemIds: ["document-templates"] },
+    { title: "Tahsilat ekranını kontrol et", href: "/tahsilatlar", relatedItemIds: ["import-customers"] },
+    { title: "Ekstre ve belge akışını gözden geçir", href: "/belgeler", relatedItemIds: ["document-templates"] },
     { title: "Ödeme hatırlatma ve servis hazırlığını kontrol et", href: "/ayarlar/staging-kontrol", relatedItemIds: ["service-whatsapp", "service-ai"] }
   ],
   depo: [
-    { title: "Depo tanimlarini dogrula", href: "/ayarlar", relatedItemIds: ["warehouses"] },
+    { title: "Depo tanımlarını doğrula", href: "/ayarlar", relatedItemIds: ["warehouses"] },
     { title: "Raf/lokasyon verisini kontrol et", href: "/stok", relatedItemIds: ["import-stock"] },
-    { title: "Depo gorevleri ekranini ac", href: "/depo", relatedItemIds: ["service-local-agent"] }
+    { title: "Depo görevleri ekranını aç", href: "/depo", relatedItemIds: ["service-local-agent"] }
   ],
   pazarlama: [
-    { title: "WhatsApp sablonlarini kontrol et", href: "/whatsapp", relatedItemIds: ["service-whatsapp"] },
-    { title: "Belge sablonlarina goz at", href: "/belgeler", relatedItemIds: ["document-templates"] },
-    { title: "Raporlar ekranini ac", href: "/raporlar", relatedItemIds: ["service-ai"] }
+    { title: "WhatsApp şablonlarını kontrol et", href: "/whatsapp", relatedItemIds: ["service-whatsapp"] },
+    { title: "Belge şablonlarına göz at", href: "/belgeler", relatedItemIds: ["document-templates"] },
+    { title: "Raporlar ekranını aç", href: "/raporlar", relatedItemIds: ["service-ai"] }
   ]
 };
 
@@ -117,7 +107,7 @@ export function PilotReadinessPage() {
       const next = await getPilotReadinessData();
       setData(next);
     } catch (readinessError) {
-      setError(readinessError instanceof Error ? readinessError.message : "Kullanim hazirligi bilgisi alinamadi.");
+      setError(readinessError instanceof Error ? readinessError.message : "Kullanım hazırlığı bilgisi alınamadı.");
     } finally {
       setLoading(false);
     }
@@ -160,32 +150,37 @@ export function PilotReadinessPage() {
     <SettingsAreaShell>
     <div className="hz-page-stack">
       <PageHeader
-        title="Kullanim Hazirligi Merkezi"
-        description="Kritik eksikler, onboarding adimlari ve servis saglik durumlariyla canli kullanim kararini tek panelden verin."
+        title="Kullanım Hazırlığı Merkezi"
+        description="Kritik eksikler, başlangıç adımları ve servis sağlık durumlarıyla canlı kullanım kararını tek panelden verin."
         actions={
           <div className="hz-inline-actions">
             <Link href="/ayarlar" className="hz-btn hz-btn-secondary">
-              Ayarlara Don
+              Ayarlara dön
             </Link>
             <Link href="/ayarlar/staging-kontrol" className="hz-btn hz-btn-secondary">
-              Servis Sagligi
+              Servis sağlığı
             </Link>
           </div>
         }
       />
 
       <section className="hz-metric-grid">
-        <MetricCard title="Tamamlanma" value={`${data?.completionRate ?? 0}%`} detail="Genel pilot readiness" tone={(data?.completionRate ?? 0) >= 80 ? "success" : "warning"} />
-        <MetricCard title="Kritik Eksik" value={String(criticalItems.length)} detail="Bloklayici kalem" tone={criticalItems.length > 0 ? "danger" : "success"} />
-        <MetricCard title="Uyari Sayisi" value={String(warningItems.length)} detail="Takip edilmesi gereken" tone="warning" />
-        <MetricCard title="Hazir Kalem" value={String(readyItems.length)} detail="Tamamlanmis adim" tone="success" />
-        <MetricCard title="Entegrasyon Sagligi" value={data?.integrationHealth.status ?? "-"} detail={`Live ${data?.integrationHealth.liveCount ?? 0} / Fallback ${data?.integrationHealth.fallbackCount ?? 0}`} tone={data?.integrationHealth.status === "healthy" ? "success" : "warning"} />
-        <MetricCard title="Veri Tutarlilik Uyarisi" value={String(data?.consistencyWarnings.length ?? 0)} detail="Kritik veri kontrolu" tone={(data?.consistencyWarnings.length ?? 0) > 0 ? "warning" : "success"} />
+        <MetricCard title="Tamamlanma" value={`${data?.completionRate ?? 0}%`} detail="Genel pilot hazırlık durumu" tone={(data?.completionRate ?? 0) >= 80 ? "success" : "warning"} />
+        <MetricCard title="Kritik eksik" value={String(criticalItems.length)} detail="Bloklayıcı kalem" tone={criticalItems.length > 0 ? "danger" : "success"} />
+        <MetricCard title="Uyarı sayısı" value={String(warningItems.length)} detail="Takip edilmesi gereken" tone="warning" />
+        <MetricCard title="Hazır kalem" value={String(readyItems.length)} detail="Tamamlanmış adım" tone="success" />
+        <MetricCard
+          title="Entegrasyon sağlığı"
+          value={data ? formatUserFacingHealthStatus(data.integrationHealth.status) : "—"}
+          detail={`Canlı ${data?.integrationHealth.liveCount ?? 0} / Yedek görünüm ${data?.integrationHealth.fallbackCount ?? 0}`}
+          tone={data?.integrationHealth.status === "healthy" ? "success" : "warning"}
+        />
+        <MetricCard title="Veri tutarlılık uyarısı" value={String(data?.consistencyWarnings.length ?? 0)} detail="Kritik veri kontrolü" tone={(data?.consistencyWarnings.length ?? 0) > 0 ? "warning" : "success"} />
       </section>
 
       <PrimaryActionToolbar>
         <button className="hz-btn hz-toolbar-btn hz-btn-primary" type="button" onClick={() => void reload()} disabled={loading}>
-          {loading ? "Yukleniyor..." : "Hazirlik Durumunu Yenile"}
+          {loading ? "Yükleniyor…" : "Hazırlık durumunu yenile"}
         </button>
       </PrimaryActionToolbar>
 
@@ -196,9 +191,9 @@ export function PilotReadinessPage() {
       ) : null}
 
       <section className="hz-content-card">
-        <h3>Bloklayicilar</h3>
+        <h3>Bloklayıcılar</h3>
         {criticalItems.length === 0 ? (
-          <p className="muted">Canli kullanimi engelleyen kritik eksik yok. Uyari seviyesindeki maddeleri tamamlayarak guvenli acilisa gecebilirsiniz.</p>
+          <p className="muted">Canlı kullanımı engelleyen kritik eksik yok. Uyarı seviyesindeki maddeleri tamamlayarak güvenli açılışa geçebilirsiniz.</p>
         ) : (
           <div className="hz-page-stack">
             {criticalItems.map((item) => (
@@ -208,7 +203,7 @@ export function PilotReadinessPage() {
                   <span className={priorityBadgeClass("critical")}>Kritik</span>
                 </div>
                 <p className="muted">{item.reason}</p>
-                <p className="muted">Sonraki adim: {item.recommendedNextStep}</p>
+                <p className="muted">Sonraki adım: {item.recommendedNextStep}</p>
                 <div className="hz-inline-actions">
                   <Link href={item.actionHref} className="hz-btn hz-btn-primary">
                     {item.actionLabel}
@@ -231,10 +226,10 @@ export function PilotReadinessPage() {
                     <thead>
                       <tr>
                         <th>Madde</th>
-                        <th>Oncelik</th>
+                        <th>Öncelik</th>
                         <th>Durum</th>
                         <th>Neden</th>
-                        <th>Sonraki Adim</th>
+                        <th>Sonraki Adım</th>
                         <th>Aksiyon</th>
                       </tr>
                     </thead>
@@ -270,23 +265,23 @@ export function PilotReadinessPage() {
             ))}
 
             <section className="hz-content-card">
-              <h3>Rol Bazli Onboarding</h3>
+              <h3>Rol Bazlı Başlangıç</h3>
               <div className="hz-compact-grid" style={{ gridTemplateColumns: "repeat(auto-fit, minmax(240px, 1fr))" }}>
                 {(data?.onboardingCards ?? []).map((card) => (
                   <article key={card.roleCode} className="hz-side-panel">
                     <h4>{card.roleName}</h4>
                     <p className="muted">{card.summary}</p>
                     <div className="hz-page-stack" style={{ gap: "8px" }}>
-                      <strong>Bugun yapilacak 3 adim</strong>
+                      <strong>Bugün yapılacak 3 adım</strong>
                       {(ONBOARDING_TASKS[card.roleCode] ?? []).slice(0, 3).map((task, index) => {
                         const tone = getTaskTone(task.relatedItemIds);
                         return (
                           <div key={`${card.roleCode}-task-${index}`} className="hz-inline-actions" style={{ justifyContent: "space-between" }}>
                             <span>{task.title}</span>
                             <div className="hz-inline-actions">
-                              <span className={taskToneClass(tone)}>{tone === "kritik" ? "Kritik" : tone === "oneri" ? "Oneri" : "Hazir"}</span>
+                              <span className={taskToneClass(tone)}>{tone === "kritik" ? "Kritik" : tone === "oneri" ? "Öneri" : "Hazır"}</span>
                               <Link href={task.href} className="hz-btn hz-btn-secondary">
-                                Ac
+                                Aç
                               </Link>
                             </div>
                           </div>
@@ -302,7 +297,7 @@ export function PilotReadinessPage() {
         side={
           <div className="hz-page-stack">
             <aside className="hz-side-panel">
-              <h3>Hizli Aksiyonlar</h3>
+              <h3>Hızlı aksiyonlar</h3>
               <div className="hz-page-stack" style={{ gap: "8px" }}>
                 {QUICK_ACTIONS.map((action) => (
                   <Link key={action.href + action.label} href={action.href} className="hz-btn hz-btn-secondary" style={{ justifyContent: "flex-start" }}>
@@ -313,26 +308,26 @@ export function PilotReadinessPage() {
             </aside>
 
             <aside className="hz-side-panel">
-              <h3>Health Ozet</h3>
+              <h3>Sağlık durumu özeti</h3>
               <div className="detail-list">
-                <span>Genel Durum</span>
-                <strong>{data?.integrationHealth.status ?? "-"}</strong>
-                <span>Configured</span>
+                <span>Genel durum</span>
+                <strong>{data ? formatUserFacingHealthStatus(data.integrationHealth.status) : "—"}</strong>
+                <span>Yapılandırıldı</span>
                 <strong>{data?.integrationHealth.configuredCount ?? 0}</strong>
-                <span>Canli</span>
+                <span>Canlı</span>
                 <strong>{data?.integrationHealth.liveCount ?? 0}</strong>
-                <span>Fallback</span>
+                <span>Yedek görünüm</span>
                 <strong>{data?.integrationHealth.fallbackCount ?? 0}</strong>
-                <span>Disabled</span>
+                <span>Devre dışı</span>
                 <strong>{data?.integrationHealth.disabledCount ?? 0}</strong>
               </div>
             </aside>
 
             <aside className="hz-side-panel">
-              <h3>Veri Tutarlilik Uyarilari</h3>
+              <h3>Veri tutarlılık uyarıları</h3>
               <ul className="hz-side-list">
                 {(data?.consistencyWarnings ?? []).length === 0 ? (
-                  <li>Kritik veri tutarlilik sorunu tespit edilmedi.</li>
+                  <li>Kritik veri tutarlılık sorunu tespit edilmedi.</li>
                 ) : (
                   (data?.consistencyWarnings ?? []).map((warning, index) => <li key={`warn-${index}`}>{warning}</li>)
                 )}

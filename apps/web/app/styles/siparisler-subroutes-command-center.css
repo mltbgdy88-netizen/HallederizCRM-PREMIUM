@@ -1,0 +1,812 @@
+/* Siparisler sub-route readiness centers */
+
+.hz-siparisler-liste-center, .hz-siparisler-orderid-ozet-center, .hz-siparisler-orderid-satirlar-center, .hz-siparisler-orderid-odeme-tahsilat-center, .hz-siparisler-orderid-teslimat-center, .hz-siparisler-orderid-fatura-center, .hz-siparisler-orderid-iade-center, .hz-siparisler-orderid-depo-stok-etkisi-center, .hz-siparisler-orderid-timeline-center {
+  height: calc(100dvh - 72px);
+  max-height: calc(100dvh - 72px);
+  overflow: hidden;
+  padding: 12px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(4, 120, 87, 0.1), transparent 24%),
+    radial-gradient(circle at 100% 0%, rgba(234, 179, 8, 0.11), transparent 26%),
+    linear-gradient(180deg, #fffdf6 0%, #f7f2e7 100%);
+  color: #102a24;
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.hz-siparisler-liste-center__intro, .hz-siparisler-orderid-ozet-center__intro, .hz-siparisler-orderid-satirlar-center__intro, .hz-siparisler-orderid-odeme-tahsilat-center__intro, .hz-siparisler-orderid-teslimat-center__intro, .hz-siparisler-orderid-fatura-center__intro, .hz-siparisler-orderid-iade-center__intro, .hz-siparisler-orderid-depo-stok-etkisi-center__intro, .hz-siparisler-orderid-timeline-center__intro,
+.hz-siparisler-liste-center__intro, .hz-siparisler-orderid-ozet-center__intro, .hz-siparisler-orderid-satirlar-center__intro, .hz-siparisler-orderid-odeme-tahsilat-center__intro, .hz-siparisler-orderid-teslimat-center__intro, .hz-siparisler-orderid-fatura-center__intro, .hz-siparisler-orderid-iade-center__intro, .hz-siparisler-orderid-depo-stok-etkisi-center__intro, .hz-siparisler-orderid-timeline-center__intro {
+  height: 56px;
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 12px;
+}
+
+.hz-siparisler-liste-center__title-row, .hz-siparisler-orderid-ozet-center__title-row, .hz-siparisler-orderid-satirlar-center__title-row, .hz-siparisler-orderid-odeme-tahsilat-center__title-row, .hz-siparisler-orderid-teslimat-center__title-row, .hz-siparisler-orderid-fatura-center__title-row, .hz-siparisler-orderid-iade-center__title-row, .hz-siparisler-orderid-depo-stok-etkisi-center__title-row, .hz-siparisler-orderid-timeline-center__title-row,
+.hz-siparisler-liste-center__title-row, .hz-siparisler-orderid-ozet-center__title-row, .hz-siparisler-orderid-satirlar-center__title-row, .hz-siparisler-orderid-odeme-tahsilat-center__title-row, .hz-siparisler-orderid-teslimat-center__title-row, .hz-siparisler-orderid-fatura-center__title-row, .hz-siparisler-orderid-iade-center__title-row, .hz-siparisler-orderid-depo-stok-etkisi-center__title-row, .hz-siparisler-orderid-timeline-center__title-row,
+.hz-siparisler-liste-center__actions, .hz-siparisler-orderid-ozet-center__actions, .hz-siparisler-orderid-satirlar-center__actions, .hz-siparisler-orderid-odeme-tahsilat-center__actions, .hz-siparisler-orderid-teslimat-center__actions, .hz-siparisler-orderid-fatura-center__actions, .hz-siparisler-orderid-iade-center__actions, .hz-siparisler-orderid-depo-stok-etkisi-center__actions, .hz-siparisler-orderid-timeline-center__actions,
+.hz-siparisler-liste-center__actions, .hz-siparisler-orderid-ozet-center__actions, .hz-siparisler-orderid-satirlar-center__actions, .hz-siparisler-orderid-odeme-tahsilat-center__actions, .hz-siparisler-orderid-teslimat-center__actions, .hz-siparisler-orderid-fatura-center__actions, .hz-siparisler-orderid-iade-center__actions, .hz-siparisler-orderid-depo-stok-etkisi-center__actions, .hz-siparisler-orderid-timeline-center__actions,
+.hz-siparisler-liste-center__side-meta, .hz-siparisler-orderid-ozet-center__side-meta, .hz-siparisler-orderid-satirlar-center__side-meta, .hz-siparisler-orderid-odeme-tahsilat-center__side-meta, .hz-siparisler-orderid-teslimat-center__side-meta, .hz-siparisler-orderid-fatura-center__side-meta, .hz-siparisler-orderid-iade-center__side-meta, .hz-siparisler-orderid-depo-stok-etkisi-center__side-meta, .hz-siparisler-orderid-timeline-center__side-meta,
+.hz-siparisler-liste-center__side-meta, .hz-siparisler-orderid-ozet-center__side-meta, .hz-siparisler-orderid-satirlar-center__side-meta, .hz-siparisler-orderid-odeme-tahsilat-center__side-meta, .hz-siparisler-orderid-teslimat-center__side-meta, .hz-siparisler-orderid-fatura-center__side-meta, .hz-siparisler-orderid-iade-center__side-meta, .hz-siparisler-orderid-depo-stok-etkisi-center__side-meta, .hz-siparisler-orderid-timeline-center__side-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.hz-siparisler-liste-center__icon, .hz-siparisler-orderid-ozet-center__icon, .hz-siparisler-orderid-satirlar-center__icon, .hz-siparisler-orderid-odeme-tahsilat-center__icon, .hz-siparisler-orderid-teslimat-center__icon, .hz-siparisler-orderid-fatura-center__icon, .hz-siparisler-orderid-iade-center__icon, .hz-siparisler-orderid-depo-stok-etkisi-center__icon, .hz-siparisler-orderid-timeline-center__icon,
+.hz-siparisler-liste-center__icon, .hz-siparisler-orderid-ozet-center__icon, .hz-siparisler-orderid-satirlar-center__icon, .hz-siparisler-orderid-odeme-tahsilat-center__icon, .hz-siparisler-orderid-teslimat-center__icon, .hz-siparisler-orderid-fatura-center__icon, .hz-siparisler-orderid-iade-center__icon, .hz-siparisler-orderid-depo-stok-etkisi-center__icon, .hz-siparisler-orderid-timeline-center__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 1px solid rgba(250, 204, 21, 0.45);
+  background: linear-gradient(135deg, rgba(254, 243, 199, 0.9), rgba(209, 250, 229, 0.65));
+  color: #064e3b;
+}
+
+.hz-siparisler-liste-center__page-title, .hz-siparisler-orderid-ozet-center__page-title, .hz-siparisler-orderid-satirlar-center__page-title, .hz-siparisler-orderid-odeme-tahsilat-center__page-title, .hz-siparisler-orderid-teslimat-center__page-title, .hz-siparisler-orderid-fatura-center__page-title, .hz-siparisler-orderid-iade-center__page-title, .hz-siparisler-orderid-depo-stok-etkisi-center__page-title, .hz-siparisler-orderid-timeline-center__page-title,
+.hz-siparisler-liste-center__page-title, .hz-siparisler-orderid-ozet-center__page-title, .hz-siparisler-orderid-satirlar-center__page-title, .hz-siparisler-orderid-odeme-tahsilat-center__page-title, .hz-siparisler-orderid-teslimat-center__page-title, .hz-siparisler-orderid-fatura-center__page-title, .hz-siparisler-orderid-iade-center__page-title, .hz-siparisler-orderid-depo-stok-etkisi-center__page-title, .hz-siparisler-orderid-timeline-center__page-title,
+.hz-siparisler-liste-center__card-title, .hz-siparisler-orderid-ozet-center__card-title, .hz-siparisler-orderid-satirlar-center__card-title, .hz-siparisler-orderid-odeme-tahsilat-center__card-title, .hz-siparisler-orderid-teslimat-center__card-title, .hz-siparisler-orderid-fatura-center__card-title, .hz-siparisler-orderid-iade-center__card-title, .hz-siparisler-orderid-depo-stok-etkisi-center__card-title, .hz-siparisler-orderid-timeline-center__card-title,
+.hz-siparisler-liste-center__card-title, .hz-siparisler-orderid-ozet-center__card-title, .hz-siparisler-orderid-satirlar-center__card-title, .hz-siparisler-orderid-odeme-tahsilat-center__card-title, .hz-siparisler-orderid-teslimat-center__card-title, .hz-siparisler-orderid-fatura-center__card-title, .hz-siparisler-orderid-iade-center__card-title, .hz-siparisler-orderid-depo-stok-etkisi-center__card-title, .hz-siparisler-orderid-timeline-center__card-title {
+  margin: 0;
+  font-weight: 900;
+  letter-spacing: -0.03em;
+}
+
+.hz-siparisler-liste-center__page-title, .hz-siparisler-orderid-ozet-center__page-title, .hz-siparisler-orderid-satirlar-center__page-title, .hz-siparisler-orderid-odeme-tahsilat-center__page-title, .hz-siparisler-orderid-teslimat-center__page-title, .hz-siparisler-orderid-fatura-center__page-title, .hz-siparisler-orderid-iade-center__page-title, .hz-siparisler-orderid-depo-stok-etkisi-center__page-title, .hz-siparisler-orderid-timeline-center__page-title,
+.hz-siparisler-liste-center__page-title, .hz-siparisler-orderid-ozet-center__page-title, .hz-siparisler-orderid-satirlar-center__page-title, .hz-siparisler-orderid-odeme-tahsilat-center__page-title, .hz-siparisler-orderid-teslimat-center__page-title, .hz-siparisler-orderid-fatura-center__page-title, .hz-siparisler-orderid-iade-center__page-title, .hz-siparisler-orderid-depo-stok-etkisi-center__page-title, .hz-siparisler-orderid-timeline-center__page-title {
+  font-size: 16px;
+}
+
+.hz-siparisler-liste-center__page-sub, .hz-siparisler-orderid-ozet-center__page-sub, .hz-siparisler-orderid-satirlar-center__page-sub, .hz-siparisler-orderid-odeme-tahsilat-center__page-sub, .hz-siparisler-orderid-teslimat-center__page-sub, .hz-siparisler-orderid-fatura-center__page-sub, .hz-siparisler-orderid-iade-center__page-sub, .hz-siparisler-orderid-depo-stok-etkisi-center__page-sub, .hz-siparisler-orderid-timeline-center__page-sub,
+.hz-siparisler-liste-center__page-sub, .hz-siparisler-orderid-ozet-center__page-sub, .hz-siparisler-orderid-satirlar-center__page-sub, .hz-siparisler-orderid-odeme-tahsilat-center__page-sub, .hz-siparisler-orderid-teslimat-center__page-sub, .hz-siparisler-orderid-fatura-center__page-sub, .hz-siparisler-orderid-iade-center__page-sub, .hz-siparisler-orderid-depo-stok-etkisi-center__page-sub, .hz-siparisler-orderid-timeline-center__page-sub,
+.hz-siparisler-liste-center__muted-line, .hz-siparisler-orderid-ozet-center__muted-line, .hz-siparisler-orderid-satirlar-center__muted-line, .hz-siparisler-orderid-odeme-tahsilat-center__muted-line, .hz-siparisler-orderid-teslimat-center__muted-line, .hz-siparisler-orderid-fatura-center__muted-line, .hz-siparisler-orderid-iade-center__muted-line, .hz-siparisler-orderid-depo-stok-etkisi-center__muted-line, .hz-siparisler-orderid-timeline-center__muted-line,
+.hz-siparisler-liste-center__muted-line, .hz-siparisler-orderid-ozet-center__muted-line, .hz-siparisler-orderid-satirlar-center__muted-line, .hz-siparisler-orderid-odeme-tahsilat-center__muted-line, .hz-siparisler-orderid-teslimat-center__muted-line, .hz-siparisler-orderid-fatura-center__muted-line, .hz-siparisler-orderid-iade-center__muted-line, .hz-siparisler-orderid-depo-stok-etkisi-center__muted-line, .hz-siparisler-orderid-timeline-center__muted-line,
+.hz-siparisler-liste-center__scope-hint, .hz-siparisler-orderid-ozet-center__scope-hint, .hz-siparisler-orderid-satirlar-center__scope-hint, .hz-siparisler-orderid-odeme-tahsilat-center__scope-hint, .hz-siparisler-orderid-teslimat-center__scope-hint, .hz-siparisler-orderid-fatura-center__scope-hint, .hz-siparisler-orderid-iade-center__scope-hint, .hz-siparisler-orderid-depo-stok-etkisi-center__scope-hint, .hz-siparisler-orderid-timeline-center__scope-hint,
+.hz-siparisler-liste-center__scope-hint, .hz-siparisler-orderid-ozet-center__scope-hint, .hz-siparisler-orderid-satirlar-center__scope-hint, .hz-siparisler-orderid-odeme-tahsilat-center__scope-hint, .hz-siparisler-orderid-teslimat-center__scope-hint, .hz-siparisler-orderid-fatura-center__scope-hint, .hz-siparisler-orderid-iade-center__scope-hint, .hz-siparisler-orderid-depo-stok-etkisi-center__scope-hint, .hz-siparisler-orderid-timeline-center__scope-hint,
+.hz-siparisler-liste-center__policy-copy, .hz-siparisler-orderid-ozet-center__policy-copy, .hz-siparisler-orderid-satirlar-center__policy-copy, .hz-siparisler-orderid-odeme-tahsilat-center__policy-copy, .hz-siparisler-orderid-teslimat-center__policy-copy, .hz-siparisler-orderid-fatura-center__policy-copy, .hz-siparisler-orderid-iade-center__policy-copy, .hz-siparisler-orderid-depo-stok-etkisi-center__policy-copy, .hz-siparisler-orderid-timeline-center__policy-copy,
+.hz-siparisler-liste-center__policy-copy, .hz-siparisler-orderid-ozet-center__policy-copy, .hz-siparisler-orderid-satirlar-center__policy-copy, .hz-siparisler-orderid-odeme-tahsilat-center__policy-copy, .hz-siparisler-orderid-teslimat-center__policy-copy, .hz-siparisler-orderid-fatura-center__policy-copy, .hz-siparisler-orderid-iade-center__policy-copy, .hz-siparisler-orderid-depo-stok-etkisi-center__policy-copy, .hz-siparisler-orderid-timeline-center__policy-copy {
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.4;
+  color: #52665e;
+}
+
+.hz-siparisler-liste-center__summary, .hz-siparisler-orderid-ozet-center__summary, .hz-siparisler-orderid-satirlar-center__summary, .hz-siparisler-orderid-odeme-tahsilat-center__summary, .hz-siparisler-orderid-teslimat-center__summary, .hz-siparisler-orderid-fatura-center__summary, .hz-siparisler-orderid-iade-center__summary, .hz-siparisler-orderid-depo-stok-etkisi-center__summary, .hz-siparisler-orderid-timeline-center__summary,
+.hz-siparisler-liste-center__summary, .hz-siparisler-orderid-ozet-center__summary, .hz-siparisler-orderid-satirlar-center__summary, .hz-siparisler-orderid-odeme-tahsilat-center__summary, .hz-siparisler-orderid-teslimat-center__summary, .hz-siparisler-orderid-fatura-center__summary, .hz-siparisler-orderid-iade-center__summary, .hz-siparisler-orderid-depo-stok-etkisi-center__summary, .hz-siparisler-orderid-timeline-center__summary {
+  min-height: 64px;
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+
+.hz-siparisler-liste-center__summary-card, .hz-siparisler-orderid-ozet-center__summary-card, .hz-siparisler-orderid-satirlar-center__summary-card, .hz-siparisler-orderid-odeme-tahsilat-center__summary-card, .hz-siparisler-orderid-teslimat-center__summary-card, .hz-siparisler-orderid-fatura-center__summary-card, .hz-siparisler-orderid-iade-center__summary-card, .hz-siparisler-orderid-depo-stok-etkisi-center__summary-card, .hz-siparisler-orderid-timeline-center__summary-card,
+.hz-siparisler-liste-center__summary-card, .hz-siparisler-orderid-ozet-center__summary-card, .hz-siparisler-orderid-satirlar-center__summary-card, .hz-siparisler-orderid-odeme-tahsilat-center__summary-card, .hz-siparisler-orderid-teslimat-center__summary-card, .hz-siparisler-orderid-fatura-center__summary-card, .hz-siparisler-orderid-iade-center__summary-card, .hz-siparisler-orderid-depo-stok-etkisi-center__summary-card, .hz-siparisler-orderid-timeline-center__summary-card,
+.hz-siparisler-liste-center__card, .hz-siparisler-orderid-ozet-center__card, .hz-siparisler-orderid-satirlar-center__card, .hz-siparisler-orderid-odeme-tahsilat-center__card, .hz-siparisler-orderid-teslimat-center__card, .hz-siparisler-orderid-fatura-center__card, .hz-siparisler-orderid-iade-center__card, .hz-siparisler-orderid-depo-stok-etkisi-center__card, .hz-siparisler-orderid-timeline-center__card,
+.hz-siparisler-liste-center__card, .hz-siparisler-orderid-ozet-center__card, .hz-siparisler-orderid-satirlar-center__card, .hz-siparisler-orderid-odeme-tahsilat-center__card, .hz-siparisler-orderid-teslimat-center__card, .hz-siparisler-orderid-fatura-center__card, .hz-siparisler-orderid-iade-center__card, .hz-siparisler-orderid-depo-stok-etkisi-center__card, .hz-siparisler-orderid-timeline-center__card,
+.hz-siparisler-liste-center__side-section, .hz-siparisler-orderid-ozet-center__side-section, .hz-siparisler-orderid-satirlar-center__side-section, .hz-siparisler-orderid-odeme-tahsilat-center__side-section, .hz-siparisler-orderid-teslimat-center__side-section, .hz-siparisler-orderid-fatura-center__side-section, .hz-siparisler-orderid-iade-center__side-section, .hz-siparisler-orderid-depo-stok-etkisi-center__side-section, .hz-siparisler-orderid-timeline-center__side-section,
+.hz-siparisler-liste-center__side-section, .hz-siparisler-orderid-ozet-center__side-section, .hz-siparisler-orderid-satirlar-center__side-section, .hz-siparisler-orderid-odeme-tahsilat-center__side-section, .hz-siparisler-orderid-teslimat-center__side-section, .hz-siparisler-orderid-fatura-center__side-section, .hz-siparisler-orderid-iade-center__side-section, .hz-siparisler-orderid-depo-stok-etkisi-center__side-section, .hz-siparisler-orderid-timeline-center__side-section,
+.hz-siparisler-liste-center__scope-card, .hz-siparisler-orderid-ozet-center__scope-card, .hz-siparisler-orderid-satirlar-center__scope-card, .hz-siparisler-orderid-odeme-tahsilat-center__scope-card, .hz-siparisler-orderid-teslimat-center__scope-card, .hz-siparisler-orderid-fatura-center__scope-card, .hz-siparisler-orderid-iade-center__scope-card, .hz-siparisler-orderid-depo-stok-etkisi-center__scope-card, .hz-siparisler-orderid-timeline-center__scope-card,
+.hz-siparisler-liste-center__scope-card, .hz-siparisler-orderid-ozet-center__scope-card, .hz-siparisler-orderid-satirlar-center__scope-card, .hz-siparisler-orderid-odeme-tahsilat-center__scope-card, .hz-siparisler-orderid-teslimat-center__scope-card, .hz-siparisler-orderid-fatura-center__scope-card, .hz-siparisler-orderid-iade-center__scope-card, .hz-siparisler-orderid-depo-stok-etkisi-center__scope-card, .hz-siparisler-orderid-timeline-center__scope-card {
+  border-radius: 14px;
+  border: 1px solid rgba(6, 78, 59, 0.1);
+  background: rgba(255, 253, 246, 0.96);
+  box-shadow: 0 1px 0 rgba(16, 42, 36, 0.05);
+}
+
+.hz-siparisler-liste-center__summary-card, .hz-siparisler-orderid-ozet-center__summary-card, .hz-siparisler-orderid-satirlar-center__summary-card, .hz-siparisler-orderid-odeme-tahsilat-center__summary-card, .hz-siparisler-orderid-teslimat-center__summary-card, .hz-siparisler-orderid-fatura-center__summary-card, .hz-siparisler-orderid-iade-center__summary-card, .hz-siparisler-orderid-depo-stok-etkisi-center__summary-card, .hz-siparisler-orderid-timeline-center__summary-card,
+.hz-siparisler-liste-center__summary-card, .hz-siparisler-orderid-ozet-center__summary-card, .hz-siparisler-orderid-satirlar-center__summary-card, .hz-siparisler-orderid-odeme-tahsilat-center__summary-card, .hz-siparisler-orderid-teslimat-center__summary-card, .hz-siparisler-orderid-fatura-center__summary-card, .hz-siparisler-orderid-iade-center__summary-card, .hz-siparisler-orderid-depo-stok-etkisi-center__summary-card, .hz-siparisler-orderid-timeline-center__summary-card {
+  padding: 8px 10px;
+}
+
+.hz-siparisler-liste-center__summary-label, .hz-siparisler-orderid-ozet-center__summary-label, .hz-siparisler-orderid-satirlar-center__summary-label, .hz-siparisler-orderid-odeme-tahsilat-center__summary-label, .hz-siparisler-orderid-teslimat-center__summary-label, .hz-siparisler-orderid-fatura-center__summary-label, .hz-siparisler-orderid-iade-center__summary-label, .hz-siparisler-orderid-depo-stok-etkisi-center__summary-label, .hz-siparisler-orderid-timeline-center__summary-label,
+.hz-siparisler-liste-center__summary-label, .hz-siparisler-orderid-ozet-center__summary-label, .hz-siparisler-orderid-satirlar-center__summary-label, .hz-siparisler-orderid-odeme-tahsilat-center__summary-label, .hz-siparisler-orderid-teslimat-center__summary-label, .hz-siparisler-orderid-fatura-center__summary-label, .hz-siparisler-orderid-iade-center__summary-label, .hz-siparisler-orderid-depo-stok-etkisi-center__summary-label, .hz-siparisler-orderid-timeline-center__summary-label,
+.hz-siparisler-liste-center__field-label, .hz-siparisler-orderid-ozet-center__field-label, .hz-siparisler-orderid-satirlar-center__field-label, .hz-siparisler-orderid-odeme-tahsilat-center__field-label, .hz-siparisler-orderid-teslimat-center__field-label, .hz-siparisler-orderid-fatura-center__field-label, .hz-siparisler-orderid-iade-center__field-label, .hz-siparisler-orderid-depo-stok-etkisi-center__field-label, .hz-siparisler-orderid-timeline-center__field-label,
+.hz-siparisler-liste-center__field-label, .hz-siparisler-orderid-ozet-center__field-label, .hz-siparisler-orderid-satirlar-center__field-label, .hz-siparisler-orderid-odeme-tahsilat-center__field-label, .hz-siparisler-orderid-teslimat-center__field-label, .hz-siparisler-orderid-fatura-center__field-label, .hz-siparisler-orderid-iade-center__field-label, .hz-siparisler-orderid-depo-stok-etkisi-center__field-label, .hz-siparisler-orderid-timeline-center__field-label,
+.hz-siparisler-liste-center__side-heading, .hz-siparisler-orderid-ozet-center__side-heading, .hz-siparisler-orderid-satirlar-center__side-heading, .hz-siparisler-orderid-odeme-tahsilat-center__side-heading, .hz-siparisler-orderid-teslimat-center__side-heading, .hz-siparisler-orderid-fatura-center__side-heading, .hz-siparisler-orderid-iade-center__side-heading, .hz-siparisler-orderid-depo-stok-etkisi-center__side-heading, .hz-siparisler-orderid-timeline-center__side-heading,
+.hz-siparisler-liste-center__side-heading, .hz-siparisler-orderid-ozet-center__side-heading, .hz-siparisler-orderid-satirlar-center__side-heading, .hz-siparisler-orderid-odeme-tahsilat-center__side-heading, .hz-siparisler-orderid-teslimat-center__side-heading, .hz-siparisler-orderid-fatura-center__side-heading, .hz-siparisler-orderid-iade-center__side-heading, .hz-siparisler-orderid-depo-stok-etkisi-center__side-heading, .hz-siparisler-orderid-timeline-center__side-heading {
+  font-size: 10px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #52665e;
+}
+
+.hz-siparisler-liste-center__summary-value, .hz-siparisler-orderid-ozet-center__summary-value, .hz-siparisler-orderid-satirlar-center__summary-value, .hz-siparisler-orderid-odeme-tahsilat-center__summary-value, .hz-siparisler-orderid-teslimat-center__summary-value, .hz-siparisler-orderid-fatura-center__summary-value, .hz-siparisler-orderid-iade-center__summary-value, .hz-siparisler-orderid-depo-stok-etkisi-center__summary-value, .hz-siparisler-orderid-timeline-center__summary-value,
+.hz-siparisler-liste-center__summary-value, .hz-siparisler-orderid-ozet-center__summary-value, .hz-siparisler-orderid-satirlar-center__summary-value, .hz-siparisler-orderid-odeme-tahsilat-center__summary-value, .hz-siparisler-orderid-teslimat-center__summary-value, .hz-siparisler-orderid-fatura-center__summary-value, .hz-siparisler-orderid-iade-center__summary-value, .hz-siparisler-orderid-depo-stok-etkisi-center__summary-value, .hz-siparisler-orderid-timeline-center__summary-value {
+  font-size: 18px;
+  font-weight: 950;
+  color: #064e3b;
+}
+
+.hz-siparisler-liste-center__summary-hint, .hz-siparisler-orderid-ozet-center__summary-hint, .hz-siparisler-orderid-satirlar-center__summary-hint, .hz-siparisler-orderid-odeme-tahsilat-center__summary-hint, .hz-siparisler-orderid-teslimat-center__summary-hint, .hz-siparisler-orderid-fatura-center__summary-hint, .hz-siparisler-orderid-iade-center__summary-hint, .hz-siparisler-orderid-depo-stok-etkisi-center__summary-hint, .hz-siparisler-orderid-timeline-center__summary-hint,
+.hz-siparisler-liste-center__summary-hint, .hz-siparisler-orderid-ozet-center__summary-hint, .hz-siparisler-orderid-satirlar-center__summary-hint, .hz-siparisler-orderid-odeme-tahsilat-center__summary-hint, .hz-siparisler-orderid-teslimat-center__summary-hint, .hz-siparisler-orderid-fatura-center__summary-hint, .hz-siparisler-orderid-iade-center__summary-hint, .hz-siparisler-orderid-depo-stok-etkisi-center__summary-hint, .hz-siparisler-orderid-timeline-center__summary-hint {
+  font-size: 10px;
+  color: #52665e;
+}
+
+.hz-siparisler-liste-center__grid, .hz-siparisler-orderid-ozet-center__grid, .hz-siparisler-orderid-satirlar-center__grid, .hz-siparisler-orderid-odeme-tahsilat-center__grid, .hz-siparisler-orderid-teslimat-center__grid, .hz-siparisler-orderid-fatura-center__grid, .hz-siparisler-orderid-iade-center__grid, .hz-siparisler-orderid-depo-stok-etkisi-center__grid, .hz-siparisler-orderid-timeline-center__grid,
+.hz-siparisler-liste-center__grid, .hz-siparisler-orderid-ozet-center__grid, .hz-siparisler-orderid-satirlar-center__grid, .hz-siparisler-orderid-odeme-tahsilat-center__grid, .hz-siparisler-orderid-teslimat-center__grid, .hz-siparisler-orderid-fatura-center__grid, .hz-siparisler-orderid-iade-center__grid, .hz-siparisler-orderid-depo-stok-etkisi-center__grid, .hz-siparisler-orderid-timeline-center__grid {
+  height: calc(100% - 132px);
+  display: grid;
+  grid-template-columns: minmax(0, 1.06fr) minmax(300px, 0.88fr) 320px;
+  gap: 12px;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.hz-siparisler-liste-center__main, .hz-siparisler-orderid-ozet-center__main, .hz-siparisler-orderid-satirlar-center__main, .hz-siparisler-orderid-odeme-tahsilat-center__main, .hz-siparisler-orderid-teslimat-center__main, .hz-siparisler-orderid-fatura-center__main, .hz-siparisler-orderid-iade-center__main, .hz-siparisler-orderid-depo-stok-etkisi-center__main, .hz-siparisler-orderid-timeline-center__main,
+.hz-siparisler-liste-center__main, .hz-siparisler-orderid-ozet-center__main, .hz-siparisler-orderid-satirlar-center__main, .hz-siparisler-orderid-odeme-tahsilat-center__main, .hz-siparisler-orderid-teslimat-center__main, .hz-siparisler-orderid-fatura-center__main, .hz-siparisler-orderid-iade-center__main, .hz-siparisler-orderid-depo-stok-etkisi-center__main, .hz-siparisler-orderid-timeline-center__main,
+.hz-siparisler-liste-center__insight, .hz-siparisler-orderid-ozet-center__insight, .hz-siparisler-orderid-satirlar-center__insight, .hz-siparisler-orderid-odeme-tahsilat-center__insight, .hz-siparisler-orderid-teslimat-center__insight, .hz-siparisler-orderid-fatura-center__insight, .hz-siparisler-orderid-iade-center__insight, .hz-siparisler-orderid-depo-stok-etkisi-center__insight, .hz-siparisler-orderid-timeline-center__insight,
+.hz-siparisler-liste-center__insight, .hz-siparisler-orderid-ozet-center__insight, .hz-siparisler-orderid-satirlar-center__insight, .hz-siparisler-orderid-odeme-tahsilat-center__insight, .hz-siparisler-orderid-teslimat-center__insight, .hz-siparisler-orderid-fatura-center__insight, .hz-siparisler-orderid-iade-center__insight, .hz-siparisler-orderid-depo-stok-etkisi-center__insight, .hz-siparisler-orderid-timeline-center__insight,
+.hz-siparisler-liste-center__side, .hz-siparisler-orderid-ozet-center__side, .hz-siparisler-orderid-satirlar-center__side, .hz-siparisler-orderid-odeme-tahsilat-center__side, .hz-siparisler-orderid-teslimat-center__side, .hz-siparisler-orderid-fatura-center__side, .hz-siparisler-orderid-iade-center__side, .hz-siparisler-orderid-depo-stok-etkisi-center__side, .hz-siparisler-orderid-timeline-center__side,
+.hz-siparisler-liste-center__side, .hz-siparisler-orderid-ozet-center__side, .hz-siparisler-orderid-satirlar-center__side, .hz-siparisler-orderid-odeme-tahsilat-center__side, .hz-siparisler-orderid-teslimat-center__side, .hz-siparisler-orderid-fatura-center__side, .hz-siparisler-orderid-iade-center__side, .hz-siparisler-orderid-depo-stok-etkisi-center__side, .hz-siparisler-orderid-timeline-center__side {
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.hz-siparisler-liste-center__card-head, .hz-siparisler-orderid-ozet-center__card-head, .hz-siparisler-orderid-satirlar-center__card-head, .hz-siparisler-orderid-odeme-tahsilat-center__card-head, .hz-siparisler-orderid-teslimat-center__card-head, .hz-siparisler-orderid-fatura-center__card-head, .hz-siparisler-orderid-iade-center__card-head, .hz-siparisler-orderid-depo-stok-etkisi-center__card-head, .hz-siparisler-orderid-timeline-center__card-head,
+.hz-siparisler-liste-center__card-head, .hz-siparisler-orderid-ozet-center__card-head, .hz-siparisler-orderid-satirlar-center__card-head, .hz-siparisler-orderid-odeme-tahsilat-center__card-head, .hz-siparisler-orderid-teslimat-center__card-head, .hz-siparisler-orderid-fatura-center__card-head, .hz-siparisler-orderid-iade-center__card-head, .hz-siparisler-orderid-depo-stok-etkisi-center__card-head, .hz-siparisler-orderid-timeline-center__card-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px 8px;
+  border-bottom: 1px solid rgba(6, 78, 59, 0.08);
+}
+
+.hz-siparisler-liste-center__card-body, .hz-siparisler-orderid-ozet-center__card-body, .hz-siparisler-orderid-satirlar-center__card-body, .hz-siparisler-orderid-odeme-tahsilat-center__card-body, .hz-siparisler-orderid-teslimat-center__card-body, .hz-siparisler-orderid-fatura-center__card-body, .hz-siparisler-orderid-iade-center__card-body, .hz-siparisler-orderid-depo-stok-etkisi-center__card-body, .hz-siparisler-orderid-timeline-center__card-body,
+.hz-siparisler-liste-center__card-body, .hz-siparisler-orderid-ozet-center__card-body, .hz-siparisler-orderid-satirlar-center__card-body, .hz-siparisler-orderid-odeme-tahsilat-center__card-body, .hz-siparisler-orderid-teslimat-center__card-body, .hz-siparisler-orderid-fatura-center__card-body, .hz-siparisler-orderid-iade-center__card-body, .hz-siparisler-orderid-depo-stok-etkisi-center__card-body, .hz-siparisler-orderid-timeline-center__card-body,
+.hz-siparisler-liste-center__side-section, .hz-siparisler-orderid-ozet-center__side-section, .hz-siparisler-orderid-satirlar-center__side-section, .hz-siparisler-orderid-odeme-tahsilat-center__side-section, .hz-siparisler-orderid-teslimat-center__side-section, .hz-siparisler-orderid-fatura-center__side-section, .hz-siparisler-orderid-iade-center__side-section, .hz-siparisler-orderid-depo-stok-etkisi-center__side-section, .hz-siparisler-orderid-timeline-center__side-section,
+.hz-siparisler-liste-center__side-section, .hz-siparisler-orderid-ozet-center__side-section, .hz-siparisler-orderid-satirlar-center__side-section, .hz-siparisler-orderid-odeme-tahsilat-center__side-section, .hz-siparisler-orderid-teslimat-center__side-section, .hz-siparisler-orderid-fatura-center__side-section, .hz-siparisler-orderid-iade-center__side-section, .hz-siparisler-orderid-depo-stok-etkisi-center__side-section, .hz-siparisler-orderid-timeline-center__side-section {
+  padding: 10px 12px 12px;
+}
+
+.hz-siparisler-liste-center__alert-copy, .hz-siparisler-orderid-ozet-center__alert-copy, .hz-siparisler-orderid-satirlar-center__alert-copy, .hz-siparisler-orderid-odeme-tahsilat-center__alert-copy, .hz-siparisler-orderid-teslimat-center__alert-copy, .hz-siparisler-orderid-fatura-center__alert-copy, .hz-siparisler-orderid-iade-center__alert-copy, .hz-siparisler-orderid-depo-stok-etkisi-center__alert-copy, .hz-siparisler-orderid-timeline-center__alert-copy,
+.hz-siparisler-liste-center__alert-copy, .hz-siparisler-orderid-ozet-center__alert-copy, .hz-siparisler-orderid-satirlar-center__alert-copy, .hz-siparisler-orderid-odeme-tahsilat-center__alert-copy, .hz-siparisler-orderid-teslimat-center__alert-copy, .hz-siparisler-orderid-fatura-center__alert-copy, .hz-siparisler-orderid-iade-center__alert-copy, .hz-siparisler-orderid-depo-stok-etkisi-center__alert-copy, .hz-siparisler-orderid-timeline-center__alert-copy {
+  margin: 0 0 10px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(254, 243, 199, 0.5);
+  border: 1px solid rgba(234, 179, 8, 0.35);
+  color: #854d0e;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+}
+
+.hz-siparisler-liste-center__filter-grid, .hz-siparisler-orderid-ozet-center__filter-grid, .hz-siparisler-orderid-satirlar-center__filter-grid, .hz-siparisler-orderid-odeme-tahsilat-center__filter-grid, .hz-siparisler-orderid-teslimat-center__filter-grid, .hz-siparisler-orderid-fatura-center__filter-grid, .hz-siparisler-orderid-iade-center__filter-grid, .hz-siparisler-orderid-depo-stok-etkisi-center__filter-grid, .hz-siparisler-orderid-timeline-center__filter-grid,
+.hz-siparisler-liste-center__filter-grid, .hz-siparisler-orderid-ozet-center__filter-grid, .hz-siparisler-orderid-satirlar-center__filter-grid, .hz-siparisler-orderid-odeme-tahsilat-center__filter-grid, .hz-siparisler-orderid-teslimat-center__filter-grid, .hz-siparisler-orderid-fatura-center__filter-grid, .hz-siparisler-orderid-iade-center__filter-grid, .hz-siparisler-orderid-depo-stok-etkisi-center__filter-grid, .hz-siparisler-orderid-timeline-center__filter-grid,
+.hz-siparisler-liste-center__scope-grid, .hz-siparisler-orderid-ozet-center__scope-grid, .hz-siparisler-orderid-satirlar-center__scope-grid, .hz-siparisler-orderid-odeme-tahsilat-center__scope-grid, .hz-siparisler-orderid-teslimat-center__scope-grid, .hz-siparisler-orderid-fatura-center__scope-grid, .hz-siparisler-orderid-iade-center__scope-grid, .hz-siparisler-orderid-depo-stok-etkisi-center__scope-grid, .hz-siparisler-orderid-timeline-center__scope-grid,
+.hz-siparisler-liste-center__scope-grid, .hz-siparisler-orderid-ozet-center__scope-grid, .hz-siparisler-orderid-satirlar-center__scope-grid, .hz-siparisler-orderid-odeme-tahsilat-center__scope-grid, .hz-siparisler-orderid-teslimat-center__scope-grid, .hz-siparisler-orderid-fatura-center__scope-grid, .hz-siparisler-orderid-iade-center__scope-grid, .hz-siparisler-orderid-depo-stok-etkisi-center__scope-grid, .hz-siparisler-orderid-timeline-center__scope-grid,
+.hz-siparisler-liste-center__action-stack, .hz-siparisler-orderid-ozet-center__action-stack, .hz-siparisler-orderid-satirlar-center__action-stack, .hz-siparisler-orderid-odeme-tahsilat-center__action-stack, .hz-siparisler-orderid-teslimat-center__action-stack, .hz-siparisler-orderid-fatura-center__action-stack, .hz-siparisler-orderid-iade-center__action-stack, .hz-siparisler-orderid-depo-stok-etkisi-center__action-stack, .hz-siparisler-orderid-timeline-center__action-stack,
+.hz-siparisler-liste-center__action-stack, .hz-siparisler-orderid-ozet-center__action-stack, .hz-siparisler-orderid-satirlar-center__action-stack, .hz-siparisler-orderid-odeme-tahsilat-center__action-stack, .hz-siparisler-orderid-teslimat-center__action-stack, .hz-siparisler-orderid-fatura-center__action-stack, .hz-siparisler-orderid-iade-center__action-stack, .hz-siparisler-orderid-depo-stok-etkisi-center__action-stack, .hz-siparisler-orderid-timeline-center__action-stack {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(120px, 0.6fr);
+  gap: 8px;
+}
+
+.hz-siparisler-liste-center__scope-grid, .hz-siparisler-orderid-ozet-center__scope-grid, .hz-siparisler-orderid-satirlar-center__scope-grid, .hz-siparisler-orderid-odeme-tahsilat-center__scope-grid, .hz-siparisler-orderid-teslimat-center__scope-grid, .hz-siparisler-orderid-fatura-center__scope-grid, .hz-siparisler-orderid-iade-center__scope-grid, .hz-siparisler-orderid-depo-stok-etkisi-center__scope-grid, .hz-siparisler-orderid-timeline-center__scope-grid,
+.hz-siparisler-liste-center__scope-grid, .hz-siparisler-orderid-ozet-center__scope-grid, .hz-siparisler-orderid-satirlar-center__scope-grid, .hz-siparisler-orderid-odeme-tahsilat-center__scope-grid, .hz-siparisler-orderid-teslimat-center__scope-grid, .hz-siparisler-orderid-fatura-center__scope-grid, .hz-siparisler-orderid-iade-center__scope-grid, .hz-siparisler-orderid-depo-stok-etkisi-center__scope-grid, .hz-siparisler-orderid-timeline-center__scope-grid,
+.hz-siparisler-liste-center__action-stack, .hz-siparisler-orderid-ozet-center__action-stack, .hz-siparisler-orderid-satirlar-center__action-stack, .hz-siparisler-orderid-odeme-tahsilat-center__action-stack, .hz-siparisler-orderid-teslimat-center__action-stack, .hz-siparisler-orderid-fatura-center__action-stack, .hz-siparisler-orderid-iade-center__action-stack, .hz-siparisler-orderid-depo-stok-etkisi-center__action-stack, .hz-siparisler-orderid-timeline-center__action-stack,
+.hz-siparisler-liste-center__action-stack, .hz-siparisler-orderid-ozet-center__action-stack, .hz-siparisler-orderid-satirlar-center__action-stack, .hz-siparisler-orderid-odeme-tahsilat-center__action-stack, .hz-siparisler-orderid-teslimat-center__action-stack, .hz-siparisler-orderid-fatura-center__action-stack, .hz-siparisler-orderid-iade-center__action-stack, .hz-siparisler-orderid-depo-stok-etkisi-center__action-stack, .hz-siparisler-orderid-timeline-center__action-stack {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.hz-siparisler-liste-center__field, .hz-siparisler-orderid-ozet-center__field, .hz-siparisler-orderid-satirlar-center__field, .hz-siparisler-orderid-odeme-tahsilat-center__field, .hz-siparisler-orderid-teslimat-center__field, .hz-siparisler-orderid-fatura-center__field, .hz-siparisler-orderid-iade-center__field, .hz-siparisler-orderid-depo-stok-etkisi-center__field, .hz-siparisler-orderid-timeline-center__field,
+.hz-siparisler-liste-center__field, .hz-siparisler-orderid-ozet-center__field, .hz-siparisler-orderid-satirlar-center__field, .hz-siparisler-orderid-odeme-tahsilat-center__field, .hz-siparisler-orderid-teslimat-center__field, .hz-siparisler-orderid-fatura-center__field, .hz-siparisler-orderid-iade-center__field, .hz-siparisler-orderid-depo-stok-etkisi-center__field, .hz-siparisler-orderid-timeline-center__field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hz-siparisler-liste-center__input, .hz-siparisler-orderid-ozet-center__input, .hz-siparisler-orderid-satirlar-center__input, .hz-siparisler-orderid-odeme-tahsilat-center__input, .hz-siparisler-orderid-teslimat-center__input, .hz-siparisler-orderid-fatura-center__input, .hz-siparisler-orderid-iade-center__input, .hz-siparisler-orderid-depo-stok-etkisi-center__input, .hz-siparisler-orderid-timeline-center__input,
+.hz-siparisler-liste-center__input, .hz-siparisler-orderid-ozet-center__input, .hz-siparisler-orderid-satirlar-center__input, .hz-siparisler-orderid-odeme-tahsilat-center__input, .hz-siparisler-orderid-teslimat-center__input, .hz-siparisler-orderid-fatura-center__input, .hz-siparisler-orderid-iade-center__input, .hz-siparisler-orderid-depo-stok-etkisi-center__input, .hz-siparisler-orderid-timeline-center__input,
+.hz-siparisler-liste-center__select, .hz-siparisler-orderid-ozet-center__select, .hz-siparisler-orderid-satirlar-center__select, .hz-siparisler-orderid-odeme-tahsilat-center__select, .hz-siparisler-orderid-teslimat-center__select, .hz-siparisler-orderid-fatura-center__select, .hz-siparisler-orderid-iade-center__select, .hz-siparisler-orderid-depo-stok-etkisi-center__select, .hz-siparisler-orderid-timeline-center__select,
+.hz-siparisler-liste-center__select, .hz-siparisler-orderid-ozet-center__select, .hz-siparisler-orderid-satirlar-center__select, .hz-siparisler-orderid-odeme-tahsilat-center__select, .hz-siparisler-orderid-teslimat-center__select, .hz-siparisler-orderid-fatura-center__select, .hz-siparisler-orderid-iade-center__select, .hz-siparisler-orderid-depo-stok-etkisi-center__select, .hz-siparisler-orderid-timeline-center__select {
+  min-height: 34px;
+  border-radius: 10px;
+  border: 1px solid rgba(6, 78, 59, 0.16);
+  background: #fffdf6;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
+.hz-siparisler-liste-center__table, .hz-siparisler-orderid-ozet-center__table, .hz-siparisler-orderid-satirlar-center__table, .hz-siparisler-orderid-odeme-tahsilat-center__table, .hz-siparisler-orderid-teslimat-center__table, .hz-siparisler-orderid-fatura-center__table, .hz-siparisler-orderid-iade-center__table, .hz-siparisler-orderid-depo-stok-etkisi-center__table, .hz-siparisler-orderid-timeline-center__table,
+.hz-siparisler-liste-center__table, .hz-siparisler-orderid-ozet-center__table, .hz-siparisler-orderid-satirlar-center__table, .hz-siparisler-orderid-odeme-tahsilat-center__table, .hz-siparisler-orderid-teslimat-center__table, .hz-siparisler-orderid-fatura-center__table, .hz-siparisler-orderid-iade-center__table, .hz-siparisler-orderid-depo-stok-etkisi-center__table, .hz-siparisler-orderid-timeline-center__table {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.hz-siparisler-liste-center__row, .hz-siparisler-orderid-ozet-center__row, .hz-siparisler-orderid-satirlar-center__row, .hz-siparisler-orderid-odeme-tahsilat-center__row, .hz-siparisler-orderid-teslimat-center__row, .hz-siparisler-orderid-fatura-center__row, .hz-siparisler-orderid-iade-center__row, .hz-siparisler-orderid-depo-stok-etkisi-center__row, .hz-siparisler-orderid-timeline-center__row,
+.hz-siparisler-liste-center__row, .hz-siparisler-orderid-ozet-center__row, .hz-siparisler-orderid-satirlar-center__row, .hz-siparisler-orderid-odeme-tahsilat-center__row, .hz-siparisler-orderid-teslimat-center__row, .hz-siparisler-orderid-fatura-center__row, .hz-siparisler-orderid-iade-center__row, .hz-siparisler-orderid-depo-stok-etkisi-center__row, .hz-siparisler-orderid-timeline-center__row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(72px, 0.6fr) minmax(88px, 0.55fr) 44px;
+  gap: 8px;
+  align-items: center;
+  min-height: 40px;
+  padding: 6px 8px;
+  border-radius: 10px;
+  background: rgba(241, 234, 219, 0.35);
+  border: 1px solid transparent;
+  cursor: pointer;
+}
+
+.hz-siparisler-liste-center__row--selected, .hz-siparisler-orderid-ozet-center__row--selected, .hz-siparisler-orderid-satirlar-center__row--selected, .hz-siparisler-orderid-odeme-tahsilat-center__row--selected, .hz-siparisler-orderid-teslimat-center__row--selected, .hz-siparisler-orderid-fatura-center__row--selected, .hz-siparisler-orderid-iade-center__row--selected, .hz-siparisler-orderid-depo-stok-etkisi-center__row--selected, .hz-siparisler-orderid-timeline-center__row--selected,
+.hz-siparisler-liste-center__row--selected, .hz-siparisler-orderid-ozet-center__row--selected, .hz-siparisler-orderid-satirlar-center__row--selected, .hz-siparisler-orderid-odeme-tahsilat-center__row--selected, .hz-siparisler-orderid-teslimat-center__row--selected, .hz-siparisler-orderid-fatura-center__row--selected, .hz-siparisler-orderid-iade-center__row--selected, .hz-siparisler-orderid-depo-stok-etkisi-center__row--selected, .hz-siparisler-orderid-timeline-center__row--selected {
+  border-color: rgba(234, 179, 8, 0.45);
+  background: linear-gradient(90deg, rgba(254, 243, 199, 0.55), rgba(209, 250, 229, 0.4));
+}
+
+.hz-siparisler-liste-center__row-title, .hz-siparisler-orderid-ozet-center__row-title, .hz-siparisler-orderid-satirlar-center__row-title, .hz-siparisler-orderid-odeme-tahsilat-center__row-title, .hz-siparisler-orderid-teslimat-center__row-title, .hz-siparisler-orderid-fatura-center__row-title, .hz-siparisler-orderid-iade-center__row-title, .hz-siparisler-orderid-depo-stok-etkisi-center__row-title, .hz-siparisler-orderid-timeline-center__row-title,
+.hz-siparisler-liste-center__row-title, .hz-siparisler-orderid-ozet-center__row-title, .hz-siparisler-orderid-satirlar-center__row-title, .hz-siparisler-orderid-odeme-tahsilat-center__row-title, .hz-siparisler-orderid-teslimat-center__row-title, .hz-siparisler-orderid-fatura-center__row-title, .hz-siparisler-orderid-iade-center__row-title, .hz-siparisler-orderid-depo-stok-etkisi-center__row-title, .hz-siparisler-orderid-timeline-center__row-title {
+  font-size: 12px;
+  font-weight: 850;
+}
+
+.hz-siparisler-liste-center__row-entity, .hz-siparisler-orderid-ozet-center__row-entity, .hz-siparisler-orderid-satirlar-center__row-entity, .hz-siparisler-orderid-odeme-tahsilat-center__row-entity, .hz-siparisler-orderid-teslimat-center__row-entity, .hz-siparisler-orderid-fatura-center__row-entity, .hz-siparisler-orderid-iade-center__row-entity, .hz-siparisler-orderid-depo-stok-etkisi-center__row-entity, .hz-siparisler-orderid-timeline-center__row-entity,
+.hz-siparisler-liste-center__row-entity, .hz-siparisler-orderid-ozet-center__row-entity, .hz-siparisler-orderid-satirlar-center__row-entity, .hz-siparisler-orderid-odeme-tahsilat-center__row-entity, .hz-siparisler-orderid-teslimat-center__row-entity, .hz-siparisler-orderid-fatura-center__row-entity, .hz-siparisler-orderid-iade-center__row-entity, .hz-siparisler-orderid-depo-stok-etkisi-center__row-entity, .hz-siparisler-orderid-timeline-center__row-entity {
+  font-size: 10.5px;
+  color: #52665e;
+}
+
+.hz-siparisler-liste-center__badge, .hz-siparisler-orderid-ozet-center__badge, .hz-siparisler-orderid-satirlar-center__badge, .hz-siparisler-orderid-odeme-tahsilat-center__badge, .hz-siparisler-orderid-teslimat-center__badge, .hz-siparisler-orderid-fatura-center__badge, .hz-siparisler-orderid-iade-center__badge, .hz-siparisler-orderid-depo-stok-etkisi-center__badge, .hz-siparisler-orderid-timeline-center__badge,
+.hz-siparisler-liste-center__badge, .hz-siparisler-orderid-ozet-center__badge, .hz-siparisler-orderid-satirlar-center__badge, .hz-siparisler-orderid-odeme-tahsilat-center__badge, .hz-siparisler-orderid-teslimat-center__badge, .hz-siparisler-orderid-fatura-center__badge, .hz-siparisler-orderid-iade-center__badge, .hz-siparisler-orderid-depo-stok-etkisi-center__badge, .hz-siparisler-orderid-timeline-center__badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 20px;
+  padding: 0 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  border: 1px solid transparent;
+}
+
+.hz-siparisler-liste-center__badge--success, .hz-siparisler-orderid-ozet-center__badge--success, .hz-siparisler-orderid-satirlar-center__badge--success, .hz-siparisler-orderid-odeme-tahsilat-center__badge--success, .hz-siparisler-orderid-teslimat-center__badge--success, .hz-siparisler-orderid-fatura-center__badge--success, .hz-siparisler-orderid-iade-center__badge--success, .hz-siparisler-orderid-depo-stok-etkisi-center__badge--success, .hz-siparisler-orderid-timeline-center__badge--success,
+.hz-siparisler-liste-center__badge--success, .hz-siparisler-orderid-ozet-center__badge--success, .hz-siparisler-orderid-satirlar-center__badge--success, .hz-siparisler-orderid-odeme-tahsilat-center__badge--success, .hz-siparisler-orderid-teslimat-center__badge--success, .hz-siparisler-orderid-fatura-center__badge--success, .hz-siparisler-orderid-iade-center__badge--success, .hz-siparisler-orderid-depo-stok-etkisi-center__badge--success, .hz-siparisler-orderid-timeline-center__badge--success {
+  background: #d1fae5;
+  color: #064e3b;
+}
+
+.hz-siparisler-liste-center__badge--warning, .hz-siparisler-orderid-ozet-center__badge--warning, .hz-siparisler-orderid-satirlar-center__badge--warning, .hz-siparisler-orderid-odeme-tahsilat-center__badge--warning, .hz-siparisler-orderid-teslimat-center__badge--warning, .hz-siparisler-orderid-fatura-center__badge--warning, .hz-siparisler-orderid-iade-center__badge--warning, .hz-siparisler-orderid-depo-stok-etkisi-center__badge--warning, .hz-siparisler-orderid-timeline-center__badge--warning,
+.hz-siparisler-liste-center__badge--warning, .hz-siparisler-orderid-ozet-center__badge--warning, .hz-siparisler-orderid-satirlar-center__badge--warning, .hz-siparisler-orderid-odeme-tahsilat-center__badge--warning, .hz-siparisler-orderid-teslimat-center__badge--warning, .hz-siparisler-orderid-fatura-center__badge--warning, .hz-siparisler-orderid-iade-center__badge--warning, .hz-siparisler-orderid-depo-stok-etkisi-center__badge--warning, .hz-siparisler-orderid-timeline-center__badge--warning,
+.hz-siparisler-liste-center__badge--needs-api, .hz-siparisler-orderid-ozet-center__badge--needs-api, .hz-siparisler-orderid-satirlar-center__badge--needs-api, .hz-siparisler-orderid-odeme-tahsilat-center__badge--needs-api, .hz-siparisler-orderid-teslimat-center__badge--needs-api, .hz-siparisler-orderid-fatura-center__badge--needs-api, .hz-siparisler-orderid-iade-center__badge--needs-api, .hz-siparisler-orderid-depo-stok-etkisi-center__badge--needs-api, .hz-siparisler-orderid-timeline-center__badge--needs-api,
+.hz-siparisler-liste-center__badge--needs-api, .hz-siparisler-orderid-ozet-center__badge--needs-api, .hz-siparisler-orderid-satirlar-center__badge--needs-api, .hz-siparisler-orderid-odeme-tahsilat-center__badge--needs-api, .hz-siparisler-orderid-teslimat-center__badge--needs-api, .hz-siparisler-orderid-fatura-center__badge--needs-api, .hz-siparisler-orderid-iade-center__badge--needs-api, .hz-siparisler-orderid-depo-stok-etkisi-center__badge--needs-api, .hz-siparisler-orderid-timeline-center__badge--needs-api {
+  background: #fef3c7;
+  color: #854d0e;
+}
+
+.hz-siparisler-liste-center__badge--danger, .hz-siparisler-orderid-ozet-center__badge--danger, .hz-siparisler-orderid-satirlar-center__badge--danger, .hz-siparisler-orderid-odeme-tahsilat-center__badge--danger, .hz-siparisler-orderid-teslimat-center__badge--danger, .hz-siparisler-orderid-fatura-center__badge--danger, .hz-siparisler-orderid-iade-center__badge--danger, .hz-siparisler-orderid-depo-stok-etkisi-center__badge--danger, .hz-siparisler-orderid-timeline-center__badge--danger,
+.hz-siparisler-liste-center__badge--danger, .hz-siparisler-orderid-ozet-center__badge--danger, .hz-siparisler-orderid-satirlar-center__badge--danger, .hz-siparisler-orderid-odeme-tahsilat-center__badge--danger, .hz-siparisler-orderid-teslimat-center__badge--danger, .hz-siparisler-orderid-fatura-center__badge--danger, .hz-siparisler-orderid-iade-center__badge--danger, .hz-siparisler-orderid-depo-stok-etkisi-center__badge--danger, .hz-siparisler-orderid-timeline-center__badge--danger {
+  background: #fee4e2;
+  color: #b42318;
+}
+
+.hz-siparisler-liste-center__badge--info, .hz-siparisler-orderid-ozet-center__badge--info, .hz-siparisler-orderid-satirlar-center__badge--info, .hz-siparisler-orderid-odeme-tahsilat-center__badge--info, .hz-siparisler-orderid-teslimat-center__badge--info, .hz-siparisler-orderid-fatura-center__badge--info, .hz-siparisler-orderid-iade-center__badge--info, .hz-siparisler-orderid-depo-stok-etkisi-center__badge--info, .hz-siparisler-orderid-timeline-center__badge--info,
+.hz-siparisler-liste-center__badge--info, .hz-siparisler-orderid-ozet-center__badge--info, .hz-siparisler-orderid-satirlar-center__badge--info, .hz-siparisler-orderid-odeme-tahsilat-center__badge--info, .hz-siparisler-orderid-teslimat-center__badge--info, .hz-siparisler-orderid-fatura-center__badge--info, .hz-siparisler-orderid-iade-center__badge--info, .hz-siparisler-orderid-depo-stok-etkisi-center__badge--info, .hz-siparisler-orderid-timeline-center__badge--info {
+  background: rgba(209, 250, 229, 0.65);
+  color: #033d30;
+}
+
+.hz-siparisler-liste-center__badge--muted, .hz-siparisler-orderid-ozet-center__badge--muted, .hz-siparisler-orderid-satirlar-center__badge--muted, .hz-siparisler-orderid-odeme-tahsilat-center__badge--muted, .hz-siparisler-orderid-teslimat-center__badge--muted, .hz-siparisler-orderid-fatura-center__badge--muted, .hz-siparisler-orderid-iade-center__badge--muted, .hz-siparisler-orderid-depo-stok-etkisi-center__badge--muted, .hz-siparisler-orderid-timeline-center__badge--muted,
+.hz-siparisler-liste-center__badge--muted, .hz-siparisler-orderid-ozet-center__badge--muted, .hz-siparisler-orderid-satirlar-center__badge--muted, .hz-siparisler-orderid-odeme-tahsilat-center__badge--muted, .hz-siparisler-orderid-teslimat-center__badge--muted, .hz-siparisler-orderid-fatura-center__badge--muted, .hz-siparisler-orderid-iade-center__badge--muted, .hz-siparisler-orderid-depo-stok-etkisi-center__badge--muted, .hz-siparisler-orderid-timeline-center__badge--muted,
+.hz-siparisler-liste-center__badge--disabled-not-allowed, .hz-siparisler-orderid-ozet-center__badge--disabled-not-allowed, .hz-siparisler-orderid-satirlar-center__badge--disabled-not-allowed, .hz-siparisler-orderid-odeme-tahsilat-center__badge--disabled-not-allowed, .hz-siparisler-orderid-teslimat-center__badge--disabled-not-allowed, .hz-siparisler-orderid-fatura-center__badge--disabled-not-allowed, .hz-siparisler-orderid-iade-center__badge--disabled-not-allowed, .hz-siparisler-orderid-depo-stok-etkisi-center__badge--disabled-not-allowed, .hz-siparisler-orderid-timeline-center__badge--disabled-not-allowed,
+.hz-siparisler-liste-center__badge--disabled-not-allowed, .hz-siparisler-orderid-ozet-center__badge--disabled-not-allowed, .hz-siparisler-orderid-satirlar-center__badge--disabled-not-allowed, .hz-siparisler-orderid-odeme-tahsilat-center__badge--disabled-not-allowed, .hz-siparisler-orderid-teslimat-center__badge--disabled-not-allowed, .hz-siparisler-orderid-fatura-center__badge--disabled-not-allowed, .hz-siparisler-orderid-iade-center__badge--disabled-not-allowed, .hz-siparisler-orderid-depo-stok-etkisi-center__badge--disabled-not-allowed, .hz-siparisler-orderid-timeline-center__badge--disabled-not-allowed,
+.hz-siparisler-liste-center__badge--source-linked, .hz-siparisler-orderid-ozet-center__badge--source-linked, .hz-siparisler-orderid-satirlar-center__badge--source-linked, .hz-siparisler-orderid-odeme-tahsilat-center__badge--source-linked, .hz-siparisler-orderid-teslimat-center__badge--source-linked, .hz-siparisler-orderid-fatura-center__badge--source-linked, .hz-siparisler-orderid-iade-center__badge--source-linked, .hz-siparisler-orderid-depo-stok-etkisi-center__badge--source-linked, .hz-siparisler-orderid-timeline-center__badge--source-linked,
+.hz-siparisler-liste-center__badge--source-linked, .hz-siparisler-orderid-ozet-center__badge--source-linked, .hz-siparisler-orderid-satirlar-center__badge--source-linked, .hz-siparisler-orderid-odeme-tahsilat-center__badge--source-linked, .hz-siparisler-orderid-teslimat-center__badge--source-linked, .hz-siparisler-orderid-fatura-center__badge--source-linked, .hz-siparisler-orderid-iade-center__badge--source-linked, .hz-siparisler-orderid-depo-stok-etkisi-center__badge--source-linked, .hz-siparisler-orderid-timeline-center__badge--source-linked {
+  background: #f1eadb;
+  color: #52665e;
+}
+
+.hz-siparisler-liste-center__row-link, .hz-siparisler-orderid-ozet-center__row-link, .hz-siparisler-orderid-satirlar-center__row-link, .hz-siparisler-orderid-odeme-tahsilat-center__row-link, .hz-siparisler-orderid-teslimat-center__row-link, .hz-siparisler-orderid-fatura-center__row-link, .hz-siparisler-orderid-iade-center__row-link, .hz-siparisler-orderid-depo-stok-etkisi-center__row-link, .hz-siparisler-orderid-timeline-center__row-link,
+.hz-siparisler-liste-center__row-link, .hz-siparisler-orderid-ozet-center__row-link, .hz-siparisler-orderid-satirlar-center__row-link, .hz-siparisler-orderid-odeme-tahsilat-center__row-link, .hz-siparisler-orderid-teslimat-center__row-link, .hz-siparisler-orderid-fatura-center__row-link, .hz-siparisler-orderid-iade-center__row-link, .hz-siparisler-orderid-depo-stok-etkisi-center__row-link, .hz-siparisler-orderid-timeline-center__row-link,
+.hz-siparisler-liste-center__button-primary, .hz-siparisler-orderid-ozet-center__button-primary, .hz-siparisler-orderid-satirlar-center__button-primary, .hz-siparisler-orderid-odeme-tahsilat-center__button-primary, .hz-siparisler-orderid-teslimat-center__button-primary, .hz-siparisler-orderid-fatura-center__button-primary, .hz-siparisler-orderid-iade-center__button-primary, .hz-siparisler-orderid-depo-stok-etkisi-center__button-primary, .hz-siparisler-orderid-timeline-center__button-primary,
+.hz-siparisler-liste-center__button-primary, .hz-siparisler-orderid-ozet-center__button-primary, .hz-siparisler-orderid-satirlar-center__button-primary, .hz-siparisler-orderid-odeme-tahsilat-center__button-primary, .hz-siparisler-orderid-teslimat-center__button-primary, .hz-siparisler-orderid-fatura-center__button-primary, .hz-siparisler-orderid-iade-center__button-primary, .hz-siparisler-orderid-depo-stok-etkisi-center__button-primary, .hz-siparisler-orderid-timeline-center__button-primary,
+.hz-siparisler-liste-center__button-secondary, .hz-siparisler-orderid-ozet-center__button-secondary, .hz-siparisler-orderid-satirlar-center__button-secondary, .hz-siparisler-orderid-odeme-tahsilat-center__button-secondary, .hz-siparisler-orderid-teslimat-center__button-secondary, .hz-siparisler-orderid-fatura-center__button-secondary, .hz-siparisler-orderid-iade-center__button-secondary, .hz-siparisler-orderid-depo-stok-etkisi-center__button-secondary, .hz-siparisler-orderid-timeline-center__button-secondary,
+.hz-siparisler-liste-center__button-secondary, .hz-siparisler-orderid-ozet-center__button-secondary, .hz-siparisler-orderid-satirlar-center__button-secondary, .hz-siparisler-orderid-odeme-tahsilat-center__button-secondary, .hz-siparisler-orderid-teslimat-center__button-secondary, .hz-siparisler-orderid-fatura-center__button-secondary, .hz-siparisler-orderid-iade-center__button-secondary, .hz-siparisler-orderid-depo-stok-etkisi-center__button-secondary, .hz-siparisler-orderid-timeline-center__button-secondary,
+.hz-siparisler-liste-center__button-gold, .hz-siparisler-orderid-ozet-center__button-gold, .hz-siparisler-orderid-satirlar-center__button-gold, .hz-siparisler-orderid-odeme-tahsilat-center__button-gold, .hz-siparisler-orderid-teslimat-center__button-gold, .hz-siparisler-orderid-fatura-center__button-gold, .hz-siparisler-orderid-iade-center__button-gold, .hz-siparisler-orderid-depo-stok-etkisi-center__button-gold, .hz-siparisler-orderid-timeline-center__button-gold,
+.hz-siparisler-liste-center__button-gold, .hz-siparisler-orderid-ozet-center__button-gold, .hz-siparisler-orderid-satirlar-center__button-gold, .hz-siparisler-orderid-odeme-tahsilat-center__button-gold, .hz-siparisler-orderid-teslimat-center__button-gold, .hz-siparisler-orderid-fatura-center__button-gold, .hz-siparisler-orderid-iade-center__button-gold, .hz-siparisler-orderid-depo-stok-etkisi-center__button-gold, .hz-siparisler-orderid-timeline-center__button-gold,
+.hz-siparisler-liste-center__button-disabled, .hz-siparisler-orderid-ozet-center__button-disabled, .hz-siparisler-orderid-satirlar-center__button-disabled, .hz-siparisler-orderid-odeme-tahsilat-center__button-disabled, .hz-siparisler-orderid-teslimat-center__button-disabled, .hz-siparisler-orderid-fatura-center__button-disabled, .hz-siparisler-orderid-iade-center__button-disabled, .hz-siparisler-orderid-depo-stok-etkisi-center__button-disabled, .hz-siparisler-orderid-timeline-center__button-disabled,
+.hz-siparisler-liste-center__button-disabled, .hz-siparisler-orderid-ozet-center__button-disabled, .hz-siparisler-orderid-satirlar-center__button-disabled, .hz-siparisler-orderid-odeme-tahsilat-center__button-disabled, .hz-siparisler-orderid-teslimat-center__button-disabled, .hz-siparisler-orderid-fatura-center__button-disabled, .hz-siparisler-orderid-iade-center__button-disabled, .hz-siparisler-orderid-depo-stok-etkisi-center__button-disabled, .hz-siparisler-orderid-timeline-center__button-disabled {
+  text-decoration: none;
+  min-height: 34px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 850;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  box-sizing: border-box;
+}
+
+.hz-siparisler-liste-center__button-primary, .hz-siparisler-orderid-ozet-center__button-primary, .hz-siparisler-orderid-satirlar-center__button-primary, .hz-siparisler-orderid-odeme-tahsilat-center__button-primary, .hz-siparisler-orderid-teslimat-center__button-primary, .hz-siparisler-orderid-fatura-center__button-primary, .hz-siparisler-orderid-iade-center__button-primary, .hz-siparisler-orderid-depo-stok-etkisi-center__button-primary, .hz-siparisler-orderid-timeline-center__button-primary,
+.hz-siparisler-liste-center__button-primary, .hz-siparisler-orderid-ozet-center__button-primary, .hz-siparisler-orderid-satirlar-center__button-primary, .hz-siparisler-orderid-odeme-tahsilat-center__button-primary, .hz-siparisler-orderid-teslimat-center__button-primary, .hz-siparisler-orderid-fatura-center__button-primary, .hz-siparisler-orderid-iade-center__button-primary, .hz-siparisler-orderid-depo-stok-etkisi-center__button-primary, .hz-siparisler-orderid-timeline-center__button-primary {
+  background: linear-gradient(135deg, #047857, #064e3b);
+  color: #fff;
+}
+
+.hz-siparisler-liste-center__button-secondary, .hz-siparisler-orderid-ozet-center__button-secondary, .hz-siparisler-orderid-satirlar-center__button-secondary, .hz-siparisler-orderid-odeme-tahsilat-center__button-secondary, .hz-siparisler-orderid-teslimat-center__button-secondary, .hz-siparisler-orderid-fatura-center__button-secondary, .hz-siparisler-orderid-iade-center__button-secondary, .hz-siparisler-orderid-depo-stok-etkisi-center__button-secondary, .hz-siparisler-orderid-timeline-center__button-secondary,
+.hz-siparisler-liste-center__button-secondary, .hz-siparisler-orderid-ozet-center__button-secondary, .hz-siparisler-orderid-satirlar-center__button-secondary, .hz-siparisler-orderid-odeme-tahsilat-center__button-secondary, .hz-siparisler-orderid-teslimat-center__button-secondary, .hz-siparisler-orderid-fatura-center__button-secondary, .hz-siparisler-orderid-iade-center__button-secondary, .hz-siparisler-orderid-depo-stok-etkisi-center__button-secondary, .hz-siparisler-orderid-timeline-center__button-secondary {
+  background: #fffdf6;
+  color: #064e3b;
+  border: 1px solid rgba(6, 78, 59, 0.18);
+}
+
+.hz-siparisler-liste-center__button-gold, .hz-siparisler-orderid-ozet-center__button-gold, .hz-siparisler-orderid-satirlar-center__button-gold, .hz-siparisler-orderid-odeme-tahsilat-center__button-gold, .hz-siparisler-orderid-teslimat-center__button-gold, .hz-siparisler-orderid-fatura-center__button-gold, .hz-siparisler-orderid-iade-center__button-gold, .hz-siparisler-orderid-depo-stok-etkisi-center__button-gold, .hz-siparisler-orderid-timeline-center__button-gold,
+.hz-siparisler-liste-center__button-gold, .hz-siparisler-orderid-ozet-center__button-gold, .hz-siparisler-orderid-satirlar-center__button-gold, .hz-siparisler-orderid-odeme-tahsilat-center__button-gold, .hz-siparisler-orderid-teslimat-center__button-gold, .hz-siparisler-orderid-fatura-center__button-gold, .hz-siparisler-orderid-iade-center__button-gold, .hz-siparisler-orderid-depo-stok-etkisi-center__button-gold, .hz-siparisler-orderid-timeline-center__button-gold {
+  background: linear-gradient(135deg, #fef3c7, #fde68a);
+  color: #422006;
+  border: 1px solid rgba(234, 179, 8, 0.45);
+}
+
+.hz-siparisler-liste-center__button-disabled, .hz-siparisler-orderid-ozet-center__button-disabled, .hz-siparisler-orderid-satirlar-center__button-disabled, .hz-siparisler-orderid-odeme-tahsilat-center__button-disabled, .hz-siparisler-orderid-teslimat-center__button-disabled, .hz-siparisler-orderid-fatura-center__button-disabled, .hz-siparisler-orderid-iade-center__button-disabled, .hz-siparisler-orderid-depo-stok-etkisi-center__button-disabled, .hz-siparisler-orderid-timeline-center__button-disabled,
+.hz-siparisler-liste-center__button-disabled, .hz-siparisler-orderid-ozet-center__button-disabled, .hz-siparisler-orderid-satirlar-center__button-disabled, .hz-siparisler-orderid-odeme-tahsilat-center__button-disabled, .hz-siparisler-orderid-teslimat-center__button-disabled, .hz-siparisler-orderid-fatura-center__button-disabled, .hz-siparisler-orderid-iade-center__button-disabled, .hz-siparisler-orderid-depo-stok-etkisi-center__button-disabled, .hz-siparisler-orderid-timeline-center__button-disabled {
+  background: #f1eadb;
+  color: #8a9a94;
+  border: 1px solid rgba(6, 78, 59, 0.08);
+  cursor: not-allowed;
+}
+
+@media (max-width: 960px) {
+  .hz-siparisler-liste-center, .hz-siparisler-orderid-ozet-center, .hz-siparisler-orderid-satirlar-center, .hz-siparisler-orderid-odeme-tahsilat-center, .hz-siparisler-orderid-teslimat-center, .hz-siparisler-orderid-fatura-center, .hz-siparisler-orderid-iade-center, .hz-siparisler-orderid-depo-stok-etkisi-center, .hz-siparisler-orderid-timeline-center {
+    height: auto;
+    max-height: none;
+    overflow: visible;
+    padding: 10px;
+  }
+
+  .hz-siparisler-liste-center__intro, .hz-siparisler-orderid-ozet-center__intro, .hz-siparisler-orderid-satirlar-center__intro, .hz-siparisler-orderid-odeme-tahsilat-center__intro, .hz-siparisler-orderid-teslimat-center__intro, .hz-siparisler-orderid-fatura-center__intro, .hz-siparisler-orderid-iade-center__intro, .hz-siparisler-orderid-depo-stok-etkisi-center__intro, .hz-siparisler-orderid-timeline-center__intro,
+  .hz-siparisler-liste-center__intro, .hz-siparisler-orderid-ozet-center__intro, .hz-siparisler-orderid-satirlar-center__intro, .hz-siparisler-orderid-odeme-tahsilat-center__intro, .hz-siparisler-orderid-teslimat-center__intro, .hz-siparisler-orderid-fatura-center__intro, .hz-siparisler-orderid-iade-center__intro, .hz-siparisler-orderid-depo-stok-etkisi-center__intro, .hz-siparisler-orderid-timeline-center__intro,
+  .hz-siparisler-liste-center__grid, .hz-siparisler-orderid-ozet-center__grid, .hz-siparisler-orderid-satirlar-center__grid, .hz-siparisler-orderid-odeme-tahsilat-center__grid, .hz-siparisler-orderid-teslimat-center__grid, .hz-siparisler-orderid-fatura-center__grid, .hz-siparisler-orderid-iade-center__grid, .hz-siparisler-orderid-depo-stok-etkisi-center__grid, .hz-siparisler-orderid-timeline-center__grid,
+  .hz-siparisler-liste-center__grid, .hz-siparisler-orderid-ozet-center__grid, .hz-siparisler-orderid-satirlar-center__grid, .hz-siparisler-orderid-odeme-tahsilat-center__grid, .hz-siparisler-orderid-teslimat-center__grid, .hz-siparisler-orderid-fatura-center__grid, .hz-siparisler-orderid-iade-center__grid, .hz-siparisler-orderid-depo-stok-etkisi-center__grid, .hz-siparisler-orderid-timeline-center__grid,
+  .hz-siparisler-liste-center__summary, .hz-siparisler-orderid-ozet-center__summary, .hz-siparisler-orderid-satirlar-center__summary, .hz-siparisler-orderid-odeme-tahsilat-center__summary, .hz-siparisler-orderid-teslimat-center__summary, .hz-siparisler-orderid-fatura-center__summary, .hz-siparisler-orderid-iade-center__summary, .hz-siparisler-orderid-depo-stok-etkisi-center__summary, .hz-siparisler-orderid-timeline-center__summary,
+  .hz-siparisler-liste-center__summary, .hz-siparisler-orderid-ozet-center__summary, .hz-siparisler-orderid-satirlar-center__summary, .hz-siparisler-orderid-odeme-tahsilat-center__summary, .hz-siparisler-orderid-teslimat-center__summary, .hz-siparisler-orderid-fatura-center__summary, .hz-siparisler-orderid-iade-center__summary, .hz-siparisler-orderid-depo-stok-etkisi-center__summary, .hz-siparisler-orderid-timeline-center__summary,
+  .hz-siparisler-liste-center__filter-grid, .hz-siparisler-orderid-ozet-center__filter-grid, .hz-siparisler-orderid-satirlar-center__filter-grid, .hz-siparisler-orderid-odeme-tahsilat-center__filter-grid, .hz-siparisler-orderid-teslimat-center__filter-grid, .hz-siparisler-orderid-fatura-center__filter-grid, .hz-siparisler-orderid-iade-center__filter-grid, .hz-siparisler-orderid-depo-stok-etkisi-center__filter-grid, .hz-siparisler-orderid-timeline-center__filter-grid,
+  .hz-siparisler-liste-center__filter-grid, .hz-siparisler-orderid-ozet-center__filter-grid, .hz-siparisler-orderid-satirlar-center__filter-grid, .hz-siparisler-orderid-odeme-tahsilat-center__filter-grid, .hz-siparisler-orderid-teslimat-center__filter-grid, .hz-siparisler-orderid-fatura-center__filter-grid, .hz-siparisler-orderid-iade-center__filter-grid, .hz-siparisler-orderid-depo-stok-etkisi-center__filter-grid, .hz-siparisler-orderid-timeline-center__filter-grid,
+  .hz-siparisler-liste-center__scope-grid, .hz-siparisler-orderid-ozet-center__scope-grid, .hz-siparisler-orderid-satirlar-center__scope-grid, .hz-siparisler-orderid-odeme-tahsilat-center__scope-grid, .hz-siparisler-orderid-teslimat-center__scope-grid, .hz-siparisler-orderid-fatura-center__scope-grid, .hz-siparisler-orderid-iade-center__scope-grid, .hz-siparisler-orderid-depo-stok-etkisi-center__scope-grid, .hz-siparisler-orderid-timeline-center__scope-grid,
+  .hz-siparisler-liste-center__scope-grid, .hz-siparisler-orderid-ozet-center__scope-grid, .hz-siparisler-orderid-satirlar-center__scope-grid, .hz-siparisler-orderid-odeme-tahsilat-center__scope-grid, .hz-siparisler-orderid-teslimat-center__scope-grid, .hz-siparisler-orderid-fatura-center__scope-grid, .hz-siparisler-orderid-iade-center__scope-grid, .hz-siparisler-orderid-depo-stok-etkisi-center__scope-grid, .hz-siparisler-orderid-timeline-center__scope-grid,
+  .hz-siparisler-liste-center__action-stack, .hz-siparisler-orderid-ozet-center__action-stack, .hz-siparisler-orderid-satirlar-center__action-stack, .hz-siparisler-orderid-odeme-tahsilat-center__action-stack, .hz-siparisler-orderid-teslimat-center__action-stack, .hz-siparisler-orderid-fatura-center__action-stack, .hz-siparisler-orderid-iade-center__action-stack, .hz-siparisler-orderid-depo-stok-etkisi-center__action-stack, .hz-siparisler-orderid-timeline-center__action-stack,
+  .hz-siparisler-liste-center__action-stack, .hz-siparisler-orderid-ozet-center__action-stack, .hz-siparisler-orderid-satirlar-center__action-stack, .hz-siparisler-orderid-odeme-tahsilat-center__action-stack, .hz-siparisler-orderid-teslimat-center__action-stack, .hz-siparisler-orderid-fatura-center__action-stack, .hz-siparisler-orderid-iade-center__action-stack, .hz-siparisler-orderid-depo-stok-etkisi-center__action-stack, .hz-siparisler-orderid-timeline-center__action-stack {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .hz-siparisler-liste-center__intro, .hz-siparisler-orderid-ozet-center__intro, .hz-siparisler-orderid-satirlar-center__intro, .hz-siparisler-orderid-odeme-tahsilat-center__intro, .hz-siparisler-orderid-teslimat-center__intro, .hz-siparisler-orderid-fatura-center__intro, .hz-siparisler-orderid-iade-center__intro, .hz-siparisler-orderid-depo-stok-etkisi-center__intro, .hz-siparisler-orderid-timeline-center__intro,
+  .hz-siparisler-liste-center__intro, .hz-siparisler-orderid-ozet-center__intro, .hz-siparisler-orderid-satirlar-center__intro, .hz-siparisler-orderid-odeme-tahsilat-center__intro, .hz-siparisler-orderid-teslimat-center__intro, .hz-siparisler-orderid-fatura-center__intro, .hz-siparisler-orderid-iade-center__intro, .hz-siparisler-orderid-depo-stok-etkisi-center__intro, .hz-siparisler-orderid-timeline-center__intro {
+    height: auto;
+    min-height: 0;
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   DARK MODE — Siparişler sub-route centers
+═══════════════════════════════════════════════════════════════ */
+
+/* Container */
+html:root[data-theme="dark"] .hz-siparisler-liste-center,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(44, 255, 154, 0.05), transparent 24%),
+    radial-gradient(circle at 100% 0%, rgba(255, 209, 102, 0.06), transparent 26%),
+    linear-gradient(180deg, rgba(8, 24, 19, 0.92) 0%, #020604 100%);
+  color: var(--hz-color-text);
+}
+
+/* Cards + surfaces */
+html:root[data-theme="dark"] .hz-siparisler-liste-center__summary-card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__summary-card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__summary-card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__summary-card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__summary-card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__summary-card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__summary-card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__summary-card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__summary-card,
+html:root[data-theme="dark"] .hz-siparisler-liste-center__card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__card,
+html:root[data-theme="dark"] .hz-siparisler-liste-center__scope-card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__scope-card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__scope-card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__scope-card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__scope-card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__scope-card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__scope-card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__scope-card,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__scope-card,
+html:root[data-theme="dark"] .hz-siparisler-liste-center__side-section,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__side-section,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__side-section,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__side-section,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__side-section,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__side-section,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__side-section,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__side-section,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__side-section {
+  border-color: rgba(44, 255, 154, 0.14);
+  background: rgba(8, 24, 19, 0.82);
+  box-shadow: 0 1px 0 rgba(44, 255, 154, 0.06);
+}
+
+/* Card head border */
+html:root[data-theme="dark"] .hz-siparisler-liste-center__card-head,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__card-head,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__card-head,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__card-head,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__card-head,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__card-head,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__card-head,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__card-head,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__card-head {
+  border-bottom-color: rgba(44, 255, 154, 0.10);
+}
+
+/* Muted text */
+html:root[data-theme="dark"] .hz-siparisler-liste-center__page-sub,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__page-sub,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__page-sub,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__page-sub,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__page-sub,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__page-sub,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__page-sub,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__page-sub,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__page-sub,
+html:root[data-theme="dark"] .hz-siparisler-liste-center__muted-line,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__muted-line,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__muted-line,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__muted-line,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__muted-line,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__muted-line,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__muted-line,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__muted-line,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__muted-line,
+html:root[data-theme="dark"] .hz-siparisler-liste-center__scope-hint,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__scope-hint,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__scope-hint,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__scope-hint,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__scope-hint,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__scope-hint,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__scope-hint,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__scope-hint,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__scope-hint,
+html:root[data-theme="dark"] .hz-siparisler-liste-center__policy-copy,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__policy-copy,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__policy-copy,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__policy-copy,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__policy-copy,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__policy-copy,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__policy-copy,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__policy-copy,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__policy-copy,
+html:root[data-theme="dark"] .hz-siparisler-liste-center__summary-label,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__summary-label,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__summary-label,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__summary-label,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__summary-label,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__summary-label,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__summary-label,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__summary-label,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__summary-label,
+html:root[data-theme="dark"] .hz-siparisler-liste-center__field-label,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__field-label,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__field-label,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__field-label,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__field-label,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__field-label,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__field-label,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__field-label,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__field-label,
+html:root[data-theme="dark"] .hz-siparisler-liste-center__side-heading,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__side-heading,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__side-heading,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__side-heading,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__side-heading,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__side-heading,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__side-heading,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__side-heading,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__side-heading,
+html:root[data-theme="dark"] .hz-siparisler-liste-center__summary-hint,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__summary-hint,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__summary-hint,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__summary-hint,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__summary-hint,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__summary-hint,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__summary-hint,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__summary-hint,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__summary-hint,
+html:root[data-theme="dark"] .hz-siparisler-liste-center__row-entity,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__row-entity,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__row-entity,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__row-entity,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__row-entity,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__row-entity,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__row-entity,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__row-entity,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__row-entity {
+  color: var(--hz-color-muted);
+}
+
+/* Summary value (primary bold number) */
+html:root[data-theme="dark"] .hz-siparisler-liste-center__summary-value,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__summary-value,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__summary-value,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__summary-value,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__summary-value,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__summary-value,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__summary-value,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__summary-value,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__summary-value {
+  color: var(--hz-color-emerald);
+}
+
+/* Icon */
+html:root[data-theme="dark"] .hz-siparisler-liste-center__icon,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__icon,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__icon,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__icon,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__icon,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__icon,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__icon,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__icon,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__icon {
+  border-color: rgba(255, 209, 102, 0.35);
+  background: linear-gradient(135deg, rgba(255, 209, 102, 0.12), rgba(44, 255, 154, 0.10));
+  color: var(--hz-color-emerald);
+}
+
+/* Alert copy */
+html:root[data-theme="dark"] .hz-siparisler-liste-center__alert-copy,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__alert-copy,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__alert-copy,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__alert-copy,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__alert-copy,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__alert-copy,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__alert-copy,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__alert-copy,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__alert-copy {
+  background: rgba(255, 209, 102, 0.08);
+  border-color: rgba(255, 209, 102, 0.25);
+  color: var(--hz-color-gold);
+}
+
+/* Rows */
+html:root[data-theme="dark"] .hz-siparisler-liste-center__row,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__row,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__row,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__row,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__row,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__row,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__row,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__row,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__row {
+  background: rgba(10, 30, 23, 0.55);
+  border-color: rgba(44, 255, 154, 0.08);
+}
+
+/* Row selected */
+html:root[data-theme="dark"] .hz-siparisler-liste-center__row--selected,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__row--selected,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__row--selected,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__row--selected,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__row--selected,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__row--selected,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__row--selected,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__row--selected,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__row--selected {
+  border-color: rgba(255, 209, 102, 0.35);
+  background: linear-gradient(90deg, rgba(255, 209, 102, 0.08), rgba(44, 255, 154, 0.08));
+}
+
+/* Inputs + selects */
+html:root[data-theme="dark"] .hz-siparisler-liste-center__input,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__input,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__input,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__input,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__input,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__input,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__input,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__input,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__input,
+html:root[data-theme="dark"] .hz-siparisler-liste-center__select,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__select,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__select,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__select,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__select,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__select,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__select,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__select,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__select {
+  border-color: rgba(44, 255, 154, 0.20);
+  background: rgba(8, 24, 19, 0.70);
+  color: var(--hz-color-text);
+}
+
+/* Primary button */
+html:root[data-theme="dark"] .hz-siparisler-liste-center__button-primary,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__button-primary,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__button-primary,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__button-primary,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__button-primary,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__button-primary,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__button-primary,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__button-primary,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__button-primary {
+  background: linear-gradient(135deg, #2cff9a, #1ad67e);
+  color: #020604;
+}
+
+/* Secondary button */
+html:root[data-theme="dark"] .hz-siparisler-liste-center__button-secondary,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__button-secondary,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__button-secondary,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__button-secondary,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__button-secondary,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__button-secondary,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__button-secondary,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__button-secondary,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__button-secondary {
+  background: rgba(8, 24, 19, 0.70);
+  color: var(--hz-color-emerald);
+  border-color: rgba(44, 255, 154, 0.22);
+}
+
+/* Gold button */
+html:root[data-theme="dark"] .hz-siparisler-liste-center__button-gold,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__button-gold,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__button-gold,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__button-gold,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__button-gold,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__button-gold,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__button-gold,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__button-gold,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__button-gold {
+  background: linear-gradient(135deg, rgba(255, 209, 102, 0.16), rgba(255, 209, 102, 0.08));
+  color: var(--hz-color-gold);
+  border-color: rgba(255, 209, 102, 0.35);
+}
+
+/* Disabled button */
+html:root[data-theme="dark"] .hz-siparisler-liste-center__button-disabled,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__button-disabled,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__button-disabled,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__button-disabled,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__button-disabled,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__button-disabled,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__button-disabled,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__button-disabled,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__button-disabled {
+  background: rgba(10, 30, 23, 0.60);
+  color: rgba(184, 200, 191, 0.50);
+  border-color: rgba(44, 255, 154, 0.08);
+}
+
+/* Badge — success */
+html:root[data-theme="dark"] .hz-siparisler-liste-center__badge--success,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__badge--success,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__badge--success,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__badge--success,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__badge--success,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__badge--success,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__badge--success,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__badge--success,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__badge--success {
+  background: rgba(44, 255, 154, 0.12);
+  color: #2cff9a;
+  border-color: rgba(44, 255, 154, 0.22);
+}
+
+/* Badge — warning / needs-api */
+html:root[data-theme="dark"] .hz-siparisler-liste-center__badge--warning,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__badge--warning,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__badge--warning,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__badge--warning,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__badge--warning,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__badge--warning,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__badge--warning,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__badge--warning,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__badge--warning,
+html:root[data-theme="dark"] .hz-siparisler-liste-center__badge--needs-api,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__badge--needs-api,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__badge--needs-api,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__badge--needs-api,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__badge--needs-api,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__badge--needs-api,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__badge--needs-api,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__badge--needs-api,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__badge--needs-api {
+  background: rgba(255, 209, 102, 0.10);
+  color: var(--hz-color-gold);
+  border-color: rgba(255, 209, 102, 0.22);
+}
+
+/* Badge — danger */
+html:root[data-theme="dark"] .hz-siparisler-liste-center__badge--danger,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__badge--danger,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__badge--danger,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__badge--danger,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__badge--danger,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__badge--danger,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__badge--danger,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__badge--danger,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__badge--danger {
+  background: rgba(255, 107, 107, 0.10);
+  color: var(--hz-color-danger);
+  border-color: rgba(255, 107, 107, 0.22);
+}
+
+/* Badge — info */
+html:root[data-theme="dark"] .hz-siparisler-liste-center__badge--info,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__badge--info,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__badge--info,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__badge--info,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__badge--info,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__badge--info,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__badge--info,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__badge--info,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__badge--info {
+  background: rgba(44, 255, 154, 0.10);
+  color: var(--hz-color-emerald);
+  border-color: rgba(44, 255, 154, 0.22);
+}
+
+/* Badge — muted / disabled / source-linked */
+html:root[data-theme="dark"] .hz-siparisler-liste-center__badge--muted,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__badge--muted,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__badge--muted,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__badge--muted,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__badge--muted,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__badge--muted,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__badge--muted,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__badge--muted,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__badge--muted,
+html:root[data-theme="dark"] .hz-siparisler-liste-center__badge--disabled-not-allowed,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__badge--disabled-not-allowed,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__badge--disabled-not-allowed,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__badge--disabled-not-allowed,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__badge--disabled-not-allowed,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__badge--disabled-not-allowed,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__badge--disabled-not-allowed,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__badge--disabled-not-allowed,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__badge--disabled-not-allowed,
+html:root[data-theme="dark"] .hz-siparisler-liste-center__badge--source-linked,
+html:root[data-theme="dark"] .hz-siparisler-orderid-ozet-center__badge--source-linked,
+html:root[data-theme="dark"] .hz-siparisler-orderid-satirlar-center__badge--source-linked,
+html:root[data-theme="dark"] .hz-siparisler-orderid-odeme-tahsilat-center__badge--source-linked,
+html:root[data-theme="dark"] .hz-siparisler-orderid-teslimat-center__badge--source-linked,
+html:root[data-theme="dark"] .hz-siparisler-orderid-fatura-center__badge--source-linked,
+html:root[data-theme="dark"] .hz-siparisler-orderid-iade-center__badge--source-linked,
+html:root[data-theme="dark"] .hz-siparisler-orderid-depo-stok-etkisi-center__badge--source-linked,
+html:root[data-theme="dark"] .hz-siparisler-orderid-timeline-center__badge--source-linked {
+  background: rgba(10, 30, 23, 0.60);
+  color: var(--hz-color-muted);
+  border-color: rgba(44, 255, 154, 0.10);
+}

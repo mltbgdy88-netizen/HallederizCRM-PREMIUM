@@ -128,6 +128,24 @@ export function findCatalogProduct(productId: string): Product | undefined {
   return stockCatalog.products.find((p) => p.id === productId);
 }
 
+/** Demo senkron veya canlı stock catalog üzerinden ürün çözümleme. */
+export async function findCatalogProductAsync(productId: string): Promise<Product | undefined> {
+  const demoMatch = findCatalogProduct(productId);
+  if (demoMatch) {
+    return demoMatch;
+  }
+  if (dataSourceConfig.useDemoData) {
+    return undefined;
+  }
+  try {
+    const { getStockCatalog } = await import("../../stock/queries/get-stock-catalog");
+    const catalog = await getStockCatalog();
+    return catalog.products.find((product) => product.id === productId);
+  } catch {
+    return undefined;
+  }
+}
+
 export function productToQuickOperationLine(product: Product): QuickOperationLine {
   const tier = product.priceTiers.find((t) => t.active && t.amount > 0);
   const unitPrice = tier?.amount ?? 0;

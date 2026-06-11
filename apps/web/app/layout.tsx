@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { AppProviders } from "../src/providers/app-providers";
 import "./globals.css";
+import "./styles/desk-dark-mode.css";
+import "./styles/desk-dark-mode-sweep.css";
 
 export const metadata: Metadata = {
   title: "HallederizCRM PREMIUM",

@@ -11,7 +11,7 @@ export function WarehouseOrderLinesTable({ lines }: { lines: WarehouseOrderLine[
               <th>Ürün kodu</th>
               <th>Ürün adı</th>
               <th>Istenen Adet</th>
-              <th>Hazirlanan</th>
+              <th>Hazırlanan</th>
               <th>Depo</th>
               <th>Raf No</th>
               <th>Lokasyon</th>

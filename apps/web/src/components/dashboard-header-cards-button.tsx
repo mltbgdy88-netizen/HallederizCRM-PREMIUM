@@ -12,7 +12,7 @@ export function DashboardHeaderCardsButton() {
       <span className="hz-header-cc-cards-icon" aria-hidden>
         <LucideIcon name="grid-3x3" size={15} strokeWidth={2.25} />
       </span>
-      Kartlar
+      Paneller
     </button>
   );
 }

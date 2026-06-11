@@ -22,8 +22,8 @@ const TAB_ITEMS: { key: ProductTabKey; label: string }[] = [
 
 const MSG_MODAL_SAVE = "Ürün kaydı henüz canlı API ve onay zincirine bağlı değil.";
 const MSG_MODAL_LABEL =
-  "Etiket ve barkod ciktisi bu ortamda kapali. Canli uretim icin modul API baglantisi gerekiyor.";
-const MSG_MODAL_PRINT = "Yazdirma ciktisi bu ortamda henuz kullanima acik degil.";
+  "Etiket ve barkod çıktısı bu ortamda kapalı. Canlı üretim için modül API bağlantısı gerekiyor.";
+const MSG_MODAL_PRINT = "Yazdırma çıktısı bu ortamda henüz kullanıma açık değil.";
 
 export interface ProductDetailModalProps {
   open: boolean;

@@ -1,0 +1,366 @@
+/*
+ * Sprint 2 — Ticari modül operasyon masaları
+ * Tahsilatlar, Teslimatlar, Faturalar, İadeler, Depo hazırlık, Fabrikalar
+ * Tek canvas #fdfcf9 (restore ile uyumlu); gradient yok.
+ */
+
+html:root[data-theme="light"] :is(
+    .hz-tahsilatlar-desk,
+    .hz-teslimatlar-desk,
+    .hz-faturalar-desk,
+    .hz-iadeler-desk,
+    .hz-depo-desk,
+    .hz-fabrikalar-desk
+  ),
+html:root:not([data-theme="dark"]) :is(
+    .hz-tahsilatlar-desk,
+    .hz-teslimatlar-desk,
+    .hz-faturalar-desk,
+    .hz-iadeler-desk,
+    .hz-depo-desk,
+    .hz-fabrikalar-desk
+  ) {
+  --desk-canvas: #fdfcf9;
+  --desk-surface: #ffffff;
+  --desk-border: #d1d5db;
+  --desk-border-soft: #e5e7eb;
+  --desk-text: #0f172a;
+  --desk-muted: #64748b;
+  --desk-green: #0d6b4f;
+  --desk-green-strong: #064e3b;
+  --desk-green-soft: #ecfdf5;
+  --desk-gold: #c9a227;
+  --desk-gold-soft: #fffbeb;
+  --desk-table-head: #f5f6f8;
+  --desk-shadow: 0 1px 2px rgba(15, 23, 42, 0.06);
+  --desk-radius: 12px;
+  --desk-gap: 8px;
+  --desk-input-bg: #ffffff;
+}
+
+/* Shell zinciri */
+.hz-shell-workspace:has(.hz-tahsilatlar-desk),
+.hz-shell-workspace:has(.hz-teslimatlar-desk),
+.hz-shell-workspace:has(.hz-faturalar-desk),
+.hz-shell-workspace:has(.hz-iadeler-desk),
+.hz-shell-workspace:has(.hz-depo-desk),
+.hz-shell-workspace:has(.hz-fabrikalar-desk) {
+  --hz-color-bg: var(--desk-canvas);
+  --hz-color-surface: var(--desk-surface);
+  --hz-bg: var(--desk-canvas);
+  --hz-surface: var(--desk-surface);
+  background: var(--desk-canvas) !important;
+}
+
+.hz-shell-workspace:has(.hz-tahsilatlar-desk) .hz-shell-header,
+.hz-shell-workspace:has(.hz-teslimatlar-desk) .hz-shell-header,
+.hz-shell-workspace:has(.hz-faturalar-desk) .hz-shell-header,
+.hz-shell-workspace:has(.hz-iadeler-desk) .hz-shell-header,
+.hz-shell-workspace:has(.hz-depo-desk) .hz-shell-header,
+.hz-shell-workspace:has(.hz-fabrikalar-desk) .hz-shell-header {
+  background: var(--desk-canvas) !important;
+  border-bottom: 1px solid var(--desk-border-soft) !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+.hz-shell-content:has(.hz-tahsilatlar-desk),
+.hz-shell-content:has(.hz-teslimatlar-desk),
+.hz-shell-content:has(.hz-faturalar-desk),
+.hz-shell-content:has(.hz-iadeler-desk),
+.hz-shell-content:has(.hz-depo-desk),
+.hz-shell-content:has(.hz-fabrikalar-desk) {
+  padding: 0 !important;
+  background: var(--desk-canvas) !important;
+}
+
+.hz-shell-content-frame:has(.hz-tahsilatlar-desk),
+.hz-shell-content-frame:has(.hz-teslimatlar-desk),
+.hz-shell-content-frame:has(.hz-faturalar-desk),
+.hz-shell-content-frame:has(.hz-iadeler-desk),
+.hz-shell-content-frame:has(.hz-depo-desk),
+.hz-shell-content-frame:has(.hz-fabrikalar-desk) {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  padding: 0 !important;
+  background: var(--desk-canvas) !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.platform-content:has(.hz-tahsilatlar-desk),
+.platform-content:has(.hz-teslimatlar-desk),
+.platform-content:has(.hz-faturalar-desk),
+.platform-content:has(.hz-iadeler-desk),
+.platform-content:has(.hz-depo-desk),
+.platform-content:has(.hz-fabrikalar-desk) {
+  padding: 0 !important;
+  background: var(--desk-canvas) !important;
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+/* Tahsilatlar — gradient kaldır */
+html:root[data-theme="light"] .hz-tahsilatlar-desk,
+html:root:not([data-theme="dark"]) .hz-tahsilatlar-desk {
+  background: var(--desk-canvas) !important;
+}
+
+/* Ortak intro (teslimat / fatura / iade / fabrika) */
+.hz-commercial-desk-intro {
+  min-height: 56px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.hz-commercial-desk-intro__left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.hz-commercial-desk-intro__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 1px solid var(--desk-border);
+  background: var(--desk-green-soft);
+  color: var(--desk-green-strong);
+}
+
+.hz-commercial-desk-intro__title {
+  margin: 0;
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: var(--desk-text);
+  line-height: 1.2;
+}
+
+.hz-commercial-desk-intro__subtitle {
+  margin: 2px 0 0;
+  font-size: 12px;
+  color: var(--desk-muted);
+  line-height: 1.35;
+}
+
+.hz-commercial-desk-intro__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.hz-commercial-desk-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 600;
+  text-decoration: none;
+  border: 1px solid transparent;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.hz-commercial-desk-btn--primary {
+  background: var(--desk-green);
+  border-color: var(--desk-green-strong);
+  color: #fff;
+}
+
+.hz-commercial-desk-btn--secondary {
+  background: var(--desk-surface);
+  border-color: var(--desk-gold);
+  color: var(--desk-green-strong);
+}
+
+.hz-commercial-desk-btn--secondary:hover,
+.hz-commercial-desk-btn--primary:hover {
+  filter: brightness(1.03);
+}
+
+/* Entity list masaları (teslimat / fatura / iade / fabrika) */
+.hz-teslimatlar-desk.hz-commercial-entity-page,
+.hz-faturalar-desk.hz-commercial-entity-page,
+.hz-iadeler-desk.hz-commercial-entity-page,
+.hz-fabrikalar-desk.hz-factory-page {
+  max-width: none;
+  width: 100%;
+  height: calc(100dvh - 56px);
+  max-height: calc(100dvh - 56px);
+  margin: 0;
+  padding: var(--desk-gap);
+  gap: var(--desk-gap);
+  background: var(--desk-canvas) !important;
+  color: var(--desk-text);
+  box-sizing: border-box;
+}
+
+.hz-teslimatlar-desk .hz-split-layout,
+.hz-faturalar-desk .hz-split-layout,
+.hz-iadeler-desk .hz-split-layout,
+.hz-fabrikalar-desk .hz-split-layout {
+  flex: 1;
+  min-height: 0;
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 332px;
+  gap: var(--desk-gap);
+  align-items: stretch;
+}
+
+.hz-teslimatlar-desk .hz-split-main,
+.hz-faturalar-desk .hz-split-main,
+.hz-iadeler-desk .hz-split-main,
+.hz-fabrikalar-desk .hz-split-main {
+  min-width: 0;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid var(--desk-border);
+  border-radius: var(--desk-radius);
+  background: var(--desk-surface);
+  box-shadow: var(--desk-shadow);
+}
+
+.hz-teslimatlar-desk .hz-split-side,
+.hz-faturalar-desk .hz-split-side,
+.hz-iadeler-desk .hz-split-side,
+.hz-fabrikalar-desk .hz-split-side {
+  min-width: 0;
+  min-height: 0;
+  overflow: auto;
+}
+
+.hz-teslimatlar-desk .hz-filter-card,
+.hz-faturalar-desk .hz-filter-card,
+.hz-iadeler-desk .hz-filter-card,
+.hz-fabrikalar-desk .hz-filter-card,
+.hz-fabrikalar-desk .hz-factory-filter {
+  flex-shrink: 0;
+  margin: 0;
+  border: none;
+  border-bottom: 1px solid var(--desk-border-soft);
+  border-radius: 0;
+  background: var(--desk-surface);
+  box-shadow: none;
+}
+
+.hz-teslimatlar-desk .hz-commercial-entity-kpi,
+.hz-faturalar-desk .hz-commercial-entity-kpi,
+.hz-iadeler-desk .hz-commercial-entity-kpi,
+.hz-fabrikalar-desk .hz-factory-kpi {
+  background: var(--desk-surface) !important;
+  border-color: var(--desk-border) !important;
+  box-shadow: var(--desk-shadow);
+}
+
+.hz-teslimatlar-desk .hz-commercial-entity-kpi-value,
+.hz-faturalar-desk .hz-commercial-entity-kpi-value,
+.hz-iadeler-desk .hz-commercial-entity-kpi-value,
+.hz-fabrikalar-desk .hz-factory-kpi-value {
+  color: var(--desk-green) !important;
+}
+
+.hz-teslimatlar-desk .hz-commercial-entity-preview-band,
+.hz-faturalar-desk .hz-commercial-entity-preview-band,
+.hz-iadeler-desk .hz-commercial-entity-preview-band,
+.hz-fabrikalar-desk .hz-factory-preview-band {
+  min-height: 20px;
+  max-height: 22px;
+  padding: 4px 10px;
+  font-size: 11px;
+  border-radius: 8px;
+  background: var(--desk-gold-soft) !important;
+  border: 1px solid color-mix(in srgb, var(--desk-gold) 35%, var(--desk-border)) !important;
+  color: var(--desk-text) !important;
+}
+
+.hz-teslimatlar-desk .hz-commercial-entity-table-head,
+.hz-faturalar-desk .hz-commercial-entity-table-head,
+.hz-iadeler-desk .hz-commercial-entity-table-head,
+.hz-fabrikalar-desk .hz-factory-table-head {
+  background: var(--desk-table-head) !important;
+  border-bottom: 1px solid var(--desk-border) !important;
+  color: var(--desk-muted) !important;
+  min-height: 26px;
+  height: 26px;
+}
+
+.hz-teslimatlar-desk .hz-commercial-entity-table-row,
+.hz-faturalar-desk .hz-commercial-entity-table-row,
+.hz-iadeler-desk .hz-commercial-entity-table-row,
+.hz-fabrikalar-desk .hz-factory-table-row {
+  background: var(--desk-surface) !important;
+  border-bottom: 1px solid var(--desk-border-soft);
+  min-height: 44px;
+  color: var(--desk-text);
+}
+
+.hz-teslimatlar-desk .hz-commercial-entity-table-row.is-selected,
+.hz-faturalar-desk .hz-commercial-entity-table-row.is-selected,
+.hz-iadeler-desk .hz-commercial-entity-table-row.is-selected,
+.hz-fabrikalar-desk .hz-factory-table-row.is-selected {
+  background: var(--desk-green-soft) !important;
+  box-shadow: inset 3px 0 0 var(--desk-green);
+}
+
+.hz-teslimatlar-desk .hz-commercial-entity-action-btn,
+.hz-faturalar-desk .hz-commercial-entity-action-btn,
+.hz-iadeler-desk .hz-commercial-entity-action-btn,
+.hz-fabrikalar-desk .hz-factory-action-btn {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid var(--desk-border);
+  background: var(--desk-input-bg);
+  color: var(--desk-text);
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.hz-teslimatlar-desk .hz-commercial-entity-side,
+.hz-faturalar-desk .hz-commercial-entity-side,
+.hz-iadeler-desk .hz-commercial-entity-side,
+.hz-fabrikalar-desk .hz-factory-side {
+  border: 1px solid var(--desk-border);
+  border-radius: var(--desk-radius);
+  background: var(--desk-surface) !important;
+  box-shadow: var(--desk-shadow);
+  padding: 12px;
+  color: var(--desk-text);
+}
+
+/* Depo hazırlık */
+.hz-warehouse-prep-page.hz-depo-desk {
+  background: var(--desk-canvas) !important;
+  color: var(--desk-text);
+}
+
+.hz-depo-desk .hz-warehouse-prep-topbar-title {
+  color: var(--desk-text);
+}
+
+.hz-depo-desk .hz-warehouse-prep-kpi {
+  background: var(--desk-surface) !important;
+  border-color: var(--desk-border) !important;
+}
+
+.hz-depo-desk .hz-warehouse-prep-main {
+  border-color: var(--desk-border);
+  background: var(--desk-surface);
+}

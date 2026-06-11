@@ -13,6 +13,7 @@ export interface OfferRow {
   validUntilLabel: string;
   priceGroupLabel: string;
   createdAtLabel: string;
+  conversionLabel: string;
 }
 
 function formatMoney(amount: number, currency: string): string {
@@ -50,6 +51,7 @@ export function mapOfferToRow(offer: Offer, customer?: Customer): OfferRow {
       : followUp.latestNote,
     validUntilLabel: new Date(offer.validUntil).toLocaleDateString("tr-TR"),
     priceGroupLabel: offer.priceSlotLabelSnapshot,
-    createdAtLabel: new Date(offer.createdAt).toLocaleDateString("tr-TR")
+    createdAtLabel: new Date(offer.createdAt).toLocaleDateString("tr-TR"),
+    conversionLabel: offer.status === "converted" ? "Tamamlandı" : offer.status === "approved" ? "Hazır" : "Bekliyor"
   };
 }
