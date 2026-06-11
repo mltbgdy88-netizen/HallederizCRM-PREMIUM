@@ -8,6 +8,7 @@ import {
   deriveOrderPaymentStatusFromAmount,
   resolveQuickOperationPayment,
   validateQuickOperationRequest,
+  validateReturnWindowFromOrderCreatedAt,
   type ResolvedQuickOperationPayment
 } from "@hallederiz/domain";
 import type {
@@ -96,7 +97,7 @@ export class QuickOperationsService {
     };
   }
 
-  async submitQuickOperation(request: QuickOperationSubmitRequest): Promise<QuickOperationSubmitResponse> {
+  async submitQuickOperation(request: QuickOperationSubmitRequest, idempotencyKey?: string): Promise<QuickOperationSubmitResponse> {
     const preview = this.previewQuickOperation(request);
     const now = Date.now();
     const base: QuickOperationSubmitResponse = {
@@ -107,14 +108,14 @@ export class QuickOperationsService {
       documentIds: [],
       auditEventIds: [],
       validationIssues: preview.validationIssues,
-      mode: "foundation"
+      mode: preview.ok ? "foundation" : "failed"
     };
 
     if (!preview.ok) {
-      return this.withSideActions(request, base);
+      return this.withSideActions(request, { ...base, ok: false, mode: "failed" });
     }
 
-    const approvalQueued = await this.queueForApprovalIfRequired(request, preview);
+    const approvalQueued = await this.queueForApprovalIfRequired(request, preview, idempotencyKey);
     if (approvalQueued) {
       return this.withSideActions(request, approvalQueued);
     }
@@ -492,10 +493,11 @@ export class QuickOperationsService {
     } catch (error) {
       return this.withSideActions(request, {
         ...base,
-        mode: "foundation",
+        ok: false,
+        mode: "foundation_blocked",
         workflowImpacts: [
           ...base.workflowImpacts,
-          impact("impact_delivery_pending", "delivery_execution_pending", "Teslim execution foundation modda", "Teslim kaydi olusturulamadi, inceleme modunda taslak olusturuldu.", "warning")
+          impact("impact_delivery_pending", "delivery_execution_pending", "Teslim execution tamamlanamadi", "Teslim kaydi olusturulamadi; islem foundation_blocked durumunda.", "warning")
         ],
         validationIssues: [
           ...(base.validationIssues ?? []),
@@ -503,7 +505,7 @@ export class QuickOperationsService {
             code: "delivery_execution_unavailable",
             field: "operationType",
             message: error instanceof Error ? error.message : "Teslim execution su an tamamlanamadi.",
-            level: "warning"
+            level: "error"
           }
         ]
       });
@@ -511,6 +513,33 @@ export class QuickOperationsService {
   }
 
   private async executeReturn(request: QuickOperationSubmitRequest, base: QuickOperationSubmitResponse): Promise<QuickOperationSubmitResponse> {
+    if (request.orderId) {
+      const order = await this.commercialService.getOrder(request.orderId);
+      if (order) {
+        const windowIssue = validateReturnWindowFromOrderCreatedAt(order.createdAt);
+        if (windowIssue) {
+          return this.withSideActions(request, {
+            ...base,
+            ok: false,
+            mode: "failed",
+            validationIssues: [
+              ...(base.validationIssues ?? []),
+              {
+                code: windowIssue.code,
+                field: "orderId",
+                message: windowIssue.message,
+                level: "error"
+              }
+            ],
+            workflowImpacts: [
+              ...base.workflowImpacts,
+              impact("impact_return_window", "return_review_required", "Iade penceresi kapali", windowIssue.message, "warning")
+            ]
+          });
+        }
+      }
+    }
+
     try {
       const returnPayload: Partial<Return> = {
         customerId: request.customerId as Return["customerId"],
@@ -552,10 +581,11 @@ export class QuickOperationsService {
     } catch (error) {
       return this.withSideActions(request, {
         ...base,
-        mode: "foundation",
+        ok: false,
+        mode: "foundation_blocked",
         workflowImpacts: [
           ...base.workflowImpacts,
-          impact("impact_return_review", "return_review_required", "Iade inceleme bekliyor", "Iade kaydi olusturulamadi, inceleme/foundation modunda taslak uretildi.", "warning"),
+          impact("impact_return_review", "return_review_required", "Iade execution tamamlanamadi", "Iade kaydi olusturulamadi; islem foundation_blocked durumunda.", "warning"),
           impact("impact_return_approval", "return_approval_may_be_required", "Approval gerekebilir", "Iade talebinin onay akisina alinmasi onerilir.", "warning")
         ],
         validationIssues: [
@@ -564,7 +594,7 @@ export class QuickOperationsService {
             code: "return_execution_unavailable",
             field: "operationType",
             message: error instanceof Error ? error.message : "Iade execution su an tamamlanamadi.",
-            level: "warning"
+            level: "error"
           }
         ]
       });
@@ -632,14 +662,18 @@ export class QuickOperationsService {
 
   private async queueForApprovalIfRequired(
     request: QuickOperationSubmitRequest,
-    preview: QuickOperationPreviewResponse
+    preview: QuickOperationPreviewResponse,
+    idempotencyKey?: string
   ): Promise<QuickOperationSubmitResponse | null> {
     const actionKey = this.resolveQuickOperationActionKey(request.operationType);
+    const stableIdempotencyKey =
+      idempotencyKey?.trim() ||
+      `quick_operation.${request.operationType}.${request.customerId}.${request.orderId ?? "none"}`;
     const policyDecision = evaluatePolicyEngineForContext(this.context, {
       actionKey,
       channel: "web",
       source: "web",
-      idempotencyKey: `quick_operation.${request.operationType}.${request.customerId}.${Date.now()}`,
+      idempotencyKey: stableIdempotencyKey,
       metadata: {
         route: "quick-operations.submit",
         operationType: request.operationType,
@@ -654,7 +688,7 @@ export class QuickOperationsService {
     const approvalRuntime = resolvePendingApprovalRepository(this.context);
     if (!approvalRuntime.repository) {
       return {
-        ok: true,
+        ok: false,
         operationType: request.operationType,
         draftId: `qod_${Date.now()}`,
         workflowImpacts: [
@@ -662,15 +696,15 @@ export class QuickOperationsService {
           impact(
             "impact_qo_approval_pending",
             "return_review_required",
-            "Onay kaydı bekleniyor",
-            "Onay deposu bu ortamda hazır değil; işlem canlı bağlantı kurulduğunda onaya gönderilecek.",
+            "Onay kaydi bekleniyor",
+            "Onay deposu bu ortamda hazir degil; islem canli baglanti kurulduğunda onaya gonderilecek.",
             "warning"
           )
         ],
         documentIds: [],
         auditEventIds: [],
         validationIssues: preview.validationIssues,
-        mode: "foundation"
+        mode: "foundation_blocked"
       };
     }
 
@@ -698,7 +732,7 @@ export class QuickOperationsService {
         paymentNote: request.paymentNote,
         allocatePaymentToOrder: request.allocatePaymentToOrder
       },
-      idempotencyKey: `quick_operation.${request.operationType}.${request.customerId}.${Date.now()}`,
+      idempotencyKey: stableIdempotencyKey,
       requestedAt: nowIso(),
       auditRequired: policyDecision.auditPolicy?.auditRequired ?? true,
       timelineRequired: policyDecision.auditPolicy?.timelineRequired ?? true
@@ -714,15 +748,15 @@ export class QuickOperationsService {
         impact(
           "impact_qo_approval_created",
           "return_review_required",
-          "Onay kaydı oluşturuldu",
-          "İşlem onay kuyruğuna alındı; onay sonrası kayıt işlenecek.",
+          "Onay kaydi olusturuldu",
+          "Islem onay kuyruguna alindi; onay sonrasi kayit islenecek.",
           "warning"
         )
       ],
       documentIds: [],
       auditEventIds: [],
       validationIssues: preview.validationIssues,
-      mode: "foundation"
+      mode: "queued_for_approval"
     };
   }
 

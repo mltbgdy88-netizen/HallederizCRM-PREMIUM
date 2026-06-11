@@ -1,10 +1,11 @@
 import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
 
 type PageProps = {
-  params: { stokSlug: string[] };
+  params: Promise<{ stokSlug: string[] }>;
 };
 
-export default function StokDeepPage({ params }: PageProps) {
-  const rest = params.stokSlug ?? [];
+export default async function StokDeepPage({ params }: PageProps) {
+  const resolvedParams = await params;
+  const rest = resolvedParams.stokSlug ?? [];
   return renderProductCatchAll(["stok", ...rest]);
 }

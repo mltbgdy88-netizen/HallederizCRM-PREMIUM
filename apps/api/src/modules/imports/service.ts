@@ -366,13 +366,22 @@ async function parseFile(type: ImportType, file: ImportFilePayload): Promise<Par
   return parsed;
 }
 
+function sanitizeImportCellValue(value: string): string {
+  const trimmed = value.trim();
+  if (/^[=@]/.test(trimmed)) {
+    throw new Error("Guvenlik nedeniyle formul ile baslayan hucreler reddedildi.");
+  }
+  return trimmed;
+}
+
 function toPreviewRows(headers: string[], rows: string[][]): PreviewRow[] {
   return rows.map((row, index) => {
     const values: Record<string, string> = {};
     const normalized: Record<string, string> = {};
     headers.forEach((header, headerIndex) => {
-      values[header] = String(row[headerIndex] ?? "").trim();
-      normalized[header] = String(row[headerIndex] ?? "").trim();
+      const cell = sanitizeImportCellValue(String(row[headerIndex] ?? ""));
+      values[header] = cell;
+      normalized[header] = cell;
     });
     return { rowNumber: index + 2, values, normalized };
   });

@@ -57,19 +57,22 @@ export class ApiClient {
     return { status: response.status, data };
   }
 
-  async post<T>(path: string, body?: unknown): Promise<T> {
-    return this.request<T>(path, { method: "POST", body });
+  async post<T>(path: string, body?: unknown, options?: { headers?: Record<string, string> }): Promise<T> {
+    return this.request<T>(path, { method: "POST", body, headers: options?.headers });
   }
 
-  async patch<T>(path: string, body?: unknown): Promise<T> {
-    return this.request<T>(path, { method: "PATCH", body });
+  async patch<T>(path: string, body?: unknown, options?: { headers?: Record<string, string> }): Promise<T> {
+    return this.request<T>(path, { method: "PATCH", body, headers: options?.headers });
   }
 
-  async delete<T>(path: string): Promise<T> {
-    return this.request<T>(path, { method: "DELETE" });
+  async delete<T>(path: string, options?: { headers?: Record<string, string> }): Promise<T> {
+    return this.request<T>(path, { method: "DELETE", headers: options?.headers });
   }
 
-  private async request<T>(path: string, init: { method: string; body?: unknown }): Promise<T> {
+  private async request<T>(
+    path: string,
+    init: { method: string; body?: unknown; headers?: Record<string, string> }
+  ): Promise<T> {
     const sessionToken = this.resolveSessionToken();
     const response = await fetch(`${this.options.baseUrl}${path}`, {
       method: init.method,
@@ -78,7 +81,8 @@ export class ApiClient {
         ...(this.options.tenantId ? { "x-tenant-id": this.options.tenantId } : {}),
         ...(this.options.userId ? { "x-user-id": this.options.userId } : {}),
         ...(sessionToken ? { "x-session-token": sessionToken } : {}),
-        ...(sessionToken ? { authorization: `Bearer ${sessionToken}` } : {})
+        ...(sessionToken ? { authorization: `Bearer ${sessionToken}` } : {}),
+        ...(init.headers ?? {})
       },
       body: init.body === undefined ? undefined : JSON.stringify(init.body),
       cache: "no-store",

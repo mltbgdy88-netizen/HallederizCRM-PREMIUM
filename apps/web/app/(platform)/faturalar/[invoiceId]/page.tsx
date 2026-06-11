@@ -1,5 +1,6 @@
 import { InvoiceDetailPage } from "../../../../src/features/invoices/components";
 
-export default function InvoiceDetailRoute({ params }: { params: { invoiceId: string } }) {
-  return <InvoiceDetailPage invoiceId={params.invoiceId} />;
+export default async function InvoiceDetailRoute({ params }: { params: Promise<{ invoiceId: string }> }) {
+  const resolvedParams = await params;
+  return <InvoiceDetailPage invoiceId={resolvedParams.invoiceId} />;
 }

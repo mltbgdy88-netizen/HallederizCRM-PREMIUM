@@ -2,9 +2,10 @@ import { CustomerLayerReferenceLayout } from "../../../../../src/features/custom
 
 
 
-export default function CarilerCustomerFinansPage({ params }: { params: { customerId: string } }) {
+export default async function CarilerCustomerFinansPage({ params }: { params: Promise<{ customerId: string }> }) {
+  const resolvedParams = await params;
 
-  return <CustomerLayerReferenceLayout customerId={params.customerId} layer="finans" />;
+  return <CustomerLayerReferenceLayout customerId={resolvedParams.customerId} layer="finans" />;
 
 }
 

@@ -2,8 +2,9 @@
 import { TaskDetailPage } from "../../../../src/features/tasks/components";
 import { getTaskById } from "../../../../src/features/dashboard/queries";
 
-export default async function TaskDetailRoutePage({ params }: { params: { taskId: string } }) {
-  const task = await getTaskById(params.taskId);
+export default async function TaskDetailRoutePage({ params }: { params: Promise<{ taskId: string }> }) {
+  const resolvedParams = await params;
+  const task = await getTaskById(resolvedParams.taskId);
 
   if (!task) {
     notFound();

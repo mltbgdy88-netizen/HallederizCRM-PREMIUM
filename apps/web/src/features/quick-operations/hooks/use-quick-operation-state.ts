@@ -624,6 +624,14 @@ export function useQuickOperationState(options?: {
     }
   };
 
+  function createQuickOperationIdempotencyKey(type: QuickOperationType, customerId: string): string {
+    const suffix =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+    return `qop_${type}_${customerId}_${suffix}`;
+  }
+
   const submitOperation = async (operationTypeOverride?: QuickOperationType): Promise<QuickOperationSubmitOutcome> => {
     const effectiveOperationType = operationTypeOverride ?? operationType;
     if (previewBlockingSubmit) {
@@ -641,7 +649,8 @@ export function useQuickOperationState(options?: {
 
     setIsSubmitting(true);
     try {
-      const result = await submitQuickOperationRecord(buildSubmitPayload(effectiveOperationType));
+      const idempotencyKey = createQuickOperationIdempotencyKey(effectiveOperationType, selectedCustomer.id);
+      const result = await submitQuickOperationRecord(buildSubmitPayload(effectiveOperationType), { idempotencyKey });
       const sanitizedImpacts = sanitizeSubmitImpacts(result.workflowImpacts);
       setSubmittedImpacts(
         sanitizedImpacts.map((impact) => ({
@@ -665,7 +674,7 @@ export function useQuickOperationState(options?: {
         paymentDetailHref: feedback.paymentDetailHref,
         paymentDetailLabel: feedback.paymentDetailLabel
       });
-      return { ok: true, toast: feedback.toast };
+      return { ok: result.ok && !result.demoPreviewOnly, toast: feedback.toast };
     } catch (error) {
       setSubmitLinks({ showApprovalsLink: false });
       setNotice(mapSubmitActionError(error));

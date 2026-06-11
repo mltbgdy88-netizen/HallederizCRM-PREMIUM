@@ -1,9 +1,10 @@
 import { renderProductCatchAll } from "../../../src/navigation/render-product-catch-all";
 
 type PageProps = {
-  params: { productSlug: string[] };
+  params: Promise<{ productSlug: string[] }>;
 };
 
-export default function ProductCatchAllPage({ params }: PageProps) {
-  return renderProductCatchAll(params.productSlug ?? []);
+export default async function ProductCatchAllPage({ params }: PageProps) {
+  const resolvedParams = await params;
+  return renderProductCatchAll(resolvedParams.productSlug ?? []);
 }

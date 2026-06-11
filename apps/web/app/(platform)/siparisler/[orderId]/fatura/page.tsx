@@ -1,5 +1,6 @@
 import { SiparislerOrderidFaturaCommandCenterPage } from "../../../../../src/features/ui-inventory/components/SiparislerSubRoutePages";
 
-export default function SiparislerOrderFaturaPage({ params }: { params: { orderId: string } }) {
-  return <SiparislerOrderidFaturaCommandCenterPage orderId={params.orderId} />;
+export default async function SiparislerOrderFaturaPage({ params }: { params: Promise<{ orderId: string }> }) {
+  const resolvedParams = await params;
+  return <SiparislerOrderidFaturaCommandCenterPage orderId={resolvedParams.orderId} />;
 }

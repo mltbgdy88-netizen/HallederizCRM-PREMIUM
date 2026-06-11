@@ -2,11 +2,12 @@ import { OrderDetailPage as OrderDetailFeaturePage } from "../../../../src/featu
 import { OrderEntityLayerNav } from "../../../../src/features/ui-inventory/components/EntityLayerNav";
 import { SiparislerOrderidCommandCenterShell } from "../../../../src/features/ui-inventory/components/SiparislerShellWrappers";
 
-export default function OrderDetailPage({ params }: { params: { orderId: string } }) {
+export default async function OrderDetailPage({ params }: { params: Promise<{ orderId: string }> }) {
+  const resolvedParams = await params;
   return (
     <SiparislerOrderidCommandCenterShell>
-      <OrderEntityLayerNav orderId={params.orderId} />
-      <OrderDetailFeaturePage orderId={params.orderId} />
+      <OrderEntityLayerNav orderId={resolvedParams.orderId} />
+      <OrderDetailFeaturePage orderId={resolvedParams.orderId} />
     </SiparislerOrderidCommandCenterShell>
   );
 }

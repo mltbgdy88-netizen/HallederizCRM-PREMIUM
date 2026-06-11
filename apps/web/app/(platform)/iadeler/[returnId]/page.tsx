@@ -1,5 +1,6 @@
 import { ReturnDetailPage } from "../../../../src/features/returns/components";
 
-export default function ReturnDetailRoute({ params }: { params: { returnId: string } }) {
-  return <ReturnDetailPage returnId={params.returnId} />;
+export default async function ReturnDetailRoute({ params }: { params: Promise<{ returnId: string }> }) {
+  const resolvedParams = await params;
+  return <ReturnDetailPage returnId={resolvedParams.returnId} />;
 }

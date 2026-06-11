@@ -2,11 +2,12 @@ import { OfferDetailPage as OfferDetailFeaturePage } from "../../../../src/featu
 import { OfferEntityLayerNav } from "../../../../src/features/ui-inventory/components/EntityLayerNav";
 import { TekliflerOfferidCommandCenterShell } from "../../../../src/features/ui-inventory/components/TekliflerShellWrappers";
 
-export default function OfferDetailPage({ params }: { params: { offerId: string } }) {
+export default async function OfferDetailPage({ params }: { params: Promise<{ offerId: string }> }) {
+  const resolvedParams = await params;
   return (
     <TekliflerOfferidCommandCenterShell>
-      <OfferEntityLayerNav offerId={params.offerId} />
-      <OfferDetailFeaturePage offerId={params.offerId} />
+      <OfferEntityLayerNav offerId={resolvedParams.offerId} />
+      <OfferDetailFeaturePage offerId={resolvedParams.offerId} />
     </TekliflerOfferidCommandCenterShell>
   );
 }

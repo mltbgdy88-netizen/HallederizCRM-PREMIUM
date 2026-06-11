@@ -1,5 +1,6 @@
 import { DeliveryDetailPage } from "../../../../src/features/deliveries/components";
 
-export default function DeliveryDetailRoute({ params }: { params: { deliveryId: string } }) {
-  return <DeliveryDetailPage deliveryId={params.deliveryId} />;
+export default async function DeliveryDetailRoute({ params }: { params: Promise<{ deliveryId: string }> }) {
+  const resolvedParams = await params;
+  return <DeliveryDetailPage deliveryId={resolvedParams.deliveryId} />;
 }

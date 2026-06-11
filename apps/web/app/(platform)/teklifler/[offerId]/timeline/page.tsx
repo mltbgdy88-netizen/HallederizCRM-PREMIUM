@@ -1,5 +1,6 @@
 import { TekliflerOfferidTimelineCommandCenterPage } from "../../../../../src/features/ui-inventory/components/TekliflerSubRoutePages";
 
-export default function TekliflerOfferTimelinePage({ params }: { params: { offerId: string } }) {
-  return <TekliflerOfferidTimelineCommandCenterPage offerId={params.offerId} />;
+export default async function TekliflerOfferTimelinePage({ params }: { params: Promise<{ offerId: string }> }) {
+  const resolvedParams = await params;
+  return <TekliflerOfferidTimelineCommandCenterPage offerId={resolvedParams.offerId} />;
 }

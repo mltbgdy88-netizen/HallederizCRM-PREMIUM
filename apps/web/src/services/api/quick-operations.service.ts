@@ -6,23 +6,6 @@ import type {
 import { dataSourceConfig, sdk } from "../../lib/data-source";
 import { calculateQuickOperationTotals } from "@hallederiz/domain";
 
-function resolveCreatedEntityType(operationType: QuickOperationSubmitRequest["operationType"]): QuickOperationSubmitResponse["createdEntityType"] {
-  switch (operationType) {
-    case "offer":
-      return "offer";
-    case "sale_order":
-      return "order";
-    case "delivery":
-      return "delivery";
-    case "payment":
-      return "payment";
-    case "return":
-      return "return";
-    default:
-      return undefined;
-  }
-}
-
 function resolveDocumentTitle(operationType: QuickOperationSubmitRequest["operationType"]): string {
   switch (operationType) {
     case "offer":
@@ -66,20 +49,30 @@ export async function previewQuickOperationRecord(
   return response.item;
 }
 
-export async function submitQuickOperationRecord(payload: QuickOperationSubmitRequest): Promise<QuickOperationSubmitResponse> {
+export async function submitQuickOperationRecord(
+  payload: QuickOperationSubmitRequest,
+  options?: { idempotencyKey?: string }
+): Promise<QuickOperationSubmitResponse> {
   if (dataSourceConfig.useDemoData) {
     const referenceNo = `QO-DEMO-${String(Date.now()).slice(-6)}`;
     return {
-      ok: true,
+      ok: false,
+      demoPreviewOnly: true,
       operationType: payload.operationType,
       draftId: `qod_demo_${Date.now()}`,
-      createdEntityType: resolveCreatedEntityType(payload.operationType),
-      createdEntityId: `foundation_${payload.operationType}_${Date.now()}`,
-      createdEntityNo: referenceNo,
-      workflowImpacts: [],
+      workflowImpacts: [
+        {
+          id: "demo_preview_only",
+          key: "offer_no_reservation",
+          title: "Demo onizleme",
+          description: "Demo modda canli kayit olusturulmaz; yalnizca onizleme gosterilir.",
+          severity: "warning"
+        }
+      ],
       documentIds: [],
       auditEventIds: [],
       validationIssues: [],
+      mode: "foundation_blocked",
       sideActions: {
         documentPreview: {
           documentType: payload.operationType,
@@ -122,11 +115,10 @@ export async function submitQuickOperationRecord(payload: QuickOperationSubmitRe
           recommendations: ["Canli gonderim ve belge uretimi islem kuyrugu baglandiginda acilir."],
           source: "template"
         }
-      },
-      mode: "foundation"
+      }
     };
   }
 
-  const response = await sdk.quickOperations.submitQuickOperation(payload);
+  const response = await sdk.quickOperations.submitQuickOperation(payload, options);
   return response.item;
 }

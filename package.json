@@ -30,12 +30,22 @@
     "smoke:product-readiness": "pnpm typecheck && pnpm smoke:routes && pnpm smoke:navigation",
     "ui:guard": "node scripts/ui-guard.cjs",
     "smoke:production-safety": "pnpm --filter @hallederiz/api... build && pnpm --filter @hallederiz/api exec node --loader ts-node/esm --experimental-specifier-resolution=node --test src/tests/production-safety-smoke.test.ts",
+    "security:secret-scan": "node scripts/security/secret-scan.cjs",
+    "security:audit": "pnpm audit --audit-level high",
+    "security:audit:report": "pnpm audit --audit-level moderate",
     "local-ai:smoke": "node scripts/local-ai/health.cjs --degraded-ok",
     "dev:clean:windows": "powershell -ExecutionPolicy Bypass -File scripts/windows-clean-dev.ps1 -Reinstall"
   },
   "devDependencies": {
     "@types/node": "^22.7.4",
-    "turbo": "^2.1.3",
+    "turbo": "^2.9.14",
     "typescript": "^5.6.3"
+  },
+  "pnpm": {
+    "overrides": {
+      "fast-uri": ">=3.1.2",
+      "uuid": ">=11.1.0",
+      "tmp": ">=0.2.6"
+    }
   }
 }

@@ -20,7 +20,8 @@ export const API_CORS_HEADERS = [
   "authorization",
   "x-session-token",
   "x-tenant-id",
-  "x-user-id"
+  "x-user-id",
+  "idempotency-key"
 ];
 
 export function parseApiCorsOrigins(input: string | undefined, nodeEnv = process.env.NODE_ENV): string[] {

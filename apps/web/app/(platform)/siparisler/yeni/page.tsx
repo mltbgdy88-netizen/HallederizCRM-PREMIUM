@@ -1,16 +1,17 @@
 import { OrderCreateHub } from "../../../../src/features/orders/components/OrderCreateHub";
 import { SiparislerYeniCommandCenterShell } from "../../../../src/features/ui-inventory/components/SiparislerShellWrappers";
 
-export default function NewOrderPage({
+export default async function NewOrderPage({
   searchParams
 }: {
-  searchParams?: { sourceOffer?: string; customer?: string; offer?: string };
+  searchParams?: Promise<{ sourceOffer?: string; customer?: string; offer?: string }>;
 }) {
-  const sourceOfferId = searchParams?.sourceOffer ?? searchParams?.offer ?? null;
+  const resolvedSearchParams = searchParams ? await searchParams : undefined;
+  const sourceOfferId = resolvedSearchParams?.sourceOffer ?? resolvedSearchParams?.offer ?? null;
 
   return (
     <SiparislerYeniCommandCenterShell>
-      <OrderCreateHub customerId={searchParams?.customer ?? null} sourceOfferId={sourceOfferId} />
+      <OrderCreateHub customerId={resolvedSearchParams?.customer ?? null} sourceOfferId={sourceOfferId} />
     </SiparislerYeniCommandCenterShell>
   );
 }

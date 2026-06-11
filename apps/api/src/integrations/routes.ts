@@ -3,6 +3,7 @@ import { Readable } from "node:stream";
 import { hashInboundMessageContent, parseWhatsAppApprovalCommand } from "@hallederiz/domain";
 import type { ErpConnection, ErpMapping, FactoryOrder, WhatsAppActionRequest, WhatsAppMessage } from "@hallederiz/types";
 import { IntegrationsService } from "../modules/integrations/service";
+import { verifyWebhookTimestamp } from "../shared/webhook-security";
 import { whatsAppWorkflowStoreService } from "../modules/whatsapp-workflow/store";
 import { requireTenantPermissionGuards, withGuards } from "../shared/auth-guards";
 import { AiRuntimeService } from "../modules/ai-runtime/service";
@@ -124,6 +125,13 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
     });
     if (secret && !service.verifyWhatsAppWebhookSignature(rawBody ?? "", signature)) {
       return reply.status(403).send({ message: "Webhook signature mismatch." });
+    }
+    if (secret && process.env.NODE_ENV === "production") {
+      const timestampHeader =
+        getHeaderValue(request.headers["x-hub-timestamp-256"]) ?? getHeaderValue(request.headers["x-hub-timestamp"]);
+      if (timestampHeader && !verifyWebhookTimestamp(timestampHeader)) {
+        return reply.status(403).send({ message: "Webhook timestamp outside tolerance." });
+      }
     }
     const event = request.body as WhatsAppWebhookBody;
     const resolvedTenantId = resolveWebhookTenantId(event);

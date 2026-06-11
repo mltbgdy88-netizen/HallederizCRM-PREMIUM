@@ -131,12 +131,31 @@ export function resolveSubmitFeedback(
   const detail = resolveDetailLink(result, options.useDemoData);
   const approvalsHref = resolveApprovalsHref(result);
 
-  if (options.useDemoData) {
+  if (options.useDemoData || result.demoPreviewOnly) {
     const notice = [MSG_SUBMIT_DRAFT_READY, refSuffix, MSG_SUBMIT_PREVIEW].filter(Boolean).join(" ");
     return {
       notice,
       toast: notice,
       showApprovalsLink: false
+    };
+  }
+
+  if (result.mode === "foundation_blocked" || result.mode === "failed") {
+    const notice = [MSG_SUBMIT_VALIDATION_FAILED, refSuffix].filter(Boolean).join(" ");
+    return {
+      notice,
+      toast: notice,
+      showApprovalsLink: false
+    };
+  }
+
+  if (result.mode === "queued_for_approval" || result.approvalId?.trim()) {
+    const notice = [MSG_SUBMIT_SENT_FOR_APPROVAL, refSuffix, MSG_SUBMIT_AFTER_APPROVAL].filter(Boolean).join(" ");
+    return {
+      notice,
+      toast: [MSG_SUBMIT_SENT_FOR_APPROVAL, MSG_SUBMIT_APPROVALS_HINT].join(" "),
+      showApprovalsLink: true,
+      approvalsHref
     };
   }
 
@@ -146,16 +165,6 @@ export function resolveSubmitFeedback(
       notice,
       toast: notice,
       showApprovalsLink: false
-    };
-  }
-
-  if (result.approvalId?.trim()) {
-    const notice = [MSG_SUBMIT_SENT_FOR_APPROVAL, refSuffix, MSG_SUBMIT_AFTER_APPROVAL].filter(Boolean).join(" ");
-    return {
-      notice,
-      toast: [MSG_SUBMIT_SENT_FOR_APPROVAL, MSG_SUBMIT_APPROVALS_HINT].join(" "),
-      showApprovalsLink: true,
-      approvalsHref
     };
   }
 
