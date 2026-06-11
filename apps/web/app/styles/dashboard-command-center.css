@@ -10,7 +10,7 @@
   --app-header-height: 56px;
 }
 
-/* —— Sidebar (204px, internal scroll) —— */
+/* —— Sidebar (204px, compact grouped nav with internal scroll) —— */
 .hz-sidebar-root.hz-sidebar-root--command {
   display: flex;
   flex-direction: column;
@@ -74,11 +74,11 @@
 .hz-sidebar-root--command .hz-sidebar-scroll {
   flex: 1 1 auto;
   min-height: 0;
-  overflow-x: hidden;
   overflow-y: auto;
-  overscroll-behavior: contain;
+  overflow-x: hidden;
   scrollbar-gutter: stable;
-  padding: 6px 8px 10px;
+  overscroll-behavior: contain;
+  padding: 8px 10px 10px;
   display: flex;
   flex-direction: column;
   gap: 2px;
@@ -87,12 +87,12 @@
 }
 
 .hz-sidebar-root--command .hz-sidebar-scroll::-webkit-scrollbar {
-  width: 5px;
+  width: 6px;
 }
 
 .hz-sidebar-root--command .hz-sidebar-scroll::-webkit-scrollbar-thumb {
+  background: rgba(250, 204, 21, 0.34);
   border-radius: 999px;
-  background: rgba(250, 204, 21, 0.35);
 }
 
 .hz-sidebar-root--command .hz-sidebar-section {
@@ -104,31 +104,29 @@
 }
 
 .hz-sidebar-root--command .hz-sidebar-section + .hz-sidebar-section {
-  margin-top: 6px;
+  margin-top: 7px;
   padding-top: 6px;
-  border-top: 1px solid rgba(250, 204, 21, 0.1);
+  border-top: 1px solid rgba(250, 204, 21, 0.16);
 }
 
 .hz-sidebar-root--command .hz-sidebar-section-title {
   display: block;
   margin: 8px 8px 4px;
-  padding: 0;
+  color: rgba(255, 255, 255, 0.62);
   font-size: 9px;
-  font-weight: 850;
+  font-weight: 900;
   line-height: 1;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: rgba(250, 204, 21, 0.55);
-  opacity: 0.55;
   white-space: nowrap;
 }
 
 .hz-sidebar-root--command .hz-sidebar-nav {
   display: flex;
-  flex-direction: column;
-  gap: 3px;
   flex: 0 0 auto;
   min-height: auto;
+  flex-direction: column;
+  gap: 3px;
 }
 
 .hz-sidebar-root--command .hz-sidebar-item {

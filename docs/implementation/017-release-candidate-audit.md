@@ -1,4 +1,4 @@
-﻿# 017 - Release Candidate Audit
+# 017 - Release Candidate Audit
 
 ## Denetim Tarihi
 - 2026-04-30
@@ -124,3 +124,72 @@ Asagidaki maddeler pilot kapsaminda risk olusturur ancak kontrollu pilotla yonet
   - outbound channels
   - high-volume webhook davranisi
   icin son kararlar verilmelidir.
+
+---
+
+## 2026-06-11 UI ve Dil Freeze Ek Kabul Notu
+
+### Genel karar
+
+**Sonuç: PASS_WITH_WARNINGS**
+
+UI nakli, sol menü sadeleştirme, eski ekran denetimi, 1920×1080 görsel kabul turu, Hızlı İşlem yüklenme düzeltmesi ve Türkçe dil standardı çalışmaları birlikte değerlendirildi. Ana kullanıcı yüzeylerinde günlük operasyonu bloke eden eski ekran, sol menü taşması veya belirgin dil standardı problemi kalmadı.
+
+### Sol menü kararı
+
+- Sol menü sadeleştirildi.
+- Hızlı İşlem hedefi `/hizli-islem/satis-masasi` olarak sabitlendi.
+- Yönetim kalemleri tek `Ayarlar` girişi altında toplandı.
+- Sidebar kaydırma ve hizalama `dashboard-command-center.css` içinde düzeltildi.
+- Yazıların üst üste binmesine neden olan sıkıştırıcı flex davranışı ve scroll engeli kaldırıldı.
+
+### UI Freeze kararı
+
+- Ana kullanıcı rotaları referans/operasyon masası yüzeylerine taşınmış kabul edilir.
+- Eski/generic ekranlar ana sidebar rotalarında kabul edilmez.
+- Bilinçli catch-all ve geliştirici/envanter route'ları ayrı backlog olarak izlenir.
+
+### Türkçe dil kararı
+
+- Ana kullanıcı UI metinleri Türkçe ve sade dil standardına taşındı.
+- Status/type/mode gibi değerler Türkçe gösterim haritasına bağlandı.
+- Kalan dil borçları backend ham hata mesajları, demo reason metinleri ve geliştirici paneli teknik anahtarlarıdır.
+
+### Kalite kapıları
+
+Son kabul turlarında aşağıdaki kapılar geçti olarak raporlandı:
+
+- `pnpm --filter @hallederiz/web typecheck`
+- `pnpm --filter @hallederiz/ui typecheck`
+- `pnpm smoke:navigation`
+- `pnpm smoke:routes`
+
+Not: Bu ek kabul notu GitHub üzerinden belge güncellemesi olarak eklenmiştir; terminal komutları bu commit üzerinde yeniden çalıştırılmamıştır.
+
+### Kalan borçlar
+
+#### P0
+
+Yok.
+
+#### P1
+
+- Derin teklif detay alt rotalarında envanter/geliştirici yüzeyi kalmışsa referans katmanla konsolide edilmelidir.
+
+#### P2
+
+- Backend/API ham hata mesajlarının Türkçeleştirilmesi.
+- Pixel-perfect 1920×1080 screenshot regresyon otomasyonu.
+- Güncel GitHub main üzerinde production build doğrulaması.
+
+#### P3
+
+- Demo/pilot reason ve recommendedNextStep metinleri.
+- Geliştirici chip anahtarları.
+- Düşük öncelikli teknik/karma etiketler.
+
+### Final kabul
+
+**GENEL SONUÇ: PASS_WITH_WARNINGS**
+
+UI ve dil freeze kabul edilmiştir. Kalan borçlar ayrı backlog olarak izlenmelidir.
