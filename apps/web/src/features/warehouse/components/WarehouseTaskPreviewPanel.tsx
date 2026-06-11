@@ -5,8 +5,8 @@ export function WarehouseTaskPreviewPanel({ warehouseOrder, customer }: { wareho
   if (!warehouseOrder) {
     return (
       <section className="hz-content-card">
-        <h3>Depo Preview</h3>
-        <p className="hz-content-card-description">Bir depo emri secildiginde toplama ozeti burada gorunur.</p>
+        <h3>Depo Önizleme</h3>
+        <p className="hz-content-card-description">Bir depo emri seçildiğinde toplama özeti burada görünür.</p>
       </section>
     );
   }
@@ -16,13 +16,13 @@ export function WarehouseTaskPreviewPanel({ warehouseOrder, customer }: { wareho
 
   return (
     <section className="hz-content-card">
-      <h3>Depo Preview</h3>
+      <h3>Depo Önizleme</h3>
       <ul className="hz-side-list hz-margin-top-sm">
         <li>Müşteri: {customer?.name ?? warehouseOrder.customerId}</li>
         <li>Siparis: {warehouseOrder.orderNo}</li>
         <li>Depo: {warehouseOrder.warehouseName}</li>
         <li>Durum: {getWarehouseOrderPrepLabel(warehouseOrder)}</li>
-        <li>Hazirlanan: {preparedTotal} / {requestedTotal}</li>
+        <li>Hazırlanan: {preparedTotal} / {requestedTotal}</li>
         <li>WhatsApp: depocu gorev bildirimi placeholder.</li>
       </ul>
     </section>

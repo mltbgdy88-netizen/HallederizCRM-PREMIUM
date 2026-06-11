@@ -1,5 +1,5 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+import { DeliveryRouteOperationsPage } from "../../../../src/features/deliveries/components";
 
 export default function TeslimatlarRotaPage() {
-  return renderProductCatchAll(["teslimatlar", "rota"]);
+  return <DeliveryRouteOperationsPage />;
 }

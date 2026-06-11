@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import type { ImportApplyResult, ImportHistoryRecord, ImportPreviewResult, ImportType } from "@hallederiz/types";
 import { FilterActions, FilterBar, FilterGrid, MetricCard, PageHeader, Pagination, SplitContentLayout, TabSwitcher } from "@hallederiz/ui";
+import { formatUserFacingStatus, formatUserFacingType } from "../../../lib/user-facing-labels";
 import { SettingsAreaShell } from "../../settings/components/SettingsAreaShell";
 import {
   applyImportApi,
@@ -22,7 +23,7 @@ const IMPORT_TABS: Array<{ id: ImportTab; label: string }> = [
   { id: "pricing", label: "Fiyatlar" },
   { id: "warehouses", label: "Depolar" },
   { id: "stock-locations", label: "Stok / Lokasyon" },
-  { id: "history", label: "Gecmis" }
+  { id: "history", label: "Geçmiş" }
 ];
 
 function toBase64(file: File): Promise<string> {
@@ -33,13 +34,15 @@ function toBase64(file: File): Promise<string> {
       const commaIndex = value.indexOf(",");
       resolve(commaIndex >= 0 ? value.slice(commaIndex + 1) : value);
     };
-    reader.onerror = () => reject(reader.error ?? new Error("Dosya okunamadi."));
+    reader.onerror = () => reject(reader.error ?? new Error("Dosya okunamadı."));
     reader.readAsDataURL(file);
   });
 }
 
 export function DataImportPage() {
   const [activeTab, setActiveTab] = useState<ImportTab>("customers");
+  const setupDemoNote =
+    "Kurulum veri içe aktarma: gerçek içe aktarma işlemi sonraki fazda bağlanacaktır; önizleme ve uygulama toast/guard ile sınırlıdır.";
   const [templates, setTemplates] = useState<Array<{ type: ImportType; fileName: string; description: string }>>([]);
   const [history, setHistory] = useState<ImportHistoryRecord[]>([]);
   const [loading, setLoading] = useState(false);
@@ -72,7 +75,7 @@ export function DataImportPage() {
       })
       .catch((error) => {
         if (!alive) return;
-        setFeedback(error instanceof Error ? error.message : "Import merkezi yuklenemedi.");
+        setFeedback(error instanceof Error ? error.message : "İçe aktarma merkezi yüklenemedi.");
       })
       .finally(() => {
         if (alive) setLoading(false);
@@ -95,13 +98,13 @@ export function DataImportPage() {
       link.click();
       URL.revokeObjectURL(link.href);
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : "Sablon indirilemedi.");
+      setFeedback(error instanceof Error ? error.message : "Şablon indirilemedi.");
     }
   };
 
   const handlePreview = async () => {
     if (!selectedFile) {
-      setFeedback("Lutfen once bir dosya secin.");
+      setFeedback("Lütfen önce bir dosya seçin.");
       return;
     }
     setLoading(true);
@@ -120,11 +123,11 @@ export function DataImportPage() {
       }
       setFeedback(
         previewResult.errorCount > 0
-          ? `Onizleme tamamlandi: ${previewResult.errorCount} hata var.`
-          : `Onizleme hazir: ${previewResult.validRows}/${previewResult.totalRows} satir gecerli.`
+          ? `Önizleme tamamlandı: ${previewResult.errorCount} hata var.`
+          : `Önizleme hazır: ${previewResult.validRows}/${previewResult.totalRows} satır geçerli.`
       );
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : "Onizleme olusturulamadi.");
+      setFeedback(error instanceof Error ? error.message : "Önizleme oluşturulamadı.");
     } finally {
       setLoading(false);
     }
@@ -132,7 +135,7 @@ export function DataImportPage() {
 
   const handleApply = async () => {
     if (!selectedFile) {
-      setFeedback("Lutfen once bir dosya secin.");
+      setFeedback("Lütfen önce bir dosya seçin.");
       return;
     }
     setLoading(true);
@@ -149,11 +152,11 @@ export function DataImportPage() {
       setHistory(historyItems);
       setFeedback(
         applyResult.status === "applied"
-          ? `Import tamamlandi: ${applyResult.successCount} satir isledi.`
-          : `Import basarisiz: ${applyResult.errorCount} hata`
+          ? `İçe aktarma tamamlandı: ${applyResult.successCount} satır işlendi.`
+          : `İçe aktarma başarısız: ${applyResult.errorCount} hata`
       );
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : "Import uygulanamadi.");
+      setFeedback(error instanceof Error ? error.message : "İçe aktarma uygulanamadı.");
     } finally {
       setLoading(false);
     }
@@ -169,9 +172,9 @@ export function DataImportPage() {
       setLoading(true);
       await retryImportHistoryApi(id);
       await refreshHistory();
-      setFeedback("Import kaydi yeniden deneme icin hazirlandi.");
+      setFeedback("İçe aktarma kaydı yeniden deneme için hazırlandı.");
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : "Import yeniden deneme islemi basarisiz.");
+      setFeedback(error instanceof Error ? error.message : "İçe aktarma yeniden deneme işlemi başarısız.");
     } finally {
       setLoading(false);
     }
@@ -184,7 +187,7 @@ export function DataImportPage() {
       const errors = await getImportErrorReportApi(id);
       setSelectedHistoryErrorReport(errors);
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : "Hata raporu alinamadi.");
+      setFeedback(error instanceof Error ? error.message : "Hata raporu alınamadı.");
     } finally {
       setLoading(false);
     }
@@ -194,23 +197,27 @@ export function DataImportPage() {
     <SettingsAreaShell>
       <>
       <PageHeader
-        title="Veri Yukleme Merkezi"
-        description="Cari, urun, fiyat, depo ve stok verilerini parse/validate/preview/apply akisiyla sisteme alin."
+        title="Veri Yükleme Merkezi"
+        description="Cari, ürün, fiyat, depo ve stok verilerini ayrıştırma, doğrulama, önizleme ve uygulama akışıyla sisteme alın."
       />
 
+      <p className="erpf-demo-band setupf-demo-band" role="status">
+        {setupDemoNote}
+      </p>
+
       <section className="hz-metric-grid">
-        <MetricCard title="Template Sayisi" value={String(templates.length)} detail="CSV sablonlari" tone="info" />
-        <MetricCard title="Import Gecmisi" value={String(history.length)} detail="Tum yuklemeler" tone="success" />
+        <MetricCard title="Şablon Sayısı" value={String(templates.length)} detail="CSV şablonları" tone="info" />
+        <MetricCard title="İçe Aktarma Geçmişi" value={String(history.length)} detail="Tüm yüklemeler" tone="success" />
         <MetricCard
-          title="Son Onizleme"
+          title="Son Önizleme"
           value={preview ? `${preview.validRows}/${preview.totalRows}` : "-"}
-          detail={preview ? `${preview.errorCount} hata` : "Hazir degil"}
+          detail={preview ? `${preview.errorCount} hata` : "Hazır değil"}
           tone={preview && preview.errorCount > 0 ? "warning" : "info"}
         />
         <MetricCard
-          title="Son Sonuc"
+          title="Son Sonuç"
           value={result ? `${result.successCount}` : "-"}
-          detail={result ? `${result.errorCount} hata` : "Import bekleniyor"}
+          detail={result ? `${result.errorCount} hata` : "İçe aktarma bekleniyor"}
           tone={result && result.errorCount > 0 ? "warning" : "success"}
         />
       </section>
@@ -225,30 +232,30 @@ export function DataImportPage() {
 
       {activeTab === "history" ? (
         <section className="hz-content-card">
-          <h3>Import Gecmisi</h3>
+          <h3>İçe Aktarma Geçmişi</h3>
           <div className="table-wrap hz-table-wrap">
             <table className="table hz-table">
               <thead>
                 <tr>
-                  <th>Import No</th>
-                  <th>Tip</th>
+                  <th>İçe Aktarma No</th>
+                  <th>Tür</th>
                   <th>Dosya</th>
-                  <th>Tur</th>
-                  <th>Sheet</th>
-                  <th>Yukleyen</th>
+                  <th>Dosya türü</th>
+                  <th>Sayfa</th>
+                  <th>Yükleyen</th>
                   <th>Tarih</th>
-                  <th>Basarili</th>
+                  <th>Başarılı</th>
                   <th>Atlanan</th>
                   <th>Hata</th>
                   <th>Durum</th>
-                  <th>Islem</th>
+                  <th>İşlem</th>
                 </tr>
               </thead>
               <tbody>
                 {pagedHistory.map((item) => (
                   <tr key={item.id}>
                     <td>{item.id}</td>
-                    <td>{item.type}</td>
+                    <td>{formatUserFacingType(item.type)}</td>
                     <td>{item.fileName}</td>
                     <td>{item.fileType?.toUpperCase() ?? "-"}</td>
                     <td>{item.sheetName ?? "-"}</td>
@@ -259,7 +266,7 @@ export function DataImportPage() {
                     <td>{item.errorCount}</td>
                     <td>
                       <span className={`hz-badge ${item.status === "applied" ? "hz-badge-success" : item.status === "failed" ? "hz-badge-danger" : "hz-badge-info"}`}>
-                        {item.status}
+                        {formatUserFacingStatus(item.status)}
                       </span>
                     </td>
                     <td>
@@ -298,11 +305,11 @@ export function DataImportPage() {
               <FilterBar>
                 <FilterGrid>
                   <label className="hz-field-label">
-                    Yukleme Tipi
-                    <input className="hz-control" value={importType} readOnly />
+                    Yükleme Tipi
+                    <input className="hz-control" value={formatUserFacingType(importType)} readOnly />
                   </label>
                   <label className="hz-field-label">
-                    Dosya Sec
+                    Dosya Seç
                     <input
                       className="hz-control"
                       type="file"
@@ -316,17 +323,17 @@ export function DataImportPage() {
                     />
                   </label>
                   <label className="hz-field-label">
-                    Secili Dosya
+                    Seçili Dosya
                     <input className="hz-control" value={selectedFile?.name ?? "-"} readOnly />
                   </label>
                   <label className="hz-field-label">
-                    Sheet
+                    Sayfa
                     <select
                       className="hz-control"
                       value={selectedSheetName}
                       onChange={(event) => setSelectedSheetName(event.target.value)}
                     >
-                      <option value="">Ilk sheet (varsayilan)</option>
+                      <option value="">İlk sayfa (varsayılan)</option>
                       {(preview?.sheetNames ?? []).map((sheetName) => (
                         <option key={sheetName} value={sheetName}>
                           {sheetName}
@@ -335,23 +342,23 @@ export function DataImportPage() {
                     </select>
                   </label>
                   <label className="hz-field-label">
-                    Sablon
+                    Şablon
                     <input className="hz-control" value={activeTemplate?.fileName ?? "-"} readOnly />
                   </label>
                   <div className="hz-field-label">
-                    Aciklama
+                    Açıklama
                     <input className="hz-control" value={activeTemplate?.description ?? "-"} readOnly />
                   </div>
                 </FilterGrid>
                 <FilterActions>
                   <button className="hz-btn hz-btn-secondary" type="button" onClick={handleDownloadTemplate} disabled={loading}>
-                    Template Indir
+                    Şablon İndir
                   </button>
                   <button className="hz-btn hz-btn-secondary" type="button" onClick={handlePreview} disabled={loading}>
-                    Onizleme
+                    Önizleme
                   </button>
                   <button className="hz-btn hz-btn-primary" type="button" onClick={handleApply} disabled={loading}>
-                    Ice Aktar
+                    İçe Aktar
                   </button>
                 </FilterActions>
               </FilterBar>
@@ -364,20 +371,20 @@ export function DataImportPage() {
 
               {preview ? (
                 <section className="hz-content-card">
-                  <h3>Import Onizleme</h3>
+                  <h3>İçe Aktarma Önizlemesi</h3>
                   <div className="hz-filter-grid" style={{ marginBottom: 10 }}>
                     <div className="hz-stat-pill">Dosya: <strong>{preview.fileName}</strong></div>
-                    <div className="hz-stat-pill">Tip: <strong>{preview.fileType.toUpperCase()}</strong></div>
-                    <div className="hz-stat-pill">Sheet: <strong>{preview.sheetName ?? "-"}</strong></div>
-                    <div className="hz-stat-pill">Onerilen Sheet: <strong>{preview.suggestedSheetName ?? "-"}</strong></div>
+                    <div className="hz-stat-pill">Dosya türü: <strong>{preview.fileType.toUpperCase()}</strong></div>
+                    <div className="hz-stat-pill">Sayfa: <strong>{preview.sheetName ?? "-"}</strong></div>
+                    <div className="hz-stat-pill">Önerilen Sayfa: <strong>{preview.suggestedSheetName ?? "-"}</strong></div>
                     <div className="hz-stat-pill">Toplam: <strong>{preview.totalRows}</strong></div>
-                    <div className="hz-stat-pill">Gecerli/Uyari/Hata: <strong>{preview.validRows}/{preview.warningCount}/{preview.errorCount}</strong></div>
+                    <div className="hz-stat-pill">Geçerli/Uyarı/Hata: <strong>{preview.validRows}/{preview.warningCount}/{preview.errorCount}</strong></div>
                   </div>
                   <div className="table-wrap hz-table-wrap">
                     <table className="table hz-table">
                       <thead>
                         <tr>
-                          <th>Satir</th>
+                          <th>Satır</th>
                           <th>Durum</th>
                           <th>Veri</th>
                         </tr>
@@ -388,7 +395,7 @@ export function DataImportPage() {
                             <td>{row.rowNumber}</td>
                             <td>
                               <span className={`hz-badge ${row.status === "error" ? "hz-badge-danger" : row.status === "warning" ? "hz-badge-warning" : "hz-badge-success"}`}>
-                                {row.status ?? "valid"}
+                                {formatUserFacingStatus(row.status ?? "valid")}
                               </span>
                             </td>
                             <td>{Object.entries(row.data).map(([key, value]) => `${key}: ${value}`).join(" | ")}</td>
@@ -403,50 +410,50 @@ export function DataImportPage() {
           }
           side={
               <div className="hz-side-panel">
-                <h3>Validation</h3>
+                <h3>Doğrulama</h3>
                 <div className="detail-list">
                   <span>Dosya Tipi</span>
                   <strong>{preview?.fileType?.toUpperCase() ?? "-"}</strong>
-                  <span>Sheet</span>
+                  <span>Sayfa</span>
                   <strong>{preview?.sheetName ?? "-"}</strong>
-                  <span>Onerilen Sheet</span>
+                  <span>Önerilen Sayfa</span>
                   <strong>{preview?.suggestedSheetName ?? "-"}</strong>
-                  <span>Toplam Satir</span>
+                  <span>Toplam Satır</span>
                   <strong>{preview?.totalRows ?? 0}</strong>
-                <span>Gecerli Satir</span>
+                <span>Geçerli Satır</span>
                 <strong>{preview?.validRows ?? 0}</strong>
                 <span>Hata</span>
                 <strong>{preview?.errorCount ?? 0}</strong>
-                <span>Uyari</span>
+                <span>Uyarı</span>
                 <strong>{preview?.warningCount ?? 0}</strong>
                 <span>Eksik Zorunlu Kolon</span>
                 <strong>{preview?.requiredMissingColumns?.length ?? 0}</strong>
-                <span>Eslestirilemeyen Kolon</span>
+                <span>Eşleştirilemeyen Kolon</span>
                 <strong>{preview?.unmappedColumns?.length ?? 0}</strong>
               </div>
 
-              <h3>Sheet Skor Ozeti</h3>
+              <h3>Sayfa Skor Özeti</h3>
               <ul className="hz-side-list">
                 {(preview?.sheetScoreSummary ?? []).slice(0, 4).map((sheet) => (
                   <li key={sheet.sheetName}>
                     <strong>{sheet.sheetName}</strong>
                     <div>Skor: {sheet.score}</div>
-                    <div>Eslestirme: {sheet.matchedColumns.length}</div>
+                    <div>Eşleme: {sheet.matchedColumns.length}</div>
                   </li>
                 ))}
-                {!preview?.sheetScoreSummary?.length ? <li>Sheet skoru yok.</li> : null}
+                {!preview?.sheetScoreSummary?.length ? <li>Sayfa skoru yok.</li> : null}
               </ul>
 
-              <h3>Hata/Oneri</h3>
+              <h3>Hata/Öneri</h3>
               <ul className="hz-side-list">
                 {(preview?.issues ?? []).slice(0, 8).map((issue) => (
                   <li key={`${issue.rowNumber}_${issue.field}_${issue.message}`}>
-                    <strong>{`Satir ${issue.rowNumber}`}</strong>
+                    <strong>{`Satır ${issue.rowNumber}`}</strong>
                     <div>{issue.message}</div>
                     {issue.suggestion ? <div className="muted">{issue.suggestion}</div> : null}
                   </li>
                 ))}
-                {!preview?.issues?.length ? <li>Henuz issue yok.</li> : null}
+                {!preview?.issues?.length ? <li>Henüz sorun yok.</li> : null}
               </ul>
             </div>
           }

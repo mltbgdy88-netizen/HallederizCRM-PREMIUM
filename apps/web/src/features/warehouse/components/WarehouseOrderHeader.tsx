@@ -5,7 +5,7 @@ export function WarehouseOrderHeader({ warehouseOrder, customer }: { warehouseOr
   return (
     <section className="crm-identity-header">
       <div>
-        <p className="drawer-eyebrow">Depo Hazirlik Emri</p>
+        <p className="drawer-eyebrow">Depo Hazırlık Emri</p>
         <h2>{warehouseOrder.warehouseOrderNo}</h2>
         <p>{warehouseOrder.orderNo} / {customer?.name ?? warehouseOrder.customerId}</p>
       </div>

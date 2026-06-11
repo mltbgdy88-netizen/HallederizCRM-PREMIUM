@@ -1,5 +1,6 @@
 import Link from "next/link";
 import type { ReactNode } from "react";
+import { getModuleGroupLabel } from "../navigation/module-group-labels";
 import type { ProductModuleGroup, RouteStatus } from "../navigation/product-route-types";
 
 export interface ProductPageShellLink {
@@ -22,7 +23,7 @@ export interface ProductPageShellProps {
 
 const STATUS_LABEL: Record<RouteStatus, string> = {
   implemented: "Uygulandı",
-  shell: "Production modül iskeleti",
+  shell: "Modül hazırlık ekranı",
   "needs-api": "Modül API bağlantısı eksik",
   planned: "Yol haritasında"
 };
@@ -43,7 +44,7 @@ export function ProductPageShell({
     <div className="hz-product-shell-root">
       <div className="hz-product-shell-card">
         <div className="hz-product-shell-header">
-          <span className="hz-product-shell-group">{moduleGroup}</span>
+          <span className="hz-product-shell-group">{getModuleGroupLabel(moduleGroup)}</span>
           <span className={`hz-product-status hz-product-status--${status}`}>{STATUS_LABEL[status]}</span>
         </div>
         <h1 className="hz-product-shell-title">{title}</h1>

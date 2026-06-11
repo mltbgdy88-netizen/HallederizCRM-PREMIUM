@@ -2,9 +2,13 @@
 
 import { EntityListPageTemplate, EmptyState, LoadingState, Pagination } from "@hallederiz/ui";
 import type { Customer, Invoice } from "@hallederiz/types";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
+import { LucideIcon } from "../../../components/icons/lucide-icons";
 import { dataSourceConfig } from "../../../lib/data-source";
+import { useToast } from "../../../providers/toast-provider";
+import { CommercialOperasyonDeskIntro } from "../../ui-inventory/components/CommercialOperasyonDeskIntro";
 import { dateLabel, money } from "../utils";
 import { getInvoices } from "../queries/get-invoices";
 import { getInvoiceStatusLabel } from "../queries/invoice-mock-data";
@@ -52,14 +56,25 @@ function InvoiceFilterBar() {
   );
 }
 
-function InvoicePreviewPanel({ invoice, customerName }: { invoice: Invoice | null; customerName: string | null }) {
+function InvoicePreviewPanel({
+  invoice,
+  customerName,
+  onNavigate
+}: {
+  invoice: Invoice | null;
+  customerName: string | null;
+  onNavigate: (id: string) => void;
+}) {
+  const { pushToast } = useToast();
+
   if (!invoice) {
     return (
       <aside className="hz-commercial-entity-side hz-invoices-side">
-        <p className="hz-commercial-entity-side-empty">Listeden bir fatura seçin.</p>
+        <p className="hz-commercial-entity-side-empty">Kayıt seçilmedi.</p>
       </aside>
     );
   }
+
   return (
     <aside className="hz-commercial-entity-side hz-invoices-side">
       <h3>Fatura önizleme</h3>
@@ -83,12 +98,31 @@ function InvoicePreviewPanel({ invoice, customerName }: { invoice: Invoice | nul
           <strong>Belge:</strong> {invoice.documentId ? "Bağlı" : "Üretilecek"}
         </li>
       </ul>
+      <div style={{ marginTop: 10, display: "flex", gap: 6, flexWrap: "wrap" }}>
+        <button
+          type="button"
+          className="hz-btn hz-btn-primary hz-toolbar-btn"
+          style={{ flex: 1 }}
+          onClick={() => onNavigate(invoice.id)}
+        >
+          Detay
+        </button>
+        <button
+          type="button"
+          className="hz-btn hz-btn-secondary hz-toolbar-btn"
+          style={{ flex: 1 }}
+          onClick={() => pushToast("Taslak hazırlandı: fatura gönderim belge servisine yönlendirildi.")}
+        >
+          Gönder
+        </button>
+      </div>
     </aside>
   );
 }
 
 export function InvoicesPage() {
   const router = useRouter();
+  const { pushToast } = useToast();
   const [invoices, setInvoices] = useState<Invoice[]>([]);
   const [customers, setCustomers] = useState<Customer[]>([]);
   const [loading, setLoading] = useState(true);
@@ -137,17 +171,39 @@ export function InvoicesPage() {
 
   return (
     <EntityListPageTemplate
-      className="hz-commercial-entity-page hz-invoices-page"
+      className="hz-commercial-entity-page hz-invoices-page hz-faturalar-desk"
+      previewSideWidth="detail"
       header={
         <>
-          <header className="hz-commercial-entity-topbar">
-            <div>
-              <h1 className="hz-commercial-entity-topbar-title">Faturalar</h1>
-              <p className="hz-commercial-entity-topbar-sub">
-                Siparişten türetilen fatura taslakları, kesim ve belge dağıtım akışlarını yönetin.
-              </p>
-            </div>
-          </header>
+          <CommercialOperasyonDeskIntro
+            title="Fatura Operasyon Masası"
+            subtitle="Fatura taslakları, kesim ve belge dağıtım akışlarını tek ekranda yönetin."
+            icon="file-text"
+            actions={
+              <>
+                <Link href="/faturalar/yeni" className="hz-commercial-desk-btn hz-commercial-desk-btn--primary">
+                  <LucideIcon name="plus" size={14} />
+                  Yeni Fatura
+                </Link>
+                <Link
+                  href="/hizli-islem/satis-masasi"
+                  className="hz-commercial-desk-btn hz-commercial-desk-btn--secondary"
+                  title="Yeni satış veya tahsilat için Hızlı İşlem"
+                >
+                  <LucideIcon name="zap" size={14} />
+                  Satış için Hızlı İşlem
+                </Link>
+                <button
+                  type="button"
+                  className="hz-commercial-desk-btn hz-commercial-desk-btn--secondary"
+                  onClick={() => pushToast("Dışa aktarma backend onay akışına bağlıdır; demo modunda simüle edildi.")}
+                >
+                  <LucideIcon name="download" size={14} />
+                  Dışa Aktar
+                </button>
+              </>
+            }
+          />
           <div className="hz-commercial-entity-kpi-strip" aria-label="Fatura özeti">
             <div className="hz-commercial-entity-kpi">
               <span className="hz-commercial-entity-kpi-label">Kayıt</span>
@@ -208,6 +264,9 @@ export function InvoicesPage() {
                       role="row"
                       className={`hz-commercial-entity-table-row hz-invoices-table-row${selectedId === invoice.id ? " is-selected" : ""}`}
                       onClick={() => setSelectedId(invoice.id)}
+                      onKeyDown={(event) => {
+                        if (event.key === "Enter") setSelectedId(invoice.id);
+                      }}
                       tabIndex={0}
                     >
                       <span>{invoice.invoiceNo}</span>
@@ -239,7 +298,13 @@ export function InvoicesPage() {
           )}
         </div>
       }
-      preview={<InvoicePreviewPanel invoice={selected} customerName={selectedCustomerName} />}
+      preview={
+        <InvoicePreviewPanel
+          invoice={selected}
+          customerName={selectedCustomerName}
+          onNavigate={(id) => router.push(`/faturalar/${id}`)}
+        />
+      }
     />
   );
 }

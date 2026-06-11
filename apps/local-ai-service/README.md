@@ -60,10 +60,10 @@ Mevcut ortama uygun baska bir lokal model secilebilir.
 
 ## Ses dosyalari
 
-Buyuk ses modeli binary'leri repo icine eklenmez. `start.ps1`, eksikse Piper Turkce modelini `apps/local-ai-service/assets/` altina indirir. Manuel kullanmak icin:
+Buyuk ses modeli binary'leri repo icine eklenmez (`tr_TR-dfki-medium.onnx` ~60MB GitHub limiti nedeniyle git disidir). `start.ps1`, eksikse Piper Turkce modelini Hugging Face uzerinden `apps/local-ai-service/assets/` altina indirir. Manuel kullanmak icin:
 
-- `assets/tr_TR-dfki-medium.onnx`
-- `assets/tr_TR-dfki-medium.onnx.json`
+- `assets/tr_TR-dfki-medium.onnx` (yerelde indirilir)
+- `assets/tr_TR-dfki-medium.onnx.json` (repo icinde kalir)
 
 ## Guvenlik
 

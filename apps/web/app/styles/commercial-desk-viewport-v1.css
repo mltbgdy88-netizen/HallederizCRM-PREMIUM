@@ -1,0 +1,792 @@
+/* Commercial Desk Viewport Standard v1 */
+
+:root {
+  --commercial-desk-canvas: #fdfcf9;
+  --commercial-desk-card: #ffffff;
+  --commercial-desk-card-soft: #f8fafc;
+  --commercial-desk-border: #dfe7e3;
+  --commercial-desk-border-soft: #e8eeeb;
+  --commercial-desk-text: #0f172a;
+  --commercial-desk-muted: #64748b;
+  --commercial-desk-green: #047857;
+  --commercial-desk-green-soft: #ecfdf5;
+  --commercial-desk-blue: #2563eb;
+  --commercial-desk-amber: #d97706;
+  --commercial-desk-radius: 16px;
+  --commercial-desk-gap: 10px;
+  --commercial-desk-height: calc(100dvh - 56px);
+  --commercial-desk-max-width: 1604px;
+}
+
+.hz-commercial-desk-standard {
+  width: 100%;
+  height: var(--commercial-desk-height);
+  max-height: var(--commercial-desk-height);
+  min-height: 0;
+  overflow: hidden;
+  background: var(--commercial-desk-canvas);
+}
+
+.hz-commercial-desk-standard * {
+  box-sizing: border-box;
+}
+
+.hz-commercial-desk-shell {
+  width: min(100%, var(--commercial-desk-max-width));
+  height: 100%;
+  min-height: 0;
+  margin: 0 auto;
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr);
+  gap: var(--commercial-desk-gap);
+  overflow: hidden;
+}
+
+.hz-commercial-desk-header {
+  min-height: 46px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.hz-commercial-desk-header h1 {
+  margin: 0;
+  color: var(--commercial-desk-text);
+  font-size: 22px;
+  line-height: 1.05;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.hz-commercial-desk-header p {
+  margin: 3px 0 0;
+  color: var(--commercial-desk-muted);
+  font-size: 11px;
+  line-height: 1.25;
+}
+
+.hz-commercial-desk-kpis {
+  min-height: 58px;
+  max-height: 68px;
+  display: grid;
+  gap: 6px;
+  overflow: hidden;
+}
+
+.hz-commercial-desk-body {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 332px;
+  gap: var(--commercial-desk-gap);
+  overflow: hidden;
+}
+
+.hz-commercial-desk-main,
+.hz-commercial-desk-side {
+  min-height: 0;
+  height: 100%;
+  overflow: hidden;
+}
+
+.hz-commercial-desk-card {
+  border: 1px solid var(--commercial-desk-border);
+  border-radius: var(--commercial-desk-radius);
+  background: var(--commercial-desk-card);
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.hz-commercial-desk-scroll {
+  min-height: 0;
+  overflow: auto;
+}
+
+.hz-commercial-preview-band {
+  min-height: 24px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 4px 10px;
+  border: 1px solid #fde68a;
+  border-radius: 999px;
+  background: #fffbeb;
+  color: #92400e;
+  font-size: 10px;
+  font-weight: 800;
+}
+
+@media (max-width: 1366px) {
+  .hz-commercial-desk-body {
+    grid-template-columns: minmax(0, 1fr) 330px;
+  }
+
+  .hz-commercial-desk-header h1 {
+    font-size: 20px;
+  }
+}
+
+/* ── T3A: Teklifler ana liste — commercial standard uygulaması ── */
+
+.hz-offers-page--desk.hz-commercial-desk-standard {
+  display: flex;
+  flex-direction: column;
+  padding: var(--commercial-desk-gap);
+  gap: 0;
+  background: var(--commercial-desk-canvas) !important;
+  color: var(--commercial-desk-text);
+  --offers-bg: var(--commercial-desk-canvas);
+  --offers-paper: var(--commercial-desk-card);
+  --offers-surface: var(--commercial-desk-card);
+  --offers-border: var(--commercial-desk-border);
+  --offers-text: var(--commercial-desk-text);
+  --offers-muted: var(--commercial-desk-muted);
+  --offers-emerald: var(--commercial-desk-green);
+  --offers-emerald-strong: #065f46;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-commercial-desk-shell {
+  flex: 1;
+  min-height: 0;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-commercial-desk-shell:has(.hz-commercial-preview-band) {
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-desk-head {
+  min-height: 52px;
+  max-height: 58px;
+  padding: 10px 14px;
+  border: 1px solid var(--commercial-desk-border) !important;
+  border-radius: var(--commercial-desk-radius) !important;
+  background: var(--commercial-desk-card) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-desk-head__text h1 {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--commercial-desk-text) !important;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-desk-head__text p {
+  font-size: 11px;
+  color: var(--commercial-desk-muted) !important;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-desk-btn {
+  min-height: 34px;
+  border: 1px solid var(--commercial-desk-border);
+  background: var(--commercial-desk-card);
+  color: var(--commercial-desk-green);
+  border-radius: 10px;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-desk-btn--primary {
+  background: var(--commercial-desk-green) !important;
+  border-color: var(--commercial-desk-green) !important;
+  color: #fff !important;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-commercial-desk-kpis {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-height: 58px;
+  max-height: 68px;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-desk-stats > article {
+  border: 1px solid var(--commercial-desk-border) !important;
+  border-radius: 12px !important;
+  background: var(--commercial-desk-card) !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+  padding: 6px 9px;
+  min-height: 52px;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-stat-ico {
+  width: 32px;
+  height: 32px;
+  border: 1px solid var(--commercial-desk-border-soft);
+  background: var(--commercial-desk-green-soft);
+  color: var(--commercial-desk-green);
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-desk-stats > article > div > span,
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-desk-stats > article > div > small {
+  font-size: 10px;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-desk-stats > article > div > strong {
+  font-size: 17px;
+  color: var(--commercial-desk-text);
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-preview-band,
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-commercial-preview-band {
+  margin: 0;
+  min-height: 22px;
+  max-height: 24px;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-desk-main {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--commercial-desk-border) !important;
+  border-radius: var(--commercial-desk-radius) !important;
+  background: var(--commercial-desk-card) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-filter-bar {
+  min-height: 50px;
+  max-height: 54px;
+  padding: 8px 10px;
+  border-bottom: 1px solid var(--commercial-desk-border-soft);
+  background: var(--commercial-desk-card-soft);
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-filter-field select,
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-filter-search-shell {
+  height: 30px;
+  min-height: 30px;
+  border-color: var(--commercial-desk-border);
+  background: var(--commercial-desk-card);
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-table-card {
+  min-height: 0;
+  overflow: hidden;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-table-wrap {
+  min-height: 0;
+  overflow: auto;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-table th {
+  height: 28px;
+  background: var(--commercial-desk-card-soft) !important;
+  border-bottom: 1px solid var(--commercial-desk-border-soft);
+  font-size: 10px;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-table td {
+  height: 44px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-row.is-selected {
+  background: var(--commercial-desk-green-soft) !important;
+  box-shadow: inset 3px 0 0 var(--commercial-desk-green) !important;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-pagination {
+  min-height: 32px;
+  border-top: 1px solid var(--commercial-desk-border-soft);
+  background: var(--commercial-desk-card);
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-desk-side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-desk-side > .hz-offers-context,
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-desk-side > .hz-offers-context-card {
+  flex: 1;
+  min-height: 0;
+  max-height: 100%;
+  border: 1px solid var(--commercial-desk-border) !important;
+  border-radius: var(--commercial-desk-radius) !important;
+  background: var(--commercial-desk-card) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-context__head {
+  background: var(--commercial-desk-card-soft) !important;
+  border-bottom: 1px solid var(--commercial-desk-border-soft);
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-context-card {
+  border: 1px solid var(--commercial-desk-border-soft) !important;
+  background: var(--commercial-desk-card) !important;
+  border-radius: 10px;
+}
+
+.hz-offers-page--desk.hz-commercial-desk-standard .hz-offers-context-btn--primary {
+  background: var(--commercial-desk-green) !important;
+  border-color: var(--commercial-desk-green) !important;
+  color: #fff !important;
+}
+
+/* Shell zinciri — commercial teklifler */
+.hz-shell-workspace:has(.hz-commercial-desk-standard) {
+  --hz-color-bg: var(--commercial-desk-canvas);
+  --hz-bg: var(--commercial-desk-canvas);
+  background: var(--commercial-desk-canvas) !important;
+}
+
+.hz-shell-content:has(.hz-commercial-desk-standard),
+.hz-shell-content-frame:has(.hz-commercial-desk-standard),
+.platform-content:has(.hz-commercial-desk-standard) {
+  padding: 0 !important;
+  background: var(--commercial-desk-canvas) !important;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.platform-content:has(.hz-commercial-desk-standard) > .hz-offers-page,
+.platform-content:has(.hz-commercial-desk-standard) > .hz-tahsilatlar-page,
+.platform-content:has(.hz-commercial-desk-standard) > .hz-orders-page {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: none;
+}
+
+/* ── T3B: Tahsilatlar ana liste — commercial standard uygulaması ── */
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard {
+  display: flex;
+  flex-direction: column;
+  padding: var(--commercial-desk-gap);
+  gap: 0;
+  grid-template-rows: unset;
+  background: var(--commercial-desk-canvas) !important;
+  color: var(--commercial-desk-text);
+  --th-bg: var(--commercial-desk-canvas);
+  --th-paper: var(--commercial-desk-card);
+  --th-surface: var(--commercial-desk-card-soft);
+  --th-border: var(--commercial-desk-border);
+  --th-text: var(--commercial-desk-text);
+  --th-muted: var(--commercial-desk-muted);
+  --th-emerald-700: var(--commercial-desk-green);
+  --th-emerald-950: #065f46;
+  --th-emerald-900: #065f46;
+  --th-emerald-800: #047857;
+  --th-emerald-soft: var(--commercial-desk-green-soft);
+  --th-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+  --th-border-gold: var(--commercial-desk-border);
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-commercial-desk-shell {
+  flex: 1;
+  min-height: 0;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-commercial-desk-shell:has(.hz-commercial-preview-band) {
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-desk-head {
+  min-height: 52px;
+  max-height: 58px;
+  padding: 10px 14px;
+  border: 1px solid var(--commercial-desk-border) !important;
+  border-radius: var(--commercial-desk-radius) !important;
+  background: var(--commercial-desk-card) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-intro__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: var(--commercial-desk-green-soft) !important;
+  border: 1px solid var(--commercial-desk-border-soft);
+  color: var(--commercial-desk-green);
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-intro__title {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--commercial-desk-text) !important;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-intro__subtitle {
+  font-size: 11px;
+  color: var(--commercial-desk-muted) !important;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-intro-btn {
+  min-height: 34px;
+  border-radius: 10px;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-intro-btn--primary {
+  background: var(--commercial-desk-green) !important;
+  border: 1px solid var(--commercial-desk-green) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-intro-btn--secondary {
+  border: 1px solid var(--commercial-desk-border);
+  background: var(--commercial-desk-card);
+  color: var(--commercial-desk-green);
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-commercial-desk-kpis {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-height: 58px;
+  max-height: 68px;
+  height: auto;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-stat {
+  border: 1px solid var(--commercial-desk-border) !important;
+  border-radius: 12px !important;
+  background: var(--commercial-desk-card) !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+  padding: 8px 10px;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-stat__label {
+  font-size: 10px;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-stat__value {
+  font-size: 16px;
+  color: var(--commercial-desk-text);
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-preview-band,
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-commercial-preview-band {
+  margin: 0;
+  min-height: 22px;
+  max-height: 24px;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-desk-main {
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr) auto;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--commercial-desk-border) !important;
+  border-radius: var(--commercial-desk-radius) !important;
+  background: var(--commercial-desk-card) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-toolbar {
+  border-bottom: 1px solid var(--commercial-desk-border-soft);
+  background: var(--commercial-desk-card-soft);
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-filterbar {
+  min-height: 48px;
+  max-height: 52px;
+  padding: 8px 10px;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-search-wrap,
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-filter-select {
+  height: 30px;
+  min-height: 30px;
+  border-color: var(--commercial-desk-border);
+  background: var(--commercial-desk-card);
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-table-wrap {
+  min-height: 0;
+  overflow: auto;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-table th {
+  height: 26px;
+  background: var(--commercial-desk-card-soft) !important;
+  border-bottom: 1px solid var(--commercial-desk-border-soft);
+  font-size: 10px;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-table td,
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-row {
+  min-height: 44px;
+  height: 44px;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-row.is-selected {
+  background: var(--commercial-desk-green-soft) !important;
+  box-shadow: inset 3px 0 0 var(--commercial-desk-green) !important;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-list__footer {
+  min-height: 32px;
+  border-top: 1px solid var(--commercial-desk-border-soft);
+  background: var(--commercial-desk-card);
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-desk-side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-desk-side > .hz-tahsilatlar-preview {
+  flex: 1;
+  min-height: 0;
+  max-height: 100%;
+  border: 1px solid var(--commercial-desk-border) !important;
+  border-radius: var(--commercial-desk-radius) !important;
+  background: var(--commercial-desk-card) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-preview__header {
+  background: var(--commercial-desk-card-soft) !important;
+  border-bottom: 1px solid var(--commercial-desk-border-soft);
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-preview-section {
+  border: 1px solid var(--commercial-desk-border-soft) !important;
+  background: var(--commercial-desk-card) !important;
+  border-radius: 10px;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-preview__body {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-button-primary {
+  background: var(--commercial-desk-green) !important;
+  border-color: var(--commercial-desk-green) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+.hz-tahsilatlar-desk.hz-commercial-desk-standard .hz-tahsilatlar-button-secondary {
+  border: 1px solid var(--commercial-desk-border);
+  background: var(--commercial-desk-card);
+  color: var(--commercial-desk-green);
+}
+
+.hz-shell-workspace:has(.hz-tahsilatlar-desk.hz-commercial-desk-standard) {
+  --hz-color-bg: var(--commercial-desk-canvas);
+  --hz-bg: var(--commercial-desk-canvas);
+  background: var(--commercial-desk-canvas) !important;
+}
+
+.hz-shell-workspace:has(.hz-tahsilatlar-desk.hz-commercial-desk-standard) .hz-shell-header {
+  background: var(--commercial-desk-canvas) !important;
+  border-bottom: 1px solid var(--commercial-desk-border-soft) !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+
+/* ── T3C: Siparişler ana liste — commercial standard uygulaması ── */
+
+.hz-orders-desk.hz-commercial-desk-standard {
+  display: flex;
+  flex-direction: column;
+  padding: var(--commercial-desk-gap);
+  gap: 0;
+  grid-template-rows: unset;
+  background: var(--commercial-desk-canvas) !important;
+  color: var(--commercial-desk-text);
+  --orders-bg: var(--commercial-desk-canvas);
+  --orders-paper: var(--commercial-desk-card);
+  --orders-surface: var(--commercial-desk-card-soft);
+  --orders-border: var(--commercial-desk-border);
+  --orders-text: var(--commercial-desk-text);
+  --orders-muted: var(--commercial-desk-muted);
+  --orders-emerald-700: var(--commercial-desk-green);
+  --orders-emerald-900: #065f46;
+  --orders-emerald-800: #047857;
+  --orders-emerald-soft: var(--commercial-desk-green-soft);
+  --orders-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-commercial-desk-shell {
+  flex: 1;
+  min-height: 0;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-commercial-desk-shell:has(.hz-commercial-preview-band) {
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-desk-head {
+  min-height: 52px;
+  max-height: 58px;
+  padding: 10px 14px;
+  border: 1px solid var(--commercial-desk-border) !important;
+  border-radius: var(--commercial-desk-radius) !important;
+  background: var(--commercial-desk-card) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-intro__icon {
+  background: var(--commercial-desk-green-soft) !important;
+  border: 1px solid var(--commercial-desk-border-soft);
+  color: var(--commercial-desk-green);
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-intro__title {
+  font-size: 22px;
+  font-weight: 900;
+  color: var(--commercial-desk-text) !important;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-intro__subtitle {
+  font-size: 11px;
+  color: var(--commercial-desk-muted) !important;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-intro-btn--primary {
+  background: var(--commercial-desk-green) !important;
+  border-color: var(--commercial-desk-green) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-intro-btn--secondary {
+  border: 1px solid var(--commercial-desk-border);
+  background: var(--commercial-desk-card);
+  color: var(--commercial-desk-green);
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-commercial-desk-kpis {
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  min-height: 58px;
+  max-height: 68px;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-stat {
+  border: 1px solid var(--commercial-desk-border) !important;
+  border-radius: 12px !important;
+  background: var(--commercial-desk-card) !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-stat__label {
+  font-size: 10px;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-stat__value {
+  font-size: 16px;
+  color: var(--commercial-desk-text);
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-preview-band,
+.hz-orders-desk.hz-commercial-desk-standard .hz-commercial-preview-band {
+  margin: 0;
+  min-height: 22px;
+  max-height: 24px;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-desk-main {
+  display: grid;
+  grid-template-rows: auto auto minmax(0, 1fr) auto;
+  min-height: 0;
+  overflow: hidden;
+  border: 1px solid var(--commercial-desk-border) !important;
+  border-radius: var(--commercial-desk-radius) !important;
+  background: var(--commercial-desk-card) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-toolbar {
+  border-bottom: 1px solid var(--commercial-desk-border-soft);
+  background: var(--commercial-desk-card-soft);
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-table-wrap {
+  min-height: 0;
+  overflow: auto;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-table th {
+  height: 26px;
+  background: var(--commercial-desk-card-soft) !important;
+  border-bottom: 1px solid var(--commercial-desk-border-soft);
+  font-size: 10px;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-table td,
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-row {
+  min-height: 44px;
+  height: 44px;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-row.is-selected {
+  background: var(--commercial-desk-green-soft) !important;
+  box-shadow: inset 3px 0 0 var(--commercial-desk-green) !important;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-list__footer {
+  border-top: 1px solid var(--commercial-desk-border-soft);
+  background: var(--commercial-desk-card);
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-desk-side {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-desk-side > .hz-orders-preview {
+  flex: 1;
+  min-height: 0;
+  max-height: 100%;
+  border: 1px solid var(--commercial-desk-border) !important;
+  border-radius: var(--commercial-desk-radius) !important;
+  background: var(--commercial-desk-card) !important;
+  box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05) !important;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-preview__header {
+  background: var(--commercial-desk-card-soft) !important;
+  border-bottom: 1px solid var(--commercial-desk-border-soft);
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-preview-section {
+  border: 1px solid var(--commercial-desk-border-soft) !important;
+  background: var(--commercial-desk-card) !important;
+  border-radius: 10px;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-preview__body {
+  min-height: 0;
+  overflow-y: auto;
+  overflow-x: hidden;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-button-primary {
+  background: var(--commercial-desk-green) !important;
+  border-color: var(--commercial-desk-green) !important;
+  color: #fff !important;
+  box-shadow: none !important;
+}
+
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-button-secondary,
+.hz-orders-desk.hz-commercial-desk-standard .hz-orders-button-tertiary {
+  border: 1px solid var(--commercial-desk-border);
+  background: var(--commercial-desk-card);
+  color: var(--commercial-desk-green);
+}
+
+.hz-shell-workspace:has(.hz-orders-desk.hz-commercial-desk-standard) {
+  --hz-color-bg: var(--commercial-desk-canvas);
+  --hz-bg: var(--commercial-desk-canvas);
+  background: var(--commercial-desk-canvas) !important;
+}
+
+.hz-shell-workspace:has(.hz-orders-desk.hz-commercial-desk-standard) .hz-shell-header {
+  background: var(--commercial-desk-canvas) !important;
+  border-bottom: 1px solid var(--commercial-desk-border-soft) !important;
+  backdrop-filter: none !important;
+  box-shadow: none !important;
+}
+

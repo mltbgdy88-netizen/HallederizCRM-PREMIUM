@@ -380,3 +380,53 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Dark mode overrides — reports / AI / inbox / WhatsApp */
+html:root[data-theme="dark"] .hz-ai-review-note {
+  background: color-mix(in srgb, var(--hz-color-gold, #ffd166) 12%, var(--hz-surface));
+  border-color: color-mix(in srgb, var(--hz-color-gold, #ffd166) 28%, transparent);
+}
+
+html:root[data-theme="dark"] .hz-reports-chart-empty,
+html:root[data-theme="dark"] .hz-reports-live-band {
+  background: color-mix(in srgb, var(--hz-color-bg) 80%, var(--hz-surface));
+  border-color: color-mix(in srgb, var(--hz-color-emerald, #2cff9a) 22%, var(--hz-border));
+}
+
+html:root[data-theme="dark"] .hz-inbox-preview-band,
+html:root[data-theme="dark"] .hz-wa-context-band {
+  background: color-mix(in srgb, var(--hz-color-gold, #ffd166) 10%, var(--hz-surface));
+  border-color: color-mix(in srgb, var(--hz-color-gold, #ffd166) 22%, transparent);
+}
+
+html:root[data-theme="dark"] .hz-reports-detail-export {
+  background: var(--hz-surface);
+  border-color: var(--hz-border);
+  color: var(--hz-color-muted);
+}
+
+html:root[data-theme="dark"] .hz-reports-detail-filters {
+  background: var(--hz-surface);
+  border-color: var(--hz-border);
+}
+
+html:root[data-theme="dark"] .hz-reports-detail-kpi-card {
+  background: var(--hz-surface);
+  border-color: var(--hz-border);
+}
+
+html:root[data-theme="dark"] .hz-route-error {
+  background: var(--hz-surface);
+  border-color: var(--hz-border);
+}
+
+html:root[data-theme="dark"] .hz-unauthorized-page {
+  background: var(--hz-surface);
+  border-color: var(--hz-border);
+}
+
+html:root[data-theme="dark"] .hz-unauthorized-secondary {
+  background: var(--hz-surface);
+  border-color: var(--hz-border);
+  color: var(--hz-color-text);
+}

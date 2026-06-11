@@ -1,0 +1,19 @@
+---
+description: UI work must match approved reference mockups exactly
+alwaysApply: true
+---
+
+# Referans Görsel Sadakati
+
+UI işi yapılırken daha önce üretilip kullanıcı tarafından onaylanan referans görseller **tasarım hedefidir**, yalnızca ilham değildir.
+
+Zorunlu kurallar:
+
+- Kodlanan sayfa, onaylı görseldeki şematik yerleşimi bire bir takip eder: header, KPI şeridi, filtre bandı, ana liste, sağ bağlam paneli, aksiyon sırası.
+- “Benzer tasarım dili” yeterli değildir. Sayfa görseldeki düzen, yoğunluk, kolon adları, buton sırası ve sağ panel içeriğiyle eşleşmelidir.
+- Renk paleti **onaylı referans PNG** ile sabittir (`docs/design/reference/*-acik-mod.png`): düz yumuşak krem canvas (~`#fdfcf9`), beyaz kart yüzeyi, nötr gri border, koyu yeşil birincil aksiyon. `brand-design-language.css` zümrüt/altın/cam gradient kuralları bu route'larda **geçersiz**; çok katmanlı gradient ve cam yüzey kullanma.
+- Büyük grafik eklenmez. Sağ kolon bulunduğu sayfanın bağlam, uyarı, takip ve sonraki adım panelidir.
+- Liste sayfalarında filtre ve satır yükseklikleri kompakt tutulur; ilk görünümde mümkün olduğunca fazla satır görünür.
+- Uygulama sonrası kodu sadece typecheck ile değil, görsel referansla karşılaştırarak değerlendir.
+
+Örnek: `teklifler-operasyon-masasi-acik-mod.png` onaylandıysa `/teklifler` ve `/teklifler/liste` bu görseldeki layout’a göre kodlanır; eski template veya readiness görünümü kabul edilmez.

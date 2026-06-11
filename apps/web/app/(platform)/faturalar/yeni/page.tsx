@@ -1,5 +1,5 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+import { InvoiceCreatePage } from "../../../../src/features/invoices/components/InvoiceCreatePage";
 
-export default function FaturalarYeniPage() {
-  return renderProductCatchAll(["faturalar", "yeni"]);
+export default function FaturalarYeniPage({ searchParams }: { searchParams?: { order?: string } }) {
+  return <InvoiceCreatePage sourceOrderId={searchParams?.order ?? null} />;
 }

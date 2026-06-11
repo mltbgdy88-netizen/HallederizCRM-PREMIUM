@@ -73,7 +73,7 @@ const OPS_KPI_CARDS: Array<{ id: DashboardCardId; title: string; href: string }>
 
 const QUICK_ACTIONS = [
   { href: "/cariler/yeni", label: "Yeni cari" },
-  { href: "/hizli-islem", label: "Hızlı işlem" },
+  { href: "/hizli-islem/satis-masasi", label: "Hızlı işlem" },
   { href: "/teklifler/yeni", label: "Yeni teklif" },
   { href: "/siparisler/yeni", label: "Yeni sipariş" },
   { href: "/tahsilatlar/yeni", label: "Tahsilat" },
@@ -87,7 +87,7 @@ const MODULE_STATUSES = [
   { label: "Onaylar", note: "Arayüz hazır; akış güvenli", href: "/onaylar", tone: "ok" as const },
   { label: "Cariler", note: "Liste, detay ve yeni ekran güvenli", href: "/cariler", tone: "ok" as const },
   { label: "Stok", note: "Liste, modal ve satır aksiyonları güvenli", href: "/stok", tone: "ok" as const },
-  { label: "Hızlı işlem", note: "Workbench hazır; canlı kayıt kuyruğu bekleniyor", href: "/hizli-islem", tone: "pending" as const },
+  { label: "Hızlı işlem", note: "Workbench hazır; canlı kayıt kuyruğu bekleniyor", href: "/hizli-islem/satis-masasi", tone: "pending" as const },
   { label: "Teklif / sipariş", note: "Hub ve workbench yönlendirmesi güvenli", href: "/teklifler", tone: "ok" as const },
   { label: "Tahsilat", note: "Hub ve workbench yönlendirmesi güvenli", href: "/tahsilatlar/yeni", tone: "ok" as const },
   { label: "Belgeler / arşiv", note: "Önizleme ve arşiv akışı güvenli", href: "/belgeler", tone: "ok" as const },

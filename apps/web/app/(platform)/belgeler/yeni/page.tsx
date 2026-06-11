@@ -1,5 +1,5 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+import { DocumentCreatePage } from "../../../../src/features/documents/components/DocumentCreatePage";
 
 export default function BelgelerYeniPage() {
-  return renderProductCatchAll(["belgeler", "yeni"]);
+  return <DocumentCreatePage />;
 }

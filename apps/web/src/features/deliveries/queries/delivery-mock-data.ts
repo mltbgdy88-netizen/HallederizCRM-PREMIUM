@@ -53,11 +53,11 @@ export async function getDeliveryById(deliveryId?: string): Promise<Delivery | n
 export function getDeliveryStatusLabel(status: DeliveryStatus): string {
   const labels: Record<DeliveryStatus, string> = {
     pending: "Bekliyor",
-    ready: "Hazir",
-    partially_delivered: "Kismi Teslim",
-    delivered: "Teslim Edildi",
-    failed: "Basarisiz",
-    rolled_back: "Rollback"
+    ready: "Hazır",
+    partially_delivered: "Kısmi teslim",
+    delivered: "Teslim edildi",
+    failed: "Başarısız",
+    rolled_back: "Geri alındı"
   };
   return labels[status];
 }

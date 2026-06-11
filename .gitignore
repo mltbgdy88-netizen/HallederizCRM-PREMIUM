@@ -22,6 +22,9 @@ pnpm-debug.log*
 .env.local
 .env.*.local
 
+# Local AI large voice model (downloaded by apps/local-ai-service/start.ps1)
+apps/local-ai-service/assets/tr_TR-dfki-medium.onnx
+
 # OS / Editor
 .DS_Store
 Thumbs.db

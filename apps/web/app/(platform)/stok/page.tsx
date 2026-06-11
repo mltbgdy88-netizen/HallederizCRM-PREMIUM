@@ -1,5 +1,5 @@
-import { StockPage } from "../../../src/features/stock/components";
+import { StockReferenceLayout } from "../../../src/features/stock/components/StockReferenceLayout";
 
 export default function StockRoutePage() {
-  return <StockPage />;
+  return <StockReferenceLayout />;
 }

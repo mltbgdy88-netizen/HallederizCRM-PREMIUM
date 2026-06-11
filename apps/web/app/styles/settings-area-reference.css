@@ -1,0 +1,122 @@
+/* Ayarlar alt sayfalar — hub (ahb-*) ile uyumlu minimal shell */
+
+.asa-home {
+  --asa-gap: clamp(8px, 1vh, 12px);
+  --asa-pad: clamp(12px, 1.2vw, 16px);
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1604px;
+  margin: 0 auto;
+  height: 100%;
+  min-height: 0;
+  padding: var(--asa-pad);
+  overflow: hidden;
+  background: #f4f6f8;
+  display: grid;
+  grid-template-rows: auto minmax(0, 1fr);
+  gap: var(--asa-gap);
+  color: #0f172a;
+}
+
+.asa-home--embedded {
+  grid-template-rows: auto minmax(0, 1fr);
+}
+
+.asa-head {
+  flex: 0 0 auto;
+}
+
+.asa-crumb {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 700;
+  color: #64748b;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.asa-crumb-link {
+  color: #047857;
+  text-decoration: none;
+}
+
+.asa-crumb-link:hover {
+  text-decoration: underline;
+}
+
+.asa-crumb-sep {
+  color: #94a3b8;
+}
+
+.asa-body {
+  min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.asa-home.hz-settings-page {
+  --hz-settings-primary: #047857;
+  background: #f4f6f8;
+}
+
+.asa-home .hz-settings-page {
+  flex: 1;
+  min-height: 0;
+  max-width: none;
+  margin: 0;
+  padding: 0;
+  background: transparent;
+}
+
+.asa-home .hz-settings-layout,
+.asa-body > .hz-settings-layout {
+  flex: 1;
+  min-height: 0;
+}
+
+.asa-home .hz-settings-inner-nav-link:hover {
+  background: #ecfdf5;
+  color: #065f46;
+  border-color: transparent;
+}
+
+.asa-home .hz-settings-inner-nav-link--active {
+  border-color: #bbf7d0;
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.asa-home .hz-settings-context-band,
+.asa-home .asa-context-band {
+  border-color: #e2e8f0;
+  background: #fff;
+  color: #475569;
+  font-size: 11px;
+}
+
+.asa-home .hz-settings-layout-nav {
+  border-color: #e2e8f0;
+  background: #fff;
+  border-radius: 12px;
+}
+
+.asa-home .hz-settings-aux-body {
+  min-height: 0;
+  overflow: auto;
+}
+
+.platform-content:has(.asa-home--embedded),
+.hz-shell-content:has(.asa-home--embedded),
+.hz-shell-content-frame:has(.asa-home--embedded) {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.platform-content:has(.asa-home--embedded) > .asa-home--embedded {
+  height: 100%;
+  min-height: 0;
+}

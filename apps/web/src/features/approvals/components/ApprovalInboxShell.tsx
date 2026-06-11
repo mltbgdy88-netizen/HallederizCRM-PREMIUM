@@ -131,7 +131,7 @@ export function ApprovalInboxShell() {
       return null;
     }
     if (!sandboxAvailability) {
-      return "Sandbox durumu alinamadi (API veya oturum).";
+      return "Test ortamı durumu alınamadı (API veya oturum).";
     }
     if (!sandboxAvailability.sandboxSeedRouteEnabled) {
       const r = sandboxAvailability.reasons?.length ? sandboxAvailability.reasons.join(", ") : "demo disi persistence";

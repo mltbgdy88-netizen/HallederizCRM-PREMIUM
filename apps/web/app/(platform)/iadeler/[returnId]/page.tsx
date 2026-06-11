@@ -1,5 +1,5 @@
-import { ReturnDetailPage as ReturnDetailFeaturePage } from "../../../../src/features/returns/components";
+import { ReturnDetailPage } from "../../../../src/features/returns/components";
 
-export default function ReturnDetailPage({ params }: { params: { returnId: string } }) {
-  return <ReturnDetailFeaturePage returnId={params.returnId} />;
+export default function ReturnDetailRoute({ params }: { params: { returnId: string } }) {
+  return <ReturnDetailPage returnId={params.returnId} />;
 }

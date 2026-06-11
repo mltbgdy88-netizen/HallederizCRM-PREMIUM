@@ -1,5 +1,5 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+import { ApprovalLimitsPage } from "../../../../src/features/approvals/components/ApprovalLimitsPage";
 
 export default function OnaylarLimitlerPage() {
-  return renderProductCatchAll(["onaylar", "limitler"]);
+  return <ApprovalLimitsPage />;
 }

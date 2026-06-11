@@ -39,7 +39,7 @@ export function TaskCenterPage() {
 
       <section className="hz-metric-grid">
         <MetricCard title="Açık görev" value={String(data?.tasks.filter((task) => task.status !== "done" && task.status !== "cancelled").length ?? 0)} detail="Sistem + AI" tone="info" />
-        <MetricCard title="Kritik" value={String(data?.tasks.filter((task) => task.priority === "critical" || task.status === "overdue").length ?? 0)} detail="Oncelikli takip" tone="danger" />
+        <MetricCard title="Kritik" value={String(data?.tasks.filter((task) => task.priority === "critical" || task.status === "overdue").length ?? 0)} detail="Öncelikli takip" tone="danger" />
         <MetricCard title="Onay Bekleyen" value={String(data?.approvals.filter((approval) => approval.status === "pending").length ?? 0)} detail="Approval engine" tone="warning" />
         <MetricCard title="Aktif Workflow" value={String(data?.workflows.filter((workflow) => workflow.status === "active").length ?? 0)} detail="Entity bazli akis" tone="success" />
       </section>

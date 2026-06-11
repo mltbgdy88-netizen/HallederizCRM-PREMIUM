@@ -1,5 +1,5 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+import { DocumentArchivePage } from "../../../../src/features/documents/components/DocumentArchivePage";
 
 export default function BelgelerArsivPage() {
-  return renderProductCatchAll(["belgeler", "arsiv"]);
+  return <DocumentArchivePage />;
 }

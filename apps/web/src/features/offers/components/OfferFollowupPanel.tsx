@@ -18,7 +18,7 @@ const stateLabels: Record<OfferResponseState, string> = {
 export function OfferFollowupPanel({ followUps }: { followUps: OfferFollowUp[] }) {
   return (
     <div className="hz-tab-content">
-      <h3>Follow-up</h3>
+      <h3>Takip aksiyonu</h3>
       <div className="hz-filter-grid hz-margin-top-sm">
         <label>
           Kanal
@@ -30,7 +30,7 @@ export function OfferFollowupPanel({ followUps }: { followUps: OfferFollowUp[] }
           </select>
         </label>
         <label>
-          Response State
+          Yanıt Durumu
           <select defaultValue="planned">
             <option value="planned">Planlandi</option>
             <option value="waiting">Cevap bekliyor</option>
@@ -41,7 +41,7 @@ export function OfferFollowupPanel({ followUps }: { followUps: OfferFollowUp[] }
         </label>
         <label>
           Not
-          <input placeholder="Follow-up notu" />
+          <input placeholder="Takip notu" />
         </label>
         <label>
           Planlanan Tarih

@@ -209,3 +209,97 @@
     display: none;
   }
 }
+
+/* ─── Dark mode overrides: deliveries / invoices / returns ─── */
+:root[data-theme="dark"] .hz-commercial-entity-page {
+  --hz-color-emerald: #2cff9a;
+  --hz-color-gold: #ffd166;
+  --hz-color-gold-soft: rgba(255, 209, 102, 0.12);
+  --hz-color-bg: #020604;
+  --hz-color-surface: rgba(8, 24, 19, 0.82);
+  --hz-color-text: #e6f5ef;
+  --hz-color-muted: rgba(44, 255, 154, 0.55);
+}
+
+:root[data-theme="dark"] .hz-commercial-entity-kpi {
+  border-color: rgba(44, 255, 154, 0.18);
+  background: rgba(8, 24, 19, 0.82);
+}
+
+:root[data-theme="dark"] .hz-commercial-entity-kpi-value {
+  color: #2cff9a;
+}
+
+:root[data-theme="dark"] .hz-commercial-entity-kpi-label {
+  color: rgba(44, 255, 154, 0.55);
+}
+
+:root[data-theme="dark"] .hz-commercial-entity-topbar-title {
+  color: #e6f5ef;
+}
+
+:root[data-theme="dark"] .hz-commercial-entity-topbar-sub {
+  color: rgba(44, 255, 154, 0.55);
+}
+
+:root[data-theme="dark"] .hz-commercial-entity-preview-band {
+  background: rgba(255, 209, 102, 0.06);
+  border-color: rgba(255, 209, 102, 0.22);
+  color: rgba(255, 209, 102, 0.85);
+}
+
+:root[data-theme="dark"] .hz-commercial-entity-table-head {
+  color: rgba(44, 255, 154, 0.55);
+  border-bottom-color: rgba(44, 255, 154, 0.18);
+  background: rgba(2, 10, 6, 0.7);
+}
+
+:root[data-theme="dark"] .hz-commercial-entity-table-row {
+  border-bottom-color: rgba(44, 255, 154, 0.12);
+  color: #c8eed9;
+}
+
+:root[data-theme="dark"] .hz-commercial-entity-table-row:hover {
+  background: rgba(44, 255, 154, 0.06);
+}
+
+:root[data-theme="dark"] .hz-commercial-entity-table-row.is-selected {
+  background: rgba(255, 209, 102, 0.08);
+  box-shadow: inset 3px 0 0 #ffd166;
+}
+
+:root[data-theme="dark"] .hz-commercial-entity-action-btn {
+  border-color: rgba(255, 209, 102, 0.35);
+  background: rgba(255, 209, 102, 0.08);
+  color: #ffd166;
+}
+
+:root[data-theme="dark"] .hz-commercial-entity-action-btn:hover {
+  background: rgba(255, 209, 102, 0.14);
+}
+
+:root[data-theme="dark"] .hz-commercial-entity-side {
+  border-color: rgba(44, 255, 154, 0.18);
+  background: rgba(8, 24, 19, 0.82);
+}
+
+:root[data-theme="dark"] .hz-commercial-entity-side h3 {
+  color: #2cff9a;
+}
+
+:root[data-theme="dark"] .hz-commercial-entity-side-list {
+  color: #c8eed9;
+}
+
+:root[data-theme="dark"] .hz-commercial-entity-side-empty {
+  color: rgba(44, 255, 154, 0.45);
+}
+
+:root[data-theme="dark"] .hz-commercial-entity-detail-page {
+  --hz-color-emerald: #2cff9a;
+  --hz-color-gold: #ffd166;
+  --hz-color-surface: rgba(8, 24, 19, 0.82);
+  --hz-color-bg: #020604;
+  --hz-color-text: #e6f5ef;
+  --hz-color-muted: rgba(44, 255, 154, 0.55);
+}

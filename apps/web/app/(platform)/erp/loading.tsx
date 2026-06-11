@@ -1,7 +1,7 @@
 export default function ErpLoading() {
   return (
-    <div className="hz-erp-page" aria-busy="true">
-      <p className="hz-erp-topbar-sub">ERP paneli yükleniyor…</p>
+    <div className="erpf-page" aria-busy="true">
+      <p className="erpf-demo-band">ERP entegrasyon masası yükleniyor…</p>
     </div>
   );
 }

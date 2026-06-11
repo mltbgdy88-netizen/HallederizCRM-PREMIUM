@@ -1,5 +1,5 @@
-﻿import { UsersManagementPage } from "../../../src/features/users/components/UsersManagementPage";
+﻿import { UsersOperationDeskReferenceLayout } from "../../../src/features/users/components/UsersOperationDeskReferenceLayout";
 
 export default function UsersPage() {
-  return <UsersManagementPage />;
+  return <UsersOperationDeskReferenceLayout />;
 }

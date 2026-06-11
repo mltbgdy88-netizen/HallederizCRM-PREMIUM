@@ -1,5 +1,5 @@
-import { PaymentDetailPage as PaymentDetailFeaturePage } from "../../../../src/features/payments/components";
+import { PaymentDetailPage } from "../../../../src/features/payments/components/PaymentDetailPage";
 
-export default function PaymentDetailPage({ params }: { params: { paymentId: string } }) {
-  return <PaymentDetailFeaturePage paymentId={params.paymentId} />;
+export default function PaymentDetailRoute({ params }: { params: { paymentId: string } }) {
+  return <PaymentDetailPage paymentId={params.paymentId} />;
 }

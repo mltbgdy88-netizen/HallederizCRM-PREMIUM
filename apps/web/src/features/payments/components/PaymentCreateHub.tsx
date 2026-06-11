@@ -8,10 +8,12 @@ import { getOrders } from "../../orders/queries/get-orders";
 import { getPayments } from "../queries/get-payments";
 
 function buildQuickOpHref(customerId: string | null): string {
-  if (!customerId) {
-    return "/hizli-islem";
+  const params = new URLSearchParams();
+  params.set("tab", "payment");
+  if (customerId) {
+    params.set("customer", customerId);
   }
-  return `/hizli-islem?customer=${encodeURIComponent(customerId)}`;
+  return `/hizli-islem/satis-masasi?${params.toString()}`;
 }
 
 export function PaymentCreateHub({

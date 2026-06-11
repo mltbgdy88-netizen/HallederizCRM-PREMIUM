@@ -1,104 +1,94 @@
 "use client";
 
-import { EmptyState, EntityDetailLayout, FormPageShell, LoadingState, PageHeader, TabSwitcher } from "@hallederiz/ui";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
+import { useOfferDetailReferenceState } from "../hooks/use-offer-detail-reference-state";
+import { buildQuickOfferHref } from "../utils/map-offer-detail-to-reference";
 import { OfferActionButtons } from "./OfferActionButtons";
+import { OfferConversionPanel } from "./OfferConversionPanel";
 import { OfferConvertDialog } from "./OfferConvertDialog";
-import { OfferFollowupPanel } from "./OfferFollowupPanel";
-import { OfferHeaderInfo } from "./OfferHeaderInfo";
-import { OfferLineEditor } from "./OfferLineEditor";
 import { OfferLineTable } from "./OfferLineTable";
 import { OfferSendModal } from "./OfferSendModal";
-import { OfferTotalsPanel } from "./OfferTotalsPanel";
-import { customerPriceSlots } from "../../customers/queries/customer-mock-data";
-import { getOfferDetail, type OfferDetailQueryResult } from "../queries/get-offers";
+import {
+  OfferReferenceDemoBand,
+  OfferReferenceFieldGrid,
+  OfferReferenceHeader,
+  OfferReferenceKpiStrip,
+  OfferReferenceLoadingState,
+  OfferReferenceNotFoundState,
+  OfferReferenceSection,
+  OfferReferenceShell,
+  OfferReferenceSidePanel,
+  OfferReferenceTimelineList,
+  offerInfoFields
+} from "./offer-reference-shared";
 
 export function OfferDetailPage({ offerId, customerId }: { offerId?: string; customerId?: string | null }) {
-  const [data, setData] = useState<OfferDetailQueryResult | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("Satırlar");
+  const state = useOfferDetailReferenceState(offerId, customerId);
   const [sendModalOpen, setSendModalOpen] = useState(false);
   const [convertDialogOpen, setConvertDialogOpen] = useState(false);
-  useEffect(() => {
-    let mounted = true;
 
-    getOfferDetail(offerId, customerId)
-      .then((result) => {
-        if (mounted) {
-          setData(result);
-        }
-      })
-      .finally(() => {
-        if (mounted) {
-          setLoading(false);
-        }
-      });
+  const quickHref = useMemo(() => {
+    if (!state.offer) {
+      return undefined;
+    }
+    return buildQuickOfferHref(state.customer?.id ?? state.offer.customerId);
+  }, [state.offer, state.customer?.id]);
 
-    return () => {
-      mounted = false;
-    };
-  }, [offerId, customerId]);
-
-  const offer = data?.offer ?? null;
-  const customer = useMemo(
-    () => data?.customers.find((item) => item.id === offer?.customerId) ?? null,
-    [data?.customers, offer?.customerId]
-  );
-
-  if (loading) {
-    return <LoadingState title="Teklif yükleniyor" message="Fiyat slotları, satırlar ve follow-up kayıtları hazırlanıyor." />;
+  if (state.loading) {
+    return <OfferReferenceLoadingState />;
   }
 
-  if (!data || !offer) {
-    return <EmptyState title="Teklif bulunamadı" message="Seçilen teklif bulunamadı veya erişim kapsamında değil." />;
+  if (state.notFound || !state.offer || !state.referenceModel) {
+    return <OfferReferenceNotFoundState />;
   }
+
+  const offer = state.offer;
 
   return (
-    <div className="hz-offers-detail-page">
-      <EntityDetailLayout
-        summary={
-          <>
-            <PageHeader
-              title={offerId ? "Teklif detayı" : "Yeni teklif"}
-              description="Cari fiyat grubu ile bağlı teklif satırları, follow-up ve siparişe dönüşüm omurgası."
+    <>
+      <OfferReferenceShell>
+        <OfferReferenceHeader title="Teklif Detayı" meta={state.referenceModel.headerMeta} quickHref={quickHref} />
+        <OfferReferenceDemoBand />
+        <OfferReferenceKpiStrip kpis={state.referenceModel.kpis} />
+        <main className="ofd-layout">
+          <section className="ofd-main">
+            <OfferReferenceSection title="Teklif bilgileri" description="Katman geçişleri üst menüden yapılır.">
+              <OfferReferenceFieldGrid fields={offerInfoFields(offer, state.customer)} />
+            </OfferReferenceSection>
+            <OfferReferenceSection title="Teklif satır özeti">
+              <OfferLineTable lines={offer.lines} variant="reference" compact />
+            </OfferReferenceSection>
+            <OfferReferenceSection title="Dönüşüm özeti">
+              <OfferConversionPanel offer={offer} customer={state.customer} />
+            </OfferReferenceSection>
+            <OfferReferenceSection title="Son hareketler">
+              <OfferReferenceTimelineList events={state.referenceModel.timelineEvents.slice(0, 8)} />
+            </OfferReferenceSection>
+          </section>
+          <aside className="ofd-side">
+            <OfferReferenceSidePanel
+              offer={offer}
+              customer={state.customer}
+              model={state.referenceModel}
+              onConvert={() => setConvertDialogOpen(true)}
+              onSend={() => setSendModalOpen(true)}
+              actions={
+                <section className="ofd-actions-wrap" aria-label="Teklif aksiyonları">
+                  <OfferActionButtons
+                    layout="reference"
+                    onSend={() => setSendModalOpen(true)}
+                    onConvert={() => setConvertDialogOpen(true)}
+                  />
+                  <p className="ofd-note">Kaydet / PDF / Follow-up aksiyonları demo/sonraki fazdır; canlı mutation bağlı değildir.</p>
+                </section>
+              }
             />
-            <OfferHeaderInfo offer={offer} customers={data.customers} />
-            <OfferActionButtons onSend={() => setSendModalOpen(true)} onConvert={() => setConvertDialogOpen(true)} />
-          </>
-        }
-        sections={
-          <FormPageShell className="hz-offers-form">
-            <div className="hz-page-stack">
-              <OfferLineEditor offer={offer} customer={customer} priceSlots={customerPriceSlots} />
-              <section className="hz-content-card">
-                <TabSwitcher
-                  items={["Satırlar", "Follow-up", "Belgeler", "Zaman çizelgesi"].map((tab) => ({ key: tab, label: tab }))}
-                  activeKey={activeTab}
-                  onChange={setActiveTab}
-                />
-                {activeTab === "Satırlar" ? <OfferLineTable lines={offer.lines} /> : null}
-                {activeTab === "Follow-up" ? <OfferFollowupPanel followUps={offer.followUps} /> : null}
-                {activeTab === "Belgeler" ? (
-                  <div className="hz-state-card hz-tab-content">
-                    <h4>Belgeler</h4>
-                    <p>Teklif PDF önizleme, gönderim ve belge teslim kayıtları bu sekmede izlenecek.</p>
-                  </div>
-                ) : null}
-                {activeTab === "Zaman çizelgesi" ? (
-                  <div className="hz-state-card hz-tab-content">
-                    <h4>Zaman çizelgesi</h4>
-                    <p>Teklif oluşumu, gönderim, follow-up ve dönüşüm olayları kayıt zaman çizelgesine bağlanacak.</p>
-                  </div>
-                ) : null}
-              </section>
-            </div>
-          </FormPageShell>
-        }
-        sidebar={<OfferTotalsPanel offer={offer} customer={customer} />}
-      />
+          </aside>
+        </main>
+      </OfferReferenceShell>
 
-      <OfferSendModal open={sendModalOpen} offer={offer} customer={customer} onClose={() => setSendModalOpen(false)} />
-      <OfferConvertDialog open={convertDialogOpen} offer={offer} customer={customer} onClose={() => setConvertDialogOpen(false)} />
-    </div>
+      <OfferSendModal open={sendModalOpen} offer={offer} customer={state.customer} onClose={() => setSendModalOpen(false)} />
+      <OfferConvertDialog open={convertDialogOpen} offer={offer} customer={state.customer} onClose={() => setConvertDialogOpen(false)} />
+    </>
   );
 }

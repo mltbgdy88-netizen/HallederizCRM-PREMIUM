@@ -1,5 +1,5 @@
-﻿import { ApprovalsPage } from "../../../src/features/approvals/components";
+import { ApprovalsReferenceLayout } from "../../../src/features/approvals/components/ApprovalsReferenceLayout";
 
 export default function ApprovalsRoutePage() {
-  return <ApprovalsPage />;
+  return <ApprovalsReferenceLayout />;
 }

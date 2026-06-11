@@ -1,5 +1,5 @@
-import { CustomersPage as CustomersFeaturePage } from "../../../src/features/customers/components";
+import { CustomersReferenceLayout } from "../../../src/features/customers/components/CustomersReferenceLayout";
 
 export default function CustomersPage() {
-  return <CustomersFeaturePage />;
+  return <CustomersReferenceLayout />;
 }

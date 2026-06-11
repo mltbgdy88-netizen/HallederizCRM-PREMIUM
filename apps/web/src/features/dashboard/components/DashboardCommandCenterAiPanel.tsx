@@ -111,6 +111,25 @@ export function DashboardCommandCenterAiPanel() {
   }, [messages, loading]);
 
   useEffect(() => {
+    const onQuickPrompt = (event: Event) => {
+      const message = (event as CustomEvent<{ message?: string }>).detail?.message?.trim();
+      if (!message) return;
+      setPrompt(message);
+      setVoiceOpen(false);
+    };
+    const onFocusComposer = () => {
+      const node = document.querySelector<HTMLInputElement>(".hz-cc-ai-composer-input");
+      node?.focus();
+    };
+    window.addEventListener("dashboard:ai-quick-prompt", onQuickPrompt);
+    window.addEventListener("dashboard:ai-focus-composer", onFocusComposer);
+    return () => {
+      window.removeEventListener("dashboard:ai-quick-prompt", onQuickPrompt);
+      window.removeEventListener("dashboard:ai-focus-composer", onFocusComposer);
+    };
+  }, []);
+
+  useEffect(() => {
     return () => {
       recognitionRef.current?.abort();
       recognitionRef.current = null;

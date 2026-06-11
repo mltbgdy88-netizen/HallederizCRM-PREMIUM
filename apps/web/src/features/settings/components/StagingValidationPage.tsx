@@ -1,6 +1,7 @@
 "use client";
 
 import { MetricCard, PageHeader, PrimaryActionToolbar, SplitContentLayout } from "@hallederiz/ui";
+import { formatUserFacingHealthStatus, formatUserFacingMode, formatUserFacingServiceName } from "../../../lib/user-facing-labels";
 import { SettingsAreaShell } from "./SettingsAreaShell";
 import { useEffect, useMemo, useState } from "react";
 import {
@@ -36,10 +37,10 @@ function getBadgeClass(status: ServiceHealthRecord["status"]) {
 }
 
 function statusDisplayLabel(status: ServiceHealthRecord["status"]) {
-  if (status === "healthy") return "Hazir";
-  if (status === "fallback" || status === "degraded") return "Yerel Gelistirme / Fallback";
+  if (status === "healthy") return "Sağlıklı";
+  if (status === "fallback" || status === "degraded") return "Yerel geliştirme / yedek görünüm";
   if (status === "misconfigured") return "Yapilandirma Eksik";
-  if (status === "disabled") return "Devre Disi";
+  if (status === "disabled") return "Devre dışı";
   return "Hata";
 }
 
@@ -48,14 +49,14 @@ function renderServiceReason(service: ServiceHealthRecord) {
   const localStatus = String(service.details?.localStatus ?? "unknown");
   const externalStatus = String(service.details?.externalStatus ?? "unknown");
   const active = String(service.details?.activeProviderMode ?? service.mode);
-  return `${service.reason} | Local: ${localStatus} | External: ${externalStatus} | Aktif: ${active}`;
+  return `${service.reason} | Yerel: ${formatUserFacingHealthStatus(localStatus)} | Dış: ${formatUserFacingHealthStatus(externalStatus)} | Aktif: ${formatUserFacingMode(active)}`;
 }
 
 function runLabel(state: RunState) {
-  if (state === "running") return "Calisiyor...";
-  if (state === "ok") return "Basarili";
-  if (state === "error") return "Basarisiz";
-  return "Hazir";
+  if (state === "running") return "Çalışıyor…";
+  if (state === "ok") return "Başarılı";
+  if (state === "error") return "Başarısız";
+  return "Hazır";
 }
 
 export function StagingValidationPage() {
@@ -77,7 +78,7 @@ export function StagingValidationPage() {
       const result = await getIntegrationHealthSummaryApi();
       setSummary(result);
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : "Servis sagligi bilgisi alinamadi.");
+      setFeedback(error instanceof Error ? error.message : "Servis sağlığı bilgisi alınamadı.");
     } finally {
       setLoading(false);
     }
@@ -106,13 +107,13 @@ export function StagingValidationPage() {
       }
       setFeedback(
         service === "local-agent"
-          ? "LOCAL-AGENT dry-run testi tamamlandi. Bu sonuc canli yazdirma yerine guvenli simulasyon dogrulamasidir."
-          : `${service.toUpperCase()} testi tamamlandi.`
+          ? "Yerel araç deneme testi tamamlandı. Bu sonuç canlı yazdırma yerine güvenli simülasyon doğrulamasıdır."
+          : `${formatUserFacingServiceName(service)} testi tamamlandı.`
       );
       setRunState((previous) => ({ ...previous, [service]: "ok" }));
       await reload();
     } catch (error) {
-      setFeedback(error instanceof Error ? error.message : `${service.toUpperCase()} testi basarisiz oldu.`);
+      setFeedback(error instanceof Error ? error.message : `${formatUserFacingServiceName(service)} testi başarısız oldu.`);
       setRunState((previous) => ({ ...previous, [service]: "error" }));
       await reload();
     }
@@ -127,15 +128,15 @@ export function StagingValidationPage() {
       />
 
       <section className="hz-metric-grid">
-        <MetricCard title="Genel Durum" value={summary?.status ?? "-"} detail="Toplu health sonucu" tone={getStatusTone(summary?.status ?? "fallback")} />
-        <MetricCard title="Live Servis" value={String(summary?.liveCount ?? 0)} detail="Canli moda hazir" tone="success" />
-        <MetricCard title="Fallback" value={String(summary?.fallbackCount ?? 0)} detail="Guvenli yedek mod" tone="warning" />
-        <MetricCard title="Disabled" value={String(summary?.disabledCount ?? 0)} detail="Devre disi servis" tone="neutral" />
+        <MetricCard title="Genel Durum" value={summary ? formatUserFacingHealthStatus(summary.status) : "—"} detail="Toplu sağlık durumu sonucu" tone={getStatusTone(summary?.status ?? "fallback")} />
+        <MetricCard title="Canlı servis" value={String(summary?.liveCount ?? 0)} detail="Canlı moda hazır" tone="success" />
+        <MetricCard title="Yedek görünüm" value={String(summary?.fallbackCount ?? 0)} detail="Güvenli yedek mod" tone="warning" />
+        <MetricCard title="Devre dışı" value={String(summary?.disabledCount ?? 0)} detail="Devre dışı servis" tone="neutral" />
       </section>
 
       <PrimaryActionToolbar>
         <button className="hz-btn hz-toolbar-btn hz-btn-primary" type="button" onClick={() => void reload()} disabled={loading}>
-          {loading ? "Yukleniyor..." : "Saglik Durumunu Yenile"}
+          {loading ? "Yükleniyor…" : "Sağlık durumunu yenile"}
         </button>
       </PrimaryActionToolbar>
 
@@ -148,7 +149,7 @@ export function StagingValidationPage() {
       <SplitContentLayout
         main={
           <section className="hz-content-card">
-            <h3>Servis Sagligi ve Test Aksiyonlari</h3>
+            <h3>Servis sağlığı ve test aksiyonları</h3>
             <div className="table-wrap hz-table-wrap">
               <table className="table hz-table">
                 <thead>
@@ -156,8 +157,8 @@ export function StagingValidationPage() {
                     <th>Servis</th>
                     <th>Durum</th>
                     <th>Mod</th>
-                    <th>Configured</th>
-                    <th>Son Kontrol</th>
+                    <th>Yapılandırıldı</th>
+                    <th>Son kontrol</th>
                     <th>Mesaj</th>
                     <th>Test</th>
                   </tr>
@@ -165,17 +166,17 @@ export function StagingValidationPage() {
                 <tbody>
                   {services.length === 0 ? (
                     <tr>
-                      <td className="table-empty" colSpan={7}>Servis sagligi bilgisi bekleniyor.</td>
+                      <td className="table-empty" colSpan={7}>Servis sağlığı bilgisi bekleniyor.</td>
                     </tr>
                   ) : (
                     services.map((service) => (
                       <tr key={service.service}>
-                        <td>{service.service}</td>
+                        <td>{formatUserFacingServiceName(service.service)}</td>
                         <td>
                           <span className={getBadgeClass(service.status)}>{statusDisplayLabel(service.status)}</span>
                         </td>
-                        <td>{service.mode}</td>
-                        <td>{service.configured ? "Evet" : "Hayir"}</td>
+                        <td>{formatUserFacingMode(service.mode)}</td>
+                        <td>{service.configured ? "Evet" : "Hayır"}</td>
                         <td>{new Date(service.lastCheckedAt).toLocaleString("tr-TR")}</td>
                         <td>{renderServiceReason(service)}</td>
                         <td>
@@ -199,13 +200,13 @@ export function StagingValidationPage() {
         side={
           <div className="hz-page-stack">
             <aside className="hz-side-panel">
-              <h3>Fallback Durumu</h3>
-              <p className="muted">AI local-first calisir; external provider opsiyoneldir. Live olmayan servisler fallback veya disabled modda calisir. Kritik mutationlar onaysiz canliya gitmez.</p>
-              <p className="muted">Not: Bazi testler dry-run/foundation seviyesinde sadece zincir dogrulama yapar; canli operasyon etkisi uretmez.</p>
+              <h3>Yedek görünüm durumu</h3>
+              <p className="muted">Yapay zekâ yerel öncelikli çalışır; dış sağlayıcı isteğe bağlıdır. Canlı olmayan servisler yedek görünüm veya devre dışı modda çalışır. Kritik işlemler onaysız canlıya gitmez.</p>
+              <p className="muted">Not: Bazı testler kuru çalıştırma/temel mod seviyesinde yalnızca zincir doğrulaması yapar; canlı operasyon etkisi üretmez.</p>
               <div className="detail-list">
-                <span>Configured Servis</span>
+                <span>Yapılandırılmış servis</span>
                 <strong>{summary?.configuredCount ?? 0}</strong>
-                <span>Son Kontrol</span>
+                <span>Son kontrol</span>
                 <strong>{summary?.lastCheckedAt ? new Date(summary.lastCheckedAt).toLocaleString("tr-TR") : "-"}</strong>
               </div>
             </aside>

@@ -1,0 +1,310 @@
+/* Sipariş Yeni Hub — siparisler-yeni-hub-acik-mod.png (sof-*) */
+
+.hz-shell-frame:has(.sof-page) {
+  --hz-header-height: 56px;
+}
+
+.hz-siparisler-yeni-center:has(.sof-page) {
+  min-height: 0;
+  height: 100%;
+  padding: 0 !important;
+  background: #fdfcf9 !important;
+}
+
+.hz-shell-content:has(.sof-page),
+.hz-shell-content-frame:has(.sof-page),
+.platform-content:has(.sof-page) {
+  padding: 0 !important;
+  background: #fdfcf9 !important;
+  border: none !important;
+  box-shadow: none !important;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.platform-content:has(.sof-page) > .hz-siparisler-yeni-center {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+}
+
+.sof-page {
+  --sof-canvas: #fdfcf9;
+  --sof-surface: #ffffff;
+  --sof-border: #d1d5db;
+  --sof-border-soft: #e5e7eb;
+  --sof-text: #0f172a;
+  --sof-muted: #64748b;
+  --sof-green: #047857;
+  --sof-green-strong: #064e3b;
+  --sof-green-soft: #ecfdf5;
+  --sof-gold: #b45309;
+  --sof-gold-soft: #fffbeb;
+  --sof-radius: 14px;
+  --sof-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  --sof-gap: 12px;
+
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1380px;
+  height: calc(100dvh - 56px);
+  max-height: calc(100dvh - 56px);
+  margin: 0 auto;
+  padding: 14px 18px;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr);
+  background: var(--sof-canvas);
+  color: var(--sof-text);
+}
+
+.sof-shell {
+  min-height: 0;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  gap: var(--sof-gap);
+  overflow: hidden;
+}
+
+.sof-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.sof-header__main {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  min-width: 0;
+}
+
+.sof-header__icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  flex-shrink: 0;
+  border: 1px solid color-mix(in srgb, var(--sof-green) 22%, var(--sof-border));
+  background: var(--sof-green-soft);
+  color: var(--sof-green-strong);
+}
+
+.sof-header__eyebrow {
+  margin: 0 0 2px;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--sof-muted);
+}
+
+.sof-header h1 {
+  margin: 0;
+  font-size: 22px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+  line-height: 1.15;
+}
+
+.sof-header__lead {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: var(--sof-muted);
+}
+
+.sof-header__back {
+  flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  border: 1px solid var(--sof-border);
+  background: var(--sof-surface);
+  color: var(--sof-green-strong);
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.sof-header__back:hover {
+  border-color: color-mix(in srgb, var(--sof-green) 30%, var(--sof-border));
+  color: var(--sof-green);
+}
+
+.sof-preview-band {
+  margin: 0;
+  padding: 4px 10px;
+  min-height: 22px;
+  max-height: 24px;
+  display: flex;
+  align-items: center;
+  border-radius: 9px;
+  border: 1px solid color-mix(in srgb, var(--sof-gold) 34%, var(--sof-border));
+  background: color-mix(in srgb, var(--sof-gold-soft) 72%, var(--sof-surface));
+  font-size: 10px;
+  font-weight: 800;
+  color: #854d0e;
+  flex-shrink: 0;
+}
+
+.sof-context-band {
+  margin: 0;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--sof-border-soft);
+  background: #f8fafc;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--sof-text);
+  flex-shrink: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+}
+
+.sof-context-band span {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.sof-context-band strong {
+  color: var(--sof-green-strong);
+  font-weight: 800;
+}
+
+.sof-card-grid {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 14px;
+  align-content: start;
+  overflow: auto;
+  padding: 4px 0;
+}
+
+.sof-action-card {
+  min-height: 220px;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+  gap: 10px;
+  padding: 18px 16px 16px;
+  border-radius: var(--sof-radius);
+  border: 1px solid var(--sof-border);
+  background: var(--sof-surface);
+  box-shadow: var(--sof-shadow);
+}
+
+.sof-action-card--primary {
+  border-color: color-mix(in srgb, var(--sof-green) 32%, var(--sof-border));
+  background: linear-gradient(180deg, #ffffff 0%, color-mix(in srgb, var(--sof-green-soft) 35%, #fff) 100%);
+}
+
+.sof-action-card__icon {
+  width: 44px;
+  height: 44px;
+  border-radius: 12px;
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--sof-border-soft);
+  background: #f8fafc;
+  color: var(--sof-green-strong);
+}
+
+.sof-action-card--primary .sof-action-card__icon {
+  background: var(--sof-green-soft);
+  border-color: color-mix(in srgb, var(--sof-green) 24%, var(--sof-border));
+}
+
+.sof-action-card__title {
+  margin: 0;
+  font-size: 16px;
+  font-weight: 900;
+  letter-spacing: -0.02em;
+}
+
+.sof-action-card__desc {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.5;
+  color: var(--sof-muted);
+}
+
+.sof-action-card__cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 32px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--sof-border);
+  background: var(--sof-surface);
+  color: var(--sof-green-strong);
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
+  width: fit-content;
+}
+
+.sof-action-card__cta--primary {
+  border-color: var(--sof-green);
+  background: linear-gradient(135deg, var(--sof-green), var(--sof-green-strong));
+  color: #fff;
+}
+
+.sof-feature-bar {
+  flex-shrink: 0;
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 10px;
+  padding-top: 4px;
+}
+
+.sof-feature-bar article {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--sof-border-soft);
+  background: var(--sof-surface);
+}
+
+.sof-feature-bar h3 {
+  margin: 0 0 2px;
+  font-size: 11px;
+  font-weight: 900;
+  color: var(--sof-text);
+}
+
+.sof-feature-bar p {
+  margin: 0;
+  font-size: 10px;
+  color: var(--sof-muted);
+  line-height: 1.35;
+}
+
+@media (max-width: 960px) {
+  .sof-card-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .sof-feature-bar {
+    grid-template-columns: 1fr;
+  }
+
+  .sof-header {
+    flex-direction: column;
+  }
+}

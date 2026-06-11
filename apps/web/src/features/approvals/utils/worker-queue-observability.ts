@@ -7,16 +7,16 @@ export function formatWorkerQueueHeadline(
   dlqTotal: number | undefined,
   loading: boolean
 ): string {
-  if (loading) return "Kuyruk verileri yukleniyor...";
+  if (loading) return "Kuyruk verileri yükleniyor…";
   if (workerHealth?.ok === false) {
-    return workerHealth.message || workerHealth.error || "Worker health alinamadi";
+    return workerHealth.message || workerHealth.error || "Çalışan servis sağlığı alınamadı";
   }
   const bits: string[] = [];
   if (typeof outboxTotal === "number") bits.push(`outbox ${outboxTotal}`);
   if (typeof dlqTotal === "number") bits.push(`DLQ ${dlqTotal}`);
   const c = workerHealth?.counts;
   if (c) bits.push(`bekleyen ${c.pending} · claim ${c.claimed} · hata ${c.failed}`);
-  if (!bits.length) return "Tablolari gormek icin acin";
+  if (!bits.length) return "Tabloları görmek için açın";
   return bits.join(" · ");
 }
 

@@ -1,0 +1,25 @@
+/* Onay detay route — canvas only; detail layout unchanged */
+
+.hz-onaylar-approvalid-center {
+  min-height: calc(100dvh - 72px);
+  padding: 12px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(212, 175, 55, 0.1), transparent 26%),
+    radial-gradient(circle at 96% 4%, rgba(4, 120, 87, 0.09), transparent 28%),
+    linear-gradient(180deg, var(--hz-color-surface, #fffaf0) 0%, var(--hz-color-bg, #f8f1df) 100%);
+  color: var(--hz-text-default, #102a24);
+}
+
+.hz-onaylar-approvalid-center .hz-approvals-detail-page {
+  max-width: 1604px;
+  margin: 0 auto;
+}
+
+html:root[data-theme="dark"] .hz-onaylar-approvalid-center {
+  background:
+    radial-gradient(circle at 6% 0%, rgba(44, 255, 154, 0.12), transparent 28%),
+    radial-gradient(circle at 92% 6%, rgba(255, 209, 102, 0.1), transparent 28%),
+    linear-gradient(135deg, #020604 0%, #06110d 50%, #020604 100%);
+  color: var(--hz-text-default);
+}

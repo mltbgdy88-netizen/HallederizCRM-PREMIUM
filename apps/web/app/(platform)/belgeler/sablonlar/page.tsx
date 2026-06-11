@@ -1,5 +1,5 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+import { DocumentTemplatesPage } from "../../../../src/features/documents/components/DocumentTemplatesPage";
 
 export default function BelgelerSablonlarPage() {
-  return renderProductCatchAll(["belgeler", "sablonlar"]);
+  return <DocumentTemplatesPage />;
 }

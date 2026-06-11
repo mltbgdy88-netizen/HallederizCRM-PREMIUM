@@ -1,5 +1,10 @@
-import { CustomerCreatePage } from "../../../../src/features/customers/components/CustomerCreatePage";
+import { CustomerCreateReferenceLayout } from "../../../../src/features/customers/components/CustomerCreateReferenceLayout";
+import { CarilerYeniCommandCenterShell } from "../../../../src/features/ui-inventory/components/CarilerShellWrappers";
 
 export default function CarilerYeniPage() {
-  return <CustomerCreatePage />;
+  return (
+    <CarilerYeniCommandCenterShell>
+      <CustomerCreateReferenceLayout />
+    </CarilerYeniCommandCenterShell>
+  );
 }

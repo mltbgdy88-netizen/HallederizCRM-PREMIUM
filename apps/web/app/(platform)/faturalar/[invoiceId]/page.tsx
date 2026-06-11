@@ -1,5 +1,5 @@
-import { InvoiceDetailPage as InvoiceDetailFeaturePage } from "../../../../src/features/invoices/components";
+import { InvoiceDetailPage } from "../../../../src/features/invoices/components";
 
-export default function InvoiceDetailPage({ params }: { params: { invoiceId: string } }) {
-  return <InvoiceDetailFeaturePage invoiceId={params.invoiceId} />;
+export default function InvoiceDetailRoute({ params }: { params: { invoiceId: string } }) {
+  return <InvoiceDetailPage invoiceId={params.invoiceId} />;
 }

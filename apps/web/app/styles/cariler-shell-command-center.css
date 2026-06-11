@@ -1,0 +1,29 @@
+/* Cariler yeni + detay route — brand token aware, warm canvas */
+
+.hz-cariler-yeni-center,
+.hz-cariler-customerid-center {
+  min-height: calc(100dvh - 72px);
+  padding: 12px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(4, 120, 87, 0.08), transparent 24%),
+    radial-gradient(circle at 100% 0%, rgba(212, 175, 55, 0.10), transparent 26%),
+    var(--hz-bg);
+  color: var(--hz-text-default);
+}
+
+.hz-cariler-yeni-center .hz-customers-create-page,
+.hz-cariler-yeni-center .cyf-page,
+.hz-cariler-customerid-center .hz-customers-detail-page {
+  max-width: 1604px;
+  margin: 0 auto;
+}
+
+/* Dark mode overrides */
+html:root[data-theme="dark"] .hz-cariler-yeni-center,
+html:root[data-theme="dark"] .hz-cariler-customerid-center {
+  background:
+    var(--hz-brand-light-beam),
+    var(--hz-bg);
+  color: var(--hz-text-default);
+}

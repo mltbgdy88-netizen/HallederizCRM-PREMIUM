@@ -1,5 +1,5 @@
-import { OfflineApiStatePage } from "../../../src/features/system-state/components/SystemStatePages";
+import { OfflineApiCommandCenterPage } from "../../../src/features/ui-inventory/components/SystemStateCommandCenterPages";
 
 export default function OfflineApiPage() {
-  return <OfflineApiStatePage />;
+  return <OfflineApiCommandCenterPage />;
 }

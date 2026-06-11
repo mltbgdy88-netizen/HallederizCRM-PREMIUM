@@ -1,0 +1,255 @@
+/* Rapor Operasyon Merkezi — referans: docs/design/reference/rapor-operasyon-merkezi-acik-mod.png */
+
+.platform-content:has(.hz-reports-page--desk) {
+  padding: 0;
+  background: transparent;
+  height: 100%;
+  min-height: 0;
+}
+
+.platform-content:has(.hz-reports-page--desk) > .hz-reports-page--desk {
+  flex: 1;
+  min-height: 0;
+  max-width: none;
+  width: 100%;
+}
+
+.hz-reports-page--desk {
+  --hz-reports-primary: var(--hz-color-emerald, #047857);
+  --reports-bg: var(--hz-color-bg, #f8f1df);
+  --reports-paper: var(--hz-color-surface, #fffaf0);
+  --reports-emerald: var(--hz-color-emerald, #047857);
+  --reports-emerald-strong: #065f46;
+  --reports-gold: var(--hz-color-gold, #d4af37);
+  --reports-gold-soft: var(--hz-warning-soft, #fff2bf);
+  --reports-text: var(--hz-text-default, #102a24);
+  --reports-muted: var(--hz-text-muted, #42564c);
+  --reports-border: var(--hz-border, #d8cdb5);
+
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+  padding: var(--desk-gap, 8px);
+  box-sizing: border-box;
+  background: var(--desk-canvas, #fdfcf9);
+  color: var(--reports-text);
+}
+
+.hz-reports-page--desk .hz-reports-layout {
+  height: 100%;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 10px;
+  padding: 0;
+}
+
+.hz-reports-page--desk .hz-reports-main {
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.hz-reports-page--desk .hz-reports-topbar,
+.hz-reports-page--desk .hz-report-analytics-shell,
+.hz-reports-page--desk .hz-reports-list-wrap,
+.hz-reports-page--desk .hz-reports-side {
+  border: 1px solid var(--desk-border, var(--reports-border));
+  border-radius: var(--desk-radius, 12px);
+  background: var(--desk-surface, #ffffff);
+  box-shadow: var(--desk-shadow, 0 1px 2px rgba(15, 23, 42, 0.06));
+}
+
+.hz-reports-page--desk .hz-reports-topbar {
+  min-height: 60px;
+  max-height: 64px;
+  padding: 10px 16px;
+  flex-shrink: 0;
+}
+
+.hz-reports-page--desk .hz-reports-topbar-title {
+  font-size: 20px;
+  font-weight: 950;
+  color: var(--reports-emerald-strong);
+}
+
+.hz-reports-page--desk .hz-reports-topbar-sub {
+  font-size: 11px;
+  color: var(--reports-muted);
+}
+
+.hz-reports-page--desk .hz-reports-toolbar-btn--primary {
+  border-color: var(--reports-emerald);
+  background: linear-gradient(135deg, var(--reports-emerald), var(--reports-emerald-strong));
+  color: #fff;
+}
+
+.hz-reports-page--desk .hz-reports-toolbar-btn--outline {
+  border-color: color-mix(in srgb, var(--reports-emerald) 24%, var(--reports-border));
+  color: var(--reports-emerald-strong);
+  background: var(--reports-paper);
+}
+
+.hz-reports-page--desk .hz-reports-kpi-strip {
+  min-height: 72px;
+  max-height: 78px;
+}
+
+.hz-reports-page--desk .hz-reports-kpi {
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--reports-border) 78%, var(--reports-gold) 18%);
+}
+
+.hz-reports-page--desk .hz-reports-kpi-value {
+  color: var(--reports-emerald-strong);
+  font-weight: 950;
+}
+
+.hz-reports-page--desk .hz-reports-type-tabs {
+  min-height: 30px;
+  max-height: 32px;
+}
+
+.hz-reports-page--desk .hz-reports-type-tab--active {
+  border-color: var(--reports-emerald);
+  background: color-mix(in srgb, var(--hz-success-soft) 70%, var(--reports-paper));
+  color: var(--reports-emerald-strong);
+}
+
+.hz-reports-page--desk .hz-reports-mini-trend {
+  min-height: 28px;
+  max-height: 32px;
+  padding: 4px 10px;
+}
+
+.hz-reports-page--desk .hz-reports-mini-trend-bar {
+  max-height: 18px;
+}
+
+.hz-reports-page--desk .hz-reports-chart-empty {
+  min-height: 28px;
+  max-height: 32px;
+  padding: 6px 10px;
+  font-size: 10px;
+}
+
+.hz-reports-desk-card {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: 1px solid color-mix(in srgb, var(--reports-border) 78%, var(--reports-gold) 22%);
+  border-radius: 16px;
+  background: var(--hz-brand-glass-strong, var(--reports-paper));
+  box-shadow: var(--hz-shadow-card);
+}
+
+.hz-reports-page--desk .hz-reports-type-tabs--desk-head {
+  flex-shrink: 0;
+  min-height: 30px;
+  max-height: 32px;
+  margin: 0;
+  padding: 8px 12px 0;
+}
+
+.hz-reports-page--desk .hz-reports-desk-card .hz-report-analytics-shell {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  border: none;
+  border-radius: 0;
+  background: transparent;
+  box-shadow: none;
+}
+
+.hz-reports-page--desk .hz-reports-desk-card .hz-report-analytics-kpis {
+  order: 1;
+}
+
+.hz-reports-page--desk .hz-reports-desk-card .hz-report-analytics-filters {
+  order: 2;
+}
+
+.hz-reports-page--desk .hz-reports-desk-card .hz-report-analytics-table {
+  order: 3;
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.hz-reports-page--desk .hz-report-analytics-charts {
+  display: none;
+}
+
+.hz-reports-page--desk .hz-reports-filter-row--desk {
+  grid-template-columns: minmax(200px, 1fr) minmax(140px, 0.8fr) minmax(140px, 0.8fr) auto !important;
+}
+
+.hz-reports-target-progress {
+  height: 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--reports-border) 70%, var(--reports-paper));
+  overflow: hidden;
+  margin-top: 8px;
+}
+
+.hz-reports-target-progress > span {
+  display: block;
+  height: 100%;
+  max-width: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, var(--reports-emerald), #059669);
+}
+
+.hz-reports-target-progress-label {
+  margin: 4px 0 0;
+  font-size: 9.5px;
+  font-weight: 800;
+  color: var(--reports-emerald-strong);
+}
+
+.hz-reports-ai-checklist {
+  margin: 0 0 8px;
+  padding-left: 16px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--reports-muted);
+  line-height: 1.4;
+}
+
+.hz-reports-side-btn--plan {
+  width: 100%;
+  justify-content: center;
+}
+
+.hz-reports-page--desk .hz-reports-list-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.hz-reports-page--desk .hz-reports-row {
+  min-height: 42px;
+  max-height: 44px;
+}
+
+.hz-reports-page--desk .hz-reports-row--selected {
+  background: linear-gradient(90deg, color-mix(in srgb, var(--hz-success-soft) 55%, var(--reports-paper)), var(--reports-paper));
+  box-shadow: inset 4px 0 0 var(--reports-emerald);
+}
+
+.hz-reports-page--desk .hz-reports-side-title {
+  font-size: 11px;
+  font-weight: 900;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: var(--reports-muted);
+}
+
+html:root[data-theme="dark"] .hz-reports-page--desk {
+  background: linear-gradient(180deg, #06110d, #020604);
+}

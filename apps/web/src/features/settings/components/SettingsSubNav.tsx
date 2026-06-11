@@ -4,7 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const NAV_ITEMS: { href: string; label: string }[] = [
-  { href: "/ayarlar", label: "Genel" },
+  { href: "/ayarlar", label: "Ayarlar" },
+  { href: "/ayarlar/genel", label: "Genel" },
   { href: "/ayarlar/veri-yukleme", label: "Veri yükleme" },
   { href: "/ayarlar/staging-kontrol", label: "Hazırlık kontrolü" },
   { href: "/ayarlar/kullanim-hazirligi", label: "Kullanım hazırlığı" },
@@ -21,7 +22,7 @@ export function SettingsSubNav() {
   const pathname = usePathname() ?? "";
 
   return (
-    <ul className="hz-settings-inner-nav">
+    <ul className="hz-settings-inner-nav asa-subnav">
       {NAV_ITEMS.map((item) => {
         const active = linkActive(pathname, item.href);
         return (

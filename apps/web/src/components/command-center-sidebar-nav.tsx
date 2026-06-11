@@ -15,7 +15,7 @@ function item(key: string, label: string, href: string, icon: LucideIconName): A
   return { key, label, href, icon: <NavIcon name={icon} /> };
 }
 
-/** Command center sidebar — sade operasyon menüsü. */
+/** Command center sidebar — günlük operasyon + tek Ayarlar hub kalemi. */
 export function buildCommandCenterSidebarNavSections(): SidebarNavSection[] {
   return [
     {
@@ -33,8 +33,8 @@ export function buildCommandCenterSidebarNavSections(): SidebarNavSection[] {
         item("cc-offers", "Teklifler", "/teklifler", "file-text"),
         item("cc-payments", "Tahsilatlar", "/tahsilatlar", "circle-dollar-sign"),
         item("cc-deliveries", "Teslimatlar", "/teslimatlar", "truck"),
-        item("cc-route", "Rota Planlama", "/teslimatlar/rota", "grid-3x3"),
-        item("cc-invoices", "Faturalar", "/faturalar", "file-text"),
+        item("cc-delivery-route", "Rota Planlama", "/teslimatlar/rota", "flag"),
+        item("cc-invoices", "Faturalar", "/faturalar", "credit-card"),
         item("cc-returns", "İadeler", "/iadeler", "rotate-ccw")
       ]
     },
@@ -42,20 +42,20 @@ export function buildCommandCenterSidebarNavSections(): SidebarNavSection[] {
       title: "STOK / DEPO / ÜRETİM",
       items: [
         item("cc-stock", "Stok", "/stok", "package"),
-        item("cc-warehouse", "Depo", "/depo", "package-minus"),
-        item("cc-factory", "Fabrikalar", "/fabrikalar/siparisler", "factory")
+        item("cc-warehouse", "Depo", "/depo", "package-check"),
+        item("cc-factory-orders", "Fabrikalar", "/fabrikalar/siparisler", "factory")
       ]
     },
     {
       title: "OPERASYON",
       items: [
-        item("cc-documents", "Belgeler", "/belgeler", "file-text"),
+        item("cc-documents", "Belgeler", "/belgeler", "clipboard-check"),
         item("cc-tasks", "Görevler", "/gorevler", "clipboard-list"),
-        item("cc-inbox", "Gelen Kutu", "/gelen-kutu", "message-circle"),
+        item("cc-inbox", "Gelen Kutu", "/gelen-kutu", "mail"),
         item("cc-wa", "WhatsApp", "/whatsapp", "message-circle"),
         item("cc-approvals", "Onaylar", "/onaylar", "check-circle-2"),
         item("cc-reports", "Raporlar", "/raporlar", "bar-chart-3"),
-        item("cc-archive", "Arşiv", "/archive", "package")
+        item("cc-archive", "Arşiv", "/archive", "receipt")
       ]
     },
     {

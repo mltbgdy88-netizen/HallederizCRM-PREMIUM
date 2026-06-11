@@ -1,0 +1,365 @@
+/* Kullanıcı / Rol admin — admf-* referans operasyon masası */
+
+.admf-home {
+  --admf-gap: clamp(6px, 0.75vh, 10px);
+  --admf-pad: clamp(10px, 1vw, 14px);
+  --admf-green: #047857;
+  --admf-green-strong: #065f46;
+  box-sizing: border-box;
+  width: 100%;
+  max-width: 1604px;
+  margin: 0 auto;
+  height: calc(100dvh - 56px);
+  max-height: calc(100dvh - 56px);
+  padding: var(--admf-pad);
+  overflow: hidden;
+  background: #fdfcf9;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+  gap: var(--admf-gap);
+  color: #0f172a;
+}
+
+.admf-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.admf-head-text h1 {
+  margin: 0;
+  font-size: clamp(17px, 2vh, 22px);
+  font-weight: 900;
+  letter-spacing: -0.03em;
+  color: var(--admf-green-strong);
+}
+
+.admf-head-text p {
+  margin: 3px 0 0;
+  max-width: 52ch;
+  font-size: clamp(10px, 1.1vh, 12px);
+  color: #64748b;
+  line-height: 1.35;
+}
+
+.admf-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.admf-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 750;
+  cursor: pointer;
+  white-space: nowrap;
+  appearance: none;
+  font: inherit;
+  text-decoration: none;
+  color: inherit;
+}
+
+.admf-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.admf-btn--primary {
+  border: 1px solid var(--admf-green);
+  background: var(--admf-green);
+  color: #fff;
+}
+
+.admf-btn--outline {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+}
+
+.admf-demo-band {
+  margin: 0;
+  padding: 5px 10px;
+  border-radius: 8px;
+  border: 1px solid #fde68a;
+  background: #fffbeb;
+  font-size: 10px;
+  font-weight: 650;
+  color: #92400e;
+  flex-shrink: 0;
+}
+
+.admf-kpi-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.admf-kpi {
+  padding: 8px 10px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.admf-kpi-label {
+  display: block;
+  font-size: 9px;
+  font-weight: 700;
+  color: #64748b;
+  text-transform: uppercase;
+}
+
+.admf-kpi-value {
+  display: block;
+  margin-top: 2px;
+  font-size: 14px;
+  font-weight: 900;
+}
+
+.admf-workspace {
+  min-height: 0;
+  min-width: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 332px;
+  gap: var(--admf-gap);
+  overflow: hidden;
+}
+
+.admf-main {
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+  overflow: hidden;
+}
+
+.admf-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 8px;
+  padding: 8px 10px;
+  border-bottom: 1px solid #e2e8f0;
+  flex-shrink: 0;
+}
+
+.admf-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 140px;
+}
+
+.admf-filter-label {
+  font-size: 9px;
+  font-weight: 700;
+  color: #64748b;
+}
+
+.admf-filter-input,
+.admf-filter-select {
+  min-height: 32px;
+  padding: 6px 8px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  font-size: 11px;
+}
+
+.admf-list-header,
+.admf-list-row {
+  display: grid;
+  align-items: center;
+  gap: 8px;
+  padding: 0 10px;
+  font-size: 10px;
+}
+
+.admf-list-header {
+  min-height: 28px;
+  border-bottom: 1px solid #e2e8f0;
+  background: #f8fafc;
+  font-weight: 800;
+  color: #64748b;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  flex-shrink: 0;
+}
+
+.admf-list-body {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+}
+
+.admf-list-row {
+  min-height: 44px;
+  height: 44px;
+  border-bottom: 1px solid #f1f5f9;
+  cursor: pointer;
+}
+
+.admf-list-row:hover {
+  background: #f8fafc;
+}
+
+.admf-list-row--selected {
+  background: #ecfdf5;
+}
+
+.admf-users-grid {
+  grid-template-columns: 1.2fr 1.4fr 0.7fr 0.9fr 0.8fr 0.7fr;
+}
+
+.admf-roles-grid {
+  grid-template-columns: 1.2fr 0.7fr 1.4fr 0.6fr 0.7fr;
+}
+
+.admf-cell-strong {
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.admf-cell-muted {
+  color: #64748b;
+}
+
+.admf-side {
+  min-height: 0;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  overflow: auto;
+}
+
+.admf-side-card {
+  padding: 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 12px;
+  background: #fff;
+}
+
+.admf-side-card h2 {
+  margin: 0 0 8px;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.admf-side-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  gap: 6px;
+}
+
+.admf-side-list li {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 10px;
+  color: #475569;
+}
+
+.admf-side-actions {
+  display: grid;
+  gap: 6px;
+  margin-top: 10px;
+}
+
+.admf-badge {
+  display: inline-flex;
+  align-items: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 750;
+}
+
+.admf-badge--success {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.admf-badge--warning {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.admf-badge--danger {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.admf-badge--neutral {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.admf-matrix-wrap {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 10px;
+  display: grid;
+  gap: 8px;
+  align-content: start;
+}
+
+.admf-matrix-card {
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.admf-matrix-card h3 {
+  margin: 0 0 4px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.admf-matrix-card p {
+  margin: 0 0 6px;
+  font-size: 10px;
+  color: #64748b;
+}
+
+.admf-state {
+  padding: 24px 12px;
+  text-align: center;
+  font-size: 11px;
+  color: #64748b;
+}
+
+.platform-content:has(.admf-home),
+.hz-shell-content:has(.admf-home),
+.hz-shell-content-frame:has(.admf-home) {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.platform-content:has(.admf-home) {
+  padding: 0 !important;
+  background: #fdfcf9 !important;
+}
+
+.platform-content:has(.admf-home) > .admf-home {
+  height: calc(100dvh - 56px);
+  min-height: 0;
+}

@@ -1,5 +1,5 @@
-import { OperationalObservabilityPage } from "../../../../src/features/settings/components";
+import { SettingsOperationalObservabilityReferenceLayout } from "../../../../src/features/settings/components/SettingsOperationalObservabilityReferenceLayout";
 
 export default function OperationalObservabilityRoutePage() {
-  return <OperationalObservabilityPage />;
+  return <SettingsOperationalObservabilityReferenceLayout />;
 }

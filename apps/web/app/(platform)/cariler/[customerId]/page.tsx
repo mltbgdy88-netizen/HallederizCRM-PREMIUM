@@ -1,5 +1,5 @@
-import { CustomerDetailPage as CustomerDetailFeaturePage } from "../../../../src/features/customers/components";
+import { CustomerDetailReferenceLayout } from "../../../../src/features/customers/components/CustomerDetailReferenceLayout";
 
 export default function CustomerDetailPage({ params }: { params: { customerId: string } }) {
-  return <CustomerDetailFeaturePage customerId={params.customerId} />;
+  return <CustomerDetailReferenceLayout customerId={params.customerId} />;
 }

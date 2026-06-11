@@ -1,4 +1,5 @@
 export * from "./CustomersPage";
+export * from "./CustomersReferenceLayout";
 export * from "./CustomerFilterBar";
 export * from "./CustomerTable";
 export * from "./CustomerQuickPreviewPanel";

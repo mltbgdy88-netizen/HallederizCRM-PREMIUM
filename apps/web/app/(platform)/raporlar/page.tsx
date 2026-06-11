@@ -1,5 +1,5 @@
-import { ReportsPage } from "../../../src/features/reports/components/ReportsPage";
+import { ReportsReferenceLayout } from "../../../src/features/reports/components/ReportsReferenceLayout";
 
 export default function ReportsRoutePage() {
-  return <ReportsPage />;
+  return <ReportsReferenceLayout />;
 }

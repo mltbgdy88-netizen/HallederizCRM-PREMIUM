@@ -35,14 +35,33 @@ import type { ApprovalInboxRecord, ApprovalInboxViewId } from "./types";
 
 type UiPhase = "loading" | "ready" | "empty" | "error";
 
-export function ApprovalInboxPage() {
+export type ApprovalInboxRoutePreset = "all" | "pending" | "review" | "completed";
+
+function resolvePresetState(preset: ApprovalInboxRoutePreset): {
+  activeView: ApprovalInboxViewId;
+  filters: ApprovalInboxFilterState;
+} {
+  if (preset === "pending") {
+    return { activeView: "tum", filters: { ...DEFAULT_APPROVAL_INBOX_FILTERS, status: "bekliyor" } };
+  }
+  if (preset === "review") {
+    return { activeView: "tum", filters: { ...DEFAULT_APPROVAL_INBOX_FILTERS, status: "incelemede" } };
+  }
+  if (preset === "completed") {
+    return { activeView: "yakin_sonuclanan", filters: { ...DEFAULT_APPROVAL_INBOX_FILTERS } };
+  }
+  return { activeView: "tum", filters: { ...DEFAULT_APPROVAL_INBOX_FILTERS } };
+}
+
+export function ApprovalInboxPage({ routePreset = "all" }: { routePreset?: ApprovalInboxRoutePreset }) {
+  const presetState = resolvePresetState(routePreset);
   const router = useRouter();
   const { pushToast } = useToast();
 
   const [phase, setPhase] = useState<UiPhase>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
-  const [activeView, setActiveView] = useState<ApprovalInboxViewId>("tum");
-  const [filters, setFilters] = useState<ApprovalInboxFilterState>(DEFAULT_APPROVAL_INBOX_FILTERS);
+  const [activeView, setActiveView] = useState<ApprovalInboxViewId>(presetState.activeView);
+  const [filters, setFilters] = useState<ApprovalInboxFilterState>(presetState.filters);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [pageSize, setPageSize] = useState(10);

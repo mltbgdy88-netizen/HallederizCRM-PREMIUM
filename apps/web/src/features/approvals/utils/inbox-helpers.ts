@@ -248,10 +248,10 @@ export function canRejectApproval(
 }
 
 export function summarizeWorkerHealth(worker: WorkerHealthResponse | null | undefined): string {
-  if (!worker) return "Worker health verisi yok.";
-  if (!worker.ok) return worker.message || worker.error || "Worker health kullanilamiyor.";
+  if (!worker) return "Çalışan servis sağlık verisi yok.";
+  if (!worker.ok) return worker.message || worker.error || "Çalışan servis sağlığı kullanılamıyor.";
   const h = worker.health;
-  if (!h) return "Worker health govdesi bos.";
+  if (!h) return "Çalışan servis sağlık gövdesi boş.";
   const summary = h.summary;
   const countBits: string[] = [];
   const c = worker.counts;

@@ -58,7 +58,8 @@
 | W3a | `/hizli-islem` sale_order + ödeme | Onay/canlıda order+payment veya approval; sahte başarı yok | ☐ | QA |
 | W3b | `/tahsilatlar/yeni` | Gerçek form; `Tahsilatı kaydet`; customer/order prefill | ☐ | QA |
 | W3c | Tahsilat başarı | Detay + kaynak sipariş linkleri | ☐ | QA |
-| W4 | `/onaylar` | List + detail safe | ☐ | QA |
+| W4 | `/onaylar` | Command desk: policy band, queue/detail/decision, Onayla/Reddet pending-only, no technical leakage | ☐ | QA |
+| W4a | `/siparisler` | Orders desk: payment badges, preview panel, tahsilat link; no onaya gönder | ☐ | QA |
 | W5 | `/whatsapp` | Health reflects real config | ☐ | QA |
 | W6 | `/cariler` | List + first row selection | ☐ | QA |
 | W7 | `/stok` | List density OK | ☐ | QA |
@@ -110,7 +111,7 @@
 
 | Viewport | Routes (minimum) | Pass | Owner |
 |----------|------------------|------|-------|
-| 1920×1080 | dashboard, hizli-islem, onaylar, whatsapp, cariler, stok, archive, raporlar | ☐ | QA |
+| 1920×1080 | dashboard, hizli-islem, onaylar, siparisler, whatsapp, cariler, stok, archive, raporlar | ☐ | QA |
 | 390×844 | Same set + mobile drawer | ☐ | QA |
 
 **Criteria:**

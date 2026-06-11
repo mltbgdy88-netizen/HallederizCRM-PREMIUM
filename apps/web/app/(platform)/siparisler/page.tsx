@@ -1,5 +1,5 @@
-import { OrdersPage as OrdersFeaturePage } from "../../../src/features/orders/components";
+import { OrdersDeskPage } from "../../../src/features/orders/components/OrdersDeskPage";
 
 export default function OrdersPage() {
-  return <OrdersFeaturePage />;
+  return <OrdersDeskPage />;
 }

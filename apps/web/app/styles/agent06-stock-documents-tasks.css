@@ -290,3 +290,42 @@
     grid-template-columns: 1fr 1fr;
   }
 }
+
+/* Dark mode overrides — factory / tasks / documents */
+html:root[data-theme="dark"] .hz-documents-preview-band,
+html:root[data-theme="dark"] .hz-factory-preview-band {
+  background: color-mix(in srgb, var(--hz-color-gold, #ffd166) 14%, var(--hz-surface));
+  border-color: color-mix(in srgb, var(--hz-color-gold, #ffd166) 30%, transparent);
+  color: var(--hz-color-muted);
+}
+
+html:root[data-theme="dark"] .hz-factory-table-row.is-selected,
+html:root[data-theme="dark"] .hz-documents-table-row.is-selected {
+  background: color-mix(in srgb, var(--hz-color-gold, #ffd166) 12%, var(--hz-surface));
+  box-shadow: inset 3px 0 0 var(--hz-color-gold, #ffd166);
+}
+
+html:root[data-theme="dark"] .hz-factory-table-row:hover,
+html:root[data-theme="dark"] .hz-documents-table-row:hover {
+  background: color-mix(in srgb, var(--hz-color-emerald, #2cff9a) 8%, var(--hz-surface));
+}
+
+html:root[data-theme="dark"] .hz-factory-table-head,
+html:root[data-theme="dark"] .hz-documents-table-head {
+  background: color-mix(in srgb, var(--hz-color-bg) 55%, var(--hz-surface));
+}
+
+html:root[data-theme="dark"] .hz-factory-action-btn,
+html:root[data-theme="dark"] .hz-documents-action-btn {
+  background: color-mix(in srgb, var(--hz-color-gold, #ffd166) 10%, var(--hz-surface));
+  border-color: color-mix(in srgb, var(--hz-color-gold, #ffd166) 40%, var(--hz-border));
+  color: var(--hz-color-text);
+}
+
+html:root[data-theme="dark"] .hz-factory-transmit-pill {
+  background: color-mix(in srgb, var(--hz-color-bg) 40%, var(--hz-surface));
+}
+
+html:root[data-theme="dark"] .hz-print-export-panel {
+  background: color-mix(in srgb, var(--hz-color-bg) 50%, var(--hz-surface));
+}

@@ -1,5 +1,5 @@
-﻿import { SettingsPage as SettingsFeaturePage } from "../../../src/features/settings/components";
+import { SettingsHubReferenceLayout } from "../../../src/features/settings/components/SettingsHubReferenceLayout";
 
 export default function SettingsRoutePage() {
-  return <SettingsFeaturePage />;
+  return <SettingsHubReferenceLayout />;
 }

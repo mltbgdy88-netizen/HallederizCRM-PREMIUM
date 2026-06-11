@@ -1,0 +1,29 @@
+/* Teklif yeni + detay route — warm canvas; existing hub/detail layout unchanged */
+
+.hz-teklifler-yeni-center,
+.hz-teklifler-offerid-center {
+  min-height: calc(100dvh - 72px);
+  padding: 12px;
+  box-sizing: border-box;
+  background:
+    radial-gradient(circle at 0% 0%, rgba(4, 120, 87, 0.08), transparent 24%),
+    radial-gradient(circle at 100% 0%, rgba(212, 175, 55, 0.10), transparent 26%),
+    linear-gradient(180deg, var(--hz-color-surface) 0%, var(--hz-color-bg) 100%);
+  color: var(--hz-color-text);
+}
+
+.hz-teklifler-yeni-center .hz-offers-create-hub,
+.hz-teklifler-offerid-center .hz-offers-detail-page {
+  max-width: 1604px;
+  margin: 0 auto;
+}
+
+/* ── Dark mode ─────────────────────────────────────────────────── */
+html:root[data-theme="dark"] .hz-teklifler-yeni-center,
+html:root[data-theme="dark"] .hz-teklifler-offerid-center {
+  background:
+    radial-gradient(circle at 0% 0%, rgba(44, 255, 154, 0.06), transparent 28%),
+    radial-gradient(circle at 100% 0%, rgba(255, 209, 102, 0.06), transparent 30%),
+    linear-gradient(180deg, rgba(8, 24, 19, 0.92) 0%, var(--hz-color-bg) 100%);
+  color: var(--hz-color-text);
+}

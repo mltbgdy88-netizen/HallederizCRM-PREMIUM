@@ -298,3 +298,32 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 }
+
+/* Dark mode overrides — settings / users / ERP */
+html:root[data-theme="dark"] .hz-users-preview-band,
+html:root[data-theme="dark"] .hz-roles-preview-band,
+html:root[data-theme="dark"] .hz-erp-preview-band,
+html:root[data-theme="dark"] .hz-settings-context-band {
+  background: color-mix(in srgb, var(--hz-color-gold, #ffd166) 10%, var(--hz-surface));
+  border-color: color-mix(in srgb, var(--hz-color-gold, #ffd166) 22%, transparent);
+}
+
+html:root[data-theme="dark"] .hz-users-row:hover {
+  background: color-mix(in srgb, var(--hz-color-emerald, #2cff9a) 8%, var(--hz-surface));
+}
+
+html:root[data-theme="dark"] .hz-users-row--selected {
+  background: color-mix(in srgb, var(--hz-color-emerald, #2cff9a) 8%, var(--hz-surface));
+  box-shadow: inset 3px 0 0 var(--hz-color-gold, #ffd166);
+}
+
+html:root[data-theme="dark"] .hz-roles-permission-note {
+  background: color-mix(in srgb, var(--hz-color-gold, #ffd166) 12%, var(--hz-surface));
+  border-color: color-mix(in srgb, var(--hz-color-gold, #ffd166) 28%, transparent);
+}
+
+html:root[data-theme="dark"] .hz-roles-matrix-card,
+html:root[data-theme="dark"] .hz-users-preview-card {
+  background: var(--hz-surface);
+  border-color: var(--hz-border);
+}

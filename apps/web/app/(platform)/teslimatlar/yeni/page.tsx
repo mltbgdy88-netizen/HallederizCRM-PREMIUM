@@ -1,5 +1,5 @@
-import { renderProductCatchAll } from "../../../../src/navigation/render-product-catch-all";
+import { DeliveryCreatePage } from "../../../../src/features/deliveries/components/DeliveryCreatePage";
 
-export default function TeslimatlarYeniPage() {
-  return renderProductCatchAll(["teslimatlar", "yeni"]);
+export default function TeslimatlarYeniPage({ searchParams }: { searchParams?: { order?: string } }) {
+  return <DeliveryCreatePage sourceOrderId={searchParams?.order ?? null} />;
 }

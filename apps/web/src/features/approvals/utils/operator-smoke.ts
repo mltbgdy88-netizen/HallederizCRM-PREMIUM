@@ -134,28 +134,28 @@ export function buildOperatorSmokeChecklist(ctx: OperatorSmokeContext): Operator
 
   const routeAvailable: OperatorSmokeStep = {
     id: "routeAvailable",
-    label: "Onay listesi route",
+    label: "Onay listesi rotası",
     status: !listReady ? "neutral" : listOk ? "ok" : "fail",
-    detail: !listReady ? "Liste yukleniyor..." : listOk ? "/platform/approvals erisilebilir." : ctx.listError?.message
+    detail: !listReady ? "Liste yükleniyor…" : listOk ? "/platform/approvals erişilebilir." : ctx.listError?.message
   };
 
   const sandboxAvailable: OperatorSmokeStep = {
     id: "sandboxAvailable",
-    label: "Sandbox seed (local/demo)",
+    label: "Test ortamı örnek veri (yerel/demo)",
     status: isProd ? "skipped" : ctx.sandboxAvailability?.sandboxSeedAvailable ? "ok" : ctx.sandboxAvailability ? "warning" : "neutral",
     detail: isProd
-      ? "Production derlemesinde sandbox araclari gosterilmez."
+      ? "Canlı ortam derlemesinde test ortamı araçları gösterilmez."
       : ctx.sandboxAvailability?.sandboxSeedAvailable
-        ? "Sandbox seed API hazir."
+        ? "Test ortamı örnek veri API hazır."
         : ctx.sandboxAvailability
-          ? "Sandbox kapali veya repository hazir degil."
-          : "Sandbox durumu henuz alinamadi."
+          ? "Test ortamı kapalı veya depo hazır değil."
+          : "Test ortamı durumu henüz alınamadı."
   };
 
   const pendingCount = ctx.items.filter((i) => i.status === "pending").length;
   const seedCreatedPendingApprovals: OperatorSmokeStep = {
     id: "seedCreatedPendingApprovals",
-    label: "Seed → bekleyen onay",
+    label: "Örnek veri → bekleyen onay",
     status: isProd
       ? "skipped"
       : ctx.lastSeedCounts === null
@@ -166,9 +166,9 @@ export function buildOperatorSmokeChecklist(ctx: OperatorSmokeContext): Operator
             ? "ok"
             : "warning",
     detail: isProd
-      ? "Production."
+      ? "Canlı ortam."
       : ctx.lastSeedCounts === null
-        ? "Henuz seed calistirilmadi veya sonuc yok."
+        ? "Henüz örnek veri çalıştırılmadı veya sonuç yok."
         : formatSandboxSeedOutcome(ctx.lastSeedCounts.created, ctx.lastSeedCounts.skipped).message
   };
 
@@ -176,7 +176,7 @@ export function buildOperatorSmokeChecklist(ctx: OperatorSmokeContext): Operator
     id: "listShowsPendingApproval",
     label: "Listede bekleyen",
     status: !listOk ? "neutral" : pendingCount > 0 ? "ok" : "warning",
-    detail: !listOk ? "Liste hatasi var." : pendingCount > 0 ? `${pendingCount} bekleyen kayit.` : "Bekleyen yok; filtre veya seed kontrol edin."
+    detail: !listOk ? "Liste hatası var." : pendingCount > 0 ? `${pendingCount} bekleyen kayıt.` : "Bekleyen yok; filtre veya örnek veriyi kontrol edin."
   };
 
   const detailLoads =
@@ -188,37 +188,37 @@ export function buildOperatorSmokeChecklist(ctx: OperatorSmokeContext): Operator
 
   const approvalDetailLoads: OperatorSmokeStep = {
     id: "approvalDetailLoads",
-    label: "Detay yukleme",
+    label: "Detay yükleme",
     status: !ctx.selectedId ? "neutral" : ctx.detailLoading ? "neutral" : ctx.detailError ? "fail" : detailLoads ? "ok" : "warning",
-    detail: ctx.detailError?.message ?? (detailLoads ? "Detay API tamam." : "Detay bekleniyor veya bos.")
+    detail: ctx.detailError?.message ?? (detailLoads ? "Detay API tamam." : "Detay bekleniyor veya boş.")
   };
 
   const approveMeta: OperatorSmokeStep = {
     id: "approveReturnsExecutionMetadata",
-    label: "Onay → execution / outbox sinyali",
+    label: "Onay → çalıştırma / iş kuyruğu sinyali",
     status: !ctx.lastApproveOk ? "neutral" : ctx.lastApproveHadBridgeSignal ? "ok" : "warning",
     detail: !ctx.lastApproveOk
-      ? "Bu oturumda henuz basarili onay cagrilmadi."
+      ? "Bu oturumda henüz başarılı onay çağrılmadı."
       : ctx.lastApproveHadBridgeSignal
-        ? "Son onay yanitinda execution/outbox veya idempotent duplicate sinyali alindi."
-        : "Son onay basarili ama execution/outbox alanlari bos; API surumunu kontrol edin."
+        ? "Son onay yanıtında çalıştırma/iş kuyruğu veya tekrar güvenli yinelenen sinyal alındı."
+        : "Son onay başarılı ama çalıştırma/iş kuyruğu alanları boş; API sürümünü kontrol edin."
   };
 
   const rejectRequiresReason: OperatorSmokeStep = {
     id: "rejectRequiresReason",
-    label: "Red → neden (UI dogrulama)",
+    label: "Red → neden (arayüz doğrulama)",
     status: "ok",
-    detail: "Reddetme bos nedenle gonderilmez; client tarafinda engellenir."
+    detail: "Reddetme boş nedenle gönderilmez; istemci tarafında engellenir."
   };
 
   const workerHealthAvailable: OperatorSmokeStep = {
     id: "workerHealthAvailable",
-    label: "Worker health",
+    label: "Çalışan servis sağlığı",
     status: ctx.workerHealth?.ok === true && ctx.workerHealth.health?.ok === true ? "ok" : ctx.workerHealth?.ok === false ? "warning" : "neutral",
     detail:
       ctx.workerHealth?.ok === true && ctx.workerHealth.health?.ok === true
-        ? "Worker health 200."
-        : ctx.workerHealth?.message || ctx.workerHealth?.error || "Worker health henuz alinamadi veya hata."
+        ? "Çalışan servis sağlığı yanıtı başarılı."
+        : ctx.workerHealth?.message || ctx.workerHealth?.error || "Çalışan servis sağlığı henüz alınamadı veya hata."
   };
 
   const noApiPath404: OperatorSmokeStep = {
@@ -234,28 +234,28 @@ export function buildOperatorSmokeChecklist(ctx: OperatorSmokeContext): Operator
 
   const providerWritesDisabled: OperatorSmokeStep = {
     id: "providerWritesDisabled",
-    label: "Provider writes kapali",
+    label: "Sağlayıcı yazımları kapalı",
     status: providerWrites === false ? "ok" : providerWrites === true ? "fail" : ctx.workerSafety || ctx.workerHealth ? "warning" : "neutral",
     detail:
       providerWrites === false
-        ? "worker safety: providerWritesEnabled=false"
+        ? "Çalışan güvenlik: sağlayıcı yazımları devre dışı."
         : providerWrites === true
-          ? "Uyari: providerWritesEnabled=true — beklenmeyen guvenlik sinyali."
-          : "worker/safety veya health yanitinda providerWritesEnabled alani yok."
+          ? "Uyarı: sağlayıcı yazımları etkin — beklenmeyen güvenlik sinyali."
+          : "Çalışan/güvenlik veya sağlık yanıtında sağlayıcı yazım alanı yok."
   };
 
   const realExec = readSafetyBoolean(ctx.workerSafety, "realExecutionEnabled") ?? readSafetyBoolean(ctx.workerHealth, "realExecutionEnabled");
 
   const realUserCreateDisabled: OperatorSmokeStep = {
     id: "realUserCreateDisabled",
-    label: "Gercek execution kapali (realExecution)",
+    label: "Gerçek çalıştırma kapalı",
     status: realExec === false ? "ok" : realExec === true ? "fail" : ctx.workerSafety || ctx.workerHealth ? "warning" : "neutral",
     detail:
       realExec === false
-        ? "realExecutionEnabled=false (kontrollu foundation)."
+        ? "Gerçek çalıştırma devre dışı (kontrollü temel mod)."
         : realExec === true
-          ? "Uyari: realExecutionEnabled=true — operator sandbox smoke icin kontrol edin."
-          : "realExecutionEnabled alani yanitta yok."
+          ? "Uyarı: gerçek çalıştırma etkin — operatör test ortamı doğrulaması için kontrol edin."
+          : "Gerçek çalıştırma alanı yanıtta yok."
   };
 
   return [

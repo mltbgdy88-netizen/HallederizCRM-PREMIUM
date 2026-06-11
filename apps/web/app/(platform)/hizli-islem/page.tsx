@@ -1,5 +1,5 @@
-import { QuickOperationPage } from "../../../src/features/quick-operations/components/QuickOperationPage";
+import { redirect } from "next/navigation";
 
-export default function HizliIslemPage() {
-  return <QuickOperationPage />;
+export default function QuickOperationRoutePage() {
+  redirect("/hizli-islem/satis-masasi");
 }

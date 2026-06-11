@@ -1,0 +1,305 @@
+/* Görevler Operasyon Masası — gorevler-operasyon-masasi-acik-mod (tskf-page--desk) */
+
+.platform-content:has(.tskf-page--desk) > .hz-tasks-ws-page {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.hz-tasks-ws-page:has(.tskf-page--desk) {
+  height: 100%;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.tskf-page--desk {
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.tskf-shell--desk {
+  grid-template-rows: auto auto auto minmax(0, 1fr);
+}
+
+.tskf-desk-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 12px;
+  flex-shrink: 0;
+}
+
+.tskf-desk-head__actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.tskf-desk-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  height: 34px;
+  padding: 0 12px;
+  border-radius: 10px;
+  font-size: 12px;
+  font-weight: 700;
+  text-decoration: none;
+  border: 1px solid var(--tskf-border);
+  background: var(--tskf-surface);
+  color: var(--tskf-text);
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.tskf-desk-btn:hover {
+  border-color: color-mix(in srgb, var(--tskf-green) 30%, var(--tskf-border));
+  background: var(--tskf-green-soft);
+}
+
+.tskf-desk-btn--primary {
+  border-color: color-mix(in srgb, var(--tskf-green) 40%, var(--tskf-border));
+  background: var(--tskf-green);
+  color: #fff;
+}
+
+.tskf-desk-body {
+  min-height: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 332px;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.tskf-desk-main {
+  min-height: 0;
+  display: grid;
+  grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+  gap: 8px;
+  overflow: hidden;
+  border-radius: var(--tskf-radius);
+  border: 1px solid var(--tskf-border);
+  background: var(--tskf-surface);
+  padding: 10px 12px;
+}
+
+.tskf-desk-side {
+  min-height: 0;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+
+.tskf-desk-filters {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  flex-shrink: 0;
+}
+
+.tskf-desk-filter-row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.tskf-desk-chip {
+  height: 28px;
+  padding: 0 10px;
+  border-radius: 999px;
+  border: 1px solid var(--tskf-border);
+  background: var(--tskf-surface);
+  color: var(--tskf-muted);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tskf-desk-chip--active {
+  border-color: color-mix(in srgb, var(--tskf-green) 35%, var(--tskf-border));
+  background: var(--tskf-green-soft);
+  color: var(--tskf-green-strong);
+}
+
+.tskf-desk-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 10px;
+  font-weight: 600;
+  color: var(--tskf-muted);
+  margin-left: auto;
+}
+
+.tskf-desk-search {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1 1 160px;
+  min-width: 140px;
+}
+
+.tskf-desk-search span,
+.tskf-desk-field span {
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--tskf-muted);
+}
+
+.tskf-desk-search input,
+.tskf-desk-field select {
+  min-height: 32px;
+  padding: 5px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--tskf-border);
+  background: var(--tskf-surface);
+  color: var(--tskf-text);
+  font-size: 11px;
+  font-family: inherit;
+}
+
+.tskf-desk-fields {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  align-items: end;
+}
+
+.tskf-desk-field {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 110px;
+}
+
+.tskf-desk-reset {
+  height: 32px;
+  width: 32px;
+  padding: 0;
+  border-radius: 8px;
+  border: 1px solid var(--tskf-border);
+  background: var(--tskf-surface);
+  color: var(--tskf-muted);
+  cursor: pointer;
+  flex-shrink: 0;
+}
+
+.tskf-desk-reset:hover {
+  background: var(--tskf-green-soft);
+  color: var(--tskf-green-strong);
+}
+
+.tskf-desk-filter-hint {
+  margin: 0;
+  font-size: 10px;
+  color: var(--tskf-muted);
+}
+
+.tskf-desk-summary {
+  margin: 0;
+  font-size: 10px;
+  color: var(--tskf-muted);
+  flex-shrink: 0;
+}
+
+.tskf-desk-list-wrap {
+  min-height: 0;
+  overflow: auto;
+  border-radius: 10px;
+  border: 1px solid var(--tskf-border-soft);
+}
+
+.tskf-desk-list-wrap .tskf-table th {
+  height: 26px;
+  padding: 4px 8px;
+}
+
+.tskf-desk-list-wrap .tskf-table td {
+  height: 44px;
+  padding: 4px 8px;
+}
+
+.tskf-desk-list-wrap .tskf-table tbody tr {
+  cursor: pointer;
+}
+
+.tskf-desk-list-wrap .tskf-table tbody tr:hover {
+  background: color-mix(in srgb, var(--tskf-green-soft) 45%, #fff);
+}
+
+.tskf-desk-list-wrap .tskf-table tbody tr.tskf-row--selected {
+  background: var(--tskf-green-soft);
+  box-shadow: inset 3px 0 0 var(--tskf-green);
+}
+
+.tskf-desk-act-btn {
+  height: 28px;
+  padding: 0 8px;
+  border-radius: 8px;
+  border: 1px solid var(--tskf-border);
+  background: var(--tskf-surface);
+  color: var(--tskf-green-strong);
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tskf-desk-act-btn:hover {
+  background: var(--tskf-green-soft);
+}
+
+.tskf-desk-pagination {
+  flex-shrink: 0;
+  padding-top: 4px;
+}
+
+.tskf-page--desk .hz-tasks-ws-detail.hz-ui-detail-panel {
+  height: 100%;
+  min-height: 0;
+  border-radius: var(--tskf-radius);
+  border: 1px solid var(--tskf-border);
+  background: var(--tskf-surface);
+  box-shadow: none;
+}
+
+.tskf-page--desk .hz-tasks-ws-detail .hz-ui-detail-panel-body {
+  min-height: 0;
+  overflow: auto;
+}
+
+.tskf-page--desk .hz-tasks-ws-detail-head .hz-tasks-ws-eyebrow,
+.tskf-page--desk .hz-tasks-ws-detail-title {
+  color: var(--tskf-text);
+}
+
+.tskf-page--desk .hz-tasks-ws-card {
+  border-color: var(--tskf-border-soft);
+  background: var(--tskf-surface);
+}
+
+.tskf-page--desk .hz-tasks-ws-muted {
+  color: var(--tskf-muted);
+}
+
+.tskf-badge--warn {
+  background: var(--tskf-warning-soft);
+  color: var(--tskf-warning);
+}
+
+.tskf-badge--danger {
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+@media (max-width: 1200px) {
+  .tskf-desk-body {
+    grid-template-columns: minmax(0, 1fr);
+  }
+}

@@ -34,6 +34,7 @@ export function Header({
   layout = "default",
   variant = "default"
 }: HeaderProps) {
+  const renderActionsInline = variant === "command" || suppressPageMeta;
   const rootClass = [
     "hz-header-root",
     layout === "dashboard" ? "hz-header-root--dashboard" : "",
@@ -65,16 +66,23 @@ export function Header({
 
       <div className="hz-header-trailing">
         {toolbarSlot ? <div className="hz-header-toolbar">{toolbarSlot}</div> : null}
-        <details className="hz-header-actions-drawer">
-          <summary className="hz-header-actions-drawer-trigger" aria-label="Aksiyonlar">
-            <span className="hz-sr-only">Aksiyonlar</span>
-            <span aria-hidden>⋯</span>
-          </summary>
+        {renderActionsInline ? (
           <div className="hz-header-actions">
             {notificationSlot}
             {themeSlot != null ? themeSlot : null}
           </div>
-        </details>
+        ) : (
+          <details className="hz-header-actions-drawer">
+            <summary className="hz-header-actions-drawer-trigger" aria-label="Aksiyonlar">
+              <span className="hz-sr-only">Aksiyonlar</span>
+              <span aria-hidden>⋯</span>
+            </summary>
+            <div className="hz-header-actions">
+              {notificationSlot}
+              {themeSlot != null ? themeSlot : null}
+            </div>
+          </details>
+        )}
         {userSlot}
       </div>
     </div>

@@ -250,14 +250,24 @@ export function ArchivePage() {
     [pushToast, router]
   );
 
+  const categoryChips: { key: ArchiveCategoryFilter; label: string }[] = [
+    { key: "all", label: "Tüm Kayıtlar" },
+    { key: "siparis", label: "Sipariş" },
+    { key: "tahsilat", label: "Tahsilat" },
+    { key: "onay", label: "Onay" },
+    { key: "iade", label: "İade" },
+    { key: "fatura", label: "Fatura" },
+    { key: "belge", label: "Belge" }
+  ];
+
   return (
-    <div className="hz-archive-page">
+    <div className="hz-archive-page hz-archive-page--desk">
       <div className="hz-archive-layout">
         <div className="hz-archive-main">
           <header className="hz-archive-topbar">
             <div className="hz-archive-topbar-text">
-              <h1 className="hz-archive-topbar-title">Arşiv Merkezi</h1>
-              <p className="hz-archive-topbar-sub">Belgeler, işlem kayıtları ve onay geçmişini tek ekranda takip edin.</p>
+              <h1 className="hz-archive-topbar-title">Arşiv Operasyon Merkezi</h1>
+              <p className="hz-archive-topbar-sub">Geçmiş işlemler, belgeler ve denetim kayıtlarını tek ekranda yönetin.</p>
             </div>
             <div className="hz-archive-topbar-actions">
               <button
@@ -355,6 +365,20 @@ export function ArchivePage() {
               </span>
             </div>
           </section>
+
+          <nav className="hz-archive-category-chips" aria-label="Arşiv kategorileri">
+            {categoryChips.map((chip) => (
+              <button
+                key={chip.key}
+                type="button"
+                className={`hz-archive-category-chip${category === chip.key ? " is-active" : ""}`}
+                aria-pressed={category === chip.key}
+                onClick={() => setCategory(chip.key)}
+              >
+                {chip.label}
+              </button>
+            ))}
+          </nav>
 
           <div className="hz-archive-filter-bar">
             <div className="hz-archive-filter-row hz-archive-filter-row--single">
@@ -604,11 +628,11 @@ export function ArchivePage() {
           </div>
         </div>
 
-        <aside className="hz-archive-side" aria-label="Arşiv Radarı">
+        <aside className="hz-archive-side" aria-label="Arşiv bağlamı">
           <div className="hz-archive-side-inner">
             <header className="hz-archive-side-head">
-              <h2 className="hz-archive-side-title">Arşiv Radarı</h2>
-              <p className="hz-archive-side-sub">Seçili kaydın belge, denetim ve işlem bağlamı.</p>
+              <h2 className="hz-archive-side-title">Arşiv Bağlamı</h2>
+              <p className="hz-archive-side-sub">Seçili kaydın belge, denetim ve işlem özeti.</p>
             </header>
             {!selected ? (
               <div className="hz-archive-empty hz-archive-empty--side" role="status">
@@ -652,30 +676,32 @@ export function ArchivePage() {
 
                 <article className="hz-archive-side-card">
                   <h3 className="hz-archive-side-card-title">Denetim İzi</h3>
-                  <dl className="hz-archive-dl">
-                    <div>
-                      <dt>Oluşturan</dt>
-                      <dd>{selected.auditCreatedBy}</dd>
-                    </div>
-                    <div>
-                      <dt>Oluşturma</dt>
-                      <dd>
-                        {formatArchiveDate(selected.createdAt)} {formatArchiveTime(selected.createdAt)}
-                      </dd>
-                    </div>
-                    <div>
-                      <dt>Son işlem</dt>
-                      <dd>{selected.auditLastAction}</dd>
-                    </div>
-                    <div>
-                      <dt>Onay / red</dt>
-                      <dd>{selected.auditApprovalInfo}</dd>
-                    </div>
-                    <div>
-                      <dt>IP / cihaz</dt>
-                      <dd>{selected.auditIpDevice ?? "—"}</dd>
-                    </div>
-                  </dl>
+                  <ol className="hz-archive-audit-timeline">
+                    <li>
+                      <span className="hz-archive-audit-dot hz-archive-audit-dot--ok" aria-hidden />
+                      <div>
+                        <strong>Oluşturuldu</strong>
+                        <p>
+                          {selected.auditCreatedBy} · {formatArchiveDate(selected.createdAt)}{" "}
+                          {formatArchiveTime(selected.createdAt)}
+                        </p>
+                      </div>
+                    </li>
+                    <li>
+                      <span className="hz-archive-audit-dot" aria-hidden />
+                      <div>
+                        <strong>Son işlem</strong>
+                        <p>{selected.auditLastAction}</p>
+                      </div>
+                    </li>
+                    <li>
+                      <span className="hz-archive-audit-dot hz-archive-audit-dot--warn" aria-hidden />
+                      <div>
+                        <strong>Onay / red</strong>
+                        <p>{selected.auditApprovalInfo}</p>
+                      </div>
+                    </li>
+                  </ol>
                 </article>
 
                 <article className="hz-archive-side-card">
@@ -706,13 +732,9 @@ export function ArchivePage() {
 
                 <article className="hz-archive-side-card">
                   <h3 className="hz-archive-side-card-title">Hızlı Aksiyonlar</h3>
-                  <div className="hz-archive-side-actions">
-                    <button
-                      type="button"
-                      className="hz-archive-side-btn hz-archive-side-btn--primary"
-                      onClick={() => pushToast("Arşiv detay görünümü henüz canlı kullanıma bağlı değil.")}
-                    >
-                      Detay aç
+                  <div className="hz-archive-side-actions hz-archive-side-actions--grid">
+                    <button type="button" className="hz-archive-side-btn" onClick={() => pushToast("Belge önizleme demo modunda.")}>
+                      Belgeyi Görüntüle
                     </button>
                     <button
                       type="button"
@@ -720,19 +742,10 @@ export function ArchivePage() {
                       disabled={!!actionLocks.sideDl}
                       onClick={() => notLiveAction("sideDl", "Belge indirme henüz bağlı değil.")}
                     >
-                      <IconDownload size={14} />
-                      Belge indir
+                      Belgeyi İndir
                     </button>
-                    <button type="button" className="hz-archive-side-btn" onClick={() => navigateSafe(selected.relatedLinks[0]?.href ?? "/archive")}>
-                      İlgili kayda git
-                    </button>
-                    <button
-                      type="button"
-                      className="hz-archive-side-btn"
-                      disabled={!!actionLocks.sideAudit}
-                      onClick={() => lockAction("sideAudit", "Demo: denetim raporu oluşturuluyor.")}
-                    >
-                      Denetim raporu
+                    <button type="button" className="hz-archive-side-btn" onClick={() => pushToast("Bağlantı panoya kopyalandı (demo).")}>
+                      Bağlantı Kopyala
                     </button>
                     <button
                       type="button"
@@ -740,10 +753,10 @@ export function ArchivePage() {
                       disabled={!!actionLocks.sideNote}
                       onClick={() => notLiveAction("sideNote", "Arşiv notu kaydı henüz bağlı değil.")}
                     >
-                      <IconTag size={14} />
-                      Arşiv notu ekle
+                      Not Ekle
                     </button>
                   </div>
+                  <p className="hz-archive-retention-note">Bu kayıt 7 yıl saklama politikasına tabidir.</p>
                 </article>
 
                 <article className="hz-archive-side-card hz-archive-risk-note">

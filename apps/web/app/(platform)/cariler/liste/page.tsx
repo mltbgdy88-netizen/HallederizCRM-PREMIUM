@@ -1,5 +1,5 @@
-import { redirect } from "next/navigation";
+import { CustomersReferenceLayout } from "../../../../src/features/customers/components/CustomersReferenceLayout";
 
-export default function CarilerListeAliasPage() {
-  redirect("/cariler");
+export default function CarilerListePage() {
+  return <CustomersReferenceLayout />;
 }
