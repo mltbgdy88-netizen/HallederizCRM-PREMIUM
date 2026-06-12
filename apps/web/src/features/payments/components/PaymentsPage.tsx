@@ -11,7 +11,9 @@ import { PaymentFilterBar } from "./PaymentFilterBar";
 import { PaymentPreviewPanel } from "./PaymentPreviewPanel";
 import { PaymentTable } from "./PaymentTable";
 
-const PAGE_SIZE = 10;
+import { ENTERPRISE_DESK_PAGE_SIZE } from "../../../lib/enterprise-desk-constants";
+
+const PAGE_SIZE = ENTERPRISE_DESK_PAGE_SIZE;
 
 function buildKpiStats(payments: import("@hallederiz/types").PaymentReceipt[]) {
   const today = new Date("2026-05-26T00:00:00.000Z");

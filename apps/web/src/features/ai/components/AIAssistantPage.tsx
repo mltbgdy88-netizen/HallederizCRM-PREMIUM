@@ -305,15 +305,18 @@ export function AIAssistantPage() {
         <div className="aif-main">
           <header className="aif-card aif-topbar">
             <div>
-              <p className="aif-topbar__eyebrow">Yapay zekâ operasyonu</p>
-              <h1 className="aif-topbar__title">Yapay Zekâ Operasyon Merkezi</h1>
-              <p className="aif-topbar__sub">Yerel öncelikli öneri, onay kuyruğu ve model durumu tek masada.</p>
+              <p className="aif-topbar__eyebrow">Yapay zekâ yönetimi</p>
+              <h1 className="aif-topbar__title">Yapay Zekâ Yönetim Merkezi</h1>
+              <p className="aif-topbar__sub aif-topbar__sub--mgmt">
+                Operasyon önerileri, onay kuyruğu ve model durumu. Günlük asistan etkileşimi Gösterge Paneli üzerinden yürütülür.
+              </p>
             </div>
             <div className="aif-topbar__actions">
               <button
-                className="aif-btn aif-btn--primary"
+                className="aif-btn aif-btn--primary aif-btn--pending"
                 type="button"
-                onClick={() => pushToast("İçgörü üretimi sonraki fazda API ile bağlanacaktır.")}
+                disabled
+                title="İçgörü üretimi API bağlandığında etkinleşir"
               >
                 İçgörü üret
               </button>

@@ -54,6 +54,9 @@ export function ProductPageShell({
             <strong>Backend gereksinimi:</strong> {requiredBackend}
           </p>
         ) : null}
+        <p className="hz-product-shell-readiness">
+          Bu ekran modül hazırlık görünümüdür. İlgili operasyon masası veya ana modüle geçerek canlı iş akışına devam edin.
+        </p>
         {nextActions?.length ? (
           <ul className="hz-product-shell-actions">
             {nextActions.map((a) => (

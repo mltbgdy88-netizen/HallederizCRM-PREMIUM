@@ -7,6 +7,7 @@ import { useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { LucideIcon } from "../../../components/icons/lucide-icons";
 import { dataSourceConfig } from "../../../lib/data-source";
+import { ENTERPRISE_DESK_PAGE_SIZE } from "../../../lib/enterprise-desk-constants";
 import { MSG_DATA_WHEN_RECONNECTED, MSG_REFRESH_RETRY } from "../../../lib/user-facing-data-error";
 import { useToast } from "../../../providers/toast-provider";
 import { dateLabel } from "../utils";
@@ -29,50 +30,71 @@ import {
 import { getDocuments } from "../queries/get-documents";
 import { getDocumentDeliveryStatusLabel, getDocumentTypeLabel } from "../queries/document-mock-data";
 
-export function DocumentFilterBar() {
+export function DocumentFilterBar({
+  docType,
+  entityType,
+  customerQuery,
+  deliveryStatus,
+  period,
+  onChange
+}: {
+  docType: string;
+  entityType: string;
+  customerQuery: string;
+  deliveryStatus: string;
+  period: string;
+  onChange: (patch: {
+    docType?: string;
+    entityType?: string;
+    customerQuery?: string;
+    deliveryStatus?: string;
+    period?: string;
+  }) => void;
+}) {
   return (
     <div className="docf-desk-filters" aria-label="Belge filtreleri">
       <label className="docf-desk-filter">
         Belge tipi
-        <select defaultValue="">
+        <select value={docType} onChange={(event) => onChange({ docType: event.target.value })}>
           <option value="">Tüm tipler</option>
-          <option>Teklif PDF</option>
-          <option>Teslim fişi</option>
-          <option>İade notu</option>
+          <option value="offer_pdf">Teklif PDF</option>
+          <option value="delivery_slip">Teslim fişi</option>
+          <option value="return_note">İade notu</option>
         </select>
       </label>
       <label className="docf-desk-filter">
         Kayıt türü
-        <select defaultValue="">
+        <select value={entityType} onChange={(event) => onChange({ entityType: event.target.value })}>
           <option value="">Tüm kayıtlar</option>
-          <option>Sipariş</option>
-          <option>Teslimat</option>
-          <option>Fatura</option>
-          <option>İade</option>
+          <option value="order">Sipariş</option>
+          <option value="delivery">Teslimat</option>
+          <option value="invoice">Fatura</option>
+          <option value="return">İade</option>
         </select>
       </label>
       <label className="docf-desk-filter">
         Müşteri
-        <input placeholder="Cari adı" />
+        <input placeholder="Cari adı" value={customerQuery} onChange={(event) => onChange({ customerQuery: event.target.value })} />
       </label>
       <label className="docf-desk-filter">
         İletim durumu
-        <select defaultValue="">
+        <select value={deliveryStatus} onChange={(event) => onChange({ deliveryStatus: event.target.value })}>
           <option value="">Tüm durumlar</option>
-          <option>Kuyrukta</option>
-          <option>İletim kaydı</option>
-          <option>Başarısız</option>
+          <option value="queued">Kuyrukta</option>
+          <option value="sent">İletim kaydı</option>
+          <option value="failed">Başarısız</option>
         </select>
       </label>
       <label className="docf-desk-filter">
         Tarih
-        <select defaultValue="month">
-          <option>Bugün</option>
-          <option>Bu hafta</option>
-          <option>Bu ay</option>
+        <select value={period} onChange={(event) => onChange({ period: event.target.value })}>
+          <option value="today">Bugün</option>
+          <option value="week">Bu hafta</option>
+          <option value="month">Bu ay</option>
+          <option value="all">Tümü</option>
         </select>
       </label>
-      <p className="docf-desk-filter-hint">Filtreler önizleme amaçlıdır; canlı gönderim ve arşiv bağlantısı henüz tamamlanmadı.</p>
+      <p className="docf-desk-filter-hint">Filtreler liste görünümünü daraltır; canlı gönderim onay zincirinden geçer.</p>
     </div>
   );
 }
@@ -343,7 +365,14 @@ export function DocumentsPage() {
   const [loading, setLoading] = useState(true);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const pageSize = 10;
+  const pageSize = ENTERPRISE_DESK_PAGE_SIZE;
+  const [deskFilters, setDeskFilters] = useState({
+    docType: "",
+    entityType: "",
+    customerQuery: "",
+    deliveryStatus: "",
+    period: "month"
+  });
 
   useEffect(() => {
     let mounted = true;
@@ -400,12 +429,30 @@ export function DocumentsPage() {
     if (typeParam) {
       list = list.filter((document) => document.type === typeParam);
     }
+    if (deskFilters.docType) {
+      list = list.filter((document) => document.type === deskFilters.docType);
+    }
+    if (deskFilters.entityType) {
+      list = list.filter((document) => document.entityType === deskFilters.entityType);
+    }
+    if (deskFilters.customerQuery.trim()) {
+      const q = deskFilters.customerQuery.trim().toLowerCase();
+      list = list.filter((document) => {
+        const name = customers.find((c) => c.id === document.customerId)?.name?.toLowerCase() ?? "";
+        return name.includes(q);
+      });
+    }
+    if (deskFilters.deliveryStatus) {
+      list = list.filter((document) =>
+        document.deliveries.some((delivery) => delivery.status === deskFilters.deliveryStatus)
+      );
+    }
     return list;
-  }, [documents, customerParam, typeParam]);
+  }, [documents, customerParam, typeParam, deskFilters, customers]);
 
   useEffect(() => {
     setPage(1);
-  }, [customerParam, typeParam, documentParam]);
+  }, [customerParam, typeParam, documentParam, deskFilters]);
 
   useEffect(() => {
     if (!filteredDocuments.length) {
@@ -507,7 +554,14 @@ export function DocumentsPage() {
 
         <div className="docf-desk-body">
           <section className="docf-desk-main" aria-label="Belge listesi">
-            <DocumentFilterBar />
+            <DocumentFilterBar
+              docType={deskFilters.docType}
+              entityType={deskFilters.entityType}
+              customerQuery={deskFilters.customerQuery}
+              deliveryStatus={deskFilters.deliveryStatus}
+              period={deskFilters.period}
+              onChange={(patch) => setDeskFilters((prev) => ({ ...prev, ...patch }))}
+            />
             {loading ? (
               <div className="docf-desk-state" role="status">
                 <LoadingState title="Belgeler yükleniyor" message="Kayıt bağlantıları ve iletim durumları hazırlanıyor." />

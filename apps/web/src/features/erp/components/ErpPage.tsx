@@ -299,38 +299,41 @@ export function ErpPage() {
   return (
     <div className="erpf-page">
       <p className="erpf-demo-band" role="status">
-        Entegrasyon operasyon masası: senkron ve bağlantı mutationları sonraki fazda bağlanacaktır.
+        ERP entegrasyon hazırlığı: bağlantı izleme aktif; yazım işlemleri onay ve denetim zincirinden geçer.
       </p>
 
       <div className="erpf-layout">
         <div className="erpf-main">
           <header className="erpf-card erpf-topbar">
             <div>
-              <p className="erpf-topbar__eyebrow">ERP entegrasyonu</p>
-              <h1 className="erpf-topbar__title">Entegrasyon Operasyon Masası</h1>
+              <p className="erpf-topbar__eyebrow">ERP entegrasyon hazırlığı</p>
+              <h1 className="erpf-topbar__title">ERP Entegrasyon Merkezi</h1>
               <p className="erpf-topbar__sub">
-                Bağlantı, senkron ve eşleme durumu mevcut entegrasyon verisine göre gösterilir.
+                Bağlantı sağlığı, senkron geçmişi ve eşleme durumu mevcut entegrasyon verisine göre gösterilir.
               </p>
             </div>
             <div className="erpf-topbar__actions">
               <button
-                className="erpf-btn erpf-btn--primary"
+                className="erpf-btn erpf-btn--primary erpf-btn--pending"
                 type="button"
-                onClick={() => pushToast("Yeni bağlantı tanımı sonraki fazda API ile yapılacaktır.")}
+                disabled
+                title="Yeni bağlantı tanımı entegrasyon API bağlandığında etkinleşir"
               >
                 Yeni bağlantı
               </button>
               <button
-                className="erpf-btn erpf-btn--ghost"
+                className="erpf-btn erpf-btn--ghost erpf-btn--pending"
                 type="button"
-                onClick={() => pushToast("Senkron başlatma onay zinciri bağlandığında aktif olacaktır.")}
+                disabled
+                title="Senkron başlatma onay zinciri bağlandığında etkinleşir"
               >
                 Senkron başlat
               </button>
               <button
-                className="erpf-btn erpf-btn--ghost"
+                className="erpf-btn erpf-btn--ghost erpf-btn--pending"
                 type="button"
-                onClick={() => pushToast("Excel şablonu indirme sonraki fazda bağlanacaktır.")}
+                disabled
+                title="Excel şablonu indirme entegrasyon modülü ile açılır"
               >
                 Excel şablonu
               </button>
@@ -356,48 +359,42 @@ export function ErpPage() {
             </article>
           </div>
 
-          <div className="erpf-card erpf-filter">
-            <label className="erpf-field">
-              <span>Ara</span>
-              <input placeholder="Bağlantı, modül veya kayıt no" readOnly aria-readonly="true" />
-            </label>
-            <label className="erpf-field">
-              <span>Tür</span>
-              <select defaultValue="" disabled aria-disabled="true">
-                <option value="">Tüm türler</option>
-                <option value="api">API</option>
-                <option value="excel">Excel</option>
-              </select>
-            </label>
-            <label className="erpf-field">
-              <span>Durum</span>
-              <select defaultValue="" disabled aria-disabled="true">
-                <option value="">Tüm durumlar</option>
-                <option value="healthy">Sağlıklı</option>
-                <option value="warning">Uyarı</option>
-                <option value="error">Hata</option>
-              </select>
-            </label>
-            <label className="erpf-field">
-              <span>Yön</span>
-              <select defaultValue="" disabled aria-disabled="true">
-                <option value="">Tüm yönler</option>
-                <option value="import">İçe aktarım</option>
-                <option value="export">Dışa aktarım</option>
-              </select>
-            </label>
-            <div className="erpf-filter__actions">
-              <button
-                className="erpf-btn erpf-btn--ghost"
-                type="button"
-                title="Filtreleri sıfırla"
-                aria-label="Filtreleri sıfırla"
-                onClick={() => pushToast("Filtreler canlı API sorgusuna bağlandığında aktif olacaktır.")}
-              >
-                Sıfırla
-              </button>
-            </div>
-          </div>
+          <section className="erpf-card erpf-readiness" aria-label="Entegrasyon hazırlık kontrol listesi">
+            <h2 className="erpf-readiness__title">Hazırlık kontrol listesi</h2>
+            <p className="erpf-readiness__note">
+              Aşağıdaki adımlar tamamlandığında ERP yazım ve senkron işlemleri onay zinciri üzerinden açılır.
+            </p>
+            <ul className="erpf-readiness__list">
+              <li className="erpf-readiness__item">
+                <span className="erpf-readiness__badge">Aktif</span>
+                <div>
+                  <strong>Bağlantı izleme</strong>
+                  Mevcut bağlantılar ve sağlık durumu listeleniyor.
+                </div>
+              </li>
+              <li className="erpf-readiness__item">
+                <span className="erpf-readiness__badge">Aktif</span>
+                <div>
+                  <strong>Senkron geçmişi</strong>
+                  Log ve hata kuyruğu salt okunur görüntüleniyor.
+                </div>
+              </li>
+              <li className="erpf-readiness__item">
+                <span className="erpf-readiness__badge erpf-readiness__badge--pending">Bekliyor</span>
+                <div>
+                  <strong>Canlı filtre ve arama</strong>
+                  API sorgusu bağlandığında etkinleşir.
+                </div>
+              </li>
+              <li className="erpf-readiness__item">
+                <span className="erpf-readiness__badge erpf-readiness__badge--pending">Bekliyor</span>
+                <div>
+                  <strong>Yazım mutasyonları</strong>
+                  Onay, denetim ve politika zinciri gerektirir.
+                </div>
+              </li>
+            </ul>
+          </section>
 
           <div className="erpf-body">
             <div className="erpf-scroll">

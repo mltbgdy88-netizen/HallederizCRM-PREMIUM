@@ -15,6 +15,7 @@ import { useEffect, useMemo, useState } from "react";
 import { LucideIcon } from "../../../components/icons/lucide-icons";
 
 import { getOperationsEngineData } from "../../dashboard/queries";
+import { ENTERPRISE_DESK_PAGE_SIZE } from "../../../lib/enterprise-desk-constants";
 
 import { OperatorWorkspaceContextPanel } from "./OperatorWorkspaceContextPanel";
 
@@ -520,7 +521,7 @@ export function TasksPage({ intent = "all" }: { intent?: TasksPageIntent }) {
 
   const [filters, setFilters] = useState<TaskFilters>({ ...defaultFilters, ...INTENT_DEFAULT_FILTERS[intent] });
 
-  const pageSize = 10;
+  const pageSize = ENTERPRISE_DESK_PAGE_SIZE;
 
 
 

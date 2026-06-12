@@ -1,5 +1,5 @@
-import { HomeReferenceLayout } from "../../src/features/ui-inventory/components/HomeReferenceLayout";
+import { redirect } from "next/navigation";
 
 export default function PlatformRootPage() {
-  return <HomeReferenceLayout />;
+  redirect("/dashboard");
 }

@@ -50,7 +50,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
   const dashboardLeading = (
     <div className="hz-header-cc-leading">
       <h2 className="hz-header-cc-title">Ana Sayfa</h2>
-      <p className="hz-header-cc-sub">Hoş geldiniz, {displayFirstName} 👋</p>
+      <p className="hz-header-cc-sub">Hoş geldiniz, {displayFirstName}</p>
     </div>
   );
 
@@ -79,6 +79,7 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
             isDashboard ? dashboardLeading : isApprovalsDesk ? <ApprovalsShellLeading /> : undefined
           }
           searchPlaceholder={headerOptions.searchPlaceholder}
+          searchMode="passive"
           toolbarSlot={isDashboard ? <DashboardHeaderCardsButton /> : null}
           notificationSlot={
             <>

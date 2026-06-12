@@ -7,6 +7,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { LucideIcon } from "../../../components/icons/lucide-icons";
 import { dataSourceConfig } from "../../../lib/data-source";
+import { ENTERPRISE_DESK_PAGE_SIZE } from "../../../lib/enterprise-desk-constants";
 import { useToast } from "../../../providers/toast-provider";
 import { CommercialOperasyonDeskIntro } from "../../ui-inventory/components/CommercialOperasyonDeskIntro";
 import { dateLabel } from "../utils";
@@ -136,7 +137,7 @@ export function DeliveriesPage() {
   const [loadError, setLoadError] = useState(false);
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const pageSize = 12;
+  const pageSize = ENTERPRISE_DESK_PAGE_SIZE;
 
   useEffect(() => {
     setLoadError(false);
