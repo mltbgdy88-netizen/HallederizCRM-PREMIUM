@@ -56,6 +56,7 @@ export function PaymentCreatePage({
   const router = useRouter();
   const { pushToast } = useToast();
   const initialSyncRef = useRef(false);
+  const paymentIdempotencyKeyRef = useRef(`pay_create_${crypto.randomUUID()}`);
   const [customers, setCustomers] = useState<Array<{ id: string; name: string }>>([]);
   const [orders, setOrders] = useState<DeskOrderRow[]>([]);
   const [loading, setLoading] = useState(true);
@@ -199,16 +200,19 @@ export function PaymentCreatePage({
         return;
       }
 
-      const response = await sdk.payments.create({
-        customerId,
-        amount,
-        currency: "TRY",
-        method,
-        status: "draft",
-        description: note.trim() || "Tahsilat girişi",
-        referenceNo: referenceNo.trim() || undefined,
-        receivedAt: `${receivedAt}T12:00:00.000Z`
-      });
+      const response = await sdk.payments.create(
+        {
+          customerId,
+          amount,
+          currency: "TRY",
+          method,
+          status: "draft",
+          description: note.trim() || "Tahsilat girişi",
+          referenceNo: referenceNo.trim() || undefined,
+          receivedAt: `${receivedAt}T12:00:00.000Z`
+        },
+        { idempotencyKey: paymentIdempotencyKeyRef.current }
+      );
       setSavedPaymentId(response.item.id);
       pushToast("Tahsilat kaydı hazırlandı.");
     } catch {

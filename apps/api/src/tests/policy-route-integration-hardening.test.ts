@@ -72,7 +72,7 @@ test("missing permission still denies before policy execution", async () => {
     const response = await server.inject({
       method: "POST",
       url: "/payments",
-      headers: authHeaders(login.accessToken),
+      headers: { ...authHeaders(login.accessToken), "idempotency-key": "idem_payment_permission_denied" },
       payload: { amount: 100, method: "cash" }
     });
     assert.equal(response.statusCode, 403);
@@ -161,7 +161,7 @@ test("document send and commercial critical actions are approval-first", async (
     const payment = await server.inject({
       method: "POST",
       url: "/payments",
-      headers: authHeaders(login.accessToken),
+      headers: { ...authHeaders(login.accessToken), "idempotency-key": "idem_payment_policy_approval" },
       payload: { customerId: "customer_1", amount: 1200, method: "transfer" }
     });
     const sendDoc = await server.inject({
