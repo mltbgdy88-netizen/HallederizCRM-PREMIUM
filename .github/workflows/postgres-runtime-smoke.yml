@@ -1,0 +1,84 @@
+name: Postgres Runtime Smoke
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+  workflow_dispatch:
+
+jobs:
+  postgres-runtime-smoke:
+    name: Postgres migration and runtime smoke
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    services:
+      postgres:
+        image: postgres:16
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+          POSTGRES_DB: hallederiz_ci
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 10
+
+    env:
+      PGUSER: postgres
+      PGPASSWORD: postgres
+      PGHOST: 127.0.0.1
+      PGPORT: "5432"
+      PGDATABASE: hallederiz_ci
+      PERSISTENCE_MODE: postgres
+      NODE_ENV: test
+      NEXT_PUBLIC_USE_DEMO_DATA: "false"
+      DEMO_AUTH_ENABLED: "false"
+      ALLOW_DEMO_FALLBACK: "false"
+      AUTH_SESSION_SECRET: ci-sec3c-session-secret-min-32-characters
+      AUTH_SEED_TENANT_SLUG: hallederiz
+      AUTH_SEED_ADMIN_EMAIL: ci-admin@hallederiz.test
+      AUTH_SEED_ADMIN_PASSWORD: CiTestPassword123!
+      AUTH_SEED_ADMIN_FULL_NAME: CI Platform Admin
+      AUTH_SEED_ADMIN_ROLE: platform_admin
+      API_CORS_ORIGINS: https://app.example.com
+      APP_BASE_URL: https://app.example.com
+      WEB_URL: https://app.example.com
+      PORT_API: "4010"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.12.0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Postgres migration smoke
+        run: pnpm ci:postgres-migration-smoke
+
+      - name: Postgres runtime smoke
+        run: pnpm ci:postgres-runtime-smoke
+
+      - name: Upload postgres smoke logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: postgres-runtime-smoke-logs
+          path: |
+            apps/api/**/*.log
+          if-no-files-found: ignore

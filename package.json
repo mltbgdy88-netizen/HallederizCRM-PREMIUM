@@ -28,6 +28,8 @@
     "smoke:all": "node scripts/smoke/all.cjs",
     "smoke:e2e": "node scripts/smoke/e2e.cjs",
     "smoke:product-readiness": "pnpm typecheck && pnpm smoke:routes && pnpm smoke:navigation",
+    "ci:postgres-migration-smoke": "node scripts/ci/postgres-migration-smoke.cjs",
+    "ci:postgres-runtime-smoke": "node scripts/ci/postgres-runtime-smoke.cjs",
     "ui:guard": "node scripts/ui-guard.cjs",
     "smoke:production-safety": "pnpm --filter @hallederiz/api... build && pnpm --filter @hallederiz/api exec node --loader ts-node/esm --experimental-specifier-resolution=node --test src/tests/production-safety-smoke.test.ts",
     "security:secret-scan": "node scripts/security/secret-scan.cjs",

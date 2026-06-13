@@ -231,7 +231,74 @@ Migration tekrar çalıştırma: `applyDatabaseMigrations` checksum ile idempote
 
 | Gap | Risk | Not |
 |---|---|---|
-| CI'da Postgres migration job yok | P1 | Registry parity test var; gerçek DB apply yok |
+| ~~CI'da Postgres migration job yok~~ | ~~P1~~ | **SEC-3C:** `postgres-runtime-smoke` workflow + `ci:postgres-*` scriptleri eklendi |
 | `migrate:list` CLI `dist/migrations` arıyor | P2 | `migrate:apply` registry kullanır; `migrate:list` boş dist'te fail |
 | `docker-compose.local.yml` API default `PERSISTENCE_MODE=demo` | P2 | Staging manual env override gerekir |
 | `smoke:production-data` CI'da optional (workflow_dispatch) | P2 | Live API gerektirir |
+
+---
+
+## SEC-3C — CI Postgres migration + runtime smoke
+
+**Workflow:** `.github/workflows/postgres-runtime-smoke.yml`  
+**Job adı:** `postgres-runtime-smoke`
+
+### CI ortam örneği
+
+```bash
+PGUSER=postgres
+PGPASSWORD=postgres
+PGHOST=127.0.0.1
+PGPORT=5432
+PGDATABASE=hallederiz_ci
+PERSISTENCE_MODE=postgres
+NODE_ENV=test
+DEMO_AUTH_ENABLED=false
+ALLOW_DEMO_FALLBACK=false
+AUTH_SESSION_SECRET=ci-sec3c-session-secret-min-32-characters
+AUTH_SEED_TENANT_SLUG=hallederiz
+AUTH_SEED_ADMIN_EMAIL=ci-admin@hallederiz.test
+AUTH_SEED_ADMIN_PASSWORD=CiTestPassword123!
+API_CORS_ORIGINS=https://app.example.com
+WEB_URL=https://app.example.com
+PORT_API=4010
+```
+
+### CI komutları
+
+```bash
+pnpm ci:postgres-migration-smoke
+pnpm ci:postgres-runtime-smoke
+```
+
+**Migration smoke doğrular:**
+
+- 16 migration ilk `migrate:apply` → APPLIED
+- `0015_idempotency_records` tablo + kolonlar + unique + `expires_at` index
+- İkinci `migrate:apply` → 16 SKIPPED
+
+**Runtime smoke doğrular:**
+
+- API `PERSISTENCE_MODE=postgres` boot
+- `/health` 200
+- `/platform/production-readiness` persistence `postgres`
+- Payment idempotency: missing key 400, replay, conflict 409
+- Origin guard: kötü origin 403
+- Import templates: auth yok 401
+- `idempotency_records` satır artışı (mock fallback değil)
+
+### Manuel SEC-3B vs CI SEC-3C
+
+| | SEC-3B (manuel) | SEC-3C (CI) |
+|---|---|---|
+| Postgres | Fiziksel container / staging | GitHub Actions `postgres:16` service |
+| Migration | Manuel `migrate:apply` | `ci:postgres-migration-smoke` |
+| Runtime | Manuel curl / API boot | `ci:postgres-runtime-smoke` |
+| Auth seed | `seed:auth-admin` manuel | Runtime smoke içinde otomatik |
+| Kanıt | Operatör log + SQL | CI job PASS/FAIL |
+
+### Kalan P2/P3 backlog
+
+- P2: `migrate:list` CLI `dist/migrations` uyumsuzluğu
+- P2: Web unit testleri ana `pnpm test` zincirine bağlı değil
+- P3: Developer shell `DATABASE_URL` kirliliği → test öncesi env temizle
