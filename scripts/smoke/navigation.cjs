@@ -44,7 +44,7 @@ const checks = [
   },
   {
     file: "apps/web/src/features/payments/components/PaymentCreatePage.tsx",
-    patterns: ["Kaydet", "Yeni Tahsilat", "Hızlı İşlem"],
+    patterns: ["Tahsilatı kaydet", "Yeni Tahsilat", "Taslak olarak hazırla"],
     description: "Yeni tahsilat formu"
   },
   {
