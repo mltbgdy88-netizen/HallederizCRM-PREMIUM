@@ -18,6 +18,11 @@ export interface HeaderProps {
   layout?: "default" | "dashboard";
   /** Emerald command-center chrome (dashboard). */
   variant?: "default" | "command";
+  /**
+   * `passive`: bağlı arama yokken yanıltmayan durum etiketi.
+   * `input`: gerçek arama alanı (bağlantı üst katmanda sağlanır).
+   */
+  searchMode?: "passive" | "input";
 }
 
 export function Header({
@@ -32,7 +37,8 @@ export function Header({
   themeSlot,
   userSlot,
   layout = "default",
-  variant = "default"
+  variant = "default",
+  searchMode = "passive"
 }: HeaderProps) {
   const renderActionsInline = variant === "command" || suppressPageMeta;
   const rootClass = [
@@ -61,7 +67,14 @@ export function Header({
       )}
 
       <div className="hz-header-search-wrap">
-        <input type="search" readOnly placeholder={searchPlaceholder} className="hz-header-search" />
+        {searchMode === "input" ? (
+          <input type="search" placeholder={searchPlaceholder} className="hz-header-search" aria-label={searchPlaceholder} />
+        ) : (
+          <div className="hz-header-search-passive" role="status" aria-label="Genel arama henüz etkin değil">
+            <span className="hz-header-search-passive__label">Arama yakında</span>
+            <span className="hz-header-search-passive__hint">Sayfa içi arama kullanılabilir</span>
+          </div>
+        )}
       </div>
 
       <div className="hz-header-trailing">

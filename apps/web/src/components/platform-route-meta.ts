@@ -217,6 +217,7 @@ function resolveShellSearchPlaceholder(path: string): string {
 
 function resolveShellSuppressPageMeta(path: string): boolean {
   if (path === "/") return true;
+  if (path === "/dashboard") return true;
   if (path === "/panel" || path.startsWith("/panel/")) return true;
   if (path === "/unauthorized") return true;
   if (path === "/offline-api" || path === "/demo-mode" || path === "/live-empty") return true;
@@ -232,7 +233,7 @@ function resolveShellSuppressPageMeta(path: string): boolean {
   if (path === "/tahsilatlar") return true;
   if (path === "/teslimatlar") return true;
   if (path === "/iadeler") return true;
-  if (path === "/faturalar") return true;
+  if (path === "/faturalar" || path === "/faturalar/liste") return true;
   if (path === "/archive") return true;
   if (path === "/raporlar" || path.startsWith("/raporlar/")) return true;
   if (path === "/ayarlar" || path.startsWith("/ayarlar/")) return true;

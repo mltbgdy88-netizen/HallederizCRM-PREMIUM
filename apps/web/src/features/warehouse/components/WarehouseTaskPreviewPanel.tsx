@@ -23,7 +23,7 @@ export function WarehouseTaskPreviewPanel({ warehouseOrder, customer }: { wareho
         <li>Depo: {warehouseOrder.warehouseName}</li>
         <li>Durum: {getWarehouseOrderPrepLabel(warehouseOrder)}</li>
         <li>Hazırlanan: {preparedTotal} / {requestedTotal}</li>
-        <li>WhatsApp: depocu gorev bildirimi placeholder.</li>
+        <li>WhatsApp: depocu görev bildirimi entegrasyonu hazırlanıyor.</li>
       </ul>
     </section>
   );

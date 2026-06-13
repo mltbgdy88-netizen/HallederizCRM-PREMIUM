@@ -9,6 +9,7 @@ import { OfferQuickPreviewPanel } from "./OfferQuickPreviewPanel";
 import { OfferTable } from "./OfferTable";
 import { useOfferFilters } from "../hooks/use-offer-filters";
 import { useOffersData } from "../hooks/use-offers-data";
+import { ENTERPRISE_DESK_PAGE_SIZE } from "../../../lib/enterprise-desk-constants";
 import { dataSourceConfig } from "../../../lib/data-source";
 import { useToast } from "../../../providers/toast-provider";
 
@@ -19,7 +20,7 @@ export function OffersPage() {
   const { loading, customers, filteredOffers, rows } = useOffersData(filters);
   const [selectedOfferId, setSelectedOfferId] = useState<string | null>(null);
   const [page, setPage] = useState(1);
-  const pageSize = 10;
+  const pageSize = ENTERPRISE_DESK_PAGE_SIZE;
   const pagedRows = useMemo(() => rows.slice((page - 1) * pageSize, page * pageSize), [page, rows]);
   const selectedOffer = useMemo(
     () => filteredOffers.find((offer) => offer.id === selectedOfferId) ?? filteredOffers[0] ?? null,
