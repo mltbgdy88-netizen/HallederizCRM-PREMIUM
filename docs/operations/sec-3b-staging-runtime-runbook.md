@@ -279,7 +279,7 @@ pnpm ci:postgres-runtime-smoke
 
 **Runtime smoke doğrular:**
 
-- API `PERSISTENCE_MODE=postgres` boot
+- `@hallederiz/api...` workspace build (domain/types dist) sonrası API boot
 - `/health` 200
 - `/platform/production-readiness` persistence `postgres`
 - Payment idempotency: missing key 400, replay, conflict 409

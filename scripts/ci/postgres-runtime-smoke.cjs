@@ -191,6 +191,18 @@ async function main() {
   process.env.DATABASE_URL = databaseUrl;
   process.env.POSTGRES_URL = databaseUrl;
 
+  log("ensuring workspace entrypoints");
+  const entrypointsResult = spawnSyncSafe("node", ["scripts/ci/ensure-workspace-entrypoints.cjs"]);
+  if (!entrypointsResult.ok) {
+    fail("ensure-workspace-entrypoints failed");
+  }
+
+  log("building @hallederiz/api dependency graph");
+  const buildResult = spawnSyncSafe("pnpm", ["--filter", "@hallederiz/api...", "build"]);
+  if (!buildResult.ok) {
+    fail("@hallederiz/api dependency build failed");
+  }
+
   const tenantSlug = process.env.AUTH_SEED_TENANT_SLUG?.trim() || "hallederiz";
   const allowedOrigin = process.env.WEB_URL?.trim() || "https://app.example.com";
   const evilOrigin = "https://evil.example.com";
