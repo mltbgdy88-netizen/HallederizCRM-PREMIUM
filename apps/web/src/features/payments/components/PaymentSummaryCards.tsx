@@ -1,4 +1,5 @@
 import type { PaymentReceipt } from "@hallederiz/types";
+import { DetailKpiStrip } from "../../shared/detail-shell";
 import { getPaymentMethodLabel, getPaymentStatusLabel, getPaymentSummary } from "../queries/payment-mock-data";
 import { money } from "../utils";
 
@@ -12,7 +13,7 @@ export function PaymentSummaryCards({ payment }: { payment: PaymentReceipt }) {
   const summary = getPaymentSummary(payment);
 
   return (
-    <section className="tdf-kpi-strip" aria-label="Tahsilat özeti">
+    <DetailKpiStrip ariaLabel="Tahsilat özeti">
       <article className="tdf-kpi tdf-kpi--success">
         <span className="tdf-kpi__label">Tahsilat tutarı</span>
         <strong className="tdf-kpi__value">{money(payment.amount, payment.currency)}</strong>
@@ -40,6 +41,6 @@ export function PaymentSummaryCards({ payment }: { payment: PaymentReceipt }) {
           {summary.allocationCount > 0 ? money(summary.allocatedTotal, payment.currency) : "—"}
         </span>
       </article>
-    </section>
+    </DetailKpiStrip>
   );
 }

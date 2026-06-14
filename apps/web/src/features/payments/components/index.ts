@@ -4,6 +4,7 @@ export * from "./PaymentFilterBar";
 export * from "./PaymentTable";
 export * from "./PaymentPreviewPanel";
 export * from "./PaymentDetailPage";
+export * from "./payment-reference-shared";
 export * from "./PaymentSummaryCards";
 export * from "./PaymentAllocationTable";
 export * from "./PaymentDocumentPanel";
