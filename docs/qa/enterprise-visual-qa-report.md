@@ -118,3 +118,12 @@
 **VISUAL_QA_WARNINGS**
 
 Kod ve CSS yapısı enterprise detay standardına yakın; cariler kök (`cdm-*`) responsive eksikliği ve kök aktif tab UX'i P3C öncesi görsel doğrulama gerektirir.
+
+---
+
+## T5-P3C-1 güncelleme (2026-06-08)
+
+- Kök `/cariler/[customerId]`: `cdm-tabs` içine yalnız kök ekranda aktif **Detay** sekmesi eklendi.
+- Katman sayfalarında `cul-tabs` değişmedi; çift nav yok.
+- `cariler-detay-reference.css`: 1280px ve 960px `cdm-*` responsive breakpoint eklendi.
+- Yerel browser QA hâlâ önerilir (sticky KPI + kök grid 1366).

@@ -601,6 +601,71 @@
   text-decoration: none;
 }
 
+.cdm-tab:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--cdm-green) 45%, #fff);
+  outline-offset: 2px;
+  border-radius: 6px;
+}
+
+@media (max-width: 1280px) {
+  .cdm-hero {
+    grid-template-columns: auto auto minmax(0, 1fr);
+    grid-template-rows: auto auto;
+  }
+
+  .cdm-hero-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-start;
+    flex-wrap: wrap;
+  }
+
+  .cdm-fields--2 {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .cdm-grid {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    grid-template-areas:
+      "summary"
+      "commercial"
+      "perf"
+      "risk"
+      "context"
+      "warn"
+      "steps";
+  }
+
+  .cdm-panel--quick {
+    grid-column: auto;
+  }
+}
+
+@media (max-width: 960px) {
+  .cdm-home.cdm-home--embedded {
+    height: auto;
+    min-height: 100%;
+    overflow: auto;
+  }
+
+  .cdm-grid-scroll .cdm-grid {
+    min-height: 0;
+  }
+
+  .cdm-tabs {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  .cdm-hero {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .cdm-avatar {
+    display: none;
+  }
+}
+
 .cdm-steps-cta:disabled {
   opacity: 0.72;
   cursor: not-allowed;
