@@ -1,7 +1,14 @@
 "use client";
 
 import type { ReactNode } from "react";
-import { DetailLoadingState, DetailNotFoundState } from "../../shared/detail-shell";
+import { dataSourceConfig } from "../../../lib/data-source";
+import {
+  DetailDemoBand,
+  DetailKpiStrip,
+  DetailLoadingState,
+  DetailNotFoundState,
+  DetailSideCard
+} from "../../shared/detail-shell";
 import type { CustomerLayerKey } from "../../ui-inventory/utils/cariler-subroute-command-center-data";
 
 type CustomerReferenceStateShellProps = {
@@ -9,6 +16,87 @@ type CustomerReferenceStateShellProps = {
   variant: "cdm" | "cul";
   layer?: CustomerLayerKey;
 };
+
+export function CustomerReferenceLayerShell({
+  children,
+  layer
+}: {
+  children: ReactNode;
+  layer: CustomerLayerKey;
+}) {
+  return (
+    <div className={`cul-page cul-page--embedded cul-page--${layer}`} data-page="customer-layer-unified">
+      {children}
+    </div>
+  );
+}
+
+export function CustomerReferenceLayerHeader({ children }: { children: ReactNode }) {
+  return <header className="cul-hero">{children}</header>;
+}
+
+export function CustomerReferenceSummaryScroll({ children }: { children: ReactNode }) {
+  return <div className="cul-shell__scroll">{children}</div>;
+}
+
+export function CustomerReferenceDemoBand() {
+  if (!dataSourceConfig.useDemoData) {
+    return null;
+  }
+
+  return (
+    <DetailDemoBand className="cul-demo-band">
+      Demo veri modu: bu cari katmanı örnek kayıtlarla gösterilir; canlı mutation aksiyonları bağlı değildir.
+    </DetailDemoBand>
+  );
+}
+
+export function CustomerReferenceKpiStrip({
+  children,
+  className
+}: {
+  children: ReactNode;
+  className: string;
+}) {
+  return (
+    <DetailKpiStrip className={className} stickyClassName="cul-sticky-summary" ariaLabel="Katman KPI kartları">
+      {children}
+    </DetailKpiStrip>
+  );
+}
+
+export function CustomerReferenceWorkspace({
+  children,
+  timeline = false
+}: {
+  children: ReactNode;
+  timeline?: boolean;
+}) {
+  return (
+    <div className={timeline ? "cul-workspace cul-workspace--timeline" : "cul-workspace"}>{children}</div>
+  );
+}
+
+export function CustomerReferenceSideCard({
+  title,
+  children,
+  ariaLabel
+}: {
+  title: string;
+  children: ReactNode;
+  ariaLabel?: string;
+}) {
+  return (
+    <DetailSideCard
+      title={title}
+      className="cul-side-card"
+      headClassName="cul-side-card__head"
+      ariaLabel={ariaLabel}
+    >
+      {children}
+    </DetailSideCard>
+  );
+}
 
 function CustomerReferenceStateShell({ children, variant, layer }: CustomerReferenceStateShellProps) {
   if (variant === "cdm") {
@@ -19,10 +107,12 @@ function CustomerReferenceStateShell({ children, variant, layer }: CustomerRefer
     );
   }
 
-  const className = layer ? `cul-page cul-page--embedded cul-page--${layer}` : "cul-page cul-page--embedded";
+  if (layer) {
+    return <CustomerReferenceLayerShell layer={layer}>{children}</CustomerReferenceLayerShell>;
+  }
 
   return (
-    <div className={className} data-page="customer-layer-unified">
+    <div className="cul-page cul-page--embedded" data-page="customer-layer-unified">
       {children}
     </div>
   );

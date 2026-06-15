@@ -11,7 +11,16 @@ import type {
   CkmTablePanel,
   CustomerLayerReferenceView
 } from "../utils/map-customer-layer-to-reference";
-import { CustomerReferenceLoadingState, CustomerReferenceNotFoundState } from "./customer-reference-shared";
+import {
+  CustomerReferenceDemoBand,
+  CustomerReferenceKpiStrip,
+  CustomerReferenceLayerHeader,
+  CustomerReferenceLayerShell,
+  CustomerReferenceLoadingState,
+  CustomerReferenceNotFoundState,
+  CustomerReferenceSummaryScroll,
+  CustomerReferenceWorkspace
+} from "./customer-reference-shared";
 
 type Props = {
   customerId: string;
@@ -95,7 +104,7 @@ function Header({ view }: { view: CustomerLayerReferenceView }) {
   const contact = view.header.contact.slice(0, 3);
 
   return (
-    <header className="cul-hero">
+    <CustomerReferenceLayerHeader>
       <nav className="cul-breadcrumb" aria-label="Breadcrumb">
         <Link href="/cariler">Cariler</Link>
         <span>›</span>
@@ -146,7 +155,7 @@ function Header({ view }: { view: CustomerLayerReferenceView }) {
           </Link>
         </div>
       </div>
-    </header>
+    </CustomerReferenceLayerHeader>
   );
 }
 
@@ -184,7 +193,7 @@ function KpiStrip({ view }: { view: CustomerLayerReferenceView }) {
     if (labels.length === 0) return null;
 
     return (
-      <section className={`cul-kpis cul-kpis--${labels.length}`} aria-label="Katman KPI kartları">
+      <CustomerReferenceKpiStrip className={`cul-kpis cul-kpis--${labels.length}`}>
         {labels.map((label) => (
           <article key={label} className="cul-kpi cul-kpi--placeholder">
             <span className="cul-kpi__value">—</span>
@@ -192,12 +201,12 @@ function KpiStrip({ view }: { view: CustomerLayerReferenceView }) {
             <span className="cul-kpi__sub">Canlı veri bekleniyor</span>
           </article>
         ))}
-      </section>
+      </CustomerReferenceKpiStrip>
     );
   }
 
   return (
-    <section className={`cul-kpis cul-kpis--${kpis.length}`} aria-label="Katman KPI kartları">
+    <CustomerReferenceKpiStrip className={`cul-kpis cul-kpis--${kpis.length}`}>
       {kpis.map((kpi) => (
         <article key={kpi.id} className={`cul-kpi cul-kpi--${kpi.tone}`}>
           <span className="cul-kpi__value">{kpi.value}</span>
@@ -210,7 +219,7 @@ function KpiStrip({ view }: { view: CustomerLayerReferenceView }) {
           {kpi.sub ? <span className={kpi.subWarn ? "cul-kpi__sub cul-kpi__sub--warn" : "cul-kpi__sub"}>{kpi.sub}</span> : null}
         </article>
       ))}
-    </section>
+    </CustomerReferenceKpiStrip>
   );
 }
 
@@ -578,8 +587,6 @@ function MainContent({ view }: { view: CustomerLayerReferenceView }) {
         {view.preparationMessage ? <span>{view.preparationMessage}</span> : null}
       </header>
 
-      <KpiStrip view={view} />
-
       {view.layer === "ozet" ? <OzetRecords view={view} /> : null}
       {view.layer === "finans" ? <FinanceAging view={view} /> : null}
       {view.layer === "iletisim" ? <ContactTable view={view} /> : null}
@@ -911,7 +918,7 @@ function TimelineFilters() {
 function LayoutBody({ view }: { view: CustomerLayerReferenceView }) {
   if (view.layer === "timeline") {
     return (
-      <div className="cul-workspace cul-workspace--timeline">
+      <CustomerReferenceWorkspace timeline>
         <TimelineFilters />
         <main className="cul-main">
           <MainContent view={view} />
@@ -919,19 +926,19 @@ function LayoutBody({ view }: { view: CustomerLayerReferenceView }) {
         <aside className="cul-side">
           <SideContent view={view} />
         </aside>
-      </div>
+      </CustomerReferenceWorkspace>
     );
   }
 
   return (
-    <div className="cul-workspace">
+    <CustomerReferenceWorkspace>
       <main className="cul-main">
         <MainContent view={view} />
       </main>
       <aside className="cul-side">
         <SideContent view={view} />
       </aside>
-    </div>
+    </CustomerReferenceWorkspace>
   );
 }
 
@@ -964,10 +971,14 @@ export function CustomerLayerReferenceLayout({ customerId, layer }: Props) {
   }
 
   return (
-    <div className={className} data-page="customer-layer-unified">
+    <CustomerReferenceLayerShell layer={layer}>
       <Header view={desk.view} />
       <Tabs view={desk.view} />
-      <LayoutBody view={desk.view} />
-    </div>
+      <CustomerReferenceSummaryScroll>
+        <CustomerReferenceDemoBand />
+        <KpiStrip view={desk.view} />
+        <LayoutBody view={desk.view} />
+      </CustomerReferenceSummaryScroll>
+    </CustomerReferenceLayerShell>
   );
 }
