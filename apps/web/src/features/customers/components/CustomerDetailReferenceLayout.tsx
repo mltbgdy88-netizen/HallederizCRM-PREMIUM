@@ -11,6 +11,7 @@ import {
   IconCdmPerf
 } from "./customer-detail-reference-icons";
 import { CustomerReferenceLoadingState, CustomerReferenceNotFoundState } from "./customer-reference-shared";
+import { CUSTOMER_DETAIL_ROOT_LABEL, customerLayerHref } from "../utils/customer-layer-nav";
 import type { CustomerDetailReferenceView } from "../utils/map-customer-detail-to-reference";
 
 type Props = {
@@ -294,7 +295,16 @@ export function CustomerDetailReferenceLayout({ customerId }: Props) {
         </div>
       </header>
 
-      <nav className="cdm-tabs" aria-label="Cari katmanları">
+      <nav className="cdm-tabs" aria-label="Cari detay ve katmanları" role="tablist">
+        <Link
+          href={customerLayerHref(customerId)}
+          role="tab"
+          aria-selected
+          aria-current="page"
+          className="cdm-tab cdm-tab--active"
+        >
+          {CUSTOMER_DETAIL_ROOT_LABEL}
+        </Link>
         {view.tabs.map((tab) => (
           <Link
             key={tab.id}
