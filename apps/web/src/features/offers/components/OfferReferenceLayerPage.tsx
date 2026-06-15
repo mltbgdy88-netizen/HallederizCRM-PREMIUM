@@ -27,6 +27,7 @@ import {
   OfferReferenceSection,
   OfferReferenceShell,
   OfferReferenceSidePanel,
+  OfferReferenceSummaryScroll,
   OfferReferenceTimelineList,
   offerInfoFields,
   offerTotalsFields
@@ -174,16 +175,18 @@ export function OfferReferenceLayerPage({ offerId, layer }: { offerId: string; l
       <OfferReferenceShell className="ofd-layer">
         <OfferEntityLayerNav offerId={offerId} />
         <OfferReferenceHeader title={OFFER_LAYER_TITLES[layer]} meta={state.referenceModel.headerMeta} quickHref={quickHref} />
-        <OfferReferenceDemoBand />
-        <OfferReferenceKpiStrip kpis={state.referenceModel.kpis} />
-        <LayerContent
-          layer={layer}
-          offer={state.offer}
-          customer={state.customer}
-          model={state.referenceModel}
-          onConvert={() => setConvertOpen(true)}
-          onSend={() => setSendOpen(true)}
-        />
+        <OfferReferenceSummaryScroll>
+          <OfferReferenceDemoBand />
+          <OfferReferenceKpiStrip kpis={state.referenceModel.kpis} />
+          <LayerContent
+            layer={layer}
+            offer={state.offer}
+            customer={state.customer}
+            model={state.referenceModel}
+            onConvert={() => setConvertOpen(true)}
+            onSend={() => setSendOpen(true)}
+          />
+        </OfferReferenceSummaryScroll>
       </OfferReferenceShell>
       <OfferSendModal open={sendOpen} offer={state.offer} customer={state.customer} onClose={() => setSendOpen(false)} />
       <OfferConvertDialog open={convertOpen} offer={state.offer} customer={state.customer} onClose={() => setConvertOpen(false)} />

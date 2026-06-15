@@ -4,6 +4,15 @@ import Link from "next/link";
 import type { Customer, Delivery, Invoice, PaymentReceipt, SaleOrder, WarehouseOrder } from "@hallederiz/types";
 import type { ReactNode } from "react";
 import { dataSourceConfig } from "../../../lib/data-source";
+import {
+  DetailDemoBand,
+  DetailKpiStrip,
+  DetailLoadingState,
+  DetailNotFoundState,
+  DetailReferenceHeader,
+  DetailReferenceShell,
+  DetailSideCard
+} from "../../shared/detail-shell";
 import { dateLabel, formatTryMoney, money } from "../utils/format";
 import {
   buildQuickDeliveryHref,
@@ -26,20 +35,29 @@ export function OrderReferenceShell({
   className?: string;
 }) {
   return (
-    <section className={`spd-page hz-orders-detail-page ${className}`.trim()}>
-      <div className="spd-shell">{children}</div>
-    </section>
+    <DetailReferenceShell
+      pageClassName={`spd-page ${className}`.trim()}
+      shellClassName="spd-shell"
+      pageHookClassName="hz-orders-detail-page"
+    >
+      {children}
+    </DetailReferenceShell>
   );
+}
+
+export function OrderReferenceSummaryScroll({ children }: { children: ReactNode }) {
+  return <div className="spd-shell__scroll">{children}</div>;
 }
 
 export function OrderReferenceLoadingState() {
   return (
     <OrderReferenceShell>
-      <div className="spd-state" role="status" aria-live="polite">
-        <div className="spd-state__spinner" aria-hidden />
-        <h2>Sipariş yükleniyor</h2>
-        <p>Satırlar, tahsilat, teslimat ve depo bağlamları hazırlanıyor.</p>
-      </div>
+      <DetailLoadingState
+        title="Sipariş yükleniyor"
+        message="Satırlar, tahsilat, teslimat ve depo bağlamları hazırlanıyor."
+        stateClassName="spd-state"
+        spinnerClassName="spd-state__spinner"
+      />
     </OrderReferenceShell>
   );
 }
@@ -47,13 +65,14 @@ export function OrderReferenceLoadingState() {
 export function OrderReferenceNotFoundState() {
   return (
     <OrderReferenceShell>
-      <div className="spd-state" role="alert">
-        <h2>Sipariş bulunamadı</h2>
-        <p>Seçilen sipariş bulunamadı veya erişim kapsamında değil.</p>
-        <Link href="/siparisler" className="spd-state__link">
-          Sipariş listesine dön
-        </Link>
-      </div>
+      <DetailNotFoundState
+        title="Sipariş bulunamadı"
+        message="Seçilen sipariş bulunamadı veya erişim kapsamında değil."
+        backHref="/siparisler"
+        backLabel="Sipariş listesine dön"
+        stateClassName="spd-state"
+        linkClassName="spd-state__link"
+      />
     </OrderReferenceShell>
   );
 }
@@ -72,23 +91,27 @@ export function OrderReferenceHeader({
   quickHref?: string;
 }) {
   return (
-    <header className="spd-header">
-      <div className="spd-header__main">
-        <p className="spd-header__eyebrow">Siparişler</p>
-        <h1>{title}</h1>
-        <p className="spd-header__meta">{meta}</p>
-      </div>
-      <div className="spd-header__actions">
-        {quickHref ? (
-          <Link href={quickHref} className="spd-header__btn spd-header__btn--primary">
-            Hızlı İşlem
+    <DetailReferenceHeader
+      eyebrow="Siparişler"
+      title={title}
+      meta={meta}
+      headerClassName="spd-header"
+      mainClassName="spd-header__main"
+      eyebrowClassName="spd-header__eyebrow"
+      metaClassName="spd-header__meta"
+      actions={
+        <div className="spd-header__actions">
+          {quickHref ? (
+            <Link href={quickHref} className="spd-header__btn spd-header__btn--primary">
+              Hızlı İşlem
+            </Link>
+          ) : null}
+          <Link href={backHref} className="spd-header__btn">
+            {backLabel}
           </Link>
-        ) : null}
-        <Link href={backHref} className="spd-header__btn">
-          {backLabel}
-        </Link>
-      </div>
-    </header>
+        </div>
+      }
+    />
   );
 }
 
@@ -97,15 +120,19 @@ export function OrderReferenceDemoBand() {
     return null;
   }
   return (
-    <p className="spd-demo-band" role="status">
+    <DetailDemoBand className="spd-demo-band">
       Örnek veri modu: bu kayıt demo amaçlıdır; kaydet, onay ve operasyon aksiyonları canlıda bağlı değildir.
-    </p>
+    </DetailDemoBand>
   );
 }
 
 export function OrderReferenceKpiStrip({ kpis }: { kpis: OrderReferenceKpi[] }) {
   return (
-    <section className="spd-kpi-strip" aria-label="Sipariş özeti">
+    <DetailKpiStrip
+      className="spd-kpi-strip"
+      stickyClassName="spd-sticky-summary"
+      ariaLabel="Sipariş özeti"
+    >
       {kpis.map((kpi) => (
         <article key={kpi.label} className={`spd-kpi${kpi.tone ? ` spd-kpi--${kpi.tone}` : ""}`}>
           <span className="spd-kpi__label">{kpi.label}</span>
@@ -113,7 +140,7 @@ export function OrderReferenceKpiStrip({ kpis }: { kpis: OrderReferenceKpi[] }) 
           <span className="spd-kpi__hint">{kpi.hint}</span>
         </article>
       ))}
-    </section>
+    </DetailKpiStrip>
   );
 }
 
@@ -162,12 +189,9 @@ export function OrderReferenceSideCard({
   children: ReactNode;
 }) {
   return (
-    <section className="spd-side-card">
-      <header className="spd-side-card__head">
-        <h3>{title}</h3>
-      </header>
+    <DetailSideCard title={title} className="spd-side-card" headClassName="spd-side-card__head">
       {children}
-    </section>
+    </DetailSideCard>
   );
 }
 
