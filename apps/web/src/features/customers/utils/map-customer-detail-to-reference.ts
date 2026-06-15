@@ -7,8 +7,8 @@ import type {
   CustomerLedgerEntry,
   Offer
 } from "@hallederiz/types";
-import { customerEntityHref } from "../../ui-inventory/utils/entity-layer-nav";
 import type { CustomerDetailQueryResult } from "../queries/get-customers";
+import { buildCustomerDetailTabs } from "./customer-layer-nav";
 import {
   creditUsageRatio,
   customerGroupLabel,
@@ -108,16 +108,6 @@ export type CustomerDetailReferenceView = {
   quickActions: CdmQuickAction[];
   financeLinked: boolean;
 };
-
-const DETAIL_TAB_LABELS: { id: Exclude<CdmDetailTabId, "detay">; label: string }[] = [
-  { id: "ozet", label: "Özet" },
-  { id: "iletisim", label: "İletişim" },
-  { id: "finans", label: "Finans" },
-  { id: "teklifler", label: "Teklifler" },
-  { id: "siparisler", label: "Siparişler" },
-  { id: "tahsilatlar", label: "Tahsilatlar" },
-  { id: "timeline", label: "Zaman Akışı" }
-];
 
 function buildTags(customer: Customer, account: CustomerAccount | null): CdmReferenceTag[] {
   const tags: CdmReferenceTag[] = [{ label: customerGroupLabel(customer), tone: "green" }];
@@ -220,13 +210,7 @@ function buildQuickActions(customerId: string): CdmQuickAction[] {
   ];
 }
 
-export function buildCustomerDetailTabs(customerId: string): CustomerDetailReferenceView["tabs"] {
-  return DETAIL_TAB_LABELS.map((tab) => ({
-    id: tab.id,
-    label: tab.label,
-    href: customerEntityHref(customerId, tab.id)
-  }));
-}
+export { buildCustomerDetailTabs } from "./customer-layer-nav";
 
 export function mapCustomerToDetailReference(input: {
   customerId: string;

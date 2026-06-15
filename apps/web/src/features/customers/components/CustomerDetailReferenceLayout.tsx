@@ -1,6 +1,6 @@
 "use client";
 
-import { EmptyState, LoadingState } from "@hallederiz/ui";
+import { EmptyState } from "@hallederiz/ui";
 import Link from "next/link";
 import { useCustomerDetailReferenceState } from "../hooks/use-customer-detail-reference-state";
 import {
@@ -10,6 +10,7 @@ import {
   IconCdmContact,
   IconCdmPerf
 } from "./customer-detail-reference-icons";
+import { CustomerReferenceLoadingState, CustomerReferenceNotFoundState } from "./customer-reference-shared";
 import type { CustomerDetailReferenceView } from "../utils/map-customer-detail-to-reference";
 
 type Props = {
@@ -246,26 +247,11 @@ export function CustomerDetailReferenceLayout({ customerId }: Props) {
   }
 
   if (desk.loading) {
-    return <LoadingState title="Cari yükleniyor" message="Cari kartı ve bağlı kayıtlar hazırlanıyor." />;
+    return <CustomerReferenceLoadingState variant="cdm" />;
   }
 
   if (!desk.view) {
-    return (
-      <div className="cdm-home cdm-home--embedded" data-page="customer-detail-reference">
-        <Link href="/cariler" className="cdm-back" aria-label="Cariler listesine dön">
-          <IconCdmBack />
-        </Link>
-        <EmptyState
-          title="Cari bulunamadı"
-          message="Seçilen cari kaydı bulunamadı, silinmiş olabilir veya erişim kapsamınız dışında olabilir."
-          actions={
-            <Link href="/cariler" className="cdm-btn cdm-btn--outline">
-              Cari listesine dön
-            </Link>
-          }
-        />
-      </div>
-    );
+    return <CustomerReferenceNotFoundState variant="cdm" />;
   }
 
   const view = desk.view;
@@ -314,8 +300,8 @@ export function CustomerDetailReferenceLayout({ customerId }: Props) {
             key={tab.id}
             href={tab.href}
             role="tab"
-            aria-selected={tab.id === "ozet"}
-            className={`cdm-tab${tab.id === "ozet" ? " cdm-tab--active" : ""}`}
+            aria-selected={false}
+            className="cdm-tab"
           >
             {tab.label}
           </Link>
