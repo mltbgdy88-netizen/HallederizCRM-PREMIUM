@@ -12,6 +12,7 @@ import type {
   CustomerLayerReferenceView
 } from "../utils/map-customer-layer-to-reference";
 import {
+  CustomerReferenceCommandCenterFrame,
   CustomerReferenceDemoBand,
   CustomerReferenceKpiStrip,
   CustomerReferenceLayerHeader,
@@ -948,30 +949,41 @@ export function CustomerLayerReferenceLayout({ customerId, layer }: Props) {
 
   if (desk.isDemoPreview) {
     return (
-      <div className={className} data-page="customer-layer-unified">
-        <EmptyState
-          title="Önizleme kaydı"
-          message="Bu kayıt portföy önizlemesidir; gerçek cari katmanı açılmaz."
-          actions={
-            <Link href="/cariler" className="cul-btn cul-btn--ghost">
-              Cari listesine dön
-            </Link>
-          }
-        />
-      </div>
+      <CustomerReferenceCommandCenterFrame>
+        <div className={className} data-page="customer-layer-unified">
+          <EmptyState
+            title="Önizleme kaydı"
+            message="Bu kayıt portföy önizlemesidir; gerçek cari katmanı açılmaz."
+            actions={
+              <Link href="/cariler" className="cul-btn cul-btn--ghost">
+                Cari listesine dön
+              </Link>
+            }
+          />
+        </div>
+      </CustomerReferenceCommandCenterFrame>
     );
   }
 
   if (desk.loading) {
-    return <CustomerReferenceLoadingState variant="cul" layer={layer} />;
+    return (
+      <CustomerReferenceCommandCenterFrame>
+        <CustomerReferenceLoadingState variant="cul" layer={layer} />
+      </CustomerReferenceCommandCenterFrame>
+    );
   }
 
   if (!desk.view) {
-    return <CustomerReferenceNotFoundState variant="cul" layer={layer} />;
+    return (
+      <CustomerReferenceCommandCenterFrame>
+        <CustomerReferenceNotFoundState variant="cul" layer={layer} />
+      </CustomerReferenceCommandCenterFrame>
+    );
   }
 
   return (
-    <CustomerReferenceLayerShell layer={layer}>
+    <CustomerReferenceCommandCenterFrame>
+      <CustomerReferenceLayerShell layer={layer}>
       <Header view={desk.view} />
       <Tabs view={desk.view} />
       <CustomerReferenceSummaryScroll>
@@ -980,5 +992,6 @@ export function CustomerLayerReferenceLayout({ customerId, layer }: Props) {
         <LayoutBody view={desk.view} />
       </CustomerReferenceSummaryScroll>
     </CustomerReferenceLayerShell>
+    </CustomerReferenceCommandCenterFrame>
   );
 }
