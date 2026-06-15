@@ -1,3 +1,8 @@
+import {
+  CUSTOMER_DETAIL_ROOT_LABEL,
+  CUSTOMER_LAYER_NAV_ITEMS,
+  customerLayerHref
+} from "../../customers/utils/customer-layer-nav";
 import type { CustomerLayerKey } from "./cariler-subroute-command-center-data";
 import type { OrderLayerKey } from "./siparisler-subroute-command-center-data";
 import type { OfferLayerKey } from "./teklifler-subroute-command-center-data";
@@ -5,16 +10,6 @@ import type { OfferLayerKey } from "./teklifler-subroute-command-center-data";
 export type EntityLayerNavItem = {
   href: string;
   label: string;
-};
-
-const CUSTOMER_LAYER_SUFFIX: Record<CustomerLayerKey, string> = {
-  ozet: "/ozet",
-  iletisim: "/iletisim",
-  finans: "/finans",
-  teklifler: "/teklifler",
-  siparisler: "/siparisler",
-  tahsilatlar: "/tahsilatlar",
-  timeline: "/timeline"
 };
 
 const ORDER_LAYER_SUFFIX: Record<OrderLayerKey, string> = {
@@ -38,9 +33,7 @@ const OFFER_LAYER_SUFFIX: Record<OfferLayerKey, string> = {
 };
 
 export function customerEntityHref(customerId: string, layer?: CustomerLayerKey): string {
-  const base = `/cariler/${customerId}`;
-  if (!layer) return base;
-  return `${base}${CUSTOMER_LAYER_SUFFIX[layer]}`;
+  return customerLayerHref(customerId, layer);
 }
 
 export function orderEntityHref(orderId: string, layer?: OrderLayerKey): string {
@@ -57,14 +50,11 @@ export function offerEntityHref(offerId: string, layer?: OfferLayerKey): string 
 
 export function buildCustomerEntityNav(customerId: string): EntityLayerNavItem[] {
   return [
-    { href: customerEntityHref(customerId), label: "Detay" },
-    { href: customerEntityHref(customerId, "ozet"), label: "Özet" },
-    { href: customerEntityHref(customerId, "iletisim"), label: "İletişim" },
-    { href: customerEntityHref(customerId, "finans"), label: "Finans" },
-    { href: customerEntityHref(customerId, "teklifler"), label: "Teklifler" },
-    { href: customerEntityHref(customerId, "siparisler"), label: "Siparişler" },
-    { href: customerEntityHref(customerId, "tahsilatlar"), label: "Tahsilatlar" },
-    { href: customerEntityHref(customerId, "timeline"), label: "Zaman çizelgesi" }
+    { href: customerEntityHref(customerId), label: CUSTOMER_DETAIL_ROOT_LABEL },
+    ...CUSTOMER_LAYER_NAV_ITEMS.map((tab) => ({
+      href: customerEntityHref(customerId, tab.id),
+      label: tab.label
+    }))
   ];
 }
 

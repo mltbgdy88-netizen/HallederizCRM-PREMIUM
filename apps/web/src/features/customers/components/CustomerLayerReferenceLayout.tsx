@@ -2,34 +2,21 @@
 
 import Link from "next/link";
 import type { ReactNode } from "react";
-import { EmptyState, LoadingState } from "@hallederiz/ui";
+import { EmptyState } from "@hallederiz/ui";
 import type { CustomerLayerKey } from "../../ui-inventory/utils/cariler-subroute-command-center-data";
 import { useCustomerLayerReferenceState } from "../hooks/use-customer-layer-reference-state";
+import { CUSTOMER_LAYER_NAV_ITEMS } from "../utils/customer-layer-nav";
 import type {
   CkmBadgeTone,
   CkmTablePanel,
   CustomerLayerReferenceView
 } from "../utils/map-customer-layer-to-reference";
+import { CustomerReferenceLoadingState, CustomerReferenceNotFoundState } from "./customer-reference-shared";
 
 type Props = {
   customerId: string;
   layer: CustomerLayerKey;
 };
-
-type CanonicalTab = {
-  id: CustomerLayerKey;
-  label: string;
-};
-
-const CANONICAL_TABS: CanonicalTab[] = [
-  { id: "ozet", label: "Özet" },
-  { id: "finans", label: "Finans" },
-  { id: "iletisim", label: "İletişim" },
-  { id: "timeline", label: "Zaman Akışı" },
-  { id: "teklifler", label: "Teklifler" },
-  { id: "siparisler", label: "Siparişler" },
-  { id: "tahsilatlar", label: "Tahsilatlar" }
-];
 
 function layerHref(customerId: string, layer: CustomerLayerKey): string {
   return `/cariler/${customerId}/${layer}`;
@@ -166,7 +153,7 @@ function Header({ view }: { view: CustomerLayerReferenceView }) {
 function Tabs({ view }: { view: CustomerLayerReferenceView }) {
   return (
     <nav className="cul-tabs" aria-label="Cari katman sekmeleri">
-      {CANONICAL_TABS.map((tab) => {
+      {CUSTOMER_LAYER_NAV_ITEMS.map((tab) => {
         const active = tab.id === view.layer;
         return (
           <Link
@@ -969,27 +956,11 @@ export function CustomerLayerReferenceLayout({ customerId, layer }: Props) {
   }
 
   if (desk.loading) {
-    return (
-      <div className={className} data-page="customer-layer-unified">
-        <LoadingState title="Cari katmanı yükleniyor" message="Cari kartı ve katman verileri hazırlanıyor." />
-      </div>
-    );
+    return <CustomerReferenceLoadingState variant="cul" layer={layer} />;
   }
 
   if (!desk.view) {
-    return (
-      <div className={className} data-page="customer-layer-unified">
-        <EmptyState
-          title="Cari bulunamadı"
-          message="Seçilen cari kaydı bulunamadı veya erişim kapsamınız dışında olabilir."
-          actions={
-            <Link href="/cariler" className="cul-btn cul-btn--ghost">
-              Cari listesine dön
-            </Link>
-          }
-        />
-      </div>
-    );
+    return <CustomerReferenceNotFoundState variant="cul" layer={layer} />;
   }
 
   return (

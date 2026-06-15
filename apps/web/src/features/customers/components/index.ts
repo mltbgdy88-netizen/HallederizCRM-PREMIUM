@@ -9,3 +9,4 @@ export * from "./CustomerIdentityHeader";
 export * from "./CustomerSummaryCards";
 export * from "./CustomerTabs";
 export * from "./CustomerInsightSidePanel";
+export * from "./customer-reference-shared";
