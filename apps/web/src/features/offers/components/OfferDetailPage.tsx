@@ -18,6 +18,7 @@ import {
   OfferReferenceSection,
   OfferReferenceShell,
   OfferReferenceSidePanel,
+  OfferReferenceSummaryScroll,
   OfferReferenceTimelineList,
   offerInfoFields
 } from "./offer-reference-shared";
@@ -48,9 +49,10 @@ export function OfferDetailPage({ offerId, customerId }: { offerId?: string; cus
     <>
       <OfferReferenceShell>
         <OfferReferenceHeader title="Teklif Detayı" meta={state.referenceModel.headerMeta} quickHref={quickHref} />
-        <OfferReferenceDemoBand />
-        <OfferReferenceKpiStrip kpis={state.referenceModel.kpis} />
-        <main className="ofd-layout">
+        <OfferReferenceSummaryScroll>
+          <OfferReferenceDemoBand />
+          <OfferReferenceKpiStrip kpis={state.referenceModel.kpis} />
+          <main className="ofd-layout">
           <section className="ofd-main">
             <OfferReferenceSection title="Teklif bilgileri" description="Katman geçişleri üst menüden yapılır.">
               <OfferReferenceFieldGrid fields={offerInfoFields(offer, state.customer)} />
@@ -85,6 +87,7 @@ export function OfferDetailPage({ offerId, customerId }: { offerId?: string; cus
             />
           </aside>
         </main>
+        </OfferReferenceSummaryScroll>
       </OfferReferenceShell>
 
       <OfferSendModal open={sendModalOpen} offer={offer} customer={state.customer} onClose={() => setSendModalOpen(false)} />

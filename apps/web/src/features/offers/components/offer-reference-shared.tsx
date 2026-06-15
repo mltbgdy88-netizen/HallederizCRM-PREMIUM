@@ -5,6 +5,15 @@ import type { Customer, Offer } from "@hallederiz/types";
 import type { ReactNode } from "react";
 import { dataSourceConfig } from "../../../lib/data-source";
 import {
+  DetailDemoBand,
+  DetailKpiStrip,
+  DetailLoadingState,
+  DetailNotFoundState,
+  DetailReferenceHeader,
+  DetailReferenceShell,
+  DetailSideCard
+} from "../../shared/detail-shell";
+import {
   OFFER_PREFILL_NOTE,
   buildQuickOfferHref,
   buildQuickOrderFromOfferHref,
@@ -23,20 +32,29 @@ export function OfferReferenceShell({
   className?: string;
 }) {
   return (
-    <section className={`ofd-page hz-offers-detail-page ${className}`.trim()}>
-      <div className="ofd-shell">{children}</div>
-    </section>
+    <DetailReferenceShell
+      pageClassName={`ofd-page ${className}`.trim()}
+      shellClassName="ofd-shell"
+      pageHookClassName="hz-offers-detail-page"
+    >
+      {children}
+    </DetailReferenceShell>
   );
+}
+
+export function OfferReferenceSummaryScroll({ children }: { children: ReactNode }) {
+  return <div className="ofd-shell__scroll">{children}</div>;
 }
 
 export function OfferReferenceLoadingState() {
   return (
     <OfferReferenceShell>
-      <div className="ofd-state" role="status" aria-live="polite">
-        <div className="ofd-state__spinner" aria-hidden />
-        <h2>Teklif yükleniyor</h2>
-        <p>Fiyat slotları, satırlar ve follow-up kayıtları hazırlanıyor.</p>
-      </div>
+      <DetailLoadingState
+        title="Teklif yükleniyor"
+        message="Fiyat slotları, satırlar ve follow-up kayıtları hazırlanıyor."
+        stateClassName="ofd-state"
+        spinnerClassName="ofd-state__spinner"
+      />
     </OfferReferenceShell>
   );
 }
@@ -44,13 +62,14 @@ export function OfferReferenceLoadingState() {
 export function OfferReferenceNotFoundState() {
   return (
     <OfferReferenceShell>
-      <div className="ofd-state" role="alert">
-        <h2>Teklif bulunamadı</h2>
-        <p>Seçilen teklif bulunamadı veya erişim kapsamında değil.</p>
-        <Link href="/teklifler" className="ofd-state__link">
-          Teklif listesine dön
-        </Link>
-      </div>
+      <DetailNotFoundState
+        title="Teklif bulunamadı"
+        message="Seçilen teklif bulunamadı veya erişim kapsamında değil."
+        backHref="/teklifler"
+        backLabel="Teklif listesine dön"
+        stateClassName="ofd-state"
+        linkClassName="ofd-state__link"
+      />
     </OfferReferenceShell>
   );
 }
@@ -69,23 +88,27 @@ export function OfferReferenceHeader({
   quickHref?: string;
 }) {
   return (
-    <header className="ofd-header">
-      <div className="ofd-header__main">
-        <p className="ofd-header__eyebrow">Teklifler</p>
-        <h1>{title}</h1>
-        <p className="ofd-header__meta">{meta}</p>
-      </div>
-      <div className="ofd-header__actions">
-        {quickHref ? (
-          <Link href={quickHref} className="ofd-header__btn ofd-header__btn--primary">
-            Hızlı İşlem
+    <DetailReferenceHeader
+      eyebrow="Teklifler"
+      title={title}
+      meta={meta}
+      headerClassName="ofd-header"
+      mainClassName="ofd-header__main"
+      eyebrowClassName="ofd-header__eyebrow"
+      metaClassName="ofd-header__meta"
+      actions={
+        <div className="ofd-header__actions">
+          {quickHref ? (
+            <Link href={quickHref} className="ofd-header__btn ofd-header__btn--primary">
+              Hızlı İşlem
+            </Link>
+          ) : null}
+          <Link href={backHref} className="ofd-header__btn">
+            {backLabel}
           </Link>
-        ) : null}
-        <Link href={backHref} className="ofd-header__btn">
-          {backLabel}
-        </Link>
-      </div>
-    </header>
+        </div>
+      }
+    />
   );
 }
 
@@ -94,15 +117,19 @@ export function OfferReferenceDemoBand() {
     return null;
   }
   return (
-    <p className="ofd-demo-band" role="status">
+    <DetailDemoBand className="ofd-demo-band">
       Örnek veri modu: bu kayıt demo amaçlıdır; kaydet, gönder ve dönüşüm aksiyonları canlıda bağlı değildir.
-    </p>
+    </DetailDemoBand>
   );
 }
 
 export function OfferReferenceKpiStrip({ kpis }: { kpis: OfferReferenceKpi[] }) {
   return (
-    <section className="ofd-kpi-strip" aria-label="Teklif özeti">
+    <DetailKpiStrip
+      className="ofd-kpi-strip"
+      stickyClassName="ofd-sticky-summary"
+      ariaLabel="Teklif özeti"
+    >
       {kpis.map((kpi) => (
         <article key={kpi.label} className={`ofd-kpi${kpi.tone ? ` ofd-kpi--${kpi.tone}` : ""}`}>
           <span className="ofd-kpi__label">{kpi.label}</span>
@@ -110,7 +137,7 @@ export function OfferReferenceKpiStrip({ kpis }: { kpis: OfferReferenceKpi[] }) 
           <span className="ofd-kpi__hint">{kpi.hint}</span>
         </article>
       ))}
-    </section>
+    </DetailKpiStrip>
   );
 }
 
@@ -159,12 +186,9 @@ export function OfferReferenceSideCard({
   children: ReactNode;
 }) {
   return (
-    <section className="ofd-side-card">
-      <header className="ofd-side-card__head">
-        <h3>{title}</h3>
-      </header>
+    <DetailSideCard title={title} className="ofd-side-card" headClassName="ofd-side-card__head">
       {children}
-    </section>
+    </DetailSideCard>
   );
 }
 

@@ -18,6 +18,7 @@ import {
   OrderReferenceSection,
   OrderReferenceShell,
   OrderReferenceSidePanel,
+  OrderReferenceSummaryScroll,
   OrderReferenceTimelineList,
   orderInfoFields
 } from "./order-reference-shared";
@@ -60,9 +61,10 @@ export function OrderDetailPage({
     <>
       <OrderReferenceShell>
         <OrderReferenceHeader title="Sipariş Detayı" meta={state.referenceModel.headerMeta} quickHref={quickHref} />
-        <OrderReferenceDemoBand />
-        <OrderReferenceKpiStrip kpis={state.referenceModel.kpis} />
-        <main className="spd-layout">
+        <OrderReferenceSummaryScroll>
+          <OrderReferenceDemoBand />
+          <OrderReferenceKpiStrip kpis={state.referenceModel.kpis} />
+          <main className="spd-layout">
           <section className="spd-main">
             <OrderReferenceSection title="Sipariş bilgileri" description="Detay katmanları üst menüden açılır.">
               <OrderReferenceFieldGrid fields={orderInfoFields(order, state.customer)} />
@@ -105,6 +107,7 @@ export function OrderDetailPage({
             />
           </aside>
         </main>
+        </OrderReferenceSummaryScroll>
       </OrderReferenceShell>
 
       <SourcingPlanModal open={sourcingOpen} order={order} onClose={() => setSourcingOpen(false)} />

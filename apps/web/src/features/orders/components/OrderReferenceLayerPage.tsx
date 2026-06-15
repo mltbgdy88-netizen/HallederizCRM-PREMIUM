@@ -27,6 +27,7 @@ import {
   OrderReferenceSection,
   OrderReferenceShell,
   OrderReferenceSidePanel,
+  OrderReferenceSummaryScroll,
   OrderReferenceTimelineList,
   OrderReferenceWarehouseTable,
   orderInfoFields
@@ -355,15 +356,17 @@ export function OrderReferenceLayerPage({ orderId, layer }: { orderId: string; l
           meta={state.referenceModel.headerMeta}
           quickHref={quickHref}
         />
-        <OrderReferenceDemoBand />
-        <OrderReferenceKpiStrip kpis={state.referenceModel.kpis} />
-        <LayerContent
-          layer={layer}
-          order={state.order}
-          customer={state.customer}
-          scoped={state.scopedSide}
-          model={state.referenceModel}
-        />
+        <OrderReferenceSummaryScroll>
+          <OrderReferenceDemoBand />
+          <OrderReferenceKpiStrip kpis={state.referenceModel.kpis} />
+          <LayerContent
+            layer={layer}
+            order={state.order}
+            customer={state.customer}
+            scoped={state.scopedSide}
+            model={state.referenceModel}
+          />
+        </OrderReferenceSummaryScroll>
       </OrderReferenceShell>
     </SiparislerOrderidCommandCenterShell>
   );
