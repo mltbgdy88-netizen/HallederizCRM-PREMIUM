@@ -136,3 +136,20 @@ Kod ve CSS yapısı enterprise detay standardına yakın; cariler kök (`cdm-*`)
 - `CustomerEntityLayerNav` wire edilmedi; `cdm-tabs` / `cul-tabs` korundu.
 - `cariler-shell-command-center.css`: cdm/cul overflow ve padding uyumu eklendi.
 - Yerel visual QA önerilir (shell padding, sticky KPI, 1366 taşma).
+
+---
+
+## T5-P3C-2B güncelleme (2026-06-08)
+
+- `CustomerEntityLayerNav` command center shell içine wire edildi; tek nav kaynağı.
+- `cdm-tabs` ve `cul-tabs` render'dan kaldırıldı.
+- Yerel visual QA önerilir (aktif tab state, 8 item nav scroll, sticky KPI).
+
+---
+
+## T5-P3C-3A güncelleme (2026-06-08)
+
+- `cdm-tabs` / `cul-tabs` dead CSS temizlendi (`cariler-detay-reference.css`, `cariler-katman-reference.css`).
+- Route'a bağlı olmayan `customer-layer-reference-shell.tsx` ve `customer-layer-frame/**` silindi.
+- `.ckm-*` mega CSS prune P3C-4'e bırakıldı; `ckm-kpi-icon` korundu.
+- Yerel visual QA önerilir (EntityLayerNav görünürlüğü, kök cdm-grid, sticky KPI).

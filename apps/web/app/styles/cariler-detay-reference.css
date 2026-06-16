@@ -142,32 +142,6 @@
   opacity: 0.75;
 }
 
-.cdm-tabs {
-  display: flex;
-  gap: 2px;
-  border-bottom: 1px solid #e2e8f0;
-  flex-shrink: 0;
-  overflow: hidden;
-}
-
-.cdm-tab {
-  padding: 7px 11px;
-  border: none;
-  border-bottom: 2px solid transparent;
-  background: transparent;
-  color: #64748b;
-  font-size: 11px;
-  font-weight: 700;
-  cursor: pointer;
-  margin-bottom: -1px;
-  white-space: nowrap;
-}
-
-.cdm-tab--active {
-  color: var(--cdm-green);
-  border-bottom-color: var(--cdm-green);
-}
-
 .cdm-grid {
   display: grid;
   grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr);
@@ -597,16 +571,6 @@
   min-height: 560px;
 }
 
-.cdm-tab {
-  text-decoration: none;
-}
-
-.cdm-tab:focus-visible {
-  outline: 2px solid color-mix(in srgb, var(--cdm-green) 45%, #fff);
-  outline-offset: 2px;
-  border-radius: 6px;
-}
-
 @media (max-width: 1280px) {
   .cdm-hero {
     grid-template-columns: auto auto minmax(0, 1fr);
@@ -650,11 +614,6 @@
 
   .cdm-grid-scroll .cdm-grid {
     min-height: 0;
-  }
-
-  .cdm-tabs {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
   }
 
   .cdm-hero {
