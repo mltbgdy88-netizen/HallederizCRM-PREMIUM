@@ -5,7 +5,6 @@ import type { ReactNode } from "react";
 import { EmptyState } from "@hallederiz/ui";
 import type { CustomerLayerKey } from "../../ui-inventory/utils/cariler-subroute-command-center-data";
 import { useCustomerLayerReferenceState } from "../hooks/use-customer-layer-reference-state";
-import { CUSTOMER_LAYER_NAV_ITEMS } from "../utils/customer-layer-nav";
 import type {
   CkmBadgeTone,
   CkmTablePanel,
@@ -27,10 +26,6 @@ type Props = {
   customerId: string;
   layer: CustomerLayerKey;
 };
-
-function layerHref(customerId: string, layer: CustomerLayerKey): string {
-  return `/cariler/${customerId}/${layer}`;
-}
 
 function layerTitle(layer: CustomerLayerKey): string {
   switch (layer) {
@@ -157,26 +152,6 @@ function Header({ view }: { view: CustomerLayerReferenceView }) {
         </div>
       </div>
     </CustomerReferenceLayerHeader>
-  );
-}
-
-function Tabs({ view }: { view: CustomerLayerReferenceView }) {
-  return (
-    <nav className="cul-tabs" aria-label="Cari katman sekmeleri">
-      {CUSTOMER_LAYER_NAV_ITEMS.map((tab) => {
-        const active = tab.id === view.layer;
-        return (
-          <Link
-            key={tab.id}
-            href={layerHref(view.customerId, tab.id)}
-            className={active ? "cul-tab cul-tab--active" : "cul-tab"}
-            aria-current={active ? "page" : undefined}
-          >
-            {tab.label}
-          </Link>
-        );
-      })}
-    </nav>
   );
 }
 
@@ -949,7 +924,7 @@ export function CustomerLayerReferenceLayout({ customerId, layer }: Props) {
 
   if (desk.isDemoPreview) {
     return (
-      <CustomerReferenceCommandCenterFrame>
+      <CustomerReferenceCommandCenterFrame customerId={customerId}>
         <div className={className} data-page="customer-layer-unified">
           <EmptyState
             title="Önizleme kaydı"
@@ -967,7 +942,7 @@ export function CustomerLayerReferenceLayout({ customerId, layer }: Props) {
 
   if (desk.loading) {
     return (
-      <CustomerReferenceCommandCenterFrame>
+      <CustomerReferenceCommandCenterFrame customerId={customerId}>
         <CustomerReferenceLoadingState variant="cul" layer={layer} />
       </CustomerReferenceCommandCenterFrame>
     );
@@ -975,18 +950,17 @@ export function CustomerLayerReferenceLayout({ customerId, layer }: Props) {
 
   if (!desk.view) {
     return (
-      <CustomerReferenceCommandCenterFrame>
+      <CustomerReferenceCommandCenterFrame customerId={customerId}>
         <CustomerReferenceNotFoundState variant="cul" layer={layer} />
       </CustomerReferenceCommandCenterFrame>
     );
   }
 
   return (
-    <CustomerReferenceCommandCenterFrame>
+    <CustomerReferenceCommandCenterFrame customerId={customerId}>
       <CustomerReferenceLayerShell layer={layer}>
-      <Header view={desk.view} />
-      <Tabs view={desk.view} />
-      <CustomerReferenceSummaryScroll>
+        <Header view={desk.view} />
+        <CustomerReferenceSummaryScroll>
         <CustomerReferenceDemoBand />
         <KpiStrip view={desk.view} />
         <LayoutBody view={desk.view} />

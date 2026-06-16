@@ -11,7 +11,6 @@ import {
   IconCdmPerf
 } from "./customer-detail-reference-icons";
 import { CustomerReferenceCommandCenterFrame, CustomerReferenceLoadingState, CustomerReferenceNotFoundState } from "./customer-reference-shared";
-import { CUSTOMER_DETAIL_ROOT_LABEL, customerLayerHref } from "../utils/customer-layer-nav";
 import type { CustomerDetailReferenceView } from "../utils/map-customer-detail-to-reference";
 
 type Props = {
@@ -233,7 +232,7 @@ export function CustomerDetailReferenceLayout({ customerId }: Props) {
 
   if (desk.isDemoPreview) {
     return (
-      <CustomerReferenceCommandCenterFrame>
+      <CustomerReferenceCommandCenterFrame customerId={customerId}>
         <div className="cdm-home cdm-home--embedded" data-page="customer-detail-reference">
           <EmptyState
             title="Önizleme kaydı"
@@ -251,7 +250,7 @@ export function CustomerDetailReferenceLayout({ customerId }: Props) {
 
   if (desk.loading) {
     return (
-      <CustomerReferenceCommandCenterFrame>
+      <CustomerReferenceCommandCenterFrame customerId={customerId}>
         <CustomerReferenceLoadingState variant="cdm" />
       </CustomerReferenceCommandCenterFrame>
     );
@@ -259,7 +258,7 @@ export function CustomerDetailReferenceLayout({ customerId }: Props) {
 
   if (!desk.view) {
     return (
-      <CustomerReferenceCommandCenterFrame>
+      <CustomerReferenceCommandCenterFrame customerId={customerId}>
         <CustomerReferenceNotFoundState variant="cdm" />
       </CustomerReferenceCommandCenterFrame>
     );
@@ -268,7 +267,7 @@ export function CustomerDetailReferenceLayout({ customerId }: Props) {
   const view = desk.view;
 
   return (
-    <CustomerReferenceCommandCenterFrame>
+    <CustomerReferenceCommandCenterFrame customerId={customerId}>
       <div className="cdm-home cdm-home--embedded" data-page="customer-detail-reference">
       <header className="cdm-hero" aria-label="Cari üst bilgi">
         <Link href="/cariler" className="cdm-back" aria-label="Cariler listesine dön">
@@ -305,29 +304,6 @@ export function CustomerDetailReferenceLayout({ customerId }: Props) {
           </button>
         </div>
       </header>
-
-      <nav className="cdm-tabs" aria-label="Cari detay ve katmanları" role="tablist">
-        <Link
-          href={customerLayerHref(customerId)}
-          role="tab"
-          aria-selected
-          aria-current="page"
-          className="cdm-tab cdm-tab--active"
-        >
-          {CUSTOMER_DETAIL_ROOT_LABEL}
-        </Link>
-        {view.tabs.map((tab) => (
-          <Link
-            key={tab.id}
-            href={tab.href}
-            role="tab"
-            aria-selected={false}
-            className="cdm-tab"
-          >
-            {tab.label}
-          </Link>
-        ))}
-      </nav>
 
       <div className="cdm-grid-scroll">
         <DetailPanels view={view} />
