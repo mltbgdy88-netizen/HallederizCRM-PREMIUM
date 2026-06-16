@@ -10,7 +10,7 @@ import {
   IconCdmContact,
   IconCdmPerf
 } from "./customer-detail-reference-icons";
-import { CustomerReferenceLoadingState, CustomerReferenceNotFoundState } from "./customer-reference-shared";
+import { CustomerReferenceCommandCenterFrame, CustomerReferenceLoadingState, CustomerReferenceNotFoundState } from "./customer-reference-shared";
 import { CUSTOMER_DETAIL_ROOT_LABEL, customerLayerHref } from "../utils/customer-layer-nav";
 import type { CustomerDetailReferenceView } from "../utils/map-customer-detail-to-reference";
 
@@ -233,32 +233,43 @@ export function CustomerDetailReferenceLayout({ customerId }: Props) {
 
   if (desk.isDemoPreview) {
     return (
-      <div className="cdm-home cdm-home--embedded" data-page="customer-detail-reference">
-        <EmptyState
-          title="Önizleme kaydı"
-          message="Bu kayıt portföy önizlemesidir; gerçek cari detayı açılmaz. Listeden gerçek bir cari seçin."
-          actions={
-            <Link href="/cariler" className="cdm-btn cdm-btn--outline">
-              Cari listesine dön
-            </Link>
-          }
-        />
-      </div>
+      <CustomerReferenceCommandCenterFrame>
+        <div className="cdm-home cdm-home--embedded" data-page="customer-detail-reference">
+          <EmptyState
+            title="Önizleme kaydı"
+            message="Bu kayıt portföy önizlemesidir; gerçek cari detayı açılmaz. Listeden gerçek bir cari seçin."
+            actions={
+              <Link href="/cariler" className="cdm-btn cdm-btn--outline">
+                Cari listesine dön
+              </Link>
+            }
+          />
+        </div>
+      </CustomerReferenceCommandCenterFrame>
     );
   }
 
   if (desk.loading) {
-    return <CustomerReferenceLoadingState variant="cdm" />;
+    return (
+      <CustomerReferenceCommandCenterFrame>
+        <CustomerReferenceLoadingState variant="cdm" />
+      </CustomerReferenceCommandCenterFrame>
+    );
   }
 
   if (!desk.view) {
-    return <CustomerReferenceNotFoundState variant="cdm" />;
+    return (
+      <CustomerReferenceCommandCenterFrame>
+        <CustomerReferenceNotFoundState variant="cdm" />
+      </CustomerReferenceCommandCenterFrame>
+    );
   }
 
   const view = desk.view;
 
   return (
-    <div className="cdm-home cdm-home--embedded" data-page="customer-detail-reference">
+    <CustomerReferenceCommandCenterFrame>
+      <div className="cdm-home cdm-home--embedded" data-page="customer-detail-reference">
       <header className="cdm-hero" aria-label="Cari üst bilgi">
         <Link href="/cariler" className="cdm-back" aria-label="Cariler listesine dön">
           <IconCdmBack />
@@ -321,6 +332,7 @@ export function CustomerDetailReferenceLayout({ customerId }: Props) {
       <div className="cdm-grid-scroll">
         <DetailPanels view={view} />
       </div>
-    </div>
+      </div>
+    </CustomerReferenceCommandCenterFrame>
   );
 }

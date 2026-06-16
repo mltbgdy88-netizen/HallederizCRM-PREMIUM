@@ -10,12 +10,26 @@ import {
   DetailSideCard
 } from "../../shared/detail-shell";
 import type { CustomerLayerKey } from "../../ui-inventory/utils/cariler-subroute-command-center-data";
+import { CarilerCustomeridCommandCenterShell } from "../../ui-inventory/components/CarilerShellWrappers";
 
 type CustomerReferenceStateShellProps = {
   children: ReactNode;
   variant: "cdm" | "cul";
   layer?: CustomerLayerKey;
 };
+
+export function CustomerReferenceCommandCenterFrame({
+  children,
+  className
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  const inner =
+    className ? <div className={className}>{children}</div> : children;
+
+  return <CarilerCustomeridCommandCenterShell>{inner}</CarilerCustomeridCommandCenterShell>;
+}
 
 export function CustomerReferenceLayerShell({
   children,

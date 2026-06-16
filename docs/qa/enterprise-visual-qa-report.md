@@ -127,3 +127,12 @@ Kod ve CSS yapısı enterprise detay standardına yakın; cariler kök (`cdm-*`)
 - Katman sayfalarında `cul-tabs` değişmedi; çift nav yok.
 - `cariler-detay-reference.css`: 1280px ve 960px `cdm-*` responsive breakpoint eklendi.
 - Yerel browser QA hâlâ önerilir (sticky KPI + kök grid 1366).
+
+---
+
+## T5-P3C-2A güncelleme (2026-06-08)
+
+- Kök ve katman layout'ları `CustomerReferenceCommandCenterFrame` + `CarilerCustomeridCommandCenterShell` ile sarıldı.
+- `CustomerEntityLayerNav` wire edilmedi; `cdm-tabs` / `cul-tabs` korundu.
+- `cariler-shell-command-center.css`: cdm/cul overflow ve padding uyumu eklendi.
+- Yerel visual QA önerilir (shell padding, sticky KPI, 1366 taşma).

@@ -19,6 +19,50 @@
   margin: 0 auto;
 }
 
+/* T5-P3C-2A — reference detay/katman shell içinde cdm/cul */
+
+.hz-shell-content:has(.hz-cariler-customerid-center),
+.hz-shell-content-frame:has(.hz-cariler-customerid-center),
+.platform-content:has(.hz-cariler-customerid-center) {
+  padding: 0 !important;
+  background: #fdfcf9 !important;
+  border: none !important;
+  box-shadow: none !important;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.platform-content:has(.hz-cariler-customerid-center) > .hz-cariler-customerid-center {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+}
+
+.hz-cariler-customerid-center:has(.cdm-home--embedded),
+.hz-cariler-customerid-center:has(.cul-page) {
+  height: 100%;
+  min-height: 0;
+  max-height: 100%;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.hz-cariler-customerid-center:has(.cdm-home--embedded) > .cdm-home--embedded,
+.hz-cariler-customerid-center:has(.cul-page) > .cul-page {
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+  width: 100%;
+  max-width: 1604px;
+  margin: 0 auto;
+}
+
 /* Dark mode overrides */
 html:root[data-theme="dark"] .hz-cariler-yeni-center,
 html:root[data-theme="dark"] .hz-cariler-customerid-center {
@@ -26,4 +70,11 @@ html:root[data-theme="dark"] .hz-cariler-customerid-center {
     var(--hz-brand-light-beam),
     var(--hz-bg);
   color: var(--hz-text-default);
+}
+
+@media (max-width: 1366px) {
+  .hz-cariler-customerid-center:has(.cdm-home--embedded) > .cdm-home--embedded,
+  .hz-cariler-customerid-center:has(.cul-page) > .cul-page {
+    max-width: 100%;
+  }
 }
