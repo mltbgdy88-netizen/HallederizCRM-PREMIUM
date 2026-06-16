@@ -11,6 +11,7 @@ import {
 } from "../../shared/detail-shell";
 import type { CustomerLayerKey } from "../../ui-inventory/utils/cariler-subroute-command-center-data";
 import { CarilerCustomeridCommandCenterShell } from "../../ui-inventory/components/CarilerShellWrappers";
+import { CustomerEntityLayerNav } from "../../ui-inventory/components/EntityLayerNav";
 
 type CustomerReferenceStateShellProps = {
   children: ReactNode;
@@ -20,15 +21,21 @@ type CustomerReferenceStateShellProps = {
 
 export function CustomerReferenceCommandCenterFrame({
   children,
-  className
+  className,
+  customerId
 }: {
   children: ReactNode;
   className?: string;
+  customerId?: string;
 }) {
-  const inner =
-    className ? <div className={className}>{children}</div> : children;
+  const inner = className ? <div className={className}>{children}</div> : children;
 
-  return <CarilerCustomeridCommandCenterShell>{inner}</CarilerCustomeridCommandCenterShell>;
+  return (
+    <CarilerCustomeridCommandCenterShell>
+      {customerId ? <CustomerEntityLayerNav customerId={customerId} /> : null}
+      {inner}
+    </CarilerCustomeridCommandCenterShell>
+  );
 }
 
 export function CustomerReferenceLayerShell({

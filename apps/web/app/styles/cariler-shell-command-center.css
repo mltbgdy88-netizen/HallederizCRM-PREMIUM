@@ -63,6 +63,14 @@
   margin: 0 auto;
 }
 
+.hz-cariler-customerid-center > .hz-entity-layer-nav {
+  flex-shrink: 0;
+  width: 100%;
+  max-width: 1604px;
+  margin: 0 auto;
+  box-sizing: border-box;
+}
+
 /* Dark mode overrides */
 html:root[data-theme="dark"] .hz-cariler-yeni-center,
 html:root[data-theme="dark"] .hz-cariler-customerid-center {
