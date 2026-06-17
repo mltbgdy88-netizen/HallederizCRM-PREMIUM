@@ -30,3 +30,14 @@ apps/local-ai-service/assets/tr_TR-dfki-medium.onnx
 Thumbs.db
 .idea
 .vscode
+
+# Local/generated artifacts hygiene
+__pycache__/
+*.pyc
+*.pyo
+.venv/
+apps/local-ai-service/.venv/
+.tmp-*/
+artifacts/
+*.zip
+*.tsbuildinfo
