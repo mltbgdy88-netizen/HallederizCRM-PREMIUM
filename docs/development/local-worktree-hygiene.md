@@ -159,3 +159,13 @@ pnpm --filter @hallederiz/ui typecheck
 ## Final karar
 
 **DEV_ENV_DOCS_READY**
+
+## Local generated artifacts
+
+- Python cache files such as __pycache__/, *.pyc, and *.pyo must not be committed.
+- Local AI virtual environments such as apps/local-ai-service/.venv/ must remain local.
+- Temporary extraction folders such as .tmp-* must not be committed.
+- Build/artifact folders such as artifacts/ must not be committed.
+- ZIP exports and local archive files must not be committed.
+- TypeScript build info files such as *.tsbuildinfo must not be committed.
+- The local AI model binary apps/local-ai-service/assets/tr_TR-dfki-medium.onnx remains ignored and is downloaded locally when needed.
