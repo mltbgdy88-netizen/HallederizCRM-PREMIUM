@@ -1,5 +1,6 @@
 import {
   createWorkerRuntimeApp,
+  normalizeWorkerMode,
   processWorkerTick,
   type WorkerRuntimeApp,
   type WorkerRuntimeAppConfig,
@@ -48,7 +49,7 @@ export {
   type WorkerProductionTickResult
 };
 
-const workerMode = (process.env.WORKER_MODE ?? "foundation_dry_run").trim().toLowerCase();
+const workerMode = normalizeWorkerMode(process.env.WORKER_MODE);
 
 if (workerMode === "production") {
   const result = await runWorkerProductionTick();

@@ -32,7 +32,7 @@ Operasyon hedefi: Postgres persistence, migration uygulanmış DB ve production-
 | `APP_BASE_URL` | Staging web origin |
 | `API_BASE_URL` | Staging API origin |
 | `API_CORS_ORIGINS` | Staging web origin(ler)i (wildcard yok) |
-| `WORKER_MODE` | `durable` |
+| `WORKER_MODE` | `durable` (ops adi; worker runtime icinde `production` olarak normalize edilir) |
 | `APPROVAL_EXECUTION_MODE` | `controlled` (foundation değil) |
 | `DEMO_AUTH_ENABLED` | `false` |
 | `NEXT_PUBLIC_ENABLE_DEMO_AUTH` | `false` |

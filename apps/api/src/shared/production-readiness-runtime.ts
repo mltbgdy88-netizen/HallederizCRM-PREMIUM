@@ -1,4 +1,4 @@
-import { evaluateProductionSafety } from "@hallederiz/domain";
+import { evaluateProductionSafety, normalizeWorkerMode } from "@hallederiz/domain";
 import { getAuthMode } from "./auth-mode";
 import { resolveOmnichannelRuntime } from "./omnichannel-runtime";
 import { resolvePendingApprovalRepository } from "./approval-repository-runtime";
@@ -130,6 +130,8 @@ export async function evaluateProductionReadiness(context: RequestContext): Prom
   const usageLedger = resolveTenantUsageLedger(context);
   const omnichannel = resolveOmnichannelRuntime(context);
   const workerMode = process.env.WORKER_MODE?.trim() || "foundation";
+  const resolvedWorkerMode =
+    workerMode === "foundation" ? "foundation" : normalizeWorkerMode(workerMode);
   const approvalExecutionMode = process.env.APPROVAL_EXECUTION_MODE?.trim() || "foundation";
 
   if (process.env.PERSISTENCE_MODE === "demo") {
@@ -179,7 +181,7 @@ export async function evaluateProductionReadiness(context: RequestContext): Prom
     unsafeFallbacks.push(...omnichannel.reasons);
   }
 
-  if (isProduction && workerMode !== "durable") {
+  if (isProduction && resolvedWorkerMode !== "production") {
     blockers.push("worker_mode_not_durable");
     unsafeFallbacks.push("worker_mode_foundation");
   }
@@ -249,7 +251,7 @@ export async function evaluateProductionReadiness(context: RequestContext): Prom
   const overallStatus: ProductionReadinessStatus =
     uniqueBlockers.length > 0 ? "blocked" : uniqueWarnings.length > 0 ? "degraded" : "ready";
 
-  const workerSafe = workerMode === "durable" && authMode.persistenceMode === "postgres";
+  const workerSafe = resolvedWorkerMode === "production" && authMode.persistenceMode === "postgres";
   const providerSafe = !providerModes.some((item) => item.mode === "mock");
   const mutationSafe =
     overallStatus !== "blocked" &&
@@ -328,7 +330,7 @@ export async function evaluateProductionReadiness(context: RequestContext): Prom
     unsafeFallbacks: uniqueUnsafeFallbacks,
     nextActions: [
       "Eksik env degiskenlerini production secret manager uzerinden tamamla.",
-      "PERSISTENCE_MODE=postgres ve WORKER_MODE=durable ile canli acilisi dogrula.",
+      "PERSISTENCE_MODE=postgres ve WORKER_MODE=durable (veya production) ile canli acilisi dogrula.",
       "Mock/provider foundation modlarini canli entegrasyonla degistirmeden ready bekleme.",
       "Approval ve worker akislari icin dry_run sonucunu canli basari gibi raporlama."
     ],
