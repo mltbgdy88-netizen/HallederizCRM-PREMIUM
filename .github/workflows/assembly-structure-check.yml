@@ -1,0 +1,24 @@
+name: assembly structure check
+
+on:
+  push:
+    branches: [main, unified-crm-assembly]
+  pull_request:
+    branches: [main]
+
+jobs:
+  structure-check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Check required assembly files
+        run: |
+          test -f README.md
+          test -f docs/assembly/source-map.md
+          test -f docs/assembly/feature-map.md
+          test -f docs/assembly/merge-plan.md
+          test -f packages/crm-core/README.md
+          test -f packages/sales/README.md
+          test -f packages/inventory/README.md
+          test -f packages/wallpaper-sector/README.md
+          test -f apps/web/README.md
