@@ -1,86 +1,93 @@
-# HallederizCRM-PREMIUM
+# no-code — Birleşik Açık Kaynak CRM Platformu
 
-HallederizCRM-PREMIUM, duvar kagidi sektorune odakli, cok kiracili (multi-tenant), operasyon motoru guclu bir CRM platformu icin olusturulmus temiz bir monorepo bootstrap iskeletidir.
+Bu repo, farklı açık kaynak CRM/ERP/AI projelerini doğrudan tek bir ürün gibi kullanmak yerine, onları **referans kaynak** olarak kullanarak birleşik bir CRM platformu oluşturmak için hazırlanmıştır.
 
-Bu baslangic seti su hedefler icin zemin hazirlar:
-- CRM + operasyon omurgasi
-- WhatsApp otomasyonu
-- ERP / fabrika entegrasyonlari
-- Insan onayli lokal yapay zeka akislari
-- Kurumsal, masaustu gibi kullanima uygun web arayuzu
+## Hedef
 
-## Teknoloji Secimi
+1000 maddelik **Amiral Gemisi CRM** özellik listesini aşamalı şekilde çalışan tek CRM ürününe dönüştürmek.
 
-- Monorepo: `pnpm workspace`
-- Orkestrasyon: `turbo`
-- Dil: `TypeScript`
-- Web: `Next.js` (`apps/web`)
-- API: `Fastify` tabanli TypeScript servis (`apps/api`)
+Bu hedef tek adımda tamamlanmaz. Farklı açık kaynak projeler farklı teknoloji, veri modeli ve auth yapısı kullandığı için doğru yaklaşım şudur:
 
-## Klasor Yapisi
+1. Açık kaynak repoları `vendor/` altında referans olarak tutmak.
+2. Tek ürün mimarisini `apps/` ve `packages/` altında kurmak.
+3. Ortak veri modeli, API, auth, rol/yetki ve tenant izolasyonu tasarlamak.
+4. Kaynak repolardan kullanılabilir UI, domain, workflow ve AI yaklaşımlarını kontrollü şekilde taşımak.
+5. Eksik sektörel özellikleri özel modüller olarak geliştirmek.
+
+## İndirilen açık kaynak kaynaklar
+
+| Kaynak | Yerel klasör | Rol |
+|---|---|---|
+| Atomic CRM | `vendor/atomic-crm` | Modern CRM arayüz referansı; dashboard, contacts, companies, deals demo ekranları |
+| Django CRM / BottleCRM | `vendor/django-crm` | Multi-tenant CRM/API referansı |
+| Krayin CRM | `vendor/laravel-crm` | Klasik CRM/satış süreçleri referansı |
+| NocoBase | `vendor/nocobase` | Low-code/no-code ana platform adayı |
+| OpenSource Startup CRM | `vendor/opensource-startup-crm` | Svelte/Node CRM referansı |
+| Multi-Agent Enterprise CRM | `vendor/multi-agent-enterprise-crm` | AI agent ve event-driven mimari referansı |
+
+> Not: `vendor/` kaynakları büyük olduğu için GitHub'a doğrudan toplu kopyalamak yerine yerelde indirildi. Bu repo, birleşik ürünün ana gövdesini ve entegrasyon planını tutar.
+
+## Birleşik ürün yapısı
 
 ```text
-.
-|-- apps
-|   |-- web
-|   |-- api
-|   |-- worker
-|   |-- ai-service
-|   `-- local-agent
-|-- packages
-|   |-- ui
-|   |-- config
-|   |-- database
-|   |-- types
-|   |-- utils
-|   |-- domain
-|   `-- sdk
-|-- docs
-|   |-- architecture
-|   |-- database
-|   |-- product
-|   |-- ui
-|   `-- codex-prompts
-|-- package.json
-|-- pnpm-workspace.yaml
-|-- turbo.json
-`-- tsconfig.base.json
+apps/
+  web/            Tek CRM arayüzü
+  api/            Tek backend API
+  worker/         Queue/background jobs
+  ai-gateway/     AI servis katmanı
+
+packages/
+  crm-core/       Müşteri, firma, kişi, lead, fırsat, görev
+  tenant-auth/    Firma/workspace, kullanıcı, rol, yetki
+  sales/          Teklif, sipariş, pipeline
+  inventory/      Ürün, stok, depo, şube, bayi
+  finance/        Cari, tahsilat, borç/alacak, risk limitleri
+  integrations/   WhatsApp, e-posta, SMS, webhook, API adapter
+  wallpaper-sector/ Duvar kağıdı, rulo, fire, metraj, numune, katalog
 ```
 
-## Hizli Baslangic
+## Çalışan ilk kanıt
 
-```bash
-pnpm install
-pnpm dev
+Atomic CRM demo başarıyla çalıştırıldı:
+
+```powershell
+Set-Location "C:\Users\mevlu\no-code\vendor\atomic-crm"
+npm install
+npm run dev:demo
 ```
 
-Ayri servis calistirmak icin:
+Tarayıcı:
 
-```bash
-pnpm --filter @hallederiz/web dev
-pnpm --filter @hallederiz/api dev
-pnpm --filter @hallederiz/worker dev
+```text
+http://localhost:5173/
 ```
 
-## Bootstrap Prensipleri
+Görülen çalışan sayfalar:
 
-- Is mantigi bilincli olarak eklenmedi.
-- Kod sade, okunakli ve genislemeye acik tasarlandi.
-- `@hallederiz/*` alias yapisi buyume ve domain ayrisimi icin hazirlandi.
-- Her app ve package icin minimal giris noktasi olusturuldu.
+- Dashboard
+- Contacts
+- Companies
+- Deals
 
-## Gelistirme is akisi
+## Önemli gerçek
 
-Branch/PR, Codex ve Cursor gorev standardi, kalite kapilari ve AI/onay kurallari: [docs/development/WORKFLOW.md](docs/development/WORKFLOW.md). Platform cekirdegi mimarisi: [docs/architecture/PLATFORM_CORE_ARCHITECTURE.md](docs/architecture/PLATFORM_CORE_ARCHITECTURE.md). Cursor agent kurallari: [.cursor/rules/](.cursor/rules/).
+Bu repo şu anda tüm 1000 özelliği çalışan nihai ürün değildir. İlk aşama, açık kaynak kaynakların toplanması ve birleşik CRM mimarisinin kurulmasıdır. Tüm özellikler aşamalı modül geliştirme ile tek ürüne taşınacaktır.
 
-## Product design docs
+## Sonraki teknik hedef
 
-[docs/product/README.md](docs/product/README.md)
+Ana öneri: **NocoBase tabanlı birleşik CRM + Atomic CRM UI referansı + özel TypeScript paketleri**.
 
-## Sonraki Asamalar (Oneri)
+İlk gerçek MVP hedefi:
 
-1. Tenant-aware auth ve RBAC omurgasi
-2. Event-driven operasyon akislari
-3. WhatsApp/ERP adapter katmani
-4. Lokal AI onay-kontrol boru hatlari
-5. Gozlemlenebilirlik (logs/metrics/tracing)
+- Workspace / tenant
+- Kullanıcı
+- Rol / yetki
+- Müşteri
+- Firma
+- Kişi
+- Lead
+- Fırsat
+- Görev
+- Dashboard
+- Basit teklif
+- Basit ürün listesi
