@@ -1,5 +1,5 @@
 import { applyDatabaseMigrations, createPostgresMigrationExecutor, listAppliedMigrations } from "./migrations.js";
-import { loadMigrationSqlFiles, loadSeedSqlFiles } from "./scripts.js";
+import { listPackageMigrationSqlContents, listPackageSeedSqlContents } from "./scripts.js";
 
 function getPostgresUrl(): string | undefined {
   return process.env.POSTGRES_URL ?? process.env.DATABASE_URL;
@@ -9,13 +9,13 @@ async function main() {
   const target = process.argv[2];
 
   if (target === "migrations") {
-    const files = await loadMigrationSqlFiles(import.meta.url);
+    const files = await listPackageMigrationSqlContents();
     console.log(`Migrations loaded: ${files.length}`);
     return;
   }
 
   if (target === "seeds") {
-    const files = await loadSeedSqlFiles(import.meta.url);
+    const files = await listPackageSeedSqlContents();
     console.log(`Seeds loaded: ${files.length}`);
     return;
   }

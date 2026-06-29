@@ -34,7 +34,7 @@ const checks = [
   },
   {
     file: "apps/web/src/features/offers/components/OfferCreateHub.tsx",
-    patterns: ["Yeni Teklif", "Hızlı Teklif", "Detaylı Teklif", "buildQuickOfferHref"],
+    patterns: ["Yeni Teklif", "Hızlı Teklif", "Doğrudan taslak", "buildQuickOfferHref"],
     description: "Yeni teklif Hızlı İşlem hub"
   },
   {

@@ -2,7 +2,6 @@ import type { FastifyInstance } from "fastify";
 import {
   InMemoryApprovalExecutionLogRepository,
   InMemoryOutboxJobRepository,
-  dispatchApprovedAction,
   type PendingApprovalRepository
 } from "@hallederiz/domain";
 import {
@@ -20,6 +19,7 @@ import {
   type PendingApprovalRepositoryResolution
 } from "../../shared/approval-repository-runtime";
 import { executeApprovedPendingApproval, type ApprovalBridgeTrigger } from "../../shared/approval-execution-runtime";
+import { dispatchApprovedActionWithCommercialExecution } from "../../shared/approval-commercial-dispatch";
 import { isApprovalSandboxSeedRouteEnabled, runApprovalSandboxSeed } from "../../shared/approval-sandbox-seed";
 
 interface ApprovalPendingRepository {
@@ -51,7 +51,8 @@ function createDefaultBridgeTrigger(): ApprovalBridgeTrigger {
         persistenceMode: "postgres"
       });
       return executeApprovalWithOutboxBridge(request, {
-        dispatchApprovedAction: dispatchApprovedAction,
+        dispatchApprovedAction: (bridgeRequest) =>
+          dispatchApprovedActionWithCommercialExecution(bridgeRequest, context),
         transactionRunner: runner,
         approvalExecutionRepository: executionRepository,
         outboxRepository,
@@ -78,7 +79,8 @@ function createDefaultBridgeTrigger(): ApprovalBridgeTrigger {
     }
 
     return executeApprovalWithOutboxBridge(request, {
-      dispatchApprovedAction: dispatchApprovedAction,
+      dispatchApprovedAction: (bridgeRequest) =>
+        dispatchApprovedActionWithCommercialExecution(bridgeRequest, context),
       transactionRunner: foundationRunner,
       approvalExecutionRepository: foundationExecutionRepository,
       outboxRepository: foundationOutboxRepository,

@@ -299,6 +299,52 @@
   grid-column: 1 / -1;
 }
 
+.tdf-reversals-table {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.tdf-reversals-table__head,
+.tdf-reversals-table__row {
+  display: grid;
+  grid-template-columns: 1fr 1fr 0.8fr;
+  gap: 8px;
+  align-items: center;
+  font-size: 11px;
+}
+
+.tdf-reversals-table__head {
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--tdf-muted);
+}
+
+.tdf-reversals-table__row {
+  padding: 6px 0;
+  border-top: 1px solid var(--tdf-border);
+  color: var(--tdf-text);
+}
+
+.tdf-reversals-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.tdf-reversals-form textarea {
+  width: 100%;
+  min-height: 52px;
+  padding: 8px 10px;
+  border: 1px solid var(--tdf-border);
+  border-radius: 8px;
+  font: inherit;
+  resize: vertical;
+}
+
 .tdf-table-wrap {
   overflow: auto;
   border-radius: 10px;

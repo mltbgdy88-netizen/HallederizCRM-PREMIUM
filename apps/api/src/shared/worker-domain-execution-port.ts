@@ -6,11 +6,17 @@ import {
 } from "@hallederiz/domain";
 import type { QuickOperationLine, QuickOperationSubmitRequest } from "@hallederiz/types";
 import type { RequestContext } from "./request-context";
+import {
+  executeDocumentArchiveJob,
+  executeDocumentRenderJob
+} from "../modules/documents/document-execution-service";
 
 function buildWorkerContext(tenantId: string, payload: Record<string, unknown>): RequestContext {
   const actorId = typeof payload.actorId === "string" ? payload.actorId : "worker_system";
   const persistenceMode =
-    process.env.PERSISTENCE_MODE === "postgres" && process.env.DATABASE_URL ? "postgres" : "demo";
+    process.env.PERSISTENCE_MODE === "postgres" && (process.env.DATABASE_URL || process.env.POSTGRES_URL)
+      ? "postgres"
+      : "demo";
   return {
     tenantId,
     userId: actorId,
@@ -87,19 +93,11 @@ function executeDocumentJob(
   if (!documentId) {
     return deferred("missing_document_id");
   }
-  if (context.persistenceMode !== "postgres") {
-    return deferred("document_execution_not_wired", "document", documentId);
-  }
   if (jobType === "document_render") {
-    const rendererConfigured =
-      typeof process.env.DOCUMENT_RENDERER_URL === "string" && process.env.DOCUMENT_RENDERER_URL.trim().length > 0;
-    if (!rendererConfigured) {
-      return deferred("renderer_not_configured", "document", documentId);
-    }
-    return deferred("renderer_adapter_not_implemented", "document", documentId);
+    return executeDocumentRenderJob(context, documentId);
   }
   if (jobType === "document_archive") {
-    return deferred("archive_repository_not_implemented", "document", documentId);
+    return executeDocumentArchiveJob(context, documentId);
   }
   return deferred("unsupported_document_job", "document", documentId);
 }

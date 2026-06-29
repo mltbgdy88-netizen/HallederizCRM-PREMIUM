@@ -1,11 +1,14 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { LucideIcon } from "../../../components/icons/lucide-icons";
 import { dataSourceConfig } from "../../../lib/data-source";
+import { useToast } from "../../../providers/toast-provider";
 import { getOfferDetail } from "../../offers/queries/get-offers";
 import { getOrders } from "../queries/get-orders";
+import { createDirectDraftOrder } from "../utils/direct-order-create";
 
 export function buildQuickOrderHref(customerId?: string | null, sourceOfferId?: string | null): string {
   const params = new URLSearchParams();
@@ -26,9 +29,13 @@ export function OrderCreateHub({
   customerId: string | null;
   sourceOfferId: string | null;
 }) {
+  const router = useRouter();
+  const { pushToast } = useToast();
   const [customerName, setCustomerName] = useState<string | null>(null);
   const [sourceOfferNo, setSourceOfferNo] = useState<string | null>(null);
   const [resolving, setResolving] = useState(Boolean(customerId || sourceOfferId));
+  const [directCreating, setDirectCreating] = useState(false);
+  const [directCreated, setDirectCreated] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -73,6 +80,36 @@ export function OrderCreateHub({
     : "Siparişe dönüştürülecek teklifi seçin.";
 
   const showContextBand = true;
+
+  const handleDirectCreate = async () => {
+    if (dataSourceConfig.useDemoData) {
+      pushToast("Canlı kayıt modu kapalı. Hızlı İşlem Masası'nı kullanın.");
+      return;
+    }
+    if (directCreated || directCreating) {
+      return;
+    }
+    setDirectCreating(true);
+    const result = await createDirectDraftOrder({
+      customerId,
+      sourceOfferId,
+      note: sourceOfferId ? "Tekliften doğrudan sipariş" : "Hub üzerinden taslak sipariş"
+    });
+    setDirectCreating(false);
+    if (result.ok) {
+      setDirectCreated(true);
+      pushToast(result.orderNo ? `${result.orderNo} oluşturuldu.` : "Taslak sipariş oluşturuldu.");
+      router.push(`/siparisler/${result.orderId}`);
+      return;
+    }
+    if (result.approvalRequestId) {
+      setDirectCreated(true);
+      pushToast(result.message);
+      router.push(`/onaylar?focus=${result.approvalRequestId}`);
+      return;
+    }
+    pushToast(result.message);
+  };
 
   return (
     <section className="sof-page" aria-labelledby="sof-page-title">
@@ -159,22 +196,27 @@ export function OrderCreateHub({
               <LucideIcon name="clipboard-plus" size={20} />
             </span>
             <div>
-              <h2 className="sof-action-card__title">Manuel</h2>
+              <h2 className="sof-action-card__title">Doğrudan taslak</h2>
               <p className="sof-action-card__desc">
-                Manuel form sonraki fazda ayrıştırılacak; şu anda sipariş girişi Hızlı İşlem Masası üzerinden yapılır.
+                Kaynak teklif varsa dönüşüm yapılır; aksi halde cari bağlamıyla boş taslak sipariş oluşturulur.
               </p>
             </div>
-            <Link className="sof-action-card__cta" href={quickOrderHref}>
-              Manuel girişi hızlı masada aç
+            <button
+              type="button"
+              className="sof-action-card__cta"
+              disabled={directCreating || directCreated}
+              onClick={() => void handleDirectCreate()}
+            >
+              {directCreated ? "Talep gönderildi" : directCreating ? "Oluşturuluyor…" : "Taslak sipariş oluştur"}
               <LucideIcon name="arrow-right" size={14} />
-            </Link>
+            </button>
           </article>
         </div>
 
         <section className="sof-feature-bar" aria-label="Sipariş oluşturma notları">
           <article>
             <h3>Güvenli ve hızlı</h3>
-            <p>Onay sonrası kayıt işlenir; bu ekranda doğrudan kayıt oluşturulmaz.</p>
+            <p>Onay gerektiren işlemler kuyruğa alınır; doğrudan oluşturma canlı API üzerinden çalışır.</p>
           </article>
           <article>
             <h3>Operasyon etkisi</h3>

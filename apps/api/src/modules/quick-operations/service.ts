@@ -136,6 +136,40 @@ export class QuickOperationsService {
     }
   }
 
+  /** Runs approved quick-operation payload without re-queueing for approval. */
+  async executeApprovedSubmission(request: QuickOperationSubmitRequest): Promise<QuickOperationSubmitResponse> {
+    const preview = this.previewQuickOperation(request);
+    const base: QuickOperationSubmitResponse = {
+      ok: preview.ok,
+      operationType: request.operationType,
+      draftId: `qod_${Date.now()}`,
+      workflowImpacts: preview.workflowImpacts,
+      documentIds: [],
+      auditEventIds: [],
+      validationIssues: preview.validationIssues,
+      mode: preview.ok ? "foundation" : "failed"
+    };
+
+    if (!preview.ok) {
+      return this.withSideActions(request, { ...base, ok: false, mode: "failed" });
+    }
+
+    switch (request.operationType) {
+      case "offer":
+        return this.executeOffer(request, base);
+      case "sale_order":
+        return this.executeSaleOrder(request, base);
+      case "payment":
+        return this.executePayment(request, base);
+      case "delivery":
+        return this.executeDelivery(request, base);
+      case "return":
+        return this.executeReturn(request, base);
+      default:
+        return this.withSideActions(request, base);
+    }
+  }
+
   private async executeOffer(request: QuickOperationSubmitRequest, base: QuickOperationSubmitResponse): Promise<QuickOperationSubmitResponse> {
     const offerPayload: Partial<Offer> = {
       customerId: request.customerId as Offer["customerId"],
