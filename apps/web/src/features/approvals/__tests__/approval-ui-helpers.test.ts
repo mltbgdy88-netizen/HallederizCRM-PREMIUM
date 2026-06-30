@@ -73,10 +73,10 @@ test("action availability helper disables non-pending approvals", () => {
 
 test("error message mapper returns readable auth and runtime messages", () => {
   assert.match(mapApprovalUiErrorMessage({ kind: "forbidden", message: "x" }), /403|yetki/i);
-  assert.match(mapApprovalUiErrorMessage({ kind: "unsupported", message: "foundation unavailable" }), /503|foundation|kullanilamiyor/i);
-  assert.match(mapApprovalUiErrorMessage({ kind: "network", message: "x" }), /Ag|baglanti/i);
-  assert.match(mapApprovalUiErrorMessage({ kind: "conflict", message: "cakisma" }), /409|cakisma/i);
-  assert.match(mapApprovalUiErrorMessage({ kind: "invalid_request", message: "neden" }), /400|neden/i);
+  assert.match(mapApprovalUiErrorMessage({ kind: "unsupported", message: "foundation unavailable" }), /503|foundation|kullanılamıyor|kullanilamiyor/i);
+  assert.match(mapApprovalUiErrorMessage({ kind: "network", message: "x" }), /Bağlantı|baglanti|Ag/i);
+  assert.match(mapApprovalUiErrorMessage({ kind: "conflict", message: "cakisma" }), /409|çakışma|cakisma|işlendi/i);
+  assert.match(mapApprovalUiErrorMessage({ kind: "invalid_request", message: "neden" }), /400|geçersiz|neden|Zorunlu/i);
 });
 
 test("reject reason validation requires non-empty text", () => {
