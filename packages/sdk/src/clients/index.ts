@@ -17,4 +17,5 @@ export * from "./imports.client";
 export * from "./quick-operations.client";
 export * from "./whatsapp.client";
 export * from "./erp.client";
+export * from "./factory.client";
 export * from "./omnichannel.client";

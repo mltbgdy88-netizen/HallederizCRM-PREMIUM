@@ -18,6 +18,7 @@
     "test:web-whatsapp": "node scripts/run-web-whatsapp-tests.cjs",
     "test:web-ai": "node scripts/run-web-ai-tests.cjs",
     "test:web-erp": "node scripts/run-web-erp-tests.cjs",
+    "test:web-factory": "node scripts/run-web-factory-tests.cjs",
     "test:web-navigation": "node scripts/run-web-navigation-tests.cjs",
     "ci:local": "pnpm typecheck && pnpm build && pnpm test",
     "lint": "turbo run lint",

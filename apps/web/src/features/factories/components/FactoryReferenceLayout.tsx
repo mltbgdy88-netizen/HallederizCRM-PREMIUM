@@ -4,9 +4,41 @@ import type { FactoryOrder, FactoryStockItem, IntegrationLog } from "@hallederiz
 import { Pagination } from "@hallederiz/ui";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { LucideIcon } from "../../../components/icons/lucide-icons";
 import { useToast } from "../../../providers/toast-provider";
+import { useFactoryChannel } from "../hooks/use-factory-channel";
+import { useFactoryOrderData } from "../hooks/use-factory-order-data";
+import { useFactoryOrderDetail } from "../hooks/use-factory-order-detail";
+import { useFactoryStockData } from "../hooks/use-factory-stock-data";
+import { sendFactoryOrderMutation, syncFactoryStockMutation, testFactoryChannelSyncMutation } from "../mutations";
+import type { FactoryStockData } from "../queries";
+import { canOperateFactoryRecord } from "../utils/map-factory-channel-view";
+import { latestFactoryOrderLog, logsForFactoryOrderRecord } from "../utils/sort-factory-integration-logs";
+import { FactoryChannelBand } from "./FactoryChannelBand";
+import { FactoryFeedbackState } from "./FactoryFeedbackState";
+
+function FactoryStatusBanner({
+  useDemo,
+  channel
+}: {
+  useDemo: boolean;
+  channel: ReturnType<typeof useFactoryChannel>;
+}) {
+  if (useDemo) {
+    return (
+      <p className="fabf-band" role="status">
+        Senkron ve snapshot aksiyonları entegrasyon bağlantısı açıldığında canlı hale gelir.
+      </p>
+    );
+  }
+  if (channel.error) {
+    return (
+      <FactoryFeedbackState tone="error" message={channel.error} onRetry={() => void channel.refresh()} />
+    );
+  }
+  return <FactoryChannelBand channelView={channel.channelView} loading={channel.loading} />;
+}
 
 function integrationBadgeClass(status: FactoryStockItem["integrationStatus"]) {
   if (status === "active") return "fabf-badge fabf-badge--success";
@@ -104,11 +136,33 @@ function FactoryStockFilters() {
   );
 }
 
-export function FactoryStocksPage({ data }: { data: Awaited<ReturnType<typeof import("../queries").getFactoryStockData>> }) {
+export function FactoryStocksPage() {
+  const channel = useFactoryChannel();
+  const stock = useFactoryStockData();
   const { pushToast } = useToast();
   const [page, setPage] = useState(1);
   const [selectedStockId, setSelectedStockId] = useState<string | null>(null);
+  const [syncPending, setSyncPending] = useState(false);
+  const [testPending, setTestPending] = useState(false);
   const pageSize = 12;
+
+  const data: FactoryStockData = stock.data ?? {
+    factories: [],
+    brands: [],
+    integrations: [],
+    items: [],
+    snapshots: [],
+    health: {
+      status: "healthy",
+      activeConnectionCount: 0,
+      warningCount: 0,
+      errorCount: 0,
+      message: "Yükleniyor…"
+    }
+  };
+
+  const showLoading = stock.loading && !stock.data;
+  const kpiPlaceholder = showLoading ? "…" : undefined;
   const pagedItems = useMemo(() => data.items.slice((page - 1) * pageSize, page * pageSize), [data.items, page]);
   const selected = useMemo(() => {
     if (!data.items.length || !selectedStockId) return null;
@@ -125,6 +179,46 @@ export function FactoryStocksPage({ data }: { data: Awaited<ReturnType<typeof im
     }
   }, [data.items, selectedStockId]);
 
+  const syncTargetFactoryId = selected?.factoryId ?? data.factories[0]?.id ?? null;
+  const syncEnabled =
+    Boolean(syncTargetFactoryId) &&
+    canOperateFactoryRecord(data.factories.find((factory) => factory.id === syncTargetFactoryId), stock.useDemo) &&
+    (channel.canOperate || stock.useDemo) &&
+    !showLoading &&
+    !stock.error;
+
+  const testEnabled =
+    Boolean(syncTargetFactoryId) &&
+    (channel.canOperate || stock.useDemo) &&
+    !showLoading &&
+    !stock.error;
+
+  const handleTest = async () => {
+    if (!testEnabled || testPending) return;
+    setTestPending(true);
+    const result = await testFactoryChannelSyncMutation(syncTargetFactoryId ?? undefined, {
+      useDemoData: stock.useDemo,
+      pushToast
+    });
+    if (result || stock.useDemo) {
+      await channel.refresh();
+    }
+    setTestPending(false);
+  };
+
+  const handleSync = async () => {
+    if (!syncTargetFactoryId || !syncEnabled || syncPending) return;
+    setSyncPending(true);
+    const result = await syncFactoryStockMutation(syncTargetFactoryId, {
+      useDemoData: stock.useDemo,
+      pushToast
+    });
+    if (result || stock.useDemo) {
+      await Promise.all([stock.refresh(), channel.refresh()]);
+    }
+    setSyncPending(false);
+  };
+
   return (
     <div className="fabf-page" data-page="fabrika-stok-reference">
       <div className="fabf-shell">
@@ -138,9 +232,25 @@ export function FactoryStocksPage({ data }: { data: Awaited<ReturnType<typeof im
               <LucideIcon name="factory" size={14} />
               Fabrika Siparişleri
             </Link>
-            <button type="button" className="fabf-btn fabf-btn--outline" onClick={() => pushToast("Senkron talebi entegrasyon bağlantısı ile açılacak (demo).")}>
+            <button
+              type="button"
+              className="fabf-btn fabf-btn--outline"
+              disabled={!testEnabled || testPending}
+              title={testEnabled ? "Fabrika bağlantı testi" : channel.channelView.note}
+              onClick={() => void handleTest()}
+            >
+              <LucideIcon name="zap" size={14} />
+              {testPending ? "Test…" : "Bağlantı testi"}
+            </button>
+            <button
+              type="button"
+              className="fabf-btn fabf-btn--outline"
+              disabled={!syncEnabled || syncPending}
+              title={syncEnabled ? "Seçili fabrika stok senkronu" : channel.channelView.note}
+              onClick={() => void handleSync()}
+            >
               <LucideIcon name="rotate-ccw" size={14} />
-              Senkron
+              {syncPending ? "Senkron…" : "Senkron"}
             </button>
           </div>
         </header>
@@ -148,32 +258,34 @@ export function FactoryStocksPage({ data }: { data: Awaited<ReturnType<typeof im
         <div className="fabf-kpi-row" aria-label="Fabrika stok özeti">
           <div className="fabf-kpi">
             <span className="fabf-kpi-label">Snapshot</span>
-            <span className="fabf-kpi-value">{data.snapshots.length}</span>
+            <span className="fabf-kpi-value">{kpiPlaceholder ?? data.snapshots.length}</span>
           </div>
           <div className="fabf-kpi">
             <span className="fabf-kpi-label">Stok satırı</span>
-            <span className="fabf-kpi-value">{data.items.length}</span>
+            <span className="fabf-kpi-value">{kpiPlaceholder ?? data.items.length}</span>
           </div>
           <div className="fabf-kpi">
             <span className="fabf-kpi-label">Uyarı</span>
-            <span className="fabf-kpi-value">{data.health.warningCount}</span>
+            <span className="fabf-kpi-value">{kpiPlaceholder ?? data.health.warningCount}</span>
           </div>
           <div className="fabf-kpi">
             <span className="fabf-kpi-label">Hata</span>
-            <span className="fabf-kpi-value">{data.health.errorCount}</span>
+            <span className="fabf-kpi-value">{kpiPlaceholder ?? data.health.errorCount}</span>
           </div>
         </div>
 
-        <p className="fabf-band" role="status">
-          Senkron ve snapshot aksiyonları entegrasyon bağlantısı açıldığında canlı hale gelir.
-        </p>
+        <FactoryStatusBanner useDemo={stock.useDemo} channel={channel} />
 
         <FactoryStockFilters />
 
         <div className="fabf-workspace">
           <div className="fabf-main">
             <div className="fabf-list-wrap">
-              {data.items.length === 0 ? (
+              {showLoading ? (
+                <FactoryFeedbackState tone="loading" message="Fabrika stok verileri yükleniyor…" />
+              ) : stock.error ? (
+                <FactoryFeedbackState tone="error" message={stock.error} onRetry={() => void stock.refresh()} />
+              ) : data.items.length === 0 ? (
                 <p className="fabf-empty">Fabrika stok kaydı bulunamadı. Canlı veri bekleniyor.</p>
               ) : (
                 <>
@@ -265,7 +377,7 @@ function FactoryOrderFilters() {
   );
 }
 
-function FactoryOrderSidePanel({ order }: { order: FactoryOrder | null }) {
+function FactoryOrderSidePanel({ order, logs }: { order: FactoryOrder | null; logs: IntegrationLog[] }) {
   if (!order) {
     return (
       <aside className="fabf-side">
@@ -273,6 +385,7 @@ function FactoryOrderSidePanel({ order }: { order: FactoryOrder | null }) {
       </aside>
     );
   }
+  const latestLog = latestFactoryOrderLog(logs, order);
   return (
     <aside className="fabf-side">
       <p className="fabf-side-eyebrow">Fabrika siparişi</p>
@@ -289,16 +402,33 @@ function FactoryOrderSidePanel({ order }: { order: FactoryOrder | null }) {
           <strong>Fabrika:</strong> {order.factoryName}
         </li>
       </ul>
+      {latestLog ? (
+        <div className="fabf-log-item" style={{ marginTop: 10 }}>
+          <strong>{latestLog.level}</strong>
+          <span>{latestLog.message}</span>
+          <small>{new Date(latestLog.createdAt).toLocaleString("tr-TR")}</small>
+        </div>
+      ) : (
+        <p className="fabf-section-desc">Entegrasyon günlüğü kaydı yok.</p>
+      )}
     </aside>
   );
 }
 
-export function FactoryOrdersPage({ orders }: { orders: FactoryOrder[] }) {
+export function FactoryOrdersPage() {
   const router = useRouter();
+  const channel = useFactoryChannel();
+  const ordersDesk = useFactoryOrderData();
   const { pushToast } = useToast();
   const [page, setPage] = useState(1);
   const [selectedOrderId, setSelectedOrderId] = useState<string | null>(null);
+  const [sendPending, setSendPending] = useState(false);
+  const [testPending, setTestPending] = useState(false);
   const pageSize = 12;
+  const orders = ordersDesk.orders;
+  const logs = ordersDesk.logs;
+
+  const showLoading = ordersDesk.loading && orders.length === 0 && !ordersDesk.error;
   const pagedOrders = useMemo(() => orders.slice((page - 1) * pageSize, page * pageSize), [orders, page]);
   const selected = useMemo(() => {
     if (!orders.length || !selectedOrderId) return null;
@@ -323,9 +453,44 @@ export function FactoryOrdersPage({ orders }: { orders: FactoryOrder[] }) {
     }
   }, [orders, selectedOrderId]);
 
-  const fireSendDemo = useCallback(() => {
-    pushToast("Sipariş iletimi entegrasyon onayı sonrası kuyruğa alınır (demo).");
-  }, [pushToast]);
+  const sendEnabled =
+    Boolean(selected) &&
+    (channel.canOperate || ordersDesk.useDemo) &&
+    !showLoading &&
+    !ordersDesk.error;
+
+  const testTargetFactoryId = selected?.factoryId ?? orders[0]?.factoryId ?? null;
+  const testEnabled =
+    Boolean(testTargetFactoryId) &&
+    (channel.canOperate || ordersDesk.useDemo) &&
+    !showLoading &&
+    !ordersDesk.error;
+
+  const handleTestChannel = async () => {
+    if (!testEnabled || testPending) return;
+    setTestPending(true);
+    const result = await testFactoryChannelSyncMutation(testTargetFactoryId ?? undefined, {
+      useDemoData: ordersDesk.useDemo,
+      pushToast
+    });
+    if (result || ordersDesk.useDemo) {
+      await channel.refresh();
+    }
+    setTestPending(false);
+  };
+
+  const handleSendOrder = async () => {
+    if (!selected || !sendEnabled || sendPending) return;
+    setSendPending(true);
+    const result = await sendFactoryOrderMutation(selected.id, {
+      useDemoData: ordersDesk.useDemo,
+      pushToast
+    });
+    if (result || ordersDesk.useDemo) {
+      await Promise.all([ordersDesk.refresh(), channel.refresh()]);
+    }
+    setSendPending(false);
+  };
 
   return (
     <div className="fabf-page" data-page="fabrika-siparis-reference">
@@ -340,9 +505,25 @@ export function FactoryOrdersPage({ orders }: { orders: FactoryOrder[] }) {
               <LucideIcon name="package" size={14} />
               Fabrika Stokları
             </Link>
-            <button type="button" className="fabf-btn fabf-btn--outline" onClick={fireSendDemo}>
+            <button
+              type="button"
+              className="fabf-btn fabf-btn--outline"
+              disabled={!testEnabled || testPending}
+              title={testEnabled ? "Fabrika bağlantı testi" : channel.channelView.note}
+              onClick={() => void handleTestChannel()}
+            >
+              <LucideIcon name="zap" size={14} />
+              {testPending ? "Test…" : "Bağlantı testi"}
+            </button>
+            <button
+              type="button"
+              className="fabf-btn fabf-btn--outline"
+              disabled={!sendEnabled || sendPending}
+              title={sendEnabled ? "Seçili siparişi fabrikaya ilet" : channel.channelView.note}
+              onClick={() => void handleSendOrder()}
+            >
               <LucideIcon name="send" size={14} />
-              Sipariş İlet
+              {sendPending ? "İletiliyor…" : "Sipariş İlet"}
             </button>
           </div>
         </header>
@@ -355,16 +536,18 @@ export function FactoryOrdersPage({ orders }: { orders: FactoryOrder[] }) {
           </span>
         </div>
 
-        <p className="fabf-band" role="status">
-          Sipariş açma ve durum sorgu aksiyonları entegrasyon bağlantısı açıldığında canlı hale gelir.
-        </p>
+        <FactoryStatusBanner useDemo={ordersDesk.useDemo} channel={channel} />
 
         <FactoryOrderFilters />
 
         <div className="fabf-workspace">
           <div className="fabf-main">
             <div className="fabf-list-wrap">
-              {orders.length === 0 ? (
+              {showLoading ? (
+                <FactoryFeedbackState tone="loading" message="Fabrika sipariş verileri yükleniyor…" />
+              ) : ordersDesk.error ? (
+                <FactoryFeedbackState tone="error" message={ordersDesk.error} onRetry={() => void ordersDesk.refresh()} />
+              ) : orders.length === 0 ? (
                 <p className="fabf-empty">Fabrika sipariş kaydı bulunamadı. Canlı veri bekleniyor.</p>
               ) : (
                 <>
@@ -415,27 +598,62 @@ export function FactoryOrdersPage({ orders }: { orders: FactoryOrder[] }) {
               )}
             </div>
           </div>
-          <FactoryOrderSidePanel order={selected} />
+          <FactoryOrderSidePanel order={selected} logs={logs} />
         </div>
       </div>
     </div>
   );
 }
 
-export function FactoryOrderDetailPage({ order, logs }: { order: FactoryOrder; logs: IntegrationLog[] }) {
+export function FactoryOrderDetailPage({ factoryOrderId }: { factoryOrderId: string }) {
   const router = useRouter();
+  const channel = useFactoryChannel();
+  const detail = useFactoryOrderDetail(factoryOrderId);
   const { pushToast } = useToast();
   const [approveDone, setApproveDone] = useState(false);
   const [sendDone, setSendDone] = useState(false);
-  const relatedLogs = logs.filter((log) => log.entityId === order.id);
+  const [sendPending, setSendPending] = useState(false);
 
-  const fireDemo = useCallback(
-    (msg: string, setter?: () => void) => {
-      pushToast(msg);
-      setter?.();
-    },
-    [pushToast]
-  );
+  const order = detail.order;
+  const relatedLogs = logsForFactoryOrderRecord(detail.logs, order);
+
+  const handleSend = async () => {
+    if (!order || sendPending || sendDone) return;
+    setSendPending(true);
+    const result = await sendFactoryOrderMutation(order.id, {
+      useDemoData: detail.useDemo,
+      pushToast
+    });
+    if (result || detail.useDemo) {
+      setSendDone(true);
+      await Promise.all([detail.refresh(), channel.refresh()]);
+    }
+    setSendPending(false);
+  };
+
+  if (detail.loading && !order) {
+    return (
+      <div className="fabf-page" data-page="fabrika-siparis-detay-reference">
+        <div className="fabf-shell fabf-shell--detail">
+          <FactoryFeedbackState tone="loading" message="Fabrika sipariş detayı yükleniyor…" />
+        </div>
+      </div>
+    );
+  }
+
+  if (detail.error || !order) {
+    return (
+      <div className="fabf-page" data-page="fabrika-siparis-detay-reference">
+        <div className="fabf-shell fabf-shell--detail">
+          <FactoryFeedbackState
+            tone="error"
+            message={detail.error ?? "Fabrika siparişi bulunamadı."}
+            onRetry={() => void detail.refresh()}
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="fabf-page" data-page="fabrika-siparis-detay-reference">
@@ -453,6 +671,8 @@ export function FactoryOrderDetailPage({ order, logs }: { order: FactoryOrder; l
             </button>
           </div>
         </header>
+
+        <FactoryStatusBanner useDemo={detail.useDemo} channel={channel} />
 
         <div className="fabf-detail-workspace">
           <div className="fabf-detail-main">
@@ -514,22 +734,25 @@ export function FactoryOrderDetailPage({ order, logs }: { order: FactoryOrder; l
                   className="fabf-btn fabf-btn--primary"
                   type="button"
                   disabled={approveDone}
-                  onClick={() => fireDemo("Onaya gönderme talebi demo olarak kaydedildi; kalıcı mutation yok.", () => setApproveDone(true))}
+                  onClick={() => {
+                    pushToast("Onaya gönderme talebi demo olarak kaydedildi; kalıcı mutation yok.");
+                    setApproveDone(true);
+                  }}
                 >
                   {approveDone ? "Onaya iletildi" : "Onaya gönder"}
                 </button>
                 <button
                   className="fabf-btn fabf-btn--outline"
                   type="button"
-                  disabled={sendDone}
-                  onClick={() => fireDemo("Fabrika gönderim kuyruğu demo toast ile simüle edildi.", () => setSendDone(true))}
+                  disabled={sendDone || sendPending || (!channel.canOperate && !detail.useDemo)}
+                  onClick={() => void handleSend()}
                 >
-                  {sendDone ? "Gönderildi" : "Gönder"}
+                  {sendPending ? "Gönderiliyor…" : sendDone ? "Gönderildi" : "Gönder"}
                 </button>
                 <button
                   className="fabf-btn fabf-btn--outline"
                   type="button"
-                  onClick={() => fireDemo("Durum sorgusu entegrasyon API'si bağlandığında çalışır (demo).")}
+                  onClick={() => pushToast("Durum sorgusu entegrasyon API'si bağlandığında çalışır.")}
                 >
                   Durum güncelle
                 </button>
