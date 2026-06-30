@@ -12,7 +12,7 @@
     }
   },
   "scripts": {
-    "build": "tsc -p tsconfig.json",
+    "build": "node -e \"const fs=require('node:fs');const legacy='dist/database';if(fs.existsSync(legacy))fs.rmSync(legacy,{recursive:true,force:true});\" && tsc -p tsconfig.json",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "migrate:list": "node dist/cli.js migrations",
     "migrate:status": "node dist/cli.js migrate:status",
@@ -26,6 +26,7 @@
     "typescript": "^5.6.3"
   },
   "dependencies": {
+    "@hallederiz/domain": "workspace:*",
     "pg": "^8.20.0"
   }
 }

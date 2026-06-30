@@ -179,6 +179,9 @@ importers:
 
   packages/database:
     dependencies:
+      '@hallederiz/domain':
+        specifier: workspace:*
+        version: link:../domain
       pg:
         specifier: ^8.20.0
         version: 8.20.0
