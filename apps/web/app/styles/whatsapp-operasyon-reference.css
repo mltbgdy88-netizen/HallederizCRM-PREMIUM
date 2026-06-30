@@ -871,6 +871,51 @@
   cursor: pointer;
 }
 
+.wop-channel-band {
+  min-height: 22px;
+  align-items: center;
+}
+
+.wop-channel-band strong {
+  font-weight: 800;
+}
+
+.wop-channel-band--ok {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+  color: #166534;
+}
+
+.wop-channel-band--error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #b91c1c;
+}
+
+.wop-channel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.wop-channel-dot--ok {
+  background: #16a34a;
+}
+
+.wop-channel-dot--warn {
+  background: #d97706;
+}
+
+.wop-channel-dot--error {
+  background: #dc2626;
+}
+
+.wop-reply-send:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
 .wop-state {
   padding: 16px;
   text-align: center;

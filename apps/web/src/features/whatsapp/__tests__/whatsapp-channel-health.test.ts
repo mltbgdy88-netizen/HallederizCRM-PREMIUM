@@ -28,7 +28,7 @@ test("mapWhatsAppChannelHealthView never claims connected on healthy status alon
 
 test("mapWhatsAppChannelHealthView shows ready when session connected", () => {
   const view = mapWhatsAppChannelHealthView(
-    { status: "healthy", message: "ok" },
+    { status: "healthy", message: "ok", ready: true, state: "ready" },
     { connectionStatus: "connected" },
     { useDemoData: false }
   );

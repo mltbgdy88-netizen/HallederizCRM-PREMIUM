@@ -1,8 +1,12 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { useState } from "react";
 import { useToast } from "../../../providers/toast-provider";
+import { MSG_WA_APPROVAL_PREVIEW } from "../data/whatsapp-action-messages";
+import { useWhatsAppChannel } from "../hooks/use-whatsapp-channel";
 import { useWhatsAppOperationsDeskState, type WhatsAppDeskStatusFilter } from "../hooks/use-whatsapp-operations-desk-state";
+import { sendWhatsAppOutboundMutation } from "../mutations";
 import { statusBadgeClass, type WopReferenceTableRow } from "../utils/map-conversation-to-reference-desk";
 import {
   IconInfo,
@@ -83,6 +87,36 @@ export function WhatsAppReferenceLayout({ initialCustomerId }: { initialCustomer
   const router = useRouter();
   const { pushToast } = useToast();
   const desk = useWhatsAppOperationsDeskState(initialCustomerId);
+  const channel = useWhatsAppChannel();
+  const [sendPendingId, setSendPendingId] = useState<string | null>(null);
+
+  const handleSendSuggestedReply = async (replyId: string, text: string) => {
+    if (!desk.selectedId) {
+      return;
+    }
+    if (desk.useDemo) {
+      pushToast(MSG_WA_APPROVAL_PREVIEW);
+      return;
+    }
+    if (!channel.canSend) {
+      pushToast(channel.channelView.note);
+      return;
+    }
+    setSendPendingId(replyId);
+    try {
+      const result = await sendWhatsAppOutboundMutation(
+        { conversationId: desk.selectedId, type: "text", body: text },
+        { useDemoData: false, session: channel.session, health: channel.health }
+      );
+      pushToast(result.toast);
+      desk.reloadList();
+      await desk.reloadDetail();
+    } catch (error) {
+      pushToast(error instanceof Error ? error.message : "WhatsApp gönderimi tamamlanamadı.");
+    } finally {
+      setSendPendingId(null);
+    }
+  };
 
   return (
     <div className="wop-home wop-home--embedded" data-page="whatsapp-reference-desk" aria-live="polite">
@@ -140,7 +174,36 @@ export function WhatsAppReferenceLayout({ initialCustomerId }: { initialCustomer
         <p className="wop-mode-band" role="status">
           Önizleme modu: konuşma listesi demo amaçlıdır; canlı gönderim onay zincirinden geçer.
         </p>
-      ) : desk.listError ? (
+      ) : channel.loading ? (
+        <p className="wop-mode-band wop-channel-band" role="status">
+          <span className="wop-channel-dot wop-channel-dot--warn" aria-hidden />
+          WhatsApp kanal durumu kontrol ediliyor…
+        </p>
+      ) : channel.error ? (
+        <p className="wop-mode-band wop-mode-band--error wop-channel-band" role="alert">
+          <span className="wop-channel-dot wop-channel-dot--error" aria-hidden />
+          {channel.error}
+          <button type="button" onClick={() => void channel.refresh()}>
+            Tekrar dene
+          </button>
+        </p>
+      ) : (
+        <p
+          className={`wop-mode-band wop-channel-band wop-channel-band--${channel.channelView.dotTone}`}
+          role="status"
+        >
+          <span className={`wop-channel-dot wop-channel-dot--${channel.channelView.dotTone}`} aria-hidden />
+          <strong>{channel.channelView.statusLine}</strong>
+          <span>{channel.channelView.note}</span>
+          {!channel.canSend ? (
+            <button type="button" onClick={() => void channel.refresh()}>
+              Yenile
+            </button>
+          ) : null}
+        </p>
+      )}
+
+      {desk.listError ? (
         <p className="wop-mode-band wop-mode-band--error" role="alert">
           {desk.listError}
           <button type="button" onClick={() => desk.reloadList()}>
@@ -344,7 +407,9 @@ export function WhatsAppReferenceLayout({ initialCustomerId }: { initialCustomer
                         type="button"
                         className="wop-reply-send"
                         aria-label="Gönder"
-                        onClick={() => pushToast("Gönderim onay zincirinden geçer.")}
+                        title={channel.canSend || desk.useDemo ? "Gönder" : channel.channelView.note}
+                        disabled={Boolean(sendPendingId) || (!desk.useDemo && !channel.canSend)}
+                        onClick={() => void handleSendSuggestedReply(reply.id, reply.text)}
                       >
                         <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" aria-hidden>
                           <path d="m22 2-7 20-4-9-9-4 20-7z" />

@@ -123,6 +123,32 @@ export function useWhatsAppInbox(initialCustomerId?: string | null) {
     };
   }, [useDemo, selectedId]);
 
+  const reloadDetail = useCallback(() => {
+    if (useDemo || !selectedId) {
+      return Promise.resolve();
+    }
+    setDetailLoading(true);
+    setDetailError(null);
+    return sdk.whatsapp
+      .getConversation(selectedId)
+      .then((res) => {
+        const bundle = res.item;
+        if (!bundle?.conversation) {
+          setApiMessages([]);
+          setDetailError(mapWhatsAppDetailError(new Error("not_found")));
+          return;
+        }
+        setApiMessages(bundle.messages ?? []);
+      })
+      .catch((error: unknown) => {
+        setApiMessages([]);
+        setDetailError(mapWhatsAppDetailError(error));
+      })
+      .finally(() => {
+        setDetailLoading(false);
+      });
+  }, [useDemo, selectedId]);
+
   const detail: WhatsAppPageDetail = useMemo(() => {
     if (useDemo) {
       const d = getWhatsAppConversationById(selectedId || undefined);
@@ -168,6 +194,7 @@ export function useWhatsAppInbox(initialCustomerId?: string | null) {
     listError,
     detailLoading,
     detailError,
-    reloadList
+    reloadList,
+    reloadDetail
   };
 }
