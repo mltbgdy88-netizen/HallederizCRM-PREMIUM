@@ -37,7 +37,6 @@ const PAGE_META_REGISTRY: Array<[string, ShellPageMeta]> = [
   ["/dashboard", { title: "Gösterge Paneli", subtitle: "", breadcrumb: "" }],
   ["/archive", { title: "Arşiv", subtitle: "Geçmiş işlemler ve belge arşivi.", breadcrumb: "Arşiv" }],
   ["/kurulum/veri-yukleme", { title: "Veri Yükleme", subtitle: "CSV tabanlı içe aktarma ile cari, ürün, fiyat ve stok yükleyin.", breadcrumb: "Kurulum / Veri Yükleme" }],
-  ["/ayarlar/duyuru-videolari", { title: "Duyuru Videoları", subtitle: "Dashboard tanıtım ve duyuru videolarını yönetin.", breadcrumb: "Ayarlar / Duyuru Videoları" }],
   ["/ayarlar/genel", { title: "Genel Ayarlar", subtitle: "Firma, fiyat, entegrasyon ve platform yapılandırması.", breadcrumb: "Ayarlar / Genel" }],
   ["/ayarlar/veri-yukleme", { title: "Veri Yükleme", subtitle: "Şablon indir, dosya yükle, önizle ve içe aktar.", breadcrumb: "Ayarlar / Veri Yükleme" }],
   ["/ayarlar/operasyon-gozlem", { title: "Operasyon ve Gözlem", subtitle: "İz kaydı, kiracı korelasyonu ve sürüm deneme özeti.", breadcrumb: "Ayarlar / Operasyon" }],

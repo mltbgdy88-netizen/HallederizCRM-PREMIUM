@@ -19,3 +19,4 @@ export * from "./whatsapp.client";
 export * from "./erp.client";
 export * from "./factory.client";
 export * from "./omnichannel.client";
+export * from "./operator.client";

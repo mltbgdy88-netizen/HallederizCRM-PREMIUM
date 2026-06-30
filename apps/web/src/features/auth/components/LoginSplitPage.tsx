@@ -254,6 +254,12 @@ function LoginSplitInner() {
               </aside>
             </>
           ) : null}
+
+          <p className="hz-login-operator-link">
+            Hallederiz SaaS operatörü müsünüz? Giriş sonrası{" "}
+            <Link href="/operator">SaaS Kontrol Paneli</Link>
+            üzerinden kiracı ve yayın yönetimine erişin.
+          </p>
         </div>
       </section>
     </main>

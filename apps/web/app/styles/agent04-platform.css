@@ -327,6 +327,19 @@
   color: var(--hz-color-text, var(--hz-text));
 }
 
+.hz-login-operator-link {
+  margin: 14px 0 0;
+  font-size: 12px;
+  color: var(--hz-color-text-muted, #64748b);
+  line-height: 1.5;
+}
+
+.hz-login-operator-link a {
+  color: var(--hz-color-primary, #0f766e);
+  font-weight: 600;
+  text-decoration: none;
+}
+
 @media (max-width: 860px) {
   .hz-login-page {
     grid-template-columns: 1fr;

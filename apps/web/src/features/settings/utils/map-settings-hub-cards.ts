@@ -20,13 +20,6 @@ export const AHB_PAGE_COPY = {
 export function buildSettingsHubCards(): SettingsHubCard[] {
   return [
     {
-      id: "announcement-videos",
-      title: "Duyuru Videoları",
-      description: "Dashboard video oynatıcısında gösterilecek tanıtım ve duyuru içeriklerini yönetin.",
-      icon: "ai",
-      action: { kind: "navigate", href: "/ayarlar/duyuru-videolari" }
-    },
-    {
       id: "general",
       title: "Genel",
       description: "Genel sistem ayarları, dil, para birimi ve tercihleri yönetin.",

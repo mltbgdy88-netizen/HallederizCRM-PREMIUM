@@ -44,6 +44,18 @@ export const mockPermissions: Permission[] = [
     key: "platform.settings.write",
     name: "Ayarlari guncelleme",
     moduleCode: "settings"
+  },
+  {
+    id: "perm_operator_read",
+    key: "platform.operator.read",
+    name: "SaaS operator konsolu okuma",
+    moduleCode: "core"
+  },
+  {
+    id: "perm_operator_write",
+    key: "platform.operator.write",
+    name: "SaaS operator konsolu yazma",
+    moduleCode: "core"
   }
 ];
 

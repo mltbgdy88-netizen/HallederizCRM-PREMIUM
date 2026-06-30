@@ -169,20 +169,4 @@ export class PlatformClient {
     const query = new URLSearchParams({ entityType, entityId });
     return this.api.get<ListResponse<EntityTimelineItem>>(`/timeline?${query.toString()}`);
   }
-
-  listAnnouncementVideos() {
-    return this.api.get<{ items: unknown[]; total: number }>("/settings/announcement-videos");
-  }
-
-  createAnnouncementVideo(payload: unknown) {
-    return this.api.post<{ item: unknown }>("/settings/announcement-videos", payload);
-  }
-
-  updateAnnouncementVideo(id: string, payload: unknown) {
-    return this.api.patch<{ item: unknown }>(`/settings/announcement-videos/${id}`, payload);
-  }
-
-  deleteAnnouncementVideo(id: string) {
-    return this.api.delete<{ ok: boolean }>(`/settings/announcement-videos/${id}`);
-  }
 }

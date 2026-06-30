@@ -52,6 +52,8 @@ function parseTokenPrincipal(token?: string): { tenantId?: string; userId?: stri
     ];
     const writePermissions = isAdmin
       ? [
+          "platform.operator.read",
+          "platform.operator.write",
           "customers.write",
           "products.write",
           "offers.write",

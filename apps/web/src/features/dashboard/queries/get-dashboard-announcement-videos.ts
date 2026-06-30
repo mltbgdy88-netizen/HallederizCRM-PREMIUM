@@ -10,7 +10,7 @@ export type DashboardAnnouncementFeed = {
 };
 
 /**
- * Admin panelden tenant kapsamında yayınlanan tanıtım/duyuru videoları.
+ * Platform operatör konsolundan hedeflenen tanıtım/duyuru videoları (kiracı salt okunur).
  */
 export async function getDashboardAnnouncementVideos(): Promise<DashboardAnnouncementFeed> {
   try {
