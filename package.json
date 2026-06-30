@@ -34,6 +34,7 @@
     "smoke:product-readiness": "pnpm typecheck && pnpm smoke:routes && pnpm smoke:navigation",
     "ci:postgres-migration-smoke": "node scripts/ci/postgres-migration-smoke.cjs",
     "ci:postgres-runtime-smoke": "node scripts/ci/postgres-runtime-smoke.cjs",
+    "staging:local-chain": "node scripts/staging/local-operation-chain.cjs",
     "ui:guard": "node scripts/ui-guard.cjs",
     "smoke:production-safety": "pnpm --filter @hallederiz/api... build && pnpm --filter @hallederiz/api exec node --loader ts-node/esm --experimental-specifier-resolution=node --test src/tests/production-safety-smoke.test.ts",
     "security:secret-scan": "node scripts/security/secret-scan.cjs",
