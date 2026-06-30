@@ -1,5 +1,5 @@
-import { LoginCommandCenterPage } from "../../src/features/ui-inventory/components/LoginCommandCenterPage";
+import { LoginSplitPage } from "../../src/features/auth/components/LoginSplitPage";
 
 export default function LoginPage() {
-  return <LoginCommandCenterPage />;
+  return <LoginSplitPage />;
 }

@@ -4,6 +4,7 @@ export type SettingsAreaRouteMeta = {
 
 export const SETTINGS_AREA_ROUTE_META: Record<string, SettingsAreaRouteMeta> = {
   "/ayarlar/genel": { section: "Genel" },
+  "/ayarlar/duyuru-videolari": { section: "Duyuru Videoları" },
   "/ayarlar/veri-yukleme": { section: "Veri yükleme" },
   "/ayarlar/staging-kontrol": { section: "Hazırlık kontrolü" },
   "/ayarlar/kullanim-hazirligi": { section: "Kullanım hazırlığı" },

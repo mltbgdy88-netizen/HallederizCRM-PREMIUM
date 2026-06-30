@@ -13,7 +13,8 @@ const requiredRouteFiles = [
   "apps/web/app/(platform)/cariler/liste/page.tsx",
   "apps/web/app/(platform)/onaylar/bekleyenler/page.tsx",
   "docs/product/PRODUCTION_ROUTE_MANIFEST.md",
-  "apps/web/app/(platform)/ayarlar/operasyon-gozlem/page.tsx"
+  "apps/web/app/(platform)/ayarlar/operasyon-gozlem/page.tsx",
+  "apps/web/app/(platform)/ayarlar/duyuru-videolari/page.tsx"
 ];
 
 const checks = [

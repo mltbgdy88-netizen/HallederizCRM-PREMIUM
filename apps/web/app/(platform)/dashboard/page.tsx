@@ -1,5 +1,5 @@
-import { DashboardReferenceLayout } from "../../../src/features/dashboard/components/DashboardReferenceLayout";
+import { DashboardCommandCenterPage } from "../../../src/features/dashboard/components/DashboardCommandCenterPage";
 
 export default function DashboardPage() {
-  return <DashboardReferenceLayout />;
+  return <DashboardCommandCenterPage />;
 }
