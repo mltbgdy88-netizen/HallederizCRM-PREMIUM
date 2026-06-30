@@ -3,11 +3,13 @@
  * Requires a reachable API at NEXT_PUBLIC_API_BASE_URL (default http://localhost:4000).
  * Skips with exit 0 when API is down unless SMOKE_PRODUCTION_DATA_REQUIRED=1.
  */
-const { probeApiHealth, runWithWebServer, parsePort } = require("./http-smoke-lib.cjs");
+const { probeApiHealth, runWithBuiltWebServer, parsePort } = require("./http-smoke-lib.cjs");
 
 /** Health + web dev icin canli API; offline smoke ile karismasin (SMOKE_API_BASE_URL oncelikli). */
 const apiBase =
-  process.env.SMOKE_API_BASE_URL ?? process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
+  process.env.SMOKE_API_BASE_URL ??
+  process.env.NEXT_PUBLIC_API_BASE_URL ??
+  "http://127.0.0.1:4000";
 const required = process.env.SMOKE_PRODUCTION_DATA_REQUIRED === "1" || process.env.SMOKE_PRODUCTION_DATA_REQUIRED === "true";
 const skipFlag = process.env.SMOKE_SKIP_PRODUCTION_DATA === "1" || process.env.SMOKE_SKIP_PRODUCTION_DATA === "true";
 
@@ -34,7 +36,9 @@ async function main() {
   }
 
   const port = parsePort(process.env.SMOKE_PRODUCTION_DATA_PORT, 3198);
-  const { failures, results } = await runWithWebServer({
+  const skipBuild =
+    process.env.SMOKE_SKIP_WEB_BUILD === "1" || process.env.SMOKE_SKIP_WEB_BUILD === "true";
+  const { failures, results } = await runWithBuiltWebServer({
     label: "production-data",
     port,
     envExtra: {
@@ -42,7 +46,7 @@ async function main() {
       NEXT_PUBLIC_API_BASE_URL: apiBase
     },
     checkTechnicalHtml: false,
-    readyTimeoutMs: 240000
+    skipBuild
   });
 
   const passed = results.filter((r) => r.ok).length;

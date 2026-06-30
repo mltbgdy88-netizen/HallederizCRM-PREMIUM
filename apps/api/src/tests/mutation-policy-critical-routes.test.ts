@@ -7,6 +7,7 @@ const CRITICAL_ACTION_KEYS = [
   "platform.orders.cancel",
   "platform.deliveries.complete",
   "platform.invoices.issue",
+  "platform.documents.generate",
   "platform.documents.regenerate",
   "platform.documents.send_whatsapp",
   "platform.documents.send_email",

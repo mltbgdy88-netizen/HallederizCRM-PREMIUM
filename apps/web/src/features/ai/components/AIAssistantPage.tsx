@@ -2,11 +2,15 @@
 
 import type { AiInsight, AiMessage, AiProposal, Approval } from "@hallederiz/types";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useToast } from "../../../providers/toast-provider";
-import { getAiAssistantData, getAiSettingsData, getSalesAssistantHealth } from "../queries";
+import { getAiSettingsData } from "../queries";
 import { formatUserFacingHealthStatus } from "../../../lib/user-facing-labels";
 import { buildAiProposalSnapshotJson } from "../utils/ai-proposal-snapshot";
+import { useAiAssistantData } from "../hooks/use-ai-assistant-data";
+import { useLocalAiChannel } from "../hooks/use-local-ai-channel";
+import { LocalAiChannelBand } from "./LocalAiChannelBand";
+import { confirmAiProposalMutation, rejectAiProposalMutation, runAiInsightsMutation } from "../mutations";
 
 const statusLabel: Record<AiProposal["status"], string> = {
   draft: "Taslak",
@@ -265,41 +269,61 @@ function AiRiskSidePanel({ insights, settings }: { insights: AiInsight[]; settin
 export function AIAssistantPage() {
   const router = useRouter();
   const { pushToast } = useToast();
-  const [data, setData] = useState<{
-    messages: AiMessage[];
-    proposals: AiProposal[];
-    approvals: Approval[];
-    executions: unknown[];
-    insights: AiInsight[];
-  }>({
-    messages: [],
-    proposals: [],
-    approvals: [],
-    executions: [],
-    insights: []
-  });
-  const [salesHealth, setSalesHealth] = useState<SalesHealth | null>(null);
+  const channel = useLocalAiChannel();
+  const assistant = useAiAssistantData();
+  const [insightsRunning, setInsightsRunning] = useState(false);
   const [selectedProposalId, setSelectedProposalId] = useState<string | null>(null);
   const settings = useMemo(() => getAiSettingsData(), []);
 
-  useEffect(() => {
-    void getAiAssistantData().then((next) => {
-      setData(next);
-      setSelectedProposalId(next.proposals[0]?.id ?? null);
-    });
-    void getSalesAssistantHealth().then((response) => setSalesHealth(response.item as SalesHealth));
-  }, []);
+  const data = assistant.data ?? {
+    messages: [] as AiMessage[],
+    proposals: [] as AiProposal[],
+    approvals: [] as Approval[],
+    executions: [] as unknown[],
+    insights: [] as AiInsight[]
+  };
 
-  const selectedProposal = useMemo(
-    () => data.proposals.find((proposal) => proposal.id === selectedProposalId) ?? data.proposals[0],
-    [data.proposals, selectedProposalId]
-  );
+  const selectedProposal = useMemo(() => {
+    const fallbackId = data.proposals[0]?.id ?? null;
+    const activeId = selectedProposalId ?? fallbackId;
+    return data.proposals.find((proposal) => proposal.id === activeId) ?? data.proposals[0];
+  }, [data.proposals, selectedProposalId]);
+
+  const salesHealth = channel.salesHealth;
+
+  const handleRunInsights = async () => {
+    if (!channel.canRunInsights || insightsRunning) return;
+    setInsightsRunning(true);
+    const items = await runAiInsightsMutation({ useDemoData: assistant.useDemo, pushToast });
+    if (items) {
+      await assistant.refresh();
+    }
+    setInsightsRunning(false);
+  };
+
+  const handleConfirmProposal = async (id: string) => {
+    const updated = await confirmAiProposalMutation(id, { useDemoData: assistant.useDemo, pushToast });
+    if (updated || assistant.useDemo) {
+      await assistant.refresh();
+    }
+  };
+
+  const handleRejectProposal = async (id: string) => {
+    const updated = await rejectAiProposalMutation(id, { useDemoData: assistant.useDemo, pushToast });
+    if (updated || assistant.useDemo) {
+      await assistant.refresh();
+    }
+  };
 
   return (
     <div className="aif-page">
-      <p className="aif-demo-band" role="status">
-        Yapay Zekâ Operasyon Merkezi: motor öneri/onay modunda çalışır; kritik değişiklikler doğrudan icra edilmez.
-      </p>
+      {assistant.useDemo ? (
+        <p className="aif-demo-band" role="status">
+          Yapay Zekâ Operasyon Merkezi: motor öneri/onay modunda çalışır; kritik değişiklikler doğrudan icra edilmez.
+        </p>
+      ) : (
+        <LocalAiChannelBand channelView={channel.channelView} />
+      )}
 
       <div className="aif-layout">
         <div className="aif-main">
@@ -315,10 +339,15 @@ export function AIAssistantPage() {
               <button
                 className="aif-btn aif-btn--primary aif-btn--pending"
                 type="button"
-                disabled
-                title="İçgörü üretimi API bağlandığında etkinleşir"
+                disabled={!channel.canRunInsights || insightsRunning || assistant.loading}
+                title={
+                  channel.canRunInsights
+                    ? "Yerel model ile içgörü üret"
+                    : channel.channelView.note
+                }
+                onClick={() => void handleRunInsights()}
               >
-                İçgörü üret
+                {insightsRunning ? "Üretiliyor…" : "İçgörü üret"}
               </button>
               <button
                 className="aif-btn aif-btn--ghost"
@@ -333,7 +362,9 @@ export function AIAssistantPage() {
           <div className="aif-kpi-strip" aria-label="Yapay zekâ durum kartları">
             <article className="aif-card aif-kpi">
               <span className="aif-kpi__label">Model</span>
-              <span className="aif-kpi__value">{salesHealth ? formatUserFacingHealthStatus(salesHealth.status) : "—"}</span>
+              <span className="aif-kpi__value">
+                {salesHealth ? formatUserFacingHealthStatus(salesHealth.status) : channel.loading ? "…" : "—"}
+              </span>
             </article>
             <article className="aif-card aif-kpi aif-kpi--warn">
               <span className="aif-kpi__label">Onay bekleyen</span>
@@ -367,13 +398,13 @@ export function AIAssistantPage() {
           <div className="aif-body">
             <div className="aif-scroll">
               <AiUsageSummary proposals={data.proposals} approvals={data.approvals} insights={data.insights} />
-              <AiModelConnectionCard health={salesHealth} />
+              <AiModelConnectionCard health={salesHealth as SalesHealth | null} />
               <AiProposalCardList
                 proposals={data.proposals}
-                selectedId={selectedProposalId}
+                selectedId={selectedProposal?.id ?? null}
                 onSelect={setSelectedProposalId}
-                onConfirm={() => pushToast("Onay işlemi demo modda toast-only çalışır; merkezi onay ekranından yürütülür.")}
-                onReject={() => pushToast("Red işlemi demo modda toast-only çalışır.")}
+                onConfirm={(id) => void handleConfirmProposal(id)}
+                onReject={(id) => void handleRejectProposal(id)}
               />
               <AiRecentOpsList messages={data.messages} executions={data.executions} />
               {selectedProposal ? (

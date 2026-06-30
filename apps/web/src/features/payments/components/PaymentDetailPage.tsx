@@ -9,6 +9,7 @@ import { EntityTimelinePanel } from "../../shared/components/EntityTimelinePanel
 import { PaymentActionsBar } from "./PaymentActionsBar";
 import { PaymentAllocationTable } from "./PaymentAllocationTable";
 import { PaymentDocumentPanel } from "./PaymentDocumentPanel";
+import { PaymentReversalsPanel } from "./PaymentReversalsPanel";
 import { PaymentSummaryCards } from "./PaymentSummaryCards";
 import { getPaymentDetail } from "../queries/get-payments";
 import {
@@ -152,6 +153,8 @@ export function PaymentDetailPage({ paymentId }: { paymentId: string }) {
               </section>
 
               <PaymentAllocationTable allocations={payment.allocations} />
+
+              <PaymentReversalsPanel payment={payment} />
 
               <EntityTimelinePanel entityType="payment" entityId={payment.id} title="Zaman akışı" />
             </>

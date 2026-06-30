@@ -1,4 +1,4 @@
-import type { Offer } from "@hallederiz/types";
+import type { Offer, OfferLine } from "@hallederiz/types";
 import type { ItemResponse, ListResponse } from "../base";
 import { ApiClient } from "../base";
 
@@ -19,5 +19,17 @@ export class OffersClient {
 
   create(payload: Partial<Offer>) {
     return this.api.post<ItemResponse<Offer>>("/offers", payload);
+  }
+
+  update(id: string, payload: Partial<Offer>) {
+    return this.api.patch<ItemResponse<Offer>>(`/offers/${id}`, payload);
+  }
+
+  addLine(id: string, payload: Partial<OfferLine>) {
+    return this.api.post<ItemResponse<Offer>>(`/offers/${id}/lines`, payload);
+  }
+
+  send(id: string) {
+    return this.api.post<ItemResponse<Offer>>(`/offers/${id}/send`);
   }
 }

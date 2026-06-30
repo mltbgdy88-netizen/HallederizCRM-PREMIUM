@@ -16,4 +16,16 @@ export class OrdersClient {
   create(payload: Partial<SaleOrder>) {
     return this.api.post<ItemResponse<SaleOrder>>("/orders", payload);
   }
+
+  update(id: string, payload: Partial<SaleOrder>) {
+    return this.api.patch<ItemResponse<SaleOrder>>(`/orders/${id}`, payload);
+  }
+
+  confirm(id: string) {
+    return this.api.post<ItemResponse<SaleOrder>>(`/orders/${id}/confirm`);
+  }
+
+  cancel(id: string) {
+    return this.api.post<ItemResponse<SaleOrder>>(`/orders/${id}/cancel`);
+  }
 }

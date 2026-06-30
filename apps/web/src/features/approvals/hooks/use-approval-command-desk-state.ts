@@ -1,8 +1,10 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { dataSourceConfig, sdk } from "../../../lib/data-source";
+import { dataSourceConfig } from "../../../lib/data-source";
+import { useAuth } from "../../../providers/auth-provider";
 import { useToast } from "../../../providers/toast-provider";
+import { createApprovalClient } from "../api/approval-client";
 import {
   MSG_APPROVAL_DETAIL_FAILED,
   MSG_APPROVAL_EMPTY_FILTERED,
@@ -10,13 +12,15 @@ import {
   MSG_APPROVAL_EMPTY_LIST,
   MSG_APPROVAL_LIST_FAILED
 } from "../data/approval-action-messages";
-import { approveApprovalMutation, rejectApprovalMutation } from "../mutations";
 import {
   canInboxApprove,
   canInboxReject,
   mapApprovalActionError,
-  resolveApproveRejectToast
+  resolveApproveRejectToast,
+  resolveExecuteFeedback
 } from "../utils/approval-action-feedback";
+import { mapApprovalUiErrorMessage, normalizeApproval } from "../utils/inbox-helpers";
+import { mapPlatformApprovalToInboxRecord } from "../utils/map-platform-approval-to-inbox";
 import {
   approvalSourceFromRecord,
   countCompletedToday,
@@ -25,15 +29,26 @@ import {
   type ApprovalSourceFilter
 } from "../utils/approval-command-desk-present";
 import { filterApprovalInboxRows } from "../components/inbox/filter-inbox-rows";
-import { mapApprovalToInboxRecord } from "../components/inbox/map-approvals-to-inbox";
 import { DEFAULT_APPROVAL_INBOX_FILTERS, type ApprovalInboxFilterState } from "../components/inbox/ApprovalSidebar";
 import type { ApprovalInboxRecord, ApprovalInboxViewId } from "../components/inbox/types";
 import type { ApprovalDeskStat } from "../components/ApprovalStatsStrip";
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL ?? "http://localhost:4000";
 
 export type ApprovalCommandDeskUiPhase = "loading" | "ready" | "empty" | "error";
 
 export function useApprovalCommandDeskState() {
   const { pushToast } = useToast();
+  const { accessToken, session } = useAuth();
+  const client = useMemo(
+    () =>
+      createApprovalClient({
+        apiBaseUrl: API_BASE_URL,
+        accessToken,
+        tenantId: session?.tenant.id ?? dataSourceConfig.tenantId
+      }),
+    [accessToken, session?.tenant.id]
+  );
 
   const [phase, setPhase] = useState<ApprovalCommandDeskUiPhase>("loading");
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -52,8 +67,17 @@ export function useApprovalCommandDeskState() {
     setPhase("loading");
     setErrorMessage(null);
     try {
-      const result = await sdk.approvals.list();
-      const mapped = (result.items ?? []).map((item) => mapApprovalToInboxRecord(item, dataSourceConfig.userId));
+      const result = await client.listApprovals();
+      if (!result.ok) {
+        setRows([]);
+        setErrorMessage(mapApprovalUiErrorMessage(result.error));
+        setPhase("error");
+        return;
+      }
+      const mapped = (result.data.items ?? [])
+        .map(normalizeApproval)
+        .filter((item): item is NonNullable<typeof item> => Boolean(item))
+        .map((item) => mapPlatformApprovalToInboxRecord(item, dataSourceConfig.userId));
       setRows(mapped);
       setPhase("ready");
     } catch (error) {
@@ -61,7 +85,7 @@ export function useApprovalCommandDeskState() {
       setErrorMessage(mapApprovalActionError(error) || MSG_APPROVAL_LIST_FAILED);
       setPhase("error");
     }
-  }, []);
+  }, [client]);
 
   useEffect(() => {
     void bootstrap();
@@ -93,15 +117,24 @@ export function useApprovalCommandDeskState() {
     setDetailLoading(true);
     setDetailError(null);
     try {
-      const detail = await sdk.approvals.detail(selectedId);
-      const mapped = mapApprovalToInboxRecord(detail.item, dataSourceConfig.userId);
+      const result = await client.getApproval(selectedId);
+      if (!result.ok) {
+        setDetailError(mapApprovalUiErrorMessage(result.error));
+        return;
+      }
+      const normalized = normalizeApproval(result.data.item);
+      if (!normalized) {
+        setDetailError(MSG_APPROVAL_DETAIL_FAILED);
+        return;
+      }
+      const mapped = mapPlatformApprovalToInboxRecord(normalized, dataSourceConfig.userId);
       setRows((prev) => prev.map((item) => (item.id === mapped.id ? mapped : item)));
     } catch (error) {
       setDetailError(mapApprovalActionError(error) || MSG_APPROVAL_DETAIL_FAILED);
     } finally {
       setDetailLoading(false);
     }
-  }, [selectedId]);
+  }, [client, selectedId]);
 
   useEffect(() => {
     void refreshDetail();
@@ -135,12 +168,28 @@ export function useApprovalCommandDeskState() {
 
       setActionPending(kind);
       try {
-        if (kind === "approve") {
-          await approveApprovalMutation(selectedRecord.id);
-        } else {
-          await rejectApprovalMutation(selectedRecord.id);
+        const result =
+          kind === "approve"
+            ? await client.approveApproval(selectedRecord.id)
+            : await client.rejectApproval(selectedRecord.id);
+        if (!result.ok) {
+          pushToast(mapApprovalUiErrorMessage(result.error));
+          return;
         }
-        pushToast(resolveApproveRejectToast(kind, dataSourceConfig.useDemoData));
+        if (kind === "approve") {
+          if (result.data.duplicate) {
+            pushToast("Bu onay zaten işlenmiş; tekrar execution gönderilmedi (idempotent).");
+          } else if (result.data.reasons?.some((reason) => reason.includes("mutation_executed:true"))) {
+            pushToast(resolveExecuteFeedback(
+              { approval: selectedRecord.raw, execution: { status: "executed" } },
+              { useDemoData: false }
+            ).message);
+          } else {
+            pushToast(resolveApproveRejectToast("approve", false));
+          }
+        } else {
+          pushToast(resolveApproveRejectToast("reject", false));
+        }
         await bootstrap();
         await refreshDetail();
       } catch (error) {
@@ -149,7 +198,7 @@ export function useApprovalCommandDeskState() {
         setActionPending(null);
       }
     },
-    [actionPending, bootstrap, pushToast, refreshDetail, selectedRecord]
+    [actionPending, bootstrap, client, pushToast, refreshDetail, selectedRecord]
   );
 
   const stats = useMemo((): ApprovalDeskStat[] => {

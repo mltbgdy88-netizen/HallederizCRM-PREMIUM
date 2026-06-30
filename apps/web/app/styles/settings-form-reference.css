@@ -505,6 +505,37 @@
   top: 0;
 }
 
+.setf-table-sub {
+  display: block;
+  margin-top: 2px;
+  font-size: 9px;
+  font-weight: 600;
+  color: #94a3b8;
+  max-width: 42ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.setf-table-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.setf-field--checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 700;
+}
+
+.setf-note {
+  margin: 10px 0 0;
+  font-size: 11px;
+  color: #64748b;
+}
+
 .setf-import-tabs {
   display: flex;
   flex-wrap: wrap;

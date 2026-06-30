@@ -612,6 +612,23 @@ export function getDocument(documentId: string): Document | undefined {
   return documents.find((document) => document.id === documentId || document.documentNo === documentId);
 }
 
+export function setDocumentFileReady(
+  documentId: string,
+  input: { downloadUrl: string; fileStatus?: Document["fileStatus"] }
+): Document | null {
+  const document = getDocument(documentId);
+  if (!document) {
+    return null;
+  }
+  const updated: Document = {
+    ...document,
+    downloadUrl: input.downloadUrl,
+    fileStatus: input.fileStatus ?? "ready"
+  };
+  documents = documents.map((item) => (item.id === document.id ? updated : item));
+  return updated;
+}
+
 export function renderDocument(input: { type: DocumentType; entityType: Document["entityType"]; entityId: string; entityNo: string; customerId?: string }): Document {
   const document = buildDocumentRecord({ tenantId, createdBy, ...input });
   documents = [...documents, document];

@@ -674,6 +674,9 @@ export function useQuickOperationState(options?: {
         paymentDetailHref: feedback.paymentDetailHref,
         paymentDetailLabel: feedback.paymentDetailLabel
       });
+      if (typeof window !== "undefined" && feedback.showApprovalsLink) {
+        window.dispatchEvent(new CustomEvent("approvals:refresh"));
+      }
       return { ok: result.ok && !result.demoPreviewOnly, toast: feedback.toast };
     } catch (error) {
       setSubmitLinks({ showApprovalsLink: false });

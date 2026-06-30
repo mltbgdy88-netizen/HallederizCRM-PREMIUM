@@ -1,8 +1,10 @@
 import type {
+  WhatsAppActionRequest,
   WhatsAppConversation,
   WhatsAppMessage,
   WhatsAppOutboundPayload,
-  WhatsAppSessionSnapshot
+  WhatsAppSessionSnapshot,
+  WhatsAppTemplate
 } from "@hallederiz/types";
 import type { ItemResponse, ListResponse } from "../base";
 import { ApiClient } from "../base";
@@ -42,5 +44,21 @@ export class WhatsAppClient {
 
   sendOutbound(payload: WhatsAppOutboundPayload) {
     return this.api.post<ItemResponse<WhatsAppMessage>>("/whatsapp/outbound", payload);
+  }
+
+  createActionRequest(payload: Partial<WhatsAppActionRequest>) {
+    return this.api.post<ItemResponse<WhatsAppActionRequest>>("/whatsapp/action-requests", payload);
+  }
+
+  confirmActionRequest(id: string) {
+    return this.api.post<ItemResponse<WhatsAppActionRequest>>(`/whatsapp/action-requests/${id}/confirm`, {});
+  }
+
+  rejectActionRequest(id: string) {
+    return this.api.post<ItemResponse<WhatsAppActionRequest>>(`/whatsapp/action-requests/${id}/reject`, {});
+  }
+
+  listTemplates() {
+    return this.api.get<ListResponse<WhatsAppTemplate>>("/whatsapp/templates");
   }
 }

@@ -437,6 +437,13 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
     })
   );
 
+  server.get("/factory/logs", async (request, reply) =>
+    withGuards(request, reply, requireReadAccess(readPermissions.integrations), async (context) => {
+      const service = new IntegrationsService(context);
+      return { items: service.listFactoryLogs() };
+    })
+  );
+
   server.get<{ Params: { id: string } }>("/factory-orders/:id", async (request, reply) =>
     withGuards(request, reply, requireReadAccess(readPermissions.integrations), async (context) => {
       const service = new IntegrationsService(context);

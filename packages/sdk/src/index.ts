@@ -18,7 +18,10 @@ import {
   StockClient,
   WarehouseClient,
   WhatsAppClient,
-  OmnichannelClient
+  ErpClient,
+  FactoryClient,
+  OmnichannelClient,
+  OperatorClient
 } from "./clients";
 
 export * from "./base";
@@ -43,7 +46,10 @@ export interface HallederizSdk {
   imports: ImportsClient;
   quickOperations: QuickOperationsClient;
   whatsapp: WhatsAppClient;
+  erp: ErpClient;
+  factory: FactoryClient;
   omnichannel: OmnichannelClient;
+  operator: OperatorClient;
 }
 
 export function createHallederizSdk(options: ApiClientOptions): HallederizSdk {
@@ -68,6 +74,9 @@ export function createHallederizSdk(options: ApiClientOptions): HallederizSdk {
     imports: new ImportsClient(apiClient),
     quickOperations: new QuickOperationsClient(apiClient),
     whatsapp: new WhatsAppClient(apiClient),
-    omnichannel: new OmnichannelClient(apiClient)
+    erp: new ErpClient(apiClient),
+    factory: new FactoryClient(apiClient),
+    omnichannel: new OmnichannelClient(apiClient),
+    operator: new OperatorClient(apiClient)
   };
 }

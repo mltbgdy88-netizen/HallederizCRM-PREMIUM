@@ -11,6 +11,7 @@ import { buildCommandCenterSidebarNavSections } from "./command-center-sidebar-n
 import { normalizeShellPathname, resolveShellHeaderOptions } from "./platform-route-meta";
 import { useAuth } from "../providers/auth-provider";
 import { useTheme } from "../providers/theme-provider";
+import { acknowledgeAllPendingApprovalAlerts } from "../features/dashboard/utils/dashboard-approval-alert-store";
 
 function resolveActiveHref(pathname: string, items: AppShellNavItem[]): string {
   const p = normalizeShellPathname(pathname);
@@ -39,6 +40,17 @@ export function PlatformShell({ children }: { children: React.ReactNode }) {
   const allNavItems = useMemo(() => navSections.flatMap((s) => s.items), [navSections]);
 
   const normalizedPath = useMemo(() => normalizeShellPathname(pathname), [pathname]);
+
+  useEffect(() => {
+    if (
+      normalizedPath === "/onaylar" ||
+      normalizedPath.startsWith("/onaylar/") ||
+      normalizedPath.startsWith("/ai/onaylar")
+    ) {
+      void acknowledgeAllPendingApprovalAlerts();
+    }
+  }, [normalizedPath]);
+
   const headerOptions = useMemo(() => resolveShellHeaderOptions(pathname), [pathname]);
   const activeHref = resolveActiveHref(pathname, allNavItems);
   const isDashboard = normalizedPath === "/dashboard";

@@ -1,7 +1,5 @@
 import type { Customer, CustomerPricingProfile } from "@hallederiz/types";
-import { ApiClient } from "@hallederiz/sdk";
-import { dataSourceConfig } from "../../lib/data-source";
-const api = new ApiClient({ baseUrl: dataSourceConfig.apiBaseUrl, tenantId: dataSourceConfig.tenantId, userId: dataSourceConfig.userId });
+import { apiClient, dataSourceConfig } from "../../lib/data-source";
 
 export async function createCustomerRecord(payload: Partial<Customer>) {
   if (dataSourceConfig.useDemoData) {
@@ -11,7 +9,7 @@ export async function createCustomerRecord(payload: Partial<Customer>) {
       tenantId: payload.tenantId ?? dataSourceConfig.tenantId
     } as Customer;
   }
-  const response = await api.post<{ item: Customer }>("/customers", payload);
+  const response = await apiClient.post<{ item: Customer }>("/customers", payload);
   return response.item;
 }
 
@@ -23,7 +21,7 @@ export async function updateCustomerRecord(customerId: string, payload: Partial<
       tenantId: payload.tenantId ?? dataSourceConfig.tenantId
     } as Customer;
   }
-  const response = await api.patch<{ item: Customer }>(`/customers/${customerId}`, payload);
+  const response = await apiClient.patch<{ item: Customer }>(`/customers/${customerId}`, payload);
   return response.item;
 }
 
@@ -35,6 +33,6 @@ export async function updateCustomerPricingProfile(customerId: string, payload: 
       customerId
     } as CustomerPricingProfile;
   }
-  const response = await api.patch<{ item: CustomerPricingProfile }>(`/customers/${customerId}/pricing-profile`, payload);
+  const response = await apiClient.patch<{ item: CustomerPricingProfile }>(`/customers/${customerId}/pricing-profile`, payload);
   return response.item;
 }

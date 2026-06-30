@@ -1,4 +1,4 @@
-﻿import type { ErpConnection, ErpMapping, ErpSyncLog, FactoryIntegration, FactoryOrder, FactoryStockItem, IntegrationHealthSummary, WhatsAppActionRequest, WhatsAppConversation, WhatsAppMessage, WhatsAppTemplate } from "@hallederiz/types";
+﻿import type { ErpConnection, ErpMapping, ErpSyncLog, FactoryIntegration, FactoryOrder, FactoryStockItem, IntegrationHealthSummary, IntegrationLog, WhatsAppActionRequest, WhatsAppConversation, WhatsAppMessage, WhatsAppTemplate } from "@hallederiz/types";
 
 const tenantId = "tenant_1";
 const now = "2026-04-28T12:00:00.000Z";
@@ -40,6 +40,10 @@ const factoryStocks: FactoryStockItem[] = [
 ];
 const factoryOrders: FactoryOrder[] = [
   { id: "factory_order_1", tenantId, factoryOrderNo: "FO-221", factoryId: "factory_1", factoryName: "Ankara Fabrika", saleOrderId: "order_1", saleOrderNo: "SO-2481", status: "sent", lineCount: 1, lastUpdatedAt: now, lines: [{ id: "fo_line_1", tenantId, factoryOrderId: "factory_order_1", productId: "prod_2", productCode: "DK-2022", productName: "Geo Line Ash", quantity: 18 }] }
+];
+const factoryLogs: IntegrationLog[] = [
+  { id: "factory_log_1", tenantId, integrationType: "factory", integrationId: "factory_int_1", level: "info", message: "FO-221 API ile fabrikaya gonderildi.", createdAt: now, entityType: "factory_order", entityId: "factory_order_1" },
+  { id: "factory_log_2", tenantId, integrationType: "factory", integrationId: "factory_int_2", level: "warning", message: "Stok senkronu Excel fallback ile tamamlandi.", createdAt: "2026-04-28T08:20:00.000Z", entityType: "factory_order", entityId: "factory_order_1" }
 ];
 const factoryHealth: IntegrationHealthSummary = { status: "warning", activeConnectionCount: 2, warningCount: 0, errorCount: 1, lastSyncedAt: now, message: "Bir fabrika entegrasyonunda hata var." };
 
@@ -93,11 +97,69 @@ export function patchErpMappings(body: ErpMapping[]) { erpMappings.splice(0, erp
 export function listErpLogs() { return erpLogs; }
 export function listErpTemplates() { return erpTemplates; }
 
+function factoryLogTimestamp() {
+  return new Date().toISOString();
+}
+
+export function appendFactoryLog(
+  entry: Pick<IntegrationLog, "integrationId" | "level" | "message" | "entityType" | "entityId"> & {
+    tenantId?: string;
+    createdAt?: string;
+  }
+) {
+  const log: IntegrationLog = {
+    id: `factory_log_${factoryLogs.length + 1}`,
+    tenantId: entry.tenantId ?? tenantId,
+    integrationType: "factory",
+    integrationId: entry.integrationId,
+    level: entry.level,
+    message: entry.message,
+    createdAt: entry.createdAt ?? factoryLogTimestamp(),
+    entityType: entry.entityType,
+    entityId: entry.entityId
+  };
+  factoryLogs.unshift(log);
+  return log;
+}
+
 export function listFactories() { return factories; }
 export function listFactoryStocks(factoryId: string) { return factoryStocks.filter((item) => item.factoryId === factoryId); }
-export function syncFactoryStock(factoryId: string) { return { factoryId, syncedAt: now, items: listFactoryStocks(factoryId).length }; }
+export function syncFactoryStock(factoryId: string) {
+  const syncedAt = factoryLogTimestamp();
+  const itemCount = listFactoryStocks(factoryId).length;
+  const factory = factories.find((item) => item.id === factoryId);
+  const integration = factoryIntegrations.find((item) => item.factoryId === factoryId);
+  appendFactoryLog({
+    integrationId: integration?.id ?? "factory_int_1",
+    level: integration?.status === "error" ? "warning" : "info",
+    message: `${factory?.name ?? factoryId} stok senkronu tamamlandi (${itemCount} satir).`,
+    entityId: factoryId
+  });
+  if (integration) {
+    integration.lastSyncAt = syncedAt;
+  }
+  return { factoryId, syncedAt, items: itemCount };
+}
 export function listFactoryOrders() { return factoryOrders; }
 export function getFactoryOrder(id: string) { return factoryOrders.find((item) => item.id === id || item.factoryOrderNo === id); }
 export function createFactoryOrder(body: Partial<FactoryOrder>) { const order = { ...factoryOrders[0], ...body, id: `factory_order_${factoryOrders.length + 1}`, factoryOrderNo: body.factoryOrderNo ?? `FO-${factoryOrders.length + 300}` } as FactoryOrder; factoryOrders.push(order); return order; }
-export function updateFactoryOrderStatus(id: string, status: FactoryOrder["status"]) { const order = getFactoryOrder(id); if (!order) return null; order.status = status; order.lastUpdatedAt = now; return order; }
+export function updateFactoryOrderStatus(id: string, status: FactoryOrder["status"]) { const order = getFactoryOrder(id); if (!order) return null; order.status = status; order.lastUpdatedAt = factoryLogTimestamp(); return order; }
+export function markFactoryOrderSent(id: string) {
+  const order = getFactoryOrder(id);
+  if (!order) return null;
+  order.status = "sent";
+  order.lastUpdatedAt = factoryLogTimestamp();
+  const integration = factoryIntegrations.find((item) => item.factoryId === order.factoryId);
+  appendFactoryLog({
+    integrationId: integration?.id ?? "factory_int_1",
+    level: "info",
+    message: `${order.factoryOrderNo} fabrikaya iletildi.`,
+    entityType: "factory_order",
+    entityId: order.id
+  });
+  return order;
+}
+export function listFactoryLogs() {
+  return [...factoryLogs].sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt));
+}
 export function getFactoryIntegrationHealth() { return { health: factoryHealth, integrations: factoryIntegrations }; }

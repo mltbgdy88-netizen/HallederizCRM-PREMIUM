@@ -28,3 +28,24 @@ export function withDemoAuth(run: () => Promise<void> | void) {
     run
   );
 }
+
+export function hasPostgresTestHarness(): boolean {
+  return Boolean(process.env.DATABASE_URL ?? process.env.POSTGRES_URL);
+}
+
+export function withPostgresAuth(run: () => Promise<void> | void) {
+  const postgresUrl = process.env.DATABASE_URL ?? process.env.POSTGRES_URL;
+  return withEnv(
+    {
+      DEMO_AUTH_ENABLED: "false",
+      NEXT_PUBLIC_ENABLE_DEMO_AUTH: "false",
+      ALLOW_DEMO_FALLBACK: "false",
+      NODE_ENV: "test",
+      PERSISTENCE_MODE: "postgres",
+      POSTGRES_URL: postgresUrl,
+      DATABASE_URL: postgresUrl,
+      AUTH_SESSION_SECRET: process.env.AUTH_SESSION_SECRET ?? "test-session-secret-32chars-minimum"
+    },
+    run
+  );
+}

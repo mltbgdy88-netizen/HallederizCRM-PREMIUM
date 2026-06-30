@@ -4,9 +4,12 @@ import {
   createWorkerRuntimeApp,
   getWorkerJobHandler,
   InMemoryOutboxJobRepository,
+  normalizeWorkerMode,
   processClaimedJob,
   resolveWorkerRuntimeConfig
 } from "@hallederiz/domain";
+import { evaluateProductionReadiness } from "../shared/production-readiness-runtime";
+import type { RequestContext } from "../shared/request-context";
 
 test("foundation dry run tick works", () => {
   const app = createWorkerRuntimeApp({ persistenceMode: "foundation_memory" });
@@ -32,6 +35,108 @@ test("production config with DB resolves postgres mode", () => {
   assert.equal(resolution.ok, true);
   assert.equal(resolution.persistenceMode, "postgres");
   assert.equal(resolution.config?.workerMode, "production");
+});
+
+test("durable worker mode alias resolves to production runtime config", () => {
+  assert.equal(normalizeWorkerMode("durable"), "production");
+  const resolution = resolveWorkerRuntimeConfig({
+    WORKER_MODE: "durable",
+    PERSISTENCE_MODE: "postgres",
+    POSTGRES_URL: "postgres://localhost:5432/hallederiz"
+  } as NodeJS.ProcessEnv);
+  assert.equal(resolution.ok, true);
+  assert.equal(resolution.config?.workerMode, "production");
+  assert.equal(resolution.persistenceMode, "postgres");
+});
+
+test("unsupported worker mode remains fail-closed", () => {
+  const resolution = resolveWorkerRuntimeConfig({
+    WORKER_MODE: "mystery_mode",
+    PERSISTENCE_MODE: "postgres",
+    POSTGRES_URL: "postgres://localhost:5432/hallederiz"
+  } as NodeJS.ProcessEnv);
+  assert.equal(resolution.ok, false);
+  assert.ok(resolution.reasons.includes("worker_mode_unsupported:mystery_mode"));
+});
+
+function withEnvPatch<T>(patch: Record<string, string | undefined>, fn: () => Promise<T> | T): Promise<T> | T {
+  const previous = new Map<string, string | undefined>();
+  for (const [key, value] of Object.entries(patch)) {
+    previous.set(key, process.env[key]);
+    if (value === undefined) {
+      delete process.env[key];
+    } else {
+      process.env[key] = value;
+    }
+  }
+  try {
+    return fn();
+  } finally {
+    for (const [key, value] of previous) {
+      if (value === undefined) {
+        delete process.env[key];
+      } else {
+        process.env[key] = value;
+      }
+    }
+  }
+}
+
+test("production readiness accepts durable and production worker modes", async () => {
+  const baseEnv = {
+    NODE_ENV: "production",
+    PERSISTENCE_MODE: "postgres",
+    DATABASE_URL: "postgres://demo:demo@localhost:5432/demo",
+    AUTH_SESSION_SECRET: "test-secret",
+    APP_BASE_URL: "https://app.example.com",
+    API_BASE_URL: "https://api.example.com",
+    APPROVAL_EXECUTION_MODE: "controlled",
+    DEMO_AUTH_ENABLED: undefined,
+    NEXT_PUBLIC_ENABLE_DEMO_AUTH: undefined,
+    ALLOW_DEMO_FALLBACK: undefined,
+    NEXT_PUBLIC_USE_DEMO_DATA: undefined,
+    OMNICHANNEL_ALLOW_MOCK_PROVIDERS: undefined
+  } as const;
+
+  for (const workerMode of ["durable", "production"] as const) {
+    await withEnvPatch({ ...baseEnv, WORKER_MODE: workerMode }, async () => {
+      const payload = await evaluateProductionReadiness({
+        tenantId: "tenant_1",
+        userId: "user_admin",
+        persistenceMode: "postgres",
+        isAuthenticated: true,
+        permissions: ["platform.settings.read"]
+      } satisfies RequestContext);
+      assert.equal(payload.workerSafe, true);
+      assert.ok(!payload.blockers.includes("worker_mode_not_durable"));
+    });
+  }
+});
+
+test("production readiness blocks foundation worker mode", async () => {
+  await withEnvPatch(
+    {
+      NODE_ENV: "production",
+      PERSISTENCE_MODE: "postgres",
+      DATABASE_URL: "postgres://demo:demo@localhost:5432/demo",
+      AUTH_SESSION_SECRET: "test-secret",
+      APP_BASE_URL: "https://app.example.com",
+      API_BASE_URL: "https://api.example.com",
+      WORKER_MODE: "foundation",
+      APPROVAL_EXECUTION_MODE: "controlled"
+    },
+    async () => {
+      const payload = await evaluateProductionReadiness({
+        tenantId: "tenant_1",
+        userId: "user_admin",
+        persistenceMode: "postgres",
+        isAuthenticated: true,
+        permissions: ["platform.settings.read"]
+      } satisfies RequestContext);
+      assert.ok(payload.blockers.includes("worker_mode_not_durable"));
+      assert.equal(payload.workerSafe, false);
+    }
+  );
 });
 
 test("unsupported job type does not mark completed", () => {

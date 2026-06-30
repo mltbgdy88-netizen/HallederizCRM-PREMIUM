@@ -15,4 +15,8 @@ export class DashboardClient {
   summary() {
     return this.api.get<{ item: unknown }>("/dashboard/summary");
   }
+
+  announcementVideos() {
+    return this.api.get<{ items: unknown[]; total: number }>("/dashboard/announcement-videos");
+  }
 }

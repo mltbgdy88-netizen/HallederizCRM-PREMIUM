@@ -8,8 +8,20 @@ function resolveMigrationsDirectory(): string {
   const moduleDir = path.dirname(fileURLToPath(import.meta.url));
   const candidates = [
     path.join(moduleDir, "migrations"),
-    path.join(moduleDir, "..", "src", "migrations")
+    path.join(moduleDir, "..", "src", "migrations"),
+    path.join(moduleDir, "..", "..", "..", "src", "migrations")
   ];
+
+  let current = moduleDir;
+  while (current !== path.dirname(current)) {
+    const packageJson = path.join(current, "package.json");
+    const srcMigrations = path.join(current, "src", "migrations");
+    if (existsSync(packageJson) && existsSync(srcMigrations)) {
+      candidates.push(srcMigrations);
+    }
+    current = path.dirname(current);
+  }
+
   for (const candidate of candidates) {
     if (existsSync(candidate)) {
       return candidate;

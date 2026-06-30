@@ -147,6 +147,10 @@ export class IntegrationsService {
     return this.factoryAdapter.getHealth();
   }
 
+  listFactoryLogs() {
+    return this.factoryAdapter.listLogs();
+  }
+
   getWhatsAppHealth() {
     return this.whatsappAdapter.getHealth();
   }

@@ -795,26 +795,25 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
   );
   server.post<{ Body: { type: DocumentType; entityType: Document["entityType"]; entityId: string; entityNo: string; customerId?: string } }>("/documents/render", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["documents.write", "documents.render"])], async (context) => {
-      const policyResult = await enforcePolicyForRoute(context, {
+      const entityId = request.body?.entityId ?? "document-render";
+      const wrapped = await withMutationPolicy({
+        request,
+        reply,
+        context,
         actionKey: "platform.documents.generate",
-        requiredPermissions: ["documents.write", "documents.render"],
-        productionActionType: "critical_mutation",
-        payload: { documentType: request.body?.type, entityType: request.body?.entityType }
-      });
-      if (policyResult.handled) {
-        return reply.status(policyResult.statusCode).send(policyResult.body);
-      }
-
-      const service = new CommercialCoreService(context);
-      const item = await service.renderDocument(request.body);
-      recordAuditEvent(context, {
         entityType: "document",
-        entityId: item.id,
-        eventType: "document.rendered",
-        title: "Belge uretildi",
-        description: `${item.documentNo} belgesi olusturuldu.`
+        entityId,
+        payload: {
+          documentType: request.body?.type,
+          entityType: request.body?.entityType,
+          entityId: request.body?.entityId
+        },
+        handler: async () => new CommercialCoreService(context).renderDocument(request.body)
       });
-      return reply.status(201).send({ item });
+      if (wrapped.handled) {
+        return reply.status(wrapped.statusCode).send(wrapped.body);
+      }
+      return reply.status(201).send({ item: wrapped.value });
     })
   );
   server.post<{ Params: { id: string } }>("/documents/:id/regenerate", async (request, reply) =>

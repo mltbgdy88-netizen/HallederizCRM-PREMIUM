@@ -5,6 +5,7 @@ import type {
 } from "./approval-execution-log-repository";
 import type { DbWorkerJobRecord } from "./outbox-job-repository";
 import type { DatabaseTransactionRunner } from "../transaction";
+import { createOutboxJobId } from "@hallederiz/domain";
 
 type MaybePromise<T> = T | Promise<T>;
 
@@ -97,12 +98,6 @@ function assertNonEmpty(value: string, fieldName: string) {
   if (!value) {
     throw new Error(`missing_${fieldName}`);
   }
-}
-
-function createOutboxJobId(tenantId: string, idempotencyKey: string) {
-  const compactTenant = tenantId.replace(/[^a-zA-Z0-9]/g, "").slice(0, 12) || "tenant";
-  const compactIdempotency = idempotencyKey.replace(/[^a-zA-Z0-9]/g, "").slice(0, 16) || "idem";
-  return `job_${compactTenant}_${compactIdempotency}`;
 }
 
 function normalizeOutboxConfig(config?: Partial<OutboxJobConfig>): OutboxJobConfig {

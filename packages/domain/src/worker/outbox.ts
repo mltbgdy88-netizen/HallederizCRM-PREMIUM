@@ -5,10 +5,30 @@ function nowIso() {
   return new Date().toISOString();
 }
 
-function createJobId(tenantId: string, idempotencyKey: string) {
+function fnv1a32(input: string, seed: number): number {
+  let hash = seed;
+  for (let index = 0; index < input.length; index += 1) {
+    hash ^= input.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return hash >>> 0;
+}
+
+function hashIdempotencyMaterial(tenantId: string, idempotencyKey: string): string {
+  const material = `${tenantId}:${idempotencyKey}`;
+  const partA = fnv1a32(material, 2_166_136_261).toString(16).padStart(8, "0");
+  const partB = fnv1a32(material, 709_607_855).toString(16).padStart(8, "0");
+  const partC = fnv1a32(`${material}:job`, 374_761_393).toString(16).padStart(8, "0");
+  return `${partA}${partB}${partC}`;
+}
+
+export function createOutboxJobId(tenantId: string, idempotencyKey: string) {
   const compactTenant = tenantId.replace(/[^a-zA-Z0-9]/g, "").slice(0, 12) || "tenant";
-  const compactIdempotency = idempotencyKey.replace(/[^a-zA-Z0-9]/g, "").slice(0, 16) || "idem";
-  return `job_${compactTenant}_${compactIdempotency}`;
+  return `job_${compactTenant}_${hashIdempotencyMaterial(tenantId, idempotencyKey)}`;
+}
+
+function createJobId(tenantId: string, idempotencyKey: string) {
+  return createOutboxJobId(tenantId, idempotencyKey);
 }
 
 export function createOutboxJob(

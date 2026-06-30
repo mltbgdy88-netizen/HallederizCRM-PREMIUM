@@ -8,6 +8,15 @@ function parseBooleanEnv(value: string | undefined, defaultValue = false): boole
 
 export type WorkerMode = "foundation_dry_run" | "production" | "disabled";
 
+/** Ops-facing `durable` maps to canonical runtime mode `production`. */
+export function normalizeWorkerMode(raw: string | undefined): string {
+  const normalized = (raw ?? "foundation_dry_run").trim().toLowerCase();
+  if (normalized === "durable") {
+    return "production";
+  }
+  return normalized;
+}
+
 export interface WorkerRuntimeEnvConfig {
   workerMode: WorkerMode;
   persistenceMode: "demo" | "postgres";
@@ -28,7 +37,7 @@ function readEnv(source: NodeJS.ProcessEnv): NodeJS.ProcessEnv {
 }
 
 export function resolveWorkerRuntimeConfig(env: NodeJS.ProcessEnv = process.env): WorkerRuntimeConfigResolution {
-  const workerMode = (env.WORKER_MODE ?? "foundation_dry_run").trim().toLowerCase() as WorkerMode;
+  const workerMode = normalizeWorkerMode(env.WORKER_MODE) as WorkerMode;
   const persistenceMode = (env.PERSISTENCE_MODE ?? "demo").trim().toLowerCase();
   const postgresUrl = (env.POSTGRES_URL ?? env.DATABASE_URL ?? "").trim() || undefined;
   const workerId = (env.WORKER_ID ?? "worker.production").trim() || "worker.production";

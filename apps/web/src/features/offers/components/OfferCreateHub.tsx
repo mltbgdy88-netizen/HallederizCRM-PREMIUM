@@ -1,12 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import type { Offer } from "@hallederiz/types";
 import { LucideIcon } from "../../../components/icons/lucide-icons";
 import { dataSourceConfig } from "../../../lib/data-source";
+import { useToast } from "../../../providers/toast-provider";
 import { getOffers } from "../queries/get-offers";
 import { getOfferStatusLabel } from "../queries/offer-mock-data";
+import { createDirectDraftOffer } from "../utils/direct-offer-create";
 
 export function buildQuickOfferHref(customerId?: string | null): string {
   const params = new URLSearchParams();
@@ -40,12 +43,16 @@ function pickRecentOffers(offers: Offer[]): { items: Offer[]; title: string } {
 }
 
 export function OfferCreateHub({ customerId }: { customerId: string | null }) {
+  const router = useRouter();
+  const { pushToast } = useToast();
   const [customerName, setCustomerName] = useState<string | null>(null);
   const [offers, setOffers] = useState<Offer[]>([]);
   const [customerNames, setCustomerNames] = useState<Map<string, string>>(new Map());
   const [loadingOffers, setLoadingOffers] = useState(true);
   const [resolvingCustomer, setResolvingCustomer] = useState(Boolean(customerId));
   const [tipDismissed, setTipDismissed] = useState(false);
+  const [directCreating, setDirectCreating] = useState(false);
+  const [directCreated, setDirectCreated] = useState(false);
 
   useEffect(() => {
     let mounted = true;
@@ -80,6 +87,32 @@ export function OfferCreateHub({ customerId }: { customerId: string | null }) {
 
   const quickOfferHref = useMemo(() => buildQuickOfferHref(customerId), [customerId]);
   const recentSection = useMemo(() => pickRecentOffers(offers), [offers]);
+
+  const handleDirectCreate = async () => {
+    if (dataSourceConfig.useDemoData) {
+      pushToast("Canlı kayıt modu kapalı. Hızlı İşlem Masası'nı kullanın.");
+      return;
+    }
+    if (directCreated || directCreating) {
+      return;
+    }
+    setDirectCreating(true);
+    const result = await createDirectDraftOffer({ customerId, note: "Hub üzerinden taslak teklif" });
+    setDirectCreating(false);
+    if (result.ok) {
+      setDirectCreated(true);
+      pushToast(result.offerNo ? `${result.offerNo} oluşturuldu.` : "Taslak teklif oluşturuldu.");
+      router.push(`/teklifler/${result.offerId}`);
+      return;
+    }
+    if (result.approvalRequestId) {
+      setDirectCreated(true);
+      pushToast(result.message);
+      router.push(`/onaylar?focus=${result.approvalRequestId}`);
+      return;
+    }
+    pushToast(result.message);
+  };
 
   return (
     <section className="tof-page" aria-labelledby="tof-page-title">
@@ -140,16 +173,21 @@ export function OfferCreateHub({ customerId }: { customerId: string | null }) {
               <LucideIcon name="clipboard-list" size={20} />
             </span>
             <div>
-              <h2 className="tof-action-card__title">Detaylı Teklif</h2>
+              <h2 className="tof-action-card__title">Doğrudan taslak</h2>
               <p className="tof-action-card__desc">
-                Detaylı teklif formu sonraki fazda ayrıştırılacak; şu anda teklif girişi Hızlı İşlem Masası üzerinden
-                yapılır.
+                Cari bağlamıyla boş taslak teklif oluşturun; satırları teklif detayında veya Hızlı İşlem Masası&apos;nda
+                tamamlayın.
               </p>
             </div>
-            <Link className="tof-action-card__cta" href={quickOfferHref}>
-              Detaylı teklifi hızlı masada aç
+            <button
+              type="button"
+              className="tof-action-card__cta"
+              disabled={directCreating || directCreated}
+              onClick={() => void handleDirectCreate()}
+            >
+              {directCreated ? "Talep gönderildi" : directCreating ? "Oluşturuluyor…" : "Taslak teklif oluştur"}
               <LucideIcon name="arrow-right" size={14} />
-            </Link>
+            </button>
           </article>
         </div>
 

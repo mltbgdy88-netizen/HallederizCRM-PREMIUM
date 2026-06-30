@@ -2,10 +2,13 @@
 
 import type { AiInsight, AiProposal, Approval } from "@hallederiz/types";
 import { useRouter } from "next/navigation";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { useToast } from "../../../providers/toast-provider";
-import { getAiAssistantData } from "../queries";
 import { buildAiProposalSnapshotJson } from "../utils/ai-proposal-snapshot";
+import { useAiAssistantData } from "../hooks/use-ai-assistant-data";
+import { useLocalAiChannel } from "../hooks/use-local-ai-channel";
+import { LocalAiChannelBand } from "./LocalAiChannelBand";
+import { confirmAiProposalMutation, rejectAiProposalMutation, runAiInsightsMutation } from "../mutations";
 
 const proposalStatusLabel: Record<AiProposal["status"], string> = {
   draft: "Taslak",
@@ -23,28 +26,17 @@ function severityBadge(severity: AiInsight["severity"]): string {
 export function AiApprovalsPage() {
   const router = useRouter();
   const { pushToast } = useToast();
-  const [data, setData] = useState<{ proposals: AiProposal[]; approvals: Approval[]; executions: unknown[] }>({
-    proposals: [],
-    approvals: [],
-    executions: []
-  });
+  const channel = useLocalAiChannel();
+  const assistant = useAiAssistantData();
   const [selectedProposalId, setSelectedProposalId] = useState<string | null>(null);
 
-  useEffect(() => {
-    void getAiAssistantData().then((next) => {
-      setData({
-        proposals: next.proposals,
-        approvals: next.approvals,
-        executions: next.executions
-      });
-      setSelectedProposalId(next.proposals[0]?.id ?? null);
-    });
-  }, []);
+  const data = assistant.data ?? { proposals: [] as AiProposal[], approvals: [] as Approval[], executions: [] as unknown[] };
 
-  const selectedProposal = useMemo(
-    () => data.proposals.find((proposal) => proposal.id === selectedProposalId) ?? data.proposals[0],
-    [data.proposals, selectedProposalId]
-  );
+  const selectedProposal = useMemo(() => {
+    const fallbackId = data.proposals[0]?.id ?? null;
+    const activeId = selectedProposalId ?? fallbackId;
+    return data.proposals.find((proposal) => proposal.id === activeId) ?? data.proposals[0];
+  }, [data.proposals, selectedProposalId]);
 
   const linkedApproval = useMemo(() => {
     if (!selectedProposal?.approvalId) return data.approvals[0];
@@ -53,11 +45,29 @@ export function AiApprovalsPage() {
 
   const waitingCount = data.proposals.filter((proposal) => proposal.status === "waiting_approval").length;
 
+  const handleConfirmProposal = async (id: string) => {
+    const updated = await confirmAiProposalMutation(id, { useDemoData: assistant.useDemo, pushToast });
+    if (updated || assistant.useDemo) {
+      await assistant.refresh();
+    }
+  };
+
+  const handleRejectProposal = async (id: string) => {
+    const updated = await rejectAiProposalMutation(id, { useDemoData: assistant.useDemo, pushToast });
+    if (updated || assistant.useDemo) {
+      await assistant.refresh();
+    }
+  };
+
   return (
     <div className="aif-page aif-page--approvals">
-      <p className="aif-demo-band" role="status">
-        Yapay zekâ onay kuyruğu: onay ve icra merkezi onay ekranından yürütülür; bu ekran inceleme ve yalnızca bilgi aksiyonu içindir.
-      </p>
+      {assistant.useDemo ? (
+        <p className="aif-demo-band" role="status">
+          Yapay zekâ onay kuyruğu: onay ve icra merkezi onay ekranından yürütülür; bu ekran inceleme ve yalnızca bilgi aksiyonu içindir.
+        </p>
+      ) : (
+        <LocalAiChannelBand channelView={channel.channelView} />
+      )}
 
       <div className="aif-layout">
         <div className="aif-main">
@@ -180,7 +190,7 @@ export function AiApprovalsPage() {
                             type="button"
                             onClick={(event) => {
                               event.stopPropagation();
-                              pushToast(`${proposal.proposalNo} onay talebi demo modda toast-only kaydedildi.`);
+                              void handleConfirmProposal(proposal.id);
                             }}
                           >
                             Onayla
@@ -190,7 +200,7 @@ export function AiApprovalsPage() {
                             type="button"
                             onClick={(event) => {
                               event.stopPropagation();
-                              pushToast(`${proposal.proposalNo} reddi demo modda toast-only kaydedildi.`);
+                              void handleRejectProposal(proposal.id);
                             }}
                           >
                             Reddet
@@ -268,28 +278,41 @@ export function AiApprovalsPage() {
 export function AiInsightsPage() {
   const router = useRouter();
   const { pushToast } = useToast();
-  const [insights, setInsights] = useState<AiInsight[]>([]);
+  const channel = useLocalAiChannel();
+  const assistant = useAiAssistantData();
+  const [insightsRunning, setInsightsRunning] = useState(false);
   const [selectedInsightId, setSelectedInsightId] = useState<string | null>(null);
 
-  useEffect(() => {
-    void getAiAssistantData().then((next) => {
-      setInsights(next.insights);
-      setSelectedInsightId(next.insights[0]?.id ?? null);
-    });
-  }, []);
+  const insights = assistant.data?.insights ?? [];
 
-  const selectedInsight = useMemo(
-    () => insights.find((insight) => insight.id === selectedInsightId) ?? insights[0],
-    [insights, selectedInsightId]
-  );
+  const selectedInsight = useMemo(() => {
+    const fallbackId = insights[0]?.id ?? null;
+    const activeId = selectedInsightId ?? fallbackId;
+    return insights.find((insight) => insight.id === activeId) ?? insights[0];
+  }, [insights, selectedInsightId]);
 
   const criticalCount = insights.filter((insight) => insight.severity === "critical").length;
 
+  const handleRefreshInsights = async () => {
+    if (!channel.canRunInsights || insightsRunning) return;
+    setInsightsRunning(true);
+    const items = await runAiInsightsMutation({ useDemoData: assistant.useDemo, pushToast });
+    if (items) {
+      await assistant.refresh();
+      setSelectedInsightId(items[0]?.id ?? null);
+    }
+    setInsightsRunning(false);
+  };
+
   return (
     <div className="aif-page aif-page--insights">
-      <p className="aif-demo-band" role="status">
-        Yapay zekâ içgörüleri salt okunur öneri üretir; canlı değişiklik bu ekrandan yapılmaz.
-      </p>
+      {assistant.useDemo ? (
+        <p className="aif-demo-band" role="status">
+          Yapay zekâ içgörüleri salt okunur öneri üretir; canlı değişiklik bu ekrandan yapılmaz.
+        </p>
+      ) : (
+        <LocalAiChannelBand channelView={channel.channelView} />
+      )}
 
       <div className="aif-layout">
         <div className="aif-main">
@@ -306,9 +329,11 @@ export function AiInsightsPage() {
               <button
                 className="aif-btn aif-btn--primary"
                 type="button"
-                onClick={() => pushToast("İçgörü yenileme sonraki fazda API ile bağlanacaktır.")}
+                disabled={!channel.canRunInsights || insightsRunning || assistant.loading}
+                title={channel.canRunInsights ? "Yerel model ile içgörüleri yenile" : channel.channelView.note}
+                onClick={() => void handleRefreshInsights()}
               >
-                İçgörüleri yenile
+                {insightsRunning ? "Yenileniyor…" : "İçgörüleri yenile"}
               </button>
             </div>
           </header>

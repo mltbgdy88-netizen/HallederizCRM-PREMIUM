@@ -3,6 +3,8 @@ export interface ApiClientOptions {
   tenantId?: string;
   userId?: string;
   sessionToken?: string;
+  /** When set, called on each request (e.g. live login token from auth context). */
+  resolveSessionToken?: () => string | undefined;
 }
 
 export interface ListResponse<T> {
@@ -24,7 +26,7 @@ export class ApiClient {
   constructor(private readonly options: ApiClientOptions) {}
 
   private resolveSessionToken(): string | undefined {
-    return this.options.sessionToken;
+    return this.options.resolveSessionToken?.() ?? this.options.sessionToken;
   }
 
   async get<T>(path: string): Promise<T> {

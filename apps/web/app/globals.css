@@ -31,6 +31,7 @@
 @import "./styles/root-command-center.css";
 @import "./styles/login-command-center.css";
 @import "./styles/panel-command-center.css";
+@import "./styles/operator-console.css";
 @import "./styles/unauthorized-command-center.css";
 @import "./styles/offline-api-command-center.css";
 @import "./styles/demo-mode-command-center.css";

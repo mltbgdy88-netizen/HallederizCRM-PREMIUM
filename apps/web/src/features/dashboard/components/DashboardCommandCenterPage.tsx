@@ -7,13 +7,14 @@ import { LucideIcon, type LucideIconName } from "../../../components/icons/lucid
 import { dataSourceConfig } from "../../../lib/data-source";
 import { formatUserFacingStatus } from "../../../lib/user-facing-labels";
 import { getDashboardHomeSnapshot } from "../queries/get-dashboard-home-snapshot";
-import { getDashboardLiveSnapshot } from "../queries/get-dashboard-live-snapshot";
+import { getDashboardLivePanels } from "../queries/get-dashboard-live-panels";
 import { getOperationsEngineData } from "../queries/operations-engine-mock-data";
 import {
   EMPTY_DASHBOARD_HOME_SNAPSHOT,
   type DashboardHomeSnapshot
 } from "../utils/build-dashboard-home-snapshot";
 import { DashboardCommandCenterAiPanel } from "./DashboardCommandCenterAiPanel";
+import { DashboardAnnouncementVideoPanel } from "./DashboardAnnouncementVideoPanel";
 import { DashboardCommandCenterCardEditor } from "./DashboardCommandCenterCardEditor";
 import {
   buildCommandCenterGridRows,
@@ -59,14 +60,6 @@ type RecentRow = {
   customer: string;
   amount: string;
   status: string;
-};
-
-type ContextItem = {
-  title: string;
-  detail: string;
-  href: string;
-  tone: "danger" | "gold" | "success" | "neutral";
-  icon: LucideIconName;
 };
 
 const DEMO_ALERTS: AlertCard[] = [
@@ -179,122 +172,12 @@ function buildFlow(snapshot: DashboardHomeSnapshot, isDemo: boolean): FlowRow[] 
   ];
 }
 
-function buildContextItems(alerts: AlertCard[], flowRows: FlowRow[], tasks: TaskRow[]): ContextItem[] {
-  const overdue = alerts.find((item) => item.key === "overdue");
-  const approval = alerts.find((item) => item.key === "approvals");
-  const stock = alerts.find((item) => item.key === "stock");
-  const delivery = alerts.find((item) => item.key === "delivery");
-  const firstTask = tasks[0];
-  const paymentFlow = flowRows.find((item) => item.key === "pay");
-
-  return [
-    overdue
-      ? {
-          title: overdue.title,
-          detail: `${overdue.countLabel}${overdue.amountLabel ? ` · ${overdue.amountLabel}` : ""}`,
-          href: overdue.href,
-          tone: "danger",
-          icon: overdue.icon
-        }
-      : null,
-    approval
-      ? {
-          title: approval.title,
-          detail: approval.countLabel,
-          href: approval.href,
-          tone: "gold",
-          icon: approval.icon
-        }
-      : null,
-    stock
-      ? {
-          title: stock.title,
-          detail: stock.countLabel,
-          href: stock.href,
-          tone: "gold",
-          icon: stock.icon
-        }
-      : null,
-    delivery
-      ? {
-          title: delivery.title,
-          detail: delivery.countLabel,
-          href: delivery.href,
-          tone: "success",
-          icon: delivery.icon
-        }
-      : null,
-    firstTask
-      ? {
-          title: "Sıradaki görev",
-          detail: `${firstTask.time} · ${firstTask.text}`,
-          href: "/gorevler",
-          tone: firstTask.priority === "Yüksek" ? "danger" : firstTask.priority === "Orta" ? "gold" : "neutral",
-          icon: "clipboard-list"
-        }
-      : null,
-    paymentFlow
-      ? {
-          title: paymentFlow.title,
-          detail: `${paymentFlow.count} kayıt · ${paymentFlow.subtitle}`,
-          href: paymentFlow.href,
-          tone: "neutral",
-          icon: paymentFlow.icon
-        }
-      : null
-  ].filter((item): item is ContextItem => Boolean(item));
-}
-
-function DashboardContextPanel({ items, isDemo }: { items: ContextItem[]; isDemo: boolean }) {
-  return (
-    <article className="hz-dash-card hz-dashboard-context" aria-label="Ana sayfa bağlam paneli">
-      <header className="hz-dash-card__head">
-        <h2>Bugünün Bağlamı</h2>
-        <Link href="/hizli-islem/satis-masasi" className="hz-dash-card__link">
-          Hızlı İşlem →
-        </Link>
-      </header>
-      <div className="hz-dashboard-context__body">
-        <div className="hz-dashboard-context__lead">
-          <span className="hz-dashboard-context__lead-icon" aria-hidden>
-            <LucideIcon name="sparkles" size={15} strokeWidth={2.25} />
-          </span>
-          <div>
-            <p className="hz-dashboard-context__lead-title">Öncelik sırası</p>
-            <p className="hz-dashboard-context__lead-copy">
-              Önce tahsilat ve onay bekleyen işleri kapatın; sonra sevkiyat ve stok uyarılarını güncelleyin.
-            </p>
-          </div>
-        </div>
-
-        <div className="hz-dashboard-context__list">
-          {items.slice(0, 5).map((item) => (
-            <Link key={`${item.title}-${item.href}`} href={item.href} className={`hz-dashboard-context__item is-${item.tone}`}>
-              <span className="hz-dashboard-context__item-icon" aria-hidden>
-                <LucideIcon name={item.icon} size={14} strokeWidth={2.25} />
-              </span>
-              <span className="hz-dashboard-context__item-copy">
-                <strong>{item.title}</strong>
-                <span>{item.detail}</span>
-              </span>
-              <LucideIcon name="chevron-right" size={13} strokeWidth={2.25} className="hz-dashboard-context__item-chevron" />
-            </Link>
-          ))}
-        </div>
-
-        <p className="hz-dashboard-context__mode">
-          {isDemo ? "Demo veriyle çalışıyor. Gerçek kayıt için canlı API ve onay akışı gerekir." : "Canlı veri bağlı. Kritik işlemler onay ve audit akışından geçer."}
-        </p>
-      </div>
-    </article>
-  );
-}
-
 export function DashboardCommandCenterPage() {
   const isDemo = dataSourceConfig.useDemoData;
 
   const [snapshot, setSnapshot] = useState<DashboardHomeSnapshot>(EMPTY_DASHBOARD_HOME_SNAPSHOT);
   const [tasks, setTasks] = useState<TaskRow[]>([]);
+  const [recentRows, setRecentRows] = useState<RecentRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedPanelIds, setSelectedPanelIds] = useState<CommandCenterPanelId[]>(DEFAULT_COMMAND_CENTER_PANELS);
   const [draftPanelIds, setDraftPanelIds] = useState<CommandCenterPanelId[]>(DEFAULT_COMMAND_CENTER_PANELS);
@@ -319,23 +202,25 @@ export function DashboardCommandCenterPage() {
     const load = async () => {
       setLoading(true);
       try {
-        const loader = isDemo ? getDashboardHomeSnapshot() : getDashboardLiveSnapshot();
-        const snap = await loader;
-        if (!active) return;
-        setSnapshot(snap);
-
         if (isDemo) {
-          const engine = await getOperationsEngineData();
+          const [snap, engine] = await Promise.all([getDashboardHomeSnapshot(), getOperationsEngineData()]);
           if (!active) return;
+          setSnapshot(snap);
           const mapped = mapTasksFromEngine(engine.tasks);
           setTasks(mapped.length > 0 ? mapped : DEMO_TASKS);
+          setRecentRows(DEMO_RECENT);
         } else {
-          setTasks(mapTasksFromEngine([]));
+          const panels = await getDashboardLivePanels();
+          if (!active) return;
+          setSnapshot(panels.snapshot);
+          setTasks(mapTasksFromEngine(panels.tasks));
+          setRecentRows(panels.recentRows);
         }
       } catch {
         if (!active) return;
         setSnapshot(EMPTY_DASHBOARD_HOME_SNAPSHOT);
         setTasks(isDemo ? DEMO_TASKS : []);
+        setRecentRows(isDemo ? DEMO_RECENT : []);
       } finally {
         if (active) setLoading(false);
       }
@@ -348,13 +233,11 @@ export function DashboardCommandCenterPage() {
 
   const alerts = useMemo(() => buildAlerts(snapshot, isDemo), [snapshot, isDemo]);
   const flowRows = useMemo(() => buildFlow(snapshot, isDemo), [snapshot, isDemo]);
-  const recentRows = isDemo ? DEMO_RECENT : [];
   const taskCount = tasks.length;
 
   const visiblePanels = useMemo(() => panelsToVisibility(selectedPanelIds), [selectedPanelIds]);
   const mainGridRows = useMemo(() => buildCommandCenterGridRows(visiblePanels), [visiblePanels]);
   const showMiddle = visiblePanels.tasks || visiblePanels.flow;
-  const contextItems = useMemo(() => buildContextItems(alerts, flowRows, tasks), [alerts, flowRows, tasks]);
 
   const toggleDraftPanel = (id: CommandCenterPanelId) => {
     setDraftPanelIds((prev) => (prev.includes(id) ? prev.filter((x) => x !== id) : [...prev, id]));
@@ -530,7 +413,7 @@ export function DashboardCommandCenterPage() {
 
         <aside className="hz-dashboard-command__rail">
           <DashboardCommandCenterAiPanel />
-          <DashboardContextPanel items={contextItems} isDemo={isDemo} />
+          <DashboardAnnouncementVideoPanel />
         </aside>
       </div>
 

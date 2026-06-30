@@ -28,6 +28,10 @@ export type LucideIconName =
   | "sparkles"
   | "send"
   | "play"
+  | "pause"
+  | "volume-2"
+  | "volume-x"
+  | "maximize-2"
   | "x"
   | "arrow-right"
   | "chevron-right"
@@ -49,6 +53,8 @@ export type LucideIconName =
   | "credit-card"
   | "flag"
   | "mail"
+  | "lock"
+  | "info"
   | "plus"
   | "download"
   | "wallet"
@@ -217,6 +223,34 @@ const PATHS: Record<LucideIconName, ReactNode> = {
     </>
   ),
   play: <polygon points="6 3 20 12 6 21 6 3" />,
+  pause: (
+    <>
+      <rect x="6" y="4" width="4" height="16" />
+      <rect x="14" y="4" width="4" height="16" />
+    </>
+  ),
+  "volume-2": (
+    <>
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+      <path d="M15.54 8.46a5 5 0 0 1 0 7.07" />
+      <path d="M19.07 4.93a10 10 0 0 1 0 14.14" />
+    </>
+  ),
+  "volume-x": (
+    <>
+      <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
+      <line x1="22" x2="16" y1="9" y2="15" />
+      <line x1="16" x2="22" y1="9" y2="15" />
+    </>
+  ),
+  "maximize-2": (
+    <>
+      <polyline points="15 3 21 3 21 9" />
+      <polyline points="9 21 3 21 3 15" />
+      <line x1="21" x2="14" y1="3" y2="10" />
+      <line x1="3" x2="10" y1="21" y2="14" />
+    </>
+  ),
   x: (
     <>
       <path d="M18 6 6 18" />
@@ -337,6 +371,19 @@ const PATHS: Record<LucideIconName, ReactNode> = {
     <>
       <rect width="20" height="16" x="2" y="4" rx="2" />
       <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7" />
+    </>
+  ),
+  lock: (
+    <>
+      <rect width="18" height="11" x="3" y="11" rx="2" ry="2" />
+      <path d="M7 11V7a5 5 0 0 1 10 0v4" />
+    </>
+  ),
+  info: (
+    <>
+      <circle cx="12" cy="12" r="10" />
+      <path d="M12 16v-4" />
+      <path d="M12 8h.01" />
     </>
   ),
   plus: (

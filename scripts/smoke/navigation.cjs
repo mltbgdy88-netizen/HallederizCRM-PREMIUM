@@ -13,7 +13,8 @@ const requiredRouteFiles = [
   "apps/web/app/(platform)/cariler/liste/page.tsx",
   "apps/web/app/(platform)/onaylar/bekleyenler/page.tsx",
   "docs/product/PRODUCTION_ROUTE_MANIFEST.md",
-  "apps/web/app/(platform)/ayarlar/operasyon-gozlem/page.tsx"
+  "apps/web/app/(platform)/ayarlar/operasyon-gozlem/page.tsx",
+  "apps/web/app/(operator)/operator/duyuru-videolari/page.tsx"
 ];
 
 const checks = [
@@ -34,7 +35,7 @@ const checks = [
   },
   {
     file: "apps/web/src/features/offers/components/OfferCreateHub.tsx",
-    patterns: ["Yeni Teklif", "Hızlı Teklif", "Detaylı Teklif", "buildQuickOfferHref"],
+    patterns: ["Yeni Teklif", "Hızlı Teklif", "Doğrudan taslak", "buildQuickOfferHref"],
     description: "Yeni teklif Hızlı İşlem hub"
   },
   {

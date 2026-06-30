@@ -6,8 +6,10 @@ import {
   getFactoryIntegrationHealth,
   getFactoryOrder,
   listFactories,
+  listFactoryLogs,
   listFactoryOrders,
   listFactoryStocks,
+  markFactoryOrderSent,
   syncFactoryStock,
   updateFactoryOrderStatus
 } from "../../../integrations/mock-store";
@@ -87,7 +89,7 @@ export class FactoryAdapter {
   }
 
   async sendOrder(id: string) {
-    const fallback = updateFactoryOrderStatus(id, "sent");
+    const fallback = markFactoryOrderSent(id);
     if (!fallback) return null;
     if (!this.liveEnabled || !this.baseUrl) return { ...fallback, provider: "mock" };
     try {
@@ -108,6 +110,12 @@ export class FactoryAdapter {
 
   completeOrder(id: string) {
     return updateFactoryOrderStatus(id, "completed");
+  }
+
+  listLogs() {
+    return listFactoryLogs()
+      .filter((item) => item.tenantId === this.context.tenantId)
+      .sort((left, right) => Date.parse(right.createdAt) - Date.parse(left.createdAt));
   }
 
   getHealth() {

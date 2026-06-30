@@ -15,7 +15,7 @@ test("formatWorkerQueueHeadline shows totals and repo counts", () => {
 });
 
 test("formatWorkerQueueHeadline loading", () => {
-  assert.match(formatWorkerQueueHeadline(null, undefined, undefined, true), /yukleniyor/i);
+  assert.match(formatWorkerQueueHeadline(null, undefined, undefined, true), /yükleniyor|yukleniyor/i);
 });
 
 test("takeJobsPreview caps rows", () => {

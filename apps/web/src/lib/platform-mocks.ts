@@ -24,6 +24,18 @@ export const platformPermissions: Permission[] = [
     key: "platform.settings.read",
     name: "Ayarları görüntüleme",
     moduleCode: "settings"
+  },
+  {
+    id: "perm_operator_read",
+    key: "platform.operator.read",
+    name: "SaaS operatör konsolu okuma",
+    moduleCode: "core"
+  },
+  {
+    id: "perm_operator_write",
+    key: "platform.operator.write",
+    name: "SaaS operatör konsolu yazma",
+    moduleCode: "core"
   }
 ];
 

@@ -1,6 +1,8 @@
 import type { AiInsight, AiMessage, AiProposal, Approval, ApprovalExecution } from "@hallederiz/types";
 import type { SalesAiTrainingScope } from "@hallederiz/ai-contracts";
 import { dataSourceConfig, sdk } from "../../../lib/data-source";
+import type { ApprovalClientConfig } from "../../approvals/api/approval-client";
+import { fetchAiPlatformApprovals } from "../api/fetch-ai-platform-approvals";
 import { aiApprovals, aiInsights, aiMessages, aiProposals, approvalExecutions, getAiProposalById, getAiSettingsData } from "./ai-mock-data";
 
 export interface AiAssistantData {
@@ -9,6 +11,10 @@ export interface AiAssistantData {
   approvals: Approval[];
   executions: ApprovalExecution[];
   insights: AiInsight[];
+}
+
+export interface GetAiAssistantDataOptions {
+  approvalClientConfig?: ApprovalClientConfig;
 }
 
 export interface AiChatResponse {
@@ -20,7 +26,7 @@ export interface AiChatResponse {
   requiresProposal: boolean;
 }
 
-export async function getAiAssistantData(): Promise<AiAssistantData> {
+export async function getAiAssistantData(options?: GetAiAssistantDataOptions): Promise<AiAssistantData> {
   if (dataSourceConfig.useDemoData) {
     return {
       messages: aiMessages,
@@ -31,17 +37,20 @@ export async function getAiAssistantData(): Promise<AiAssistantData> {
     };
   }
 
-  const [proposalsResponse, insightsResponse, approvalsResponse] = await Promise.all([
+  const approvalsPromise = options?.approvalClientConfig
+    ? fetchAiPlatformApprovals(options.approvalClientConfig)
+    : sdk.approvals.list().then((response) => response.items.filter((approval) => approval.type === "ai_action_proposal"));
+
+  const [proposalsResponse, insightsResponse, approvals] = await Promise.all([
     sdk.ai.listProposals(),
     sdk.ai.listInsights(),
-    sdk.approvals.list()
+    approvalsPromise
   ]);
 
-  const aiRelatedApprovals = approvalsResponse.items.filter((approval) => approval.type === "ai_action_proposal");
   return {
     messages: [],
     proposals: proposalsResponse.items,
-    approvals: aiRelatedApprovals,
+    approvals,
     executions: [],
     insights: insightsResponse.items
   };
