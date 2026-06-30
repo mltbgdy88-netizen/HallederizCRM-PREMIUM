@@ -3,9 +3,9 @@ import {
   createPlatformAnnouncementVideo,
   deletePlatformAnnouncementVideo,
   listAllPlatformAnnouncementVideos,
-  updatePlatformAnnouncementVideo,
-  type PlatformAnnouncementVideoInput
-} from "../dashboard/announcement-videos-store";
+  updatePlatformAnnouncementVideo
+} from "../dashboard/announcement-videos-service";
+import type { PlatformAnnouncementVideoInput } from "../dashboard/announcement-videos-store";
 import { withGuards } from "../shared/auth-guards";
 import { assertPlatformOperatorRead, assertPlatformOperatorWrite } from "../shared/operator-guards";
 import { listOperatorTenants } from "./tenant-directory";
@@ -13,14 +13,14 @@ import { listOperatorTenants } from "./tenant-directory";
 export async function registerOperatorConsoleRoutes(server: FastifyInstance) {
   server.get("/operator/tenants", async (request, reply) =>
     withGuards(request, reply, [assertPlatformOperatorRead], async () => {
-      const items = listOperatorTenants();
+      const items = await listOperatorTenants();
       return { items, total: items.length };
     })
   );
 
   server.get("/operator/announcement-videos", async (request, reply) =>
     withGuards(request, reply, [assertPlatformOperatorRead], async () => {
-      const items = listAllPlatformAnnouncementVideos();
+      const items = await listAllPlatformAnnouncementVideos();
       return { items, total: items.length };
     })
   );
@@ -31,7 +31,7 @@ export async function registerOperatorConsoleRoutes(server: FastifyInstance) {
       if (!body?.title?.trim() || !body?.videoUrl?.trim() || !body?.kind || !body?.targetMode) {
         return reply.status(400).send({ message: "title, videoUrl, kind ve targetMode zorunludur." });
       }
-      const item = createPlatformAnnouncementVideo(body);
+      const item = await createPlatformAnnouncementVideo(body);
       return reply.status(201).send({ item });
     })
   );
@@ -40,7 +40,7 @@ export async function registerOperatorConsoleRoutes(server: FastifyInstance) {
     "/operator/announcement-videos/:id",
     async (request, reply) =>
       withGuards(request, reply, [assertPlatformOperatorWrite], async () => {
-        const item = updatePlatformAnnouncementVideo(request.params.id, request.body ?? {});
+        const item = await updatePlatformAnnouncementVideo(request.params.id, request.body ?? {});
         if (!item) {
           return reply.status(404).send({ message: "Video kaydı bulunamadı." });
         }
@@ -50,7 +50,7 @@ export async function registerOperatorConsoleRoutes(server: FastifyInstance) {
 
   server.delete<{ Params: { id: string } }>("/operator/announcement-videos/:id", async (request, reply) =>
     withGuards(request, reply, [assertPlatformOperatorWrite], async () => {
-      const deleted = deletePlatformAnnouncementVideo(request.params.id);
+      const deleted = await deletePlatformAnnouncementVideo(request.params.id);
       if (!deleted) {
         return reply.status(404).send({ message: "Video kaydı bulunamadı." });
       }

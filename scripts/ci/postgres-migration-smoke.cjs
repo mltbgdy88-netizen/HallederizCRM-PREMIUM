@@ -1,5 +1,5 @@
 /**
- * SEC-3C: Apply migrations on a fresh CI Postgres DB and verify 0015 idempotency schema.
+ * SEC-3C: Apply migrations on a fresh CI Postgres DB and verify 0015 idempotency + 0016 operator schema.
  * Requires DATABASE_URL (or POSTGRES_URL).
  */
 const { spawnSync } = require("node:child_process");
@@ -25,7 +25,7 @@ function resolvePgClient() {
 
 const { Client } = resolvePgClient();
 
-const EXPECTED_MIGRATION_COUNT = 16;
+const EXPECTED_MIGRATION_COUNT = 17;
 const REQUIRED_COLUMNS = [
   "tenant_id",
   "scope",
@@ -127,6 +127,31 @@ async function verifySchema(client) {
   if (expiresIndex.rowCount !== 1) {
     fail("idx_idempotency_records_expires_at index missing");
   }
+
+  const operatorTable = await client.query(
+    `
+      SELECT 1
+      FROM information_schema.tables
+      WHERE table_schema = 'public'
+        AND table_name = 'platform_announcement_videos'
+    `
+  );
+  if (operatorTable.rowCount !== 1) {
+    fail("platform_announcement_videos table missing after migrate:apply");
+  }
+
+  const tenantPlanColumn = await client.query(
+    `
+      SELECT 1
+      FROM information_schema.columns
+      WHERE table_schema = 'public'
+        AND table_name = 'tenants'
+        AND column_name = 'plan_code'
+    `
+  );
+  if (tenantPlanColumn.rowCount !== 1) {
+    fail("tenants.plan_code column missing after migrate:apply");
+  }
 }
 
 function getDatabaseUrl() {
@@ -181,6 +206,13 @@ async function main() {
   );
   if (idempotencyMigration.rowCount !== 1) {
     fail("0015_idempotency_records not recorded in schema_migrations");
+  }
+
+  const operatorMigration = await client.query(
+    "SELECT 1 FROM schema_migrations WHERE name = '0016_platform_operator'"
+  );
+  if (operatorMigration.rowCount !== 1) {
+    fail("0016_platform_operator not recorded in schema_migrations");
   }
 
   await verifySchema(client);

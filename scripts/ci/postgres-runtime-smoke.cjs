@@ -367,6 +367,73 @@ async function main() {
       fail(`idempotency_records count did not increase (${beforeCount} -> ${afterCount})`);
     }
 
+    const operatorHeaders = {
+      authorization: `Bearer ${token}`,
+      "x-session-token": token,
+      origin: allowedOrigin
+    };
+
+    const operatorList = await fetchJson(`${baseUrl}/operator/announcement-videos`, {
+      headers: operatorHeaders
+    });
+    if (operatorList.status !== 200 || !Array.isArray(operatorList.body?.items)) {
+      fail(`operator announcement-videos list expected 200, got ${operatorList.status}`);
+    }
+    const seededCount = operatorList.body.items.length;
+    if (seededCount < 1) {
+      fail(`expected at least one seeded platform announcement video, got ${seededCount}`);
+    }
+
+    const smokeVideoId = `ann_ci_${Date.now()}`;
+    const createVideo = await fetchJson(`${baseUrl}/operator/announcement-videos`, {
+      method: "POST",
+      headers: {
+        ...operatorHeaders,
+        "content-type": "application/json"
+      },
+      body: JSON.stringify({
+        id: smokeVideoId,
+        title: "CI Operator Postgres Smoke",
+        videoUrl: "https://example.com/ci-operator-smoke.mp4",
+        kind: "announcement",
+        published: true,
+        targetMode: "all"
+      })
+    });
+    if (createVideo.status !== 201 || createVideo.body?.item?.id !== smokeVideoId) {
+      fail(`operator announcement video create expected 201, got ${createVideo.status}`);
+    }
+
+    const dbVideo = await pg.query(
+      "SELECT id, title FROM platform_announcement_videos WHERE id = $1 LIMIT 1",
+      [smokeVideoId]
+    );
+    if (!dbVideo.rows[0]) {
+      fail(`platform_announcement_videos row missing for ${smokeVideoId}`);
+    }
+
+    const dashboardVideos = await fetchJson(`${baseUrl}/dashboard/announcement-videos`, {
+      headers: operatorHeaders
+    });
+    if (dashboardVideos.status !== 200 || !Array.isArray(dashboardVideos.body?.items)) {
+      fail(`dashboard announcement-videos expected 200, got ${dashboardVideos.status}`);
+    }
+    const visible = dashboardVideos.body.items.some((item) => item?.id === smokeVideoId);
+    if (!visible) {
+      fail(`dashboard announcement-videos did not include created smoke video ${smokeVideoId}`);
+    }
+
+    const operatorTenants = await fetchJson(`${baseUrl}/operator/tenants`, {
+      headers: operatorHeaders
+    });
+    if (operatorTenants.status !== 200 || !Array.isArray(operatorTenants.body?.items)) {
+      fail(`operator tenants expected 200, got ${operatorTenants.status}`);
+    }
+    const tenantMatch = operatorTenants.body.items.some((item) => item?.id === tenantId);
+    if (!tenantMatch) {
+      fail(`operator tenants did not include seeded tenant ${tenantId}`);
+    }
+
     log("PASS");
   } finally {
     if (!apiExited) {
