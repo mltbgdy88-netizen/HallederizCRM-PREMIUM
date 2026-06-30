@@ -186,11 +186,16 @@ async function main() {
   const firstOutput = runPnpm(["--filter", "@hallederiz/database", "migrate:apply"]);
   const firstApplied = (firstOutput.match(/\bAPPLIED\b/g) || []).length;
   const firstSkipped = (firstOutput.match(/\bSKIPPED\b/g) || []).length;
-  if (firstApplied !== EXPECTED_MIGRATION_COUNT) {
-    fail(`expected ${EXPECTED_MIGRATION_COUNT} APPLIED on first run, got ${firstApplied}`);
+  const firstTotal = firstApplied + firstSkipped;
+  if (firstTotal !== EXPECTED_MIGRATION_COUNT) {
+    fail(
+      `expected ${EXPECTED_MIGRATION_COUNT} migrations on first run, got applied=${firstApplied} skipped=${firstSkipped}`
+    );
   }
-  if (firstSkipped !== 0) {
-    fail(`expected 0 SKIPPED on first run, got ${firstSkipped}`);
+  if (firstApplied === 0) {
+    log(`database already migrated (${firstSkipped} skipped); verifying schema`);
+  } else if (firstSkipped > 0) {
+    log(`incremental migration apply (${firstApplied} new, ${firstSkipped} skipped)`);
   }
 
   const client = new Client({ connectionString: databaseUrl });

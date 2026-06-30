@@ -12,7 +12,7 @@
     }
   },
   "scripts": {
-    "build": "node -e \"const fs=require('node:fs');const legacy='dist/database';if(fs.existsSync(legacy))fs.rmSync(legacy,{recursive:true,force:true});\" && tsc -p tsconfig.json",
+    "build": "node scripts/clean-dist.cjs && tsc -p tsconfig.json && node scripts/normalize-dist.cjs",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "migrate:list": "node dist/cli.js migrations",
     "migrate:status": "node dist/cli.js migrate:status",
