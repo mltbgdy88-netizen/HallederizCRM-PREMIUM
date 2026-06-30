@@ -1,8 +1,5 @@
 import type { Document, DocumentType } from "@hallederiz/types";
-import { ApiClient } from "@hallederiz/sdk";
-import { dataSourceConfig } from "../../lib/data-source";
-
-const api = new ApiClient({ baseUrl: dataSourceConfig.apiBaseUrl, tenantId: dataSourceConfig.tenantId, userId: dataSourceConfig.userId });
+import { apiClient } from "../../lib/data-source";
 
 export interface RenderDocumentPayload {
   type: DocumentType;
@@ -13,22 +10,22 @@ export interface RenderDocumentPayload {
 }
 
 export async function renderDocumentRecord(payload: RenderDocumentPayload) {
-  const response = await api.post<{ item: Document }>("/documents/render", payload);
+  const response = await apiClient.post<{ item: Document }>("/documents/render", payload);
   return response.item;
 }
 
 export async function regenerateDocumentRecord(documentId: string) {
-  const response = await api.post<{ item: Document }>(`/documents/${documentId}/regenerate`, {});
+  const response = await apiClient.post<{ item: Document }>(`/documents/${documentId}/regenerate`, {});
   return response.item;
 }
 
 export async function sendDocumentWhatsAppRecord(documentId: string) {
-  const response = await api.post<{ item: Document }>(`/documents/${documentId}/send-whatsapp`, {});
+  const response = await apiClient.post<{ item: Document }>(`/documents/${documentId}/send-whatsapp`, {});
   return response.item;
 }
 
 export async function sendDocumentEmailRecord(documentId: string) {
-  const response = await api.post<{ item: Document }>(`/documents/${documentId}/send-email`, {});
+  const response = await apiClient.post<{ item: Document }>(`/documents/${documentId}/send-email`, {});
   return response.item;
 }
 
@@ -52,8 +49,8 @@ export interface LocalAgentHealthSnapshot {
 
 export async function listDocumentOutputJobs(documentId: string): Promise<{ printJobs: DocumentOutputJobRow[]; fileSaveJobs: DocumentOutputJobRow[] }> {
   const [printResponse, fileResponse] = await Promise.all([
-    api.get<{ items: DocumentOutputJobRow[] }>("/print-jobs"),
-    api.get<{ items: DocumentOutputJobRow[] }>("/file-save-jobs")
+    apiClient.get<{ items: DocumentOutputJobRow[] }>("/print-jobs"),
+    apiClient.get<{ items: DocumentOutputJobRow[] }>("/file-save-jobs")
   ]);
 
   return {
@@ -64,7 +61,7 @@ export async function listDocumentOutputJobs(documentId: string): Promise<{ prin
 
 export async function getLocalAgentHealthSnapshot(): Promise<LocalAgentHealthSnapshot | null> {
   try {
-    const response = await api.get<{ item: LocalAgentHealthSnapshot }>("/health/local-agent");
+    const response = await apiClient.get<{ item: LocalAgentHealthSnapshot }>("/health/local-agent");
     return response.item ?? null;
   } catch {
     return null;

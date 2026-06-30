@@ -1,7 +1,4 @@
-import { ApiClient } from "@hallederiz/sdk";
-import { dataSourceConfig } from "../../lib/data-source";
-
-const api = new ApiClient({ baseUrl: dataSourceConfig.apiBaseUrl, tenantId: dataSourceConfig.tenantId, userId: dataSourceConfig.userId });
+import { apiClient, dataSourceConfig } from "../../lib/data-source";
 
 export interface ServiceHealthRecord {
   service: string;
@@ -37,31 +34,31 @@ function demoHealth(service: string): ServiceHealthRecord {
 
 export async function getAiHealthApi() {
   if (dataSourceConfig.useDemoData) return demoHealth("ai");
-  const response = await api.get<{ item: ServiceHealthRecord }>("/health/ai");
+  const response = await apiClient.get<{ item: ServiceHealthRecord }>("/health/ai");
   return response.item;
 }
 
 export async function getWhatsAppHealthApi() {
   if (dataSourceConfig.useDemoData) return demoHealth("whatsapp");
-  const response = await api.get<{ item: ServiceHealthRecord }>("/health/whatsapp");
+  const response = await apiClient.get<{ item: ServiceHealthRecord }>("/health/whatsapp");
   return response.item;
 }
 
 export async function getErpHealthApi() {
   if (dataSourceConfig.useDemoData) return demoHealth("erp");
-  const response = await api.get<{ item: ServiceHealthRecord }>("/health/erp");
+  const response = await apiClient.get<{ item: ServiceHealthRecord }>("/health/erp");
   return response.item;
 }
 
 export async function getFactoryHealthApi() {
   if (dataSourceConfig.useDemoData) return demoHealth("factory");
-  const response = await api.get<{ item: ServiceHealthRecord }>("/health/factory");
+  const response = await apiClient.get<{ item: ServiceHealthRecord }>("/health/factory");
   return response.item;
 }
 
 export async function getLocalAgentHealthApi() {
   if (dataSourceConfig.useDemoData) return demoHealth("local-agent");
-  const response = await api.get<{ item: ServiceHealthRecord }>("/health/local-agent");
+  const response = await apiClient.get<{ item: ServiceHealthRecord }>("/health/local-agent");
   return response.item;
 }
 
@@ -78,46 +75,46 @@ export async function getIntegrationHealthSummaryApi() {
       services
     } satisfies IntegrationsHealthSummary;
   }
-  const response = await api.get<{ item: IntegrationsHealthSummary }>("/health/integrations");
+  const response = await apiClient.get<{ item: IntegrationsHealthSummary }>("/health/integrations");
   return response.item;
 }
 
 export async function runAiTestChatApi() {
-  const response = await api.post<{ item: Record<string, unknown> }>("/health/ai/test-chat", {});
+  const response = await apiClient.post<{ item: Record<string, unknown> }>("/health/ai/test-chat", {});
   return response.item;
 }
 
 export async function runAiTestSttApi() {
-  const response = await api.post<{ item: Record<string, unknown> }>("/health/ai/test-stt", {});
+  const response = await apiClient.post<{ item: Record<string, unknown> }>("/health/ai/test-stt", {});
   return response.item;
 }
 
 export async function runAiTestTtsApi() {
-  const response = await api.post<{ item: Record<string, unknown> }>("/health/ai/test-tts", {});
+  const response = await apiClient.post<{ item: Record<string, unknown> }>("/health/ai/test-tts", {});
   return response.item;
 }
 
 export async function runWhatsAppTestSendApi() {
-  const response = await api.post<{ item: Record<string, unknown> }>("/health/whatsapp/test-send", {});
+  const response = await apiClient.post<{ item: Record<string, unknown> }>("/health/whatsapp/test-send", {});
   return response.item;
 }
 
 export async function runErpTestApi(connectionId = "erp_conn_1") {
-  const response = await api.post<{ item: Record<string, unknown> }>("/health/erp/test", { connectionId });
+  const response = await apiClient.post<{ item: Record<string, unknown> }>("/health/erp/test", { connectionId });
   return response.item;
 }
 
 export async function runFactoryTestSyncApi(factoryId = "factory_1") {
-  const response = await api.post<{ item: Record<string, unknown> }>("/health/factory/test-sync", { factoryId });
+  const response = await apiClient.post<{ item: Record<string, unknown> }>("/health/factory/test-sync", { factoryId });
   return response.item;
 }
 
 export async function runLocalAgentSaveDryRunApi() {
-  const response = await api.post<{ item: Record<string, unknown> }>("/health/local-agent/test-save-dry-run", {});
+  const response = await apiClient.post<{ item: Record<string, unknown> }>("/health/local-agent/test-save-dry-run", {});
   return response.item;
 }
 
 export async function runLocalAgentPrintDryRunApi() {
-  const response = await api.post<{ item: Record<string, unknown> }>("/health/local-agent/test-print-dry-run", {});
+  const response = await apiClient.post<{ item: Record<string, unknown> }>("/health/local-agent/test-print-dry-run", {});
   return response.item;
 }

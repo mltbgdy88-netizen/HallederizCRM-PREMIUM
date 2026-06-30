@@ -9,6 +9,7 @@ import {
   readPersistedDemoAuth,
   writePersistedDemoAuth
 } from "../lib/auth-demo-session-storage";
+import { setSdkAccessToken } from "../lib/data-source";
 import { mapUserFacingLoginError } from "../lib/user-facing-data-error";
 
 interface LoginResult {
@@ -52,6 +53,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           clearPersistedDemoAuth();
           setSession(payload.item);
           setAccessToken(null);
+          setSdkAccessToken(null);
           setState("authenticated");
           return;
         }
@@ -62,6 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
           if (persisted) {
             setSession(persisted.session);
             setAccessToken(persisted.accessToken);
+            setSdkAccessToken(persisted.accessToken);
             setState("authenticated");
             return;
           }
@@ -70,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         clearPersistedDemoAuth();
         setSession(null);
         setAccessToken(null);
+        setSdkAccessToken(null);
         setState("anonymous");
       }
     };
@@ -119,8 +123,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         : createMockLoginResponse(input, defaultTenant, defaultUser, [adminRole]);
 
     const isDemoLogin = ENABLE_DEMO_AUTH && !loginResponse?.ok;
+    const token = payload.accessToken ?? null;
     setSession(payload.session);
-    setAccessToken(isDemoLogin ? payload.accessToken : null);
+    setAccessToken(token);
+    setSdkAccessToken(token);
     if (isDemoLogin) {
       writePersistedDemoAuth(payload.session, payload.accessToken);
     } else {
@@ -140,6 +146,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }).catch(() => undefined);
     setSession(null);
     setAccessToken(null);
+    setSdkAccessToken(null);
     setState("anonymous");
   };
 
