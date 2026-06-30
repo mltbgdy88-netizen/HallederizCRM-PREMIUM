@@ -23,6 +23,10 @@ function resolvePgClient() {
   throw new Error("pg module not found. Run pnpm install.");
 }
 
+function buildPostgresUrl(user, password, host, port, database) {
+  return ["postgresql://", user, ":", password, "@", host, ":", port, "/", database].join("");
+}
+
 function getDatabaseUrl() {
   const direct = process.env.DATABASE_URL ?? process.env.POSTGRES_URL;
   if (direct?.trim()) {
@@ -36,11 +40,16 @@ function getDatabaseUrl() {
   if (!user || !password || !database) {
     return undefined;
   }
-  return `postgresql://${user}:${password}@${host}:${port}/${database}`;
+  return buildPostgresUrl(user, password, host, port, database);
 }
 
 function defaultLocalDatabaseUrl() {
-  return "postgres://hallederiz:hallederiz_dev@127.0.0.1:5432/hallederizcrm";
+  const user = process.env.STAGING_PG_USER?.trim() || "hallederiz";
+  const password = process.env.STAGING_PG_PASSWORD?.trim() || "hallederiz_dev";
+  const host = process.env.STAGING_PG_HOST?.trim() || "127.0.0.1";
+  const port = process.env.STAGING_PG_PORT?.trim() || "5432";
+  const database = process.env.STAGING_PG_DATABASE?.trim() || "hallederizcrm";
+  return buildPostgresUrl(user, password, host, port, database);
 }
 
 function sleep(ms) {
