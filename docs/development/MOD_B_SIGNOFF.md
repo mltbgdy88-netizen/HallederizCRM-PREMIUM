@@ -16,12 +16,12 @@
 | `staging:local-chain`, `smoke:production-data`, `smoke:e2e` | Yerelde PASS |
 | `pnpm test:api` (temiz env) | 471 pass |
 
-## Bilinçli erteleme (sonraki sprint)
+## Bilinçli erteleme (Sprint 9+)
 
 | Alan | Not |
 |------|-----|
-| Operator konsol Postgres kalıcılığı | Sprint: `feature/operator-postgres-persistence` |
-| Production Go: WhatsApp, Local AI, viewport QA | `docs/product/RELEASE_PRODUCTION_GO_NO_GO.md` |
+| Operator konsol Postgres kalıcılığı | **Tamam** — `main` @ `0917ada1` |
+| Production Go: WhatsApp, Local AI, viewport QA | Sprint 9: `pnpm production-go:local` + manuel kapılar |
 
 ## CI notu (PR #183)
 
@@ -44,8 +44,6 @@ pnpm smoke:e2e
 
 Web `.env.local`: `NEXT_PUBLIC_USE_DEMO_DATA=false`, `NEXT_PUBLIC_API_BASE_URL=http://localhost:4000`
 
-## Sonraki sprint başlangıç
+## Sonraki sprint (Sprint 9)
 
-1. `0016_platform_operator.sql` — `platform_announcement_videos`, `tenants.plan_code` / `status`
-2. Database repository + API route wiring
-3. Demo modda in-memory fallback korunur
+Bkz. `docs/development/SPRINT_9_PRODUCTION_GO_PREP.md` — `pnpm production-go:local`
