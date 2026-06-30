@@ -9,8 +9,18 @@ import {
   type IntegrationsHealthSummary,
   type ServiceHealthRecord
 } from "../../../services/api/health.service";
+import { runStagingIntegrationServiceTest } from "../utils/run-staging-integration-test";
 
 const SERVICE_ORDER = ["ai", "whatsapp", "erp", "factory", "local-agent"] as const;
+
+type RunState = "idle" | "running" | "ok" | "error";
+
+function runLabel(state: RunState) {
+  if (state === "running") return "Çalışıyor";
+  if (state === "ok") return "Tamam";
+  if (state === "error") return "Başarısız";
+  return "Hazır";
+}
 
 function getBadgeClass(status: ServiceHealthRecord["status"]) {
   if (status === "healthy") return "setf-badge setf-badge--success";
@@ -32,6 +42,7 @@ export function SettingsStagingControlReferenceLayout() {
   const [summary, setSummary] = useState<IntegrationsHealthSummary | null>(null);
   const [loading, setLoading] = useState(true);
   const [feedback, setFeedback] = useState<string | null>(null);
+  const [runState, setRunState] = useState<Record<string, RunState>>({});
 
   const services = useMemo(() => {
     if (!summary) return [] as ServiceHealthRecord[];
@@ -54,8 +65,29 @@ export function SettingsStagingControlReferenceLayout() {
     reload();
   }, []);
 
-  const runTest = (service: string) => {
-    pushToast(`Demo: ${service} test çalıştırması sonraki fazda bağlanacak.`);
+  const runTest = async (service: string) => {
+    setRunState((previous) => ({ ...previous, [service]: "running" }));
+    setFeedback(null);
+    try {
+      await runStagingIntegrationServiceTest(service);
+      const message =
+        service === "local-agent"
+          ? "Yerel araç deneme testi tamamlandı. Canlı yazdırma yerine güvenli simülasyon doğrulamasıdır."
+          : `${formatUserFacingServiceName(service)} testi tamamlandı.`;
+      setFeedback(message);
+      pushToast(message);
+      setRunState((previous) => ({ ...previous, [service]: "ok" }));
+      reload();
+    } catch (error) {
+      const message =
+        error instanceof Error
+          ? error.message
+          : `${formatUserFacingServiceName(service)} testi başarısız oldu.`;
+      setFeedback(message);
+      pushToast(message);
+      setRunState((previous) => ({ ...previous, [service]: "error" }));
+      reload();
+    }
   };
 
   return (
@@ -83,7 +115,7 @@ export function SettingsStagingControlReferenceLayout() {
       </header>
 
       <p className="setf-demo-band" role="status">
-        Test çalıştırmaları demo toast ile sınırlıdır; gerçek servis doğrulaması backend policy ile yapılır.
+        Test butonları backend dry-run/ping endpointlerini çağırır; kritik mutation onaysız çalışmaz.
       </p>
 
       <section className="setf-kpi-row" aria-label="Servis özeti">
@@ -135,8 +167,13 @@ export function SettingsStagingControlReferenceLayout() {
                   <div>{formatUserFacingMode(service.mode)}</div>
                   <div>{service.reason}</div>
                   <div>
-                    <button type="button" className="setf-btn setf-btn--outline" onClick={() => runTest(service.service)}>
-                      Test
+                    <button
+                      type="button"
+                      className="setf-btn setf-btn--outline"
+                      disabled={runState[service.service] === "running"}
+                      onClick={() => void runTest(service.service)}
+                    >
+                      Test ({runLabel(runState[service.service] ?? "idle")})
                     </button>
                   </div>
                 </div>

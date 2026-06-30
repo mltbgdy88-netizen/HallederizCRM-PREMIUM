@@ -446,6 +446,10 @@ async function runWithBuiltWebServer({ label, port, envExtra, checkTechnicalHtml
   if (!skipBuild || !hasBuild) {
     buildWebApp(envExtra);
   } else {
+    console.warn(
+      `[${label}] UYARI: Mevcut .next build kullaniliyor (SMOKE_SKIP_WEB_BUILD=1). ` +
+        "NEXT_PUBLIC_* degerleri build zamaninda gomulur; farkli smoke modlari arasinda skip kullanmayin."
+    );
     console.log(`[${label}] Mevcut .next build kullaniliyor (SMOKE_SKIP_WEB_BUILD=1).`);
   }
 

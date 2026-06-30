@@ -6,17 +6,10 @@ import { SettingsAreaShell } from "./SettingsAreaShell";
 import { useEffect, useMemo, useState } from "react";
 import {
   getIntegrationHealthSummaryApi,
-  runAiTestChatApi,
-  runAiTestSttApi,
-  runAiTestTtsApi,
-  runErpTestApi,
-  runFactoryTestSyncApi,
-  runLocalAgentPrintDryRunApi,
-  runLocalAgentSaveDryRunApi,
-  runWhatsAppTestSendApi,
   type IntegrationsHealthSummary,
   type ServiceHealthRecord
 } from "../../../services/api/health.service";
+import { runStagingIntegrationServiceTest } from "../utils/run-staging-integration-test";
 
 type RunState = "idle" | "running" | "ok" | "error";
 
@@ -91,20 +84,7 @@ export function StagingValidationPage() {
   const runTest = async (service: string) => {
     setRunState((previous) => ({ ...previous, [service]: "running" }));
     try {
-      if (service === "ai") {
-        await runAiTestChatApi();
-        await runAiTestSttApi();
-        await runAiTestTtsApi();
-      } else if (service === "whatsapp") {
-        await runWhatsAppTestSendApi();
-      } else if (service === "erp") {
-        await runErpTestApi();
-      } else if (service === "factory") {
-        await runFactoryTestSyncApi();
-      } else if (service === "local-agent") {
-        await runLocalAgentSaveDryRunApi();
-        await runLocalAgentPrintDryRunApi();
-      }
+      await runStagingIntegrationServiceTest(service);
       setFeedback(
         service === "local-agent"
           ? "Yerel araç deneme testi tamamlandı. Bu sonuç canlı yazdırma yerine güvenli simülasyon doğrulamasıdır."

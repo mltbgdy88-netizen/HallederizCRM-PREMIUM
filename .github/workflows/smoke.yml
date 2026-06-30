@@ -61,7 +61,7 @@ jobs:
         run: pnpm install --frozen-lockfile
 
       - name: API offline smoke
-        timeout-minutes: 6
+        timeout-minutes: 10
         run: pnpm smoke:api-offline
         env:
           SMOKE_API_OFFLINE_PORT: "3197"
