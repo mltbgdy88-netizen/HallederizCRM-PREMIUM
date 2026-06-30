@@ -1,10 +1,16 @@
 "use client";
 
-import type { ErpConnection, ErpMapping, ErpSyncLog } from "@hallederiz/types";
-import { useMemo, useState } from "react";
+import type { ErpConnection, ErpMapping, ErpSyncLog, IntegrationHealthSummary } from "@hallederiz/types";
+import { useEffect, useMemo, useState } from "react";
 import { formatUserFacingStatus } from "../../../lib/user-facing-labels";
 import { useToast } from "../../../providers/toast-provider";
-import { getErpIntegrationData } from "../queries";
+import type { ErpIntegrationData } from "../queries";
+import { useErpChannel } from "../hooks/use-erp-channel";
+import { useErpIntegrationData } from "../hooks/use-erp-integration-data";
+import { ErpChannelBand } from "./ErpChannelBand";
+import { ErpFeedbackState } from "./ErpFeedbackState";
+import { syncErpConnectionMutation, testErpConnectionMutation } from "../mutations";
+import { canOperateErpConnection } from "../utils/map-erp-channel-view";
 
 const typeLabel = { api: "API", excel: "Excel" } as const;
 const modeLabel = { import_only: "İçe aktarım", export_only: "Dışa aktarım", bidirectional: "Çift yönlü" } as const;
@@ -35,7 +41,7 @@ export function ErpHealthPanel({
   health,
   connection
 }: {
-  health: ReturnType<typeof getErpIntegrationData>["health"];
+  health: IntegrationHealthSummary;
   connection?: ErpConnection;
 }) {
   return (
@@ -97,14 +103,22 @@ export function ErpHealthPanel({
 export function ErpConnectionCard({
   connection,
   selected,
-  onSelect
+  onSelect,
+  onTest,
+  onSync,
+  canTest,
+  canSync,
+  actionPending
 }: {
   connection: ErpConnection;
   selected?: boolean;
   onSelect?: () => void;
+  onTest?: () => void;
+  onSync?: () => void;
+  canTest?: boolean;
+  canSync?: boolean;
+  actionPending?: "test" | "sync" | null;
 }) {
-  const { pushToast } = useToast();
-
   return (
     <article
       className={`erpf-card erpf-conn-card${selected ? " is-selected" : ""}`}
@@ -134,32 +148,35 @@ export function ErpConnectionCard({
         <button
           className="erpf-btn erpf-btn--ghost"
           type="button"
-          onClick={(event) => {
-            event.stopPropagation();
-            pushToast("Bağlantı düzenleme sonraki fazda API ile yapılacaktır.");
-          }}
+          disabled
+          title="Bağlantı düzenleme sonraki fazda API ile yapılacaktır"
+          onClick={(event) => event.stopPropagation()}
         >
           Düzenle
         </button>
         <button
           className="erpf-btn erpf-btn--ghost"
           type="button"
+          disabled={!canTest || actionPending === "test"}
+          title={canTest ? "Bağlantıyı test et" : "Bağlantı testi için aktif bağlantı gerekir"}
           onClick={(event) => {
             event.stopPropagation();
-            pushToast("Bağlantı testi demo modda toast-only çalışır.");
+            onTest?.();
           }}
         >
-          Test et
+          {actionPending === "test" ? "Test…" : "Test et"}
         </button>
         <button
           className="erpf-btn erpf-btn--primary"
           type="button"
+          disabled={!canSync || actionPending === "sync"}
+          title={canSync ? "Senkron başlat" : "Senkron için aktif bağlantı gerekir"}
           onClick={(event) => {
             event.stopPropagation();
-            pushToast("Senkron başlatma onay zinciri bağlandığında aktif olacaktır.");
+            onSync?.();
           }}
         >
-          Senkron
+          {actionPending === "sync" ? "Senkron…" : "Senkron"}
         </button>
       </div>
     </article>
@@ -284,10 +301,34 @@ function ErpMappingPanel({
 }
 
 export function ErpPage() {
-  const data = getErpIntegrationData();
+  const channel = useErpChannel();
+  const integration = useErpIntegrationData();
   const { pushToast } = useToast();
-  const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(data.connections[0]?.id ?? null);
-  const [selectedMappingId, setSelectedMappingId] = useState<string | null>(data.mappings[0]?.id ?? null);
+  const [selectedConnectionId, setSelectedConnectionId] = useState<string | null>(null);
+  const [selectedMappingId, setSelectedMappingId] = useState<string | null>(null);
+  const [actionPending, setActionPending] = useState<"test" | "sync" | null>(null);
+  const [pendingConnectionId, setPendingConnectionId] = useState<string | null>(null);
+
+  const data: ErpIntegrationData = integration.data ?? {
+    connections: [],
+    mappings: [],
+    logs: [],
+    templates: [],
+    health: {
+      status: "healthy",
+      activeConnectionCount: 0,
+      warningCount: 0,
+      errorCount: 0,
+      message: "Yükleniyor…"
+    },
+    previews: []
+  };
+
+  useEffect(() => {
+    if (!integration.data) return;
+    setSelectedConnectionId((current) => current ?? integration.data?.connections[0]?.id ?? null);
+    setSelectedMappingId((current) => current ?? integration.data?.mappings[0]?.id ?? null);
+  }, [integration.data]);
 
   const selectedConnection = useMemo(
     () => data.connections.find((connection) => connection.id === selectedConnectionId) ?? data.connections[0],
@@ -296,11 +337,55 @@ export function ErpPage() {
 
   const activeMappings = useMemo(() => data.mappings.filter((mapping) => mapping.active).length, [data.mappings]);
 
+  const runConnectionTest = async (connectionId: string) => {
+    if (!channel.canOperate && !integration.useDemo) return;
+    setActionPending("test");
+    setPendingConnectionId(connectionId);
+    const result = await testErpConnectionMutation(connectionId, { useDemoData: integration.useDemo, pushToast });
+    if (result || integration.useDemo) {
+      await Promise.all([integration.refresh(), channel.refresh()]);
+    }
+    setActionPending(null);
+    setPendingConnectionId(null);
+  };
+
+  const runConnectionSync = async (connectionId: string) => {
+    if (!channel.canOperate && !integration.useDemo) return;
+    setActionPending("sync");
+    setPendingConnectionId(connectionId);
+    const result = await syncErpConnectionMutation(connectionId, { useDemoData: integration.useDemo, pushToast });
+    if (result || integration.useDemo) {
+      await Promise.all([integration.refresh(), channel.refresh()]);
+    }
+    setActionPending(null);
+    setPendingConnectionId(null);
+  };
+
+  const topSyncEnabled =
+    Boolean(selectedConnection) &&
+    canOperateErpConnection(selectedConnection, integration.useDemo) &&
+    (channel.canOperate || integration.useDemo) &&
+    !integration.loading &&
+    !integration.error;
+
+  const showIntegrationLoading = integration.loading && !integration.data;
+  const kpiPlaceholder = showIntegrationLoading ? "…" : undefined;
+
   return (
     <div className="erpf-page">
-      <p className="erpf-demo-band" role="status">
-        ERP entegrasyon hazırlığı: bağlantı izleme aktif; yazım işlemleri onay ve denetim zincirinden geçer.
-      </p>
+      {integration.useDemo ? (
+        <p className="erpf-demo-band" role="status">
+          ERP entegrasyon hazırlığı: bağlantı izleme aktif; yazım işlemleri onay ve denetim zincirinden geçer.
+        </p>
+      ) : channel.error ? (
+        <ErpFeedbackState
+          tone="error"
+          message={channel.error}
+          onRetry={() => void channel.refresh()}
+        />
+      ) : (
+        <ErpChannelBand channelView={channel.channelView} loading={channel.loading} />
+      )}
 
       <div className="erpf-layout">
         <div className="erpf-main">
@@ -324,16 +409,34 @@ export function ErpPage() {
               <button
                 className="erpf-btn erpf-btn--ghost erpf-btn--pending"
                 type="button"
-                disabled
-                title="Senkron başlatma onay zinciri bağlandığında etkinleşir"
+                disabled={!topSyncEnabled || actionPending === "sync"}
+                title={
+                  topSyncEnabled
+                    ? "Seçili bağlantı için senkron başlat"
+                    : channel.channelView.note
+                }
+                onClick={() => selectedConnection && void runConnectionSync(selectedConnection.id)}
               >
-                Senkron başlat
+                {actionPending === "sync" && pendingConnectionId === selectedConnection?.id
+                  ? "Senkron…"
+                  : "Senkron başlat"}
               </button>
               <button
                 className="erpf-btn erpf-btn--ghost erpf-btn--pending"
                 type="button"
-                disabled
-                title="Excel şablonu indirme entegrasyon modülü ile açılır"
+                disabled={data.templates.length === 0}
+                title={
+                  data.templates.length > 0
+                    ? `${data.templates.length} Excel şablonu tanımlı`
+                    : "Şablon listesi boş"
+                }
+                onClick={() =>
+                  pushToast(
+                    data.templates[0]
+                      ? `Şablon: ${data.templates[0].title} (salt okunur önizleme)`
+                      : "Excel şablonu bulunamadı."
+                  )
+                }
               >
                 Excel şablonu
               </button>
@@ -343,19 +446,19 @@ export function ErpPage() {
           <div className="erpf-kpi-strip" aria-label="Entegrasyon özetleri">
             <article className="erpf-card erpf-kpi erpf-kpi--success">
               <span className="erpf-kpi__label">Aktif bağlantı</span>
-              <span className="erpf-kpi__value">{data.health.activeConnectionCount}</span>
+              <span className="erpf-kpi__value">{kpiPlaceholder ?? data.health.activeConnectionCount}</span>
             </article>
             <article className="erpf-card erpf-kpi erpf-kpi--warn">
               <span className="erpf-kpi__label">Uyarı</span>
-              <span className="erpf-kpi__value">{data.health.warningCount}</span>
+              <span className="erpf-kpi__value">{kpiPlaceholder ?? data.health.warningCount}</span>
             </article>
             <article className="erpf-card erpf-kpi erpf-kpi--danger">
               <span className="erpf-kpi__label">Hata</span>
-              <span className="erpf-kpi__value">{data.health.errorCount}</span>
+              <span className="erpf-kpi__value">{kpiPlaceholder ?? data.health.errorCount}</span>
             </article>
             <article className="erpf-card erpf-kpi">
               <span className="erpf-kpi__label">Aktif eşleme</span>
-              <span className="erpf-kpi__value">{activeMappings}</span>
+              <span className="erpf-kpi__value">{kpiPlaceholder ?? activeMappings}</span>
             </article>
           </div>
 
@@ -380,10 +483,17 @@ export function ErpPage() {
                 </div>
               </li>
               <li className="erpf-readiness__item">
+                <span className="erpf-readiness__badge">Aktif</span>
+                <div>
+                  <strong>Canlı bağlantı testi</strong>
+                  Seçili bağlantı için test ve senkron API üzerinden başlatılabilir.
+                </div>
+              </li>
+              <li className="erpf-readiness__item">
                 <span className="erpf-readiness__badge erpf-readiness__badge--pending">Bekliyor</span>
                 <div>
                   <strong>Canlı filtre ve arama</strong>
-                  API sorgusu bağlandığında etkinleşir.
+                  Gelişmiş sorgu bağlandığında etkinleşir.
                 </div>
               </li>
               <li className="erpf-readiness__item">
@@ -398,6 +508,16 @@ export function ErpPage() {
 
           <div className="erpf-body">
             <div className="erpf-scroll">
+              {showIntegrationLoading ? (
+                <ErpFeedbackState tone="loading" message="ERP entegrasyon verileri yükleniyor…" />
+              ) : integration.error ? (
+                <ErpFeedbackState
+                  tone="error"
+                  message={integration.error}
+                  onRetry={() => void integration.refresh()}
+                />
+              ) : (
+                <>
               <div className="erpf-conn-grid">
                 {data.connections.length === 0 ? (
                   <p className="erpf-side-note" role="status">
@@ -410,6 +530,17 @@ export function ErpPage() {
                       connection={connection}
                       selected={connection.id === selectedConnection?.id}
                       onSelect={() => setSelectedConnectionId(connection.id)}
+                      canTest={
+                        canOperateErpConnection(connection, integration.useDemo) &&
+                        (channel.canOperate || integration.useDemo)
+                      }
+                      canSync={
+                        canOperateErpConnection(connection, integration.useDemo) &&
+                        (channel.canOperate || integration.useDemo)
+                      }
+                      actionPending={pendingConnectionId === connection.id ? actionPending : null}
+                      onTest={() => void runConnectionTest(connection.id)}
+                      onSync={() => void runConnectionSync(connection.id)}
                     />
                   ))
                 )}
@@ -421,6 +552,8 @@ export function ErpPage() {
                 selectedId={selectedMappingId}
                 onSelect={setSelectedMappingId}
               />
+                </>
+              )}
             </div>
           </div>
         </div>

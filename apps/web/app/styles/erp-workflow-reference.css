@@ -97,6 +97,84 @@
   flex-shrink: 0;
 }
 
+.erpf-channel-band {
+  margin: 0;
+  padding: 5px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--desk-border);
+  background: #f8fafc;
+  font-size: 11px;
+  color: var(--desk-text);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+  min-height: 22px;
+}
+
+.erpf-channel-band strong {
+  font-weight: 800;
+  white-space: nowrap;
+}
+
+.erpf-channel-band--ok {
+  border-color: #bbf7d0;
+  background: #f0fdf4;
+}
+
+.erpf-channel-band--error {
+  border-color: #fecaca;
+  background: #fef2f2;
+}
+
+.erpf-channel-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  flex-shrink: 0;
+}
+
+.erpf-channel-dot--ok {
+  background: #16a34a;
+}
+
+.erpf-channel-dot--warn {
+  background: #d97706;
+}
+
+.erpf-channel-dot--error {
+  background: #dc2626;
+}
+
+.erpf-state {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 12px 14px;
+  border-radius: var(--desk-radius);
+  border: 1px solid var(--desk-border);
+  background: var(--desk-surface);
+  font-size: 12px;
+  color: var(--desk-text);
+}
+
+.erpf-state--loading {
+  border-color: #bfdbfe;
+  background: #eff6ff;
+  color: #1e3a8a;
+}
+
+.erpf-state--error {
+  border-color: #fecaca;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.erpf-state p {
+  margin: 0;
+}
+
 .aif-channel-band {
   margin: 0;
   padding: 5px 12px;
