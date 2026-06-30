@@ -8,7 +8,8 @@ function resolveMigrationsDirectory(): string {
   const moduleDir = path.dirname(fileURLToPath(import.meta.url));
   const candidates = [
     path.join(moduleDir, "migrations"),
-    path.join(moduleDir, "..", "src", "migrations")
+    path.join(moduleDir, "..", "src", "migrations"),
+    path.join(moduleDir, "..", "..", "..", "src", "migrations")
   ];
   for (const candidate of candidates) {
     if (existsSync(candidate)) {

@@ -1,14 +1,22 @@
 import type { WorkerJob } from "./model";
 import type { OutboxJobRepository } from "./repository";
+import { createHash } from "node:crypto";
 
 function nowIso() {
   return new Date().toISOString();
 }
 
-function createJobId(tenantId: string, idempotencyKey: string) {
+export function createOutboxJobId(tenantId: string, idempotencyKey: string) {
   const compactTenant = tenantId.replace(/[^a-zA-Z0-9]/g, "").slice(0, 12) || "tenant";
-  const compactIdempotency = idempotencyKey.replace(/[^a-zA-Z0-9]/g, "").slice(0, 16) || "idem";
-  return `job_${compactTenant}_${compactIdempotency}`;
+  const digest = createHash("sha256")
+    .update(`${tenantId}:${idempotencyKey}`)
+    .digest("hex")
+    .slice(0, 20);
+  return `job_${compactTenant}_${digest}`;
+}
+
+function createJobId(tenantId: string, idempotencyKey: string) {
+  return createOutboxJobId(tenantId, idempotencyKey);
 }
 
 export function createOutboxJob(
