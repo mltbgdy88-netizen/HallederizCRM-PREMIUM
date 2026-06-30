@@ -34,7 +34,10 @@ const HTTP_SMOKE_ROUTES = [
   "/archive",
   "/archive?customer=customer_1",
   "/whatsapp",
-  "/whatsapp?customer=customer_1"
+  "/whatsapp?customer=customer_1",
+  "/erp",
+  "/fabrikalar/stoklar",
+  "/fabrikalar/siparisler"
 ];
 
 const CRASH_HTML_PATTERNS = [
@@ -58,22 +61,40 @@ function parsePort(value, fallback) {
   return Number.isFinite(parsed) && parsed > 0 ? parsed : fallback;
 }
 
+function resolveNextBin() {
+  return require.resolve("next/dist/bin/next", {
+    paths: [path.join(repoRoot, "apps", "web"), repoRoot]
+  });
+}
+
 function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 async function probeApiHealth(apiBaseUrl, timeoutMs = 4000) {
-  const base = apiBaseUrl.replace(/\/$/, "");
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), timeoutMs);
-  try {
-    const response = await fetch(`${base}/health`, { signal: controller.signal });
-    return response.ok;
-  } catch {
-    return false;
-  } finally {
-    clearTimeout(timer);
+  const candidates = [apiBaseUrl.replace(/\/$/, "")];
+  const normalized = candidates[0];
+  if (normalized.includes("localhost")) {
+    candidates.push(normalized.replace("localhost", "127.0.0.1"));
+  } else if (normalized.includes("127.0.0.1")) {
+    candidates.push(normalized.replace("127.0.0.1", "localhost"));
   }
+
+  for (const base of [...new Set(candidates)]) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
+    try {
+      const response = await fetch(`${base}/health`, { signal: controller.signal });
+      if (response.ok) {
+        return true;
+      }
+    } catch {
+      // try next host
+    } finally {
+      clearTimeout(timer);
+    }
+  }
+  return false;
 }
 
 function detectHtmlIssues(html, { checkTechnical = false } = {}) {
@@ -93,7 +114,7 @@ function detectHtmlIssues(html, { checkTechnical = false } = {}) {
   return issues;
 }
 
-async function fetchRoute(baseUrl, routePath, timeoutMs = 30000) {
+async function fetchRoute(baseUrl, routePath, timeoutMs = 90000) {
   const url = `${baseUrl.replace(/\/$/, "")}${routePath.startsWith("/") ? routePath : `/${routePath}`}`;
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), timeoutMs);
@@ -266,24 +287,50 @@ async function stopWebDevServer(server) {
   return server._stopPromise;
 }
 
-async function waitForWebReady(baseUrl, timeoutMs = 180000) {
-  const deadline = Date.now() + timeoutMs;
-  while (Date.now() < deadline) {
+async function probeWebRoute(baseUrl, routePath = "/login", timeoutMs = 20000) {
+  const bases = [baseUrl.replace(/\/$/, "")];
+  if (bases[0].includes("127.0.0.1")) {
+    bases.push(bases[0].replace("127.0.0.1", "localhost"));
+  } else if (bases[0].includes("localhost")) {
+    bases.push(bases[0].replace("localhost", "127.0.0.1"));
+  }
+
+  for (const base of [...new Set(bases)]) {
+    const controller = new AbortController();
+    const timer = setTimeout(() => controller.abort(), timeoutMs);
     try {
-      const response = await fetch(baseUrl, { redirect: "manual" });
+      const response = await fetch(`${base}${routePath}`, {
+        redirect: "manual",
+        signal: controller.signal,
+        headers: { Accept: "text/html" }
+      });
       if (response.status > 0) {
-        return true;
+        return { ok: true, status: response.status, base };
       }
     } catch {
-      // keep polling
+      // try next host
+    } finally {
+      clearTimeout(timer);
     }
-    await sleep(2000);
+  }
+  return { ok: false, status: 0, base: baseUrl };
+}
+
+async function waitForWebReady(baseUrl, timeoutMs = 600000) {
+  const deadline = Date.now() + timeoutMs;
+  while (Date.now() < deadline) {
+    const probe = await probeWebRoute(baseUrl, "/login", 20000);
+    if (probe.ok) {
+      return true;
+    }
+    await sleep(3000);
   }
   return false;
 }
 
 function startWebDevServer({ port, envExtra }) {
   const portValue = parsePort(port, 3199);
+  const webDir = path.join(repoRoot, "apps", "web");
   const env = {
     ...process.env,
     ...envExtra,
@@ -293,25 +340,29 @@ function startWebDevServer({ port, envExtra }) {
   };
 
   const isWindows = process.platform === "win32";
-  const child = spawn("pnpm", ["--filter", "@hallederiz/web", "dev"], {
-    cwd: repoRoot,
-    env,
-    shell: isWindows,
-    windowsHide: true,
-    /** Unix CI: new process group so SIGTERM/-pid kills pnpm + next-server tree */
-    detached: !isWindows,
-    stdio: ["ignore", "pipe", "pipe"]
-  });
+  const nextBin = resolveNextBin();
+  const child = spawn(
+    process.execPath,
+    [nextBin, "dev", "-H", "127.0.0.1", "-p", String(portValue)],
+    {
+      cwd: webDir,
+      env,
+      shell: isWindows,
+      windowsHide: true,
+      detached: !isWindows,
+      stdio: ["ignore", "pipe", "pipe"]
+    }
+  );
 
   let ready = false;
+  let bootLog = "";
   const baseUrl = `http://127.0.0.1:${portValue}`;
 
   const onData = (chunk) => {
     const text = chunk.toString();
-    if (/Ready in/i.test(text) || new RegExp(`Local:\\s+${baseUrl.replace(/\./g, "\\.")}`, "i").test(text)) {
-      ready = true;
-    }
-    if (/Local:\s+http:\/\/127\.0\.0\.1:\d+/i.test(text) || /Local:\s+http:\/\/localhost:\d+/i.test(text)) {
+    bootLog = `${bootLog}${text}`.slice(-4000);
+    /** Next prints Local: during Starting; only Ready in means the dev server accepts requests. */
+    if (/Ready in/i.test(text) || /✓ Ready/i.test(text)) {
       ready = true;
     }
   };
@@ -325,11 +376,102 @@ function startWebDevServer({ port, envExtra }) {
     port: portValue,
     onData,
     getReadyFlag: () => ready,
+    getBootLog: () => bootLog,
     _stopPromise: null,
     stop: () => stopWebDevServer(server)
   };
 
   return server;
+}
+
+function buildWebApp(envExtra) {
+  const webDir = path.join(repoRoot, "apps", "web");
+  const env = {
+    ...process.env,
+    ...envExtra,
+    NEXT_TELEMETRY_DISABLED: "1"
+  };
+  const isWindows = process.platform === "win32";
+  const nextBin = resolveNextBin();
+  console.log("[smoke] next build basliyor...");
+  execSync(`"${process.execPath}" "${nextBin}" build`, {
+    cwd: webDir,
+    env,
+    stdio: "inherit",
+    shell: isWindows
+  });
+}
+
+function startWebProductionServer({ port, envExtra }) {
+  const portValue = parsePort(port, 3198);
+  const webDir = path.join(repoRoot, "apps", "web");
+  const env = {
+    ...process.env,
+    ...envExtra,
+    PORT: String(portValue),
+    HOSTNAME: "127.0.0.1",
+    NEXT_TELEMETRY_DISABLED: "1"
+  };
+  const isWindows = process.platform === "win32";
+  let bootLog = "";
+  const onData = (chunk) => {
+    bootLog = `${bootLog}${chunk.toString()}`.slice(-4000);
+  };
+  const child = spawn("pnpm", ["start"], {
+    cwd: webDir,
+    env,
+    shell: isWindows,
+    windowsHide: true,
+    detached: !isWindows,
+    stdio: ["ignore", "pipe", "pipe"]
+  });
+  child.stdout?.on("data", onData);
+  child.stderr?.on("data", onData);
+  return {
+    child,
+    baseUrl: `http://127.0.0.1:${portValue}`,
+    port: portValue,
+    onData,
+    getReadyFlag: () => false,
+    getBootLog: () => bootLog,
+    _stopPromise: null,
+    stop: () => stopWebDevServer({ child, port: portValue, onData, _stopPromise: null })
+  };
+}
+
+async function runWithBuiltWebServer({ label, port, envExtra, checkTechnicalHtml, skipBuild = false }) {
+  const fs = require("node:fs");
+  const webDir = path.join(repoRoot, "apps", "web");
+  const hasBuild = fs.existsSync(path.join(webDir, ".next"));
+  if (!skipBuild || !hasBuild) {
+    buildWebApp(envExtra);
+  } else {
+    console.log(`[${label}] Mevcut .next build kullaniliyor (SMOKE_SKIP_WEB_BUILD=1).`);
+  }
+
+  console.log(`[${label}] next start baslatiliyor (port ${port ?? 3198})...`);
+  const server = startWebProductionServer({ port, envExtra });
+
+  try {
+    const httpReady = await waitForWebReady(server.baseUrl, 180000);
+    if (!httpReady) {
+      const tail = server.getBootLog?.().trim();
+      throw new Error(
+        `Production web sunucusu hazir olmadi: ${server.baseUrl}${tail ? `\nSon boot ciktisi:\n${tail}` : ""}`
+      );
+    }
+
+    console.log(`[${label}] Sunucu hazir: ${server.baseUrl}`);
+    await sleep(1000);
+    return await runHttpRouteSmoke({
+      label,
+      baseUrl: server.baseUrl,
+      checkTechnicalHtml
+    });
+  } finally {
+    console.log(`[${label}] Production web sunucusu kapatiliyor...`);
+    await stopWebDevServer(server);
+  }
 }
 
 async function runHttpRouteSmoke({
@@ -343,6 +485,10 @@ async function runHttpRouteSmoke({
 
   for (const routePath of routes) {
     let result = await fetchRoute(baseUrl, routePath);
+    if (result.error) {
+      await sleep(5000);
+      result = await fetchRoute(baseUrl, routePath);
+    }
     if (result.status === 500) {
       await sleep(4000);
       result = await fetchRoute(baseUrl, routePath);
@@ -380,24 +526,31 @@ async function runWithWebServer({ label, port, envExtra, checkTechnicalHtml, rea
   const server = startWebDevServer({ port: port ?? parsePort(process.env.SMOKE_WEB_PORT, 3199), envExtra });
 
   try {
-    const readyByLog = async () => {
-      const deadline = Date.now() + 120000;
-      while (Date.now() < deadline) {
-        if (server.getReadyFlag()) {
-          return true;
+    const timeout = readyTimeoutMs ?? 600000;
+    const [logReady, httpReady] = await Promise.all([
+      (async () => {
+        const deadline = Date.now() + timeout;
+        while (Date.now() < deadline) {
+          if (server.getReadyFlag()) {
+            return true;
+          }
+          await sleep(1000);
         }
-        await sleep(1000);
-      }
-      return false;
-    };
-
-    const logReady = await readyByLog();
-    const httpReady = await waitForWebReady(server.baseUrl, readyTimeoutMs ?? 180000);
-    if (!logReady && !httpReady) {
-      throw new Error(`Web sunucusu hazir olmadi: ${server.baseUrl}`);
+        return false;
+      })(),
+      waitForWebReady(server.baseUrl, timeout)
+    ]);
+    if (!httpReady) {
+      const tail = server.getBootLog?.().trim();
+      throw new Error(
+        `Web sunucusu hazir olmadi: ${server.baseUrl} (logReady=${logReady ? "true" : "false"})${
+          tail ? `\nSon boot ciktisi:\n${tail}` : ""
+        }`
+      );
     }
 
     console.log(`[${label}] Sunucu hazir: ${server.baseUrl}`);
+    await sleep(2000);
     return await runHttpRouteSmoke({
       label,
       baseUrl: server.baseUrl,
@@ -415,6 +568,7 @@ module.exports = {
   probeApiHealth,
   runHttpRouteSmoke,
   runWithWebServer,
+  runWithBuiltWebServer,
   stopWebDevServer,
   killChildTree,
   parsePort

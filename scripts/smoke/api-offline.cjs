@@ -2,14 +2,16 @@
  * API offline HTTP smoke — demo kapali, erisilemeyen API base.
  * CI'da gercek API gerektirmez; sayfa kabugunun kırılmamasını doğrular.
  */
-const { runWithWebServer, parsePort } = require("./http-smoke-lib.cjs");
+const { runWithBuiltWebServer, parsePort } = require("./http-smoke-lib.cjs");
 
 const offlineApiBase = process.env.SMOKE_OFFLINE_API_BASE_URL ?? "http://localhost:4999";
 
 async function main() {
   const port = parsePort(process.env.SMOKE_API_OFFLINE_PORT, 3197);
+  const skipBuild =
+    process.env.SMOKE_SKIP_WEB_BUILD === "1" || process.env.SMOKE_SKIP_WEB_BUILD === "true";
 
-  const { failures, results } = await runWithWebServer({
+  const { failures, results } = await runWithBuiltWebServer({
     label: "api-offline",
     port,
     envExtra: {
@@ -19,7 +21,7 @@ async function main() {
       NEXT_PUBLIC_ENABLE_DEMO_AUTH: process.env.NEXT_PUBLIC_ENABLE_DEMO_AUTH ?? "true"
     },
     checkTechnicalHtml: true,
-    readyTimeoutMs: 240000
+    skipBuild
   });
 
   const passed = results.filter((r) => r.ok).length;
