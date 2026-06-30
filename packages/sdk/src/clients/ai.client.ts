@@ -59,6 +59,23 @@ export class AiClient {
     return this.api.post<ItemResponse<{ audioRef: string; provider: string; mimeType: string }>>("/ai/voice/speak", input);
   }
 
+  getLocalAiHealth() {
+    return this.api.get<
+      ItemResponse<{
+        state: string;
+        provider: string;
+        configured: boolean;
+        ready: boolean;
+        status: string;
+        message: string;
+        reasonCode?: string;
+        missingEnv?: string[];
+        lastCheckedAt?: string;
+        details?: Record<string, unknown>;
+      }>
+    >("/health/local-ai");
+  }
+
   getSalesAssistantHealth() {
     return this.api.get<ItemResponse<{
       ok: boolean;
