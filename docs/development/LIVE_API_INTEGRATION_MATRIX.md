@@ -59,7 +59,8 @@ Merkezi istemci: `createHallederizSdk()` → `apps/web/src/lib/data-source.ts`.
 | **Arşiv** | `/archive` | Liste UI; demo kayıt | `ARCHIVE_DEMO_RECORDS` only (`archive-demo-records.ts`) | **Yok** (SDK’da archive modülü yok) | Arşiv listesi API, indirme, not ekleme | Düşük (okuma ağırlıklı) | Tamamen demo veri | Archive read API + isteğe bağlı export job | **P2** |
 | **WhatsApp** | `/whatsapp` | UI hazır; bağlantı kapalı | `use-whatsapp-inbox.ts` → demo: `whatsapp-mock-data`; canlı: `sdk.whatsapp.listConversations`, `getConversation` | `WhatsAppClient`: read only | Outbound mesaj, QR/session, template send, webhook health | AI öneri → onay; gönderim onay sonrası | Demo bandı; gönderim toast taslak | SDK `sendMessage` + kanal health + UI gönder butonu | **P0** |
 | **Onaylar** | `/onaylar` | `ApprovalInboxPage` tam | `ApprovalInboxPage`: **her zaman** `sdk.approvals.list/detail`; `mutations/`: approve, reject, execute | `ApprovalsClient`: list, detail, approve, reject, execute | Execution sonrası domain mutation UI geri bildirimi; worker health canlı doğrulama | **Merkez** — `execute` → dispatcher | Demo bandı; API boşsa liste boş | Production’da execute + audit smoke; “review” → execute akışı netleştir | **P0** |
-| **Dashboard** | `/dashboard`, `/panel` | KPI + modül şeridi | Demo: `getDashboardHomeSnapshot()` → `operations-engine-mock-data`; canlı: **boş** `EMPTY_DASHBOARD_HOME_SNAPSHOT` | `DashboardClient`: `cards`, `cardTasks`, `summary` — **kullanılmıyor** | `GET /dashboard/summary` veya cards → `DashboardHomePage` bağlantısı | Yok (read) | Demo KPI canlı sanılmamalı (PR #98 bandı) | `sdk.dashboard.summary()` + snapshot mapper | **P1** |
+| **Dashboard** | `/dashboard`, `/panel` | KPI + modül şeridi + **duyuru video paneli** | Demo: `getDashboardHomeSnapshot()`; canlı: `GET /dashboard/announcement-videos` (Postgres hedefli) | `DashboardClient`: `cards`, `cardTasks`, `summary` — **kullanılmıyor**; duyuru videoları doğrudan API | `GET /dashboard/summary` veya cards → `DashboardHomePage` bağlantısı | Yok (read) | Demo KPI canlı sanılmamalı (PR #98 bandı) | `sdk.dashboard.summary()` + snapshot mapper | **P1** |
+| **Operator konsol** | `/operator/*` | Duyuru videoları CRUD + tenant dizini UI | `announcement-videos-operator.ts` → `sdk.operator.*` | `OperatorClient`: tenants, announcement-videos CRUD | Postgres kalıcılık (`0016`); tenant `modules` plan türetimi | Platform operator permission | Demo: in-memory store; canlı: `PERSISTENCE_MODE=postgres` | `ci:postgres-runtime-smoke` operator assert | **P1** |
 
 ---
 
@@ -76,7 +77,8 @@ Merkezi istemci: `createHallederizSdk()` → `apps/web/src/lib/data-source.ts`.
 | `documents` | list, detail | render, regenerate, send*, queue* | Canlı modda `DocumentsPage` / detay |
 | `whatsapp` | listConversations, getConversation | — | Yok (taslak toast) |
 | `approvals` | list, detail | approve, reject, execute | `ApprovalInboxPage` |
-| `dashboard` | cards, cardTasks, summary | — | Yok |
+| `dashboard` | cards, cardTasks, summary, **announcementVideos** | — | Dashboard video paneli (canlı) |
+| `operator` | tenants, announcementVideos | announcementVideos CRUD | `/operator/duyuru-videolari` |
 
 ---
 
@@ -170,4 +172,4 @@ Küçük, gerçek entegrasyona yönelik PR’lar:
 
 ---
 
-*Son güncelleme: main @ `0489f6c404dbd3aea5bf1688d95314df202592ab`*
+*Son güncelleme: `feature/operator-postgres-persistence` — operator Postgres (`0016`) + runtime smoke*

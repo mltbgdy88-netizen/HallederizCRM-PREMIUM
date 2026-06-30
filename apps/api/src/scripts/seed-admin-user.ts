@@ -46,13 +46,15 @@ async function main() {
 
     await tx.query(
       `
-        INSERT INTO tenants (id, slug, name)
-        VALUES ($1, $2, $3)
+        INSERT INTO tenants (id, slug, name, plan_code, status)
+        VALUES ($1, $2, $3, $4, $5)
         ON CONFLICT (id) DO UPDATE
         SET slug = EXCLUDED.slug,
-            name = EXCLUDED.name
+            name = EXCLUDED.name,
+            plan_code = EXCLUDED.plan_code,
+            status = EXCLUDED.status
       `,
-      [tenantId, tenantSlug, tenantName]
+      [tenantId, tenantSlug, tenantName, "premium", "active"]
     );
 
     const existingUsers = await tx.query<{ id: string }>(

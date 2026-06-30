@@ -21,3 +21,5 @@ export * from "./provider-message-receipt-repository";
 export * from "./channel-template-repository";
 export * from "./sales-ai-knowledge-repository";
 export * from "./idempotency-record-repository";
+export * from "./platform-announcement-video-repository";
+export * from "./operator-tenant-directory-repository";
