@@ -1,4 +1,4 @@
-import { sdk } from "../../../lib/data-source";
+import { dataSourceConfig, sdk } from "../../../lib/data-source";
 import {
   DASHBOARD_ANNOUNCEMENT_VIDEOS_DEMO,
   type DashboardAnnouncementVideo
@@ -18,8 +18,13 @@ export async function getDashboardAnnouncementVideos(): Promise<DashboardAnnounc
     if (Array.isArray(response.items) && response.items.length > 0) {
       return { items: response.items as DashboardAnnouncementVideo[], source: "live" };
     }
+    if (!dataSourceConfig.useDemoData) {
+      return { items: [], source: "live" };
+    }
   } catch {
-    // API kapalı — demo fallback
+    if (!dataSourceConfig.useDemoData) {
+      return { items: [], source: "live" };
+    }
   }
 
   return { items: DASHBOARD_ANNOUNCEMENT_VIDEOS_DEMO, source: "demo" };
