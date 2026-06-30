@@ -7,8 +7,20 @@ function resolveAssetDirectory(importMetaUrl: string, subdir: "migrations" | "se
   const moduleDir = path.dirname(fileURLToPath(importMetaUrl));
   const candidates = [
     path.join(moduleDir, subdir),
-    path.join(moduleDir, "..", "src", subdir)
+    path.join(moduleDir, "..", "src", subdir),
+    path.join(moduleDir, "..", "..", "..", "src", subdir)
   ];
+
+  let current = moduleDir;
+  while (current !== path.dirname(current)) {
+    const packageJson = path.join(current, "package.json");
+    const srcDir = path.join(current, "src", subdir);
+    if (existsSync(packageJson) && existsSync(srcDir)) {
+      candidates.push(srcDir);
+    }
+    current = path.dirname(current);
+  }
+
   for (const candidate of candidates) {
     if (existsSync(candidate)) {
       return candidate;
