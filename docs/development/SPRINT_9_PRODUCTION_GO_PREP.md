@@ -34,12 +34,23 @@ $env:PRODUCTION_GO_SKIP_STAGING_CHAIN="1"
 pnpm production-go:local
 ```
 
+## Yerel doğrulama (2026-06-30)
+
+| Adım | Sonuç |
+|------|--------|
+| `smoke:navigation` | PASS (24/24) |
+| `ci:postgres-migration-smoke` | PASS (17 migration) |
+| `staging:local-chain` | PASS (teklif → onay → Postgres) |
+| `local-ai:smoke` | degraded (Ollama OK, local-ai-service:8008 kapalı) |
+| API `/health/local-ai` | disabled (`PRODUCTION_GO_ALLOW_DEGRADED_AI=1`) |
+| **`pnpm production-go:local` (tam paket)** | **PASS** |
+
 ## Manuel kapılar (sprint dışı onay)
 
 - [ ] Viewport 1920×1080 — liste sayfalarında ≥5 satır (`ui-designer-rules`)
 - [ ] Viewport 390×844 — mobil kritik rotalar
 - [ ] WhatsApp webhook verify + test recipient
-- [ ] GitHub Actions yeşil (billing düzelince re-run)
+- [ ] GitHub Actions yeşil (push/PR sonrası CI re-run)
 
 ## Referans
 
