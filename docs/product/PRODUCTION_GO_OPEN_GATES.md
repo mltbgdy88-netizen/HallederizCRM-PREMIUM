@@ -2,7 +2,7 @@
 
 | Field | Value |
 |-------|--------|
-| **Baseline `main` HEAD** | `ab2af61e` |
+| **Baseline `main` HEAD** | `e2f21450` |
 | **Production decision** | **Conditional Go** |
 | **Evidence ledger** | `PRODUCTION_GO_MANUAL_EVIDENCE.md` |
 | **Last updated** | 2026-07-01 |
@@ -15,7 +15,7 @@ This document lists open gates between **Conditional Go** and **full Production 
 
 | id | priority | title | current_status | why_it_matters | required_evidence | suggested_branch | estimated_pr_count | owner_type | merge_blocker |
 |----|----------|-------|----------------|----------------|-------------------|------------------|--------------------|------------|---------------|
-| GATE-P0-VP | P0 | Manual viewport QA | **NOT_RUN** | List pages must meet density/shell rules at desktop and mobile; regressions block operator trust | [`VIEWPORT_QA_EVIDENCE.md`](./VIEWPORT_QA_EVIDENCE.md) — all routes NOT_RUN; web UI was down at pack creation (`VP-ENV-001`) | — (manual) | 0 | manual | **YES** |
+| GATE-P0-VP | P0 | Manual viewport QA | **BLOCKED** | List pages must meet density/shell rules at desktop and mobile; regressions block operator trust | [`VIEWPORT_QA_EVIDENCE.md`](./VIEWPORT_QA_EVIDENCE.md) — 2026-07-01 live run: desktop 5/7 PASS, 2 FAIL (`VP-DESK-001`, `VP-DESK-002` English operator slugs 404); mobile blocker routes 5/5 PASS | `fix/operator-route-aliases` | 1 | mixed | **YES** |
 | GATE-P0-WA | P0 | WhatsApp staging/prod credential + webhook smoke | **BLOCKED** | Omnichannel outbound/inbound requires fail-closed webhook and real credentials | Webhook verify PASS; inbound smoke; approval command smoke; signature fail-closed; secrets in manager only | `feature/whatsapp-prod-smoke` (ops-led) | 1–2 | mixed | **YES** |
 | GATE-P0-AI | P0 | Local AI `ready=true` or explicit production degraded policy | **DEGRADED** | AI is proposal-only but channel health must be honest in production | `local-ai-service` up; API `/health/local-ai` `ready=true`; OR product-signed scoped N/A | `feature/local-ai-ready-gate` | 1 | mixed | **YES** |
 
