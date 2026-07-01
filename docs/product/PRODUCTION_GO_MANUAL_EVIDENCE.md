@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|--------|
 | **Document role** | Manual evidence ledger and checklist template |
-| **Baseline `main` HEAD** | `22d4ce07` |
+| **Baseline `main` HEAD** | `ab2af61e` |
 | **Production decision** | **Conditional Go** (not full Production Go) |
 | **Last automated gate run** | 2026-07-01 (local) |
 | **Related** | `RELEASE_PRODUCTION_GO_NO_GO.md`, `PRODUCTION_GO_OPEN_GATES.md` |
@@ -14,7 +14,7 @@
 
 | Item | Status |
 |------|--------|
-| `main` HEAD | `22d4ce07` |
+| `main` HEAD | `ab2af61e` |
 | Working tree | Clean (post PR #186 artifact hygiene) |
 | Mod B technical sign-off | Complete (`MOD_B_SIGNOFF.md`) |
 | Sprint 9 local prep | Complete (`SPRINT_9_PRODUCTION_GO_PREP.md`) |
@@ -81,7 +81,15 @@ pnpm production-go:local
 
 ## 4. Manual viewport QA evidence
 
-No screenshots committed in this pack. Use this checklist for operator sign-off.
+| Field | Value |
+|-------|--------|
+| **Status** | **NOT_RUN** |
+| **Canonical ledger** | [`VIEWPORT_QA_EVIDENCE.md`](./VIEWPORT_QA_EVIDENCE.md) |
+| **Last pack update** | 2026-07-01 |
+| **Operator** | *Pending human QA* |
+| **HEAD at pack** | `ab2af61e` |
+
+No screenshots committed in this pack. Detailed per-route tables live in `VIEWPORT_QA_EVIDENCE.md`. Summary below mirrors that ledger.
 
 ### Desktop — 1920×1080
 
@@ -170,6 +178,7 @@ Credentials must live in secret manager only — **never commit**.
 ## Related documents
 
 - `docs/product/PRODUCTION_GO_OPEN_GATES.md`
+- `docs/product/VIEWPORT_QA_EVIDENCE.md`
 - `docs/product/RELEASE_PRODUCTION_GO_NO_GO.md`
 - `docs/product/PRODUCTION_SMOKE_CHECKLIST.md`
 - `docs/development/SPRINT_9_PRODUCTION_GO_PREP.md`
