@@ -31,6 +31,16 @@ Thumbs.db
 .idea
 .vscode
 
+# Local TypeScript emit artifacts in source folders
+packages/domain/src/**/*.js
+packages/domain/src/**/*.js.map
+packages/domain/src/**/*.d.ts
+packages/domain/src/**/*.d.ts.map
+packages/types/src/**/*.js
+packages/types/src/**/*.js.map
+packages/types/src/**/*.d.ts
+packages/types/src/**/*.d.ts.map
+
 # Local/generated artifacts hygiene
 __pycache__/
 *.pyc
