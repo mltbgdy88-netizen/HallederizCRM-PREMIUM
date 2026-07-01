@@ -83,12 +83,12 @@ pnpm production-go:local
 
 | Field | Value |
 |-------|--------|
-| **Status** | **BLOCKED** |
+| **Status** | **PARTIAL** |
 | **Canonical ledger** | [`VIEWPORT_QA_EVIDENCE.md`](./VIEWPORT_QA_EVIDENCE.md) |
 | **Last run** | 2026-07-01 |
 | **Operator** | Cursor Agent QA (`admin@hallederiz.local`) |
-| **HEAD at run** | `e2f21450` |
-| **Blocker findings** | `VP-DESK-001`, `VP-DESK-002` (English operator slugs 404) |
+| **HEAD at run** | `9d267b5e` |
+| **Blocker findings** | `VP-DESK-001`, `VP-DESK-002` — **resolved** via `fix/p0-operator-route-aliases`; full viewport re-run pending |
 
 Live session: web `http://127.0.0.1:3000`, API `http://127.0.0.1:4000`, live mode (`NEXT_PUBLIC_USE_DEMO_DATA=false`). No screenshots committed.
 
@@ -159,7 +159,7 @@ Credentials must live in secret manager only — **never commit**.
 |------|--------|
 | Automated gate | **PASS** |
 | Repo hygiene | **PASS** (PR #186) |
-| Viewport QA | **BLOCKED** (`VP-DESK-001`, `VP-DESK-002`) |
+| Viewport QA | **PARTIAL** — alias fix spot-checked; full viewport re-run pending (`VP-DESK-001`, `VP-DESK-002` resolved) |
 | WhatsApp prod credential | **NOT_RUN** / **BLOCKED** (no credentials in repo) |
 | Local AI ready | **BLOCKED** / **DEGRADED** |
 | **Production decision** | **CONDITIONAL_GO** — not **FULL_GO** |
