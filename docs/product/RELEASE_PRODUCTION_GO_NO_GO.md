@@ -128,6 +128,15 @@
 
 ---
 
+## Manual evidence source of truth
+
+Structured manual gate ledger and open-gate tracker (does not change the signed decision above):
+
+- [`PRODUCTION_GO_MANUAL_EVIDENCE.md`](./PRODUCTION_GO_MANUAL_EVIDENCE.md) — automated + manual evidence tables, viewport/WhatsApp/AI checklists
+- [`PRODUCTION_GO_OPEN_GATES.md`](./PRODUCTION_GO_OPEN_GATES.md) — P0/P1/P2 open gates, owners, merge blockers
+
+---
+
 ## Related documents
 
 - `PRODUCTION_CUTOVER_RUNBOOK.md`
