@@ -119,9 +119,9 @@ A row may be marked **PASS** only when all of the following are recorded:
 | id | route | viewport | severity | issue | reproduction | recommended next action | fix PR required |
 |----|-------|----------|----------|-------|--------------|-------------------------|-----------------|
 | VP-ENV-001 | *all* | *all* | P0 | ~~Visual QA not executed~~ | — | **Superseded** by 2026-07-01 live session | NO |
-| VP-DESK-001 | `/operator/announcement-videos` | 1920×1080 | **P0** | English slug returns **404**; canonical route is `/operator/duyuru-videolari` | Login → navigate `/operator/announcement-videos` | Add redirect/alias or update production checklist to Turkish slug; optional smoke link | **YES** |
-| VP-DESK-002 | `/operator/tenants` | 1920×1080 | **P0** | English slug returns **404**; canonical route is `/operator/kiracilar` | Login → navigate `/operator/tenants` | Add redirect/alias or update checklist; verify plan/status columns on canonical route | **YES** |
-| VP-MOB-001 | `/operator/announcement-videos`, `/operator/tenants` | 390×844 | **P2** | Same 404 on mobile (non-blocker routes) | Mobile viewport → same English URLs | Resolve with VP-DESK-001/002 | **YES** (same fix) |
+| VP-DESK-001 | `/operator/announcement-videos` | 1920×1080 | **P0** | ~~English slug returns **404**~~ | Login → `/operator/announcement-videos` | **RESOLVED** — `fix/p0-operator-route-aliases` server redirect to `/operator/duyuru-videolari`; spot-check 2026-07-01 (web `:3003` prod build, live API). Full viewport re-run pending. | NO (merged pending) |
+| VP-DESK-002 | `/operator/tenants` | 1920×1080 | **P0** | ~~English slug returns **404**~~ | Login → `/operator/tenants` | **RESOLVED** — redirect to `/operator/kiracilar`; spot-check 2026-07-01. Full viewport re-run pending. | NO (merged pending) |
+| VP-MOB-001 | `/operator/announcement-videos`, `/operator/tenants` | 390×844 | **P2** | ~~Same 404 on mobile~~ | Mobile viewport → same English URLs | **RESOLVED_PENDING_RECHECK** — same alias fix; mobile viewport not re-run in this PR | NO |
 
 **Reference (not in checklist):** `/operator/duyuru-videolari` and `/operator/kiracilar` load correctly at 1920×1080 with operator shell, forms, and tenant rows.
 
@@ -137,21 +137,35 @@ A row may be marked **PASS** only when all of the following are recorded:
 | **mobile_pass_count** | 5 |
 | **mobile_fail_count** | 2 |
 | **mobile_not_run_count** | 0 |
-| **production_go_impact** | Viewport P0 gate **BLOCKED** — 2 desktop blocker routes FAIL (404). Conditional Go unchanged. |
-| **viewport_gate_status** | **BLOCKED** |
+| **production_go_impact** | Alias fix closes VP-DESK-001/002 404 root cause; viewport gate **PARTIAL** until full desktop+mobile re-run. Conditional Go unchanged. |
+| **viewport_gate_status** | **PARTIAL** — alias fix spot-checked 2026-07-01; full 14-row viewport re-run pending |
 
 ### Status decision rules (applied)
 
 | Condition | Status |
 |-----------|--------|
 | All `blocker=YES` routes PASS | PASS |
-| Any P0/P1 UI blocker finding | **BLOCKED** ← **2 desktop blocker 404s** |
+| Any P0/P1 UI blocker finding | BLOCKED |
+| Alias fix applied; full viewport re-run pending | **PARTIAL** ← current |
 | Some low-priority routes NOT_RUN only | PARTIAL |
 | No visual inspection performed | NOT_RUN |
 
 ---
 
-## Related documents
+## 7. Alias fix spot-check (2026-07-01)
+
+Branch `fix/p0-operator-route-aliases` — App Router redirect pages under `(operator)` layout.
+
+| alias route | canonical target | spot-check | operator shell | auth guard |
+|-------------|------------------|------------|----------------|------------|
+| `/operator/announcement-videos` | `/operator/duyuru-videolari` | **PASS** — 307 redirect; CRUD form loads | YES | YES (`OperatorProtectedRoute`) |
+| `/operator/tenants` | `/operator/kiracilar` | **PASS** — redirect; tenant list loads | YES | YES |
+| `/operator/duyuru-videolari` | — | **PASS** (canonical unchanged) | YES | YES |
+| `/operator/kiracilar` | — | **PASS** (canonical unchanged) | YES | YES |
+
+Environment: web prod build `http://127.0.0.1:3003`, API `http://127.0.0.1:4000`, live mode, `admin@hallederiz.local`.
+
+---
 
 - `docs/product/PRODUCTION_GO_MANUAL_EVIDENCE.md` §4
 - `docs/product/PRODUCTION_GO_OPEN_GATES.md` → `GATE-P0-VP`
