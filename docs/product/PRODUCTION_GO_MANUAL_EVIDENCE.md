@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|--------|
 | **Document role** | Manual evidence ledger and checklist template |
-| **Baseline `main` HEAD** | `e2f21450` |
+| **Baseline `main` HEAD** | `6ef1645c` |
 | **Production decision** | **Conditional Go** (not full Production Go) |
 | **Last automated gate run** | 2026-07-01 (local) |
 | **Related** | `RELEASE_PRODUCTION_GO_NO_GO.md`, `PRODUCTION_GO_OPEN_GATES.md` |
@@ -14,7 +14,7 @@
 
 | Item | Status |
 |------|--------|
-| `main` HEAD | `e2f21450` |
+| `main` HEAD | `6ef1645c` |
 | Working tree | Clean (post PR #186 artifact hygiene) |
 | Mod B technical sign-off | Complete (`MOD_B_SIGNOFF.md`) |
 | Sprint 9 local prep | Complete (`SPRINT_9_PRODUCTION_GO_PREP.md`) |
@@ -83,14 +83,14 @@ pnpm production-go:local
 
 | Field | Value |
 |-------|--------|
-| **Status** | **PARTIAL** |
+| **Status** | **PASS** |
 | **Canonical ledger** | [`VIEWPORT_QA_EVIDENCE.md`](./VIEWPORT_QA_EVIDENCE.md) |
-| **Last run** | 2026-07-01 |
+| **Last run** | 2026-07-04 |
 | **Operator** | Cursor Agent QA (`admin@hallederiz.local`) |
-| **HEAD at run** | `9d267b5e` |
-| **Blocker findings** | `VP-DESK-001`, `VP-DESK-002` — **resolved** via `fix/p0-operator-route-aliases`; full viewport re-run pending |
+| **HEAD at run** | `6ef1645c` |
+| **Blocker findings** | `VP-DESK-001`, `VP-DESK-002`, `VP-MOB-001` — **CLOSED** (PR #190 alias fix + re-run PASS) |
 
-Live session: web `http://127.0.0.1:3000`, API `http://127.0.0.1:4000`, live mode (`NEXT_PUBLIC_USE_DEMO_DATA=false`). No screenshots committed.
+Live session: web `http://127.0.0.1:3000`, API `http://127.0.0.1:4000`, live mode (`NEXT_PUBLIC_USE_DEMO_DATA=false`). Playwright Chromium headless; no screenshots committed.
 
 ### Desktop — 1920×1080
 
@@ -98,23 +98,23 @@ Live session: web `http://127.0.0.1:3000`, API `http://127.0.0.1:4000`, live mod
 |-------|----------|-------------------|--------|---------|-------|
 | `/dashboard` | 1920×1080 | Shell loads; AI column dashboard-only; no body scroll | **PASS** | YES | Shell OK; no h-scroll |
 | `/hizli-islem/satis-masasi` | 1920×1080 | Workbench usable; customer catalog loads in live mode | **PASS** | YES | Cari alanı + aksiyonlar görünür |
-| `/onaylar` | 1920×1080 | Command desk; ≥5 list rows or valid empty state | **PASS** | YES | Empty state: bekleyen onay yok |
-| `/teklifler` | 1920×1080 | List density; first row selected; right panel populated | **PASS** | YES | ≥5 satır; ilk kayıt seçili |
+| `/onaylar` | 1920×1080 | Command desk; ≥5 list rows or valid empty state | **PASS** | YES | Komut masası / empty state OK |
+| `/teklifler` | 1920×1080 | List density; first row selected; right panel populated | **PASS** | YES | Liste + sağ panel OK |
 | `/operator` | 1920×1080 | Operator shell; platform context visible | **PASS** | YES | SaaS konsol OK |
-| `/operator/announcement-videos` | 1920×1080 | CRUD list; Postgres-backed | **FAIL** | YES | **404** — bkz. `VP-DESK-001` |
-| `/operator/tenants` | 1920×1080 | Tenant directory list; plan/status columns | **FAIL** | YES | **404** — bkz. `VP-DESK-002` |
+| `/operator/announcement-videos` | 1920×1080 | Alias redirect; CRUD list | **PASS** | YES | Redirect → duyuru-videolari |
+| `/operator/tenants` | 1920×1080 | Alias redirect; tenant directory | **PASS** | YES | Redirect → kiracilar |
 
 ### Mobile — 390×844
 
 | Route | Viewport | Expected evidence | Status | Blocker | Notes |
 |-------|----------|-------------------|--------|---------|-------|
-| `/dashboard` | 390×844 | Drawer nav; no horizontal scroll | **PASS** | YES | Menü butonu OK |
+| `/dashboard` | 390×844 | Drawer nav; no horizontal scroll | **PASS** | YES | Menü OK |
 | `/hizli-islem/satis-masasi` | 390×844 | Core actions reachable | **PASS** | YES | Cari alanı erişilebilir |
-| `/onaylar` | 390×844 | Approve/reject reachable | **PASS** | YES | Empty state; UI OK |
+| `/onaylar` | 390×844 | Approve/reject reachable | **PASS** | YES | Onay masası mobilde OK |
 | `/teklifler` | 390×844 | List + detail accessible | **PASS** | YES | Liste OK; h-scroll yok |
 | `/operator` | 390×844 | Operator entry usable | **PASS** | YES | Konsol mobilde OK |
-| `/operator/announcement-videos` | 390×844 | List readable | **FAIL** | NO | 404 (slug) |
-| `/operator/tenants` | 390×844 | List readable | **FAIL** | NO | 404 (slug) |
+| `/operator/announcement-videos` | 390×844 | Alias redirect; list readable | **PASS** | NO | Redirect → duyuru-videolari |
+| `/operator/tenants` | 390×844 | Alias redirect; list readable | **PASS** | NO | Redirect → kiracilar |
 
 ---
 
@@ -159,7 +159,7 @@ Credentials must live in secret manager only — **never commit**.
 |------|--------|
 | Automated gate | **PASS** |
 | Repo hygiene | **PASS** (PR #186) |
-| Viewport QA | **PARTIAL** — alias fix spot-checked; full viewport re-run pending (`VP-DESK-001`, `VP-DESK-002` resolved) |
+| Viewport QA | **PASS** (2026-07-04 re-run @ `6ef1645c`; 14/14 routes) |
 | WhatsApp prod credential | **NOT_RUN** / **BLOCKED** (no credentials in repo) |
 | Local AI ready | **BLOCKED** / **DEGRADED** |
 | **Production decision** | **CONDITIONAL_GO** — not **FULL_GO** |
