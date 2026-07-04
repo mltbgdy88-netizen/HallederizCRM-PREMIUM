@@ -3,10 +3,10 @@
 | Field | Value |
 |-------|--------|
 | **Gate** | Production Go P0 — `GATE-P0-VP` |
-| **Baseline `main` HEAD** | `e2f21450` |
-| **Evidence run branch** | `docs/p0-viewport-qa-run-results` |
-| **Last updated** | 2026-07-01 |
-| **Viewport gate status** | **BLOCKED** |
+| **Baseline `main` HEAD** | `6ef1645c` |
+| **Evidence run branch** | `docs/p0-viewport-qa-rerun` |
+| **Last updated** | 2026-07-04 |
+| **Viewport gate status** | **PASS** |
 
 ---
 
@@ -55,17 +55,16 @@ A row may be marked **PASS** only when all of the following are recorded:
 
 | Field | Value |
 |-------|--------|
-| **date** | 2026-07-01 (local) |
+| **date** | 2026-07-04 (local, UTC+3) |
 | **operator** | Cursor Agent QA session (`admin@hallederiz.local`) |
-| **branch** | `docs/p0-viewport-qa-run-results` |
-| **HEAD** | `e2f21450` |
+| **branch** | `docs/p0-viewport-qa-rerun` |
+| **HEAD** | `6ef1645c` (includes PR #190 operator route alias fix) |
 | **data mode** | Live API — `NEXT_PUBLIC_USE_DEMO_DATA=false` |
-| **API mode** | `http://127.0.0.1:4000` (Postgres; existing process on port 4000) |
-| **web** | `http://127.0.0.1:3000` |
-| **browser** | Cursor embedded Chromium; CDP `Emulation.setDeviceMetricsOverride` |
-| **viewport** | 1920×1080 desktop; 390×844 mobile |
+| **API mode** | `http://127.0.0.1:4000` (Postgres persistence) |
+| **web** | `http://127.0.0.1:3000` (Next.js dev) |
+| **browser** | Playwright Chromium headless; viewport override 1920×1080 / 390×844 |
 | **login** | Tenant `hallederiz`, `admin@hallederiz.local`, seed password — **success** → `/dashboard` |
-| **notes** | New API dev process hit `EADDRINUSE:4000`; reused existing API. Canonical operator slugs are Turkish (`/operator/kiracilar`, `/operator/duyuru-videolari`); English paths in checklist return **404**. |
+| **notes** | Post-#190 re-run. English operator alias paths redirect to canonical Turkish slugs. No screenshots committed. |
 
 ---
 
@@ -73,22 +72,22 @@ A row may be marked **PASS** only when all of the following are recorded:
 
 | route | expected | result | blocker | evidence | notes |
 |-------|----------|--------|---------|----------|-------|
-| `/dashboard` | Shell loads; AI column dashboard-only; no body scroll | **PASS** | YES | 2026-07-01, Cursor Agent QA, Chromium CDP 1920×1080, live API | Sidebar+main visible; no horizontal scroll; KPI/task rows visible; AI/command center content present |
-| `/hizli-islem/satis-masasi` | Workbench usable; customer catalog; no horizontal scroll | **PASS** | YES | 2026-07-01, Cursor Agent QA, CDP 1920×1080 | Cari/müşteri alanı ve submit aksiyonları görünür; yükleme hatası yok |
-| `/onaylar` | Command desk; ≥5 list rows or valid empty state; action column visible | **PASS** | YES | 2026-07-01, Cursor Agent QA, CDP 1920×1080 | Komut masası yüklendi; **“Bekleyen onay bulunmuyor”** empty state (veri yok); sağ panel alanı mevcut |
-| `/teklifler` | List density; first row selected; right panel populated | **PASS** | YES | 2026-07-01, Cursor Agent QA, CDP 1920×1080 | Liste yoğun (≥5 satır); ilk kayıt seçili; sağ panel dolu; yatay scroll yok |
-| `/operator` | Operator shell; platform context readable | **PASS** | YES | 2026-07-01, Cursor Agent QA, CDP 1920×1080 | SaaS Yönetim Konsolu; Kiracılar/Paketler/Duyuru kartları okunur |
-| `/operator/announcement-videos` | CRUD list; no clipped filters | **FAIL** | YES | 2026-07-01, Cursor Agent QA, CDP 1920×1080 | **404** — route yok; tenant shell içinde “This page could not be found.” |
-| `/operator/tenants` | Tenant directory; plan/status columns visible | **FAIL** | YES | 2026-07-01, Cursor Agent QA, CDP 1920×1080 | **404** — route yok; canonical slug `/operator/kiracilar` çalışıyor (4 satır görünür) |
+| `/dashboard` | Shell loads; AI column dashboard-only; no body scroll | **PASS** | YES | 2026-07-04, Cursor Agent QA, Chromium 1920×1080, live API, main 6ef1645c | Sidebar+main visible; KPI/task content present; no horizontal scroll |
+| `/hizli-islem/satis-masasi` | Workbench usable; customer catalog; no horizontal scroll | **PASS** | YES | 2026-07-04, Cursor Agent QA, Chromium 1920×1080, live API | Cari/müşteri alanı ve submit aksiyonları görünür; yükleme hatası yok |
+| `/onaylar` | Command desk; ≥5 list rows or valid empty state; action column visible | **PASS** | YES | 2026-07-04, Cursor Agent QA, Chromium 1920×1080, live API | Komut masası yüklendi; empty state veya liste OK; sağ panel alanı mevcut |
+| `/teklifler` | List density; first row selected; right panel populated | **PASS** | YES | 2026-07-04, Cursor Agent QA, Chromium 1920×1080, live API | Liste yoğun; sağ panel dolu veya geçerli empty state; yatay scroll yok |
+| `/operator` | Operator shell; platform context readable | **PASS** | YES | 2026-07-04, Cursor Agent QA, Chromium 1920×1080, live API | SaaS Yönetim Konsolu; Kiracılar/Paketler/Duyuru kartları okunur |
+| `/operator/announcement-videos` | Alias redirect; canonical CRUD list | **PASS** | YES | 2026-07-04, Cursor Agent QA, Chromium 1920×1080, live API | Redirect → `/operator/duyuru-videolari`; form/list okunur; **404 yok** |
+| `/operator/tenants` | Alias redirect; tenant directory | **PASS** | YES | 2026-07-04, Cursor Agent QA, Chromium 1920×1080, live API | Redirect → `/operator/kiracilar`; tenant listesi + plan/status görünür; **404 yok** |
 
 ### Desktop QA criteria checklist (per route)
 
-- [x] Page loads without error boundary (except documented 404 routes)
-- [x] Global shell intact on PASS routes
-- [x] Main content visible on PASS routes
-- [x] No unintended horizontal scroll on PASS routes
-- [x] Primary CTAs reachable on PASS routes
-- [x] List routes: teklifler ≥5 rows; onaylar valid empty state
+- [x] Page loads without error boundary
+- [x] Global shell intact on all blocker routes
+- [x] Main content visible on all blocker routes
+- [x] No unintended horizontal scroll on blocker routes
+- [x] Primary CTAs reachable on blocker routes
+- [x] Operator alias routes redirect to canonical Turkish slugs
 - [x] No wrong demo fallback observed in live mode
 
 ---
@@ -97,13 +96,13 @@ A row may be marked **PASS** only when all of the following are recorded:
 
 | route | expected | result | blocker | evidence | notes |
 |-------|----------|--------|---------|----------|-------|
-| `/dashboard` | Drawer nav; no horizontal scroll | **PASS** | YES | 2026-07-01, Cursor Agent QA, CDP 390×844 | Menü butonu görünür; yatay scroll yok |
-| `/hizli-islem/satis-masasi` | Core actions reachable | **PASS** | YES | 2026-07-01, Cursor Agent QA, CDP 390×844 | Cari alanı erişilebilir; menü mevcut |
-| `/onaylar` | Approve/reject actions visible | **PASS** | YES | 2026-07-01, Cursor Agent QA, CDP 390×844 | Empty state; onayla/reddet metinleri UI'da; menü OK |
-| `/teklifler` | List + detail accessible | **PASS** | YES | 2026-07-01, Cursor Agent QA, CDP 390×844 | Liste erişilebilir; yatay scroll yok |
-| `/operator` | Operator entry usable | **PASS** | YES | 2026-07-01, Cursor Agent QA, CDP 390×844 | SaaS konsol mobilde okunur |
-| `/operator/announcement-videos` | List readable | **FAIL** | NO | 2026-07-01, Cursor Agent QA, CDP 390×844 | 404 (desktop ile aynı slug sorunu) |
-| `/operator/tenants` | List readable | **FAIL** | NO | 2026-07-01, Cursor Agent QA, CDP 390×844 | 404 (desktop ile aynı slug sorunu) |
+| `/dashboard` | Drawer nav; no horizontal scroll | **PASS** | YES | 2026-07-04, Cursor Agent QA, Chromium 390×844, live API | Menü kontrolü görünür; yatay scroll yok |
+| `/hizli-islem/satis-masasi` | Core actions reachable | **PASS** | YES | 2026-07-04, Cursor Agent QA, Chromium 390×844, live API | Cari alanı erişilebilir; menü mevcut |
+| `/onaylar` | Approve/reject actions visible | **PASS** | YES | 2026-07-04, Cursor Agent QA, Chromium 390×844, live API | Onay masası mobilde erişilebilir |
+| `/teklifler` | List + detail accessible | **PASS** | YES | 2026-07-04, Cursor Agent QA, Chromium 390×844, live API | Liste erişilebilir; yatay scroll yok |
+| `/operator` | Operator entry usable | **PASS** | YES | 2026-07-04, Cursor Agent QA, Chromium 390×844, live API | SaaS konsol mobilde okunur |
+| `/operator/announcement-videos` | Alias redirect; list readable | **PASS** | NO | 2026-07-04, Cursor Agent QA, Chromium 390×844, live API | Redirect → duyuru-videolari; içerik okunur |
+| `/operator/tenants` | Alias redirect; list readable | **PASS** | NO | 2026-07-04, Cursor Agent QA, Chromium 390×844, live API | Redirect → kiracilar; tenant listesi okunur |
 
 ### Mobile QA criteria checklist (per route)
 
@@ -111,6 +110,7 @@ A row may be marked **PASS** only when all of the following are recorded:
 - [x] Primary actions reachable on PASS blocker routes
 - [x] No horizontal scroll on PASS blocker routes
 - [x] Approval page accessible on mobile
+- [x] Operator alias routes redirect correctly on mobile
 
 ---
 
@@ -119,11 +119,11 @@ A row may be marked **PASS** only when all of the following are recorded:
 | id | route | viewport | severity | issue | reproduction | recommended next action | fix PR required |
 |----|-------|----------|----------|-------|--------------|-------------------------|-----------------|
 | VP-ENV-001 | *all* | *all* | P0 | ~~Visual QA not executed~~ | — | **Superseded** by 2026-07-01 live session | NO |
-| VP-DESK-001 | `/operator/announcement-videos` | 1920×1080 | **P0** | ~~English slug returns **404**~~ | Login → `/operator/announcement-videos` | **RESOLVED** — `fix/p0-operator-route-aliases` server redirect to `/operator/duyuru-videolari`; spot-check 2026-07-01 (web `:3003` prod build, live API). Full viewport re-run pending. | NO (merged pending) |
-| VP-DESK-002 | `/operator/tenants` | 1920×1080 | **P0** | ~~English slug returns **404**~~ | Login → `/operator/tenants` | **RESOLVED** — redirect to `/operator/kiracilar`; spot-check 2026-07-01. Full viewport re-run pending. | NO (merged pending) |
-| VP-MOB-001 | `/operator/announcement-videos`, `/operator/tenants` | 390×844 | **P2** | ~~Same 404 on mobile~~ | Mobile viewport → same English URLs | **RESOLVED_PENDING_RECHECK** — same alias fix; mobile viewport not re-run in this PR | NO |
+| VP-DESK-001 | `/operator/announcement-videos` | 1920×1080 | **P0** | ~~English slug returns **404**~~ | Login → alias path | **CLOSED** — PR #190 alias redirect; re-run PASS 2026-07-04 | NO |
+| VP-DESK-002 | `/operator/tenants` | 1920×1080 | **P0** | ~~English slug returns **404**~~ | Login → alias path | **CLOSED** — PR #190 alias redirect; re-run PASS 2026-07-04 | NO |
+| VP-MOB-001 | `/operator/announcement-videos`, `/operator/tenants` | 390×844 | **P2** | ~~Same 404 on mobile~~ | Mobile viewport → alias URLs | **CLOSED** — alias redirect PASS 2026-07-04 | NO |
 
-**Reference (not in checklist):** `/operator/duyuru-videolari` and `/operator/kiracilar` load correctly at 1920×1080 with operator shell, forms, and tenant rows.
+**Canonical spot-check (2026-07-04):** `/operator/duyuru-videolari` and `/operator/kiracilar` load correctly at 1920×1080 with operator shell, forms, and tenant rows.
 
 ---
 
@@ -131,39 +131,38 @@ A row may be marked **PASS** only when all of the following are recorded:
 
 | Metric | Count |
 |--------|-------|
-| **desktop_pass_count** | 5 |
-| **desktop_fail_count** | 2 |
+| **desktop_pass_count** | 7 |
+| **desktop_fail_count** | 0 |
 | **desktop_not_run_count** | 0 |
-| **mobile_pass_count** | 5 |
-| **mobile_fail_count** | 2 |
+| **mobile_pass_count** | 7 |
+| **mobile_fail_count** | 0 |
 | **mobile_not_run_count** | 0 |
-| **production_go_impact** | Alias fix closes VP-DESK-001/002 404 root cause; viewport gate **PARTIAL** until full desktop+mobile re-run. Conditional Go unchanged. |
-| **viewport_gate_status** | **PARTIAL** — alias fix spot-checked 2026-07-01; full 14-row viewport re-run pending |
+| **production_go_impact** | Viewport gate **PASS** after PR #190 alias fix. Full Production Go remains **Conditional Go** (WhatsApp + Local AI P0 gates open). |
+| **viewport_gate_status** | **PASS** |
 
 ### Status decision rules (applied)
 
 | Condition | Status |
 |-----------|--------|
-| All `blocker=YES` routes PASS | PASS |
-| Any P0/P1 UI blocker finding | BLOCKED |
-| Alias fix applied; full viewport re-run pending | **PARTIAL** ← current |
-| Some low-priority routes NOT_RUN only | PARTIAL |
+| All `blocker=YES` routes PASS | **PASS** ← current |
+| Any P0/P1 UI blocker finding open | BLOCKED |
+| Some routes NOT_RUN only | PARTIAL |
 | No visual inspection performed | NOT_RUN |
 
 ---
 
-## 7. Alias fix spot-check (2026-07-01)
+## 7. Alias re-run verification (2026-07-04)
 
-Branch `fix/p0-operator-route-aliases` — App Router redirect pages under `(operator)` layout.
+Post PR #190 — App Router redirect pages under `(operator)` layout.
 
-| alias route | canonical target | spot-check | operator shell | auth guard |
-|-------------|------------------|------------|----------------|------------|
-| `/operator/announcement-videos` | `/operator/duyuru-videolari` | **PASS** — 307 redirect; CRUD form loads | YES | YES (`OperatorProtectedRoute`) |
-| `/operator/tenants` | `/operator/kiracilar` | **PASS** — redirect; tenant list loads | YES | YES |
-| `/operator/duyuru-videolari` | — | **PASS** (canonical unchanged) | YES | YES |
-| `/operator/kiracilar` | — | **PASS** (canonical unchanged) | YES | YES |
+| alias route | canonical target | desktop | mobile | operator shell | auth guard |
+|-------------|------------------|---------|--------|----------------|------------|
+| `/operator/announcement-videos` | `/operator/duyuru-videolari` | **PASS** | **PASS** | YES | YES |
+| `/operator/tenants` | `/operator/kiracilar` | **PASS** | **PASS** | YES | YES |
+| `/operator/duyuru-videolari` | — | **PASS** | **PASS** | YES | YES |
+| `/operator/kiracilar` | — | **PASS** | **PASS** | YES | YES |
 
-Environment: web prod build `http://127.0.0.1:3003`, API `http://127.0.0.1:4000`, live mode, `admin@hallederiz.local`.
+Environment: web dev `http://127.0.0.1:3000`, API `http://127.0.0.1:4000`, live mode, `admin@hallederiz.local`.
 
 ---
 
