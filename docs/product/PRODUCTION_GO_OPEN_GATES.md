@@ -2,10 +2,10 @@
 
 | Field | Value |
 |-------|--------|
-| **Baseline `main` HEAD** | `6ef1645c` |
+| **Baseline `main` HEAD** | `2a009763` |
 | **Production decision** | **Conditional Go** |
 | **Evidence ledger** | `PRODUCTION_GO_MANUAL_EVIDENCE.md` |
-| **Last updated** | 2026-07-04 |
+| **Last updated** | 2026-07-06 |
 
 This document lists open gates between **Conditional Go** and **full Production Go**. It does not grant Production Go by itself.
 
@@ -16,7 +16,7 @@ This document lists open gates between **Conditional Go** and **full Production 
 | id | priority | title | current_status | why_it_matters | required_evidence | suggested_branch | estimated_pr_count | owner_type | merge_blocker |
 |----|----------|-------|----------------|----------------|-------------------|------------------|--------------------|------------|---------------|
 | GATE-P0-VP | P0 | Manual viewport QA | **PASS** | List pages must meet density/shell rules at desktop and mobile; regressions block operator trust | [`VIEWPORT_QA_EVIDENCE.md`](./VIEWPORT_QA_EVIDENCE.md) — full re-run 2026-07-04 @ `6ef1645c`; 7/7 desktop + 7/7 mobile blocker routes PASS; VP-DESK-001/002/VP-MOB-001 closed | `docs/p0-viewport-qa-rerun` | 1 | mixed | **NO** |
-| GATE-P0-WA | P0 | WhatsApp staging/prod credential + webhook smoke | **BLOCKED** | Omnichannel outbound/inbound requires fail-closed webhook and real credentials | Webhook verify PASS; inbound smoke; approval command smoke; signature fail-closed; secrets in manager only | `feature/whatsapp-prod-smoke` (ops-led) | 1–2 | mixed | **YES** |
+| GATE-P0-WA | P0 | WhatsApp staging/prod credential + webhook smoke | **BLOCKED** | Omnichannel outbound/inbound requires fail-closed webhook and real credentials | [`WHATSAPP_WEBHOOK_EVIDENCE.md`](./WHATSAPP_WEBHOOK_EVIDENCE.md) — credentials MISSING; verify PARTIAL (403 wrong/missing token); signature live smoke FAIL (`POST_NO_SIG`/`POST_BAD_SIG` → 200); WA-ENV-001, WA-SIG-001 open | `fix/p0-whatsapp-signature-fail-closed` if production-like re-run confirms missing/invalid sig accepted; else `docs/p0-whatsapp-credential-rerun` | 1–2 | mixed | **YES** |
 | GATE-P0-AI | P0 | Local AI `ready=true` or explicit production degraded policy | **DEGRADED** | AI is proposal-only but channel health must be honest in production | `local-ai-service` up; API `/health/local-ai` `ready=true`; OR product-signed scoped N/A | `feature/local-ai-ready-gate` | 1 | mixed | **YES** |
 
 ---
@@ -46,7 +46,7 @@ This document lists open gates between **Conditional Go** and **full Production 
 ## 4. Recommended next sequence
 
 1. ~~**Manual viewport QA evidence**~~ — **PASS** 2026-07-04 ([`VIEWPORT_QA_EVIDENCE.md`](./VIEWPORT_QA_EVIDENCE.md)).
-2. **WhatsApp staging/prod verification** — ops configures secrets; engineering runs webhook + command smokes.
+2. **WhatsApp staging/prod verification** — **BLOCKED** ([`WHATSAPP_WEBHOOK_EVIDENCE.md`](./WHATSAPP_WEBHOOK_EVIDENCE.md)): ops configures secrets; re-run verify + signature fail-closed in production-like mode.
 3. **Local AI `ready=true` stabilization** — start `local-ai-service`; re-run `pnpm production-go:local` **without** `PRODUCTION_GO_ALLOW_DEGRADED_AI`.
 4. **`production-go:local` CI workflow** — optional regression gate on main.
 5. **P1 hardening backlog** — tenant modules, archive API, CSP reporting, test env docs.
@@ -68,6 +68,7 @@ This document lists open gates between **Conditional Go** and **full Production 
 
 - `docs/product/PRODUCTION_GO_MANUAL_EVIDENCE.md`
 - `docs/product/VIEWPORT_QA_EVIDENCE.md`
+- `docs/product/WHATSAPP_WEBHOOK_EVIDENCE.md`
 - `docs/product/RELEASE_PRODUCTION_GO_NO_GO.md`
 - `docs/product/PRODUCTION_ENV_CHECKLIST.md`
 - `docs/product/PRODUCTION_SMOKE_CHECKLIST.md`
