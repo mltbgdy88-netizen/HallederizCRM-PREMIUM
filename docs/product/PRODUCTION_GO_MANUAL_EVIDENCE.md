@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|--------|
 | **Document role** | Manual evidence ledger and checklist template |
-| **Baseline `main` HEAD** | `6ef1645c` |
+| **Baseline `main` HEAD** | `2a009763` |
 | **Production decision** | **Conditional Go** (not full Production Go) |
 | **Last automated gate run** | 2026-07-01 (local) |
 | **Related** | `RELEASE_PRODUCTION_GO_NO_GO.md`, `PRODUCTION_GO_OPEN_GATES.md` |
@@ -14,7 +14,7 @@
 
 | Item | Status |
 |------|--------|
-| `main` HEAD | `6ef1645c` |
+| `main` HEAD | `2a009763` |
 | Working tree | Clean (post PR #186 artifact hygiene) |
 | Mod B technical sign-off | Complete (`MOD_B_SIGNOFF.md`) |
 | Sprint 9 local prep | Complete (`SPRINT_9_PRODUCTION_GO_PREP.md`) |
@@ -122,17 +122,46 @@ Live session: web `http://127.0.0.1:3000`, API `http://127.0.0.1:4000`, live mod
 
 Credentials must live in secret manager only — **never commit**.
 
+| Field | Value |
+|-------|--------|
+| **Status** | **BLOCKED** |
+| **Canonical ledger** | [`WHATSAPP_WEBHOOK_EVIDENCE.md`](./WHATSAPP_WEBHOOK_EVIDENCE.md) |
+| **Last run** | 2026-07-06 |
+| **Operator** | Cursor Agent (docs-only evidence) |
+| **HEAD at run** | `2a009763` |
+| **Branch** | `docs/p0-whatsapp-webhook-evidence` |
+
+### Credential presence (redacted)
+
+| Variable | Status |
+|----------|--------|
+| `WHATSAPP_VERIFY_TOKEN` | **MISSING** |
+| `WHATSAPP_WEBHOOK_SECRET` | **MISSING** |
+| `WHATSAPP_PHONE_NUMBER_ID` | **MISSING** |
+| `WHATSAPP_BUSINESS_ACCOUNT_ID` | **MISSING** |
+| `WHATSAPP_PROVIDER` | **MISSING** |
+
+### Smoke summary
+
 | Check | Status | Blocker | Notes |
 |-------|--------|---------|-------|
-| Webhook verify URL configured | **NOT_RUN** | YES | Meta app dashboard |
-| App secret configured | **NOT_RUN** | YES | Secret manager |
-| Access token configured | **NOT_RUN** | YES | Secret manager |
-| Phone number ID configured | **NOT_RUN** | YES | Secret manager |
-| Test recipient configured | **NOT_RUN** | YES | Ops-owned |
-| Inbound message smoke | **NOT_RUN** | YES | Staging/prod webhook |
-| Approval command smoke (`ONAY`/`RED`/`INCELE`) | **NOT_RUN** | YES | See `docs/product/WHATSAPP_READINESS.md` |
-| Signature fail-closed smoke | **NOT_RUN** | YES | Invalid signature must reject |
+| Webhook verify (wrong/missing token) | **PARTIAL** | YES | 403 fail-closed; correct token **NOT_RUN** |
+| Webhook verify (correct token) | **NOT_RUN** | YES | `WHATSAPP_VERIFY_TOKEN` missing |
+| Signature fail-closed (live) | **BLOCKED** | YES | `POST_NO_SIG` → 200; `POST_BAD_SIG` → 200 |
+| Inbound message smoke | **NOT_RUN** | YES | Credentials + signature path not ready |
+| Approval command smoke (`ONAY`/`RED`/`INCELE`) | **NOT_RUN** | YES | WA-CMD-001 |
+| Outbound live send | **NOT_RUN** | YES | WA-OUTBOUND-001 — not marked PASS |
 | Retry/error logging | **NOT_RUN** | NO | Observability follow-up |
+
+### Findings
+
+| ID | Severity | Summary |
+|----|----------|---------|
+| WA-ENV-001 | P0 | Required staging/prod credentials missing |
+| WA-VERIFY-001 | PARTIAL | Wrong/missing verify token → 403; correct verify not run |
+| WA-SIG-001 | P0 BLOCKER | Live POST accepted missing/invalid signature (200) |
+| WA-CMD-001 | BLOCKED / NOT_RUN | Approval command live smoke not completed |
+| WA-OUTBOUND-001 | NOT_RUN | Live outbound not tested |
 
 ---
 
@@ -160,7 +189,7 @@ Credentials must live in secret manager only — **never commit**.
 | Automated gate | **PASS** |
 | Repo hygiene | **PASS** (PR #186) |
 | Viewport QA | **PASS** (2026-07-04 re-run @ `6ef1645c`; 14/14 routes) |
-| WhatsApp prod credential | **NOT_RUN** / **BLOCKED** (no credentials in repo) |
+| WhatsApp prod credential / webhook | **BLOCKED** ([`WHATSAPP_WEBHOOK_EVIDENCE.md`](./WHATSAPP_WEBHOOK_EVIDENCE.md)) |
 | Local AI ready | **BLOCKED** / **DEGRADED** |
 | **Production decision** | **CONDITIONAL_GO** — not **FULL_GO** |
 
@@ -180,6 +209,7 @@ Credentials must live in secret manager only — **never commit**.
 
 - `docs/product/PRODUCTION_GO_OPEN_GATES.md`
 - `docs/product/VIEWPORT_QA_EVIDENCE.md`
+- `docs/product/WHATSAPP_WEBHOOK_EVIDENCE.md`
 - `docs/product/RELEASE_PRODUCTION_GO_NO_GO.md`
 - `docs/product/PRODUCTION_SMOKE_CHECKLIST.md`
 - `docs/development/SPRINT_9_PRODUCTION_GO_PREP.md`
