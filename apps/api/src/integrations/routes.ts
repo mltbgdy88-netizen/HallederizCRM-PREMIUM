@@ -65,6 +65,15 @@ function resolveWebhookTenantId(event: WhatsAppWebhookBody): string | undefined 
   return undefined;
 }
 
+function isWhatsAppLiveProvider() {
+  const provider = (process.env.WHATSAPP_PROVIDER ?? "").trim().toLowerCase();
+  return provider === "live" || provider === "meta" || provider === "graph";
+}
+
+function requiresWhatsAppWebhookSignature() {
+  return process.env.NODE_ENV === "production" || isWhatsAppLiveProvider();
+}
+
 function extractWhatsAppWebhookMessage(event: WhatsAppWebhookBody, tenantId: string) {
   const message = event.entry?.[0]?.changes?.[0]?.value?.messages?.[0];
   const text = message?.text?.body ?? event.text ?? "";
@@ -115,27 +124,41 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
     const rawBody = (request as unknown as RequestWithRawBody).rawBody;
     const signature = getHeaderValue(request.headers["x-hub-signature-256"]) ?? getHeaderValue(request.headers["x-whatsapp-signature"]);
     const secret = process.env.WHATSAPP_WEBHOOK_APP_SECRET;
-    if (!secret && process.env.NODE_ENV === "production") {
+    const requiresSignature = requiresWhatsAppWebhookSignature();
+
+    if (requiresSignature && !secret) {
       return reply.status(503).send({ message: "WhatsApp webhook secret is not configured." });
     }
+
+    if (requiresSignature && !signature) {
+      return reply.status(403).send({ message: "Webhook signature is required." });
+    }
+
     const service = new IntegrationsService({
       tenantId: "tenant_1",
       userId: "system",
       persistenceMode: "demo"
     });
-    if (secret && !service.verifyWhatsAppWebhookSignature(rawBody ?? "", signature)) {
+
+    if (requiresSignature) {
+      if (!service.verifyWhatsAppWebhookSignature(rawBody ?? "", signature)) {
+        return reply.status(403).send({ message: "Webhook signature mismatch." });
+      }
+    } else if (secret && !service.verifyWhatsAppWebhookSignature(rawBody ?? "", signature)) {
       return reply.status(403).send({ message: "Webhook signature mismatch." });
     }
-    if (secret && process.env.NODE_ENV === "production") {
+
+    if (requiresSignature && secret) {
       const timestampHeader =
         getHeaderValue(request.headers["x-hub-timestamp-256"]) ?? getHeaderValue(request.headers["x-hub-timestamp"]);
       if (timestampHeader && !verifyWebhookTimestamp(timestampHeader)) {
         return reply.status(403).send({ message: "Webhook timestamp outside tolerance." });
       }
     }
+
     const event = request.body as WhatsAppWebhookBody;
     const resolvedTenantId = resolveWebhookTenantId(event);
-    if (!resolvedTenantId && process.env.NODE_ENV === "production") {
+    if (!resolvedTenantId && requiresSignature) {
       return reply.status(400).send({ message: "Webhook tenant context is required." });
     }
     const tenantId = resolvedTenantId ?? "tenant_1";

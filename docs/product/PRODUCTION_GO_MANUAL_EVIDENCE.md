@@ -126,20 +126,21 @@ Credentials must live in secret manager only — **never commit**.
 |-------|--------|
 | **Status** | **BLOCKED** |
 | **Canonical ledger** | [`WHATSAPP_WEBHOOK_EVIDENCE.md`](./WHATSAPP_WEBHOOK_EVIDENCE.md) |
-| **Last run** | 2026-07-06 |
-| **Operator** | Cursor Agent (docs-only evidence) |
-| **HEAD at run** | `2a009763` |
-| **Branch** | `docs/p0-whatsapp-webhook-evidence` |
+| **Last run** | 2026-07-07 (signature fix PR) |
+| **Operator** | Cursor Agent |
+| **HEAD at run** | `372e4463` + `fix/p0-whatsapp-signature-fail-closed` |
+| **Branch** | `fix/p0-whatsapp-signature-fail-closed` |
 
-### Credential presence (redacted)
+### Credential presence (canonical, redacted)
 
 | Variable | Status |
 |----------|--------|
-| `WHATSAPP_VERIFY_TOKEN` | **MISSING** |
-| `WHATSAPP_WEBHOOK_SECRET` | **MISSING** |
+| `WHATSAPP_WEBHOOK_VERIFY_TOKEN` | **MISSING** |
+| `WHATSAPP_WEBHOOK_APP_SECRET` | **MISSING** |
+| `WHATSAPP_API_TOKEN` | **MISSING** |
 | `WHATSAPP_PHONE_NUMBER_ID` | **MISSING** |
-| `WHATSAPP_BUSINESS_ACCOUNT_ID` | **MISSING** |
 | `WHATSAPP_PROVIDER` | **MISSING** |
+| `WHATSAPP_API_BASE_URL` | **MISSING** |
 
 ### Smoke summary
 
@@ -147,7 +148,7 @@ Credentials must live in secret manager only — **never commit**.
 |-------|--------|---------|-------|
 | Webhook verify (wrong/missing token) | **PARTIAL** | YES | 403 fail-closed; correct token **NOT_RUN** |
 | Webhook verify (correct token) | **NOT_RUN** | YES | `WHATSAPP_VERIFY_TOKEN` missing |
-| Signature fail-closed (live) | **BLOCKED** | YES | `POST_NO_SIG` → 200; `POST_BAD_SIG` → 200 |
+| Signature fail-closed (live) | **FIXED_PENDING_RERUN** | YES | Implementation fix in `fix/p0-whatsapp-signature-fail-closed`; automated tests PASS; live credential rerun pending |
 | Inbound message smoke | **NOT_RUN** | YES | Credentials + signature path not ready |
 | Approval command smoke (`ONAY`/`RED`/`INCELE`) | **NOT_RUN** | YES | WA-CMD-001 |
 | Outbound live send | **NOT_RUN** | YES | WA-OUTBOUND-001 — not marked PASS |
@@ -159,7 +160,7 @@ Credentials must live in secret manager only — **never commit**.
 |----|----------|---------|
 | WA-ENV-001 | P0 | Required staging/prod credentials missing |
 | WA-VERIFY-001 | PARTIAL | Wrong/missing verify token → 403; correct verify not run |
-| WA-SIG-001 | P0 BLOCKER | Live POST accepted missing/invalid signature (200) |
+| WA-SIG-001 | P0 (code fixed) | Signature fail-closed implementation added; live rerun pending |
 | WA-CMD-001 | BLOCKED / NOT_RUN | Approval command live smoke not completed |
 | WA-OUTBOUND-001 | NOT_RUN | Live outbound not tested |
 
