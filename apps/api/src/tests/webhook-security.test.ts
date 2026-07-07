@@ -83,3 +83,124 @@ test("WhatsApp webhook rejects invalid signature and accepts valid raw body sign
     }
   );
 });
+
+test("production WhatsApp webhook rejects missing signature when secret is configured", async () => {
+  await withEnv(
+    {
+      NODE_ENV: "production",
+      WHATSAPP_WEBHOOK_APP_SECRET: "test-whatsapp-webhook-secret"
+    },
+    async () => {
+      const server = Fastify();
+      await registerIntegrationRoutes(server);
+      const response = await server.inject({
+        method: "POST",
+        url: "/whatsapp/webhook",
+        headers: { "content-type": "application/json" },
+        payload: JSON.stringify({ entry: [] })
+      });
+
+      assert.equal(response.statusCode, 403);
+      assert.equal(response.json().message, "Webhook signature is required.");
+      await server.close();
+    }
+  );
+});
+
+test("live WhatsApp provider rejects missing webhook secret in development", async () => {
+  await withEnv(
+    {
+      NODE_ENV: "development",
+      WHATSAPP_PROVIDER: "live",
+      WHATSAPP_WEBHOOK_APP_SECRET: undefined
+    },
+    async () => {
+      const server = Fastify();
+      await registerIntegrationRoutes(server);
+      const response = await server.inject({
+        method: "POST",
+        url: "/whatsapp/webhook",
+        headers: { "content-type": "application/json" },
+        payload: JSON.stringify({ entry: [] })
+      });
+
+      assert.equal(response.statusCode, 503);
+      assert.equal(response.json().message, "WhatsApp webhook secret is not configured.");
+      await server.close();
+    }
+  );
+});
+
+test("live WhatsApp provider rejects missing and invalid signatures", async () => {
+  const secret = "test-whatsapp-webhook-secret";
+  await withEnv(
+    {
+      NODE_ENV: "development",
+      WHATSAPP_PROVIDER: "live",
+      WHATSAPP_WEBHOOK_APP_SECRET: secret
+    },
+    async () => {
+      const server = Fastify();
+      await registerIntegrationRoutes(server);
+      const rawBody = JSON.stringify({ entry: [], tenantId: "tenant_1" });
+
+      const missing = await server.inject({
+        method: "POST",
+        url: "/whatsapp/webhook",
+        headers: { "content-type": "application/json" },
+        payload: rawBody
+      });
+      assert.equal(missing.statusCode, 403);
+      assert.equal(missing.json().message, "Webhook signature is required.");
+
+      const invalid = await server.inject({
+        method: "POST",
+        url: "/whatsapp/webhook",
+        headers: {
+          "content-type": "application/json",
+          "x-hub-signature-256": "sha256=bad"
+        },
+        payload: rawBody
+      });
+      assert.equal(invalid.statusCode, 403);
+      assert.equal(invalid.json().message, "Webhook signature mismatch.");
+
+      const valid = await server.inject({
+        method: "POST",
+        url: "/whatsapp/webhook",
+        headers: {
+          "content-type": "application/json",
+          "x-hub-signature-256": `sha256=${signHmacSha256Payload(rawBody, secret)}`
+        },
+        payload: rawBody
+      });
+      assert.equal(valid.statusCode, 200);
+      assert.equal(valid.json().ok, true);
+      await server.close();
+    }
+  );
+});
+
+test("demo development webhook remains legacy-compatible without provider or secret", async () => {
+  await withEnv(
+    {
+      NODE_ENV: "development",
+      WHATSAPP_PROVIDER: undefined,
+      WHATSAPP_WEBHOOK_APP_SECRET: undefined
+    },
+    async () => {
+      const server = Fastify();
+      await registerIntegrationRoutes(server);
+      const response = await server.inject({
+        method: "POST",
+        url: "/whatsapp/webhook",
+        headers: { "content-type": "application/json" },
+        payload: JSON.stringify({ entry: [] })
+      });
+
+      assert.equal(response.statusCode, 200);
+      assert.equal(response.json().ok, true);
+      await server.close();
+    }
+  );
+});
