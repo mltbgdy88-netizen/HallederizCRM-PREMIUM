@@ -3,10 +3,10 @@
 | Field | Value |
 |-------|--------|
 | **Gate** | `GATE-P0-WA` |
-| **Date** | 2026-07-07 |
-| **Operator** | Cursor Agent (implementation fix + evidence update) |
-| **Branch** | `fix/p0-whatsapp-signature-fail-closed` |
-| **HEAD** | pending merge |
+| **Date** | 2026-07-07 (initial), **2026-07-08** (credential rerun #199) |
+| **Operator** | Cursor Agent (implementation fix + evidence rerun) |
+| **Branch** | `docs/p0-whatsapp-credential-rerun` |
+| **HEAD** | `ac608c67` (baseline) |
 | **API URL** | `http://127.0.0.1:4000` |
 | **Persistence mode** | `postgres` (API session); webhook route uses demo tenant context |
 | **Credential source** | Process env — **all required keys MISSING** |
@@ -104,11 +104,11 @@ Root cause: signature enforcement only when `WHATSAPP_WEBHOOK_APP_SECRET` was se
 | WA-SIG-005 | live provider | invalid signature | 403 | `webhook-security.test.ts` | **PASS** |
 | WA-SIG-006 | live provider | valid signature | 200 | `webhook-security.test.ts` | **PASS** |
 | WA-SIG-007 | demo default | no provider/secret | 200 (legacy) | `webhook-security.test.ts` | **PASS** |
-| WA-SIG-008 | live smoke rerun | missing/invalid sig | reject | **NOT_RUN** | Pending credential rerun |
+| WA-SIG-008 | live smoke rerun | missing/invalid sig | reject | **PASS** (isolated route) | 2026-07-08 §9; ephemeral secret not committed |
 
-**WA-SIG-001 finding status: FIXED_PENDING_CREDENTIAL_RERUN**
+**WA-SIG-001 finding status: CLOSED (code + isolated live smoke)**
 
-**signature_status: FIXED_PENDING_RERUN** — automated tests prove fail-closed; live credential rerun still required.
+**signature_status: PASS (isolated live provider)** — fail-closed proven on route harness; **full API live boot still blocked** without ops credentials (§9).
 
 ---
 
@@ -145,8 +145,9 @@ Automated test evidence (no live Meta): 7 tests in `whatsapp-command-approval.te
 |----|----------|-------|----------|-----------------|-----------------|
 | **WA-ENV-001** | **P0** | Required WhatsApp staging/prod credentials are missing | Canonical keys MISSING (see §2) | Configure via secret manager. **Do not commit secrets.** | No (ops) |
 | **WA-VERIFY-001** | PARTIAL | Webhook verify fail-closed works for wrong/missing token; correct-token verify not run | Wrong token → **403**; missing token → **403** | Set `WHATSAPP_WEBHOOK_VERIFY_TOKEN`; re-run WA-VERIFY-001 | No (ops + docs rerun) |
-| **WA-SIG-001** | **P0** (resolved in code) | Live smoke accepted missing/invalid signatures before fix | Pre-fix: `POST_NO_SIG`/`POST_BAD_SIG` → 200 | **FIXED_PENDING_CREDENTIAL_RERUN** — `fix/p0-whatsapp-signature-fail-closed`; automated tests PASS; live rerun after credentials | **Merged pending** |
-| **WA-CMD-001** | BLOCKED / NOT_RUN | Inbound approval command live smoke not completed | Signed webhook + credentials not ready | Complete after WA-ENV-001 + WA-SIG-001 resolved | TBD |
+| **WA-SIG-001** | **P0** (resolved) | Live smoke accepted missing/invalid signatures before fix | Pre-fix: `POST_NO_SIG`/`POST_BAD_SIG` → 200; rerun: live provider isolated smoke → 503/403/403/200 | **CLOSED** — merged `fix/p0-whatsapp-signature-fail-closed`; isolated live rerun PASS (§9) | No |
+| **WA-BOOT-001** | **P0** | Full API cannot boot with `WHATSAPP_PROVIDER=live` when ops credentials missing | `runtime_env_validation_failed` (verify token, secret, API base, token, phone id) | Ops configures canonical credentials; then staging API boot + live HTTP smoke | No (ops) |
+| **WA-CMD-001** | PARTIAL | Live Meta inbound/approval not completed; isolated signed smoke OK | Signed synthetic inbound `workflowReserved=true`; approval `ticket_not_found` (no fixture) | Ops credentials + staging ticket fixture for end-to-end live smoke | TBD |
 | **WA-OUTBOUND-001** | NOT_RUN | Live outbound send not tested | No token / no recipient | Ops-led staging outbound smoke after credentials | No (ops) |
 
 ---
@@ -157,19 +158,97 @@ Automated test evidence (no live Meta): 7 tests in `whatsapp-command-approval.te
 |-------|--------|
 | **credential_status** | **BLOCKED** |
 | **verify_status** | **PARTIAL** |
-| **signature_status** | **FIXED_PENDING_RERUN** |
-| **inbound_status** | **BLOCKED / NOT_RUN** |
-| **approval_command_status** | **BLOCKED / NOT_RUN** |
+| **signature_status** | **PASS** (isolated live provider; demo default API legacy 200) |
+| **inbound_status** | **PARTIAL** (isolated signed synthetic only) |
+| **approval_command_status** | **PARTIAL** (isolated signed synthetic; `ticket_not_found`) |
 | **outbound_status** | **NOT_RUN** |
 | **gate_status (`GATE-P0-WA`)** | **BLOCKED** |
-| **production_go_impact** | Full Production Go remains **Conditional Go**; credentials + live rerun still required |
+| **production_go_impact** | Full Production Go remains **Conditional Go**; ops credentials + staging live HTTP smoke still required |
 
 ### Decision rules applied
 
-- **PASS** not granted: required credentials still missing; correct verify not run; live credential rerun not completed.
-- **BLOCKED**: gate remains blocked until ops credential setup + `docs/p0-whatsapp-credential-rerun`.
-- Signature implementation fix: automated tests prove fail-closed for production and live provider modes.
+- **PASS** not granted: required ops credentials still **MISSING**; correct-token verify not run on running API; full API live boot blocked; outbound not run.
+- **BLOCKED**: gate remains blocked until ops configures canonical WhatsApp credentials and staging live HTTP smoke completes.
+- Signature fail-closed: **proven** via automated tests + isolated `WHATSAPP_PROVIDER=live` route harness (§9).
 - No secrets committed in this evidence package.
+
+---
+
+## 9. 2026-07-08 Credential Rerun (`docs/p0-whatsapp-credential-rerun`, issue #199)
+
+Controlled evidence rerun on `main` @ `ac608c67`. Docs-only; no code changes.
+
+### 9.1 Credential presence (redacted)
+
+Re-checked process/user/machine env — **all canonical keys MISSING** (same as §2). No private values recorded.
+
+**credential_status: BLOCKED**
+
+### 9.2 Running API (`http://127.0.0.1:4000`, demo/default)
+
+| Probe | Status | Body (truncated) | Result |
+|-------|--------|------------------|--------|
+| `GET /health` | **200** | healthy | API up |
+| `GET /health/whatsapp` | **401** | auth required | Expected for protected health |
+| WA-VERIFY-002 wrong token | **403** | empty | **PASS** (fail-closed) |
+| WA-VERIFY-003 missing token | **403** | empty | **PASS** (fail-closed) |
+| WA-VERIFY-001 correct token | **NOT_RUN** | — | verify token **MISSING** on running API |
+| POST demo default, no signature | **200** | `ok:true` | Legacy demo path (no live provider) |
+| POST demo default, bad signature | **200** | `ok:true` | Legacy demo path |
+
+**verify_status: PARTIAL**
+
+### 9.3 Full API live boot attempt
+
+`WHATSAPP_PROVIDER=live` without ops secrets → API bootstrap **FAIL**:
+
+`runtime_env_validation_failed: whatsapp_verify_token_missing, whatsapp_webhook_secret_missing, whatsapp_api_base_missing, whatsapp_api_token_missing, whatsapp_phone_id_missing`
+
+Ops credentials required before staging/production live HTTP smoke on full API process.
+
+### 9.4 Isolated route harness (`WHATSAPP_PROVIDER=live`)
+
+Ephemeral in-memory secret used for route-level smoke only — **not committed**, not ops credentials.
+
+| Probe | Expected | Observed | Result |
+|-------|----------|----------|--------|
+| POST, live provider, no secret | 503 | **503** `WhatsApp webhook secret is not configured.` | **PASS** |
+| POST, missing signature | 403 | **403** `Webhook signature is required.` | **PASS** |
+| POST, invalid signature | 403 | **403** `Webhook signature mismatch.` | **PASS** |
+| POST, valid signature | 200 | **200** `ok:true` | **PASS** |
+| GET verify, correct ephemeral token | 200 | **200** challenge echoed | **PASS** (harness only) |
+| GET verify, wrong token | 403 | **403** | **PASS** |
+
+**signature_status: PASS** (isolated live provider)
+
+### 9.5 Inbound / approval (isolated signed synthetic)
+
+| Probe | Observed | Result | Notes |
+|-------|----------|--------|-------|
+| Signed inbound text message | **200** `workflowReserved:true` | **PARTIAL** | Synthetic Meta-shaped payload; not live Meta |
+| Signed `ONAY SO-SMOKE-001 …` command | **200** `commandResult.ok:false` `reason:ticket_not_found` | **PARTIAL** | Parser + handler reached; no staging approval ticket fixture |
+
+**inbound_status: PARTIAL**  
+**approval_command_status: PARTIAL**
+
+### 9.6 Outbound
+
+| Check | Status |
+|-------|--------|
+| Live outbound send | **NOT_RUN** — `WHATSAPP_API_TOKEN` **MISSING** |
+
+### 9.7 Automated regression (reference)
+
+`webhook-security.test.ts`, `whatsapp-command-approval.test.ts`, `whatsapp-webhook-idempotency.test.ts` — signature/command/idempotency paths covered in CI/local test harness (no live Meta).
+
+### 9.8 Gate decision
+
+| Field | Status |
+|-------|--------|
+| **`GATE-P0-WA`** | **BLOCKED** |
+| **`GATE-P0-VP`** | unchanged **PASS** |
+| **`GATE-P0-AI`** | unchanged **PASS** |
+| **Full Production Go** | **NOT granted** |
 
 ---
 
