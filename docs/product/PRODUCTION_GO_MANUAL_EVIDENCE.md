@@ -3,7 +3,7 @@
 | Field | Value |
 |-------|--------|
 | **Document role** | Manual evidence ledger and checklist template |
-| **Baseline `main` HEAD** | `2a009763` |
+| **Baseline `main` HEAD** | `7912bfb6` |
 | **Production decision** | **Conditional Go** (not full Production Go) |
 | **Last automated gate run** | 2026-07-01 (local) |
 | **Related** | `RELEASE_PRODUCTION_GO_NO_GO.md`, `PRODUCTION_GO_OPEN_GATES.md` |
@@ -14,7 +14,7 @@
 
 | Item | Status |
 |------|--------|
-| `main` HEAD | `2a009763` |
+| `main` HEAD | `7912bfb6` |
 | Working tree | Clean (post PR #186 artifact hygiene) |
 | Mod B technical sign-off | Complete (`MOD_B_SIGNOFF.md`) |
 | Sprint 9 local prep | Complete (`SPRINT_9_PRODUCTION_GO_PREP.md`) |
@@ -168,18 +168,40 @@ Credentials must live in secret manager only — **never commit**.
 
 ## 6. Local AI readiness evidence
 
-| Signal | Current state |
-|--------|----------------|
-| Ollama | **healthy** (`:11434`) |
-| `local-ai-service` | **down** (`:8008` fetch failed) |
-| API `/health/local-ai` | **disabled**, `ready=false` |
-| Local bundle waiver | `PRODUCTION_GO_ALLOW_DEGRADED_AI=1` accepted for local/staging |
+| Field | Value |
+|-------|--------|
+| **Status** | **DEGRADED** (service layer ready; canonical postgres bundle blocked) |
+| **Canonical ledger** | [`LOCAL_AI_READY_EVIDENCE.md`](./LOCAL_AI_READY_EVIDENCE.md) |
+| **Last run** | 2026-07-07 |
+| **Operator** | Cursor Agent |
+| **HEAD at run** | `7912bfb6` |
+
+### Runtime signals (2026-07-07)
+
+| Signal | Status | Notes |
+|--------|--------|-------|
+| Ollama `:11434` | **healthy** | Models: `llama3.2:3b`, `RefinedNeuro/Turkcell-LLM-7b-v1:latest` |
+| `local-ai-service` `:8008` | **healthy** | After `pnpm local-ai:dev`; `pnpm local-ai:health` PASS |
+| API `/health/local-ai` | **ready=true** | With `AI_PROVIDER=ollama`, `AI_LOCAL_ENABLED=true`; default API env still `disabled` |
+| `production-go:local` (postgres, no waiver) | **FAIL** | `ECONNREFUSED 127.0.0.1:5432` — LAI-PG-001 |
+| `production-go:local` (AI-only path, no waiver) | **PASS** | Services up + configured API; skips migration when no `DATABASE_URL` |
+| Dashboard voice channel | **NOT_RUN** | LAI-WEB-001 |
+
+### Findings
+
+| ID | Summary |
+|----|---------|
+| LAI-PG-001 | Postgres unavailable — canonical bundle blocked |
+| LAI-ENV-001 | API needs explicit ollama env (not default `.env.example`) |
+| LAI-PROBE-001 | API `ready` probes Ollama; `local-ai:health` stricter |
+| LAI-WEB-001 | Dashboard voice not verified |
 
 | Decision | Value |
 |----------|--------|
+| **GATE-P0-AI** | **DEGRADED** — not PASS (postgres canonical bundle incomplete) |
 | Production-ready | **NO** |
-| Allowed for local/staging | **YES**, with explicit degraded flag |
-| Required for production-ready | `pnpm local-ai:dev` (or equivalent); API `ready=true`; dashboard AI channel not disabled |
+| Full Production Go | **NO** (`GATE-P0-WA` BLOCKED) |
+| Next action | Start Postgres; re-run `production-go:local` without waiver |
 
 ---
 
@@ -191,7 +213,7 @@ Credentials must live in secret manager only — **never commit**.
 | Repo hygiene | **PASS** (PR #186) |
 | Viewport QA | **PASS** (2026-07-04 re-run @ `6ef1645c`; 14/14 routes) |
 | WhatsApp prod credential / webhook | **BLOCKED** ([`WHATSAPP_WEBHOOK_EVIDENCE.md`](./WHATSAPP_WEBHOOK_EVIDENCE.md)) |
-| Local AI ready | **BLOCKED** / **DEGRADED** |
+| Local AI ready | **DEGRADED** ([`LOCAL_AI_READY_EVIDENCE.md`](./LOCAL_AI_READY_EVIDENCE.md)) |
 | **Production decision** | **CONDITIONAL_GO** — not **FULL_GO** |
 
 ---
@@ -211,6 +233,7 @@ Credentials must live in secret manager only — **never commit**.
 - `docs/product/PRODUCTION_GO_OPEN_GATES.md`
 - `docs/product/VIEWPORT_QA_EVIDENCE.md`
 - `docs/product/WHATSAPP_WEBHOOK_EVIDENCE.md`
+- `docs/product/LOCAL_AI_READY_EVIDENCE.md`
 - `docs/product/RELEASE_PRODUCTION_GO_NO_GO.md`
 - `docs/product/PRODUCTION_SMOKE_CHECKLIST.md`
 - `docs/development/SPRINT_9_PRODUCTION_GO_PREP.md`
