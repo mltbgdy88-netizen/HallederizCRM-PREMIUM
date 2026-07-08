@@ -3,9 +3,9 @@
 | Field | Value |
 |-------|--------|
 | **Gate** | `GATE-P0-AI` |
-| **Date** | 2026-07-07 (initial), **2026-07-08** (production-go rerun) |
-| **Branch** | `docs/p0-local-ai-production-go-rerun` |
-| **HEAD** | `44e757cd` |
+| **Date** | 2026-07-07 (initial), **2026-07-08** (rerun #1, rerun #2) |
+| **Branch** | `docs/p0-local-ai-production-go-rerun-2` |
+| **HEAD** | `47c6d483` |
 | **OS** | Windows 10 (win32 10.0.26200) |
 | **Node** | v20.20.1 |
 | **Production decision** | **Conditional Go** — no Full Production Go |
@@ -86,26 +86,18 @@ Default `.env.example` uses `AI_PROVIDER=disabled` — API returns `ready=false`
 
 ---
 
-## 6. Decision
+## 6. Decision (current)
 
 | Field | Status |
 |-------|--------|
-| **Service layer** | **READY** when `pnpm local-ai:dev` + Ollama running |
-| **API ready probe** | **PASS** with correct AI env + Ollama |
-| **Canonical production-go (postgres)** | **FAIL** — Postgres env blocker |
-| **`GATE-P0-AI`** | **DEGRADED** (improved; not PASS) |
-| **merge_blocker** | **YES** |
+| **Service layer** | **READY** |
+| **API ready probe** | **PASS** |
+| **Canonical production-go (postgres, no waiver)** | **PASS** (2026-07-08 rerun #2) |
+| **`GATE-P0-AI`** | **PASS** |
+| **merge_blocker** | **NO** |
 | **Full Production Go** | **NO** — `GATE-P0-WA` still **BLOCKED** |
 
-### Why not PASS
-
-Per gate rules: canonical `production-go:local` with postgres env **failed** (Postgres down). Degraded waiver not used for PASS claim. Dashboard channel not verified.
-
-### Next actions
-
-1. **Start Docker Desktop** and run `docker compose -f docker-compose.local.yml up -d postgres`.
-2. Re-run `production-go:local` **without** `PRODUCTION_GO_ALLOW_DEGRADED_AI` with full env.
-3. Document local dev bootstrap env in ops runbook (no secret commit).
+Canonical `pnpm production-go:local` completed **without** `PRODUCTION_GO_ALLOW_DEGRADED_AI` after Docker Desktop + Postgres were started. Dashboard voice channel (LAI-WEB-001) remains optional follow-up, not required for API readiness gate.
 
 ---
 
@@ -145,6 +137,49 @@ Canonical waiver-less `pnpm production-go:local` rerun with Postgres + Local AI 
 **Ops action:** Start Docker Desktop → `docker compose -f docker-compose.local.yml up -d postgres` → re-run this evidence branch or new `docs/p0-local-ai-production-go-rerun-2`.
 
 ---
+
+## 8. 2026-07-08 Production-Go Rerun #2 (`docs/p0-local-ai-production-go-rerun-2`)
+
+Issue #197 — canonical waiver-less bundle with Docker Desktop + Postgres running.
+
+| Item | Status | Evidence |
+|------|--------|----------|
+| **Docker Desktop** | **PASS** | Started; `docker info` OK |
+| **Postgres** | **PASS** | `hallederizcrm-postgres` Up; `Test-NetConnection 127.0.0.1:5432` → `TcpTestSucceeded: True` |
+| **local-ai-service** | **PASS** | `:8008` HTTP 200 |
+| **Ollama** | **PASS** | `:11434/api/tags` HTTP 200 |
+| **`pnpm local-ai:health`** | **PASS** | `ok:true`, `local_ai_service_and_ollama_ready` |
+| **`ci:postgres-migration-smoke`** | **PASS** | 17 migrations; idempotent second apply |
+| **`staging:local-chain`** | **PASS** | Offer count 25 → 26 |
+| **`local-ai:smoke`** | **PASS** | healthy |
+| **API `/health/local-ai`** | **PASS** | `state=ready ready=true configured=true status=healthy` |
+| **`production-go:local` without waiver** | **PASS** | Final: `PASS — yerel Production Go prep tamamlandı` |
+| **`PRODUCTION_GO_ALLOW_DEGRADED_AI`** | **NOT SET** | Confirmed unset |
+| **Degraded waiver used** | **NO** | |
+
+### Bundle steps observed
+
+1. `smoke:navigation` — PASS  
+2. `ci:postgres-migration-smoke` — PASS  
+3. `staging:local-chain` — PASS  
+4. `local-ai:smoke` — PASS  
+5. API `/health/local-ai` probe — `ready=true`
+
+### Rerun #2 findings
+
+| ID | Status | Notes |
+|----|--------|-------|
+| **LAI-PG-001** | **CLOSED** | Postgres reachable after Docker Desktop start |
+| **LAI-ENV-001** | **MITIGATED** | AI env set for local gate run |
+| **LAI-WEB-001** | **NOT_RUN** | Dashboard voice optional follow-up |
+
+### Rerun #2 decision
+
+| Field | Status |
+|-------|--------|
+| **`GATE-P0-AI`** | **PASS** |
+| **merge_blocker** | **NO** |
+| **Full Production Go** | **NO** — `GATE-P0-WA` **BLOCKED** |
 
 ## Related documents
 

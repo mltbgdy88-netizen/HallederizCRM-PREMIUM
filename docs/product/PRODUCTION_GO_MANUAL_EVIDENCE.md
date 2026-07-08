@@ -14,7 +14,7 @@
 
 | Item | Status |
 |------|--------|
-| `main` HEAD | `44e757cd` |
+| `main` HEAD | `47c6d483` |
 | Working tree | Clean (post PR #186 artifact hygiene) |
 | Mod B technical sign-off | Complete (`MOD_B_SIGNOFF.md`) |
 | Sprint 9 local prep | Complete (`SPRINT_9_PRODUCTION_GO_PREP.md`) |
@@ -170,11 +170,11 @@ Credentials must live in secret manager only — **never commit**.
 
 | Field | Value |
 |-------|--------|
-| **Status** | **DEGRADED** (service layer ready; canonical postgres bundle blocked) |
+| **Status** | **PASS** |
 | **Canonical ledger** | [`LOCAL_AI_READY_EVIDENCE.md`](./LOCAL_AI_READY_EVIDENCE.md) |
-| **Last run** | 2026-07-08 (production-go rerun) |
+| **Last run** | 2026-07-08 (production-go rerun #2) |
 | **Operator** | Cursor Agent |
-| **HEAD at run** | `44e757cd` |
+| **HEAD at run** | `47c6d483` |
 
 ### Runtime signals (2026-07-07)
 
@@ -198,20 +198,20 @@ Credentials must live in secret manager only — **never commit**.
 
 | Decision | Value |
 |----------|--------|
-| **GATE-P0-AI** | **DEGRADED** — not PASS (postgres canonical bundle incomplete) |
-| Production-ready | **NO** |
+| **GATE-P0-AI** | **PASS** (2026-07-08 rerun #2; canonical bundle without waiver) |
+| Production-ready (local AI gate) | **YES** (local/staging) |
 | Full Production Go | **NO** (`GATE-P0-WA` BLOCKED) |
-| Next action | Start Docker Desktop + Postgres; re-run canonical `production-go:local` without waiver |
 
-### Production-go rerun (2026-07-08)
+### Production-go rerun #2 (2026-07-08, issue #197)
 
 | Signal | Status | Notes |
 |--------|--------|-------|
-| Docker / Postgres | **FAIL** | Docker daemon not running; port 5432 closed |
+| Docker / Postgres | **PASS** | Container `hallederizcrm-postgres` Up; port 5432 open |
 | `local-ai:health` | **PASS** | Service + Ollama healthy |
-| `production-go:local` (canonical, no waiver) | **FAIL** | `ci:postgres-migration-smoke` → `ECONNREFUSED` |
+| `production-go:local` (canonical, no waiver) | **PASS** | All bundle steps green |
+| API `/health/local-ai` | **PASS** | `ready=true`, `status=healthy` |
 | `PRODUCTION_GO_ALLOW_DEGRADED_AI` | **NOT SET** | |
-| **GATE-P0-AI** | **DEGRADED** | LAI-PG-001 still open |
+| **GATE-P0-AI** | **PASS** | LAI-PG-001 closed |
 
 ---
 
@@ -223,7 +223,7 @@ Credentials must live in secret manager only — **never commit**.
 | Repo hygiene | **PASS** (PR #186) |
 | Viewport QA | **PASS** (2026-07-04 re-run @ `6ef1645c`; 14/14 routes) |
 | WhatsApp prod credential / webhook | **BLOCKED** ([`WHATSAPP_WEBHOOK_EVIDENCE.md`](./WHATSAPP_WEBHOOK_EVIDENCE.md)) |
-| Local AI ready | **DEGRADED** ([`LOCAL_AI_READY_EVIDENCE.md`](./LOCAL_AI_READY_EVIDENCE.md)) |
+| Local AI ready | **PASS** ([`LOCAL_AI_READY_EVIDENCE.md`](./LOCAL_AI_READY_EVIDENCE.md) §8) |
 | **Production decision** | **CONDITIONAL_GO** — not **FULL_GO** |
 
 ---
