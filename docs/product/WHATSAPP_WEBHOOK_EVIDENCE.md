@@ -3,10 +3,10 @@
 | Field | Value |
 |-------|--------|
 | **Gate** | `GATE-P0-WA` |
-| **Date** | 2026-07-07 (initial), **2026-07-08** (credential rerun #199) |
-| **Operator** | Cursor Agent (implementation fix + evidence rerun) |
-| **Branch** | `docs/p0-whatsapp-credential-rerun` |
-| **HEAD** | `ac608c67` (baseline) |
+| **Date** | 2026-07-07 (initial), **2026-07-08** (rerun #199), **2026-07-08** (final live #201) |
+| **Operator** | Cursor Agent (evidence runs) |
+| **Branch** | `docs/p0-whatsapp-final-live-verification` |
+| **HEAD** | `0b808e2b` (baseline) |
 | **API URL** | `http://127.0.0.1:4000` |
 | **Persistence mode** | `postgres` (API session); webhook route uses demo tenant context |
 | **Credential source** | Process env — **all required keys MISSING** |
@@ -159,17 +159,17 @@ Automated test evidence (no live Meta): 7 tests in `whatsapp-command-approval.te
 | **credential_status** | **BLOCKED** |
 | **verify_status** | **PARTIAL** |
 | **signature_status** | **PASS** (isolated live provider; demo default API legacy 200) |
-| **inbound_status** | **PARTIAL** (isolated signed synthetic only) |
-| **approval_command_status** | **PARTIAL** (isolated signed synthetic; `ticket_not_found`) |
+| **inbound_status** | **NOT_RUN** (final live §10; prior isolated **PARTIAL** in §9) |
+| **approval_command_status** | **NOT_RUN** (final live §10) |
 | **outbound_status** | **NOT_RUN** |
 | **gate_status (`GATE-P0-WA`)** | **BLOCKED** |
-| **production_go_impact** | Full Production Go remains **Conditional Go**; ops credentials + staging live HTTP smoke still required |
+| **production_go_impact** | Full Production Go remains **Conditional Go**; ops credentials not loadable (§10) |
 
 ### Decision rules applied
 
-- **PASS** not granted: required ops credentials still **MISSING**; correct-token verify not run on running API; full API live boot blocked; outbound not run.
-- **BLOCKED**: gate remains blocked until ops configures canonical WhatsApp credentials and staging live HTTP smoke completes.
-- Signature fail-closed: **proven** via automated tests + isolated `WHATSAPP_PROVIDER=live` route harness (§9).
+- **PASS** not granted: final live verification (§10) blocked — ops credentials not loadable; full API boot **FAIL**.
+- **BLOCKED**: gate remains blocked until ops loads secrets and staging live HTTP smoke completes.
+- Prior signature fail-closed evidence (§4, §9) remains valid; does not substitute for ops live smoke.
 - No secrets committed in this evidence package.
 
 ---
@@ -249,6 +249,68 @@ Ephemeral in-memory secret used for route-level smoke only — **not committed**
 | **`GATE-P0-VP`** | unchanged **PASS** |
 | **`GATE-P0-AI`** | unchanged **PASS** |
 | **Full Production Go** | **NOT granted** |
+
+---
+
+## 10. 2026-07-08 Final Live Verification (`docs/p0-whatsapp-final-live-verification`, issue #201)
+
+Final controlled staging/live verification on `main` @ `0b808e2b`. Docs-only; no code changes.
+
+### 10.1 Ops credential load attempt
+
+| Source checked | Result |
+|----------------|--------|
+| Process / user / machine env | **MISSING** — all canonical keys absent |
+| Repo `.env` / `apps/api/.env` | **MISSING** — files not present |
+| `.env.local` | **MISSING** |
+| `WHATSAPP_TEST_RECIPIENT` | **MISSING** |
+
+No private values loaded or recorded. Secret manager not reachable from agent runtime.
+
+**credential_status: BLOCKED**
+
+### 10.2 Full API live/staging boot
+
+`WHATSAPP_PROVIDER=live` boot attempt → **FAIL** — `runtime_env_validation_failed` (verify token, webhook secret, API base, API token, phone id **MISSING**).
+
+**boot_status: FAIL**
+
+### 10.3 Webhook verify (`:4000`, demo/default API)
+
+| Test ID | Case | Status | Result |
+|---------|------|--------|--------|
+| WA-VERIFY-002 | Wrong token | **403** | **PASS** |
+| WA-VERIFY-003 | Missing token | **403** | **PASS** |
+| WA-VERIFY-001 | Correct ops token | **NOT_RUN** | Ops verify token **MISSING** |
+
+**verify_status: PARTIAL**
+
+### 10.4 Signed POST (staging live)
+
+| Case | Result |
+|------|--------|
+| Missing / invalid / valid signature on live API | **NOT_RUN** — full API boot **FAIL** |
+
+**signed_post_status: NOT_RUN**
+
+### 10.5 Inbound / approval / outbound
+
+| Check | Result |
+|-------|--------|
+| Staging inbound | **NOT_RUN** |
+| Approval command + ticket fixture | **NOT_RUN** |
+| Outbound to test recipient | **NOT_RUN** |
+
+### 10.6 Gate decision
+
+| Field | Status |
+|-------|--------|
+| **`GATE-P0-WA`** | **BLOCKED** |
+| **`GATE-P0-VP`** | **PASS** (unchanged) |
+| **`GATE-P0-AI`** | **PASS** (unchanged) |
+| **Full Production Go** | **NOT granted** |
+
+**Ops action:** load secrets into secret manager or `.env.local` (never commit); re-run §10 on staging API.
 
 ---
 
