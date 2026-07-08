@@ -14,7 +14,7 @@
 
 | Item | Status |
 |------|--------|
-| `main` HEAD | `7912bfb6` |
+| `main` HEAD | `44e757cd` |
 | Working tree | Clean (post PR #186 artifact hygiene) |
 | Mod B technical sign-off | Complete (`MOD_B_SIGNOFF.md`) |
 | Sprint 9 local prep | Complete (`SPRINT_9_PRODUCTION_GO_PREP.md`) |
@@ -172,9 +172,9 @@ Credentials must live in secret manager only — **never commit**.
 |-------|--------|
 | **Status** | **DEGRADED** (service layer ready; canonical postgres bundle blocked) |
 | **Canonical ledger** | [`LOCAL_AI_READY_EVIDENCE.md`](./LOCAL_AI_READY_EVIDENCE.md) |
-| **Last run** | 2026-07-07 |
+| **Last run** | 2026-07-08 (production-go rerun) |
 | **Operator** | Cursor Agent |
-| **HEAD at run** | `7912bfb6` |
+| **HEAD at run** | `44e757cd` |
 
 ### Runtime signals (2026-07-07)
 
@@ -201,7 +201,17 @@ Credentials must live in secret manager only — **never commit**.
 | **GATE-P0-AI** | **DEGRADED** — not PASS (postgres canonical bundle incomplete) |
 | Production-ready | **NO** |
 | Full Production Go | **NO** (`GATE-P0-WA` BLOCKED) |
-| Next action | Start Postgres; re-run `production-go:local` without waiver |
+| Next action | Start Docker Desktop + Postgres; re-run canonical `production-go:local` without waiver |
+
+### Production-go rerun (2026-07-08)
+
+| Signal | Status | Notes |
+|--------|--------|-------|
+| Docker / Postgres | **FAIL** | Docker daemon not running; port 5432 closed |
+| `local-ai:health` | **PASS** | Service + Ollama healthy |
+| `production-go:local` (canonical, no waiver) | **FAIL** | `ci:postgres-migration-smoke` → `ECONNREFUSED` |
+| `PRODUCTION_GO_ALLOW_DEGRADED_AI` | **NOT SET** | |
+| **GATE-P0-AI** | **DEGRADED** | LAI-PG-001 still open |
 
 ---
 

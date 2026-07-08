@@ -3,10 +3,9 @@
 | Field | Value |
 |-------|--------|
 | **Gate** | `GATE-P0-AI` |
-| **Date** | 2026-07-07 |
-| **Operator** | Cursor Agent |
-| **Branch** | `feature/local-ai-ready-gate` |
-| **HEAD** | `7912bfb6` |
+| **Date** | 2026-07-07 (initial), **2026-07-08** (production-go rerun) |
+| **Branch** | `docs/p0-local-ai-production-go-rerun` |
+| **HEAD** | `44e757cd` |
 | **OS** | Windows 10 (win32 10.0.26200) |
 | **Node** | v20.20.1 |
 | **Production decision** | **Conditional Go** — no Full Production Go |
@@ -104,9 +103,46 @@ Per gate rules: canonical `production-go:local` with postgres env **failed** (Po
 
 ### Next actions
 
-1. Start Postgres; re-run `production-go:local` **without** `PRODUCTION_GO_ALLOW_DEGRADED_AI` with full env (`DATABASE_URL`, AI env, `local-ai:dev` running).
-2. Document local dev bootstrap env in ops runbook (no secret commit).
-3. Optional: `docs/p0-local-ai-production-go-rerun` after Postgres up.
+1. **Start Docker Desktop** and run `docker compose -f docker-compose.local.yml up -d postgres`.
+2. Re-run `production-go:local` **without** `PRODUCTION_GO_ALLOW_DEGRADED_AI` with full env.
+3. Document local dev bootstrap env in ops runbook (no secret commit).
+
+---
+
+## 7. 2026-07-08 Production-Go Rerun (`docs/p0-local-ai-production-go-rerun`)
+
+Canonical waiver-less `pnpm production-go:local` rerun with Postgres + Local AI + Ollama.
+
+| Item | Status | Evidence |
+|------|--------|----------|
+| **Postgres** | **FAIL** | Docker daemon not running: `npipe:////./pipe/dockerDesktopLinuxEngine` not found; `Test-NetConnection 127.0.0.1:5432` → `TcpTestSucceeded: False` |
+| **local-ai-service** | **PASS** | `:8008` HTTP 200; prior `pnpm local-ai:dev` session active |
+| **Ollama** | **PASS** | `:11434/api/tags` HTTP 200; models: `llama3.2:3b`, `RefinedNeuro/Turkcell-LLM-7b-v1:latest` |
+| **`pnpm local-ai:health`** | **PASS** | `ok:true`, `status:healthy`, `local_ai_service_and_ollama_ready` |
+| **API `/health/local-ai`** (canonical bundle) | **NOT_RUN** | Bundle failed at `ci:postgres-migration-smoke` before API probe |
+| **`production-go:local` without waiver** | **FAIL** | Failed at `ci:postgres-migration-smoke`: `ECONNREFUSED 127.0.0.1:5432` |
+| **`PRODUCTION_GO_ALLOW_DEGRADED_AI`** | **NOT SET** | Confirmed unset before run |
+| **Degraded waiver used** | **NO** | |
+
+### Rerun findings
+
+| ID | Status | Notes |
+|----|--------|-------|
+| **LAI-PG-001** | **OPEN** | Docker Desktop not running; Postgres container never started |
+| **LAI-ENV-001** | OPEN | AI env prepared for rerun but canonical bundle did not complete |
+| **LAI-WEB-001** | NOT_RUN | Dashboard voice not exercised |
+
+### Rerun decision
+
+| Field | Status |
+|-------|--------|
+| **`GATE-P0-AI`** | **DEGRADED** — not PASS |
+| **merge_blocker** | **YES** |
+| **Full Production Go** | **NO** — `GATE-P0-WA` **BLOCKED** |
+
+**PASS not granted:** canonical `production-go:local` without waiver did not complete; Postgres env blocker (`LAI-PG-001`).
+
+**Ops action:** Start Docker Desktop → `docker compose -f docker-compose.local.yml up -d postgres` → re-run this evidence branch or new `docs/p0-local-ai-production-go-rerun-2`.
 
 ---
 
