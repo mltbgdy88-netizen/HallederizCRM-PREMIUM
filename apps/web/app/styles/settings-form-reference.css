@@ -571,3 +571,267 @@
   height: calc(100dvh - 56px);
   min-height: 0;
 }
+
+/* WhatsApp bağlantı yöntemleri — genel ayarlar referans */
+.setf-wa-conn {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.setf-wa-conn-intro p {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.setf-wa-conn-note {
+  margin-top: 6px;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.setf-wa-conn-note--warn {
+  color: #b45309;
+}
+
+.setf-wa-conn-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.setf-wa-conn-card {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 12px;
+  border-radius: 14px;
+  border: 1px solid #dfe7e3;
+  background: #fff;
+}
+
+.setf-wa-conn-card--featured {
+  border-color: #a7d7c5;
+  background: linear-gradient(135deg, #f8fffb 0%, #ffffff 72%);
+}
+
+.setf-wa-conn-card--muted {
+  background: #f8fafc;
+}
+
+.setf-wa-conn-card--active {
+  border-color: #86c8b0;
+}
+
+.setf-wa-conn-card-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.setf-wa-conn-card-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+.setf-wa-conn-card-subtitle {
+  margin: 2px 0 0;
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+}
+
+.setf-wa-conn-card-status {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: #0f172a;
+}
+
+.setf-wa-conn-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+}
+
+.setf-wa-conn-dot--ok {
+  background: #16a34a;
+}
+
+.setf-wa-conn-dot--warn {
+  background: #d97706;
+}
+
+.setf-wa-conn-dot--error {
+  background: #dc2626;
+}
+
+.setf-wa-conn-card-body {
+  margin: 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1.45;
+}
+
+.setf-wa-conn-card-body--emphasis {
+  color: #b45309;
+  font-weight: 700;
+}
+
+.setf-wa-conn-card-checklist {
+  margin: 0;
+  padding-left: 16px;
+  font-size: 10px;
+  font-weight: 600;
+  color: #64748b;
+  line-height: 1.4;
+}
+
+.setf-wa-conn-card-checklist a {
+  color: #047857;
+  font-weight: 800;
+}
+
+.setf-wa-conn-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: auto;
+}
+
+.setf-wa-conn-btn,
+.setf-wa-conn-link {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: 10px;
+  font-size: 10px;
+  font-weight: 800;
+  text-decoration: none;
+}
+
+.setf-wa-conn-btn {
+  border: 1px solid #dfe7e3;
+  background: #fff;
+  color: #0f172a;
+  cursor: pointer;
+}
+
+.setf-wa-conn-btn--disabled,
+.setf-wa-conn-btn:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
+.setf-wa-conn-link {
+  border: 1px solid #b7e4d2;
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.setf-wa-conn-badge {
+  display: inline-flex;
+  align-items: center;
+  min-height: 22px;
+  padding: 0 8px;
+  border-radius: 999px;
+  font-size: 9px;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.setf-wa-conn-badge--recommended {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.setf-wa-conn-badge--ok {
+  background: #ecfdf5;
+  color: #047857;
+}
+
+.setf-wa-conn-badge--warn {
+  background: #fffbeb;
+  color: #b45309;
+}
+
+.setf-wa-conn-badge--neutral {
+  background: #f1f5f9;
+  color: #475569;
+}
+
+.setf-wa-conn-badge--planned {
+  background: #eef2ff;
+  color: #4338ca;
+}
+
+.setf-wa-conn-badge--beta {
+  background: #fdf2f8;
+  color: #9d174d;
+}
+
+.setf-wa-conn-card-qr-frame {
+  border-radius: 12px;
+  border: 1px dashed #cbd5e1;
+  background: #f8fafc;
+  padding: 10px;
+}
+
+.setf-wa-conn-card-qr-placeholder {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  min-height: 88px;
+  color: #64748b;
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.setf-wa-conn-card-qr-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 2px solid #cbd5e1;
+  opacity: 0.45;
+}
+
+.setf-wa-conn-field {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  font-size: 10px;
+  font-weight: 800;
+  color: #64748b;
+}
+
+.setf-wa-conn-ops {
+  padding-top: 4px;
+  border-top: 1px solid #e8eeeb;
+}
+
+.setf-wa-conn-ops-title {
+  margin: 0 0 8px;
+  font-size: 12px;
+  font-weight: 800;
+  color: #0f172a;
+}
+
+@media (max-width: 1100px) {
+  .setf-wa-conn-grid {
+    grid-template-columns: 1fr;
+  }
+}
