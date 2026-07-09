@@ -126,10 +126,10 @@ Credentials must live in secret manager only — **never commit**.
 |-------|--------|
 | **Status** | **BLOCKED** |
 | **Canonical ledger** | [`WHATSAPP_WEBHOOK_EVIDENCE.md`](./WHATSAPP_WEBHOOK_EVIDENCE.md) |
-| **Last run** | 2026-07-08 (credential rerun #199) |
+| **Last run** | 2026-07-08 (final live verification #201) |
 | **Operator** | Cursor Agent |
-| **HEAD at run** | `ac608c67` |
-| **Branch** | `docs/p0-whatsapp-credential-rerun` |
+| **HEAD at run** | `0b808e2b` |
+| **Branch** | `docs/p0-whatsapp-final-live-verification` |
 
 ### Credential presence (canonical, redacted)
 
@@ -141,30 +141,30 @@ Credentials must live in secret manager only — **never commit**.
 | `WHATSAPP_PHONE_NUMBER_ID` | **MISSING** |
 | `WHATSAPP_PROVIDER` | **MISSING** |
 | `WHATSAPP_API_BASE_URL` | **MISSING** |
+| `WHATSAPP_TEST_RECIPIENT` | **MISSING** |
 
-### Smoke summary
+### Smoke summary (final live #201)
 
 | Check | Status | Blocker | Notes |
 |-------|--------|---------|-------|
-| Webhook verify (wrong/missing token) | **PARTIAL** | YES | 403 fail-closed on running API; correct token **NOT_RUN** |
-| Webhook verify (correct token) | **NOT_RUN** | YES | Ops verify token missing on running API |
-| Signature fail-closed (live) | **PASS** (isolated) | YES | Isolated `WHATSAPP_PROVIDER=live` route harness: 503/403/403/200; demo API legacy 200 without provider |
-| Full API live boot | **BLOCKED** | YES | `runtime_env_validation_failed` without ops credentials |
-| Inbound message smoke | **PARTIAL** | YES | Isolated signed synthetic inbound only |
-| Approval command smoke (`ONAY`/`RED`/`INCELE`) | **PARTIAL** | YES | Isolated signed command → `ticket_not_found` (no fixture) |
-| Outbound live send | **NOT_RUN** | YES | WA-OUTBOUND-001 — not marked PASS |
-| Retry/error logging | **NOT_RUN** | NO | Observability follow-up |
+| Ops credential load | **FAIL** | YES | Secret manager / local env not populated |
+| Full API live boot | **FAIL** | YES | `runtime_env_validation_failed` |
+| Webhook verify (wrong/missing) | **PASS** | NO | **403** on `:4000` |
+| Webhook verify (correct ops token) | **NOT_RUN** | YES | Verify token **MISSING** |
+| Signed POST (staging live) | **NOT_RUN** | YES | Boot **FAIL** |
+| Inbound staging smoke | **NOT_RUN** | YES | Credentials **MISSING** |
+| Approval command + ticket fixture | **NOT_RUN** | YES | Credentials **MISSING** |
+| Outbound test recipient | **NOT_RUN** | YES | Token + recipient **MISSING** |
 
 ### Findings
 
 | ID | Severity | Summary |
 |----|----------|---------|
-| WA-ENV-001 | P0 | Required staging/prod credentials missing |
-| WA-BOOT-001 | P0 | Full API cannot boot `WHATSAPP_PROVIDER=live` without ops secrets |
-| WA-VERIFY-001 | PARTIAL | Wrong/missing verify token → 403; correct verify not run on running API |
-| WA-SIG-001 | P0 (closed) | Signature fail-closed proven (automated + isolated live harness) |
-| WA-CMD-001 | PARTIAL | Isolated signed inbound/approval only; live Meta + ticket fixture pending |
-| WA-OUTBOUND-001 | NOT_RUN | Live outbound not tested |
+| WA-ENV-001 | P0 | Ops credentials not loadable — all canonical keys **MISSING** |
+| WA-BOOT-001 | P0 | Full API `WHATSAPP_PROVIDER=live` boot **FAIL** |
+| WA-VERIFY-001 | PARTIAL | Wrong/missing → **403**; correct ops verify **NOT_RUN** |
+| WA-FINAL-001 | P0 | Final live verification incomplete — inbound/approval/outbound **NOT_RUN** |
+| WA-OUTBOUND-001 | NOT_RUN | Outbound not tested |
 
 ---
 
