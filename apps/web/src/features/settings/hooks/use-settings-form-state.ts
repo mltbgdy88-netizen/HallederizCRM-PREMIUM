@@ -2,6 +2,7 @@
 
 import type { PlatformSettings } from "@hallederiz/types";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import { useToast } from "../../../providers/toast-provider";
 import { getPilotSetupData } from "../queries";
 
@@ -32,6 +33,7 @@ function cloneSettings(settings: PlatformSettings): PlatformSettings {
 
 export function useSettingsFormState() {
   const { pushToast } = useToast();
+  const searchParams = useSearchParams();
   const baselineRef = useRef<PlatformSettings | null>(null);
   const [activeCategory, setActiveCategory] = useState<SettingsFormCategoryId>("firma");
   const [settings, setSettings] = useState<PlatformSettings | null>(null);
@@ -59,6 +61,14 @@ export function useSettingsFormState() {
   useEffect(() => {
     loadData();
   }, [loadData]);
+
+  useEffect(() => {
+    const section = searchParams.get("bolum");
+    if (!section) return;
+    if (SETTINGS_FORM_CATEGORIES.some((item) => item.id === section)) {
+      setActiveCategory(section as SettingsFormCategoryId);
+    }
+  }, [searchParams]);
 
   const checklistDone = useMemo(() => {
     if (!settings) return 0;
@@ -88,8 +98,8 @@ export function useSettingsFormState() {
         next: "WhatsApp otomasyon ayarlarını gözden geçirin."
       },
       whatsapp: {
-        hint: "Kanal otomasyonu ve niyet kuralları.",
-        next: "Belge şablonlarını kontrol edin."
+        hint: "Bağlantı yöntemleri ve kanal operasyon ayarları. Meta Cloud API resmi production yoludur.",
+        next: "Staging kontrolünden WhatsApp sağlığını doğrulayın."
       },
       belgeler: {
         hint: "PDF şablonu ve arşiv tercihleri.",

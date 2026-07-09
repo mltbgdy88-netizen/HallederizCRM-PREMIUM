@@ -15,6 +15,7 @@ import type {
 import { savePlatformSettings, quickCreateUser } from "../mutations";
 import { getPilotSetupData } from "../queries";
 import { IntentRuleAssistantPanel, WhatsAppIntentRulesSection } from "./WhatsAppIntentRulesSection";
+import { WhatsAppConnectionMethodsSection } from "./WhatsAppConnectionMethodsSection";
 import { SettingsSubNav } from "./SettingsSubNav";
 import { useToast } from "../../../providers/toast-provider";
 import {
@@ -231,8 +232,8 @@ export function SettingsPage() {
         next: "Bağlantılar tamamsa WhatsApp mesaj akışını açın."
       },
       whatsapp: {
-        hint: "Mesajların onaya düşmesi riski azaltır.",
-        next: "WhatsApp sonrası kural matrisi ve AI onaylarını gözden geçirin."
+        hint: "Bağlantı yöntemleri ve kanal operasyon ayarları. Meta Cloud API resmi production yoludur.",
+        next: "Staging kontrolünden WhatsApp sağlığını doğrulayın."
       },
       "kural-onay": {
         hint: "Niyet bazlı Evet / Hayır / Koşullu kararlar ve şablonlar burada.",
@@ -974,52 +975,12 @@ export function SettingsPage() {
             {activeCategory === "whatsapp" ? (
               <article className="hz-settings-section">
                 <div className="hz-settings-section-head">
-                  <h2 className="hz-settings-section-title">WhatsApp ayarları</h2>
-                  <p className="hz-settings-section-desc">Mesajların nasıl alınacağını ve onaya düşeceğini belirleyin.</p>
+                  <h2 className="hz-settings-section-title">WhatsApp bağlantı yöntemleri</h2>
+                  <p className="hz-settings-section-desc">
+                    Resmi production yolu Meta Cloud API&apos;dir. QR ve embedded signup production-ready değildir.
+                  </p>
                 </div>
-                <div className="hz-settings-form-grid">
-                  <label className="hz-settings-label">
-                    WhatsApp açık
-                    <input
-                      type="checkbox"
-                      checked={s.whatsapp.enabled}
-                      onChange={(e) => setSettings({ ...s, whatsapp: { ...s.whatsapp, enabled: e.target.checked } })}
-                    />
-                  </label>
-                  <label className="hz-settings-label">
-                    Bağlantı tipi
-                    <select
-                      className="hz-settings-select"
-                      value={s.whatsapp.provider}
-                      onChange={(e) =>
-                        setSettings({
-                          ...s,
-                          whatsapp: { ...s.whatsapp, provider: e.target.value as typeof s.whatsapp.provider }
-                        })
-                      }
-                    >
-                      <option value="meta">Meta</option>
-                      <option value="twilio">Twilio</option>
-                      <option value="custom">Özel</option>
-                    </select>
-                  </label>
-                  <label className="hz-settings-label">
-                    Gönderen adı
-                    <input
-                      className="hz-settings-input"
-                      value={s.whatsapp.defaultSenderName}
-                      onChange={(e) => setSettings({ ...s, whatsapp: { ...s.whatsapp, defaultSenderName: e.target.value } })}
-                    />
-                  </label>
-                  <label className="hz-settings-label">
-                    Mesajda onay iste
-                    <input
-                      type="checkbox"
-                      checked={s.whatsapp.approvalRequired}
-                      onChange={(e) => setSettings({ ...s, whatsapp: { ...s.whatsapp, approvalRequired: e.target.checked } })}
-                    />
-                  </label>
-                </div>
+                <WhatsAppConnectionMethodsSection settings={s} onChange={setSettings} layout="settings" />
               </article>
             ) : null}
 

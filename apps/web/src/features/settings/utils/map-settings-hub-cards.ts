@@ -50,13 +50,9 @@ export function buildSettingsHubCards(): SettingsHubCard[] {
     {
       id: "whatsapp",
       title: "WhatsApp",
-      description: "WhatsApp Business API bağlantısı ve otomasyon ayarlarını yönetin.",
+      description: "Meta Cloud API, alternatif sağlayıcılar ve bağlantı yöntemleri.",
       icon: "whatsapp",
-      action: {
-        kind: "toast",
-        message:
-          "WhatsApp Business bağlantı ve otomasyon ayarları tam editörde yapılandırılır. Operasyon paneli için sol menüden WhatsApp'ı açın."
-      }
+      action: { kind: "navigate", href: "/ayarlar/genel?bolum=whatsapp" }
     },
     {
       id: "ai",

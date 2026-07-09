@@ -11,3 +11,4 @@ export * from "./SettingsUsageReadinessReferenceLayout";
 export * from "./SettingsProductionReadinessReferenceLayout";
 export * from "./SettingsStagingControlReferenceLayout";
 export * from "./SettingsDataImportReferenceLayout";
+export * from "./WhatsAppConnectionMethodsSection";

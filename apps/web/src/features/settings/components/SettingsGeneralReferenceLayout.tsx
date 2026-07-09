@@ -7,6 +7,7 @@ import {
   useSettingsFormState,
   type SettingsFormCategoryId
 } from "../hooks/use-settings-form-state";
+import { WhatsAppConnectionMethodsSection } from "./WhatsAppConnectionMethodsSection";
 
 function SettingsFormFields({
   category,
@@ -259,46 +260,7 @@ function SettingsFormFields({
   }
 
   if (category === "whatsapp") {
-    return (
-      <div className="setf-form-grid">
-        <label className="setf-field">
-          Kanal etkin
-          <select
-            className="setf-select"
-            value={s.whatsapp.enabled ? "yes" : "no"}
-            onChange={(e) => onChange({ ...s, whatsapp: { ...s.whatsapp, enabled: e.target.value === "yes" } })}
-          >
-            <option value="yes">Açık</option>
-            <option value="no">Kapalı</option>
-          </select>
-        </label>
-        <label className="setf-field">
-          Sağlayıcı
-          <select
-            className="setf-select"
-            value={s.whatsapp.provider}
-            onChange={(e) =>
-              onChange({
-                ...s,
-                whatsapp: { ...s.whatsapp, provider: e.target.value as PlatformSettings["whatsapp"]["provider"] }
-              })
-            }
-          >
-            <option value="meta">Meta</option>
-            <option value="twilio">Twilio</option>
-            <option value="custom">Özel</option>
-          </select>
-        </label>
-        <label className="setf-field setf-field--full">
-          Gönderen adı
-          <input
-            className="setf-input"
-            value={s.whatsapp.defaultSenderName}
-            onChange={(e) => onChange({ ...s, whatsapp: { ...s.whatsapp, defaultSenderName: e.target.value } })}
-          />
-        </label>
-      </div>
-    );
+    return <WhatsAppConnectionMethodsSection settings={s} onChange={onChange} layout="reference" />;
   }
 
   if (category === "belgeler") {
