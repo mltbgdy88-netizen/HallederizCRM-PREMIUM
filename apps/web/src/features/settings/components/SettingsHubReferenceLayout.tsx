@@ -2,6 +2,7 @@
 
 import { useSettingsHubState } from "../hooks/use-settings-hub-state";
 import { HubIcon, IconClose } from "./settings-hub-reference-icons";
+import { SettingsLoadErrorView } from "./SettingsLoadErrorView";
 
 export function SettingsHubReferenceLayout() {
   const hub = useSettingsHubState();
@@ -23,6 +24,24 @@ export function SettingsHubReferenceLayout() {
         <div className="ahb-state" role="status">
           Ayar hub özeti yükleniyor…
         </div>
+      </div>
+    );
+  }
+
+  if (hub.loadError) {
+    return (
+      <div className="ahb-home ahb-home--embedded" data-page="settings-hub-reference" aria-live="polite">
+        <header className="ahb-head">
+          <h1>{hub.pageCopy.title}</h1>
+          <p>{hub.pageCopy.subtitle}</p>
+        </header>
+        <SettingsLoadErrorView
+          failure={hub.loadError}
+          onRetry={hub.reloadSummary}
+          layout="hub"
+          retrying={hub.loading}
+          genericTitle="Ayar hub özeti yüklenemedi"
+        />
       </div>
     );
   }

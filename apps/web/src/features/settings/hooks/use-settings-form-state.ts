@@ -37,6 +37,9 @@ export function useSettingsFormState() {
   const { pushToast } = useToast();
   const searchParams = useSearchParams();
   const baselineRef = useRef<PlatformSettings | null>(null);
+  const mountedRef = useRef(false);
+  const loadRequestSeqRef = useRef(0);
+  const saveTimeoutRef = useRef<number | null>(null);
   const [activeCategory, setActiveCategory] = useState<SettingsFormCategoryId>("firma");
   const [settings, setSettings] = useState<PlatformSettings | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,24 +47,39 @@ export function useSettingsFormState() {
   const [saving, setSaving] = useState(false);
 
   const loadData = useCallback(() => {
+    const requestId = loadRequestSeqRef.current + 1;
+    loadRequestSeqRef.current = requestId;
+    const isCurrentRequest = () => mountedRef.current && loadRequestSeqRef.current === requestId;
+
     setLoading(true);
     setLoadError(null);
     void getPilotSetupData()
       .then((data) => {
+        if (!isCurrentRequest()) return;
         const next = cloneSettings(data.settings);
         setSettings(next);
         baselineRef.current = cloneSettings(data.settings);
       })
       .catch((error) => {
+        if (!isCurrentRequest()) return;
         setLoadError(resolveSettingsLoadError(error, "Ayarlar yüklenemedi."));
       })
       .finally(() => {
-        setLoading(false);
+        if (isCurrentRequest()) setLoading(false);
       });
   }, []);
 
   useEffect(() => {
+    mountedRef.current = true;
     loadData();
+    return () => {
+      mountedRef.current = false;
+      loadRequestSeqRef.current += 1;
+      if (saveTimeoutRef.current !== null) {
+        window.clearTimeout(saveTimeoutRef.current);
+        saveTimeoutRef.current = null;
+      }
+    };
   }, [loadData]);
 
   useEffect(() => {
@@ -118,9 +136,11 @@ export function useSettingsFormState() {
   const handleSave = () => {
     if (!settings) return;
     setSaving(true);
-    window.setTimeout(() => {
+    saveTimeoutRef.current = window.setTimeout(() => {
+      if (!mountedRef.current) return;
       baselineRef.current = cloneSettings(settings);
       setSaving(false);
+      saveTimeoutRef.current = null;
       pushToast("Demo: ayar kaydetme sonraki fazda bağlanacak.");
     }, 280);
   };

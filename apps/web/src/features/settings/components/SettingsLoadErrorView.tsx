@@ -1,13 +1,16 @@
 "use client";
 
 import { ErrorState, UiButton } from "@hallederiz/ui";
-import type { SettingsLoadFailure } from "../utils/resolve-settings-load-error";
+import {
+  SETTINGS_SESSION_RECOVERY_COPY,
+  type SettingsLoadFailure
+} from "../utils/resolve-settings-load-error";
 import { SettingsSessionRecoveryPanel } from "./SettingsSessionRecoveryPanel";
 
 type SettingsLoadErrorViewProps = {
   failure: SettingsLoadFailure;
   onRetry: () => void;
-  layout?: "settings" | "reference";
+  layout?: "settings" | "reference" | "hub";
   retrying?: boolean;
   genericTitle?: string;
 };
@@ -25,12 +28,23 @@ export function SettingsLoadErrorView({
     );
   }
 
+  if (layout === "hub") {
+    return (
+      <div className="ahb-state ahb-state--error" role="alert">
+        <p>{failure.message}</p>
+        <button type="button" className="ahb-session-recovery-secondary" onClick={onRetry} disabled={retrying}>
+          {retrying ? SETTINGS_SESSION_RECOVERY_COPY.retryingAction : SETTINGS_SESSION_RECOVERY_COPY.retryAction}
+        </button>
+      </div>
+    );
+  }
+
   if (layout === "reference") {
     return (
       <div className="setf-state" role="alert">
         <p>{failure.message}</p>
         <button type="button" className="setf-btn setf-btn--outline" onClick={onRetry} disabled={retrying}>
-          {retrying ? "Deneniyor…" : "Tekrar dene"}
+          {retrying ? SETTINGS_SESSION_RECOVERY_COPY.retryingAction : SETTINGS_SESSION_RECOVERY_COPY.retryAction}
         </button>
       </div>
     );
@@ -42,7 +56,7 @@ export function SettingsLoadErrorView({
       message={failure.message}
       actions={
         <UiButton type="button" variant="secondary" size="md" onClick={onRetry} disabled={retrying}>
-          {retrying ? "Deneniyor…" : "Tekrar dene"}
+          {retrying ? SETTINGS_SESSION_RECOVERY_COPY.retryingAction : SETTINGS_SESSION_RECOVERY_COPY.retryAction}
         </UiButton>
       }
     />

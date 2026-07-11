@@ -1,5 +1,3 @@
-import { ApiError } from "@hallederiz/sdk";
-
 export type SettingsLoadFailureKind = "session" | "generic";
 
 export type SettingsLoadFailure = {
@@ -7,13 +5,15 @@ export type SettingsLoadFailure = {
   message: string;
 };
 
-const SESSION_RECOVERY_MESSAGE =
-  "Oturumunuz sona ermiş veya geçersiz. Ayarları görüntülemek için tekrar giriş yapın.";
+export const SETTINGS_SESSION_RECOVERY_COPY = {
+  title: "Oturum doğrulanamadı",
+  message: "Oturumunuz sona ermiş veya geçersiz. Ayarları görüntülemek için tekrar giriş yapın.",
+  loginAction: "Tekrar giriş yap",
+  retryAction: "Tekrar dene",
+  retryingAction: "Deneniyor…"
+} as const;
 
 function readApiError(error: unknown): { status: number; message: string } | null {
-  if (error instanceof ApiError) {
-    return { status: error.status, message: error.message };
-  }
   if (typeof error === "object" && error !== null) {
     const candidate = error as { status?: unknown; message?: unknown };
     if (typeof candidate.status === "number" && typeof candidate.message === "string") {
@@ -40,22 +40,21 @@ function looksLikeSessionMessage(message: string): boolean {
     normalized.includes("missing_session") ||
     normalized.includes("expired_session") ||
     normalized.includes("session_invalid") ||
-    normalized.includes("session_expired") ||
-    normalized.includes("unauthorized")
+    normalized.includes("session_expired")
   );
 }
 
 export function isSettingsSessionError(error: unknown): boolean {
   const httpError = readApiError(error);
   if (httpError?.status === 401) return true;
-  if (httpError && looksLikeSessionMessage(httpError.message)) return true;
+  if (httpError) return looksLikeSessionMessage(httpError.message);
   if (error instanceof Error && looksLikeSessionMessage(error.message)) return true;
   return false;
 }
 
 export function resolveSettingsLoadError(error: unknown, fallbackMessage: string): SettingsLoadFailure {
   if (isSettingsSessionError(error)) {
-    return { kind: "session", message: SESSION_RECOVERY_MESSAGE };
+    return { kind: "session", message: SETTINGS_SESSION_RECOVERY_COPY.message };
   }
 
   const httpError = readApiError(error);

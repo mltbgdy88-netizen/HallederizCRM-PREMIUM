@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { ErrorState, LoadingState, SettingsLayout, UiButton } from "@hallederiz/ui";
+import { LoadingState, SettingsLayout } from "@hallederiz/ui";
 import { type FormEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import type {
@@ -17,7 +17,10 @@ import { getPilotSetupData } from "../queries";
 import { IntentRuleAssistantPanel, WhatsAppIntentRulesSection } from "./WhatsAppIntentRulesSection";
 import { WhatsAppConnectionMethodsSection } from "./WhatsAppConnectionMethodsSection";
 import { SettingsSubNav } from "./SettingsSubNav";
+import { SettingsLoadErrorView } from "./SettingsLoadErrorView";
 import { useToast } from "../../../providers/toast-provider";
+import type { SettingsLoadFailure } from "../utils/resolve-settings-load-error";
+import { resolveSettingsLoadError } from "../utils/resolve-settings-load-error";
 import {
   IconArchive,
   IconBarChart3,
@@ -99,13 +102,15 @@ export function SettingsPage() {
   const router = useRouter();
   const { pushToast } = useToast();
   const baselineRef = useRef<PlatformSettings | null>(null);
+  const mountedRef = useRef(false);
+  const loadRequestSeqRef = useRef(0);
 
   const [activeCategory, setActiveCategory] = useState<SettingsCategoryId>("firma");
   const [settings, setSettings] = useState<PlatformSettings | null>(null);
   const [rolePresets, setRolePresets] = useState<RolePresetItem[]>([]);
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<SettingsLoadFailure | null>(null);
   const [saving, setSaving] = useState(false);
   const [feedback, setFeedback] = useState<string | null>(null);
   const [feedbackIsError, setFeedbackIsError] = useState(false);
@@ -116,11 +121,16 @@ export function SettingsPage() {
   const [ruleSidebarEditMode, setRuleSidebarEditMode] = useState(false);
 
   const loadData = useCallback(() => {
+    const requestId = loadRequestSeqRef.current + 1;
+    loadRequestSeqRef.current = requestId;
+    const isCurrentRequest = () => mountedRef.current && loadRequestSeqRef.current === requestId;
+
     setLoading(true);
     setLoadError(null);
     setFeedback(null);
     void getPilotSetupData()
       .then((data) => {
+        if (!isCurrentRequest()) return;
         const next = cloneSettings(data.settings);
         setSettings(next);
         baselineRef.current = cloneSettings(data.settings);
@@ -128,15 +138,21 @@ export function SettingsPage() {
         setUsers(data.users);
       })
       .catch((error) => {
-        setLoadError(error instanceof Error ? error.message : "Ayarlar yüklenemedi.");
+        if (!isCurrentRequest()) return;
+        setLoadError(resolveSettingsLoadError(error, "Ayarlar yüklenemedi."));
       })
       .finally(() => {
-        setLoading(false);
+        if (isCurrentRequest()) setLoading(false);
       });
   }, []);
 
   useEffect(() => {
+    mountedRef.current = true;
     loadData();
+    return () => {
+      mountedRef.current = false;
+      loadRequestSeqRef.current += 1;
+    };
   }, [loadData]);
 
   useEffect(() => {
@@ -273,14 +289,12 @@ export function SettingsPage() {
     return (
       <div className="hz-settings-page">
         <div className="hz-ui-state-center">
-          <ErrorState
-            title="Ayarlar yüklenemedi"
-            message={loadError}
-            actions={
-              <UiButton type="button" variant="secondary" size="md" onClick={loadData}>
-                Tekrar dene
-              </UiButton>
-            }
+          <SettingsLoadErrorView
+            failure={loadError}
+            onRetry={loadData}
+            layout="settings"
+            retrying={loading}
+            genericTitle="Ayarlar yüklenemedi"
           />
         </div>
       </div>
