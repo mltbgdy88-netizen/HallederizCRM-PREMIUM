@@ -6,6 +6,8 @@ import { useToast } from "../../../providers/toast-provider";
 import { dataSourceConfig } from "../../../lib/data-source";
 import { getPilotSetupData } from "../queries";
 import { AHB_PAGE_COPY, buildSettingsHubCards, type SettingsHubCard } from "../utils/map-settings-hub-cards";
+import type { SettingsLoadFailure } from "../utils/resolve-settings-load-error";
+import { resolveSettingsLoadError } from "../utils/resolve-settings-load-error";
 
 export function useSettingsHubState() {
   const router = useRouter();
@@ -14,39 +16,37 @@ export function useSettingsHubState() {
   const cards = useMemo(() => buildSettingsHubCards(), []);
 
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<SettingsLoadFailure | null>(null);
   const [checklistDone, setChecklistDone] = useState(0);
   const [checklistTotal, setChecklistTotal] = useState(0);
   const [demoBannerDismissed, setDemoBannerDismissed] = useState(false);
 
-  useEffect(() => {
-    let active = true;
+  const reloadSummary = useCallback(() => {
     setLoading(true);
     setLoadError(null);
     void getPilotSetupData()
       .then((data) => {
-        if (!active) return;
         const done = data.settings.pilotSetup.checklist.filter((item) => item.completed).length;
         setChecklistDone(done);
         setChecklistTotal(data.settings.pilotSetup.checklist.length);
       })
       .catch((error) => {
-        if (!active) return;
-        setLoadError(error instanceof Error ? error.message : "Ayar özeti yüklenemedi.");
+        setLoadError(resolveSettingsLoadError(error, "Ayar özeti yüklenemedi."));
         setChecklistDone(0);
         setChecklistTotal(0);
       })
       .finally(() => {
-        if (active) setLoading(false);
+        setLoading(false);
       });
-    return () => {
-      active = false;
-    };
   }, []);
+
+  useEffect(() => {
+    reloadSummary();
+  }, [reloadSummary]);
 
   const statusBand = useMemo(() => {
     if (loadError) {
-      return { kind: "error" as const, message: loadError };
+      return { kind: "error" as const, message: loadError.message, failure: loadError };
     }
     const pilotNote =
       checklistTotal > 0 ? ` Pilot kurulum: ${checklistDone}/${checklistTotal} tamamlandı.` : "";
@@ -81,6 +81,7 @@ export function useSettingsHubState() {
     cards,
     loading,
     loadError,
+    reloadSummary,
     checklistDone,
     checklistTotal,
     usingDemoData: dataSourceConfig.useDemoData,

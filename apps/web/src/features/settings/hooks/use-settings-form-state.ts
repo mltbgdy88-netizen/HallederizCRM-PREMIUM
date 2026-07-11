@@ -5,6 +5,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useToast } from "../../../providers/toast-provider";
 import { getPilotSetupData } from "../queries";
+import type { SettingsLoadFailure } from "../utils/resolve-settings-load-error";
+import { resolveSettingsLoadError } from "../utils/resolve-settings-load-error";
 
 export type SettingsFormCategoryId =
   | "firma"
@@ -38,7 +40,7 @@ export function useSettingsFormState() {
   const [activeCategory, setActiveCategory] = useState<SettingsFormCategoryId>("firma");
   const [settings, setSettings] = useState<PlatformSettings | null>(null);
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<SettingsLoadFailure | null>(null);
   const [saving, setSaving] = useState(false);
 
   const loadData = useCallback(() => {
@@ -51,7 +53,7 @@ export function useSettingsFormState() {
         baselineRef.current = cloneSettings(data.settings);
       })
       .catch((error) => {
-        setLoadError(error instanceof Error ? error.message : "Ayarlar yüklenemedi.");
+        setLoadError(resolveSettingsLoadError(error, "Ayarlar yüklenemedi."));
       })
       .finally(() => {
         setLoading(false);
