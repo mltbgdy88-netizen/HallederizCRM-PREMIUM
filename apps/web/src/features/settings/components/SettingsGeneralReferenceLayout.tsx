@@ -7,6 +7,7 @@ import {
   useSettingsFormState,
   type SettingsFormCategoryId
 } from "../hooks/use-settings-form-state";
+import { SettingsLoadErrorView } from "./SettingsLoadErrorView";
 import { WhatsAppConnectionMethodsSection } from "./WhatsAppConnectionMethodsSection";
 
 function SettingsFormFields({
@@ -373,12 +374,13 @@ export function SettingsGeneralReferenceLayout() {
   if (!form.settings && form.loadError) {
     return (
       <div className="setf-home" data-page="settings-general-reference">
-        <div className="setf-state" role="alert">
-          {form.loadError}
-          <button type="button" className="setf-btn setf-btn--outline" onClick={form.loadData}>
-            Tekrar dene
-          </button>
-        </div>
+        <SettingsLoadErrorView
+          failure={form.loadError}
+          onRetry={form.loadData}
+          layout="reference"
+          retrying={form.loading}
+          genericTitle="Genel ayarlar yüklenemedi"
+        />
       </div>
     );
   }

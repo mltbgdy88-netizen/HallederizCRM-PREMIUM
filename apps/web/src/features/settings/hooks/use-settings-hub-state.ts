@@ -1,52 +1,65 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useToast } from "../../../providers/toast-provider";
 import { dataSourceConfig } from "../../../lib/data-source";
 import { getPilotSetupData } from "../queries";
 import { AHB_PAGE_COPY, buildSettingsHubCards, type SettingsHubCard } from "../utils/map-settings-hub-cards";
+import type { SettingsLoadFailure } from "../utils/resolve-settings-load-error";
+import { resolveSettingsLoadError } from "../utils/resolve-settings-load-error";
 
 export function useSettingsHubState() {
   const router = useRouter();
   const { pushToast } = useToast();
 
   const cards = useMemo(() => buildSettingsHubCards(), []);
+  const mountedRef = useRef(false);
+  const loadRequestSeqRef = useRef(0);
 
   const [loading, setLoading] = useState(true);
-  const [loadError, setLoadError] = useState<string | null>(null);
+  const [loadError, setLoadError] = useState<SettingsLoadFailure | null>(null);
   const [checklistDone, setChecklistDone] = useState(0);
   const [checklistTotal, setChecklistTotal] = useState(0);
   const [demoBannerDismissed, setDemoBannerDismissed] = useState(false);
 
-  useEffect(() => {
-    let active = true;
+  const reloadSummary = useCallback(() => {
+    const requestId = loadRequestSeqRef.current + 1;
+    loadRequestSeqRef.current = requestId;
+    const isCurrentRequest = () => mountedRef.current && loadRequestSeqRef.current === requestId;
+
     setLoading(true);
     setLoadError(null);
     void getPilotSetupData()
       .then((data) => {
-        if (!active) return;
+        if (!isCurrentRequest()) return;
         const done = data.settings.pilotSetup.checklist.filter((item) => item.completed).length;
         setChecklistDone(done);
         setChecklistTotal(data.settings.pilotSetup.checklist.length);
       })
       .catch((error) => {
-        if (!active) return;
-        setLoadError(error instanceof Error ? error.message : "Ayar özeti yüklenemedi.");
+        if (!isCurrentRequest()) return;
+        setLoadError(resolveSettingsLoadError(error, "Ayar özeti yüklenemedi."));
         setChecklistDone(0);
         setChecklistTotal(0);
       })
       .finally(() => {
-        if (active) setLoading(false);
+        if (isCurrentRequest()) setLoading(false);
       });
-    return () => {
-      active = false;
-    };
   }, []);
+
+  useEffect(() => {
+    mountedRef.current = true;
+    reloadSummary();
+    return () => {
+      mountedRef.current = false;
+      loadRequestSeqRef.current += 1;
+    };
+  }, [reloadSummary]);
 
   const statusBand = useMemo(() => {
     if (loadError) {
-      return { kind: "error" as const, message: loadError };
+      return { kind: "error" as const, message: loadError.message, failure: loadError };
     }
     const pilotNote =
       checklistTotal > 0 ? ` Pilot kurulum: ${checklistDone}/${checklistTotal} tamamlandı.` : "";
@@ -81,6 +94,7 @@ export function useSettingsHubState() {
     cards,
     loading,
     loadError,
+    reloadSummary,
     checklistDone,
     checklistTotal,
     usingDemoData: dataSourceConfig.useDemoData,

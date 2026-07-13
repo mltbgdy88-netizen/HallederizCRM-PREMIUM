@@ -430,6 +430,40 @@
   color: #64748b;
 }
 
+.setf-session-recovery {
+  align-self: center;
+  justify-self: center;
+  width: min(100%, 520px);
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  background: #eff6ff;
+  color: #1e3a8a;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.setf-session-recovery-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.setf-session-recovery-message {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.setf-session-recovery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
 .setf-filter-row {
   display: flex;
   flex-wrap: wrap;

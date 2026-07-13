@@ -146,6 +146,86 @@ button.ahb-card {
   color: #64748b;
 }
 
+.ahb-state--error {
+  gap: 10px;
+  justify-items: center;
+  padding: 16px;
+  border: 1px solid #fecaca;
+  border-radius: 12px;
+  background: #fef2f2;
+  color: #991b1b;
+}
+
+.ahb-state--error p {
+  margin: 0;
+  text-align: center;
+}
+
+.ahb-session-recovery {
+  align-self: start;
+  width: min(100%, 560px);
+  display: grid;
+  gap: 10px;
+  padding: 18px;
+  border: 1px solid #bfdbfe;
+  border-radius: 12px;
+  background: #eff6ff;
+  color: #1e3a8a;
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+.ahb-session-recovery-title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 900;
+  color: #0f172a;
+}
+
+.ahb-session-recovery-message {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.ahb-session-recovery-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  align-items: center;
+}
+
+.ahb-session-recovery-primary,
+.ahb-session-recovery-secondary {
+  min-height: 32px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 12px;
+  border-radius: 9px;
+  font-size: 11px;
+  font-weight: 800;
+  text-decoration: none;
+  cursor: pointer;
+  font: inherit;
+}
+
+.ahb-session-recovery-primary {
+  border: 1px solid #047857;
+  background: #047857;
+  color: #fff;
+}
+
+.ahb-session-recovery-secondary {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #0f172a;
+}
+
+.ahb-session-recovery-secondary:disabled {
+  opacity: 0.55;
+  cursor: not-allowed;
+}
+
 .platform-content:has(.ahb-home--embedded),
 .hz-shell-content:has(.ahb-home--embedded),
 .hz-shell-content-frame:has(.ahb-home--embedded) {
