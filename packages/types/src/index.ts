@@ -13,5 +13,6 @@ export * from "./commercial-lines";
 export * from "./archive";
 export * from "./whatsapp-workflow";
 export * from "./whatsapp-intent-rules";
+export * from "./whatsapp-web-local";
 export * from "./omnichannel-social";
 export * from "./policy";

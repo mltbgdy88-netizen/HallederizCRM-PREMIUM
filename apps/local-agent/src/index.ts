@@ -15,6 +15,7 @@ export * from "./files";
 export * from "./print";
 export * from "./jobs";
 export * from "./status";
+export * from "./whatsapp-web-local";
 
 const agentName = "local-agent";
 

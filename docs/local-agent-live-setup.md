@@ -13,6 +13,7 @@
 - `LOCAL_AGENT_USER_ID`
 - `LOCAL_AGENT_SESSION_TOKEN` (opsiyonel ama onerilir)
 - `LOCAL_AGENT_POLL_INTERVAL_MS`
+- `WHATSAPP_WEB_LOCAL_ENABLED=false` (varsayilan kapali; production ortaminda hard-deny)
 
 Opsiyonel alt klasor env:
 
@@ -42,3 +43,11 @@ Print ve file-save gecisleri audit olayina yazilir:
 - `LOCAL_AGENT_MODE=disabled` ise agent sadece disabled status raporlar
 - `safe_mode=true` ise riskli otomatik aksiyonlar kapali tutulabilir
 - Yazdirma basarisiz olursa job `failed` olur ve `errorMessage` saklanir
+
+## Local WhatsApp Web Pairing Foundation
+
+- Feature kimligi `whatsapp_web_local` olarak sabittir.
+- Bu fazdaki pairing engine yalnizca bellek ici durum makinesidir; gercek WhatsApp Web kutuphanesi veya QR uretimi yoktur.
+- Outbound mesaj adaptoru fail-closed calisir ve `providerCallExecuted=false` doner.
+- Production ortaminda env degeri ne olursa olsun feature acilmaz.
+- Secret, QR icerigi, token, auth state ve session verisi olay kaydina veya loglara eklenmez.

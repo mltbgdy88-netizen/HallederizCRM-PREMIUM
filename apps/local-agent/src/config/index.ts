@@ -1,4 +1,5 @@
 import type { LocalOutputRule } from "@hallederiz/types";
+import { resolveWhatsAppWebLocalFeatureFlag } from "../whatsapp-web-local";
 
 export interface LocalAgentSettings {
   mode: "enabled" | "disabled";
@@ -13,6 +14,7 @@ export interface LocalAgentSettings {
   userId: string;
   sessionToken?: string;
   pollIntervalMs: number;
+  whatsappWebLocal: ReturnType<typeof resolveWhatsAppWebLocalFeatureFlag>;
 }
 
 export function loadSettings(): LocalAgentSettings {
@@ -42,7 +44,8 @@ export function loadSettings(): LocalAgentSettings {
     tenantId: process.env.LOCAL_AGENT_TENANT_ID ?? "tenant_1",
     userId: process.env.LOCAL_AGENT_USER_ID ?? "user_local_agent",
     sessionToken: process.env.LOCAL_AGENT_SESSION_TOKEN,
-    pollIntervalMs: Number(process.env.LOCAL_AGENT_POLL_INTERVAL_MS ?? 15000)
+    pollIntervalMs: Number(process.env.LOCAL_AGENT_POLL_INTERVAL_MS ?? 15000),
+    whatsappWebLocal: resolveWhatsAppWebLocalFeatureFlag()
   };
 }
 

@@ -91,6 +91,9 @@ importers:
       '@hallederiz/sdk':
         specifier: workspace:*
         version: link:../../packages/sdk
+      '@hallederiz/types':
+        specifier: workspace:*
+        version: link:../../packages/types
     devDependencies:
       '@types/node':
         specifier: ^22.7.4
