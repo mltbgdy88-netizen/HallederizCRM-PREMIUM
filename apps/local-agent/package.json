@@ -8,12 +8,14 @@
     "build": "tsc -p tsconfig.json",
     "start": "node dist/index.js",
     "typecheck": "tsc -p tsconfig.json --noEmit",
+    "test": "node --loader ts-node/esm --experimental-specifier-resolution=node --test src/tests/whatsapp-web-local.test.ts",
     "lint": "tsc -p tsconfig.json --noEmit",
     "clean": "node -e \"console.log('clean: no-op for @hallederiz/local-agent')\""
   },
   "dependencies": {
     "@hallederiz/domain": "workspace:*",
-    "@hallederiz/sdk": "workspace:*"
+    "@hallederiz/sdk": "workspace:*",
+    "@hallederiz/types": "workspace:*"
   },
   "devDependencies": {
     "@types/node": "^22.7.4",
