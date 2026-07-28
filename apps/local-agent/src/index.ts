@@ -9,6 +9,7 @@ import {
 } from "./jobs";
 import { printJob } from "./print";
 import { reportLocalStatus } from "./status";
+import { startLocalWhatsAppWebControlPlane } from "./whatsapp-web-local-control-plane";
 
 export * from "./config";
 export * from "./files";
@@ -16,6 +17,7 @@ export * from "./print";
 export * from "./jobs";
 export * from "./status";
 export * from "./whatsapp-web-local";
+export * from "./whatsapp-web-local-control-plane";
 
 const agentName = "local-agent";
 
@@ -40,6 +42,14 @@ async function processQueueCycle() {
 async function bootstrapLocalAgent() {
   const settings = loadSettings();
   console.info(`[${agentName}] foundation ready`);
+  if (settings.whatsappWebLocalControlToken) {
+    await startLocalWhatsAppWebControlPlane({
+      controlToken: settings.whatsappWebLocalControlToken,
+      port: settings.whatsappWebLocalControlPort,
+      runtimeEnvironment: process.env
+    });
+    console.info(`[${agentName}] local control plane ready on loopback`);
+  }
   if (settings.mode === "disabled") {
     await reportLocalStatus("disabled", "Agent disabled modunda.");
     return;
