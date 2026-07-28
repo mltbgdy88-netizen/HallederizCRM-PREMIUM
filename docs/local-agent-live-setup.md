@@ -14,6 +14,8 @@
 - `LOCAL_AGENT_SESSION_TOKEN` (opsiyonel ama onerilir)
 - `LOCAL_AGENT_POLL_INTERVAL_MS`
 - `WHATSAPP_WEB_LOCAL_ENABLED=false` (varsayilan kapali; production ortaminda hard-deny)
+- `LOCAL_AGENT_CONTROL_PORT=4319`
+- `LOCAL_AGENT_CONTROL_TOKEN` (yerel kontrol uclari icin zorunlu; loglanmaz)
 
 Opsiyonel alt klasor env:
 
@@ -51,3 +53,15 @@ Print ve file-save gecisleri audit olayina yazilir:
 - Outbound mesaj adaptoru fail-closed calisir ve `providerCallExecuted=false` doner.
 - Production ortaminda env degeri ne olursa olsun feature acilmaz.
 - Secret, QR icerigi, token, auth state ve session verisi olay kaydina veya loglara eklenmez.
+
+### Yerel Pairing Control Plane
+
+- Sunucu yalnizca `127.0.0.1` adresine bind olur ve `Authorization: Bearer <LOCAL_AGENT_CONTROL_TOKEN>` ister.
+- `GET /whatsapp-web-local/status`
+- `POST /whatsapp-web-local/start`
+- `POST /whatsapp-web-local/refresh`
+- `POST /whatsapp-web-local/disconnect`
+- `POST /whatsapp-web-local/logout`
+- Tum yanitlar `Cache-Control: no-store` kullanir ve yalnizca `state`, `reasonCode`, `generation`, `providerCallExecuted`, `checkedAt` alanlarini dondurur.
+- Feature kapaliysa durum `disabled` kalir. Production ortaminda tum mutasyon uclari hard-deny olur.
+- Kontrol duzlemi gercek QR, auth-state, session saklama veya canli mesaj gonderimi yapmaz.

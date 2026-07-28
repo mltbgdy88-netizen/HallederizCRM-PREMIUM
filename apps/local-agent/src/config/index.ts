@@ -15,6 +15,8 @@ export interface LocalAgentSettings {
   sessionToken?: string;
   pollIntervalMs: number;
   whatsappWebLocal: ReturnType<typeof resolveWhatsAppWebLocalFeatureFlag>;
+  whatsappWebLocalControlPort: number;
+  whatsappWebLocalControlToken?: string;
 }
 
 export function loadSettings(): LocalAgentSettings {
@@ -45,7 +47,9 @@ export function loadSettings(): LocalAgentSettings {
     userId: process.env.LOCAL_AGENT_USER_ID ?? "user_local_agent",
     sessionToken: process.env.LOCAL_AGENT_SESSION_TOKEN,
     pollIntervalMs: Number(process.env.LOCAL_AGENT_POLL_INTERVAL_MS ?? 15000),
-    whatsappWebLocal: resolveWhatsAppWebLocalFeatureFlag()
+    whatsappWebLocal: resolveWhatsAppWebLocalFeatureFlag(),
+    whatsappWebLocalControlPort: Number(process.env.LOCAL_AGENT_CONTROL_PORT ?? 4319),
+    whatsappWebLocalControlToken: process.env.LOCAL_AGENT_CONTROL_TOKEN?.trim() || undefined
   };
 }
 
