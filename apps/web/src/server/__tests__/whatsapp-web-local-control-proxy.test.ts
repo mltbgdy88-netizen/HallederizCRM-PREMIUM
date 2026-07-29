@@ -165,6 +165,7 @@ function deterministicDeadlineRuntime(
 ): {
   runtime: WhatsAppWebLocalProxyRuntime;
   advance: (milliseconds: number) => void;
+  advanceClockOnly: (milliseconds: number) => void;
   now: () => number;
   timerCreateCount: () => number;
   timerClearCount: () => number;
@@ -214,6 +215,9 @@ function deterministicDeadlineRuntime(
         activeTimer = undefined;
         callback();
       }
+    },
+    advanceClockOnly: (milliseconds) => {
+      currentTime += milliseconds;
     },
     now: () => currentTime,
     timerCreateCount: () => timerCreateCount,
@@ -674,6 +678,136 @@ test("one monotonic dispatch deadline is shared across session and local-agent",
   assert.equal(serialized.includes("TOTAL_DEADLINE_SECRET_MARKER"), false);
   assert.equal(harness.now(), 100);
   assert.equal(localAgentStartedAt, 75);
+  assert.equal(harness.timerCreateCount(), 1);
+  assert.equal(harness.timerClearCount(), 1);
+  assert.equal(harness.controllerCreateCount(), 1);
+  assert.equal(observedSignals.length, 2);
+  assert.equal(observedSignals[0], observedSignals[1]);
+  assert.equal(observedSignals[0]?.aborted, true);
+});
+
+test("session parse overrun fails closed before local-agent without relying on the timer callback", async () => {
+  const observedSignals: AbortSignal[] = [];
+  const validSessionPayload = (await sessionResponse().json()) as {
+    item: SessionModel & { secret?: string };
+  };
+  validSessionPayload.item.secret = "SESSION_PARSE_OVERRUN_SECRET_MARKER";
+  let fetchCount = 0;
+  let bodyCancelled = false;
+  let harness: ReturnType<typeof deterministicDeadlineRuntime>;
+
+  const session = new Response(
+    new ReadableStream<Uint8Array>({
+      cancel() {
+        bodyCancelled = true;
+      }
+    }),
+    {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    }
+  );
+  Object.defineProperty(session, "json", {
+    value: () => {
+      harness.advanceClockOnly(101);
+      return Promise.resolve(validSessionPayload);
+    }
+  });
+
+  const fetchImpl = (async (
+    _input: string | URL | Request,
+    init?: RequestInit
+  ): Promise<Response> => {
+    fetchCount += 1;
+    assert.ok(init?.signal);
+    observedSignals.push(init.signal);
+    return session;
+  }) as typeof fetch;
+  harness = deterministicDeadlineRuntime(fetchImpl, 100);
+
+  const response = await dispatchWhatsAppWebLocalControlRequest(
+    requestFor("status"),
+    "status",
+    harness.runtime
+  );
+
+  assert.equal(response.status, 503);
+  const serialized = await response.text();
+  assert.equal(serialized.includes("SESSION_PARSE_OVERRUN_SECRET_MARKER"), false);
+  const body = JSON.parse(serialized) as WhatsAppWebLocalBffResponse;
+  assert.deepEqual(Object.keys(body).sort(), SAFE_RESPONSE_KEYS);
+  assert.equal(body.reasonCode, "whatsapp_web_local_bff_session_validation_unavailable");
+  assert.equal(body.providerCallExecuted, false);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  assert.equal(fetchCount, 1);
+  assert.equal(bodyCancelled, true);
+  assert.equal(harness.now(), 101);
+  assert.equal(harness.timerCreateCount(), 1);
+  assert.equal(harness.timerClearCount(), 1);
+  assert.equal(harness.controllerCreateCount(), 1);
+  assert.equal(observedSignals.length, 1);
+  assert.equal(observedSignals[0]?.aborted, true);
+});
+
+test("local-agent parse overrun rejects a valid payload without relying on the timer callback", async () => {
+  const observedSignals: AbortSignal[] = [];
+  let bodyCancelled = false;
+  let harness: ReturnType<typeof deterministicDeadlineRuntime>;
+  const localResponse = new Response(
+    new ReadableStream<Uint8Array>({
+      cancel() {
+        bodyCancelled = true;
+      }
+    }),
+    {
+      status: 200,
+      headers: { "Content-Type": "application/json" }
+    }
+  );
+  Object.defineProperty(localResponse, "json", {
+    value: () => {
+      harness.advanceClockOnly(101);
+      return Promise.resolve({
+        state: "connected",
+        reasonCode: "whatsapp_web_local_state_updated",
+        generation: 1,
+        providerCallExecuted: false,
+        checkedAt: TEST_NOW,
+        secret: "LOCAL_AGENT_PARSE_OVERRUN_SECRET_MARKER"
+      });
+    }
+  });
+
+  const calls: FetchCall[] = [];
+  const fetchImpl = (async (
+    input: string | URL | Request,
+    init?: RequestInit
+  ): Promise<Response> => {
+    const url = new URL(input instanceof Request ? input.url : input.toString());
+    calls.push({ url, init: init ?? {} });
+    assert.ok(init?.signal);
+    observedSignals.push(init.signal);
+    return url.pathname === "/auth/session" ? sessionResponse() : localResponse;
+  }) as typeof fetch;
+  harness = deterministicDeadlineRuntime(fetchImpl, 100);
+
+  const response = await dispatchWhatsAppWebLocalControlRequest(
+    requestFor("status"),
+    "status",
+    harness.runtime
+  );
+
+  assert.equal(response.status, 503);
+  const serialized = await response.text();
+  assert.equal(serialized.includes("LOCAL_AGENT_PARSE_OVERRUN_SECRET_MARKER"), false);
+  const body = JSON.parse(serialized) as WhatsAppWebLocalBffResponse;
+  assert.deepEqual(Object.keys(body).sort(), SAFE_RESPONSE_KEYS);
+  assert.equal(body.reasonCode, "whatsapp_web_local_bff_upstream_unavailable");
+  assert.equal(body.providerCallExecuted, false);
+  assert.equal(response.headers.get("cache-control"), "no-store");
+  assert.equal(calls.length, 2);
+  assert.equal(bodyCancelled, true);
+  assert.equal(harness.now(), 101);
   assert.equal(harness.timerCreateCount(), 1);
   assert.equal(harness.timerClearCount(), 1);
   assert.equal(harness.controllerCreateCount(), 1);

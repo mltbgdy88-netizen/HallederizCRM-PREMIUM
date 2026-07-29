@@ -376,6 +376,7 @@ async function fetchJsonWithDeadline(
     try {
       deadline.assertActive();
       const payload = await deadline.race(response.json());
+      deadline.assertActive();
       return {
         status: response.status,
         ok: true,
