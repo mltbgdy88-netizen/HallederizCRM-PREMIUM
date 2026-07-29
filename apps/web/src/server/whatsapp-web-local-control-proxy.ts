@@ -68,14 +68,22 @@ const SAFE_UPSTREAM_REASON_CODES = new Set([
   "whatsapp_web_local_state_updated"
 ]);
 
-function noStoreJson(status: number, body: WhatsAppWebLocalBffResponse): Response {
+function noStoreHeaders(extraHeaders?: HeadersInit): Headers {
+  const headers = new Headers(extraHeaders);
+  headers.set("Cache-Control", "no-store");
+  headers.set("Content-Type", "application/json; charset=utf-8");
+  headers.set("X-Content-Type-Options", "nosniff");
+  return headers;
+}
+
+function noStoreJson(
+  status: number,
+  body: WhatsAppWebLocalBffResponse,
+  extraHeaders?: HeadersInit
+): Response {
   return Response.json(body, {
     status,
-    headers: {
-      "Cache-Control": "no-store",
-      "Content-Type": "application/json; charset=utf-8",
-      "X-Content-Type-Options": "nosniff"
-    }
+    headers: noStoreHeaders(extraHeaders)
   });
 }
 
@@ -94,6 +102,28 @@ function deniedResponse(
   });
 }
 
+export function createWhatsAppWebLocalMethodNotAllowedResponse(
+  allowedMethod: "GET" | "POST",
+  requestMethod: string,
+  now: () => string = () => new Date().toISOString()
+): Response {
+  const headers = noStoreHeaders({ Allow: allowedMethod });
+  if (requestMethod.toUpperCase() === "HEAD") {
+    return new Response(null, { status: 405, headers });
+  }
+  return noStoreJson(
+    405,
+    {
+      state: "disabled",
+      reasonCode: "whatsapp_web_local_bff_method_not_allowed",
+      generation: 0,
+      providerCallExecuted: false,
+      checkedAt: now()
+    },
+    headers
+  );
+}
+
 function resolveAction(action: string): WhatsAppWebLocalBffAction | undefined {
   return Object.prototype.hasOwnProperty.call(WHATSAPP_WEB_LOCAL_BFF_PATHS, action)
     ? (action as WhatsAppWebLocalBffAction)
@@ -108,10 +138,43 @@ function isProduction(env: RuntimeEnvironment): boolean {
   return env.NODE_ENV?.trim().toLowerCase() === "production";
 }
 
-function validateSameOrigin(request: Request): boolean {
+function resolveTrustedWebOrigin(env: RuntimeEnvironment): URL | undefined {
+  const configuredOrigin = env.WEB_URL?.trim();
+  if (!configuredOrigin) {
+    return undefined;
+  }
+
+  try {
+    const origin = new URL(configuredOrigin);
+    if (
+      (origin.protocol !== "http:" && origin.protocol !== "https:") ||
+      origin.username ||
+      origin.password ||
+      origin.pathname !== "/" ||
+      origin.search ||
+      origin.hash
+    ) {
+      return undefined;
+    }
+    return origin;
+  } catch {
+    return undefined;
+  }
+}
+
+function validateSameOrigin(request: Request, env: RuntimeEnvironment): boolean {
+  if (
+    request.headers.has("forwarded") ||
+    request.headers.has("x-forwarded-host") ||
+    request.headers.has("x-forwarded-proto")
+  ) {
+    return false;
+  }
+
+  const trustedOrigin = resolveTrustedWebOrigin(env);
   const originHeader = request.headers.get("origin")?.trim();
   const hostHeader = request.headers.get("host")?.trim().toLowerCase();
-  if (!originHeader || !hostHeader || /[\\/\s]/.test(hostHeader)) {
+  if (!trustedOrigin || !originHeader || !hostHeader || /[\\/\s]/.test(hostHeader)) {
     return false;
   }
 
@@ -124,7 +187,8 @@ function validateSameOrigin(request: Request): boolean {
       origin.pathname === "/" &&
       !origin.search &&
       !origin.hash &&
-      origin.host.toLowerCase() === hostHeader
+      origin.origin === trustedOrigin.origin &&
+      hostHeader === trustedOrigin.host.toLowerCase()
     );
   } catch {
     return false;
@@ -174,6 +238,14 @@ function resolveLocalAgentPort(env: RuntimeEnvironment): number | undefined {
   return Number.isInteger(port) && port >= 1 && port <= 65_535 ? port : undefined;
 }
 
+function resolveLocalAgentTenantId(env: RuntimeEnvironment): string | undefined {
+  const tenantId = env.LOCAL_AGENT_TENANT_ID;
+  if (!tenantId || tenantId.trim().length === 0 || tenantId !== tenantId.trim()) {
+    return undefined;
+  }
+  return tenantId;
+}
+
 function resolveTimeoutMs(runtime: WhatsAppWebLocalProxyRuntime): number {
   const timeoutMs = runtime.timeoutMs ?? DEFAULT_TIMEOUT_MS;
   if (!Number.isFinite(timeoutMs) || timeoutMs <= 0) {
@@ -182,21 +254,92 @@ function resolveTimeoutMs(runtime: WhatsAppWebLocalProxyRuntime): number {
   return Math.min(Math.floor(timeoutMs), MAX_TIMEOUT_MS);
 }
 
-async function fetchWithTimeout(
+class DeadlineExceededError extends Error {}
+
+type JsonFetchResult = {
+  status: number;
+  ok: boolean;
+  payload?: unknown;
+  bodyReadFailed: boolean;
+};
+
+async function cancelResponseBody(
+  response: Response | undefined,
+  deadline: Promise<never>
+): Promise<void> {
+  if (!response?.body) {
+    return;
+  }
+  try {
+    await Promise.race([response.body.cancel(), deadline]);
+  } catch {
+    // The request signal is also aborted on failures, so locked native fetch bodies are closed there.
+  }
+}
+
+async function fetchJsonWithDeadline(
   fetchImpl: typeof fetch,
   input: string | URL,
   init: RequestInit,
   timeoutMs: number
-): Promise<Response> {
+): Promise<JsonFetchResult> {
   const controller = new AbortController();
-  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+  let timeout: ReturnType<typeof setTimeout> | undefined;
+  const deadline = new Promise<never>((_resolve, reject) => {
+    timeout = setTimeout(() => {
+      controller.abort();
+      reject(new DeadlineExceededError());
+    }, timeoutMs);
+  });
+  let response: Response | undefined;
+
   try {
-    return await fetchImpl(input, {
-      ...init,
-      signal: controller.signal
-    });
+    response = await Promise.race([
+      fetchImpl(input, {
+        ...init,
+        signal: controller.signal
+      }),
+      deadline
+    ]);
+
+    if (!response.ok) {
+      await cancelResponseBody(response, deadline);
+      return {
+        status: response.status,
+        ok: false,
+        bodyReadFailed: false
+      };
+    }
+
+    try {
+      const payload = await Promise.race([response.json(), deadline]);
+      return {
+        status: response.status,
+        ok: true,
+        payload,
+        bodyReadFailed: false
+      };
+    } catch (error) {
+      const timedOut = controller.signal.aborted || error instanceof DeadlineExceededError;
+      controller.abort();
+      await cancelResponseBody(response, deadline);
+      if (timedOut) {
+        throw new DeadlineExceededError();
+      }
+      return {
+        status: response.status,
+        ok: true,
+        bodyReadFailed: true
+      };
+    }
+  } catch (error) {
+    controller.abort();
+    await cancelResponseBody(response, deadline);
+    throw error;
   } finally {
-    clearTimeout(timeout);
+    if (timeout) {
+      clearTimeout(timeout);
+    }
   }
 }
 
@@ -211,8 +354,16 @@ function readSession(payload: unknown): SessionModel | undefined {
   const candidate = item as Partial<SessionModel>;
   if (
     typeof candidate.expiresAt !== "string" ||
+    !candidate.tenant ||
+    typeof candidate.tenant !== "object" ||
+    typeof candidate.tenant.id !== "string" ||
+    candidate.tenant.id.trim().length === 0 ||
+    candidate.tenant.id !== candidate.tenant.id.trim() ||
     !candidate.user ||
     typeof candidate.user !== "object" ||
+    typeof candidate.user.tenantId !== "string" ||
+    candidate.user.tenantId.trim().length === 0 ||
+    candidate.user.tenantId !== candidate.user.tenantId.trim() ||
     !Array.isArray(candidate.permissions)
   ) {
     return undefined;
@@ -252,25 +403,31 @@ async function authorizeRequest(
     env: RuntimeEnvironment;
     timeoutMs: number;
   }
-): Promise<Response | undefined> {
+): Promise<{ ok: true; session: SessionModel } | { ok: false; response: Response }> {
   const sessionCookie = readSessionCookieHeader(request.headers.get("cookie"));
   if (!sessionCookie) {
-    return deniedResponse(401, "whatsapp_web_local_bff_auth_required", runtime.now);
+    return {
+      ok: false,
+      response: deniedResponse(401, "whatsapp_web_local_bff_auth_required", runtime.now)
+    };
   }
 
   const sessionUrl = resolveApiSessionUrl(runtime.env);
   if (!sessionUrl) {
-    return deniedResponse(
-      503,
-      "whatsapp_web_local_bff_session_validation_unavailable",
-      runtime.now,
-      "error"
-    );
+    return {
+      ok: false,
+      response: deniedResponse(
+        503,
+        "whatsapp_web_local_bff_session_validation_unavailable",
+        runtime.now,
+        "error"
+      )
+    };
   }
 
-  let sessionResponse: Response;
+  let sessionResult: JsonFetchResult;
   try {
-    sessionResponse = await fetchWithTimeout(
+    sessionResult = await fetchJsonWithDeadline(
       runtime.fetchImpl,
       sessionUrl,
       {
@@ -286,44 +443,63 @@ async function authorizeRequest(
       runtime.timeoutMs
     );
   } catch {
-    return deniedResponse(
-      503,
-      "whatsapp_web_local_bff_session_validation_unavailable",
-      runtime.now,
-      "error"
-    );
+    return {
+      ok: false,
+      response: deniedResponse(
+        503,
+        "whatsapp_web_local_bff_session_validation_unavailable",
+        runtime.now,
+        "error"
+      )
+    };
   }
 
-  if (sessionResponse.status === 401) {
-    return deniedResponse(401, "whatsapp_web_local_bff_session_invalid", runtime.now);
+  if (sessionResult.status === 401) {
+    return {
+      ok: false,
+      response: deniedResponse(401, "whatsapp_web_local_bff_session_invalid", runtime.now)
+    };
   }
-  if (!sessionResponse.ok) {
-    return deniedResponse(
-      503,
-      "whatsapp_web_local_bff_session_validation_unavailable",
-      runtime.now,
-      "error"
-    );
+  if (!sessionResult.ok) {
+    return {
+      ok: false,
+      response: deniedResponse(
+        503,
+        "whatsapp_web_local_bff_session_validation_unavailable",
+        runtime.now,
+        "error"
+      )
+    };
   }
 
-  let session: SessionModel | undefined;
-  try {
-    session = readSession(await sessionResponse.json());
-  } catch {
-    session = undefined;
-  }
+  const session = sessionResult.bodyReadFailed ? undefined : readSession(sessionResult.payload);
   if (!session) {
-    return deniedResponse(401, "whatsapp_web_local_bff_session_invalid", runtime.now);
+    return {
+      ok: false,
+      response: deniedResponse(401, "whatsapp_web_local_bff_session_invalid", runtime.now)
+    };
   }
   if (!isSessionActive(session)) {
-    return deniedResponse(401, "whatsapp_web_local_bff_session_expired", runtime.now);
+    return {
+      ok: false,
+      response: deniedResponse(401, "whatsapp_web_local_bff_session_expired", runtime.now)
+    };
+  }
+  if (session.tenant.id !== session.user.tenantId) {
+    return {
+      ok: false,
+      response: deniedResponse(403, "whatsapp_web_local_bff_tenant_denied", runtime.now)
+    };
   }
 
   const requiredPermissions = action === "status" ? STATUS_PERMISSIONS : MUTATION_PERMISSIONS;
   if (!hasSessionPermission(session, requiredPermissions)) {
-    return deniedResponse(403, "whatsapp_web_local_bff_permission_denied", runtime.now);
+    return {
+      ok: false,
+      response: deniedResponse(403, "whatsapp_web_local_bff_permission_denied", runtime.now)
+    };
   }
-  return undefined;
+  return { ok: true, session };
 }
 
 function sanitizeUpstreamResponse(payload: unknown): WhatsAppWebLocalBffResponse | undefined {
@@ -382,13 +558,26 @@ export async function dispatchWhatsAppWebLocalControlRequest(
     );
   }
 
-  if (MUTATION_ACTIONS.has(action) && !validateSameOrigin(request)) {
+  if (MUTATION_ACTIONS.has(action) && !validateSameOrigin(request, env)) {
     return deniedResponse(403, "whatsapp_web_local_bff_origin_denied", now);
   }
 
-  const authFailure = await authorizeRequest(request, action, runtime);
-  if (authFailure) {
-    return authFailure;
+  const authorization = await authorizeRequest(request, action, runtime);
+  if (!authorization.ok) {
+    return authorization.response;
+  }
+
+  const localAgentTenantId = resolveLocalAgentTenantId(env);
+  if (!localAgentTenantId) {
+    return deniedResponse(
+      503,
+      "whatsapp_web_local_bff_control_unavailable",
+      now,
+      "error"
+    );
+  }
+  if (authorization.session.tenant.id !== localAgentTenantId) {
+    return deniedResponse(403, "whatsapp_web_local_bff_tenant_denied", now);
   }
 
   const controlToken = env.LOCAL_AGENT_CONTROL_TOKEN?.trim();
@@ -416,9 +605,9 @@ export async function dispatchWhatsAppWebLocalControlRequest(
     `http://${LOCAL_AGENT_HOST}:${port}`
   );
 
-  let upstreamResponse: Response;
+  let upstreamResult: JsonFetchResult;
   try {
-    upstreamResponse = await fetchWithTimeout(
+    upstreamResult = await fetchJsonWithDeadline(
       fetchImpl,
       localAgentUrl,
       {
@@ -443,7 +632,7 @@ export async function dispatchWhatsAppWebLocalControlRequest(
     );
   }
 
-  if (!upstreamResponse.ok) {
+  if (!upstreamResult.ok) {
     return deniedResponse(
       502,
       "whatsapp_web_local_bff_upstream_rejected",
@@ -452,12 +641,9 @@ export async function dispatchWhatsAppWebLocalControlRequest(
     );
   }
 
-  let safePayload: WhatsAppWebLocalBffResponse | undefined;
-  try {
-    safePayload = sanitizeUpstreamResponse(await upstreamResponse.json());
-  } catch {
-    safePayload = undefined;
-  }
+  const safePayload = upstreamResult.bodyReadFailed
+    ? undefined
+    : sanitizeUpstreamResponse(upstreamResult.payload);
   if (!safePayload) {
     return deniedResponse(
       502,

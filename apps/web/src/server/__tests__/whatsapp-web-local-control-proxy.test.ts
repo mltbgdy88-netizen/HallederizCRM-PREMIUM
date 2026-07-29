@@ -1,8 +1,8 @@
 import assert from "node:assert/strict";
 import test from "node:test";
 import type { Permission, SessionModel } from "@hallederiz/types";
-import { POST as routePost } from "../../../app/api/whatsapp-web-local/[action]/route";
-import { GET as routeGetStatus } from "../../../app/api/whatsapp-web-local/status/route";
+import * as actionRoute from "../../../app/api/whatsapp-web-local/[action]/route";
+import * as statusRoute from "../../../app/api/whatsapp-web-local/status/route";
 import {
   WHATSAPP_WEB_LOCAL_BFF_PATHS,
   dispatchWhatsAppWebLocalControlRequest,
@@ -38,7 +38,11 @@ function permission(key: string): Permission {
 
 function sessionResponse(
   permissions: string[] = ["integrations.read", "integrations.write", "whatsapp.write"],
-  expiresAt = "2099-01-01T00:00:00.000Z"
+  expiresAt = "2099-01-01T00:00:00.000Z",
+  tenantOverrides: {
+    sessionTenantId?: string | null;
+    userTenantId?: string | null;
+  } = {}
 ): Response {
   const permissionItems = permissions.map(permission);
   const session: SessionModel = {
@@ -67,6 +71,24 @@ function sessionResponse(
     issuedAt: TEST_NOW,
     expiresAt
   };
+  const mutableSession = session as unknown as {
+    tenant: { id?: string };
+    user: { tenantId?: string };
+  };
+  if (Object.prototype.hasOwnProperty.call(tenantOverrides, "sessionTenantId")) {
+    if (tenantOverrides.sessionTenantId === null) {
+      delete mutableSession.tenant.id;
+    } else {
+      mutableSession.tenant.id = tenantOverrides.sessionTenantId;
+    }
+  }
+  if (Object.prototype.hasOwnProperty.call(tenantOverrides, "userTenantId")) {
+    if (tenantOverrides.userTenantId === null) {
+      delete mutableSession.user.tenantId;
+    } else {
+      mutableSession.user.tenantId = tenantOverrides.userTenantId;
+    }
+  }
   return Response.json({ item: session });
 }
 
@@ -90,6 +112,9 @@ function requestFor(
     cookie?: string | null;
     origin?: string | null;
     host?: string | null;
+    forwarded?: string | null;
+    xForwardedHost?: string | null;
+    xForwardedProto?: string | null;
   } = {}
 ): Request {
   const headers = new Headers();
@@ -103,6 +128,9 @@ function requestFor(
   } else if (options.origin) {
     headers.set("origin", options.origin);
   }
+  if (options.forwarded) headers.set("forwarded", options.forwarded);
+  if (options.xForwardedHost) headers.set("x-forwarded-host", options.xForwardedHost);
+  if (options.xForwardedProto) headers.set("x-forwarded-proto", options.xForwardedProto);
 
   return new Request(`http://localhost:3000/api/whatsapp-web-local/${action}`, {
     method: options.method ?? (action === "status" ? "GET" : "POST"),
@@ -119,14 +147,56 @@ function runtime(
     env: {
       NODE_ENV: "development",
       API_BASE_URL: "http://localhost:4000",
+      WEB_URL: "http://localhost:3000",
       LOCAL_AGENT_CONTROL_PORT: "4319",
       LOCAL_AGENT_CONTROL_TOKEN: CONTROL_TOKEN,
+      LOCAL_AGENT_TENANT_ID: "tenant_test",
       ...envOverrides
     },
     fetchImpl,
     now: () => TEST_NOW,
     timeoutMs
   };
+}
+
+async function withRouteEnvironment<T>(
+  fetchImpl: typeof fetch,
+  envOverrides: Record<string, string | undefined>,
+  run: () => Promise<T> | T
+): Promise<T> {
+  const env = {
+    NODE_ENV: "development",
+    API_BASE_URL: "http://localhost:4000",
+    WEB_URL: "http://localhost:3000",
+    LOCAL_AGENT_CONTROL_PORT: "4319",
+    LOCAL_AGENT_CONTROL_TOKEN: CONTROL_TOKEN,
+    LOCAL_AGENT_TENANT_ID: "tenant_test",
+    ...envOverrides
+  };
+  const originalFetch = globalThis.fetch;
+  const originalEnv = new Map<string, string | undefined>();
+
+  try {
+    for (const [key, value] of Object.entries(env)) {
+      originalEnv.set(key, process.env[key]);
+      if (value === undefined) {
+        Reflect.deleteProperty(process.env, key);
+      } else {
+        Reflect.set(process.env, key, value);
+      }
+    }
+    globalThis.fetch = fetchImpl;
+    return await run();
+  } finally {
+    globalThis.fetch = originalFetch;
+    for (const [key, value] of originalEnv) {
+      if (value === undefined) {
+        Reflect.deleteProperty(process.env, key);
+      } else {
+        Reflect.set(process.env, key, value);
+      }
+    }
+  }
 }
 
 async function readSafeResponse(response: Response): Promise<WhatsAppWebLocalBffResponse> {
@@ -184,6 +254,73 @@ test("expired server session is rejected without calling local-agent", async () 
   assert.equal(calls[0]?.url.pathname, "/auth/session");
 });
 
+test("tenant context is required and bound to both the session user and local-agent", { concurrency: false }, async () => {
+  const scenarios = [
+    {
+      name: "missing session tenant",
+      session: sessionResponse(undefined, undefined, { sessionTenantId: null }),
+      env: {},
+      expectedStatus: 401,
+      expectedReason: "whatsapp_web_local_bff_session_invalid"
+    },
+    {
+      name: "missing user tenant",
+      session: sessionResponse(undefined, undefined, { userTenantId: null }),
+      env: {},
+      expectedStatus: 401,
+      expectedReason: "whatsapp_web_local_bff_session_invalid"
+    },
+    {
+      name: "session and user tenant mismatch",
+      session: sessionResponse(undefined, undefined, { userTenantId: "tenant_other" }),
+      env: {},
+      expectedStatus: 403,
+      expectedReason: "whatsapp_web_local_bff_tenant_denied"
+    },
+    {
+      name: "missing local-agent tenant",
+      session: sessionResponse(),
+      env: { LOCAL_AGENT_TENANT_ID: undefined },
+      expectedStatus: 503,
+      expectedReason: "whatsapp_web_local_bff_control_unavailable"
+    },
+    {
+      name: "blank local-agent tenant",
+      session: sessionResponse(),
+      env: { LOCAL_AGENT_TENANT_ID: "   " },
+      expectedStatus: 503,
+      expectedReason: "whatsapp_web_local_bff_control_unavailable"
+    },
+    {
+      name: "session and local-agent tenant mismatch",
+      session: sessionResponse(),
+      env: { LOCAL_AGENT_TENANT_ID: "tenant_other" },
+      expectedStatus: 403,
+      expectedReason: "whatsapp_web_local_bff_tenant_denied"
+    }
+  ] as const;
+
+  for (const scenario of scenarios) {
+    const calls: FetchCall[] = [];
+    const fetchImpl = (async (input: string | URL | Request, init?: RequestInit) => {
+      const url = new URL(input instanceof Request ? input.url : input.toString());
+      calls.push({ url, init: init ?? {} });
+      return url.pathname === "/auth/session" ? scenario.session : localAgentResponse();
+    }) as typeof fetch;
+
+    const response = await withRouteEnvironment(
+      fetchImpl,
+      scenario.env,
+      () => statusRoute.GET(requestFor("status"))
+    );
+
+    assert.equal(response.status, scenario.expectedStatus, scenario.name);
+    assert.equal((await readSafeResponse(response)).reasonCode, scenario.expectedReason, scenario.name);
+    assert.equal(calls.length, 1, `${scenario.name} must not call local-agent`);
+    assert.equal(calls[0]?.url.pathname, "/auth/session");
+  }
+});
+
 test("status and mutations use existing read/write permissions and fail closed when missing", async () => {
   for (const [action, permissions, expectedStatus] of [
     ["status", ["integrations.read"], 200],
@@ -215,30 +352,58 @@ test("status and mutations use existing read/write permissions and fail closed w
   }
 });
 
-test("cross-origin and invalid Origin/Host mutations are denied before auth or local-agent", async () => {
+test("mutations require the trusted full origin and reject untrusted proxy headers", { concurrency: false }, async () => {
   const invalidRequests = [
-    requestFor("start", { origin: "https://evil.example", host: "localhost:3000" }),
+    requestFor("start", { origin: "https://localhost:3000", host: "localhost:3000" }),
+    requestFor("start", { origin: "http://localhost:3001", host: "localhost:3001" }),
+    requestFor("start", { origin: "https://evil.example", host: "evil.example" }),
     requestFor("start", { origin: "not-a-url", host: "localhost:3000" }),
     requestFor("start", { origin: null, host: "localhost:3000" }),
     requestFor("start", { origin: "http://localhost:3000", host: "evil.example" }),
     requestFor("start", { origin: "http://localhost:3000", host: "localhost:3000/path" }),
-    requestFor("start", { origin: "http://user@localhost:3000", host: "localhost:3000" })
+    requestFor("start", { origin: "http://user@localhost:3000", host: "localhost:3000" }),
+    requestFor("start", {
+      forwarded: "host=localhost:3000;proto=http"
+    }),
+    requestFor("start", {
+      xForwardedHost: "localhost:3000"
+    }),
+    requestFor("start", {
+      xForwardedProto: "http"
+    })
   ];
 
   for (const request of invalidRequests) {
     let fetchCount = 0;
-    const response = await dispatchWhatsAppWebLocalControlRequest(
-      request,
-      "start",
-      runtime((async () => {
+    const response = await withRouteEnvironment(
+      (async () => {
         fetchCount += 1;
         throw new Error("unexpected fetch");
-      }) as typeof fetch)
+      }) as typeof fetch,
+      {},
+      () => actionRoute.POST(request, { params: Promise.resolve({ action: "start" }) })
     );
     assert.equal(response.status, 403);
     assert.equal((await readSafeResponse(response)).reasonCode, "whatsapp_web_local_bff_origin_denied");
     assert.equal(fetchCount, 0);
   }
+
+  const calls: FetchCall[] = [];
+  const trustedResponse = await withRouteEnvironment(
+    successfulFetch(calls),
+    {},
+    () =>
+      actionRoute.POST(
+        requestFor("start", {
+          origin: "http://localhost:3000",
+          host: "localhost:3000"
+        }),
+        { params: Promise.resolve({ action: "start" }) }
+      )
+  );
+  assert.equal(trustedResponse.status, 200);
+  await readSafeResponse(trustedResponse);
+  assert.equal(calls.length, 2);
 });
 
 test("production status is disabled and every mutation hard-denies with zero upstream calls", async () => {
@@ -325,6 +490,89 @@ test("local-agent timeout and connection failure return a generic safe error", a
     assert.equal(serialized.includes("TOKEN_MARKER"), false);
     assert.match(serialized, /whatsapp_web_local_bff_upstream_unavailable/);
     assert.equal(callCount, 2);
+  }
+});
+
+test("exported status route deadlines cover session and local-agent response bodies", { concurrency: false }, async () => {
+  for (const target of ["session", "local-agent"] as const) {
+    const calls: FetchCall[] = [];
+    const timedSignal: { current: AbortSignal | null } = { current: null };
+    const fetchImpl = (async (input: string | URL | Request, init?: RequestInit) => {
+      const url = new URL(input instanceof Request ? input.url : input.toString());
+      calls.push({ url, init: init ?? {} });
+      const isSessionCall = url.pathname === "/auth/session";
+      if (
+        (target === "session" && isSessionCall) ||
+        (target === "local-agent" && !isSessionCall)
+      ) {
+        timedSignal.current = init?.signal ?? null;
+        const stream = new ReadableStream<Uint8Array>({
+          start(controller) {
+            controller.enqueue(new TextEncoder().encode('{"secret":"BODY_SECRET_MARKER"'));
+          }
+        });
+        return new Response(stream, {
+          status: 200,
+          headers: { "Content-Type": "application/json" }
+        });
+      }
+      return sessionResponse();
+    }) as typeof fetch;
+
+    const response = await withRouteEnvironment(
+      fetchImpl,
+      {},
+      () => statusRoute.GET(requestFor("status"))
+    );
+    assert.equal(response.status, 503, target);
+    const serialized = await response.text();
+    assert.equal(serialized.includes("BODY_SECRET_MARKER"), false);
+    assert.equal(timedSignal.current?.aborted, true, `${target} signal must be aborted`);
+    assert.equal(calls.length, target === "session" ? 1 : 2);
+  }
+});
+
+test("exported status route cancels non-OK bodies without exposing them", { concurrency: false }, async () => {
+  for (const target of ["session", "local-agent"] as const) {
+    let bodyCancelled = false;
+    const calls: FetchCall[] = [];
+    const nonOkResponse = new Response(
+      new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode("NON_OK_SECRET_MARKER"));
+        },
+        cancel() {
+          bodyCancelled = true;
+        }
+      }),
+      {
+        status: 500,
+        headers: { "Content-Type": "application/json" }
+      }
+    );
+    const fetchImpl = (async (input: string | URL | Request, init?: RequestInit) => {
+      const url = new URL(input instanceof Request ? input.url : input.toString());
+      calls.push({ url, init: init ?? {} });
+      const isSessionCall = url.pathname === "/auth/session";
+      if (
+        (target === "session" && isSessionCall) ||
+        (target === "local-agent" && !isSessionCall)
+      ) {
+        return nonOkResponse;
+      }
+      return sessionResponse();
+    }) as typeof fetch;
+
+    const response = await withRouteEnvironment(
+      fetchImpl,
+      {},
+      () => statusRoute.GET(requestFor("status"))
+    );
+    assert.equal(response.status, target === "session" ? 503 : 502);
+    const serialized = await response.text();
+    assert.equal(bodyCancelled, true, `${target} body must be cancelled`);
+    assert.equal(serialized.includes("NON_OK_SECRET_MARKER"), false);
+    assert.equal(calls.length, target === "session" ? 1 : 2);
   }
 });
 
@@ -446,6 +694,83 @@ test("invalid or failed upstream bodies are never passed through", async () => {
   }
 });
 
+test("exported Route Handlers return secure 405 responses for every unsupported method", { concurrency: false }, async () => {
+  const originalFetch = globalThis.fetch;
+  let fetchCount = 0;
+  try {
+    globalThis.fetch = (async () => {
+      fetchCount += 1;
+      throw new Error("unsupported route method must not fetch");
+    }) as typeof fetch;
+
+    const statusMethods = [
+      ["POST", statusRoute.POST, false],
+      ["PUT", statusRoute.PUT, false],
+      ["PATCH", statusRoute.PATCH, false],
+      ["DELETE", statusRoute.DELETE, false],
+      ["OPTIONS", statusRoute.OPTIONS, false],
+      ["HEAD", statusRoute.HEAD, true]
+    ] as const;
+    const actionMethods = [
+      ["GET", actionRoute.GET, false],
+      ["PUT", actionRoute.PUT, false],
+      ["PATCH", actionRoute.PATCH, false],
+      ["DELETE", actionRoute.DELETE, false],
+      ["OPTIONS", actionRoute.OPTIONS, false],
+      ["HEAD", actionRoute.HEAD, true]
+    ] as const;
+
+    for (const [method, handler, isHead] of statusMethods) {
+      const response = handler();
+      assert.equal(response.status, 405, `status ${method}`);
+      assert.equal(response.headers.get("allow"), "GET", `status ${method}`);
+      assert.equal(response.headers.get("cache-control"), "no-store", `status ${method}`);
+      assert.equal(response.headers.has("access-control-allow-origin"), false, `status ${method}`);
+      assert.equal(response.headers.has("access-control-allow-methods"), false, `status ${method}`);
+      if (isHead) {
+        assert.equal(await response.text(), "");
+      } else {
+        assert.equal(
+          (await readSafeResponse(response)).reasonCode,
+          "whatsapp_web_local_bff_method_not_allowed"
+        );
+      }
+    }
+
+    for (const [method, handler, isHead] of actionMethods) {
+      const response = handler();
+      assert.equal(response.status, 405, `action ${method}`);
+      assert.equal(response.headers.get("allow"), "POST", `action ${method}`);
+      assert.equal(response.headers.get("cache-control"), "no-store", `action ${method}`);
+      assert.equal(response.headers.has("access-control-allow-origin"), false, `action ${method}`);
+      assert.equal(response.headers.has("access-control-allow-methods"), false, `action ${method}`);
+      if (isHead) {
+        assert.equal(await response.text(), "");
+      } else {
+        assert.equal(
+          (await readSafeResponse(response)).reasonCode,
+          "whatsapp_web_local_bff_method_not_allowed"
+        );
+      }
+    }
+
+    const unknownAction = await actionRoute.POST(
+      new Request("http://localhost:3000/api/whatsapp-web-local/unknown", {
+        method: "POST"
+      }),
+      { params: Promise.resolve({ action: "unknown" }) }
+    );
+    assert.equal(unknownAction.status, 404);
+    assert.equal(
+      (await readSafeResponse(unknownAction)).reasonCode,
+      "whatsapp_web_local_bff_action_not_found"
+    );
+    assert.equal(fetchCount, 0);
+  } finally {
+    globalThis.fetch = originalFetch;
+  }
+});
+
 test("Next route handlers expose status GET and four mutation POST actions", { concurrency: false }, async () => {
   const originalNodeEnv = process.env.NODE_ENV;
   const originalFetch = globalThis.fetch;
@@ -457,12 +782,12 @@ test("Next route handlers expose status GET and four mutation POST actions", { c
       throw new Error("route production guard must not fetch");
     }) as typeof fetch;
 
-    const statusResponse = await routeGetStatus(requestFor("status", { cookie: null }));
+    const statusResponse = await statusRoute.GET(requestFor("status", { cookie: null }));
     assert.equal(statusResponse.status, 200);
     assert.equal((await readSafeResponse(statusResponse)).state, "disabled");
 
     for (const action of ["start", "refresh", "disconnect", "logout"] as const) {
-      const response = await routePost(
+      const response = await actionRoute.POST(
         requestFor(action, { cookie: null }),
         { params: Promise.resolve({ action }) }
       );
