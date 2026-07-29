@@ -18,8 +18,8 @@
     "@hallederiz/types": "workspace:*"
   },
   "devDependencies": {
-    "@types/node": "^22.7.4",
+    "@types/node": "^26.1.2",
     "ts-node": "^10.9.2",
-    "typescript": "^5.6.3"
+    "typescript": "^7.0.2"
   }
 }
