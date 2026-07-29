@@ -28,6 +28,10 @@ export interface WhatsAppWebLocalProxyRuntime {
   fetchImpl?: typeof fetch;
   now?: () => string;
   timeoutMs?: number;
+  monotonicNow?: () => number;
+  setDeadlineTimer?: (callback: () => void, delayMs: number) => unknown;
+  clearDeadlineTimer?: (handle: unknown) => void;
+  createAbortController?: () => AbortController;
 }
 
 const SESSION_COOKIE_NAME = "hz_session";
@@ -263,15 +267,81 @@ type JsonFetchResult = {
   bodyReadFailed: boolean;
 };
 
+type DispatchDeadline = {
+  signal: AbortSignal;
+  expiresAt: number;
+  remainingMs: () => number;
+  assertActive: () => void;
+  race: <T>(operation: Promise<T>) => Promise<T>;
+  abort: () => void;
+  dispose: () => void;
+};
+
+type DeadlineRuntime = {
+  timeoutMs: number;
+  monotonicNow: () => number;
+  setDeadlineTimer: (callback: () => void, delayMs: number) => unknown;
+  clearDeadlineTimer: (handle: unknown) => void;
+  createAbortController: () => AbortController;
+};
+
+function createDispatchDeadline(runtime: DeadlineRuntime): DispatchDeadline {
+  const controller = runtime.createAbortController();
+  const expiresAt = runtime.monotonicNow() + runtime.timeoutMs;
+  let deadlineError: DeadlineExceededError | undefined;
+  let rejectDeadline: (error: DeadlineExceededError) => void = () => undefined;
+  let disposed = false;
+
+  const deadlinePromise = new Promise<never>((_resolve, reject) => {
+    rejectDeadline = reject;
+  });
+  void deadlinePromise.catch(() => undefined);
+
+  const expire = (): DeadlineExceededError => {
+    if (!deadlineError) {
+      deadlineError = new DeadlineExceededError();
+      controller.abort();
+      rejectDeadline(deadlineError);
+    }
+    return deadlineError;
+  };
+
+  const timerHandle = runtime.setDeadlineTimer(expire, runtime.timeoutMs);
+  const remainingMs = (): number => Math.max(0, expiresAt - runtime.monotonicNow());
+  const assertActive = (): void => {
+    if (controller.signal.aborted || remainingMs() <= 0) {
+      throw expire();
+    }
+  };
+
+  return {
+    signal: controller.signal,
+    expiresAt,
+    remainingMs,
+    assertActive,
+    race: async <T>(operation: Promise<T>): Promise<T> => {
+      return await Promise.race([operation, deadlinePromise]);
+    },
+    abort: () => controller.abort(),
+    dispose: () => {
+      if (!disposed) {
+        disposed = true;
+        runtime.clearDeadlineTimer(timerHandle);
+      }
+    }
+  };
+}
+
 async function cancelResponseBody(
   response: Response | undefined,
-  deadline: Promise<never>
+  deadline: DispatchDeadline
 ): Promise<void> {
   if (!response?.body) {
     return;
   }
   try {
-    await Promise.race([response.body.cancel(), deadline]);
+    const cancellation = response.body.cancel();
+    await deadline.race(cancellation);
   } catch {
     // The request signal is also aborted on failures, so locked native fetch bodies are closed there.
   }
@@ -281,26 +351,18 @@ async function fetchJsonWithDeadline(
   fetchImpl: typeof fetch,
   input: string | URL,
   init: RequestInit,
-  timeoutMs: number
+  deadline: DispatchDeadline
 ): Promise<JsonFetchResult> {
-  const controller = new AbortController();
-  let timeout: ReturnType<typeof setTimeout> | undefined;
-  const deadline = new Promise<never>((_resolve, reject) => {
-    timeout = setTimeout(() => {
-      controller.abort();
-      reject(new DeadlineExceededError());
-    }, timeoutMs);
-  });
   let response: Response | undefined;
 
   try {
-    response = await Promise.race([
+    deadline.assertActive();
+    response = await deadline.race(
       fetchImpl(input, {
         ...init,
-        signal: controller.signal
-      }),
-      deadline
-    ]);
+        signal: deadline.signal
+      })
+    );
 
     if (!response.ok) {
       await cancelResponseBody(response, deadline);
@@ -312,7 +374,8 @@ async function fetchJsonWithDeadline(
     }
 
     try {
-      const payload = await Promise.race([response.json(), deadline]);
+      deadline.assertActive();
+      const payload = await deadline.race(response.json());
       return {
         status: response.status,
         ok: true,
@@ -320,8 +383,8 @@ async function fetchJsonWithDeadline(
         bodyReadFailed: false
       };
     } catch (error) {
-      const timedOut = controller.signal.aborted || error instanceof DeadlineExceededError;
-      controller.abort();
+      const timedOut = deadline.signal.aborted || error instanceof DeadlineExceededError;
+      deadline.abort();
       await cancelResponseBody(response, deadline);
       if (timedOut) {
         throw new DeadlineExceededError();
@@ -333,13 +396,9 @@ async function fetchJsonWithDeadline(
       };
     }
   } catch (error) {
-    controller.abort();
+    deadline.abort();
     await cancelResponseBody(response, deadline);
     throw error;
-  } finally {
-    if (timeout) {
-      clearTimeout(timeout);
-    }
   }
 }
 
@@ -401,8 +460,8 @@ async function authorizeRequest(
   action: WhatsAppWebLocalBffAction,
   runtime: Required<Pick<WhatsAppWebLocalProxyRuntime, "fetchImpl" | "now">> & {
     env: RuntimeEnvironment;
-    timeoutMs: number;
-  }
+  },
+  deadline: DispatchDeadline
 ): Promise<{ ok: true; session: SessionModel } | { ok: false; response: Response }> {
   const sessionCookie = readSessionCookieHeader(request.headers.get("cookie"));
   if (!sessionCookie) {
@@ -440,7 +499,7 @@ async function authorizeRequest(
         credentials: "omit",
         redirect: "manual"
       },
-      runtime.timeoutMs
+      deadline
     );
   } catch {
     return {
@@ -540,7 +599,25 @@ export async function dispatchWhatsAppWebLocalControlRequest(
   const fetchImpl = overrides.fetchImpl ?? fetch;
   const now = overrides.now ?? (() => new Date().toISOString());
   const timeoutMs = resolveTimeoutMs(overrides);
-  const runtime = { env, fetchImpl, now, timeoutMs };
+  const monotonicNow = overrides.monotonicNow ?? (() => performance.now());
+  const setDeadlineTimer =
+    overrides.setDeadlineTimer ??
+    ((callback: () => void, delayMs: number): unknown => setTimeout(callback, delayMs));
+  const clearDeadlineTimer =
+    overrides.clearDeadlineTimer ??
+    ((handle: unknown): void => clearTimeout(handle as ReturnType<typeof setTimeout>));
+  const createAbortController =
+    overrides.createAbortController ?? (() => new AbortController());
+  const runtime = {
+    env,
+    fetchImpl,
+    now,
+    timeoutMs,
+    monotonicNow,
+    setDeadlineTimer,
+    clearDeadlineTimer,
+    createAbortController
+  };
 
   const action = resolveAction(requestedAction);
   if (!action) {
@@ -562,96 +639,112 @@ export async function dispatchWhatsAppWebLocalControlRequest(
     return deniedResponse(403, "whatsapp_web_local_bff_origin_denied", now);
   }
 
-  const authorization = await authorizeRequest(request, action, runtime);
-  if (!authorization.ok) {
-    return authorization.response;
-  }
-
-  const localAgentTenantId = resolveLocalAgentTenantId(env);
-  if (!localAgentTenantId) {
-    return deniedResponse(
-      503,
-      "whatsapp_web_local_bff_control_unavailable",
-      now,
-      "error"
-    );
-  }
-  if (authorization.session.tenant.id !== localAgentTenantId) {
-    return deniedResponse(403, "whatsapp_web_local_bff_tenant_denied", now);
-  }
-
-  const controlToken = env.LOCAL_AGENT_CONTROL_TOKEN?.trim();
-  if (!controlToken) {
-    return deniedResponse(
-      503,
-      "whatsapp_web_local_bff_control_unavailable",
-      now,
-      "error"
-    );
-  }
-
-  const port = resolveLocalAgentPort(env);
-  if (!port) {
-    return deniedResponse(
-      503,
-      "whatsapp_web_local_bff_control_unavailable",
-      now,
-      "error"
-    );
-  }
-
-  const localAgentUrl = new URL(
-    WHATSAPP_WEB_LOCAL_BFF_PATHS[action],
-    `http://${LOCAL_AGENT_HOST}:${port}`
-  );
-
-  let upstreamResult: JsonFetchResult;
+  let deadline: DispatchDeadline;
   try {
-    upstreamResult = await fetchJsonWithDeadline(
-      fetchImpl,
-      localAgentUrl,
-      {
-        method: expectedMethod(action),
-        headers: {
-          Accept: "application/json",
-          Authorization: `Bearer ${controlToken}`
-        },
-        body: undefined,
-        cache: "no-store",
-        credentials: "omit",
-        redirect: "manual"
-      },
-      timeoutMs
-    );
+    deadline = createDispatchDeadline(runtime);
   } catch {
     return deniedResponse(
       503,
-      "whatsapp_web_local_bff_upstream_unavailable",
+      "whatsapp_web_local_bff_control_unavailable",
       now,
       "error"
     );
   }
 
-  if (!upstreamResult.ok) {
-    return deniedResponse(
-      502,
-      "whatsapp_web_local_bff_upstream_rejected",
-      now,
-      "error"
-    );
-  }
+  try {
+    const authorization = await authorizeRequest(request, action, runtime, deadline);
+    if (!authorization.ok) {
+      return authorization.response;
+    }
 
-  const safePayload = upstreamResult.bodyReadFailed
-    ? undefined
-    : sanitizeUpstreamResponse(upstreamResult.payload);
-  if (!safePayload) {
-    return deniedResponse(
-      502,
-      "whatsapp_web_local_bff_invalid_upstream_response",
-      now,
-      "error"
-    );
-  }
+    const localAgentTenantId = resolveLocalAgentTenantId(env);
+    if (!localAgentTenantId) {
+      return deniedResponse(
+        503,
+        "whatsapp_web_local_bff_control_unavailable",
+        now,
+        "error"
+      );
+    }
+    if (authorization.session.tenant.id !== localAgentTenantId) {
+      return deniedResponse(403, "whatsapp_web_local_bff_tenant_denied", now);
+    }
 
-  return noStoreJson(200, safePayload);
+    const controlToken = env.LOCAL_AGENT_CONTROL_TOKEN?.trim();
+    if (!controlToken) {
+      return deniedResponse(
+        503,
+        "whatsapp_web_local_bff_control_unavailable",
+        now,
+        "error"
+      );
+    }
+
+    const port = resolveLocalAgentPort(env);
+    if (!port) {
+      return deniedResponse(
+        503,
+        "whatsapp_web_local_bff_control_unavailable",
+        now,
+        "error"
+      );
+    }
+
+    const localAgentUrl = new URL(
+      WHATSAPP_WEB_LOCAL_BFF_PATHS[action],
+      `http://${LOCAL_AGENT_HOST}:${port}`
+    );
+
+    let upstreamResult: JsonFetchResult;
+    try {
+      upstreamResult = await fetchJsonWithDeadline(
+        fetchImpl,
+        localAgentUrl,
+        {
+          method: expectedMethod(action),
+          headers: {
+            Accept: "application/json",
+            Authorization: `Bearer ${controlToken}`
+          },
+          body: undefined,
+          cache: "no-store",
+          credentials: "omit",
+          redirect: "manual"
+        },
+        deadline
+      );
+    } catch {
+      return deniedResponse(
+        503,
+        "whatsapp_web_local_bff_upstream_unavailable",
+        now,
+        "error"
+      );
+    }
+
+    if (!upstreamResult.ok) {
+      return deniedResponse(
+        502,
+        "whatsapp_web_local_bff_upstream_rejected",
+        now,
+        "error"
+      );
+    }
+
+    const safePayload = upstreamResult.bodyReadFailed
+      ? undefined
+      : sanitizeUpstreamResponse(upstreamResult.payload);
+    if (!safePayload) {
+      return deniedResponse(
+        502,
+        "whatsapp_web_local_bff_invalid_upstream_response",
+        now,
+        "error"
+      );
+    }
+
+    return noStoreJson(200, safePayload);
+  } finally {
+    deadline.dispose();
+  }
 }

@@ -159,6 +159,69 @@ function runtime(
   };
 }
 
+function deterministicDeadlineRuntime(
+  fetchImpl: typeof fetch,
+  timeoutMs = 100
+): {
+  runtime: WhatsAppWebLocalProxyRuntime;
+  advance: (milliseconds: number) => void;
+  now: () => number;
+  timerCreateCount: () => number;
+  timerClearCount: () => number;
+  controllerCreateCount: () => number;
+} {
+  let currentTime = 0;
+  let timerCreateCount = 0;
+  let timerClearCount = 0;
+  let controllerCreateCount = 0;
+  let activeTimer:
+    | {
+        handle: object;
+        dueAt: number;
+        callback: () => void;
+      }
+    | undefined;
+
+  const deadlineRuntime = runtime(fetchImpl, {}, timeoutMs);
+  deadlineRuntime.monotonicNow = () => currentTime;
+  deadlineRuntime.setDeadlineTimer = (callback, delayMs) => {
+    timerCreateCount += 1;
+    const handle = {};
+    activeTimer = {
+      handle,
+      dueAt: currentTime + delayMs,
+      callback
+    };
+    return handle;
+  };
+  deadlineRuntime.clearDeadlineTimer = (handle) => {
+    timerClearCount += 1;
+    if (activeTimer?.handle === handle) {
+      activeTimer = undefined;
+    }
+  };
+  deadlineRuntime.createAbortController = () => {
+    controllerCreateCount += 1;
+    return new AbortController();
+  };
+
+  return {
+    runtime: deadlineRuntime,
+    advance: (milliseconds) => {
+      currentTime += milliseconds;
+      if (activeTimer && currentTime >= activeTimer.dueAt) {
+        const callback = activeTimer.callback;
+        activeTimer = undefined;
+        callback();
+      }
+    },
+    now: () => currentTime,
+    timerCreateCount: () => timerCreateCount,
+    timerClearCount: () => timerClearCount,
+    controllerCreateCount: () => controllerCreateCount
+  };
+}
+
 async function withRouteEnvironment<T>(
   fetchImpl: typeof fetch,
   envOverrides: Record<string, string | undefined>,
@@ -254,7 +317,7 @@ test("expired server session is rejected without calling local-agent", async () 
   assert.equal(calls[0]?.url.pathname, "/auth/session");
 });
 
-test("tenant context is required and bound to both the session user and local-agent", { concurrency: false }, async () => {
+test("exported action route binds valid trimmed tenant context before local-agent", { concurrency: false }, async () => {
   const scenarios = [
     {
       name: "missing session tenant",
@@ -276,6 +339,30 @@ test("tenant context is required and bound to both the session user and local-ag
       env: {},
       expectedStatus: 403,
       expectedReason: "whatsapp_web_local_bff_tenant_denied"
+    },
+    {
+      name: "whitespace session tenant",
+      session: sessionResponse(undefined, undefined, { sessionTenantId: "   " }),
+      env: {},
+      expectedStatus: 401,
+      expectedReason: "whatsapp_web_local_bff_session_invalid"
+    },
+    {
+      name: "whitespace user tenant",
+      session: sessionResponse(undefined, undefined, { userTenantId: "   " }),
+      env: {},
+      expectedStatus: 401,
+      expectedReason: "whatsapp_web_local_bff_session_invalid"
+    },
+    {
+      name: "tenant values mismatch after unsafe surrounding whitespace",
+      session: sessionResponse(undefined, undefined, {
+        sessionTenantId: " tenant_test",
+        userTenantId: "tenant_test"
+      }),
+      env: {},
+      expectedStatus: 401,
+      expectedReason: "whatsapp_web_local_bff_session_invalid"
     },
     {
       name: "missing local-agent tenant",
@@ -311,7 +398,10 @@ test("tenant context is required and bound to both the session user and local-ag
     const response = await withRouteEnvironment(
       fetchImpl,
       scenario.env,
-      () => statusRoute.GET(requestFor("status"))
+      () =>
+        actionRoute.POST(requestFor("start"), {
+          params: Promise.resolve({ action: "start" })
+        })
     );
 
     assert.equal(response.status, scenario.expectedStatus, scenario.name);
@@ -406,17 +496,65 @@ test("mutations require the trusted full origin and reject untrusted proxy heade
   assert.equal(calls.length, 2);
 });
 
+test("exported action route rejects invalid canonical WEB_URL before every upstream call", { concurrency: false }, async () => {
+  const invalidWebUrls = [
+    ["non-http protocol", "ftp://localhost:3000"],
+    ["username credential", "http://user@localhost:3000"],
+    ["password credential", "http://:password@localhost:3000"],
+    ["non-root path", "http://localhost:3000/not-root"],
+    ["query", "http://localhost:3000?source=unsafe"],
+    ["fragment", "http://localhost:3000#unsafe"],
+    ["missing", undefined],
+    ["empty", ""],
+    ["whitespace", "   "]
+  ] as const;
+
+  for (const [name, webUrl] of invalidWebUrls) {
+    let fetchCount = 0;
+    const response = await withRouteEnvironment(
+      (async () => {
+        fetchCount += 1;
+        throw new Error("invalid WEB_URL must not fetch");
+      }) as typeof fetch,
+      { WEB_URL: webUrl },
+      () =>
+        actionRoute.POST(requestFor("start"), {
+          params: Promise.resolve({ action: "start" })
+        })
+    );
+
+    assert.equal(response.status, 403, name);
+    assert.equal(
+      (await readSafeResponse(response)).reasonCode,
+      "whatsapp_web_local_bff_origin_denied",
+      name
+    );
+    assert.equal(fetchCount, 0, name);
+  }
+});
+
 test("production status is disabled and every mutation hard-denies with zero upstream calls", async () => {
   let fetchCount = 0;
+  let timerCreateCount = 0;
+  let controllerCreateCount = 0;
   const fetchImpl = (async () => {
     fetchCount += 1;
     throw new Error("production must not fetch");
   }) as typeof fetch;
+  const productionRuntime = runtime(fetchImpl, { NODE_ENV: "production" });
+  productionRuntime.setDeadlineTimer = () => {
+    timerCreateCount += 1;
+    return {};
+  };
+  productionRuntime.createAbortController = () => {
+    controllerCreateCount += 1;
+    return new AbortController();
+  };
 
   const statusResponse = await dispatchWhatsAppWebLocalControlRequest(
     requestFor("status", { cookie: null }),
     "status",
-    runtime(fetchImpl, { NODE_ENV: "production" })
+    productionRuntime
   );
   assert.equal(statusResponse.status, 200);
   assert.equal((await readSafeResponse(statusResponse)).state, "disabled");
@@ -425,7 +563,7 @@ test("production status is disabled and every mutation hard-denies with zero ups
     const response = await dispatchWhatsAppWebLocalControlRequest(
       requestFor(action, { cookie: null, origin: null, host: null }),
       action,
-      runtime(fetchImpl, { NODE_ENV: "production" })
+      productionRuntime
     );
     assert.equal(response.status, 403);
     const body = await readSafeResponse(response);
@@ -433,6 +571,8 @@ test("production status is disabled and every mutation hard-denies with zero ups
     assert.equal(body.reasonCode, "whatsapp_web_local_production_hard_deny");
   }
   assert.equal(fetchCount, 0);
+  assert.equal(timerCreateCount, 0);
+  assert.equal(controllerCreateCount, 0);
 });
 
 test("missing token and invalid port fail closed without calling local-agent", async () => {
@@ -493,42 +633,121 @@ test("local-agent timeout and connection failure return a generic safe error", a
   }
 });
 
-test("exported status route deadlines cover session and local-agent response bodies", { concurrency: false }, async () => {
+test("one monotonic dispatch deadline is shared across session and local-agent", async () => {
+  const observedSignals: AbortSignal[] = [];
+  let localAgentStartedAt = -1;
+  let harness: ReturnType<typeof deterministicDeadlineRuntime>;
+
+  const fetchImpl = (async (
+    input: string | URL | Request,
+    init?: RequestInit
+  ): Promise<Response> => {
+    const url = new URL(input instanceof Request ? input.url : input.toString());
+    assert.ok(init?.signal);
+    observedSignals.push(init.signal);
+
+    if (url.pathname === "/auth/session") {
+      harness.advance(75);
+      return sessionResponse();
+    }
+
+    localAgentStartedAt = harness.now();
+    return await new Promise<Response>((_resolve, reject) => {
+      const rejectOnAbort = () => reject(new Error("TOTAL_DEADLINE_SECRET_MARKER"));
+      if (init.signal?.aborted) {
+        rejectOnAbort();
+        return;
+      }
+      init.signal?.addEventListener("abort", rejectOnAbort, { once: true });
+      harness.advance(25);
+    });
+  }) as typeof fetch;
+  harness = deterministicDeadlineRuntime(fetchImpl, 100);
+
+  const response = await dispatchWhatsAppWebLocalControlRequest(
+    requestFor("status"),
+    "status",
+    harness.runtime
+  );
+  assert.equal(response.status, 503);
+  const serialized = await response.text();
+  assert.equal(serialized.includes("TOTAL_DEADLINE_SECRET_MARKER"), false);
+  assert.equal(harness.now(), 100);
+  assert.equal(localAgentStartedAt, 75);
+  assert.equal(harness.timerCreateCount(), 1);
+  assert.equal(harness.timerClearCount(), 1);
+  assert.equal(harness.controllerCreateCount(), 1);
+  assert.equal(observedSignals.length, 2);
+  assert.equal(observedSignals[0], observedSignals[1]);
+  assert.equal(observedSignals[0]?.aborted, true);
+});
+
+test("shared deadline aborts hanging session and local-agent bodies and cleans resources", async () => {
   for (const target of ["session", "local-agent"] as const) {
     const calls: FetchCall[] = [];
-    const timedSignal: { current: AbortSignal | null } = { current: null };
+    const observedSignals: AbortSignal[] = [];
+    let bodyCancelled = false;
+    let resolveBodyStarted: (() => void) | undefined;
+    const bodyStarted = new Promise<void>((resolve) => {
+      resolveBodyStarted = resolve;
+    });
+
+    const hangingResponse = new Response(
+      new ReadableStream<Uint8Array>({
+        start(controller) {
+          controller.enqueue(new TextEncoder().encode("HANGING_BODY_SECRET_MARKER"));
+        },
+        cancel() {
+          bodyCancelled = true;
+        }
+      }),
+      {
+        status: 200,
+        headers: { "Content-Type": "application/json" }
+      }
+    );
+    Object.defineProperty(hangingResponse, "json", {
+      value: () => {
+        resolveBodyStarted?.();
+        return new Promise<unknown>(() => undefined);
+      }
+    });
+
     const fetchImpl = (async (input: string | URL | Request, init?: RequestInit) => {
       const url = new URL(input instanceof Request ? input.url : input.toString());
       calls.push({ url, init: init ?? {} });
+      assert.ok(init?.signal);
+      observedSignals.push(init.signal);
       const isSessionCall = url.pathname === "/auth/session";
       if (
         (target === "session" && isSessionCall) ||
         (target === "local-agent" && !isSessionCall)
       ) {
-        timedSignal.current = init?.signal ?? null;
-        const stream = new ReadableStream<Uint8Array>({
-          start(controller) {
-            controller.enqueue(new TextEncoder().encode('{"secret":"BODY_SECRET_MARKER"'));
-          }
-        });
-        return new Response(stream, {
-          status: 200,
-          headers: { "Content-Type": "application/json" }
-        });
+        return hangingResponse;
       }
       return sessionResponse();
     }) as typeof fetch;
+    const harness = deterministicDeadlineRuntime(fetchImpl, 100);
 
-    const response = await withRouteEnvironment(
-      fetchImpl,
-      {},
-      () => statusRoute.GET(requestFor("status"))
+    const dispatchPromise = dispatchWhatsAppWebLocalControlRequest(
+      requestFor("status"),
+      "status",
+      harness.runtime
     );
+    await bodyStarted;
+    harness.advance(100);
+    const response = await dispatchPromise;
+
     assert.equal(response.status, 503, target);
     const serialized = await response.text();
-    assert.equal(serialized.includes("BODY_SECRET_MARKER"), false);
-    assert.equal(timedSignal.current?.aborted, true, `${target} signal must be aborted`);
+    assert.equal(serialized.includes("HANGING_BODY_SECRET_MARKER"), false);
+    assert.equal(bodyCancelled, true, `${target} body must be cancelled`);
+    assert.equal(harness.timerCreateCount(), 1);
+    assert.equal(harness.timerClearCount(), 1);
+    assert.equal(harness.controllerCreateCount(), 1);
     assert.equal(calls.length, target === "session" ? 1 : 2);
+    assert.equal(observedSignals.every((signal) => signal === observedSignals[0]), true);
+    assert.equal(observedSignals[0]?.aborted, true);
   }
 });
 
