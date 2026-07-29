@@ -31,9 +31,6 @@ jobs:
       - name: Install dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: WhatsApp Web BFF security tests
-        run: pnpm test:web-whatsapp-bff
-
       - name: Typecheck
         run: pnpm typecheck
 
@@ -42,6 +39,9 @@ jobs:
 
       - name: Build
         run: pnpm build
+
+      - name: WhatsApp Web BFF security tests
+        run: pnpm test:web-whatsapp-bff
 
       - name: API tests
         run: pnpm test
