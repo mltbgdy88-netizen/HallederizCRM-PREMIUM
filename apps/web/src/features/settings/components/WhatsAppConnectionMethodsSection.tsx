@@ -9,8 +9,7 @@ import {
   resolveAlternateProviderLabel,
   resolveMetaCloudBadge
 } from "../utils/whatsapp-connection-methods";
-import { formatWhatsAppWebLocalCheckedAt } from "../utils/whatsapp-web-local-view";
-import { SettingsSessionRecoveryPanel } from "./SettingsSessionRecoveryPanel";
+import { WhatsAppWebLocalConnectionCard } from "./WhatsAppWebLocalConnectionCard";
 
 type WhatsAppConnectionMethodsSectionProps = {
   settings: PlatformSettings;
@@ -29,28 +28,12 @@ export function WhatsAppConnectionMethodsSection({
   layout = "settings"
 }: WhatsAppConnectionMethodsSectionProps) {
   const { channelView, health, loading, error, useDemo, refresh } = useWhatsAppChannel();
-  const {
-    snapshot: localSnapshot,
-    view: localView,
-    loading: localLoading,
-    mutating: localMutating,
-    activeAction: localActiveAction,
-    sessionError: localSessionError,
-    errorMessage: localErrorMessage,
-    refresh: refreshLocalStatus,
-    start: startLocalPairing,
-    refreshPairing,
-    disconnect: disconnectLocalPairing,
-    logout: logoutLocalPairing
-  } = useWhatsAppWebLocalControl();
+  const localControl = useWhatsAppWebLocalControl();
   const metaBadge = resolveMetaCloudBadge(health, useDemo);
   const alternateActive = isAlternateProviderSelected(settings.whatsapp.provider);
   const rootClass = layout === "reference" ? "setf-wa-conn" : "hz-settings-wa-conn";
   const cardClass = `${rootClass}-card`;
   const gridClass = `${rootClass}-grid`;
-  const localBusy = localLoading || localMutating;
-  const localControlsBlocked = localBusy || Boolean(localErrorMessage);
-  const localCheckedAt = formatWhatsAppWebLocalCheckedAt(localSnapshot?.checkedAt);
 
   return (
     <div className={rootClass}>
@@ -116,152 +99,7 @@ export function WhatsAppConnectionMethodsSection({
           </button>
         </article>
 
-        <article className={`${cardClass} ${cardClass}--muted`} role="listitem">
-          <header className={`${cardClass}-head`}>
-            <div>
-              <h3 className={`${cardClass}-title`}>WhatsApp Web Yerel Beta</h3>
-              <p className={`${cardClass}-subtitle`}>
-                Yerel eşleştirme denemesi — production yolu değil
-              </p>
-            </div>
-            <span className={badgeClass("beta", layout)}>Beta / yerel</span>
-          </header>
-
-          <div
-            className={`${cardClass}-status`}
-            role="status"
-            aria-live="polite"
-            aria-busy={localBusy}
-          >
-            <span
-              className={`${rootClass}-dot ${rootClass}-dot--${localView.dotTone}`}
-              aria-hidden
-            />
-            <span>
-              {localLoading && !localSnapshot
-                ? "Yerel beta durumu yükleniyor…"
-                : localView.statusText}
-            </span>
-            <span className={badgeClass(localView.badgeTone, layout)}>
-              {localView.badgeLabel}
-            </span>
-          </div>
-
-          <p className={`${cardClass}-body`}>{localView.description}</p>
-          {localCheckedAt && localSnapshot ? (
-            <p className={`${cardClass}-body`}>
-              Son kontrol: <time dateTime={localSnapshot.checkedAt}>{localCheckedAt}</time>
-            </p>
-          ) : null}
-
-          <div className={`${cardClass}-qr-frame`}>
-            <div className={`${cardClass}-qr-placeholder`}>
-              <span className={`${cardClass}-qr-icon`} aria-hidden />
-              <span>{localView.qrPlaceholderText}</span>
-            </div>
-          </div>
-
-          {localSessionError ? (
-            <SettingsSessionRecoveryPanel
-              layout="inline"
-              onRetry={() => void refreshLocalStatus()}
-              retrying={localBusy}
-              message={localErrorMessage ?? undefined}
-            />
-          ) : null}
-          {!localSessionError && localErrorMessage ? (
-            <div className={`${rootClass}-note ${rootClass}-note--warn`} role="alert">
-              <p>{localErrorMessage}</p>
-              <button
-                type="button"
-                className={`${rootClass}-btn`}
-                onClick={() => void refreshLocalStatus()}
-                disabled={localBusy}
-              >
-                {localLoading ? "Durum kontrol ediliyor…" : "Tekrar dene"}
-              </button>
-            </div>
-          ) : null}
-
-          <p className={`${cardClass}-body`}>{localView.actionHint}</p>
-          {localBusy ? (
-            <p className={`${cardClass}-body`} role="status" aria-live="polite">
-              İşlem tamamlanana kadar diğer yerel kontroller kilitlidir.
-            </p>
-          ) : null}
-
-          <div className={`${cardClass}-actions`}>
-            {localView.actions.start.visible ? (
-              <button
-                type="button"
-                className={`${rootClass}-btn`}
-                onClick={() => void startLocalPairing()}
-                disabled={!localView.actions.start.enabled || localControlsBlocked}
-              >
-                {localActiveAction === "start" ? "Başlatılıyor…" : "Yerel betayı başlat"}
-              </button>
-            ) : null}
-            {localView.actions.status.visible ? (
-              <button
-                type="button"
-                className={`${rootClass}-btn`}
-                onClick={() => void refreshLocalStatus()}
-                disabled={!localView.actions.status.enabled || localControlsBlocked}
-              >
-                {localActiveAction === "status" ? "Durum kontrol ediliyor…" : "Durumu yenile"}
-              </button>
-            ) : null}
-            {localView.actions.refresh_pairing.visible ? (
-              <button
-                type="button"
-                className={`${rootClass}-btn`}
-                onClick={() => void refreshPairing()}
-                disabled={
-                  !localView.actions.refresh_pairing.enabled || localControlsBlocked
-                }
-              >
-                {localActiveAction === "refresh_pairing"
-                  ? "Eşleştirme yenileniyor…"
-                  : "Eşleştirmeyi yenile"}
-              </button>
-            ) : null}
-            {localView.actions.disconnect.visible ? (
-              <button
-                type="button"
-                className={`${rootClass}-btn`}
-                onClick={() => void disconnectLocalPairing()}
-                disabled={!localView.actions.disconnect.enabled || localControlsBlocked}
-              >
-                {localActiveAction === "disconnect"
-                  ? "Bağlantı kesiliyor…"
-                  : "Bağlantıyı kes"}
-              </button>
-            ) : null}
-            {localView.actions.logout.visible ? (
-              <button
-                type="button"
-                className={`${rootClass}-btn`}
-                onClick={() => void logoutLocalPairing()}
-                disabled={!localView.actions.logout.enabled || localControlsBlocked}
-              >
-                {localActiveAction === "logout"
-                  ? "Yerel durum kapatılıyor…"
-                  : "Yerel oturumdan çık"}
-              </button>
-            ) : null}
-          </div>
-
-          <ul className={`${cardClass}-checklist`}>
-            <li>Bu özellik Beta / Yerel&apos;dir.</li>
-            <li>Production go-live sağlamaz.</li>
-            <li>GATE-P0-WA durumunu değiştirmez.</li>
-            <li>Resmi production yolu Meta WhatsApp Cloud API&apos;dir.</li>
-            <li>Mesaj gönderimi kapalıdır.</li>
-          </ul>
-          <p className={`${cardClass}-body ${cardClass}-body--emphasis`}>
-            Gerçek QR, sağlayıcı, session saklama ve canlı mesaj gönderimi bu kapsamda yoktur.
-          </p>
-        </article>
+        <WhatsAppWebLocalConnectionCard control={localControl} layout={layout} />
 
         <article
           className={`${cardClass}${alternateActive ? ` ${cardClass}--active` : ""}`}

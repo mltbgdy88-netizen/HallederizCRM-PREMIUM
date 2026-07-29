@@ -1,14 +1,44 @@
 /**
- * Runs focused client-side WhatsApp Web settings service, state, view, and UI tests.
+ * Runs focused client-side WhatsApp Web settings service, state, view, and React UI tests.
  */
 const { spawnSync } = require("node:child_process");
-const { readdirSync } = require("node:fs");
+const { existsSync, readdirSync, rmSync } = require("node:fs");
 const { join } = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 const root = join(__dirname, "..");
 const webDir = join(root, "apps", "web");
 const apiDir = join(root, "apps", "api");
+const uiDistDir = join(root, "packages", "ui", "dist");
+const uiDistExisted = existsSync(uiDistDir);
+const cleanupWorkspaceBuild = () => {
+  if (!uiDistExisted) {
+    rmSync(uiDistDir, { recursive: true, force: true });
+  }
+};
+process.once("exit", cleanupWorkspaceBuild);
+process.once("SIGINT", () => process.exit(130));
+process.once("SIGTERM", () => process.exit(143));
+const pnpmCommand = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
+const pnpmExecPath = process.env.npm_execpath;
+const workspaceBuildCommand = pnpmExecPath ? process.execPath : pnpmCommand;
+const workspaceBuildArgs = [
+  ...(pnpmExecPath ? [pnpmExecPath] : []),
+  "--filter",
+  "@hallederiz/ui",
+  "build"
+];
+
+const workspaceBuild = spawnSync(workspaceBuildCommand, workspaceBuildArgs, {
+  cwd: root,
+  stdio: "inherit",
+  env: { ...process.env }
+});
+
+if (workspaceBuild.status !== 0) {
+  console.error("Could not build the WhatsApp Web settings test dependencies.");
+  process.exit(workspaceBuild.status ?? 1);
+}
 
 const resolved = spawnSync(
   process.execPath,
@@ -29,7 +59,8 @@ const testDir = join(webDir, "src", "features", "settings", "__tests__");
 const testFiles = readdirSync(testDir)
   .filter(
     (file) =>
-      file.startsWith("whatsapp-web-local-") && file.endsWith(".test.ts")
+      file.startsWith("whatsapp-web-local-") &&
+      (file.endsWith(".test.ts") || file.endsWith(".test.tsx"))
   )
   .sort()
   .map((file) => join("src", "features", "settings", "__tests__", file));
@@ -52,7 +83,10 @@ const result = spawnSync(
   {
     cwd: webDir,
     stdio: "inherit",
-    env: { ...process.env }
+    env: {
+      ...process.env,
+      TS_NODE_COMPILER_OPTIONS: JSON.stringify({ jsx: "react-jsx" })
+    }
   }
 );
 

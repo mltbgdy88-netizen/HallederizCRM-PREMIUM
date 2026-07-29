@@ -9,8 +9,14 @@ const COMPONENT_PATH = resolve(
   "components",
   "WhatsAppConnectionMethodsSection.tsx"
 );
+const LOCAL_CARD_PATH = resolve(
+  SETTINGS_ROOT,
+  "components",
+  "WhatsAppWebLocalConnectionCard.tsx"
+);
 const CLIENT_SOURCE_PATHS = [
   COMPONENT_PATH,
+  LOCAL_CARD_PATH,
   resolve(SETTINGS_ROOT, "services", "whatsapp-web-local-control.ts"),
   resolve(SETTINGS_ROOT, "hooks", "use-whatsapp-web-local-control.ts"),
   resolve(SETTINGS_ROOT, "utils", "whatsapp-web-local-view.ts")
@@ -37,7 +43,7 @@ test("the existing Meta Cloud card contract remains present", () => {
 });
 
 test("the local card shows beta, production, gate, and outbound boundaries", () => {
-  const component = read(COMPONENT_PATH);
+  const component = read(LOCAL_CARD_PATH);
 
   for (const expected of [
     "WhatsApp Web Yerel Beta",
@@ -55,7 +61,7 @@ test("the local card shows beta, production, gate, and outbound boundaries", () 
 });
 
 test("the local card wires manual actions and inline session recovery", () => {
-  const component = read(COMPONENT_PATH);
+  const component = read(LOCAL_CARD_PATH);
 
   for (const actionLabel of [
     "Yerel betayı başlat",
@@ -75,7 +81,7 @@ test("the local card wires manual actions and inline session recovery", () => {
 });
 
 test("the card never renders raw control fields or fake QR material", () => {
-  const component = read(COMPONENT_PATH);
+  const component = read(LOCAL_CARD_PATH);
 
   assert.equal(component.includes(".reasonCode"), false);
   assert.equal(component.includes(".generation"), false);

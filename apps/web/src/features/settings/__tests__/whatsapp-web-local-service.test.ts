@@ -22,6 +22,15 @@ function jsonResponse(payload: unknown, status = 200): Response {
   return Response.json(payload, { status });
 }
 
+function bodyResponse(
+  body: BodyInit | null,
+  status: number,
+  contentType?: string
+): Response {
+  const headers = contentType ? { "Content-Type": contentType } : undefined;
+  return new Response(body, { status, headers });
+}
+
 function captureFetch(
   responder: (call: CapturedCall) => Response | Promise<Response>
 ): { fetchImpl: typeof fetch; calls: CapturedCall[] } {
@@ -178,16 +187,23 @@ test("401 produces a structured session recovery error without body leakage", as
 });
 
 test("403 production hard-deny produces only the safe production mapping", async () => {
-  const { fetchImpl } = captureFetch(() =>
-    jsonResponse(
-      {
-        ...SAFE_SNAPSHOT,
-        state: "disabled",
-        reasonCode: "whatsapp_web_local_production_hard_deny"
-      },
-      403
-    )
+  let bodyReads = 0;
+  const response = jsonResponse(
+    {
+      ...SAFE_SNAPSHOT,
+      state: "disabled",
+      reasonCode: "whatsapp_web_local_production_hard_deny"
+    },
+    403
   );
+  const originalJson = response.json.bind(response);
+  Object.defineProperty(response, "json", {
+    value: async () => {
+      bodyReads += 1;
+      return originalJson();
+    }
+  });
+  const { fetchImpl } = captureFetch(() => response);
 
   await assert.rejects(
     () => createWhatsAppWebLocalControlClient(fetchImpl).start(),
@@ -199,6 +215,202 @@ test("403 production hard-deny produces only the safe production mapping", async
       return true;
     }
   );
+  assert.equal(bodyReads, 1);
+});
+
+test("application/json success responses are accepted", async () => {
+  const { fetchImpl } = captureFetch(() =>
+    bodyResponse(JSON.stringify(SAFE_SNAPSHOT), 200, "application/json")
+  );
+
+  assert.deepEqual(
+    await createWhatsAppWebLocalControlClient(fetchImpl).getStatus(),
+    SAFE_SNAPSHOT
+  );
+});
+
+test("application/json with charset parameters is accepted", async () => {
+  const { fetchImpl } = captureFetch(() =>
+    bodyResponse(
+      JSON.stringify(SAFE_SNAPSHOT),
+      200,
+      "Application/JSON; charset=utf-8"
+    )
+  );
+
+  assert.deepEqual(
+    await createWhatsAppWebLocalControlClient(fetchImpl).getStatus(),
+    SAFE_SNAPSHOT
+  );
+});
+
+test("application structured +json media types are accepted", async () => {
+  const { fetchImpl } = captureFetch(() =>
+    bodyResponse(
+      JSON.stringify(SAFE_SNAPSHOT),
+      200,
+      "application/vnd.hallederiz.control+json; charset=UTF-8"
+    )
+  );
+
+  assert.deepEqual(
+    await createWhatsAppWebLocalControlClient(fetchImpl).getStatus(),
+    SAFE_SNAPSHOT
+  );
+});
+
+for (const [label, contentType] of [
+  ["text/plain", "text/plain"],
+  ["text/html", "text/html; charset=utf-8"],
+  ["application/javascript", "application/javascript"],
+  ["multipart/form-data", "multipart/form-data; boundary=safe"]
+] as const) {
+  test(`${label} success responses fail closed even when the body contains valid JSON`, async () => {
+    const { fetchImpl } = captureFetch(() =>
+      bodyResponse(JSON.stringify(SAFE_SNAPSHOT), 200, contentType)
+    );
+
+    await assert.rejects(
+      () => createWhatsAppWebLocalControlClient(fetchImpl).getStatus(),
+      (error: unknown) =>
+        error instanceof WhatsAppWebLocalControlError &&
+        error.reasonCode === "invalid_response"
+    );
+  });
+}
+
+test("missing Content-Type fails closed", async () => {
+  const { fetchImpl } = captureFetch(() =>
+    bodyResponse(JSON.stringify(SAFE_SNAPSHOT), 200)
+  );
+
+  await assert.rejects(
+    () => createWhatsAppWebLocalControlClient(fetchImpl).getStatus(),
+    (error: unknown) =>
+      error instanceof WhatsAppWebLocalControlError &&
+      error.reasonCode === "invalid_response"
+  );
+});
+
+test("204, empty JSON, and invalid JSON success responses fail closed", async () => {
+  for (const response of [
+    bodyResponse(null, 204),
+    bodyResponse("", 200, "application/json"),
+    bodyResponse("{invalid-json", 200, "application/json")
+  ]) {
+    const { fetchImpl } = captureFetch(() => response);
+    await assert.rejects(
+      () => createWhatsAppWebLocalControlClient(fetchImpl).getStatus(),
+      (error: unknown) =>
+        error instanceof WhatsAppWebLocalControlError &&
+        error.reasonCode === "invalid_response"
+    );
+  }
+});
+
+test("non-OK responses cannot become success snapshots", async () => {
+  const { fetchImpl } = captureFetch(() => jsonResponse(SAFE_SNAPSHOT, 500));
+
+  await assert.rejects(
+    () => createWhatsAppWebLocalControlClient(fetchImpl).getStatus(),
+    (error: unknown) => {
+      assert.ok(error instanceof WhatsAppWebLocalControlError);
+      assert.equal(error.reasonCode, "service_unavailable");
+      return true;
+    }
+  );
+});
+
+test("a valid JSON permission 403 remains request-denied", async () => {
+  let bodyReads = 0;
+  const response = jsonResponse(SAFE_SNAPSHOT, 403);
+  const originalJson = response.json.bind(response);
+  Object.defineProperty(response, "json", {
+    value: async () => {
+      bodyReads += 1;
+      return originalJson();
+    }
+  });
+  const { fetchImpl } = captureFetch(() => response);
+
+  await assert.rejects(
+    () => createWhatsAppWebLocalControlClient(fetchImpl).start(),
+    (error: unknown) => {
+      assert.ok(error instanceof WhatsAppWebLocalControlError);
+      assert.equal(error.status, 403);
+      assert.equal(error.reasonCode, "request_denied");
+      return true;
+    }
+  );
+  assert.equal(bodyReads, 1);
+});
+
+test("a production reason with a non-disabled state remains request-denied", async () => {
+  const { fetchImpl } = captureFetch(() =>
+    jsonResponse(
+      {
+        ...SAFE_SNAPSHOT,
+        state: "connected",
+        reasonCode: "whatsapp_web_local_production_hard_deny"
+      },
+      403
+    )
+  );
+
+  await assert.rejects(
+    () => createWhatsAppWebLocalControlClient(fetchImpl).start(),
+    (error: unknown) =>
+      error instanceof WhatsAppWebLocalControlError &&
+      error.reasonCode === "request_denied"
+  );
+});
+
+test("a non-JSON 403 is never classified as production hard-deny", async () => {
+  const marker = "PRODUCTION_HARD_DENY_MARKER_MUST_NOT_LEAK";
+  const { fetchImpl } = captureFetch(() =>
+    bodyResponse(
+      JSON.stringify({
+        ...SAFE_SNAPSHOT,
+        reasonCode: "whatsapp_web_local_production_hard_deny",
+        marker
+      }),
+      403,
+      "text/plain"
+    )
+  );
+
+  await assert.rejects(
+    () => createWhatsAppWebLocalControlClient(fetchImpl).start(),
+    (error: unknown) => {
+      assert.ok(error instanceof WhatsAppWebLocalControlError);
+      assert.equal(error.reasonCode, "request_denied");
+      assert.equal(error.message.includes(marker), false);
+      return true;
+    }
+  );
+});
+
+test("401 is mapped before its response body is read", async () => {
+  let bodyReads = 0;
+  const response = jsonResponse(
+    { session: "SESSION_RESPONSE_MARKER_MUST_NOT_LEAK" },
+    401
+  );
+  Object.defineProperty(response, "json", {
+    value: async () => {
+      bodyReads += 1;
+      throw new Error("body must not be read");
+    }
+  });
+  const { fetchImpl } = captureFetch(() => response);
+
+  await assert.rejects(
+    () => createWhatsAppWebLocalControlClient(fetchImpl).getStatus(),
+    (error: unknown) =>
+      error instanceof WhatsAppWebLocalControlError &&
+      error.reasonCode === "session_required"
+  );
+  assert.equal(bodyReads, 0);
 });
 
 test("invalid JSON fails closed without console logging", async () => {

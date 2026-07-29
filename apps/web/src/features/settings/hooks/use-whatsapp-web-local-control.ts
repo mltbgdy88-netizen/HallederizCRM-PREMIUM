@@ -74,6 +74,18 @@ function safeErrorState(error: unknown): Pick<
   };
 }
 
+function isAbortError(error: unknown): boolean {
+  return (
+    (error instanceof WhatsAppWebLocalControlError &&
+      error.reasonCode === "request_aborted") ||
+    (error instanceof DOMException && error.name === "AbortError") ||
+    (typeof error === "object" &&
+      error !== null &&
+      "name" in error &&
+      error.name === "AbortError")
+  );
+}
+
 export function createWhatsAppWebLocalControlController(
   client: WhatsAppWebLocalControlClient
 ): WhatsAppWebLocalControlController {
@@ -132,11 +144,12 @@ export function createWhatsAppWebLocalControlController(
       if (!isCurrentRequest(requestId)) {
         return;
       }
-      if (!state.snapshot || nextSnapshot.generation >= state.snapshot.generation) {
-        updateState({ snapshot: nextSnapshot });
-      }
+      updateState({ snapshot: nextSnapshot });
     } catch (error) {
       if (!isCurrentRequest(requestId) || controller.signal.aborted) {
+        return;
+      }
+      if (isAbortError(error)) {
         return;
       }
       updateState(safeErrorState(error));

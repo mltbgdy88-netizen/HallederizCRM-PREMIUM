@@ -120,7 +120,29 @@ function invalidResponseError(): WhatsAppWebLocalControlError {
   );
 }
 
+function hasJsonMediaType(response: Response): boolean {
+  const contentType = response.headers.get("Content-Type");
+  if (!contentType) {
+    return false;
+  }
+
+  const [mediaType] = contentType.split(";", 1);
+  const normalized = mediaType?.trim().toLowerCase();
+  if (!normalized) {
+    return false;
+  }
+
+  return (
+    normalized === "application/json" ||
+    /^application\/[a-z0-9!#$&^_.+-]+\+json$/i.test(normalized)
+  );
+}
+
 async function readJson(response: Response): Promise<unknown> {
+  if (!hasJsonMediaType(response)) {
+    throw invalidResponseError();
+  }
+
   try {
     return await response.json();
   } catch {
@@ -129,15 +151,15 @@ async function readJson(response: Response): Promise<unknown> {
 }
 
 async function isProductionHardDeny(response: Response): Promise<boolean> {
-  if (response.status !== 403) {
+  if (response.status !== 403 || !hasJsonMediaType(response)) {
     return false;
   }
 
   try {
-    const payload: unknown = await response.json();
+    const snapshot = sanitizeSnapshot(await readJson(response));
     return (
-      isRecord(payload) &&
-      payload.reasonCode === "whatsapp_web_local_production_hard_deny"
+      snapshot.state === "disabled" &&
+      snapshot.reasonCode === "whatsapp_web_local_production_hard_deny"
     );
   } catch {
     return false;
