@@ -17,6 +17,7 @@
     "test:web-approvals": "node scripts/run-web-approval-tests.cjs",
     "test:web-whatsapp": "node scripts/run-web-whatsapp-tests.cjs",
     "test:web-whatsapp-bff": "node scripts/run-web-whatsapp-bff-tests.cjs",
+    "test:web-whatsapp-settings": "node scripts/run-web-whatsapp-settings-tests.cjs",
     "test:web-ai": "node scripts/run-web-ai-tests.cjs",
     "test:web-erp": "node scripts/run-web-erp-tests.cjs",
     "test:web-factory": "node scripts/run-web-factory-tests.cjs",
