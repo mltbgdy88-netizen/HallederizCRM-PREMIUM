@@ -9,6 +9,30 @@ const { pathToFileURL } = require("node:url");
 const root = join(__dirname, "..");
 const webDir = join(root, "apps", "web");
 const apiDir = join(root, "apps", "api");
+const pnpmCommand = process.platform === "win32" ? "pnpm.cmd" : "pnpm";
+const pnpmExecPath = process.env.npm_execpath;
+const workspaceBuildCommand = pnpmExecPath ? process.execPath : pnpmCommand;
+const workspaceBuildArgs = [
+  ...(pnpmExecPath ? [pnpmExecPath] : []),
+  "--filter",
+  "@hallederiz/domain",
+  "build"
+];
+
+const workspaceBuild = spawnSync(
+  workspaceBuildCommand,
+  workspaceBuildArgs,
+  {
+    cwd: root,
+    stdio: "inherit",
+    env: { ...process.env }
+  }
+);
+
+if (workspaceBuild.status !== 0) {
+  console.error("Could not build the WhatsApp Web BFF workspace dependencies.");
+  process.exit(workspaceBuild.status ?? 1);
+}
 
 const resolved = spawnSync(process.execPath, ["-e", "process.stdout.write(require.resolve('ts-node/esm'))"], {
   cwd: apiDir,
