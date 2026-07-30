@@ -74,12 +74,28 @@ const SAFE_SUCCESS_REASON_CODES = new Set([
   "whatsapp_web_local_state_updated"
 ]);
 
+const SAFE_SNAPSHOT_KEYS = new Set([
+  "state",
+  "reasonCode",
+  "generation",
+  "providerCallExecuted",
+  "checkedAt"
+]);
+
 function isRecord(value: unknown): value is Record<string, unknown> {
   return typeof value === "object" && value !== null && !Array.isArray(value);
 }
 
 function sanitizeSnapshot(payload: unknown): WhatsAppWebLocalControlSnapshot {
   if (!isRecord(payload)) {
+    throw invalidResponseError();
+  }
+
+  const payloadKeys = Object.keys(payload);
+  if (
+    payloadKeys.length !== SAFE_SNAPSHOT_KEYS.size ||
+    payloadKeys.some((key) => !SAFE_SNAPSHOT_KEYS.has(key))
+  ) {
     throw invalidResponseError();
   }
 

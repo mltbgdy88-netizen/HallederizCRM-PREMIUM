@@ -86,18 +86,11 @@ test("mutation methods use only the four fixed POST endpoints without a body", a
   }
 });
 
-test("response is reduced to the five-field allowlist", async () => {
-  const { fetchImpl } = captureFetch(() =>
-    jsonResponse({
-      ...SAFE_SNAPSHOT,
-      secret: "must-not-enter-state",
-      session: { value: "must-not-enter-state" },
-      qr: "must-not-enter-state"
-    })
-  );
-
+test("an exact five-field success snapshot is accepted and returned allowlisted", async () => {
+  const { fetchImpl } = captureFetch(() => jsonResponse(SAFE_SNAPSHOT));
   const snapshot = await createWhatsAppWebLocalControlClient(fetchImpl).getStatus();
 
+  assert.deepEqual(snapshot, SAFE_SNAPSHOT);
   assert.deepEqual(Object.keys(snapshot).sort(), [
     "checkedAt",
     "generation",
@@ -105,9 +98,97 @@ test("response is reduced to the five-field allowlist", async () => {
     "reasonCode",
     "state"
   ]);
-  assert.equal("secret" in snapshot, false);
-  assert.equal("session" in snapshot, false);
-  assert.equal("qr" in snapshot, false);
+});
+
+test("exact snapshot keys are accepted regardless of field order", async () => {
+  const reordered = {
+    checkedAt: SAFE_SNAPSHOT.checkedAt,
+    providerCallExecuted: SAFE_SNAPSHOT.providerCallExecuted,
+    generation: SAFE_SNAPSHOT.generation,
+    state: SAFE_SNAPSHOT.state,
+    reasonCode: SAFE_SNAPSHOT.reasonCode
+  };
+  const { fetchImpl } = captureFetch(() => jsonResponse(reordered));
+
+  assert.deepEqual(
+    await createWhatsAppWebLocalControlClient(fetchImpl).getStatus(),
+    SAFE_SNAPSHOT
+  );
+});
+
+for (const [field, marker] of [
+  ["secret", "SUCCESS_SECRET_MARKER_MUST_NOT_LEAK"],
+  ["session", "SUCCESS_SESSION_MARKER_MUST_NOT_LEAK"]
+] as const) {
+  test(`a successful snapshot with an extra ${field} field fails closed`, async () => {
+    const { fetchImpl } = captureFetch(() =>
+      jsonResponse({ ...SAFE_SNAPSHOT, [field]: marker })
+    );
+
+    await assert.rejects(
+      () => createWhatsAppWebLocalControlClient(fetchImpl).getStatus(),
+      (error: unknown) => {
+        assert.ok(error instanceof WhatsAppWebLocalControlError);
+        assert.equal(error.reasonCode, "invalid_response");
+        assert.equal(error.message.includes(marker), false);
+        return true;
+      }
+    );
+  });
+}
+
+test("every missing required snapshot field fails closed", async () => {
+  for (const field of Object.keys(SAFE_SNAPSHOT)) {
+    const payload: Record<string, unknown> = { ...SAFE_SNAPSHOT };
+    delete payload[field];
+    const { fetchImpl } = captureFetch(() => jsonResponse(payload));
+
+    await assert.rejects(
+      () => createWhatsAppWebLocalControlClient(fetchImpl).getStatus(),
+      (error: unknown) =>
+        error instanceof WhatsAppWebLocalControlError &&
+        error.reasonCode === "invalid_response"
+    );
+  }
+});
+
+test("an own enumerable __proto__ JSON field fails closed", async () => {
+  const payload = `{"state":"logged_out","reasonCode":"whatsapp_web_local_enabled_non_production","generation":0,"providerCallExecuted":false,"checkedAt":"2026-07-29T10:00:00.000Z","__proto__":{"polluted":true}}`;
+  const { fetchImpl } = captureFetch(() =>
+    bodyResponse(payload, 200, "application/json")
+  );
+
+  await assert.rejects(
+    () => createWhatsAppWebLocalControlClient(fetchImpl).getStatus(),
+    (error: unknown) =>
+      error instanceof WhatsAppWebLocalControlError &&
+      error.reasonCode === "invalid_response"
+  );
+});
+
+test("an extra field value is not read while the exact key set is rejected", async () => {
+  let extraValueReads = 0;
+  const payload: Record<string, unknown> = { ...SAFE_SNAPSHOT };
+  Object.defineProperty(payload, "secret", {
+    enumerable: true,
+    get() {
+      extraValueReads += 1;
+      return "UNREAD_SECRET_MARKER";
+    }
+  });
+  const response = bodyResponse(null, 200, "application/json");
+  Object.defineProperty(response, "json", {
+    value: async () => payload
+  });
+  const { fetchImpl } = captureFetch(() => response);
+
+  await assert.rejects(
+    () => createWhatsAppWebLocalControlClient(fetchImpl).getStatus(),
+    (error: unknown) =>
+      error instanceof WhatsAppWebLocalControlError &&
+      error.reasonCode === "invalid_response"
+  );
+  assert.equal(extraValueReads, 0);
 });
 
 test("unknown states fail closed", async () => {
@@ -217,6 +298,69 @@ test("403 production hard-deny produces only the safe production mapping", async
   );
   assert.equal(bodyReads, 1);
 });
+
+for (const [field, marker] of [
+  ["secret", "PRODUCTION_SECRET_MARKER_MUST_NOT_LEAK"],
+  ["session", "PRODUCTION_SESSION_MARKER_MUST_NOT_LEAK"],
+  ["unexpected", "PRODUCTION_UNKNOWN_MARKER_MUST_NOT_LEAK"]
+] as const) {
+  test(`a production-deny 403 with an extra ${field} field remains request-denied`, async () => {
+    let bodyReads = 0;
+    const loggedMessages: string[] = [];
+    const originalLog = console.log;
+    const originalWarn = console.warn;
+    const originalError = console.error;
+    const response = jsonResponse(
+      {
+        ...SAFE_SNAPSHOT,
+        state: "disabled",
+        reasonCode: "whatsapp_web_local_production_hard_deny",
+        [field]: marker
+      },
+      403
+    );
+    const originalJson = response.json.bind(response);
+    Object.defineProperty(response, "json", {
+      value: async () => {
+        bodyReads += 1;
+        return originalJson();
+      }
+    });
+    const { fetchImpl } = captureFetch(() => response);
+
+    console.log = (...args: unknown[]) => {
+      loggedMessages.push(args.map(String).join(" "));
+    };
+    console.warn = (...args: unknown[]) => {
+      loggedMessages.push(args.map(String).join(" "));
+    };
+    console.error = (...args: unknown[]) => {
+      loggedMessages.push(args.map(String).join(" "));
+    };
+    try {
+      await assert.rejects(
+        () => createWhatsAppWebLocalControlClient(fetchImpl).start(),
+        (error: unknown) => {
+          assert.ok(error instanceof WhatsAppWebLocalControlError);
+          assert.equal(error.status, 403);
+          assert.equal(error.reasonCode, "request_denied");
+          assert.equal(error.message.includes(marker), false);
+          return true;
+        }
+      );
+    } finally {
+      console.log = originalLog;
+      console.warn = originalWarn;
+      console.error = originalError;
+    }
+    assert.equal(bodyReads, 1);
+    assert.equal(
+      loggedMessages.some((message) => message.includes(marker)),
+      false
+    );
+    assert.deepEqual(loggedMessages, []);
+  });
+}
 
 test("application/json success responses are accepted", async () => {
   const { fetchImpl } = captureFetch(() =>

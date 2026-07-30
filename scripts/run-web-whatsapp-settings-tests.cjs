@@ -85,6 +85,7 @@ const result = spawnSync(
     stdio: "inherit",
     env: {
       ...process.env,
+      NODE_ENV: "development",
       TS_NODE_COMPILER_OPTIONS: JSON.stringify({ jsx: "react-jsx" })
     }
   }
