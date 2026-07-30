@@ -3,12 +3,13 @@
 import Link from "next/link";
 import type { PlatformSettings } from "@hallederiz/types";
 import { useWhatsAppChannel } from "../../whatsapp/hooks/use-whatsapp-channel";
-import { MSG_WA_QR_PLACEHOLDER } from "../../whatsapp/data/whatsapp-action-messages";
+import { useWhatsAppWebLocalControl } from "../hooks/use-whatsapp-web-local-control";
 import {
   isAlternateProviderSelected,
   resolveAlternateProviderLabel,
   resolveMetaCloudBadge
 } from "../utils/whatsapp-connection-methods";
+import { WhatsAppWebLocalConnectionCard } from "./WhatsAppWebLocalConnectionCard";
 
 type WhatsAppConnectionMethodsSectionProps = {
   settings: PlatformSettings;
@@ -27,6 +28,7 @@ export function WhatsAppConnectionMethodsSection({
   layout = "settings"
 }: WhatsAppConnectionMethodsSectionProps) {
   const { channelView, health, loading, error, useDemo, refresh } = useWhatsAppChannel();
+  const localControl = useWhatsAppWebLocalControl();
   const metaBadge = resolveMetaCloudBadge(health, useDemo);
   const alternateActive = isAlternateProviderSelected(settings.whatsapp.provider);
   const rootClass = layout === "reference" ? "setf-wa-conn" : "hz-settings-wa-conn";
@@ -97,26 +99,7 @@ export function WhatsAppConnectionMethodsSection({
           </button>
         </article>
 
-        <article className={`${cardClass} ${cardClass}--muted`} role="listitem">
-          <header className={`${cardClass}-head`}>
-            <div>
-              <h3 className={`${cardClass}-title`}>QR / WhatsApp Web</h3>
-              <p className={`${cardClass}-subtitle`}>Yerel deneme — production yolu değil</p>
-            </div>
-            <span className={badgeClass("beta", layout)}>Beta / yerel</span>
-          </header>
-          <div className={`${cardClass}-qr-frame`} aria-hidden>
-            <div className={`${cardClass}-qr-placeholder`}>
-              <span className={`${cardClass}-qr-icon`} />
-              <span>QR alanı</span>
-            </div>
-          </div>
-          <p className={`${cardClass}-body`}>{MSG_WA_QR_PLACEHOLDER}</p>
-          <p className={`${cardClass}-body ${cardClass}-body--emphasis`}>
-            Production go-live için kullanılmaz. Bağlı görünüm üretilmez; desteklenen adapter olmadan
-            eşleştirme başlatılmaz.
-          </p>
-        </article>
+        <WhatsAppWebLocalConnectionCard control={localControl} layout={layout} />
 
         <article
           className={`${cardClass}${alternateActive ? ` ${cardClass}--active` : ""}`}
