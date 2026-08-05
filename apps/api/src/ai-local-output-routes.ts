@@ -223,26 +223,32 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.get("/local-output/rules", async (request, reply) =>
-    withGuards(request, reply, requireReadAccess(readPermissions.localOutput), async () => ({ items: listLocalOutputRules() }))
+    withGuards(request, reply, requireReadAccess(readPermissions.localOutput), async (context) => ({
+      items: listLocalOutputRules(context.tenantId)
+    }))
   );
 
   server.patch<{ Body: LocalOutputRule[] }>("/local-output/rules", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write", "documents.write"])], async () => ({
-      items: patchLocalOutputRules(request.body)
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write", "documents.write"])], async (context) => ({
+      items: patchLocalOutputRules(context.tenantId, request.body)
     }))
   );
 
   server.get("/print-jobs", async (request, reply) =>
-    withGuards(request, reply, requireReadAccess(readPermissions.localOutput), async () => ({ items: listPrintJobs() }))
+    withGuards(request, reply, requireReadAccess(readPermissions.localOutput), async (context) => ({
+      items: listPrintJobs(context.tenantId)
+    }))
   );
 
   server.get("/file-save-jobs", async (request, reply) =>
-    withGuards(request, reply, requireReadAccess(readPermissions.localOutput), async () => ({ items: listFileSaveJobs() }))
+    withGuards(request, reply, requireReadAccess(readPermissions.localOutput), async (context) => ({
+      items: listFileSaveJobs(context.tenantId)
+    }))
   );
 
   server.post<{ Params: { id: string } }>("/documents/:id/queue-save", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write", "documents.write"])], async (context) => {
-      const item = queueDocumentSave(request.params.id);
+      const item = queueDocumentSave(context.tenantId, request.params.id);
       recordAuditEvent(context, {
         entityType: "document",
         entityId: request.params.id,
@@ -256,7 +262,7 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
 
   server.post<{ Params: { id: string } }>("/documents/:id/queue-print", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write", "documents.write"])], async (context) => {
-      const item = queueDocumentPrint(request.params.id);
+      const item = queueDocumentPrint(context.tenantId, request.params.id);
       recordAuditEvent(context, {
         entityType: "document",
         entityId: request.params.id,
@@ -270,7 +276,7 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
 
   server.post<{ Params: { id: string } }>("/print-jobs/:id/start", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) => {
-      const item = markPrintJobStatus(request.params.id, "printing");
+      const item = markPrintJobStatus(context.tenantId, request.params.id, "printing");
       if (!item) return reply.status(404).send({ message: "Print job not found" });
       recordAuditEvent(context, {
         entityType: "print_job",
@@ -285,7 +291,7 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
 
   server.post<{ Params: { id: string }; Body: { errorMessage?: string } }>("/print-jobs/:id/complete", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) => {
-      const item = markPrintJobStatus(request.params.id, "completed", request.body?.errorMessage);
+      const item = markPrintJobStatus(context.tenantId, request.params.id, "completed", request.body?.errorMessage);
       if (!item) return reply.status(404).send({ message: "Print job not found" });
       recordAuditEvent(context, {
         entityType: "print_job",
@@ -300,7 +306,7 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
 
   server.post<{ Params: { id: string }; Body: { errorMessage?: string } }>("/print-jobs/:id/fail", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) => {
-      const item = markPrintJobStatus(request.params.id, "failed", request.body?.errorMessage);
+      const item = markPrintJobStatus(context.tenantId, request.params.id, "failed", request.body?.errorMessage);
       if (!item) return reply.status(404).send({ message: "Print job not found" });
       recordAuditEvent(context, {
         entityType: "print_job",
@@ -315,7 +321,7 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
 
   server.post<{ Params: { id: string } }>("/file-save-jobs/:id/start", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) => {
-      const item = markFileSaveJobStatus(request.params.id, "saving");
+      const item = markFileSaveJobStatus(context.tenantId, request.params.id, "saving");
       if (!item) return reply.status(404).send({ message: "File save job not found" });
       recordAuditEvent(context, {
         entityType: "file_save_job",
@@ -330,7 +336,7 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
 
   server.post<{ Params: { id: string }; Body: { errorMessage?: string } }>("/file-save-jobs/:id/complete", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) => {
-      const item = markFileSaveJobStatus(request.params.id, "completed", request.body?.errorMessage);
+      const item = markFileSaveJobStatus(context.tenantId, request.params.id, "completed", request.body?.errorMessage);
       if (!item) return reply.status(404).send({ message: "File save job not found" });
       recordAuditEvent(context, {
         entityType: "file_save_job",
@@ -345,7 +351,7 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
 
   server.post<{ Params: { id: string }; Body: { errorMessage?: string } }>("/file-save-jobs/:id/fail", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) => {
-      const item = markFileSaveJobStatus(request.params.id, "failed", request.body?.errorMessage);
+      const item = markFileSaveJobStatus(context.tenantId, request.params.id, "failed", request.body?.errorMessage);
       if (!item) return reply.status(404).send({ message: "File save job not found" });
       recordAuditEvent(context, {
         entityType: "file_save_job",
@@ -359,7 +365,9 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.get("/local-agent/status", async (request, reply) =>
-    withGuards(request, reply, requireReadAccess(readPermissions.localOutput), async () => ({ item: getLocalAgentStatus() }))
+    withGuards(request, reply, requireReadAccess(readPermissions.localOutput), async (context) => ({
+      item: getLocalAgentStatus(context.tenantId)
+    }))
   );
 
   server.get("/health/ai", async (request, reply) =>
@@ -419,8 +427,8 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.get("/health/local-agent", async (request, reply) =>
-    withGuards(request, reply, requireReadAccess(readPermissions.localOutput), async () => {
-      const status = getLocalAgentStatus();
+    withGuards(request, reply, requireReadAccess(readPermissions.localOutput), async (context) => {
+      const status = getLocalAgentStatus(context.tenantId);
       return {
         item: {
           service: "local-agent",
@@ -443,8 +451,8 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.post("/health/local-agent/test-save-dry-run", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated], async () => {
-      const job = queueDocumentSave("document_1");
+    withGuards(request, reply, [assertAuthenticated], async (context) => {
+      const job = queueDocumentSave(context.tenantId, "document_1");
       return {
         item: {
           status: "healthy",
@@ -459,8 +467,8 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.post("/health/local-agent/test-print-dry-run", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated], async () => {
-      const job = queueDocumentPrint("document_1");
+    withGuards(request, reply, [assertAuthenticated], async (context) => {
+      const job = queueDocumentPrint(context.tenantId, "document_1");
       return {
         item: {
           status: "healthy",
@@ -477,8 +485,8 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   server.post<{ Body: { status?: LocalAgentStatus; version?: string; checkedAt?: string; message?: string } }>(
     "/local-agent/status",
     async (request, reply) =>
-      withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async () =>
-        reply.status(201).send({ item: reportLocalAgentStatus(request.body ?? {}) })
+      withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) =>
+        reply.status(201).send({ item: reportLocalAgentStatus(context.tenantId, request.body ?? {}) })
       )
   );
 }

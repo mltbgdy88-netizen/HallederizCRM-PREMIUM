@@ -885,7 +885,7 @@ export async function registerCommercialOperationsRoutes(server: FastifyInstance
       const { resolveDocumentDownloadLink } = await import("../modules/documents/download-contract");
       const service = new CommercialCoreService(context);
       const document = await service.getDocument(request.params.id);
-      const resolved = resolveDocumentDownloadLink(document, request.params.id);
+      const resolved = resolveDocumentDownloadLink(document, request.params.id, context.tenantId);
       if (resolved.status === 404) {
         return reply.status(404).send({ message: "Document not found" });
       }

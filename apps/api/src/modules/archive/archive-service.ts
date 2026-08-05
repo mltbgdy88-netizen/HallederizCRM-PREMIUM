@@ -19,11 +19,11 @@ function mapDocumentTypeToSource(document: Document): ArchiveSourceType {
   }
 }
 
-function mapDocumentToArchiveStatus(document: Document, documentId: string): ArchiveRecord["status"] {
+function mapDocumentToArchiveStatus(document: Document, documentId: string, tenantId: string): ArchiveRecord["status"] {
   if (document.downloadUrl && HTTPS_URL.test(document.downloadUrl)) {
     return "ready";
   }
-  const job = getLatestFileSaveJobForDocument(documentId);
+  const job = getLatestFileSaveJobForDocument(tenantId, documentId);
   if (job?.status === "failed") {
     return "failed";
   }
@@ -37,8 +37,8 @@ function mapDocumentToArchiveStatus(document: Document, documentId: string): Arc
 }
 
 export function mapDocumentToArchiveRecord(document: Document, tenantId: string): ArchiveRecord {
-  const status = mapDocumentToArchiveStatus(document, document.id);
-  const job = getLatestFileSaveJobForDocument(document.id);
+  const status = mapDocumentToArchiveStatus(document, document.id, tenantId);
+  const job = getLatestFileSaveJobForDocument(tenantId, document.id);
   const downloadUrl =
     document.downloadUrl && HTTPS_URL.test(document.downloadUrl) ? document.downloadUrl.trim() : undefined;
 
@@ -90,7 +90,7 @@ export class ArchiveService {
       .filter((doc) => doc.tenantId === this.context.tenantId)
       .map((doc) => mapDocumentToArchiveRecord(doc, this.context.tenantId));
 
-    const completedJobs = listFileSaveJobs().filter((job) => job.status === "completed" && job.tenantId === this.context.tenantId);
+    const completedJobs = listFileSaveJobs(this.context.tenantId).filter((job) => job.status === "completed");
     for (const job of completedJobs) {
       const existing = items.find((row) => row.documentId === job.documentId);
       if (existing) {
@@ -147,8 +147,8 @@ export class ArchiveService {
     }
 
     const documents = listDocuments();
-    const document = documents.find((doc) => doc.id === documentId);
-    const resolved = resolveDocumentDownloadLink(document, documentId);
+    const document = documents.find((doc) => doc.id === documentId && doc.tenantId === this.context.tenantId);
+    const resolved = resolveDocumentDownloadLink(document, documentId, this.context.tenantId);
 
     if (resolved.status === 404) {
       return { status: 404 };

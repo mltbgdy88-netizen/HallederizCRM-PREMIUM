@@ -138,12 +138,27 @@ const fileSaveJobs: FileSaveJob[] = [
   }
 ];
 
-const localAgentState: { status: LocalAgentStatus; version: string; checkedAt: string; message?: string } = {
+type LocalAgentState = { status: LocalAgentStatus; version: string; checkedAt: string; message?: string };
+
+const defaultLocalAgentState: LocalAgentState = {
   status: "safe_mode",
   version: "0.1.0-foundation",
   checkedAt: now,
   message: "Local agent beklemede."
 };
+
+const localAgentStateByTenant = new Map<string, LocalAgentState>([
+  [tenantId, { ...defaultLocalAgentState }]
+]);
+
+const TENANT_ID_PATTERN = /^[A-Za-z0-9][A-Za-z0-9._:-]{0,127}$/;
+
+function requireTenantId(value: string): string {
+  if (typeof value !== "string" || value !== value.trim() || !TENANT_ID_PATTERN.test(value)) {
+    throw new Error("tenant_id_required");
+  }
+  return value;
+}
 
 function classifyExecutionFailure(error: unknown): { retryable: boolean; message: string } {
   const message = error instanceof Error ? error.message : "Execution failed";
@@ -260,8 +275,8 @@ export function runApprovalExecution(id: string) {
       create_invoice: () => createInvoice(payload as never),
       create_return: () => createReturn(payload as never),
       send_document_whatsapp: () => sendDocumentWhatsApp(String(payload.documentId ?? execution.targetId)),
-      queue_document_save: () => queueDocumentSave(String(payload.documentId ?? execution.targetId)),
-      queue_document_print: () => queueDocumentPrint(String(payload.documentId ?? execution.targetId))
+      queue_document_save: () => queueDocumentSave(execution.tenantId, String(payload.documentId ?? execution.targetId)),
+      queue_document_print: () => queueDocumentPrint(execution.tenantId, String(payload.documentId ?? execution.targetId))
     };
 
     const runner = actionMap[operation];
@@ -346,33 +361,42 @@ export function cancelApprovalExecution(id: string) {
   return execution;
 }
 
-export function listLocalOutputRules() {
-  return localOutputRules;
+export function listLocalOutputRules(tenantId: string) {
+  const scopedTenantId = requireTenantId(tenantId);
+  return localOutputRules.filter((rule) => rule.tenantId === scopedTenantId);
 }
 
-export function patchLocalOutputRules(body: LocalOutputRule[]) {
-  localOutputRules.splice(0, localOutputRules.length, ...body);
-  return localOutputRules;
+export function patchLocalOutputRules(tenantId: string, body: LocalOutputRule[]) {
+  const scopedTenantId = requireTenantId(tenantId);
+  const retainedRules = localOutputRules.filter((rule) => rule.tenantId !== scopedTenantId);
+  const scopedRules = body.map((rule) => ({ ...rule, tenantId: scopedTenantId }));
+  localOutputRules.splice(0, localOutputRules.length, ...retainedRules, ...scopedRules);
+  return listLocalOutputRules(scopedTenantId);
 }
 
-export function listPrintJobs() {
-  return printJobs;
+export function listPrintJobs(tenantId: string) {
+  const scopedTenantId = requireTenantId(tenantId);
+  return printJobs.filter((job) => job.tenantId === scopedTenantId);
 }
 
-export function listFileSaveJobs() {
-  return fileSaveJobs;
+export function listFileSaveJobs(tenantId: string) {
+  const scopedTenantId = requireTenantId(tenantId);
+  return fileSaveJobs.filter((job) => job.tenantId === scopedTenantId);
 }
 
-export function getLatestFileSaveJobForDocument(documentId: string) {
+export function getLatestFileSaveJobForDocument(tenantId: string, documentId: string) {
+  const scopedTenantId = requireTenantId(tenantId);
   return [...fileSaveJobs]
-    .filter((job) => job.documentId === documentId)
+    .filter((job) => job.tenantId === scopedTenantId && job.documentId === documentId)
     .sort((left, right) => right.queuedAt.localeCompare(left.queuedAt))[0];
 }
 
-export function queueDocumentSave(documentId: string) {
+export function queueDocumentSave(tenantId: string, documentId: string) {
+  const scopedTenantId = requireTenantId(tenantId);
   const job = {
     ...fileSaveJobs[0],
     id: `file_save_${documentId}_${Date.now()}`,
+    tenantId: scopedTenantId,
     documentId,
     queuedAt: new Date().toISOString(),
     status: "queued"
@@ -381,10 +405,12 @@ export function queueDocumentSave(documentId: string) {
   return job;
 }
 
-export function queueDocumentPrint(documentId: string) {
+export function queueDocumentPrint(tenantId: string, documentId: string) {
+  const scopedTenantId = requireTenantId(tenantId);
   const job = {
     ...printJobs[0],
     id: `print_${documentId}_${Date.now()}`,
+    tenantId: scopedTenantId,
     documentId,
     queuedAt: new Date().toISOString(),
     status: "queued"
@@ -393,25 +419,32 @@ export function queueDocumentPrint(documentId: string) {
   return job;
 }
 
-export function getLocalAgentStatus() {
-  return { ...localAgentState };
+export function getLocalAgentStatus(tenantId: string) {
+  const scopedTenantId = requireTenantId(tenantId);
+  return { ...(localAgentStateByTenant.get(scopedTenantId) ?? defaultLocalAgentState) };
 }
 
-export function reportLocalAgentStatus(payload: {
+export function reportLocalAgentStatus(tenantId: string, payload: {
   status?: LocalAgentStatus;
   version?: string;
   checkedAt?: string;
   message?: string;
 }) {
-  localAgentState.status = payload.status ?? localAgentState.status;
-  localAgentState.version = payload.version ?? localAgentState.version;
-  localAgentState.checkedAt = payload.checkedAt ?? new Date().toISOString();
-  localAgentState.message = payload.message ?? localAgentState.message;
-  return getLocalAgentStatus();
+  const scopedTenantId = requireTenantId(tenantId);
+  const current = getLocalAgentStatus(scopedTenantId);
+  const next: LocalAgentState = {
+    status: payload.status ?? current.status,
+    version: payload.version ?? current.version,
+    checkedAt: payload.checkedAt ?? new Date().toISOString(),
+    message: payload.message ?? current.message
+  };
+  localAgentStateByTenant.set(scopedTenantId, next);
+  return { ...next };
 }
 
-export function markPrintJobStatus(id: string, status: PrintJob["status"], errorMessage?: string) {
-  const job = printJobs.find((item) => item.id === id);
+export function markPrintJobStatus(tenantId: string, id: string, status: PrintJob["status"], errorMessage?: string) {
+  const scopedTenantId = requireTenantId(tenantId);
+  const job = printJobs.find((item) => item.tenantId === scopedTenantId && item.id === id);
   if (!job) return null;
   if (status === "printing") {
     job.startedAt = new Date().toISOString();
@@ -424,8 +457,9 @@ export function markPrintJobStatus(id: string, status: PrintJob["status"], error
   return job;
 }
 
-export function markFileSaveJobStatus(id: string, status: FileSaveJob["status"], errorMessage?: string) {
-  const job = fileSaveJobs.find((item) => item.id === id);
+export function markFileSaveJobStatus(tenantId: string, id: string, status: FileSaveJob["status"], errorMessage?: string) {
+  const scopedTenantId = requireTenantId(tenantId);
+  const job = fileSaveJobs.find((item) => item.tenantId === scopedTenantId && item.id === id);
   if (!job) return null;
   if (status === "saving") {
     job.startedAt = new Date().toISOString();

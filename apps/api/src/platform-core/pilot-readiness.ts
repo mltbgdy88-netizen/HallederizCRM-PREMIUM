@@ -258,7 +258,7 @@ export function buildPilotReadiness(tenantId: string, settings: PlatformSettings
     "statement_pdf",
     "return_note_pdf"
   ];
-  const ruleTypes = new Set(listLocalOutputRules().map((rule) => rule.documentType));
+  const ruleTypes = new Set(listLocalOutputRules(tenantId).map((rule) => rule.documentType));
   const missingTemplateCoverage = requiredDocumentTypes.filter((type) => !ruleTypes.has(type as never));
   const documentStatus: PilotChecklistStatus =
     missingTemplateCoverage.length === 0 ? "tamam" : missingTemplateCoverage.length <= 3 ? "uyari" : "eksik";
