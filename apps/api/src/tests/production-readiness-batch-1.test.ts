@@ -46,15 +46,15 @@ test("integrations service: erp sync includes preview fields", async () => {
 });
 
 test("local output lifecycle: queue + status update + local-agent status", () => {
-  const queuedSave = queueDocumentSave("document_1");
-  const queuedPrint = queueDocumentPrint("document_1");
+  const queuedSave = queueDocumentSave(context.tenantId, "document_1");
+  const queuedPrint = queueDocumentPrint(context.tenantId, "document_1");
 
-  const startedSave = markFileSaveJobStatus(queuedSave.id, "saving");
-  const completedPrint = markPrintJobStatus(queuedPrint.id, "completed");
+  const startedSave = markFileSaveJobStatus(context.tenantId, queuedSave.id, "saving");
+  const completedPrint = markPrintJobStatus(context.tenantId, queuedPrint.id, "completed");
   assert.equal(startedSave?.status, "saving");
   assert.equal(completedPrint?.status, "completed");
 
-  const reported = reportLocalAgentStatus({ status: "online", message: "test cycle ok" });
+  const reported = reportLocalAgentStatus(context.tenantId, { status: "online", message: "test cycle ok" });
   assert.equal(reported.status, "online");
-  assert.equal(getLocalAgentStatus().status, "online");
+  assert.equal(getLocalAgentStatus(context.tenantId).status, "online");
 });

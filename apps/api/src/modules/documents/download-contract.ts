@@ -27,9 +27,10 @@ function buildFileMetadata(document: Document, downloadUrl: string | null): Part
 
 export function resolveDocumentDownloadLink(
   document: Document | null | undefined,
-  documentId: string
+  documentId: string,
+  tenantId: string
 ): { status: 404 } | { status: 202; item: DocumentDownloadLink } | { status: 200; item: DocumentDownloadLink } {
-  if (!document) {
+  if (!document || document.tenantId !== tenantId) {
     return { status: 404 };
   }
 
@@ -47,7 +48,7 @@ export function resolveDocumentDownloadLink(
     };
   }
 
-  const job = getLatestFileSaveJobForDocument(documentId);
+  const job = getLatestFileSaveJobForDocument(tenantId, documentId);
   const base: DocumentDownloadLink = {
     documentId,
     status: "pending",

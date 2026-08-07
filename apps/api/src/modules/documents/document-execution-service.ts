@@ -109,9 +109,9 @@ export function executeDocumentArchiveJob(
     return { status: "failed", mutation_executed: false, reasons: ["document_not_found"] };
   }
 
-  let job = getLatestFileSaveJobForDocument(documentId);
+  let job = getLatestFileSaveJobForDocument(context.tenantId, documentId);
   if (!job) {
-    job = queueDocumentSave(documentId);
+    job = queueDocumentSave(context.tenantId, documentId);
   }
 
   const downloadUrl =
@@ -123,7 +123,7 @@ export function executeDocumentArchiveJob(
     setDocumentFileReady(documentId, { downloadUrl, fileStatus: "ready" });
   }
 
-  markFileSaveJobStatus(job.id, "completed");
+  markFileSaveJobStatus(context.tenantId, job.id, "completed");
 
   return {
     status: "completed",

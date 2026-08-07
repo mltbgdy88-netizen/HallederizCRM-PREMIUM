@@ -649,7 +649,7 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
     withGuards(request, reply, requireReadAccess(readPermissions.integrations), async (context) => {
       const service = new IntegrationsService(context);
       const aiHealth = new AiRuntimeService(context).getHealth();
-      const localAgent = getLocalAgentStatus();
+      const localAgent = getLocalAgentStatus(context.tenantId);
       const summary = service.getIntegrationsHealthSummary();
       return {
         item: {
