@@ -1,6 +1,7 @@
 import type { FastifyRequest } from "fastify";
 import { extractSessionTokenFromCookieHeader, getSessionByToken } from "./session-store";
 import { getAuthMode } from "./auth-mode";
+import { extractLocalAgentServiceBearer, LOCAL_AGENT_SERVICE_TOKEN_PREFIX } from "./local-agent-service-auth";
 
 export interface RequestContext {
   tenantId: string;
@@ -113,10 +114,15 @@ export function buildRequestContext(request: FastifyRequest): RequestContext {
   const authMode = getAuthMode();
   const authHeader = request.headers.authorization;
   const bearerToken = typeof authHeader === "string" && authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : undefined;
+  const serviceAuthorization = extractLocalAgentServiceBearer(typeof authHeader === "string" ? authHeader : undefined);
   const cookieToken = extractSessionTokenFromCookieHeader(
     typeof request.headers.cookie === "string" ? request.headers.cookie : undefined
   );
-  const sessionToken = String(request.headers["x-session-token"] ?? bearerToken ?? cookieToken ?? "");
+  const sessionToken = String(
+    serviceAuthorization.candidate
+      ? serviceAuthorization.accessToken ?? `${LOCAL_AGENT_SERVICE_TOKEN_PREFIX}invalid`
+      : request.headers["x-session-token"] ?? bearerToken ?? cookieToken ?? ""
+  );
   const isMockAccessToken = sessionToken.startsWith("mock_access_");
   const principal = authMode.allowMockAccessTokens ? parseTokenPrincipal(sessionToken || undefined) : { roles: [], permissions: [] };
   const session =
