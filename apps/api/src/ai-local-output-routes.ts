@@ -1,4 +1,4 @@
-import type { FastifyInstance } from "fastify";
+import type { FastifyInstance, FastifyReply, FastifyRequest } from "fastify";
 import type { ApprovalExecution, LocalAgentStatus, LocalOutputRule } from "@hallederiz/types";
 import {
   cancelApprovalExecution,
@@ -31,8 +31,61 @@ import { recordAuditEvent } from "./shared/audit-timeline";
 import { AiRuntimeService } from "./modules/ai-runtime/service";
 import { readPermissions, requireReadAccess } from "./shared/read-guards";
 import { enforcePolicyForRoute } from "./shared/policy-route-enforcement";
+import { getAuthMode } from "./shared/auth-mode";
+import { asApiErrorPayload } from "./shared/errors";
+import type { RequestContext } from "./shared/request-context";
+import {
+  LocalAgentServiceTokenStore,
+  buildLocalAgentServiceError,
+  localAgentServiceTokenStore,
+  resolveLocalAgentServiceRequest,
+  type LocalAgentServiceCapability
+} from "./shared/local-agent-service-auth";
 
-export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
+export interface AiLocalOutputRouteDeps {
+  localAgentServiceTokenStore?: LocalAgentServiceTokenStore;
+}
+
+async function withLocalAgentOperationAccess<T>(
+  request: FastifyRequest,
+  reply: FastifyReply,
+  requiredCapability: LocalAgentServiceCapability,
+  userGuards: Array<(context: RequestContext) => void>,
+  run: (context: RequestContext) => Promise<T> | T,
+  tokenStore: LocalAgentServiceTokenStore
+) {
+  const serviceResolution = resolveLocalAgentServiceRequest(request, requiredCapability, tokenStore);
+  if (serviceResolution.kind === "user_session") {
+    return withGuards(request, reply, userGuards, run);
+  }
+  if (serviceResolution.kind === "denied") {
+    reply.header("cache-control", "no-store");
+    reply.header("pragma", "no-cache");
+    return reply
+      .status(serviceResolution.statusCode)
+      .send(buildLocalAgentServiceError(serviceResolution.statusCode, serviceResolution.reason));
+  }
+
+  const serviceContext: RequestContext = {
+    tenantId: serviceResolution.principal.tenantId,
+    userId: "system",
+    persistenceMode: getAuthMode().persistenceMode,
+    isAuthenticated: false,
+    roles: [],
+    permissions: []
+  };
+  reply.header("cache-control", "no-store");
+  reply.header("pragma", "no-cache");
+  try {
+    return await run(serviceContext);
+  } catch (error) {
+    const payload = asApiErrorPayload(error);
+    return reply.status(payload.statusCode).send(payload.body);
+  }
+}
+
+export async function registerAiLocalOutputRoutes(server: FastifyInstance, deps: AiLocalOutputRouteDeps = {}) {
+  const serviceTokenStore = deps.localAgentServiceTokenStore ?? localAgentServiceTokenStore;
   server.post<{ Body: { message?: string } }>("/ai/chat", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated], async (context) => {
       const service = new AiRuntimeService(context);
@@ -235,15 +288,25 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.get("/print-jobs", async (request, reply) =>
-    withGuards(request, reply, requireReadAccess(readPermissions.localOutput), async (context) => ({
-      items: listPrintJobs(context.tenantId)
-    }))
+    withLocalAgentOperationAccess(
+      request,
+      reply,
+      "local_agent.jobs.read",
+      requireReadAccess(readPermissions.localOutput),
+      async (context) => ({ items: listPrintJobs(context.tenantId) }),
+      serviceTokenStore
+    )
   );
 
   server.get("/file-save-jobs", async (request, reply) =>
-    withGuards(request, reply, requireReadAccess(readPermissions.localOutput), async (context) => ({
-      items: listFileSaveJobs(context.tenantId)
-    }))
+    withLocalAgentOperationAccess(
+      request,
+      reply,
+      "local_agent.jobs.read",
+      requireReadAccess(readPermissions.localOutput),
+      async (context) => ({ items: listFileSaveJobs(context.tenantId) }),
+      serviceTokenStore
+    )
   );
 
   server.post<{ Params: { id: string } }>("/documents/:id/queue-save", async (request, reply) =>
@@ -275,93 +338,135 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.post<{ Params: { id: string } }>("/print-jobs/:id/start", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) => {
-      const item = markPrintJobStatus(context.tenantId, request.params.id, "printing");
-      if (!item) return reply.status(404).send({ message: "Print job not found" });
-      recordAuditEvent(context, {
-        entityType: "print_job",
-        entityId: item.id,
-        eventType: "local_output.print.start",
-        title: "Yazdirma isi baslatildi",
-        description: `${item.documentType} yazdirma isi baslatildi.`
-      });
-      return { item };
-    })
+    withLocalAgentOperationAccess(
+      request,
+      reply,
+      "local_agent.jobs.transition",
+      [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])],
+      async (context) => {
+        const item = markPrintJobStatus(context.tenantId, request.params.id, "printing");
+        if (!item) return reply.status(404).send({ message: "Print job not found" });
+        recordAuditEvent(context, {
+          entityType: "print_job",
+          entityId: item.id,
+          eventType: "local_output.print.start",
+          title: "Yazdirma isi baslatildi",
+          description: `${item.documentType} yazdirma isi baslatildi.`
+        });
+        return { item };
+      },
+      serviceTokenStore
+    )
   );
 
   server.post<{ Params: { id: string }; Body: { errorMessage?: string } }>("/print-jobs/:id/complete", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) => {
-      const item = markPrintJobStatus(context.tenantId, request.params.id, "completed", request.body?.errorMessage);
-      if (!item) return reply.status(404).send({ message: "Print job not found" });
-      recordAuditEvent(context, {
-        entityType: "print_job",
-        entityId: item.id,
-        eventType: "local_output.print.completed",
-        title: "Yazdirma isi tamamlandi",
-        description: `${item.documentType} yazdirma isi tamamlandi.`
-      });
-      return { item };
-    })
+    withLocalAgentOperationAccess(
+      request,
+      reply,
+      "local_agent.jobs.transition",
+      [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])],
+      async (context) => {
+        const item = markPrintJobStatus(context.tenantId, request.params.id, "completed", request.body?.errorMessage);
+        if (!item) return reply.status(404).send({ message: "Print job not found" });
+        recordAuditEvent(context, {
+          entityType: "print_job",
+          entityId: item.id,
+          eventType: "local_output.print.completed",
+          title: "Yazdirma isi tamamlandi",
+          description: `${item.documentType} yazdirma isi tamamlandi.`
+        });
+        return { item };
+      },
+      serviceTokenStore
+    )
   );
 
   server.post<{ Params: { id: string }; Body: { errorMessage?: string } }>("/print-jobs/:id/fail", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) => {
-      const item = markPrintJobStatus(context.tenantId, request.params.id, "failed", request.body?.errorMessage);
-      if (!item) return reply.status(404).send({ message: "Print job not found" });
-      recordAuditEvent(context, {
-        entityType: "print_job",
-        entityId: item.id,
-        eventType: "local_output.print.failed",
-        title: "Yazdirma isi basarisiz",
-        description: request.body?.errorMessage ?? `${item.documentType} yazdirma isi basarisiz oldu.`
-      });
-      return { item };
-    })
+    withLocalAgentOperationAccess(
+      request,
+      reply,
+      "local_agent.jobs.transition",
+      [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])],
+      async (context) => {
+        const item = markPrintJobStatus(context.tenantId, request.params.id, "failed", request.body?.errorMessage);
+        if (!item) return reply.status(404).send({ message: "Print job not found" });
+        recordAuditEvent(context, {
+          entityType: "print_job",
+          entityId: item.id,
+          eventType: "local_output.print.failed",
+          title: "Yazdirma isi basarisiz",
+          description: request.body?.errorMessage ?? `${item.documentType} yazdirma isi basarisiz oldu.`
+        });
+        return { item };
+      },
+      serviceTokenStore
+    )
   );
 
   server.post<{ Params: { id: string } }>("/file-save-jobs/:id/start", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) => {
-      const item = markFileSaveJobStatus(context.tenantId, request.params.id, "saving");
-      if (!item) return reply.status(404).send({ message: "File save job not found" });
-      recordAuditEvent(context, {
-        entityType: "file_save_job",
-        entityId: item.id,
-        eventType: "local_output.file_save.start",
-        title: "Dosya kaydetme isi baslatildi",
-        description: `${item.documentType} kaydetme isi baslatildi.`
-      });
-      return { item };
-    })
+    withLocalAgentOperationAccess(
+      request,
+      reply,
+      "local_agent.jobs.transition",
+      [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])],
+      async (context) => {
+        const item = markFileSaveJobStatus(context.tenantId, request.params.id, "saving");
+        if (!item) return reply.status(404).send({ message: "File save job not found" });
+        recordAuditEvent(context, {
+          entityType: "file_save_job",
+          entityId: item.id,
+          eventType: "local_output.file_save.start",
+          title: "Dosya kaydetme isi baslatildi",
+          description: `${item.documentType} kaydetme isi baslatildi.`
+        });
+        return { item };
+      },
+      serviceTokenStore
+    )
   );
 
   server.post<{ Params: { id: string }; Body: { errorMessage?: string } }>("/file-save-jobs/:id/complete", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) => {
-      const item = markFileSaveJobStatus(context.tenantId, request.params.id, "completed", request.body?.errorMessage);
-      if (!item) return reply.status(404).send({ message: "File save job not found" });
-      recordAuditEvent(context, {
-        entityType: "file_save_job",
-        entityId: item.id,
-        eventType: "local_output.file_save.completed",
-        title: "Dosya kaydetme isi tamamlandi",
-        description: `${item.documentType} kaydetme isi tamamlandi.`
-      });
-      return { item };
-    })
+    withLocalAgentOperationAccess(
+      request,
+      reply,
+      "local_agent.jobs.transition",
+      [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])],
+      async (context) => {
+        const item = markFileSaveJobStatus(context.tenantId, request.params.id, "completed", request.body?.errorMessage);
+        if (!item) return reply.status(404).send({ message: "File save job not found" });
+        recordAuditEvent(context, {
+          entityType: "file_save_job",
+          entityId: item.id,
+          eventType: "local_output.file_save.completed",
+          title: "Dosya kaydetme isi tamamlandi",
+          description: `${item.documentType} kaydetme isi tamamlandi.`
+        });
+        return { item };
+      },
+      serviceTokenStore
+    )
   );
 
   server.post<{ Params: { id: string }; Body: { errorMessage?: string } }>("/file-save-jobs/:id/fail", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) => {
-      const item = markFileSaveJobStatus(context.tenantId, request.params.id, "failed", request.body?.errorMessage);
-      if (!item) return reply.status(404).send({ message: "File save job not found" });
-      recordAuditEvent(context, {
-        entityType: "file_save_job",
-        entityId: item.id,
-        eventType: "local_output.file_save.failed",
-        title: "Dosya kaydetme isi basarisiz",
-        description: request.body?.errorMessage ?? `${item.documentType} kaydetme isi basarisiz oldu.`
-      });
-      return { item };
-    })
+    withLocalAgentOperationAccess(
+      request,
+      reply,
+      "local_agent.jobs.transition",
+      [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])],
+      async (context) => {
+        const item = markFileSaveJobStatus(context.tenantId, request.params.id, "failed", request.body?.errorMessage);
+        if (!item) return reply.status(404).send({ message: "File save job not found" });
+        recordAuditEvent(context, {
+          entityType: "file_save_job",
+          entityId: item.id,
+          eventType: "local_output.file_save.failed",
+          title: "Dosya kaydetme isi basarisiz",
+          description: request.body?.errorMessage ?? `${item.documentType} kaydetme isi basarisiz oldu.`
+        });
+        return { item };
+      },
+      serviceTokenStore
+    )
   );
 
   server.get("/local-agent/status", async (request, reply) =>
@@ -485,8 +590,13 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   server.post<{ Body: { status?: LocalAgentStatus; version?: string; checkedAt?: string; message?: string } }>(
     "/local-agent/status",
     async (request, reply) =>
-      withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])], async (context) =>
-        reply.status(201).send({ item: reportLocalAgentStatus(context.tenantId, request.body ?? {}) })
+      withLocalAgentOperationAccess(
+        request,
+        reply,
+        "local_agent.status.write",
+        [assertAuthenticated, (context) => assertAnyPermission(context, ["local_output.write"])],
+        async (context) => reply.status(201).send({ item: reportLocalAgentStatus(context.tenantId, request.body ?? {}) }),
+        serviceTokenStore
       )
   );
 }
