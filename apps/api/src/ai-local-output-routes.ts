@@ -38,7 +38,7 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
       const service = new AiRuntimeService(context);
       const prompt = request.body?.message ?? "";
       if (!prompt.trim()) {
-        return { item: chatAi(request.body) };
+        return { item: chatAi(context.tenantId, request.body) };
       }
       const chat = await service.chat(prompt);
       const messages = service.buildAssistantMessage(prompt, chat.message, "text");
@@ -85,7 +85,7 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
           targetId: request.body?.targetId,
           targetNo: request.body?.targetNo
         });
-        const proposal = saveAiProposal(generated.proposal);
+        const proposal = saveAiProposal(context.tenantId, generated.proposal);
         recordAuditEvent(context, {
           entityType: "ai_proposal",
           entityId: proposal.id,
@@ -98,12 +98,15 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.get("/ai/proposals", async (request, reply) =>
-    withGuards(request, reply, requireReadAccess(readPermissions.approvals), async () => ({ items: listAiProposals(), total: listAiProposals().length }))
+    withGuards(request, reply, requireReadAccess(readPermissions.approvals), async (context) => {
+      const items = listAiProposals(context.tenantId);
+      return { items, total: items.length };
+    })
   );
 
   server.get<{ Params: { id: string } }>("/ai/proposals/:id", async (request, reply) =>
-    withGuards(request, reply, requireReadAccess(readPermissions.approvals), async () => {
-      const item = getAiProposal(request.params.id);
+    withGuards(request, reply, requireReadAccess(readPermissions.approvals), async (context) => {
+      const item = getAiProposal(context.tenantId, request.params.id);
       if (!item) return reply.status(404).send({ message: "AI proposal not found" });
       return { item };
     })
@@ -111,7 +114,7 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
 
   server.post<{ Params: { id: string } }>("/ai/proposals/:id/confirm", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.write", "ai.actions.write"])], async (context) => {
-      const item = updateAiProposalStatus(request.params.id, "approved");
+      const item = updateAiProposalStatus(context.tenantId, request.params.id, "approved");
       if (!item) return reply.status(404).send({ message: "AI proposal not found" });
       recordAuditEvent(context, {
         entityType: "ai_proposal",
@@ -126,7 +129,7 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
 
   server.post<{ Params: { id: string } }>("/ai/proposals/:id/reject", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.write", "ai.actions.write"])], async (context) => {
-      const item = updateAiProposalStatus(request.params.id, "rejected");
+      const item = updateAiProposalStatus(context.tenantId, request.params.id, "rejected");
       if (!item) return reply.status(404).send({ message: "AI proposal not found" });
       recordAuditEvent(context, {
         entityType: "ai_proposal",
@@ -140,16 +143,19 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.get("/ai/insights", async (request, reply) =>
-    withGuards(request, reply, requireReadAccess(readPermissions.tasks), async () => ({ items: listAiInsights(), total: listAiInsights().length }))
+    withGuards(request, reply, requireReadAccess(readPermissions.tasks), async (context) => {
+      const items = listAiInsights(context.tenantId);
+      return { items, total: items.length };
+    })
   );
 
   server.post("/ai/insights/run", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["ai.actions.write", "approvals.write"])], async (context) => {
       const service = new AiRuntimeService(context);
       const insights = await service.generateInsights();
-      replaceAiInsights(insights);
+      replaceAiInsights(context.tenantId, insights);
       return {
-        item: runAiInsights()
+        item: runAiInsights(context.tenantId)
       };
     })
   );
@@ -179,25 +185,35 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
   );
 
   server.get("/approval-executions", async (request, reply) =>
-    withGuards(request, reply, requireReadAccess(readPermissions.approvals), async () => ({ items: listApprovalExecutions(), total: listApprovalExecutions().length }))
+    withGuards(request, reply, requireReadAccess(readPermissions.approvals), async (context) => {
+      const items = listApprovalExecutions(context.tenantId);
+      return { items, total: items.length };
+    })
   );
 
   server.get<{ Params: { id: string } }>("/approval-executions/:id", async (request, reply) =>
-    withGuards(request, reply, requireReadAccess(readPermissions.approvals), async () => {
-      const item = getApprovalExecution(request.params.id);
+    withGuards(request, reply, requireReadAccess(readPermissions.approvals), async (context) => {
+      const item = getApprovalExecution(context.tenantId, request.params.id);
       if (!item) return reply.status(404).send({ message: "Approval execution not found" });
       return { item };
     })
   );
 
   server.post<{ Body: Partial<ApprovalExecution> }>("/approval-executions", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.write", "ai.actions.write"])], async () =>
-      reply.status(201).send({ item: createApprovalExecution(request.body) })
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.write", "ai.actions.write"])], async (context) => {
+      if (process.env.NODE_ENV === "production") {
+        return reply.status(404).send({ message: "Route not found" });
+      }
+      return reply.status(201).send({ item: createApprovalExecution(context.tenantId, request.body) });
+    }
     )
   );
 
   server.post<{ Params: { id: string } }>("/approval-executions/:id/run", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.write", "ai.actions.write"])], async (context) => {
+      if (process.env.NODE_ENV === "production") {
+        return reply.status(404).send({ message: "Route not found" });
+      }
       const policyResult = await enforcePolicyForRoute(context, {
         actionKey: "platform.ai.execute",
         requiredPermissions: ["approvals.write", "ai.actions.write"],
@@ -208,15 +224,15 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
         return reply.status(policyResult.statusCode).send(policyResult.body);
       }
 
-      const item = runApprovalExecution(request.params.id);
+      const item = runApprovalExecution(context.tenantId, request.params.id);
       if (!item) return reply.status(404).send({ message: "Approval execution not found" });
       return { item };
     })
   );
 
   server.post<{ Params: { id: string } }>("/approval-executions/:id/cancel", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.write", "ai.actions.write"])], async () => {
-      const item = cancelApprovalExecution(request.params.id);
+    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.write", "ai.actions.write"])], async (context) => {
+      const item = cancelApprovalExecution(context.tenantId, request.params.id);
       if (!item) return reply.status(404).send({ message: "Approval execution not found" });
       return { item };
     })
