@@ -65,7 +65,8 @@ export class FactoryAdapter {
   }
 
   async syncStock(factoryId: string) {
-    const fallback = syncFactoryStock(factoryId);
+    const fallback = syncFactoryStock(this.context.tenantId, factoryId);
+    if (!fallback) return null;
     if (!this.liveEnabled || !this.baseUrl) return { ...fallback, provider: "mock" };
     try {
       const payload = await this.fetchLive(`/factories/${factoryId}/sync-stock`, "POST", { tenantId: this.context.tenantId });
@@ -85,11 +86,11 @@ export class FactoryAdapter {
   }
 
   createOrder(payload: Partial<FactoryOrder>) {
-    return createFactoryOrder(payload);
+    return createFactoryOrder(this.context.tenantId, payload);
   }
 
   async sendOrder(id: string) {
-    const fallback = markFactoryOrderSent(id);
+    const fallback = markFactoryOrderSent(this.context.tenantId, id);
     if (!fallback) return null;
     if (!this.liveEnabled || !this.baseUrl) return { ...fallback, provider: "mock" };
     try {
@@ -101,15 +102,15 @@ export class FactoryAdapter {
   }
 
   confirmOrder(id: string) {
-    return updateFactoryOrderStatus(id, "confirmed");
+    return updateFactoryOrderStatus(this.context.tenantId, id, "confirmed");
   }
 
   markShipped(id: string) {
-    return updateFactoryOrderStatus(id, "shipped");
+    return updateFactoryOrderStatus(this.context.tenantId, id, "shipped");
   }
 
   completeOrder(id: string) {
-    return updateFactoryOrderStatus(id, "completed");
+    return updateFactoryOrderStatus(this.context.tenantId, id, "completed");
   }
 
   listLogs() {

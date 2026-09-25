@@ -167,6 +167,9 @@ export async function registerOperationsEngineRoutes(server: FastifyInstance) {
   });
   server.post<{ Params: { id: string } }>("/approvals/:id/execute", async (request, reply) => {
     return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.write", "approvals.execute", "ai.actions.write"])], async (context) => {
+      if (process.env.NODE_ENV === "production") {
+        return reply.status(404).send({ message: "Route not found" });
+      }
       const service = new OperationsEngineService(context);
       const currentApproval = service.getApproval(request.params.id);
       if (!currentApproval) return reply.status(404).send({ message: "Approval not found" });
@@ -186,7 +189,8 @@ export async function registerOperationsEngineRoutes(server: FastifyInstance) {
       }
 
       const execution = runApprovalExecution(
-        createApprovalExecution({
+        context.tenantId,
+        createApprovalExecution(context.tenantId, {
           tenantId: currentApproval.tenantId,
           approvalId: currentApproval.id,
           proposalId: typeof currentApproval.payload.proposalId === "string" ? currentApproval.payload.proposalId : undefined,

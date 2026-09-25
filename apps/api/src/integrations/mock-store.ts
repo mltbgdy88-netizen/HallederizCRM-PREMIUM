@@ -88,12 +88,13 @@ export function listWhatsAppTemplates() { return whatsappTemplates; }
 
 export function listErpConnections() { return erpConnections; }
 export function getErpConnection(id: string) { return erpConnections.find((item) => item.id === id); }
-export function createErpConnection(body: Partial<ErpConnection>) { const connection = { ...erpConnections[0], ...body, id: `erp_conn_${erpConnections.length + 1}` } as ErpConnection; erpConnections.push(connection); return connection; }
-export function patchErpConnection(id: string, body: Partial<ErpConnection>) { const connection = getErpConnection(id); if (!connection) return null; Object.assign(connection, body); return connection; }
-export function testErpConnection(id: string) { const connection = getErpConnection(id); if (!connection) return null; connection.lastTestResult = "success"; return connection; }
-export function syncErpConnection(id: string) { const connection = getErpConnection(id); if (!connection) return null; connection.lastSyncedAt = now; return { connection, log: erpLogs[0] }; }
+export function getErpConnectionForTenant(expectedTenantId: string, id: string) { const connection = getErpConnection(id); return connection?.tenantId === expectedTenantId ? connection : null; }
+export function createErpConnection(expectedTenantId: string, body: Partial<ErpConnection>) { const connection = { ...erpConnections[0], ...body, tenantId: expectedTenantId, id: `erp_conn_${erpConnections.length + 1}` } as ErpConnection; erpConnections.push(connection); return connection; }
+export function patchErpConnection(expectedTenantId: string, id: string, body: Partial<ErpConnection>) { const connection = getErpConnectionForTenant(expectedTenantId, id); if (!connection) return null; Object.assign(connection, body, { tenantId: expectedTenantId }); return connection; }
+export function testErpConnection(expectedTenantId: string, id: string) { const connection = getErpConnectionForTenant(expectedTenantId, id); if (!connection) return null; connection.lastTestResult = "success"; return connection; }
+export function syncErpConnection(expectedTenantId: string, id: string) { const connection = getErpConnectionForTenant(expectedTenantId, id); if (!connection) return null; connection.lastSyncedAt = now; const log = erpLogs.find((item) => item.tenantId === expectedTenantId); return { connection, log }; }
 export function listErpMappings() { return erpMappings; }
-export function patchErpMappings(body: ErpMapping[]) { erpMappings.splice(0, erpMappings.length, ...body); return erpMappings; }
+export function patchErpMappings(expectedTenantId: string, body: ErpMapping[]) { const retained = erpMappings.filter((item) => item.tenantId !== expectedTenantId); const scoped = body.map((item) => ({ ...item, tenantId: expectedTenantId })); erpMappings.splice(0, erpMappings.length, ...retained, ...scoped); return scoped; }
 export function listErpLogs() { return erpLogs; }
 export function listErpTemplates() { return erpTemplates; }
 
@@ -124,13 +125,15 @@ export function appendFactoryLog(
 
 export function listFactories() { return factories; }
 export function listFactoryStocks(factoryId: string) { return factoryStocks.filter((item) => item.factoryId === factoryId); }
-export function syncFactoryStock(factoryId: string) {
+export function syncFactoryStock(expectedTenantId: string, factoryId: string) {
   const syncedAt = factoryLogTimestamp();
-  const itemCount = listFactoryStocks(factoryId).length;
-  const factory = factories.find((item) => item.id === factoryId);
-  const integration = factoryIntegrations.find((item) => item.factoryId === factoryId);
+  const factory = factories.find((item) => item.id === factoryId && item.tenantId === expectedTenantId);
+  if (!factory) return null;
+  const itemCount = listFactoryStocks(factoryId).filter((item) => item.tenantId === expectedTenantId).length;
+  const integration = factoryIntegrations.find((item) => item.factoryId === factoryId && item.tenantId === expectedTenantId);
   appendFactoryLog({
     integrationId: integration?.id ?? "factory_int_1",
+    tenantId: expectedTenantId,
     level: integration?.status === "error" ? "warning" : "info",
     message: `${factory?.name ?? factoryId} stok senkronu tamamlandi (${itemCount} satir).`,
     entityId: factoryId
@@ -142,16 +145,18 @@ export function syncFactoryStock(factoryId: string) {
 }
 export function listFactoryOrders() { return factoryOrders; }
 export function getFactoryOrder(id: string) { return factoryOrders.find((item) => item.id === id || item.factoryOrderNo === id); }
-export function createFactoryOrder(body: Partial<FactoryOrder>) { const order = { ...factoryOrders[0], ...body, id: `factory_order_${factoryOrders.length + 1}`, factoryOrderNo: body.factoryOrderNo ?? `FO-${factoryOrders.length + 300}` } as FactoryOrder; factoryOrders.push(order); return order; }
-export function updateFactoryOrderStatus(id: string, status: FactoryOrder["status"]) { const order = getFactoryOrder(id); if (!order) return null; order.status = status; order.lastUpdatedAt = factoryLogTimestamp(); return order; }
-export function markFactoryOrderSent(id: string) {
-  const order = getFactoryOrder(id);
+export function getFactoryOrderForTenant(expectedTenantId: string, id: string) { const order = getFactoryOrder(id); return order?.tenantId === expectedTenantId ? order : null; }
+export function createFactoryOrder(expectedTenantId: string, body: Partial<FactoryOrder>) { const order = { ...factoryOrders[0], ...body, tenantId: expectedTenantId, id: `factory_order_${factoryOrders.length + 1}`, factoryOrderNo: body.factoryOrderNo ?? `FO-${factoryOrders.length + 300}` } as FactoryOrder; factoryOrders.push(order); return order; }
+export function updateFactoryOrderStatus(expectedTenantId: string, id: string, status: FactoryOrder["status"]) { const order = getFactoryOrderForTenant(expectedTenantId, id); if (!order) return null; order.status = status; order.lastUpdatedAt = factoryLogTimestamp(); return order; }
+export function markFactoryOrderSent(expectedTenantId: string, id: string) {
+  const order = getFactoryOrderForTenant(expectedTenantId, id);
   if (!order) return null;
   order.status = "sent";
   order.lastUpdatedAt = factoryLogTimestamp();
-  const integration = factoryIntegrations.find((item) => item.factoryId === order.factoryId);
+  const integration = factoryIntegrations.find((item) => item.factoryId === order.factoryId && item.tenantId === expectedTenantId);
   appendFactoryLog({
     integrationId: integration?.id ?? "factory_int_1",
+    tenantId: expectedTenantId,
     level: "info",
     message: `${order.factoryOrderNo} fabrikaya iletildi.`,
     entityType: "factory_order",

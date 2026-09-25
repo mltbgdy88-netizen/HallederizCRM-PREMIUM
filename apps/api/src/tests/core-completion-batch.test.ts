@@ -30,23 +30,23 @@ test("request context flags tenant mismatch when session tenant differs from hea
 });
 
 test("approval execution marks failed results with retryability suffix", () => {
-  const exec = getApprovalExecution("approval_exec_1");
+  const exec = getApprovalExecution("tenant_1", "approval_exec_1");
   assert.ok(exec);
   if (!exec) return;
   exec.operationType = "unsupported_test_action" as never;
   exec.targetId = "invalid_target_id";
-  const failed = runApprovalExecution(exec.id);
+  const failed = runApprovalExecution("tenant_1", exec.id);
   assert.ok(failed);
   assert.equal(failed?.status, "failed");
   assert.match(failed?.result?.message ?? "", /\[(RETRYABLE|NON_RETRYABLE)\]/);
 });
 
 test("approval execution cancel path sets cancelled status", () => {
-  const created = getApprovalExecution("approval_exec_1");
+  const created = getApprovalExecution("tenant_1", "approval_exec_1");
   assert.ok(created);
   if (!created) return;
   created.status = "authorized";
-  const cancelled = cancelApprovalExecution(created.id);
+  const cancelled = cancelApprovalExecution("tenant_1", created.id);
   assert.ok(cancelled);
   assert.equal(cancelled?.status, "cancelled");
 });

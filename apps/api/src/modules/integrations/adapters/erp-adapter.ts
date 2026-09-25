@@ -79,15 +79,15 @@ export class ErpAdapter {
   }
 
   createConnection(payload: Partial<ErpConnection>) {
-    return createErpConnection(payload);
+    return createErpConnection(this.context.tenantId, payload);
   }
 
   patchConnection(id: string, payload: Partial<ErpConnection>) {
-    return patchErpConnection(id, payload);
+    return patchErpConnection(this.context.tenantId, id, payload);
   }
 
   async testConnection(id: string) {
-    const base = testErpConnection(id);
+    const base = testErpConnection(this.context.tenantId, id);
     if (!base) return null;
     if (!this.liveEnabled || !this.baseUrl) return { ...base, provider: "mock" };
 
@@ -112,7 +112,7 @@ export class ErpAdapter {
   }
 
   async syncConnection(id: string) {
-    const result = syncErpConnection(id);
+    const result = syncErpConnection(this.context.tenantId, id);
     if (!result) return null;
 
     if (this.liveEnabled && this.baseUrl) {
@@ -165,7 +165,7 @@ export class ErpAdapter {
   }
 
   patchMappings(payload: ErpMapping[]) {
-    return patchErpMappings(payload);
+    return patchErpMappings(this.context.tenantId, payload);
   }
 
   listLogs() {

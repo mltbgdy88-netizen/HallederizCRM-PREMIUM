@@ -167,17 +167,18 @@ function classifyExecutionFailure(error: unknown): { retryable: boolean; message
   return { retryable, message };
 }
 
-export function chatAi(body: { message?: string }) {
+export function chatAi(expectedTenantId: string, body: { message?: string }) {
+  const tenant = requireTenantId(expectedTenantId);
   const message: AiMessage = {
     id: `ai_msg_api_${Date.now()}`,
-    tenantId,
+    tenantId: tenant,
     sessionId: "ai_session_api",
     role: "assistant",
     inputMode: "text",
     body: `Mock AI cevap: ${body.message ?? ""}`,
     createdAt: new Date().toISOString()
   };
-  return { message, proposals: aiProposals };
+  return { message, proposals: listAiProposals(tenant) };
 }
 
 export function parseAiCommand(body: { text?: string }) {
@@ -189,52 +190,59 @@ export function parseAiCommand(body: { text?: string }) {
   };
 }
 
-export function listAiProposals() {
-  return aiProposals;
+export function listAiProposals(expectedTenantId: string) {
+  return aiProposals.filter((proposal) => proposal.tenantId === requireTenantId(expectedTenantId));
 }
 
-export function saveAiProposal(proposal: AiProposal) {
-  aiProposals.unshift(proposal);
-  return proposal;
+export function saveAiProposal(expectedTenantId: string, proposal: AiProposal) {
+  const scopedProposal = { ...proposal, tenantId: requireTenantId(expectedTenantId) };
+  aiProposals.unshift(scopedProposal);
+  return scopedProposal;
 }
 
-export function getAiProposal(id: string) {
-  return aiProposals.find((proposal) => proposal.id === id || proposal.proposalNo === id);
+export function getAiProposal(expectedTenantId: string, id: string) {
+  const tenant = requireTenantId(expectedTenantId);
+  return aiProposals.find((proposal) => proposal.tenantId === tenant && (proposal.id === id || proposal.proposalNo === id));
 }
 
-export function updateAiProposalStatus(id: string, status: AiProposal["status"]) {
-  const proposal = getAiProposal(id);
+export function updateAiProposalStatus(expectedTenantId: string, id: string, status: AiProposal["status"]) {
+  const proposal = getAiProposal(expectedTenantId, id);
   if (!proposal) return null;
   proposal.status = status;
   proposal.updatedAt = new Date().toISOString();
   return proposal;
 }
 
-export function listAiInsights() {
-  return aiInsights;
+export function listAiInsights(expectedTenantId: string) {
+  return aiInsights.filter((insight) => insight.tenantId === requireTenantId(expectedTenantId));
 }
 
-export function replaceAiInsights(nextInsights: AiInsight[]) {
-  aiInsights.splice(0, aiInsights.length, ...nextInsights);
-  return aiInsights;
+export function replaceAiInsights(expectedTenantId: string, nextInsights: AiInsight[]) {
+  const tenant = requireTenantId(expectedTenantId);
+  const retained = aiInsights.filter((insight) => insight.tenantId !== tenant);
+  aiInsights.splice(0, aiInsights.length, ...retained, ...nextInsights.map((insight) => ({ ...insight, tenantId: tenant })));
+  return listAiInsights(tenant);
 }
 
-export function runAiInsights() {
-  return { items: aiInsights, generatedAt: new Date().toISOString() };
+export function runAiInsights(expectedTenantId: string) {
+  return { items: listAiInsights(expectedTenantId), generatedAt: new Date().toISOString() };
 }
 
-export function listApprovalExecutions() {
-  return approvalExecutions;
+export function listApprovalExecutions(expectedTenantId: string) {
+  return approvalExecutions.filter((execution) => execution.tenantId === requireTenantId(expectedTenantId));
 }
 
-export function getApprovalExecution(id: string) {
-  return approvalExecutions.find((execution) => execution.id === id);
+export function getApprovalExecution(expectedTenantId: string, id: string) {
+  const tenant = requireTenantId(expectedTenantId);
+  return approvalExecutions.find((execution) => execution.tenantId === tenant && execution.id === id);
 }
 
-export function createApprovalExecution(body: Partial<ApprovalExecution>) {
+export function createApprovalExecution(expectedTenantId: string, body: Partial<ApprovalExecution>) {
+  const tenant = requireTenantId(expectedTenantId);
   const execution = {
     ...approvalExecutions[0],
     ...body,
+    tenantId: tenant,
     id: `approval_exec_${approvalExecutions.length + 1}`,
     createdAt: new Date().toISOString()
   } as ApprovalExecution;
@@ -242,9 +250,13 @@ export function createApprovalExecution(body: Partial<ApprovalExecution>) {
   return execution;
 }
 
-export function runApprovalExecution(id: string) {
-  const execution = getApprovalExecution(id);
+export function runApprovalExecution(expectedTenantId: string, id: string) {
+  const tenant = requireTenantId(expectedTenantId);
+  const execution = getApprovalExecution(tenant, id);
   if (!execution) return null;
+  if (execution.status !== "authorized") {
+    throw new Error("approval_execution_not_authorized");
+  }
   const actorContext: RequestContext = {
     tenantId: execution.tenantId,
     userId: execution.authorizedBy ?? execution.requestedBy,
@@ -256,7 +268,7 @@ export function runApprovalExecution(id: string) {
 
   try {
     const operation = execution.operationType;
-    const proposal = execution.proposalId ? getAiProposal(execution.proposalId) : undefined;
+    const proposal = execution.proposalId ? getAiProposal(tenant, execution.proposalId) : undefined;
     const payload = proposal?.operations.find((item) => item.type === operation)?.payload ?? {};
 
     const actionMap: Record<string, () => unknown> = {
@@ -337,8 +349,8 @@ export function runApprovalExecution(id: string) {
   return execution;
 }
 
-export function cancelApprovalExecution(id: string) {
-  const execution = getApprovalExecution(id);
+export function cancelApprovalExecution(expectedTenantId: string, id: string) {
+  const execution = getApprovalExecution(expectedTenantId, id);
   if (!execution) return null;
   execution.status = "cancelled";
   recordAuditEvent(

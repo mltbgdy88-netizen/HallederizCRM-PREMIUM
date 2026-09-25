@@ -41,24 +41,26 @@ test("tenant guard: mismatch throws forbidden", () => {
 });
 
 test("approval execution dispatch: happy path and failure path", () => {
-  const success = createApprovalExecution({
+  const success = createApprovalExecution("tenant_1", {
     operationType: "create_order",
     targetId: "order_new",
     targetType: "order",
     requestedBy: "user_admin",
-    authorizedBy: "user_admin"
+    authorizedBy: "user_admin",
+    status: "authorized"
   });
-  const successResult = runApprovalExecution(success.id);
+  const successResult = runApprovalExecution("tenant_1", success.id);
   assert.equal(successResult?.status, "executed");
 
-  const failed = createApprovalExecution({
+  const failed = createApprovalExecution("tenant_1", {
     operationType: "unsupported_test_action" as never,
     targetId: "delivery_missing",
     targetType: "delivery",
     requestedBy: "user_admin",
-    authorizedBy: "user_admin"
+    authorizedBy: "user_admin",
+    status: "authorized"
   });
-  const failedResult = runApprovalExecution(failed.id);
+  const failedResult = runApprovalExecution("tenant_1", failed.id);
   assert.equal(failedResult?.status, "failed");
   assert.ok(failedResult?.result?.message);
 });
