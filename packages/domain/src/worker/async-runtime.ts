@@ -107,7 +107,7 @@ export async function processClaimedJobAsync(
   }
 
   try {
-    const result = normalizeHandlerResult(handler.handle(job));
+    const result = normalizeHandlerResult(await handler.handle(job));
     const reasons = result.reasons ?? [isWorkerJobCompletable(result) ? "handler_completed" : "handler_deferred"];
 
     if (isWorkerJobCompletable(result)) {

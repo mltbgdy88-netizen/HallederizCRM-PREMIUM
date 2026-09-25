@@ -14,7 +14,7 @@ export interface WorkerJobHandler {
   liveReady?: boolean;
   requiredEnv?: string[];
   supportedActions?: string[];
-  handle: (job: WorkerJob) => WorkerJobHandleResult;
+  handle: (job: WorkerJob) => WorkerJobHandleResult | Promise<WorkerJobHandleResult>;
 }
 
 const registry = new Map<string, WorkerJobHandler>();

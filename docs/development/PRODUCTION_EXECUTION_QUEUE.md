@@ -1,5 +1,7 @@
 # Üretim / gerçek ürün — yürütme kuyruğu
 
+> Güncel kanonik teslimat durumu: [DELIVERY_STATUS.md](../product/DELIVERY_STATUS.md). Aşağıdaki `[x]` işaretleri çoğu yerde UI/foundation tamamlanmasını gösterir; tek başına live-ready anlamına gelmez.
+
 Bu dosya, **tek tek onay beklemeden** sırayla ilerletilebilmesi için tüm bilinen boşlukları fazlara ayırır. Her madde tamamlandığında `[ ]` → `[x]` yapın ve mümkünse PR referansı ekleyin.
 
 **Kapsam notu:** ERP/WhatsApp prod uçları, gerçek müşteri sözleşmeleri ve sırlar bu repodan tamamlanamaz; ilgili maddeler **hazırlık + entegrasyon** altında kalır.
@@ -75,7 +77,7 @@ pnpm smoke:production-safety
 
 ## Sonraki yonlendirme
 
-Uretim kuyrugu **Faz A–G** tamamlandi; yeni maddeler `docs/core-completion-batch.md`, `docs/module-map.md` ve urun blueprint/backlog dosyalari uzerinden acilmalidir. Ekran bazli UI isleri: [UI_SCREENS_IMPLEMENTATION_BACKLOG.md](../product/UI_SCREENS_IMPLEMENTATION_BACKLOG.md).
+UI/foundation kuyrugu **Faz A–G** kapsaminda tamamlanmistir. Canli kalicilik, saglayici sertifikasyonu, telemetry ve deploy kapilari [DELIVERY_STATUS.md](../product/DELIVERY_STATUS.md) uzerinden izlenir. Ekran bazli UI isleri: [UI_SCREENS_IMPLEMENTATION_BACKLOG.md](../product/UI_SCREENS_IMPLEMENTATION_BACKLOG.md).
 
 ---
 

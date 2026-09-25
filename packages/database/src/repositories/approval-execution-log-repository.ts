@@ -316,4 +316,23 @@ export class DatabaseApprovalExecutionLogRepository {
     );
     return rows[0] ? mapExecutionLogRowToDomainRecord(rows[0]) : undefined;
   }
+
+  async getExecutionLogForTenant(
+    tenantId: string,
+    executionId: string
+  ): Promise<ApprovalExecutionLogEntryRecord | undefined> {
+    this.assertPersistenceSupported();
+    assertNonEmpty(tenantId, "tenant_id");
+    assertNonEmpty(executionId, "execution_id");
+    const rows = await this.executor.query<ApprovalExecutionLogRow>(
+      `SELECT
+        id, tenant_id, approval_request_id, action_key, actor_id, approved_by, status, mode, idempotency_key,
+        audit_required, timeline_required, reasons, created_at, completed_at, handler_key, handler_mode
+      FROM approval_execution_logs
+      WHERE tenant_id = $1 AND id = $2
+      LIMIT 1`,
+      [tenantId, executionId]
+    );
+    return rows[0] ? mapExecutionLogRowToDomainRecord(rows[0]) : undefined;
+  }
 }

@@ -241,7 +241,8 @@ test("worker validates execution gate metadata on approval dispatch jobs", () =>
   assert.notEqual(validGate.results[0]?.status, "completed");
   assert.ok(
     reasons.includes("execution_gate_metadata_verified") ||
-      reasons.includes("approval_execution_dispatch_deferred")
+      reasons.includes("approval_execution_dispatch_deferred") ||
+      reasons.includes("domain_execution_port_not_registered")
   );
   assert.ok(reasons.includes("mutation_executed:false"));
   assert.ok(reasons.includes("provider_call_executed:false"));

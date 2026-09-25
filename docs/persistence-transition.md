@@ -1,5 +1,7 @@
 # Persistence Transition
 
+> Güncel kanonik teslimat durumu: [DELIVERY_STATUS.md](./product/DELIVERY_STATUS.md). Bu belge geçiş geçmişini anlatır; eski fallback notları mevcut production politikasını geçersiz kılamaz.
+
 Tarih: 28 Nisan 2026
 
 ## Gercek Persistence Foundation'a Tasinan Alanlar
