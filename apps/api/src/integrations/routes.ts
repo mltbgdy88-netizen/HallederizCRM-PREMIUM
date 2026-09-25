@@ -12,6 +12,7 @@ import { readPermissions, requireReadAccess } from "../shared/read-guards";
 import { enforcePolicyForRoute } from "../shared/policy-route-enforcement";
 import { resolveOmnichannelRuntime } from "../shared/omnichannel-runtime";
 import { OmnichannelInboundService } from "../modules/omnichannel-inbound/service";
+import { collectWebhookRawBody } from "../shared/webhook-raw-body";
 
 type RequestWithRawBody = {
   rawBody?: string;
@@ -42,14 +43,6 @@ type WhatsAppWebhookBody = Record<string, unknown> & {
   tenantSlug?: string;
   text?: string;
 };
-
-async function collectRawBody(payload: AsyncIterable<Buffer | string>) {
-  const chunks: Buffer[] = [];
-  for await (const chunk of payload) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-  }
-  return Buffer.concat(chunks);
-}
 
 function resolveWebhookTenantId(event: WhatsAppWebhookBody): string | undefined {
   const tenantId = typeof event.tenantId === "string" ? event.tenantId.trim() : "";
@@ -94,7 +87,7 @@ function extractWhatsAppWebhookMessage(event: WhatsAppWebhookBody, tenantId: str
 export async function registerIntegrationRoutes(server: FastifyInstance) {
   server.addHook("preParsing", async (request, _reply, payload) => {
     if (request.method !== "POST" || request.url.split("?")[0] !== "/whatsapp/webhook") return payload;
-    const buffer = await collectRawBody(payload as AsyncIterable<Buffer | string>);
+    const buffer = await collectWebhookRawBody(payload as AsyncIterable<Buffer | string>);
     (request as unknown as RequestWithRawBody).rawBody = buffer.toString("utf8");
     const replay = Readable.from([buffer]);
     (replay as Readable & { receivedEncodedLength?: number }).receivedEncodedLength = buffer.length;
@@ -148,18 +141,17 @@ export async function registerIntegrationRoutes(server: FastifyInstance) {
       return reply.status(403).send({ message: "Webhook signature mismatch." });
     }
 
-    if (requiresSignature && secret) {
-      const timestampHeader =
-        getHeaderValue(request.headers["x-hub-timestamp-256"]) ?? getHeaderValue(request.headers["x-hub-timestamp"]);
-      if (timestampHeader && !verifyWebhookTimestamp(timestampHeader)) {
-        return reply.status(403).send({ message: "Webhook timestamp outside tolerance." });
-      }
-    }
-
     const event = request.body as WhatsAppWebhookBody;
     const resolvedTenantId = resolveWebhookTenantId(event);
     if (!resolvedTenantId && requiresSignature) {
       return reply.status(400).send({ message: "Webhook tenant context is required." });
+    }
+    if (requiresSignature && secret) {
+      const timestampHeader =
+        getHeaderValue(request.headers["x-hub-timestamp-256"]) ?? getHeaderValue(request.headers["x-hub-timestamp"]);
+      if (!timestampHeader || !verifyWebhookTimestamp(timestampHeader)) {
+        return reply.status(403).send({ message: "Webhook timestamp outside tolerance." });
+      }
     }
     const tenantId = resolvedTenantId ?? "tenant_1";
     const { contentHash, from, messageBody, messageId } = extractWhatsAppWebhookMessage(event, tenantId);

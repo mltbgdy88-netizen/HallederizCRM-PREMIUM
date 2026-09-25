@@ -5,6 +5,8 @@ import { verifyHmacSha256Signature } from "../../shared/webhook-security";
 import { resolveOmnichannelRuntime } from "../../shared/omnichannel-runtime";
 import { OmnichannelInboundService } from "../../modules/omnichannel-inbound/service";
 import { resolveMetaVerifyTokenHash } from "../../modules/omnichannel-ai/service";
+import { collectWebhookRawBody } from "../../shared/webhook-raw-body";
+import { verifyWebhookTimestamp } from "../../shared/webhook-security";
 
 type RequestWithRawBody = {
   rawBody?: string;
@@ -18,14 +20,6 @@ function getHeaderValue(value: string | string[] | undefined): string | undefine
   return Array.isArray(value) ? value[0] : value;
 }
 
-async function collectRawBody(payload: AsyncIterable<Buffer | string>) {
-  const chunks: Buffer[] = [];
-  for await (const chunk of payload) {
-    chunks.push(Buffer.isBuffer(chunk) ? chunk : Buffer.from(chunk));
-  }
-  return Buffer.concat(chunks);
-}
-
 function createWebhookEventId() {
   return `wh_${Date.now()}_${Math.random().toString(36).slice(2, 9)}`;
 }
@@ -35,7 +29,7 @@ export async function registerOmnichannelWebhookRoutes(server: FastifyInstance) 
     if (request.method !== "POST" || request.url.split("?")[0] !== "/platform/omnichannel/webhooks/meta") {
       return payload;
     }
-    const buffer = await collectRawBody(payload as AsyncIterable<Buffer | string>);
+    const buffer = await collectWebhookRawBody(payload as AsyncIterable<Buffer | string>);
     (request as unknown as RequestWithRawBody).rawBody = buffer.toString("utf8");
     const replay = Readable.from([buffer]);
     (replay as Readable & { receivedEncodedLength?: number }).receivedEncodedLength = buffer.length;
@@ -92,6 +86,14 @@ export async function registerOmnichannelWebhookRoutes(server: FastifyInstance) 
 
     if (secret && signature && !verifyHmacSha256Signature(rawBody, signature, secret)) {
       return reply.status(403).send({ ok: false, message: "Webhook signature mismatch." });
+    }
+
+    if (process.env.NODE_ENV === "production" && secret) {
+      const timestampHeader =
+        getHeaderValue(request.headers["x-hub-timestamp-256"]) ?? getHeaderValue(request.headers["x-hub-timestamp"]);
+      if (!timestampHeader || !verifyWebhookTimestamp(timestampHeader)) {
+        return reply.status(403).send({ ok: false, message: "Webhook timestamp outside tolerance." });
+      }
     }
 
     const runtime = resolveOmnichannelRuntime();
