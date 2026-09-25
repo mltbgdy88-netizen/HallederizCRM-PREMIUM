@@ -139,7 +139,7 @@ test("production readiness blocks foundation worker mode", async () => {
   );
 });
 
-test("unsupported job type does not mark completed", () => {
+test("unsupported job type does not mark completed", async () => {
   const repository = new InMemoryOutboxJobRepository();
   const job = repository.enqueue({
     jobId: "job_contract_1",
@@ -158,7 +158,7 @@ test("unsupported job type does not mark completed", () => {
   assert.ok(claimed);
   const handler = getWorkerJobHandler("ai_reply_send");
   assert.ok(handler);
-  const handleResult = handler!.handle(claimed!);
+  const handleResult = await handler!.handle(claimed!);
   assert.equal(handleResult.ok, false);
   const processed = processClaimedJob(claimed!, repository, { now: new Date().toISOString() });
   assert.notEqual(processed.status, "completed");

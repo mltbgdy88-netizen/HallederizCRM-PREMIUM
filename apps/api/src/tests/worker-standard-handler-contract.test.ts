@@ -19,12 +19,12 @@ test("approval_execution requires approval id", () => {
   assert.ok(reasons.includes("missing_approval_id"));
 });
 
-test("unsupported contract handlers never return ok true", () => {
+test("unsupported contract handlers never return ok true", async () => {
   const handlers = listContractJobHandlers();
   const approval = handlers.find((handler) => handler.jobType === "approval_execution");
   assert.ok(approval);
   const now = new Date().toISOString();
-  const result = approval!.handle({
+  const result = await approval!.handle({
     jobId: "job_1",
     tenantId: "tenant_1",
     jobType: "approval_execution",

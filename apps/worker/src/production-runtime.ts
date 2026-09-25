@@ -13,6 +13,7 @@ import {
   mapOutboxRowToDomainRecord,
   type DbWorkerJobRecord
 } from "@hallederiz/database";
+import { registerApprovalExecutionConfirmationPort } from "./execution-confirmation-port.js";
 
 function mapDbRecordToWorkerJob(record: DbWorkerJobRecord): WorkerJob {
   return {
@@ -133,6 +134,7 @@ export async function runWorkerProductionTick(
   }
 
   const repository = createPostgresAsyncRepository(resolution.config.postgresUrl, resolution.config.workerId);
+  registerApprovalExecutionConfirmationPort(resolution.config.postgresUrl);
   const tickResult = await processWorkerTickAsync(repository, {
     maxJobsPerTick: options?.maxJobsPerTick ?? 1,
     lease: {

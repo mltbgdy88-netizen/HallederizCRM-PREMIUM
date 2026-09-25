@@ -12,8 +12,9 @@
     "dev": "turbo run dev --parallel",
     "build": "turbo run build",
     "typecheck": "turbo run typecheck",
-    "test": "pnpm test:api",
+    "test": "pnpm test:api && pnpm test:worker",
     "test:api": "pnpm --filter @hallederiz/api... build && node scripts/ci/ensure-workspace-entrypoints.cjs && pnpm --filter @hallederiz/api test",
+    "test:worker": "pnpm --filter @hallederiz/worker... build && node scripts/ci/ensure-workspace-entrypoints.cjs && pnpm --filter @hallederiz/worker test",
     "test:web-approvals": "node scripts/run-web-approval-tests.cjs",
     "test:web-whatsapp": "node scripts/run-web-whatsapp-tests.cjs",
     "test:web-whatsapp-bff": "node scripts/run-web-whatsapp-bff-tests.cjs",
@@ -57,12 +58,13 @@
   "pnpm": {
     "overrides": {
       "archiver": "8.0.0",
-      "fast-uri": "4.1.2",
+      "fast-uri": "4.1.3",
       "find-my-way": "9.7.0",
+      "nanoid@3": "3.3.18",
       "uuid": ">=11.1.0",
       "tmp": ">=0.2.6",
-      "postcss": "8.5.18",
-      "sharp": "0.35.0",
+      "postcss": "8.5.23",
+      "sharp": "0.35.4",
       "unzipper": "0.12.5"
     }
   }

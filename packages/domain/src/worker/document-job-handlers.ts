@@ -1,7 +1,7 @@
 import type { WorkerJob, WorkerJobHandleResult } from "./model";
 import type { WorkerJobHandler } from "./handler-registry";
 import { completedHandlerResult, deferredHandlerResult, invalidPayloadResult } from "./handle-result";
-import { getWorkerDomainExecutionPort } from "./execution-port";
+import { getWorkerDomainExecutionPort, type WorkerDomainExecutionResult } from "./execution-port";
 
 function readPayload(job: WorkerJob): Record<string, unknown> {
   return job.payload && typeof job.payload === "object" ? (job.payload as Record<string, unknown>) : {};
@@ -29,7 +29,30 @@ function validateDocumentJobPayload(job: WorkerJob): { ok: true; tenantId: strin
   return { ok: true, tenantId, documentId, idempotencyKey };
 }
 
-function handleDocumentJob(job: WorkerJob, jobType: "document_render" | "document_archive"): WorkerJobHandleResult {
+function mapDocumentDispatch(
+  jobType: "document_render" | "document_archive",
+  documentId: string,
+  dispatch: WorkerDomainExecutionResult
+): WorkerJobHandleResult {
+  if (dispatch.status === "completed" && dispatch.mutation_executed) {
+    return completedHandlerResult({
+      jobType,
+      entityType: "document",
+      entityId: documentId,
+      reasons: ["document_job_completed", ...dispatch.reasons]
+    });
+  }
+
+  return deferredHandlerResult(jobType, dispatch.reasons[0] ?? "document_execution_deferred", {
+    entityType: "document",
+    entityId: documentId
+  });
+}
+
+function handleDocumentJob(
+  job: WorkerJob,
+  jobType: "document_render" | "document_archive"
+): WorkerJobHandleResult | Promise<WorkerJobHandleResult> {
   const validated = validateDocumentJobPayload(job);
   if (!validated.ok) {
     return validated.result;
@@ -61,19 +84,9 @@ function handleDocumentJob(job: WorkerJob, jobType: "document_render" | "documen
     idempotencyKey: validated.idempotencyKey
   });
 
-  if (dispatch.status === "completed" && dispatch.mutation_executed) {
-    return completedHandlerResult({
-      jobType,
-      entityType: "document",
-      entityId: validated.documentId,
-      reasons: ["document_job_completed", ...dispatch.reasons]
-    });
-  }
-
-  return deferredHandlerResult(jobType, dispatch.reasons[0] ?? "document_execution_deferred", {
-    entityType: "document",
-    entityId: validated.documentId
-  });
+  return dispatch instanceof Promise
+    ? dispatch.then((resolved) => mapDocumentDispatch(jobType, validated.documentId, resolved))
+    : mapDocumentDispatch(jobType, validated.documentId, dispatch);
 }
 
 export function createDocumentRenderHandler(): WorkerJobHandler {

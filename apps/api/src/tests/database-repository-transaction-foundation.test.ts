@@ -137,6 +137,21 @@ test("approval execution repository exposes expected contract methods", () => {
   assert.equal(typeof repository.saveTimelineEventDraft, "function");
   assert.equal(typeof repository.findByIdempotencyKey, "function");
   assert.equal(typeof repository.getExecutionLog, "function");
+  assert.equal(typeof repository.getExecutionLogForTenant, "function");
+});
+
+test("approval execution lookup requires tenant and execution id in SQL predicate", async () => {
+  const executor = new FakeQueryExecutor(async () => []);
+  const repository = new DatabaseApprovalExecutionLogRepository({
+    executor,
+    persistenceMode: "postgres"
+  });
+
+  await repository.getExecutionLogForTenant("tenant_1", "exec_1");
+  const call = executor.calls[0];
+  assert.ok(call);
+  assert.match(call.sql, /WHERE tenant_id = \$1 AND id = \$2/);
+  assert.deepEqual(call.params, ["tenant_1", "exec_1"]);
 });
 
 test("outbox repository exposes expected contract methods", () => {

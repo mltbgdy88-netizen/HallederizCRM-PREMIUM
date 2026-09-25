@@ -7,7 +7,7 @@ import { createDocumentRenderHandler } from "@hallederiz/domain";
 import { listDocuments } from "../commercial-operations/mock-store";
 import { bootstrapWorkerDomainExecutionPort } from "../shared/worker-domain-execution-port";
 
-test("document_render completes when foundation renderer env is configured", () => {
+test("document_render completes when foundation renderer env is configured", async () => {
   const pendingDocument = listDocuments().find((doc) => !doc.downloadUrl) ?? listDocuments()[0];
   assert.ok(pendingDocument, "expected foundation document seed");
   const tempDir = mkdtempSync(path.join(tmpdir(), "hz-doc-render-"));
@@ -21,7 +21,7 @@ test("document_render completes when foundation renderer env is configured", () 
 
   bootstrapWorkerDomainExecutionPort();
   const handler = createDocumentRenderHandler();
-  const result = handler.handle({
+  const result = await handler.handle({
     jobId: "job_render_1",
     tenantId: "tenant_1",
     jobType: "document_render",

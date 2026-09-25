@@ -120,7 +120,25 @@ export function processClaimedJob(
   }
 
   try {
-    const result = normalizeHandlerResult(handler.handle(job));
+    const handled = handler.handle(job);
+    if (handled instanceof Promise) {
+      void handled.catch(() => undefined);
+      const nextRetryAt = calculateNextRetryAt(
+        job.attempts,
+        options?.baseRetryDelayMs,
+        options?.maxRetryDelayMs,
+        new Date(now)
+      );
+      const failed = repository.fail(job.jobId, "async_handler_requires_async_runtime", nextRetryAt, now);
+      return {
+        status: "failed",
+        claimedJob: job,
+        job: failed,
+        reasons: ["async_handler_requires_async_runtime", "mutation_executed:false"],
+        handlerMode: handler.mode
+      };
+    }
+    const result = normalizeHandlerResult(handled);
     const reasons = result.reasons ?? [isWorkerJobCompletable(result) ? "handler_completed" : "handler_deferred"];
 
     if (isWorkerJobCompletable(result)) {

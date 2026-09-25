@@ -1,5 +1,7 @@
 # Production Go Open Gates
 
+> Güncel kanonik teslimat durumu: [DELIVERY_STATUS.md](./DELIVERY_STATUS.md). Bu belge tarihsel gate kanıtını ayrıntılandırır; çelişki halinde kanonik durum dosyası esas alınır.
+
 | Field | Value |
 |-------|--------|
 | **Baseline `main` HEAD** | `ac608c67` |

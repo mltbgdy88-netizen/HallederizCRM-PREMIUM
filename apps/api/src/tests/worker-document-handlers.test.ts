@@ -30,9 +30,9 @@ function buildJob(overrides: Partial<WorkerJob> = {}): WorkerJob {
   };
 }
 
-test("document_render rejects missing documentId", () => {
+test("document_render rejects missing documentId", async () => {
   const handler = createDocumentRenderHandler();
-  const result = handler.handle(
+  const result = await handler.handle(
     buildJob({
       payload: { tenantId: "tenant_1", idempotencyKey: "idem_1" }
     })
@@ -41,9 +41,9 @@ test("document_render rejects missing documentId", () => {
   assert.ok(result.reasons?.includes("missing_document_id"));
 });
 
-test("document_render does not complete without renderer", () => {
+test("document_render does not complete without renderer", async () => {
   const handler = createDocumentRenderHandler();
-  const result = handler.handle(buildJob());
+  const result = await handler.handle(buildJob());
   assert.equal(result.ok, false);
   assert.ok(
     result.reasons?.some(
@@ -52,9 +52,9 @@ test("document_render does not complete without renderer", () => {
   );
 });
 
-test("document_archive rejects missing documentId", () => {
+test("document_archive rejects missing documentId", async () => {
   const handler = createDocumentArchiveHandler();
-  const result = handler.handle(
+  const result = await handler.handle(
     buildJob({
       jobType: "document_archive",
       payload: { tenantId: "tenant_1", idempotencyKey: "idem_1" }
@@ -64,7 +64,7 @@ test("document_archive rejects missing documentId", () => {
   assert.ok(result.reasons?.includes("missing_document_id"));
 });
 
-test("document_archive completes foundation archive job when document exists", () => {
+test("document_archive completes foundation archive job when document exists", async () => {
   const archiveDocument = listDocuments()[0];
   assert.ok(archiveDocument);
   const previousMode = process.env.PERSISTENCE_MODE;
@@ -73,7 +73,7 @@ test("document_archive completes foundation archive job when document exists", (
   process.env.DATABASE_URL = "postgres://example";
   bootstrapWorkerDomainExecutionPort();
   const handler = createDocumentArchiveHandler();
-  const result = handler.handle(
+  const result = await handler.handle(
     buildJob({
       jobType: "document_archive",
       actionKey: "document.archive",

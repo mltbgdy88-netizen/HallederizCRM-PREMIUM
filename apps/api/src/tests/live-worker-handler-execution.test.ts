@@ -33,12 +33,12 @@ test("deferredHandlerResult is not completable", () => {
   assert.equal(isWorkerJobCompletable(result), false);
 });
 
-test("approval_execution handler defers without execution port", () => {
+test("approval_execution handler defers without execution port", async () => {
   resetWorkerDomainExecutionPort();
   const handler = listContractJobHandlers().find((item) => item.jobType === "approval_execution");
   assert.ok(handler);
   const now = new Date().toISOString();
-  const raw = handler!.handle({
+  const raw = await handler!.handle({
     jobId: "job_live_1",
     tenantId: "tenant_1",
     jobType: "approval_execution",
@@ -65,7 +65,7 @@ test("approval_execution handler defers without execution port", () => {
   assert.ok(result.reasons?.some((reason) => reason.includes("mutation_executed:false")));
 });
 
-test("approval_execution with port never returns fake entity id", () => {
+test("approval_execution with port never returns fake entity id", async () => {
   registerWorkerDomainExecutionPort(() => ({
     status: "deferred",
     mutation_executed: false,
@@ -75,7 +75,7 @@ test("approval_execution with port never returns fake entity id", () => {
   assert.ok(handler);
   const now = new Date().toISOString();
   const result = normalizeHandlerResult(
-    handler!.handle({
+    await handler!.handle({
       jobId: "job_live_2",
       tenantId: "tenant_1",
       jobType: "approval_execution",

@@ -11,11 +11,15 @@ export interface WorkerDomainExecutionResult {
   mutation_executed: boolean;
   entityType?: string;
   entityId?: string;
+  auditEventId?: string;
+  timelineEventId?: string;
   reasons: string[];
   metadata?: Record<string, unknown>;
 }
 
-export type WorkerDomainExecutionPort = (request: WorkerDomainExecutionRequest) => WorkerDomainExecutionResult;
+export type WorkerDomainExecutionPort = (
+  request: WorkerDomainExecutionRequest
+) => WorkerDomainExecutionResult | Promise<WorkerDomainExecutionResult>;
 
 let executionPort: WorkerDomainExecutionPort | undefined;
 

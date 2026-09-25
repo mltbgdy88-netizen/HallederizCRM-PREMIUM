@@ -161,13 +161,14 @@ test("ai source cannot bypass production gate", async () => {
   );
 });
 
-test("worker foundation handlers are marked non-live for production", () => {
+test("approval dispatch is live only through the registered execution port", () => {
   resetWorkerJobHandlers();
   const handlers = listWorkerJobHandlers();
   const approvalDispatch = handlers.find((handler) => handler.jobType === "approval.execution.dispatch");
   assert.ok(approvalDispatch);
-  assert.notEqual(approvalDispatch?.productionAllowed, true);
-  assert.notEqual(approvalDispatch?.liveReady, true);
+  assert.equal(approvalDispatch?.productionAllowed, true);
+  assert.equal(approvalDispatch?.liveReady, true);
+  assert.equal(approvalDispatch?.mode, "execute");
 });
 
 test("approval execution is blocked by production gate and does not mark approved", async () => {
