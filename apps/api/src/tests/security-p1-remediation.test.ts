@@ -73,6 +73,16 @@ test("AI and approval stores require matching tenant scope", () => {
   assert.equal(runApprovalExecution("tenant_1", foreignExecution.id), null);
 });
 
+test("process-global AI and approval stores fail closed in production", async () => {
+  await withEnv({ NODE_ENV: "production" }, async () => {
+    assert.throws(() => listAiProposals("tenant_1"), /process_global_ai_store_disabled/);
+    assert.throws(
+      () => createApprovalExecution("tenant_1", { status: "authorized" }),
+      /process_global_ai_store_disabled/
+    );
+  });
+});
+
 test("legacy approval execution create and run routes are absent in production", async () => {
   const sessionSecret = "security-p1-test-session-secret-32-chars";
   await withEnv(

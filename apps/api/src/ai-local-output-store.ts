@@ -160,6 +160,12 @@ function requireTenantId(value: string): string {
   return value;
 }
 
+function assertProcessGlobalStoreAllowed() {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error("process_global_ai_store_disabled");
+  }
+}
+
 function classifyExecutionFailure(error: unknown): { retryable: boolean; message: string } {
   const message = error instanceof Error ? error.message : "Execution failed";
   const retryableHints = ["timeout", "network", "ECONN", "rate limit", "temporarily"];
@@ -168,6 +174,7 @@ function classifyExecutionFailure(error: unknown): { retryable: boolean; message
 }
 
 export function chatAi(expectedTenantId: string, body: { message?: string }) {
+  assertProcessGlobalStoreAllowed();
   const tenant = requireTenantId(expectedTenantId);
   const message: AiMessage = {
     id: `ai_msg_api_${Date.now()}`,
@@ -191,21 +198,25 @@ export function parseAiCommand(body: { text?: string }) {
 }
 
 export function listAiProposals(expectedTenantId: string) {
+  assertProcessGlobalStoreAllowed();
   return aiProposals.filter((proposal) => proposal.tenantId === requireTenantId(expectedTenantId));
 }
 
 export function saveAiProposal(expectedTenantId: string, proposal: AiProposal) {
+  assertProcessGlobalStoreAllowed();
   const scopedProposal = { ...proposal, tenantId: requireTenantId(expectedTenantId) };
   aiProposals.unshift(scopedProposal);
   return scopedProposal;
 }
 
 export function getAiProposal(expectedTenantId: string, id: string) {
+  assertProcessGlobalStoreAllowed();
   const tenant = requireTenantId(expectedTenantId);
   return aiProposals.find((proposal) => proposal.tenantId === tenant && (proposal.id === id || proposal.proposalNo === id));
 }
 
 export function updateAiProposalStatus(expectedTenantId: string, id: string, status: AiProposal["status"]) {
+  assertProcessGlobalStoreAllowed();
   const proposal = getAiProposal(expectedTenantId, id);
   if (!proposal) return null;
   proposal.status = status;
@@ -214,10 +225,12 @@ export function updateAiProposalStatus(expectedTenantId: string, id: string, sta
 }
 
 export function listAiInsights(expectedTenantId: string) {
+  assertProcessGlobalStoreAllowed();
   return aiInsights.filter((insight) => insight.tenantId === requireTenantId(expectedTenantId));
 }
 
 export function replaceAiInsights(expectedTenantId: string, nextInsights: AiInsight[]) {
+  assertProcessGlobalStoreAllowed();
   const tenant = requireTenantId(expectedTenantId);
   const retained = aiInsights.filter((insight) => insight.tenantId !== tenant);
   aiInsights.splice(0, aiInsights.length, ...retained, ...nextInsights.map((insight) => ({ ...insight, tenantId: tenant })));
@@ -225,19 +238,23 @@ export function replaceAiInsights(expectedTenantId: string, nextInsights: AiInsi
 }
 
 export function runAiInsights(expectedTenantId: string) {
+  assertProcessGlobalStoreAllowed();
   return { items: listAiInsights(expectedTenantId), generatedAt: new Date().toISOString() };
 }
 
 export function listApprovalExecutions(expectedTenantId: string) {
+  assertProcessGlobalStoreAllowed();
   return approvalExecutions.filter((execution) => execution.tenantId === requireTenantId(expectedTenantId));
 }
 
 export function getApprovalExecution(expectedTenantId: string, id: string) {
+  assertProcessGlobalStoreAllowed();
   const tenant = requireTenantId(expectedTenantId);
   return approvalExecutions.find((execution) => execution.tenantId === tenant && execution.id === id);
 }
 
 export function createApprovalExecution(expectedTenantId: string, body: Partial<ApprovalExecution>) {
+  assertProcessGlobalStoreAllowed();
   const tenant = requireTenantId(expectedTenantId);
   const execution = {
     ...approvalExecutions[0],
@@ -251,6 +268,7 @@ export function createApprovalExecution(expectedTenantId: string, body: Partial<
 }
 
 export function runApprovalExecution(expectedTenantId: string, id: string) {
+  assertProcessGlobalStoreAllowed();
   const tenant = requireTenantId(expectedTenantId);
   const execution = getApprovalExecution(tenant, id);
   if (!execution) return null;
@@ -350,6 +368,7 @@ export function runApprovalExecution(expectedTenantId: string, id: string) {
 }
 
 export function cancelApprovalExecution(expectedTenantId: string, id: string) {
+  assertProcessGlobalStoreAllowed();
   const execution = getApprovalExecution(expectedTenantId, id);
   if (!execution) return null;
   execution.status = "cancelled";
