@@ -23,8 +23,8 @@ Full Production Go için gerçek Meta WhatsApp staging kanıtı, gerekli ERP/fab
 
 | Dalga | Durum | Tamamlanan | Açık kapı |
 |---|---|---|---|
-| 0 — Güvenli başlangıç | Devam ediyor | Dal `origin/main` `e38e621` üzerinden açıldı; kullanıcı `next-env.d.ts` farkı korundu; repo teslimat becerisi oluşturuldu ve doğrulandı. | Docker daemon, env dosyaları ve bağlı deploy/security hesapları yok. Tam temiz baseline yeniden koşulacak. |
-| 1 — Mutation ve worker | Uygulandı, PR bekliyor | Kanonik `approval.execution.dispatch` production handler oldu; async execution port desteği, tenant-scoped kalıcı execution doğrulaması, audit/timeline metadata ve worker testleri eklendi. | Gerçek PostgreSQL kabulü Docker/DB olmadan koşturulamadı. `notification.dispatch` canlı provider olmadığı için fail-closed kalır. |
+| 0 — Güvenli başlangıç | Tamamlandı | `main` GitHub ile hizalandı; kullanıcı `next-env.d.ts` farkı commit dışında korundu; repo teslimat becerisi oluşturuldu ve doğrulandı; tam yerel kalite kapıları çalıştırıldı. | Yerel Docker engine ve env dosyaları yok; deploy/security hesap bağlantıları ayrıca gerekli. |
+| 1 — Mutation ve worker | Tamamlandı (#219) | Kanonik `approval.execution.dispatch` production handler oldu; async execution port desteği, tenant-scoped kalıcı execution doğrulaması, audit/timeline metadata ve worker testleri eklendi. GitHub PostgreSQL migration/runtime smoke PASS. | `notification.dispatch` canlı provider olmadığı için fail-closed kalır; gerçek sağlayıcı teslimi Dalga 3 kapsamındadır. |
 | 2 — PostgreSQL sürekliliği | Açık | Commercial repository temelleri ve tenant guard'lar var. | Local-output/agent state, module flags ve kalan kontrollü mock/fallback yolları PostgreSQL'e taşınacak. |
 | 3 — Entegrasyon ve edge | Dış bağımlılıklı | WhatsApp imza/idempotency ve adapter foundation'ları var; Ollama yerelde çalışıyor. | Gerçek Meta/ERP/fabrika hesapları, Windows spooler ve local-ai CI sertifikasyonu gerekli. |
 | 4 — UI canlı veri | Açık | UI freeze ve ana CRM yüzeyleri mevcut. | Placeholder ekranlar, ortak mutation feedback ve iki viewport Playwright matrisi tamamlanacak. |
@@ -48,14 +48,14 @@ Full Production Go için gerçek Meta WhatsApp staging kanıtı, gerekli ERP/fab
 - Worker testleri: 4/4 PASS.
 - Secret scan: PASS.
 - Dependency audit: high/critical ve moderate dahil bilinen açık yok; Next.js, Fastify, PostCSS, Sharp, fast-uri ve Nano ID güvenli patch sürümlerine yükseltildi.
+- GitHub PR #219: merge edildi; quality gate, PostgreSQL migration/runtime smoke, navigation smoke ve API offline smoke PASS. Opsiyonel production-data smoke secrets/ortam olmadığı için SKIP.
 - PostgreSQL entegrasyon testi: bağlantı olmadığı için SKIP; production kanıtı değildir.
 - Full Go: **BLOCKED** — WhatsApp staging ve dış sağlayıcı kanıtları eksik.
 
 ## Sıradaki yürütme sırası
 
-1. Dalga 1 tam kalite kapılarını bitir, küçük PR aç ve rollback notunu ekle.
-2. Docker/PostgreSQL erişimi sağlandığında fresh/upgrade/re-apply ve worker lease/retry/DLQ testlerini çalıştır.
-3. Dalga 2'yi local-output ve tenant module persistence ile başlat.
-4. Dış sağlayıcı sırları gelene kadar simulator/contract testlerini geliştir; canlı sertifikasyonu NOT_RUN tut.
+1. Dalga 2'yi local-output ve tenant module persistence ile başlat; repository, API facade ve tüm consumer'ları aynı dilimde geçir.
+2. Local-output için servis restart kalıcılığı, duplicate iş ve iki tenant negatif testlerini PostgreSQL üzerinde çalıştır.
+3. Dış sağlayıcı sırları gelene kadar simulator/contract testlerini geliştir; canlı sertifikasyonu NOT_RUN tut.
 
 İlgili ayrıntılar: [Production Go açık kapıları](./PRODUCTION_GO_OPEN_GATES.md), [üretim yürütme kuyruğu](../development/PRODUCTION_EXECUTION_QUEUE.md), [persistence geçişi](../persistence-transition.md).
