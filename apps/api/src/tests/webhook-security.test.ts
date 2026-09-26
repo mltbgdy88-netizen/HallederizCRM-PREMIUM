@@ -143,6 +143,7 @@ test("live WhatsApp provider rejects missing and invalid signatures", async () =
       const server = Fastify();
       await registerIntegrationRoutes(server);
       const rawBody = JSON.stringify({ entry: [], tenantId: "tenant_1" });
+      const timestamp = String(Math.floor(Date.now() / 1000));
 
       const missing = await server.inject({
         method: "POST",
@@ -170,7 +171,8 @@ test("live WhatsApp provider rejects missing and invalid signatures", async () =
         url: "/whatsapp/webhook",
         headers: {
           "content-type": "application/json",
-          "x-hub-signature-256": `sha256=${signHmacSha256Payload(rawBody, secret)}`
+          "x-hub-signature-256": `sha256=${signHmacSha256Payload(rawBody, secret)}`,
+          "x-hub-timestamp": timestamp
         },
         payload: rawBody
       });
