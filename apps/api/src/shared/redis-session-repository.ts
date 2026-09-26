@@ -1,5 +1,5 @@
 import { createHash } from "node:crypto";
-import { createClient, type RedisClientType } from "redis";
+import { createClient } from "redis";
 import type { LoginResponse, SessionModel } from "@hallederiz/types";
 
 export interface RedisSessionRepositoryOptions {
@@ -9,7 +9,7 @@ export interface RedisSessionRepositoryOptions {
 }
 
 export class RedisSessionRepository {
-  private readonly client: RedisClientType;
+  private readonly client: ReturnType<typeof createClient>;
   private readonly ttlSeconds: number;
   private readonly prefix: string;
 
