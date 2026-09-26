@@ -19,6 +19,7 @@ import { registerOriginGuard } from "./shared/origin-guard";
 import { bootstrapRuntimeEnvValidation } from "./shared/runtime-env-bootstrap";
 import { bootstrapApprovalCommercialActionHandlers } from "./shared/approval-commercial-action-handlers";
 import { bootstrapWorkerDomainExecutionPort } from "./shared/worker-domain-execution-port";
+import { createPostgresMigrationExecutor, databaseMigrations, listAppliedMigrations } from "@hallederiz/database";
 
 bootstrapRuntimeEnvValidation();
 bootstrapApprovalCommercialActionHandlers();
@@ -36,6 +37,48 @@ server.get("/health", async () => {
     status: "ok",
     service: "api"
   };
+});
+
+server.get("/ready", async (_request, reply) => {
+  const databaseConfigured = Boolean((process.env.POSTGRES_URL ?? process.env.DATABASE_URL)?.trim());
+  if (!databaseConfigured) {
+    if (process.env.NODE_ENV === "production") {
+      return reply.status(503).send({
+        status: "blocked",
+        service: "api",
+        database: "unconfigured",
+        migrations: "unknown"
+      });
+    }
+    return { status: "ready", service: "api", database: "not_required", migrations: "not_required" };
+  }
+
+  try {
+    const executor = createPostgresMigrationExecutor({
+      mode: "postgres",
+      postgresUrl: (process.env.POSTGRES_URL ?? process.env.DATABASE_URL) as string
+    });
+    await executor.query("SELECT 1");
+    const applied = await listAppliedMigrations(executor);
+    const appliedNames = new Set(applied.map((migration) => migration.name));
+    const migrationsReady = databaseMigrations.every((migration) => appliedNames.has(migration.name));
+    if (!migrationsReady) {
+      return reply.status(503).send({
+        status: "blocked",
+        service: "api",
+        database: "ok",
+        migrations: "pending"
+      });
+    }
+    return { status: "ready", service: "api", database: "ok", migrations: "ok" };
+  } catch {
+    return reply.status(503).send({
+      status: "blocked",
+      service: "api",
+      database: "unavailable",
+      migrations: "unknown"
+    });
+  }
 });
 
 server.get("/", async () => {
