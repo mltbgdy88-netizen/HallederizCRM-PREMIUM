@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { ForbiddenError, UnauthorizedError, asApiErrorPayload } from "./errors";
-import { buildRequestContext, type RequestContext } from "./request-context";
+import { buildRequestContext, buildRequestContextAsync, type RequestContext } from "./request-context";
 
 export function resolveContext(request: FastifyRequest): RequestContext {
   return buildRequestContext(request);
@@ -82,7 +82,7 @@ export async function withGuards<T>(
   run: (context: RequestContext) => Promise<T> | T
 ) {
   try {
-    const context = resolveContext(request);
+    const context = await buildRequestContextAsync(request);
     for (const guard of guards) {
       guard(context);
     }
