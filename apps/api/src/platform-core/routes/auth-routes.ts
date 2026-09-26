@@ -8,6 +8,9 @@ import {
   createLocalPilotSession,
   createSession,
   getSessionByToken
+  ,persistSessionToProduction
+  ,getSessionByTokenAsync
+  ,clearSessionTokenAsync
 } from "../../shared/session-store";
 import { buildRequestContext } from "../../shared/request-context";
 import { getAuthMode } from "../../shared/auth-mode";
@@ -24,7 +27,12 @@ export async function registerAuthRoutes(server: FastifyInstance, deps: AuthRout
     deps.authenticateDatabaseLogin ??
     (async (input: LoginInput) => authenticateWithDatabase(input, createPostgresAuthExecutor()));
 
-  function sendLoginPayload(reply: FastifyReply, loginPayload: LoginResponse) {
+  async function sendLoginPayload(reply: FastifyReply, loginPayload: LoginResponse) {
+    try {
+      await persistSessionToProduction(loginPayload);
+    } catch {
+      return reply.status(503).send({ message: "Session store unavailable." });
+    }
     reply.header("set-cookie", buildSessionCookieHeader(loginPayload.accessToken, loginPayload.session.expiresAt));
     return reply.send(loginPayload);
   }
@@ -135,7 +143,7 @@ export async function registerAuthRoutes(server: FastifyInstance, deps: AuthRout
 
   server.get("/auth/me", async (request, reply) => {
     const context = buildRequestContext(request);
-    const session = getSessionByToken(context.sessionToken);
+    const session = await getSessionByTokenAsync(context.sessionToken);
     if (!session) {
       return reply.status(401).send({ message: "Oturum gecersiz veya suresi dolmus." });
     }
@@ -144,7 +152,7 @@ export async function registerAuthRoutes(server: FastifyInstance, deps: AuthRout
 
   server.get("/auth/session", async (request, reply) => {
     const context = buildRequestContext(request);
-    const session = getSessionByToken(context.sessionToken);
+    const session = await getSessionByTokenAsync(context.sessionToken);
     if (!session) {
       return reply.status(401).send({ message: "Oturum bulunamadi." });
     }
@@ -153,7 +161,7 @@ export async function registerAuthRoutes(server: FastifyInstance, deps: AuthRout
 
   server.post("/auth/logout", async (request, reply) => {
     const context = buildRequestContext(request);
-    clearSessionToken(context.sessionToken);
+    await clearSessionTokenAsync(context.sessionToken);
     reply.header("set-cookie", buildClearSessionCookieHeader());
     return { ok: true };
   });
