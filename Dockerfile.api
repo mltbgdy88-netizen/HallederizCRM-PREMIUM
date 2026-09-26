@@ -1,0 +1,18 @@
+FROM node:20.20.1-bookworm-slim AS build
+ENV PNPM_HOME=/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
+WORKDIR /app
+COPY . .
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @hallederiz/api... build
+
+FROM node:20.20.1-bookworm-slim AS runner
+ENV NODE_ENV=production
+ENV PORT_API=10000
+WORKDIR /app
+RUN useradd --system --uid 1001 appuser
+COPY --from=build --chown=appuser:appuser /app /app
+USER appuser
+EXPOSE 10000
+CMD ["node", "apps/api/dist/index.js"]

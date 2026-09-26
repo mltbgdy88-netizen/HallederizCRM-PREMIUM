@@ -1,0 +1,93 @@
+services:
+  - type: web
+    name: hallederiz-web
+    runtime: docker
+    region: frankfurt
+    plan: starter
+    dockerfilePath: ./Dockerfile.web
+    dockerContext: .
+    autoDeployTrigger: checksPass
+    healthCheckPath: /
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: API_BASE_URL
+        fromService:
+          type: web
+          name: hallederiz-api
+          property: hostport
+      - key: AUTH_SESSION_SECRET
+        generateValue: true
+        sync: false
+
+  - type: web
+    name: hallederiz-api
+    runtime: docker
+    region: frankfurt
+    plan: starter
+    dockerfilePath: ./Dockerfile.api
+    dockerContext: .
+    autoDeployTrigger: checksPass
+    preDeployCommand: node packages/database/dist/cli.js migrate:apply
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: PERSISTENCE_MODE
+        value: postgres
+      - key: WORKER_MODE
+        value: production
+      - key: DATABASE_URL
+        fromDatabase:
+          name: hallederiz-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: hallederiz-cache
+          property: connectionString
+      - key: AUTH_SESSION_SECRET
+        generateValue: true
+        sync: false
+      - key: APP_BASE_URL
+        sync: false
+      - key: API_BASE_URL
+        sync: false
+      - key: WHATSAPP_PROVIDER
+        value: disabled
+
+  - type: worker
+    name: hallederiz-worker
+    runtime: docker
+    region: frankfurt
+    plan: starter
+    dockerfilePath: ./Dockerfile.worker
+    dockerContext: .
+    autoDeployTrigger: checksPass
+    envVars:
+      - key: NODE_ENV
+        value: production
+      - key: WORKER_MODE
+        value: production
+      - key: PERSISTENCE_MODE
+        value: postgres
+      - key: DATABASE_URL
+        fromDatabase:
+          name: hallederiz-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: keyvalue
+          name: hallederiz-cache
+          property: connectionString
+
+  - type: keyvalue
+    name: hallederiz-cache
+    region: frankfurt
+    plan: starter
+    maxmemoryPolicy: noeviction
+
+databases:
+  - name: hallederiz-db
+    region: frankfurt
+    plan: basic_1gb

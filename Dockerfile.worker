@@ -1,0 +1,16 @@
+FROM node:20.20.1-bookworm-slim AS build
+ENV PNPM_HOME=/pnpm
+ENV PATH=$PNPM_HOME:$PATH
+RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
+WORKDIR /app
+COPY . .
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @hallederiz/worker... build
+
+FROM node:20.20.1-bookworm-slim AS runner
+ENV NODE_ENV=production
+WORKDIR /app
+RUN useradd --system --uid 1001 appuser
+COPY --from=build --chown=appuser:appuser /app /app
+USER appuser
+CMD ["node", "apps/worker/dist/index.js"]
