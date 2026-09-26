@@ -40,6 +40,7 @@ export function runWorkerFoundationTick(options?: WorkerRuntimeOptions): WorkerB
 import {
   createWorkerRuntimeFromEnv,
   runWorkerProductionTick,
+  runWorkerProductionDaemon,
   type WorkerProductionTickResult
 } from "./production-runtime.js";
 
@@ -52,7 +53,11 @@ export {
 const workerMode = normalizeWorkerMode(process.env.WORKER_MODE);
 
 if (workerMode === "production") {
-  const result = await runWorkerProductionTick();
+  const controller = new AbortController();
+  const stop = () => controller.abort();
+  process.once("SIGTERM", stop);
+  process.once("SIGINT", stop);
+  const result = await runWorkerProductionDaemon({ signal: controller.signal, onTick: (tick) => console.log("[worker] production tick", JSON.stringify({ status: tick.ok ? "ok" : "error", processed: tick.tickResult?.processed ?? 0, completed: tick.tickResult?.completed ?? 0, failed: tick.tickResult?.failed ?? 0, deadLettered: tick.tickResult?.deadLettered ?? 0 })) });
   if (!result.ok) {
     console.error("[worker] production tick fail-closed", result.reasons.join(","));
     process.exitCode = 1;

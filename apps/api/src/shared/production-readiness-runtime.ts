@@ -115,6 +115,11 @@ export async function evaluateProductionReadiness(context: RequestContext): Prom
   if (!databaseConfigured) {
     addMissingEnv("DATABASE_URL", blockers, missingEnv, requiredEnv, warnings, isProduction);
   }
+  if (isProduction && !(process.env.REDIS_URL ?? process.env.VALKEY_URL)?.trim()) {
+    blockers.push("redis_session_store_missing");
+    requiredEnv.push("REDIS_URL");
+    missingEnv.push("REDIS_URL");
+  }
 
   if (!hasText(process.env.AUTH_SESSION_SECRET)) {
     addMissingEnv("AUTH_SESSION_SECRET", blockers, missingEnv, requiredEnv, warnings, isProduction);
