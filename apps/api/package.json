@@ -6,7 +6,7 @@
   "scripts": {
     "dev": "node --watch --experimental-specifier-resolution=node --loader ts-node/esm src/index.ts",
     "build": "tsc -p tsconfig.json",
-    "start": "node --experimental-specifier-resolution=node --loader ts-node/esm src/index.ts",
+    "start": "node --experimental-specifier-resolution=node dist/index.js",
     "seed:auth-admin": "node --experimental-specifier-resolution=node --loader ts-node/esm src/scripts/seed-admin-user.ts",
     "typecheck": "tsc -p tsconfig.json --noEmit",
     "test": "node scripts/run-tests.cjs",
@@ -22,7 +22,8 @@
     "@hallederiz/types": "workspace:*",
     "@hallederiz/utils": "workspace:*",
     "exceljs": "^4.4.0",
-    "fastify": "^5.12.1"
+    "fastify": "^5.12.1",
+    "redis": "^4.7.0"
   },
   "devDependencies": {
     "@types/node": "^22.7.4",

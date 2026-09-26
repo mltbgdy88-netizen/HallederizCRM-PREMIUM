@@ -23,6 +23,9 @@ export interface WorkerRuntimeEnvConfig {
   postgresUrl?: string;
   workerId: string;
   claimLeaseMs: number;
+  pollIntervalMs: number;
+  errorBackoffMs: number;
+  maxJobsPerTick: number;
 }
 
 export interface WorkerRuntimeConfigResolution {
@@ -42,6 +45,9 @@ export function resolveWorkerRuntimeConfig(env: NodeJS.ProcessEnv = process.env)
   const postgresUrl = (env.POSTGRES_URL ?? env.DATABASE_URL ?? "").trim() || undefined;
   const workerId = (env.WORKER_ID ?? "worker.production").trim() || "worker.production";
   const claimLeaseMs = Number(env.WORKER_CLAIM_LEASE_MS ?? "300000");
+  const pollIntervalMs = Number(env.WORKER_POLL_INTERVAL_MS ?? "1000");
+  const errorBackoffMs = Number(env.WORKER_ERROR_BACKOFF_MS ?? "5000");
+  const maxJobsPerTick = Number(env.WORKER_MAX_JOBS_PER_TICK ?? "10");
   const reasons: string[] = [];
 
   if (workerMode === "disabled") {
@@ -57,6 +63,9 @@ export function resolveWorkerRuntimeConfig(env: NodeJS.ProcessEnv = process.env)
         postgresUrl,
         workerId: env.WORKER_ID ?? "worker.foundation",
         claimLeaseMs: Number.isFinite(claimLeaseMs) ? claimLeaseMs : 300000
+        ,pollIntervalMs: Number.isFinite(pollIntervalMs) ? pollIntervalMs : 1000
+        ,errorBackoffMs: Number.isFinite(errorBackoffMs) ? errorBackoffMs : 5000
+        ,maxJobsPerTick: Number.isFinite(maxJobsPerTick) ? maxJobsPerTick : 10
       },
       persistenceMode: "foundation_memory",
       reasons: ["worker_foundation_dry_run"]
@@ -99,6 +108,9 @@ export function resolveWorkerRuntimeConfig(env: NodeJS.ProcessEnv = process.env)
       postgresUrl,
       workerId,
       claimLeaseMs: Number.isFinite(claimLeaseMs) ? claimLeaseMs : 300000
+      ,pollIntervalMs: Number.isFinite(pollIntervalMs) ? pollIntervalMs : 1000
+      ,errorBackoffMs: Number.isFinite(errorBackoffMs) ? errorBackoffMs : 5000
+      ,maxJobsPerTick: Number.isFinite(maxJobsPerTick) ? maxJobsPerTick : 10
     },
     persistenceMode: "postgres",
     reasons: ["worker_production_postgres_ready"]

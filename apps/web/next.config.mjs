@@ -5,6 +5,7 @@ const createNextConfig = (phase) => {
 
   return {
     reactStrictMode: true,
+    output: "standalone",
     distDir: isDevServer ? ".runtime-next-dev" : ".runtime-next",
     transpilePackages: ["@hallederiz/ui", "@hallederiz/domain", "@hallederiz/sdk", "@hallederiz/types"],
     async headers() {

@@ -1,0 +1,11 @@
+node_modules
+.git
+.env*
+dist
+.next
+.runtime-next
+.runtime-next-dev
+*.log
+coverage
+tmp
+temp
