@@ -1,6 +1,7 @@
 import type { FastifyRequest } from "fastify";
 import { extractSessionTokenFromCookieHeader, getSessionByToken, getSessionByTokenAsync } from "./session-store";
 import { getAuthMode } from "./auth-mode";
+import { ApiDomainError } from "./errors";
 
 export interface RequestContext {
   tenantId: string;
@@ -178,7 +179,16 @@ export function buildRequestContext(request: FastifyRequest): RequestContext {
 export async function buildRequestContextAsync(request: FastifyRequest): Promise<RequestContext> {
   const context = buildRequestContext(request);
   if (process.env.NODE_ENV !== "production" || !context.sessionToken) return context;
-  const session = await getSessionByTokenAsync(context.sessionToken);
+  let session;
+  try {
+    session = await getSessionByTokenAsync(context.sessionToken);
+  } catch (error) {
+    throw new ApiDomainError("persistence_unavailable", "Session store is unavailable.", {
+      reason: error instanceof Error && /required|connect|redis|valkey/i.test(error.message)
+        ? "production_session_store_unavailable"
+        : "production_session_store_error"
+    });
+  }
   return {
     ...context,
     tenantId: String(session?.tenant.id ?? "tenant_unknown"),

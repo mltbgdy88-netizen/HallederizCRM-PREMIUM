@@ -199,21 +199,20 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
     })
   );
 
-  server.post<{ Body: Partial<ApprovalExecution> }>("/approval-executions", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.write", "ai.actions.write"])], async (context) => {
-      if (process.env.NODE_ENV === "production") {
-        return reply.status(404).send({ message: "Route not found" });
-      }
-      return reply.status(201).send({ item: createApprovalExecution(context.tenantId, request.body) });
+  server.post<{ Body: Partial<ApprovalExecution> }>("/approval-executions", async (request, reply) => {
+    if (process.env.NODE_ENV === "production") {
+      return reply.status(404).send({ message: "Route not found" });
     }
-    )
-  );
+    return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.write", "ai.actions.write"])], async (context) => {
+      return reply.status(201).send({ item: createApprovalExecution(context.tenantId, request.body) });
+    });
+  });
 
-  server.post<{ Params: { id: string } }>("/approval-executions/:id/run", async (request, reply) =>
-    withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.write", "ai.actions.write"])], async (context) => {
-      if (process.env.NODE_ENV === "production") {
-        return reply.status(404).send({ message: "Route not found" });
-      }
+  server.post<{ Params: { id: string } }>("/approval-executions/:id/run", async (request, reply) => {
+    if (process.env.NODE_ENV === "production") {
+      return reply.status(404).send({ message: "Route not found" });
+    }
+    return withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.write", "ai.actions.write"])], async (context) => {
       const policyResult = await enforcePolicyForRoute(context, {
         actionKey: "platform.ai.execute",
         requiredPermissions: ["approvals.write", "ai.actions.write"],
@@ -227,8 +226,8 @@ export async function registerAiLocalOutputRoutes(server: FastifyInstance) {
       const item = runApprovalExecution(context.tenantId, request.params.id);
       if (!item) return reply.status(404).send({ message: "Approval execution not found" });
       return { item };
-    })
-  );
+    });
+  });
 
   server.post<{ Params: { id: string } }>("/approval-executions/:id/cancel", async (request, reply) =>
     withGuards(request, reply, [assertAuthenticated, (context) => assertAnyPermission(context, ["approvals.write", "ai.actions.write"])], async (context) => {

@@ -89,6 +89,16 @@ export async function withGuards<T>(
     return await run(context);
   } catch (error) {
     const payload = asApiErrorPayload(error);
+    if (
+      payload.statusCode === 503 &&
+      error instanceof Error &&
+      error.name === "ApiDomainError" &&
+      (payload.body.details as { reason?: string } | undefined)?.reason === "production_session_store_unavailable"
+    ) {
+      payload.body.usagePersistenceMode = "unsupported";
+      payload.body.usagePersistenceSkipped = true;
+      payload.body.reasons = ["tenant_usage_postgres_url_missing"];
+    }
     return reply.status(payload.statusCode).send(payload.body);
   }
 }
