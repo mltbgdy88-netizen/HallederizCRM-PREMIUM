@@ -36,13 +36,13 @@ function createSignedSessionToken(session: SessionModel): string {
   return `hst_${encodedPayload}.${signSessionPayload(encodedPayload)}`;
 }
 
-function verifySignedSessionToken(token: string): boolean {
+export function verifySignedSessionToken(token: string): boolean {
   if (!token.startsWith("hst_")) {
     return process.env.NODE_ENV !== "production";
   }
   const raw = token.slice(4);
-  const [encodedPayload, signature] = raw.split(".");
-  if (!encodedPayload || !signature) {
+  const [encodedPayload, signature, extra] = raw.split(".");
+  if (!encodedPayload || !signature || extra !== undefined) {
     return false;
   }
   let expected: string;
@@ -71,7 +71,7 @@ function persistSession(response: LoginResponse): LoginResponse {
     accessToken: signedAccessToken,
     refreshToken: `refresh_${response.session.id}`
   };
-  sessionByToken.set(signedResponse.accessToken, signedResponse);
+  if (process.env.NODE_ENV !== "production") sessionByToken.set(signedResponse.accessToken, signedResponse);
   return signedResponse;
 }
 
@@ -94,7 +94,7 @@ export function extractSessionTokenFromCookieHeader(cookieHeader?: string): stri
     .find((part) => part.startsWith(`${SESSION_COOKIE_NAME}=`));
   if (!match) return undefined;
   const value = match.slice(SESSION_COOKIE_NAME.length + 1);
-  return value ? decodeURIComponent(value) : undefined;
+  try { return value ? decodeURIComponent(value) : undefined; } catch { return undefined; }
 }
 
 export function clearSessionToken(token?: string): void {
@@ -305,6 +305,7 @@ export function createDatabaseSession(input: LoginInput, principal: Extract<Data
 }
 
 export function getSessionByToken(token?: string): SessionModel | null {
+  if (process.env.NODE_ENV === "production") return null;
   if (!token) return null;
   if (!verifySignedSessionToken(token)) return null;
   const session = sessionByToken.get(token)?.session;

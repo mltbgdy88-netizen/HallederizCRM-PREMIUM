@@ -14,17 +14,21 @@ import { getAuthMode } from "../../shared/auth-mode";
 import { authenticateWithDatabase, createPostgresAuthExecutor, type DatabaseAuthResult } from "../../shared/database-auth";
 import { buildPersistenceUnavailableError } from "../../shared/persistence-policy";
 import { asApiErrorPayload } from "../../shared/errors";
+import { registerProductionSessions, preparedProductionSession, type DurableSessionRepository } from "../../shared/production-sessions";
 
 interface AuthRouteDeps {
+  sessionRepository?: DurableSessionRepository;
   authenticateDatabaseLogin?: (input: LoginInput) => Promise<DatabaseAuthResult>;
 }
 
 export async function registerAuthRoutes(server: FastifyInstance, deps: AuthRouteDeps = {}) {
+  const sessions = registerProductionSessions(server, deps.sessionRepository);
   const authenticateDatabaseLogin =
     deps.authenticateDatabaseLogin ??
     (async (input: LoginInput) => authenticateWithDatabase(input, createPostgresAuthExecutor()));
 
-  function sendLoginPayload(reply: FastifyReply, loginPayload: LoginResponse) {
+  async function sendLoginPayload(reply: FastifyReply, loginPayload: LoginResponse) {
+    await sessions.save(loginPayload);
     reply.header("set-cookie", buildSessionCookieHeader(loginPayload.accessToken, loginPayload.session.expiresAt));
     return reply.send(loginPayload);
   }
@@ -64,7 +68,7 @@ export async function registerAuthRoutes(server: FastifyInstance, deps: AuthRout
             email: body.email,
             password: body.password
           });
-          return sendLoginPayload(reply, loginPayload);
+          return await sendLoginPayload(reply, loginPayload);
         }
       }
 
@@ -84,7 +88,7 @@ export async function registerAuthRoutes(server: FastifyInstance, deps: AuthRout
             },
             dbAuthResult
           );
-          return sendLoginPayload(reply, loginPayload);
+          return await sendLoginPayload(reply, loginPayload);
         }
 
         if (dbAuthResult.status === "inactive_user") {
@@ -135,7 +139,7 @@ export async function registerAuthRoutes(server: FastifyInstance, deps: AuthRout
 
   server.get("/auth/me", async (request, reply) => {
     const context = buildRequestContext(request);
-    const session = getSessionByToken(context.sessionToken);
+    const session = process.env.NODE_ENV === "production" ? preparedProductionSession(request) : getSessionByToken(context.sessionToken);
     if (!session) {
       return reply.status(401).send({ message: "Oturum gecersiz veya suresi dolmus." });
     }
@@ -144,7 +148,7 @@ export async function registerAuthRoutes(server: FastifyInstance, deps: AuthRout
 
   server.get("/auth/session", async (request, reply) => {
     const context = buildRequestContext(request);
-    const session = getSessionByToken(context.sessionToken);
+    const session = process.env.NODE_ENV === "production" ? preparedProductionSession(request) : getSessionByToken(context.sessionToken);
     if (!session) {
       return reply.status(401).send({ message: "Oturum bulunamadi." });
     }
@@ -153,6 +157,7 @@ export async function registerAuthRoutes(server: FastifyInstance, deps: AuthRout
 
   server.post("/auth/logout", async (request, reply) => {
     const context = buildRequestContext(request);
+    await sessions.revoke(context.sessionToken);
     clearSessionToken(context.sessionToken);
     reply.header("set-cookie", buildClearSessionCookieHeader());
     return { ok: true };

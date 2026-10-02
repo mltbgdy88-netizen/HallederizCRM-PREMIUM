@@ -58,14 +58,15 @@
   "pnpm": {
     "overrides": {
       "archiver": "8.0.0",
-      "fast-uri": "4.1.3",
+      "fast-uri": "4.1.5",
       "find-my-way": "9.7.0",
       "nanoid@3": "3.3.18",
       "uuid": ">=11.1.0",
       "tmp": ">=0.2.6",
       "postcss": "8.5.23",
       "sharp": "0.35.4",
-      "unzipper": "0.12.5"
+      "unzipper": "0.12.5",
+      "brace-expansion@>=4": "5.0.12"
     }
   }
 }

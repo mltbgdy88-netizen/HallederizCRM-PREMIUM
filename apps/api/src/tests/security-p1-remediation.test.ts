@@ -1,3 +1,4 @@
+import { registerProductionSessions } from "../shared/production-sessions";
 import assert from "node:assert/strict";
 import test from "node:test";
 import Fastify from "fastify";
@@ -95,6 +96,10 @@ test("legacy approval execution create and run routes are absent in production",
     async () => {
       const login = createSession({ tenantSlug: "hallederiz", email: "admin@hallederiz.com", password: "demo" });
       const server = Fastify();
+      registerProductionSessions(server, {
+        async get(token) { return token === login.accessToken ? login.session : null; },
+        async save() {}, async revoke() {}, async close() {}, async ping() {}
+      });
       await registerAiLocalOutputRoutes(server);
       await registerOperationsEngineRoutes(server);
 

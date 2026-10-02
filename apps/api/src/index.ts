@@ -19,7 +19,7 @@ import { registerOriginGuard } from "./shared/origin-guard";
 import { bootstrapRuntimeEnvValidation } from "./shared/runtime-env-bootstrap";
 import { bootstrapApprovalCommercialActionHandlers } from "./shared/approval-commercial-action-handlers";
 import { bootstrapWorkerDomainExecutionPort } from "./shared/worker-domain-execution-port";
-import { createPostgresMigrationExecutor, databaseMigrations, listAppliedMigrations } from "@hallederiz/database";
+import { calculateMigrationChecksum, createPostgresMigrationExecutor, databaseMigrations, listAppliedMigrations } from "@hallederiz/database";
 
 bootstrapRuntimeEnvValidation();
 bootstrapApprovalCommercialActionHandlers();
@@ -31,6 +31,7 @@ const server = Fastify({
 
 const port = Number(process.env.PORT_API ?? 4000);
 const host = process.env.HOST_API ?? "0.0.0.0";
+let readinessExecutor: ReturnType<typeof createPostgresMigrationExecutor> | undefined;
 
 server.get("/health", async () => {
   return {
@@ -54,14 +55,15 @@ server.get("/ready", async (_request, reply) => {
   }
 
   try {
-    const executor = createPostgresMigrationExecutor({
+    const executor = readinessExecutor ??= createPostgresMigrationExecutor({
       mode: "postgres",
       postgresUrl: (process.env.POSTGRES_URL ?? process.env.DATABASE_URL) as string
     });
     await executor.query("SELECT 1");
     const applied = await listAppliedMigrations(executor);
-    const appliedNames = new Set(applied.map((migration) => migration.name));
-    const migrationsReady = databaseMigrations.every((migration) => appliedNames.has(migration.name));
+    const appliedChecksums = new Map(applied.map((migration) => [migration.name, migration.checksum]));
+    const migrationsReady = databaseMigrations.every((migration) =>
+      appliedChecksums.get(migration.name) === calculateMigrationChecksum(migration.sql));
     if (!migrationsReady) {
       return reply.status(503).send({
         status: "blocked",

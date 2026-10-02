@@ -1,3 +1,5 @@
+import { registerAuthRoutes } from "../platform-core/routes/auth-routes";
+import { registerUsageRoutes } from "../platform-core/routes/usage-routes";
 import assert from "node:assert/strict";
 import test from "node:test";
 import Fastify from "fastify";
@@ -128,7 +130,11 @@ test("tenant usage API does not silently use memory fallback for production post
         async () => {
           resetTenantUsageRuntimeForTests();
           const server = Fastify();
-          await registerPlatformCoreRoutes(server);
+          await registerAuthRoutes(server, { sessionRepository: {
+            async get(token) { return token === login.accessToken ? login.session : null; },
+            async save() {}, async revoke() {}, async close() {}, async ping() {}
+          } });
+          await registerUsageRoutes(server);
           const response = await server.inject({
             method: "GET",
             url: "/platform/tenant-usage/summary",
