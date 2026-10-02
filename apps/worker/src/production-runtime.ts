@@ -14,6 +14,7 @@ import {
   type DbWorkerJobRecord
 } from "@hallederiz/database";
 import { registerApprovalExecutionConfirmationPort } from "./execution-confirmation-port.js";
+import { abortableDelay } from "./abortable-delay.js";
 
 function mapDbRecordToWorkerJob(record: DbWorkerJobRecord): WorkerJob {
   return {
@@ -86,14 +87,9 @@ export async function runWorkerProductionDaemon(options: WorkerDaemonOptions = {
   if (!resolution.ok || !resolution.config || resolution.config.workerMode !== "production") {
     return { mode: "fail_closed", ok: false, reasons: resolution.reasons.length ? resolution.reasons : ["worker_production_config_invalid"] };
   }
-  const shutdownMs = options.maxShutdownMs ?? 30_000;
   let last: WorkerProductionTickResult = { mode: "production", ok: true, reasons: resolution.reasons };
   const signal = options.signal ?? new AbortController().signal;
-  const sleep = (ms: number) => new Promise<void>((resolve) => {
-    if (signal.aborted) return resolve();
-    const timer = setTimeout(resolve, ms);
-    signal.addEventListener("abort", () => clearTimeout(timer), { once: true });
-  });
+  const sleep = (ms: number) => abortableDelay(ms, signal);
   while (!signal.aborted) {
     try {
       last = await runWorkerProductionTick({ maxJobsPerTick: resolution.config.maxJobsPerTick });
@@ -104,10 +100,6 @@ export async function runWorkerProductionDaemon(options: WorkerDaemonOptions = {
       options.onTick?.(last);
       await sleep(resolution.config.errorBackoffMs);
     }
-  }
-  const deadline = Date.now() + shutdownMs;
-  while (Date.now() < deadline) {
-    break;
   }
   return last;
 }

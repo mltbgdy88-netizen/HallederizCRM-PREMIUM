@@ -5,7 +5,11 @@ RUN corepack enable && corepack prepare pnpm@9.12.0 --activate
 WORKDIR /app
 COPY . .
 RUN pnpm install --frozen-lockfile
-RUN pnpm --filter @hallederiz/web build
+ARG NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_API_BASE_URL=$NEXT_PUBLIC_API_BASE_URL
+ENV NEXT_PUBLIC_USE_DEMO_DATA=false
+ENV NEXT_PUBLIC_ENABLE_DEMO_AUTH=false
+RUN test -n "$NEXT_PUBLIC_API_BASE_URL" && pnpm --filter @hallederiz/web build
 
 FROM node:20.20.1-bookworm-slim AS runner
 ENV NODE_ENV=production

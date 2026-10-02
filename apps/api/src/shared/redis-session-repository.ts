@@ -12,10 +12,15 @@ export class RedisSessionRepository {
   private readonly client: RedisClientType;
   private readonly ttlSeconds: number;
   private readonly prefix: string;
+  private connecting?: Promise<void>;
 
   constructor(options: RedisSessionRepositoryOptions) {
     if (!options.url.trim()) throw new Error("REDIS_URL is required for production sessions.");
-    this.client = createClient({ url: options.url });
+    this.client = createClient({ url: options.url, disableOfflineQueue: true,
+      socket: { connectTimeout: 3000, reconnectStrategy: false } });
+    // Redis emits error events in addition to rejected commands. Never leak URLs
+    // or let an unhandled EventEmitter error terminate the API.
+    this.client.on("error", () => {});
     this.ttlSeconds = options.ttlSeconds ?? 8 * 60 * 60;
     this.prefix = options.prefix ?? "hallederiz:session";
   }
@@ -25,12 +30,23 @@ export class RedisSessionRepository {
   }
 
   async connect(): Promise<void> {
-    if (!this.client.isOpen) await this.client.connect();
+    if (this.client.isReady) return;
+    if (!this.connecting) {
+      this.connecting = this.client.connect().then(() => {}).finally(() => { this.connecting = undefined; });
+    }
+    await this.connecting;
   }
 
   async save(token: string, response: LoginResponse): Promise<void> {
     await this.connect();
-    await this.client.set(this.key(token), JSON.stringify(response), { EX: this.ttlSeconds });
+    const remaining = Math.floor((Date.parse(response.session.expiresAt) - Date.now()) / 1000);
+    if (!Number.isFinite(remaining) || remaining <= 0) throw new Error("Session expired.");
+    await this.client.set(this.key(token), JSON.stringify(response), { EX: Math.min(this.ttlSeconds, remaining) });
+  }
+
+  async ping(): Promise<void> {
+    await this.connect();
+    await this.client.ping();
   }
 
   async get(token: string): Promise<SessionModel | null> {

@@ -63,6 +63,12 @@ export function validateRuntimeEnv(env: RuntimeEnvironment, options: RuntimeEnvO
   const issues: RuntimeEnvValidationIssue[] = [];
 
   if (strictProduction) {
+    if (!(env.REDIS_URL ?? env.VALKEY_URL ?? "").trim()) {
+      issues.push(issue("redis_session_required", "Production oturumlari icin REDIS_URL zorunludur.", "REDIS_URL"));
+    }
+    if ((env.AUTH_SESSION_SECRET ?? env.SESSION_SECRET ?? "").trim().length < 32) {
+      issues.push(issue("session_secret_required", "Production oturum anahtari en az 32 karakter olmalidir.", "AUTH_SESSION_SECRET"));
+    }
     if (isTruthyDemoFlag(env, "DEMO_AUTH_ENABLED")) {
       issues.push(issue("demo_auth_forbidden", "Production ortamında DEMO_AUTH_ENABLED açık olamaz.", "DEMO_AUTH_ENABLED"));
     }

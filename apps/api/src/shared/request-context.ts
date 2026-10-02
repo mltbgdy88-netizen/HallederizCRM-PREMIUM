@@ -1,6 +1,7 @@
 import type { FastifyRequest } from "fastify";
 import { extractSessionTokenFromCookieHeader, getSessionByToken } from "./session-store";
 import { getAuthMode } from "./auth-mode";
+import { preparedProductionSession } from "./production-sessions";
 
 export interface RequestContext {
   tenantId: string;
@@ -120,7 +121,8 @@ export function buildRequestContext(request: FastifyRequest): RequestContext {
   const isMockAccessToken = sessionToken.startsWith("mock_access_");
   const principal = authMode.allowMockAccessTokens ? parseTokenPrincipal(sessionToken || undefined) : { roles: [], permissions: [] };
   const session =
-    isMockAccessToken && !authMode.allowMockAccessTokens ? null : getSessionByToken(sessionToken || undefined);
+    isMockAccessToken && !authMode.allowMockAccessTokens ? null : process.env.NODE_ENV === "production"
+      ? preparedProductionSession(request) : getSessionByToken(sessionToken || undefined);
   const requestedTenantId = request.headers["x-tenant-id"] ? String(request.headers["x-tenant-id"]) : undefined;
   const requestedUserId = request.headers["x-user-id"] ? String(request.headers["x-user-id"]) : undefined;
   const tenantId = String(session?.tenant.id ?? requestedTenantId ?? principal.tenantId ?? "tenant_unknown");
