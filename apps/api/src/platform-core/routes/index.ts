@@ -11,6 +11,7 @@ import { registerUsageRoutes } from "./usage-routes";
 import { registerProductionReadinessRoutes } from "./production-readiness-routes";
 import { registerAiSalesRoutes } from "./ai-sales-routes";
 import { registerTimelineRoutes } from "./timeline-routes";
+import { registerLocalAgentServiceAuthRoutes } from "./local-agent-service-auth-routes";
 
 export interface PlatformCoreRouteDeps {
   approvalRoutes?: ApprovalRouteDeps;
@@ -19,6 +20,7 @@ export interface PlatformCoreRouteDeps {
 
 export async function registerPlatformCoreRoutes(server: FastifyInstance, deps: PlatformCoreRouteDeps = {}) {
   await registerAuthRoutes(server);
+  await registerLocalAgentServiceAuthRoutes(server);
   await registerUserRoutes(server);
   await registerRoleRoutes(server);
   await registerSettingsRoutes(server);
