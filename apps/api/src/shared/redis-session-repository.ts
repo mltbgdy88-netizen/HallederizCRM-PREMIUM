@@ -6,21 +6,31 @@ export interface RedisSessionRepositoryOptions {
   url: string;
   ttlSeconds?: number;
   prefix?: string;
+  client?: RedisSessionClient;
+}
+
+export interface RedisSessionClient {
+  isOpen: boolean;
+  connect(): Promise<unknown>;
+  set(key: string, value: string, options: { EX: number }): Promise<unknown>;
+  get(key: string): Promise<string | null>;
+  del(key: string): Promise<unknown>;
+  quit(): Promise<unknown>;
 }
 
 export class RedisSessionRepository {
-  private readonly client: ReturnType<typeof createClient>;
+  private readonly client: RedisSessionClient;
   private readonly ttlSeconds: number;
   private readonly prefix: string;
 
   constructor(options: RedisSessionRepositoryOptions) {
     if (!options.url.trim()) throw new Error("REDIS_URL is required for production sessions.");
-    this.client = createClient({ url: options.url });
+    this.client = options.client ?? createClient({ url: options.url });
     this.ttlSeconds = options.ttlSeconds ?? 8 * 60 * 60;
     this.prefix = options.prefix ?? "hallederiz:session";
   }
 
-  private key(token: string): string {
+  keyForToken(token: string): string {
     return `${this.prefix}:${createHash("sha256").update(token).digest("hex")}`;
   }
 
@@ -30,12 +40,12 @@ export class RedisSessionRepository {
 
   async save(token: string, response: LoginResponse): Promise<void> {
     await this.connect();
-    await this.client.set(this.key(token), JSON.stringify(response), { EX: this.ttlSeconds });
+    await this.client.set(this.keyForToken(token), JSON.stringify(response), { EX: this.ttlSeconds });
   }
 
   async get(token: string): Promise<SessionModel | null> {
     await this.connect();
-    const raw = await this.client.get(this.key(token));
+    const raw = await this.client.get(this.keyForToken(token));
     if (!raw) return null;
     const response = JSON.parse(raw) as LoginResponse;
     return response.session;
@@ -43,7 +53,7 @@ export class RedisSessionRepository {
 
   async revoke(token: string): Promise<void> {
     await this.connect();
-    await this.client.del(this.key(token));
+    await this.client.del(this.keyForToken(token));
   }
 
   async close(): Promise<void> {
