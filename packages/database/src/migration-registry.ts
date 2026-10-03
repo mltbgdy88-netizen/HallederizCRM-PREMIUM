@@ -49,7 +49,8 @@ export const ORDERED_SQL_MIGRATION_FILES = [
   "0013_omnichannel_provider_accounts_ai.sql",
   "0014_commercial_line_tables.sql",
   "0015_idempotency_records.sql",
-  "0016_platform_operator.sql"
+  "0016_platform_operator.sql",
+  "0017_local_output_persistence.sql"
 ] as const;
 
 /** Tables that must appear in the ordered migration SQL corpus (Sprint 1 foundation). */
@@ -78,7 +79,10 @@ export const FOUNDATION_TABLE_NAMES = [
   "delivery_lines",
   "invoice_lines",
   "return_lines",
-  "document_deliveries"
+  "document_deliveries",
+  "local_output_rules",
+  "local_output_jobs",
+  "local_agent_states"
 ] as const;
 
 function loadSqlMigration(fileName: string): DatabaseMigration {
