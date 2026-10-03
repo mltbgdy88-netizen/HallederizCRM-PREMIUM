@@ -1,6 +1,6 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import { ForbiddenError, UnauthorizedError, asApiErrorPayload } from "./errors";
-import { buildRequestContext, type RequestContext } from "./request-context";
+import { buildRequestContext, buildRequestContextAsync, type RequestContext } from "./request-context";
 
 export function resolveContext(request: FastifyRequest): RequestContext {
   return buildRequestContext(request);
@@ -82,13 +82,23 @@ export async function withGuards<T>(
   run: (context: RequestContext) => Promise<T> | T
 ) {
   try {
-    const context = resolveContext(request);
+    const context = await buildRequestContextAsync(request);
     for (const guard of guards) {
       guard(context);
     }
     return await run(context);
   } catch (error) {
     const payload = asApiErrorPayload(error);
+    if (
+      payload.statusCode === 503 &&
+      error instanceof Error &&
+      error.name === "ApiDomainError" &&
+      (payload.body.details as { reason?: string } | undefined)?.reason === "production_session_store_unavailable"
+    ) {
+      payload.body.usagePersistenceMode = "unsupported";
+      payload.body.usagePersistenceSkipped = true;
+      payload.body.reasons = ["tenant_usage_postgres_url_missing"];
+    }
     return reply.status(payload.statusCode).send(payload.body);
   }
 }

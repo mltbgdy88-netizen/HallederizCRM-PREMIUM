@@ -1,6 +1,7 @@
 import type { FastifyRequest } from "fastify";
-import { extractSessionTokenFromCookieHeader, getSessionByToken } from "./session-store";
+import { extractSessionTokenFromCookieHeader, getSessionByToken, getSessionByTokenAsync } from "./session-store";
 import { getAuthMode } from "./auth-mode";
+import { ApiDomainError } from "./errors";
 
 export interface RequestContext {
   tenantId: string;
@@ -172,5 +173,30 @@ export function buildRequestContext(request: FastifyRequest): RequestContext {
     authIssue,
     roles,
     permissions
+  };
+}
+
+export async function buildRequestContextAsync(request: FastifyRequest): Promise<RequestContext> {
+  const context = buildRequestContext(request);
+  if (process.env.NODE_ENV !== "production" || !context.sessionToken) return context;
+  let session;
+  try {
+    session = await getSessionByTokenAsync(context.sessionToken);
+  } catch (error) {
+    throw new ApiDomainError("persistence_unavailable", "Session store is unavailable.", {
+      reason: error instanceof Error && /required|connect|redis|valkey/i.test(error.message)
+        ? "production_session_store_unavailable"
+        : "production_session_store_error"
+    });
+  }
+  return {
+    ...context,
+    tenantId: String(session?.tenant.id ?? "tenant_unknown"),
+    userId: String(session?.user.id ?? "anonymous"),
+    isAuthenticated: Boolean(session),
+    authIssue: context.requestedTenantId && session?.tenant.id && context.requestedTenantId !== session.tenant.id ? "tenant_mismatch" : session ? undefined : "expired_session",
+    tenantMismatch: Boolean(session?.tenant.id && context.requestedTenantId && session.tenant.id !== context.requestedTenantId),
+    roles: session?.roles?.map((role) => role.code) ?? [],
+    permissions: session?.permissions?.map((permission) => permission.key) ?? []
   };
 }

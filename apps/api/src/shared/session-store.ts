@@ -3,8 +3,10 @@ import { createHmac, timingSafeEqual } from "node:crypto";
 import { createLoginPayload, mockRoles, mockTenant, mockUsers } from "../platform-core/mock-data";
 import { assertDemoAuthAllowed, getAuthMode } from "./auth-mode";
 import type { DatabaseAuthResult } from "./database-auth";
+import { RedisSessionRepository } from "./redis-session-repository";
 
 const sessionByToken = new Map<string, LoginResponse>();
+let redisRepository: RedisSessionRepository | null = null;
 export const SESSION_COOKIE_NAME = "hz_session";
 
 function getSessionSecret(): string {
@@ -101,6 +103,39 @@ export function clearSessionToken(token?: string): void {
   if (token) {
     sessionByToken.delete(token);
   }
+}
+
+function getProductionRedisRepository(): RedisSessionRepository {
+  if (process.env.NODE_ENV !== "production") {
+    throw new Error("Production Redis session repository requested outside production.");
+  }
+  if (!redisRepository) {
+    redisRepository = new RedisSessionRepository({ url: (process.env.REDIS_URL ?? process.env.VALKEY_URL ?? "").trim() });
+  }
+  return redisRepository;
+}
+
+export async function persistSessionToProduction(response: LoginResponse): Promise<void> {
+  if (process.env.NODE_ENV !== "production") return;
+  await getProductionRedisRepository().save(response.accessToken, response);
+}
+
+export async function getSessionByTokenAsync(token?: string): Promise<SessionModel | null> {
+  if (!token) return null;
+  if (process.env.NODE_ENV !== "production") return getSessionByToken(token);
+  if (!verifySignedSessionToken(token)) return null;
+  const session = await getProductionRedisRepository().get(token);
+  if (!session || new Date(session.expiresAt).getTime() <= Date.now()) return null;
+  return session;
+}
+
+export async function clearSessionTokenAsync(token?: string): Promise<void> {
+  if (!token) return;
+  if (process.env.NODE_ENV !== "production") {
+    clearSessionToken(token);
+    return;
+  }
+  await getProductionRedisRepository().revoke(token);
 }
 
 const demoBusinessReadPermissions = [
